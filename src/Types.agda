@@ -29,7 +29,7 @@ retrieve-size t = size (retrieve-ctx t)
 retrieve-ctx {c} ⋆P = c
 retrieve-ctx (_⟶P_ {t = t} x y) = arr (retrieve-ctx t) x y
 
-data PD (c : Ctx) : ℕ → Set
+data PD (c : Ctx) : Set
 
 data Ty (c : Ctx) : ℕ → Set
 
@@ -41,17 +41,21 @@ data Ty c where
 
 purety-to-ty : {c : Ctx} → {n : ℕ} → (PureTy c n) → (Ty c n)
 
-get-nth-tgt-pd-ty : ∀ {n} {c} → (PD c n) → (f : Fin (suc n)) → Ty c (n ℕ-ℕ f)
-get-nth-tgt-pd-tm : ∀ {n} {c} → (pd : PD c n) → (f : Fin (suc n)) → Term c (get-nth-tgt-pd-ty pd f)
+pd-n : {c : Ctx} → PD c → ℕ
+
+get-nth-tgt-pd-ty : ∀ {c} → (pd : PD c) → (f : Fin (suc (pd-n pd))) → Ty c ((pd-n pd) ℕ-ℕ f)
+get-nth-tgt-pd-tm : ∀ {c} → (pd : PD c) → (f : Fin (suc (pd-n pd))) → Term c (get-nth-tgt-pd-ty pd f)
 
 data PD c where
-  Base : Term c ⋆ → PD c 0
-  Attach : ∀ {n} →
-           (pd : PD c n) →
-           (f : Fin (suc n)) →
+  Base : Term c ⋆ → PD c
+  Attach : (pd : PD c) →
+           (f : Fin (suc (pd-n pd))) →
            (tgt : Term c (get-nth-tgt-pd-ty pd f)) →
            (fill : Term c (get-nth-tgt-pd-tm pd f ⟶ tgt)) →
-           PD c (suc (n ℕ-ℕ f))
+           PD c
+
+pd-n (Base x) = 0
+pd-n (Attach pd f tgt fill) = suc ((pd-n pd) ℕ-ℕ f)
 
 get-nth-tgt-ty : ∀ {n} {c} →
                  (f : Fin (suc n)) →

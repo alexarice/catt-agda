@@ -2,32 +2,15 @@
 
 module Types where
 
+open import Ctx
 open import Data.Nat
 open import Data.Fin
 open import Data.Product
 
-record Ctx : Set where
-  coinductive
-  field
-    size : ℕ
-    arr : (x y : Fin size) → Ctx
-
-open Ctx
-
-data PureTy (c : Ctx) : ℕ → Set
-
-retrieve-size : {c : Ctx} → {n : ℕ} → (t : PureTy c n) → ℕ
-
-data PureTy c where
-  ⋆P : PureTy c 0
-  _⟶P_ : ∀ {n} {t : PureTy c n} → (x y : Fin (retrieve-size t)) → PureTy c (suc n)
-
-retrieve-ctx : {c : Ctx} → {n : ℕ} → (t : PureTy c n) → Ctx
-
-retrieve-size t = size (retrieve-ctx t)
-
-retrieve-ctx {c} ⋆P = c
-retrieve-ctx (_⟶P_ {t = t} x y) = arr (retrieve-ctx t) x y
+private
+  variable
+    c : Ctx
+    n : ℕ
 
 data PD (c : Ctx) : Set
 
@@ -39,12 +22,30 @@ data Ty c where
   ⋆ : Ty c 0
   _⟶_ : ∀ {n} {t : Ty c n} → (x y : Term c t) → Ty c (suc n)
 
-purety-to-ty : {c : Ctx} → {n : ℕ} → (PureTy c n) → (Ty c n)
+purety-to-ty : PureTy c n → Ty c n
 
-pd-n : {c : Ctx} → PD c → ℕ
+pd-n : PD c → ℕ
 
-get-nth-tgt-pd-ty : ∀ {c} → (pd : PD c) → (f : Fin (suc (pd-n pd))) → Ty c ((pd-n pd) ℕ-ℕ f)
-get-nth-tgt-pd-tm : ∀ {c} → (pd : PD c) → (f : Fin (suc (pd-n pd))) → Term c (get-nth-tgt-pd-ty pd f)
+get-nth-tgt-ty : (f : Fin (suc n)) →
+                 {ty : Ty c n} →
+                 Term c ty →
+                 Ty c (n ℕ-ℕ f)
+get-nth-tgt-ty zero {ty} tm = ty
+get-nth-tgt-ty (suc f) {x ⟶ y} tm = get-nth-tgt-ty f y
+
+get-nth-tgt-tm : (f : Fin (suc n)) →
+                 {ty : Ty c n}
+                 (tm : Term c ty) →
+                 Term c (get-nth-tgt-ty f tm)
+get-nth-tgt-tm zero tm = tm
+get-nth-tgt-tm (suc f) {x ⟶ y} tm = get-nth-tgt-tm f y
+
+get-nth-tgt-pd-ty : (pd : PD c) →
+                    (f : Fin (suc (pd-n pd))) →
+                    Ty c ((pd-n pd) ℕ-ℕ f)
+get-nth-tgt-pd-tm : (pd : PD c) →
+                    (f : Fin (suc (pd-n pd))) →
+                    Term c (get-nth-tgt-pd-ty pd f)
 
 data PD c where
   Base : Term c ⋆ → PD c
@@ -56,22 +57,6 @@ data PD c where
 
 pd-n (Base x) = 0
 pd-n (Attach pd f tgt fill) = suc ((pd-n pd) ℕ-ℕ f)
-
-get-nth-tgt-ty : ∀ {n} {c} →
-                 (f : Fin (suc n)) →
-                 {ty : Ty c n} →
-                 Term c ty →
-                 Ty c (n ℕ-ℕ f)
-get-nth-tgt-ty zero {ty} tm = ty
-get-nth-tgt-ty (suc f) {x ⟶ y} tm = get-nth-tgt-ty f y
-
-get-nth-tgt-tm : ∀ {n} {c} →
-                 (f : Fin (suc n)) →
-                 {ty : Ty c n}
-                 (tm : Term c ty) →
-                 Term c (get-nth-tgt-ty f tm)
-get-nth-tgt-tm zero tm = tm
-get-nth-tgt-tm (suc f) {x ⟶ y} tm = get-nth-tgt-tm f y
 
 get-nth-tgt-pd-ty (Base x) zero = ⋆
 get-nth-tgt-pd-ty (Attach pd f tgt fill) i = get-nth-tgt-ty i fill

@@ -4,7 +4,7 @@ module Types where
 
 open import Data.Nat
 open import Data.Fin
-open import Data.Product using (∃; _,_)
+open import Data.Product
 
 record Ctx : Set where
   coinductive
@@ -29,10 +29,6 @@ retrieve-size t = size (retrieve-ctx t)
 retrieve-ctx {c} ⋆P = c
 retrieve-ctx (_⟶P_ {t = t} x y) = arr (retrieve-ctx t) x y
 
--- data PD : ℕ → Set where
---   Base : PD 0
---   Attach : ∀ {n} → PD n → (f : Fin (suc n)) → PD (suc (n ℕ-ℕ f))
-
 data PD (c : Ctx) : ℕ → Set
 
 data Ty (c : Ctx) : ℕ → Set
@@ -42,9 +38,6 @@ data Term (c : Ctx) : {n : ℕ} → Ty c n → Set
 data Ty c where
   ⋆ : Ty c 0
   _⟶_ : ∀ {n} {t : Ty c n} → (x y : Term c t) → Ty c (suc n)
-
-get-ty-of-term : ∀ {c} {n} {ty : Ty c n} → Term c ty → Ty c n
-get-ty-of-term {ty = ty} _ = ty
 
 purety-to-ty : {c : Ctx} → {n : ℕ} → (PureTy c n) → (Ty c n)
 

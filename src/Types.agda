@@ -10,6 +10,8 @@ open import Data.Nat.Properties
 open import Data.Product
 open import NatProperties
 open import Relation.Nullary
+open import Function.Base
+open import Induction.WellFounded
 
 private
   variable
@@ -58,7 +60,7 @@ data PDB {c} where
           {src : Term ty} →
           {tgt : Term ty} →
           {tm : Term (src ⟶ tgt)} →
-          {dim : ℕ}
+          {dim : ℕ} →
           (pd : PDB tm dim) →
           PDB tgt dim
 
@@ -115,6 +117,76 @@ drop (Restr pd) nt = ⊥-elim (si≰‴i (pdb-dim-lemma pd))
 
 pd-tgt : {i : ℕ} → PD c (suc i) → PD c i
 pd-tgt {_} {i} = map₂ (λ pdb → pdb-tgt-i≤ i pdb (≤⇒≤‴ z≤n))
+
+record PDB′ (c : Ctx) : Set where
+  constructor mkPDB′
+  field
+    {pdb-n} : ℕ
+    {pdb-ty} : Ty c pdb-n
+    {pdb-tm} : Term pdb-ty
+    {pdb-d} : ℕ
+    getPdb : PDB pdb-tm pdb-d
+
+infix 4 _<pb_
+data _<pb_ {c : Ctx} : PDB′ c → PDB′ c → Set where
+  AMStep : {n : ℕ} →
+           {ty : Ty c n} →
+           {tm : Term ty} →
+           (pd : PDB tm n) →
+           (tgt : Term ty) →
+           (fill : Term (tm ⟶ tgt)) →
+           mkPDB′ pd <pb mkPDB′ (AttachMax pd tgt fill)
+  ANStep : {n : ℕ} →
+           {ty : Ty c n} →
+           {tm : Term ty} →
+           {dim : ℕ} →
+           (p : n <‴ dim) →
+           (pd : PDB tm dim) →
+           (tgt : Term ty) →
+           (fill : Term (tm ⟶ tgt)) →
+           mkPDB′ pd <pb mkPDB′ (AttachNM p pd tgt fill)
+  RStep : {n : ℕ} →
+          {ty : Ty c n} →
+          {src : Term ty} →
+          {tgt : Term ty} →
+          {tm : Term (src ⟶ tgt)} →
+          {dim : ℕ} →
+          (pd : PDB tm dim) →
+          mkPDB′ pd <pb mkPDB′ (Restr pd)
+
+wf : (c : Ctx) → WellFounded (_<pb_ {c})
+wf c (mkPDB′ pdb) = go pdb
+  where
+    transport : ∀ {x₁ x₂ y : PDB′ c} → x₁ <pb y → x₂ <pb y → Acc _<pb_ x₁ → Acc _<pb_ x₂
+    transport (AMStep pd tgt fill) (AMStep .pd .tgt .fill) a = a
+    transport (ANStep p pd tgt fill) (ANStep .p .pd .tgt .fill) a = a
+    transport (RStep pd) (RStep .pd) a = a
+
+    lem : ∀ {x y : PDB′ c} → x <pb y → Acc _<pb_ x → Acc _<pb_ y
+    lem p₁ a = acc (λ x₂ p₂ → transport p₁ p₂ a)
+
+    go : {ty : Ty c n} → {tm : Term ty} → {d : ℕ} → (pdb : PDB tm d) → Acc _<pb_ (mkPDB′ pdb)
+    go (Base _) = acc (λ y ())
+    go (AttachMax pdb tgt fill) = lem (AMStep pdb tgt fill) (go pdb)
+    go (AttachNM x pdb tgt fill) = lem (ANStep x pdb tgt fill) (go pdb)
+    go (Restr pdb) = lem (RStep pdb) (go pdb)
+
+ctx-parser : ∀ {i} → {base : Ty c n} → {src tgt : Term base} → {tm : Term (src ⟶ tgt)} → PDB tm i → NECtx × Σ[ t ∈ Term base ] Σ[ d ∈ ℕ ] PDB t d
+ctx-parser (AttachMax pd _ _) = singleton-ctx-ne , -, -, pd
+ctx-parser (AttachNM x pd _ _) = singleton-ctx-ne , -, -, pd
+ctx-parser (Restr pd) = attach-ctx-ne (proj₁ continue) (proj₁ (proj₁ res)) , proj₂ continue
+  where
+    get-pdb : _
+    get-pdb = proj₂ ∘ proj₂ ∘ proj₂
+
+    res : NECtx × Σ[ t ∈ Term _ ] Σ[ d ∈ ℕ ] PDB t d
+    res = ctx-parser pd
+
+    continue : NECtx × Σ[ t ∈ Term _ ] Σ[ d ∈ ℕ ] PDB t d
+    continue = ctx-parser (get-pdb res)
+
+pd-ctx : ∀ {i} → PD c i → Ctx
+pd-ctx (_ , pdb) = {!!}
 
 purety-to-ty : PureTy c n → Ty c n
 

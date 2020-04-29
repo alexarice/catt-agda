@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe --with-K #-}
 
 module Types where
 
@@ -23,7 +23,7 @@ data Ty (c : Ctx) : ℕ → Set
 
 data Term {c : Ctx} : {n : ℕ} → Ty c n → Set
 
-data PDB {c : Ctx} : ∀ {n} {ty : Ty c n} → Term ty → Set
+data PDB {c : Ctx} : ∀ {n} {ty : Ty c n} → Term ty → (dim : ℕ) → Set
 
 data Ty c where
   ⋆ : Ty c 0
@@ -39,73 +39,63 @@ ty-tgt : (ty : Ty c (suc n)) → Term (ty-base ty)
 ty-tgt (x ⟶ y) = y
 
 data PDB {c} where
-  Base : (t : Term {c} ⋆) → PDB t
-  Attach : {n : ℕ} →
-           {ty : Ty c n} →
-           {tm : Term ty} →
-           (pd : PDB tm) →
-           (tgt : Term ty) →
-           (fill : Term (tm ⟶ tgt)) →
-           PDB fill
+  Base : (t : Term {c} ⋆) → PDB t 0
+  AttachMax : {n : ℕ} →
+              {ty : Ty c n} →
+              {tm : Term ty} →
+              (pd : PDB tm n) →
+              (tgt : Term ty) →
+              (fill : Term (tm ⟶ tgt)) →
+              PDB fill (suc n)
+  AttachNM : {n : ℕ} →
+             {ty : Ty c n} →
+             {tm : Term ty} →
+             {dim : ℕ} →
+             (n <‴ dim) →
+             (pd : PDB tm dim) →
+             (tgt : Term ty) →
+             (fill : Term (tm ⟶ tgt)) →
+             PDB fill dim
   Restr : {n : ℕ} →
           {ty : Ty c n} →
           {src : Term ty} →
           {tgt : Term ty} →
           {tm : Term (src ⟶ tgt)} →
-          (pd : PDB tm) →
-          PDB tgt
+          {dim : ℕ}
+          (pd : PDB tm dim) →
+          PDB tgt dim
 
-PD : Ctx → Set
-PD c = Σ[ t ∈ Term {c} ⋆ ] PDB t
+PD : Ctx → ℕ → Set
+PD c dim = Σ[ t ∈ Term {c} ⋆ ] PDB t dim
 
-ty-dim : Ty c n → ℕ
-ty-dim ⋆ = 0
-ty-dim (_⟶_ {ty = ty} x y) = suc (ty-dim ty)
+pdb-dim-lemma : {ty : Ty c n} → {tm : Term ty} → {dim : ℕ} → (pd : PDB tm dim) → n ≤‴ dim
+pdb-dim-lemma (Base _) = ≤‴-refl
+pdb-dim-lemma (AttachMax pd tgt _) = ≤‴-refl
+pdb-dim-lemma (AttachNM x pd tgt _) = x
+pdb-dim-lemma (Restr pd) = ≤‴-step (pdb-dim-lemma pd)
 
-tm-dim : {ty : Ty c n} → Term ty → ℕ
-tm-dim {ty = ty} _ = ty-dim ty
+pdb-src-i< : (i : ℕ) → {n : ℕ} → {ty : Ty c n} → {tm : Term ty} → (pd : PDB tm (suc i)) → n <‴ i → PDB tm i
+pdb-src-i≡ : (i : ℕ) → {ty : Ty c i} → {tm : Term ty} → (pd : PDB tm (suc i)) → Σ[ t ∈ Term ty ] PDB t i
+pdb-src-i> : (i : ℕ) → {base : Ty c i} → {src tgt : Term base} → {tm : Term (src ⟶ tgt)} → (pd : PDB tm (suc i)) → Σ[ t ∈ Term base ] PDB t i
 
-pdb-dim : {ty : Ty c n} → {tm : Term ty} → PDB tm -> ℕ
-pdb-dim (Base _) = 0
-pdb-dim {c} {n} (Attach pd tgt fill) = pdb-dim pd ⊔ n
-pdb-dim (Restr pd) = pdb-dim pd
+pdb-src-i< i (AttachMax pd tgt fill) p = ⊥-elim (si≰‴i (≤‴-step p))
+pdb-src-i< i (AttachNM x pd tgt fill) p =
+  AttachNM (≤‴-step p) (pdb-src-i< i pd (≤‴-step p)) tgt fill
+pdb-src-i< i (Restr pd) ≤‴-refl = Restr (proj₂ (pdb-src-i≡ i pd))
+pdb-src-i< i (Restr pd) (≤‴-step p) = Restr (pdb-src-i< i pd p)
 
-pd-dim : PD c → ℕ
-pd-dim (_ , p) = pdb-dim p
+pdb-src-i≡ i (AttachNM x pd tgt fill) =
+  fill , AttachNM ≤‴-refl (pdb-src-i< i pd ≤‴-refl) tgt fill
+pdb-src-i≡ i (Restr pd) = pdb-src-i> i pd
 
-pdb-dim-lemma : {ty : Ty c n} → {tm : Term ty} → (pd : PDB tm) → n ≤ pdb-dim pd
-pdb-dim-lemma (Base _) = ≤-refl
-pdb-dim-lemma (Attach pd tgt _) = n≤m⊔n (pdb-dim pd) (suc _)
-pdb-dim-lemma (Restr pd) = ≤-trans (n≤1+n _) (pdb-dim-lemma pd)
+pdb-src-i> i (AttachMax pd tgt fill) = -, pd
+pdb-src-i> i (AttachNM ≤‴-refl pd tgt fill) = pdb-src-i≡ i pd
+pdb-src-i> i (AttachNM (≤‴-step p) pd tgt fill) = ⊥-elim (si≰‴i p)
+pdb-src-i> i (Restr pd) = ⊥-elim (si≰‴i (pdb-dim-lemma pd))
 
-pdb-src-i< : (i : ℕ) → {ty : Ty c n} → {tm : Term ty} → (pd : PDB tm) → pdb-dim pd ≤ suc i → n <‴ i → PDB tm
-
-pdb-src-i≡ : (i : ℕ) → {ty : Ty c n} → {tm : Term ty} → (pd : PDB tm) → pdb-dim pd ≤ suc i → n ≡ i → Σ[ t ∈ Term ty ] PDB t
-
-pdb-src-i> : (i : ℕ) → {base : Ty c n} → {src tgt : Term base} → {tm : Term (src ⟶ tgt)} → (pd : PDB tm) → pdb-dim pd ≤ suc i → suc n >‴ i → Σ[ t ∈ Term base ] PDB t
-
-pdb-src-i< i (Base x) d p = Base x
-pdb-src-i< i (Attach pd tgt fill) d p =
-  Attach (pdb-src-i< i pd (m⊔n≤o⇒m≤o (pdb-dim pd) _ d) (≤‴-step p)) tgt fill
-pdb-src-i< i (Restr {n} {ty} {src} {tgt} {tm} pd) d p = γ
-  where
-    go : Dec (suc n <‴ i) → PDB tgt
-    go (yes q) = Restr (pdb-src-i< i pd d q)
-    go (no q) = Restr (proj₂ (pdb-src-i≡ i pd d (¬<‴∧≤‴⇒≡ q p)))
-
-    γ : PDB tgt
-    γ = go (suc n <‴? i)
-
-pdb-src-i≡ i (Base x) d p = x , (Base x)
-pdb-src-i≡ i (Attach pd tgt fill) d refl =
-  fill , (Attach (pdb-src-i< i pd (m⊔n≤o⇒m≤o (pdb-dim pd) _ d) ≤‴-refl) tgt fill)
-pdb-src-i≡ i (Restr {n} {ty} {src} {tgt} {tm} pd) d refl = pdb-src-i> i pd d ≤‴-refl
-
-pdb-src-i> {c} {n} i (Attach pd tgt fill) d p = pdb-src-i≡ i pd (m⊔n≤o⇒m≤o (pdb-dim pd) _ d) (≤-antisym (≤-pred (m⊔n≤o⇒n≤o (pdb-dim pd) (suc n) d)) (≤-pred (≤‴⇒≤ p)))
-pdb-src-i> i (Restr pd) d p = ⊥-elim (≤⇒≯ (≤-trans (pdb-dim-lemma pd) d) (s≤s (≤‴⇒≤ p)))
-
-pd-src : PD c → Maybe (PD c)
-pd-src (_ , pdb) = {!!}
+pd-src : {i : ℕ} → PD c (suc i) → PD c i
+pd-src {_} {zero} (_ , pdb) = pdb-src-i≡ 0 pdb
+pd-src {_} {suc i} (_ , pdb) = -, pdb-src-i< (suc i) pdb (≤⇒≤‴ (s≤s z≤n))
 
 purety-to-ty : PureTy c n → Ty c n
 

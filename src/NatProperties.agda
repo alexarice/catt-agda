@@ -3,7 +3,7 @@
 module NatProperties where
 
 open import Data.Bool using (T)
-open import Data.Bool.Properties
+open import Data.Bool.Properties using (T?)
 open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Empty
@@ -37,15 +37,20 @@ _≥‴?_ = flip _≤‴?_
 _>‴?_ : Decidable _>‴_
 _>‴?_ = flip _<‴?_
 
-¬<‴∧≤‴⇒≡ : ∀ {n m} → ¬ n <‴ m → n ≤‴ m → n ≡ m
-¬<‴∧≤‴⇒≡ nlt ≤‴-refl = refl
-¬<‴∧≤‴⇒≡ nlt (≤‴-step leq) = ⊥-elim (nlt leq)
-
 ≤⇒≤‴ : _≤_ ⇒ _≤‴_
 ≤⇒≤‴ = ≤″⇒≤‴ ∘ ≤⇒≤″
 
 ≤‴⇒≤ : _≤‴_ ⇒ _≤_
 ≤‴⇒≤ = ≤″⇒≤ ∘ ≤‴⇒≤″
+
+si≰‴i : ∀ {i} → ¬ suc i ≤‴ i
+si≰‴i p = ≤⇒≯ (≤‴⇒≤ p) ≤-refl
+
+¬<‴∧≤‴⇒≡ : ∀ {n m} → ¬ n <‴ m → n ≤‴ m → n ≡ m
+¬<‴∧≤‴⇒≡ nlt ≤‴-refl = refl
+¬<‴∧≤‴⇒≡ nlt (≤‴-step leq) = ⊥-elim (nlt leq)
+
+
 
 1>i⇒0≡i : ∀ {i} → 1 > i → 0 ≡ i
 1>i⇒0≡i (s≤s z≤n) = refl

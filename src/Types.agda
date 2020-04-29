@@ -8,10 +8,13 @@ open import Data.Fin using (Fin)
 open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Product
+open import Data.Unit
 open import NatProperties
 open import Relation.Nullary
 open import Function.Base
 open import Induction.WellFounded
+open import Induction
+open import Level using (0ℓ)
 
 private
   variable
@@ -64,8 +67,11 @@ data PDB {c} where
           (pd : PDB tm dim) →
           PDB tgt dim
 
-PD : Ctx → ℕ → Set
-PD c dim = Σ[ t ∈ Term {c} ⋆ ] PDB t dim
+record PD (c : Ctx) (d : ℕ) : Set where
+  constructor mkPD
+  field
+    {pd-tm} : Term {c} ⋆
+    getPD : PDB pd-tm d
 
 pdb-dim-lemma : {ty : Ty c n} → {tm : Term ty} → {dim : ℕ} → (pd : PDB tm dim) → n ≤‴ dim
 pdb-dim-lemma (Base _) = ≤‴-refl
@@ -93,8 +99,8 @@ pdb-src-i> i (AttachNM (≤‴-step p) pd tgt fill) = ⊥-elim (si≰‴i p)
 pdb-src-i> i (Restr pd) = ⊥-elim (si≰‴i (pdb-dim-lemma pd))
 
 pd-src : {i : ℕ} → PD c (suc i) → PD c i
-pd-src {_} {zero} (_ , pdb) = pdb-src-i≡ 0 pdb
-pd-src {_} {suc i} (_ , pdb) = -, pdb-src-i< (suc i) pdb (≤⇒≤‴ (s≤s z≤n))
+pd-src {_} {zero} (mkPD pdb) = mkPD (proj₂ (pdb-src-i≡ 0 pdb))
+pd-src {_} {suc i} (mkPD pdb) = mkPD (pdb-src-i< (suc i) pdb (≤⇒≤‴ (s≤s z≤n)))
 
 pdb-tgt-i≤ : (i : ℕ) → {n : ℕ} → {ty : Ty c n} → {tm : Term ty} → (pd : PDB tm (suc i)) → n ≤‴ i → PDB tm i
 pdb-tgt-i> : (i : ℕ) → {base : Ty c i} → {src tgt : Term base} → {tm : Term (src ⟶ tgt)} → (pd : PDB tm (suc i)) → PDB tgt i
@@ -116,7 +122,7 @@ drop (AttachNM x pd tgt _) nt = AttachNM x pd tgt nt
 drop (Restr pd) nt = ⊥-elim (si≰‴i (pdb-dim-lemma pd))
 
 pd-tgt : {i : ℕ} → PD c (suc i) → PD c i
-pd-tgt {_} {i} = map₂ (λ pdb → pdb-tgt-i≤ i pdb (≤⇒≤‴ z≤n))
+pd-tgt {_} {i} (mkPD pdb) = mkPD (pdb-tgt-i≤ i pdb (≤⇒≤‴ z≤n))
 
 record PDB′ (c : Ctx) : Set where
   constructor mkPDB′
@@ -126,6 +132,8 @@ record PDB′ (c : Ctx) : Set where
     {pdb-tm} : Term pdb-ty
     {pdb-d} : ℕ
     getPdb : PDB pdb-tm pdb-d
+
+open PDB′
 
 infix 4 _<pb_
 data _<pb_ {c : Ctx} : PDB′ c → PDB′ c → Set where
@@ -171,22 +179,93 @@ wf c (mkPDB′ pdb) = go pdb
     go (AttachNM x pdb tgt fill) = lem (ANStep x pdb tgt fill) (go pdb)
     go (Restr pdb) = lem (RStep pdb) (go pdb)
 
-ctx-parser : ∀ {i} → {base : Ty c n} → {src tgt : Term base} → {tm : Term (src ⟶ tgt)} → PDB tm i → NECtx × Σ[ t ∈ Term base ] Σ[ d ∈ ℕ ] PDB t d
-ctx-parser (AttachMax pd _ _) = singleton-ctx-ne , -, -, pd
-ctx-parser (AttachNM x pd _ _) = singleton-ctx-ne , -, -, pd
-ctx-parser (Restr pd) = attach-ctx-ne (proj₁ continue) (proj₁ (proj₁ res)) , proj₂ continue
+open TransitiveClosure
+
+infix 4 _<pb⁺_
+
+_<pb⁺_ : {c : Ctx} → PDB′ c → PDB′ c → Set
+_<pb⁺_ {c} = _<⁺_ (_<pb_ {c})
+
+wf⁺ : (c : Ctx) → WellFounded (_<pb⁺_ {c})
+wf⁺ c = wellFounded _<pb_ (wf c)
+
+higher : PDB′ c → Set
+higher (mkPDB′ {zero} _) = ⊥
+higher (mkPDB′ {suc n} _) = ⊤
+
+record parsable-pd {n} {d} {base : Ty c n}
+                   {src tgt : Term base}
+                   {tm : Term (src ⟶ tgt)}
+                   (pd : PDB tm d) : Set where
+  constructor parse
+  field
+    parsed : NECtx
+    {nt} : Term base
+    {dim} : ℕ
+    npd : PDB nt dim
+    wfproof : mkPDB′ npd <pb⁺ mkPDB′ pd
+
+open parsable-pd
+
+parsable-helper : (pdb : PDB′ c) → (higher pdb) → Set
+parsable-helper (mkPDB′ {suc n} {x ⟶ y} pdb) tt = parsable-pd pdb
+
+parsable : PDB′ c → Set
+parsable pdb = (h : higher pdb) → parsable-helper pdb h
+
+ctx-parser : (pd : PDB′ c) → parsable pd
+ctx-parser {c} = All.wfRec (wf⁺ c) 0ℓ parsable go
   where
-    get-pdb : _
-    get-pdb = proj₂ ∘ proj₂ ∘ proj₂
+    go : ∀ x → WfRec _<pb⁺_ parsable x → parsable x
+    go (mkPDB′ pd@(AttachMax pdb tgt fill)) rec tt =
+      parse singleton-ctx-ne pdb [ AMStep pdb tgt fill ]
+    go (mkPDB′ pd@(AttachNM x pdb tgt fill)) rec tt =
+      parse singleton-ctx-ne pdb [ ANStep x pdb tgt fill ]
+    go (mkPDB′ {suc n} {x ⟶ y} pd@(Restr pdb)) rec tt =
+      parse (attach-ctx-ne (parsed continue) (proj₁ (parsed continue))) (npd continue) (trans (wfproof continue) continuation<pb)
+      where
+        parse-inner : parsable-pd pdb
+        parse-inner = rec (mkPDB′ pdb) [ RStep pdb ] tt
 
-    res : NECtx × Σ[ t ∈ Term _ ] Σ[ d ∈ ℕ ] PDB t d
-    res = ctx-parser pd
+        continuation : PDB (nt parse-inner) (dim parse-inner)
+        continuation = npd parse-inner
 
-    continue : NECtx × Σ[ t ∈ Term _ ] Σ[ d ∈ ℕ ] PDB t d
-    continue = ctx-parser (get-pdb res)
+        continuation<pb : mkPDB′ continuation <pb⁺ mkPDB′ (Restr pdb)
+        continuation<pb = trans (wfproof parse-inner) [ RStep pdb ]
 
-pd-ctx : ∀ {i} → PD c i → Ctx
-pd-ctx (_ , pdb) = {!!}
+        continue : parsable-pd continuation
+        continue = rec (mkPDB′ continuation) continuation<pb tt
+
+lower : PDB′ c → Set
+lower (mkPDB′ {zero} pdb) = ⊤
+lower (mkPDB′ {suc n} pdb) = ⊥
+
+parsable-base : PDB′ c → Set
+parsable-base pdb = (lower pdb) → NECtx
+
+pd-ctx : ∀ {i} → PD c i → NECtx
+pd-ctx {c} (mkPD pdb) = helper (mkPDB′ pdb) tt
+  where
+    helper : (pdb : PDB′ c) → parsable-base pdb
+    helper = All.wfRec (wf⁺ c) 0ℓ parsable-base go
+      where
+        go : ∀ x → WfRec (_<pb⁺_ {c}) parsable-base x → parsable-base x
+        go (mkPDB′ (Base _)) rec tt = singleton-ctx-ne
+        go (mkPDB′ {zero} (Restr pdb)) rec tt = attach-ctx-ne (continue tt) (proj₁ (parsed parse-inner))
+          where
+            parse-inner : parsable-pd pdb
+            parse-inner = ctx-parser (mkPDB′ pdb) tt
+
+            continuation : PDB′ c
+            continuation = mkPDB′ (npd parse-inner)
+
+            continuation<pb : continuation <pb⁺ mkPDB′ (Restr pdb)
+            continuation<pb = trans (wfproof parse-inner) [ RStep pdb ]
+
+            continue : parsable-base continuation
+            continue = rec continuation continuation<pb
+
+
 
 purety-to-ty : PureTy c n → Ty c n
 

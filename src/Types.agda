@@ -3,16 +3,13 @@
 module Types where
 
 open import Ctx
+open import Data.Empty
+open import Data.Fin using (Fin)
 open import Data.Nat
 open import Data.Nat.Properties
-open import NatProperties
-open import Data.Fin using (Fin)
-open import Data.Sum
 open import Data.Product
-open import Data.Maybe
+open import NatProperties
 open import Relation.Nullary
-open import Relation.Binary.PropositionalEquality using (_≡_; refl)
-open import Data.Empty
 
 private
   variable
@@ -96,6 +93,28 @@ pdb-src-i> i (Restr pd) = ⊥-elim (si≰‴i (pdb-dim-lemma pd))
 pd-src : {i : ℕ} → PD c (suc i) → PD c i
 pd-src {_} {zero} (_ , pdb) = pdb-src-i≡ 0 pdb
 pd-src {_} {suc i} (_ , pdb) = -, pdb-src-i< (suc i) pdb (≤⇒≤‴ (s≤s z≤n))
+
+pdb-tgt-i≤ : (i : ℕ) → {n : ℕ} → {ty : Ty c n} → {tm : Term ty} → (pd : PDB tm (suc i)) → n ≤‴ i → PDB tm i
+pdb-tgt-i> : (i : ℕ) → {base : Ty c i} → {src tgt : Term base} → {tm : Term (src ⟶ tgt)} → (pd : PDB tm (suc i)) → PDB tgt i
+drop : {i : ℕ} → {ty : Ty c i} → {tm : Term ty} → (pd : PDB tm i) → (nt : Term ty) → PDB nt i
+
+pdb-tgt-i≤ i (AttachMax pd tgt fill) p = ⊥-elim (si≰‴i p)
+pdb-tgt-i≤ i (AttachNM x pd tgt fill) p = AttachNM p (pdb-tgt-i≤ i pd (≤‴-step p)) tgt fill
+pdb-tgt-i≤ i (Restr pd) ≤‴-refl = pdb-tgt-i> i pd
+pdb-tgt-i≤ i (Restr pd) (≤‴-step p) = Restr (pdb-tgt-i≤ i pd p)
+
+pdb-tgt-i> i (AttachMax pd tgt fill) = drop pd tgt
+pdb-tgt-i> i (AttachNM ≤‴-refl pd tgt fill) = drop (pdb-tgt-i≤ i pd ≤‴-refl) tgt
+pdb-tgt-i> i (AttachNM (≤‴-step p) pd tgt fill) = ⊥-elim (si≰‴i p)
+pdb-tgt-i> i (Restr pd) = ⊥-elim (si≰‴i (pdb-dim-lemma pd))
+
+drop (Base _) nt = Base nt
+drop (AttachMax pd tgt _) nt = AttachMax pd tgt nt
+drop (AttachNM x pd tgt _) nt = AttachNM x pd tgt nt
+drop (Restr pd) nt = ⊥-elim (si≰‴i (pdb-dim-lemma pd))
+
+pd-tgt : {i : ℕ} → PD c (suc i) → PD c i
+pd-tgt {_} {i} = map₂ (λ pdb → pdb-tgt-i≤ i pdb (≤⇒≤‴ z≤n))
 
 purety-to-ty : PureTy c n → Ty c n
 

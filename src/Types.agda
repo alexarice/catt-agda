@@ -9,6 +9,7 @@ open import NatProperties
 open import Data.Fin using (Fin)
 open import Data.Sum
 open import Data.Product
+open import Data.Maybe
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Data.Empty
@@ -98,14 +99,7 @@ pdb-src-i< i (Restr {n} {ty} {src} {tgt} {tm} pd) d p = γ
 pdb-src-i≡ i (Base x) d p = x , (Base x)
 pdb-src-i≡ i (Attach pd tgt fill) d refl =
   fill , (Attach (pdb-src-i< i pd (m⊔n≤o⇒m≤o (pdb-dim pd) _ d) ≤‴-refl) tgt fill)
-pdb-src-i≡ i (Restr {n} {ty} {src} {tgt} {tm} pd) d refl = t , pd'
-  where
-    tpd' : Σ[ t ∈ Term ty ] PDB t
-    tpd' = pdb-src-i> i pd d ≤‴-refl
-    t : Term ty
-    t = proj₁ tpd'
-    pd' : PDB t
-    pd' = proj₂ tpd'
+pdb-src-i≡ i (Restr {n} {ty} {src} {tgt} {tm} pd) d refl = pdb-src-i> i pd d ≤‴-refl
 
 pdb-src-i> {c} {n} i (Attach pd tgt fill) d p = pdb-src-i≡ i pd (m⊔n≤o⇒m≤o (pdb-dim pd) _ d) (≤-antisym (≤-pred (m⊔n≤o⇒n≤o (pdb-dim pd) (suc n) d)) (≤-pred (≤‴⇒≤ p)))
 pdb-src-i> i (Restr pd) d p = ⊥-elim (≤⇒≯ (≤-trans (pdb-dim-lemma pd) d) (s≤s (≤‴⇒≤ p)))

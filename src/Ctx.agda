@@ -6,6 +6,9 @@ open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Fin hiding (_+_)
 open import Data.Product
+open import Data.Container.Core
+open import Level using (0ℓ)
+open import Relation.Unary
 
 record Ctx : Set where
   inductive
@@ -16,15 +19,19 @@ record Ctx : Set where
 
 open Ctx public
 
-data PureTy (c : Ctx) : ℕ → Set
+data PureTy (c : Ctx) : Set
 
-retrieve-size : {c : Ctx} → {n : ℕ} → (t : PureTy c n) → ℕ
+retrieve-size : {c : Ctx} → (t : PureTy c) → ℕ
 
 data PureTy c where
-  ⋆P : PureTy c 0
-  _⟶P_ : ∀ {n} {t : PureTy c n} → (x y : Fin (retrieve-size t)) → PureTy c (suc n)
+  ⋆P : PureTy c
+  _⟶P_ : {t : PureTy c} → (x y : Fin (retrieve-size t)) → PureTy c
 
-retrieve-ctx : {c : Ctx} → {n : ℕ} → (t : PureTy c n) → Ctx
+pt-dim : {c : Ctx} → PureTy c → ℕ
+pt-dim ⋆P = 0
+pt-dim (_⟶P_ {t = t} _ _) = suc (pt-dim t)
+
+retrieve-ctx : {c : Ctx} → (t : PureTy c) → Ctx
 
 retrieve-size t = size (retrieve-ctx t)
 
@@ -55,3 +62,6 @@ attach-ctx (⟨ .(suc _) , f ⟩ , (s≤s p)) a .arr (suc (suc x)) (suc y) = f (
 
 attach-ctx-ne : (c : NECtx) → Ctx → NECtx
 attach-ctx-ne nec@(⟨ .(suc _) , _ ⟩ , s≤s p) a = (attach-ctx nec a) , s≤s z≤n
+
+CtxIndex : Ctx → Set
+CtxIndex c = Σ[ p ∈ PureTy c ] Fin (retrieve-size p)

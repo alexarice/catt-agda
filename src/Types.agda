@@ -4,6 +4,7 @@ module Types where
 
 open import Ctx
 open import Data.Empty
+open import Data.Bool using (Bool)
 open import Data.Fin using (Fin)
 open import Data.Nat
 open import Data.Nat.Properties
@@ -14,6 +15,9 @@ open import Relation.Nullary
 open import Function.Base
 open import Induction.WellFounded
 open import Induction
+open import Data.Container.Core hiding (⟪_⟫)
+open import Data.Container.Membership using (_∈_)
+open import Data.Container.Relation.Unary.All using (□)
 open import Level using (0ℓ)
 
 private
@@ -68,6 +72,7 @@ data PDB {c} where
           PDB tgt dim
 
 record PD (c : Ctx) (d : ℕ) : Set where
+  inductive
   constructor mkPD
   field
     {pd-tm} : Term {c} ⋆
@@ -104,27 +109,28 @@ pd-src {_} {suc i} (mkPD pdb) = mkPD (pdb-src-i< (suc i) pdb (≤⇒≤‴ (s≤
 
 pdb-tgt-i≤ : (i : ℕ) → {n : ℕ} → {ty : Ty c n} → {tm : Term ty} → (pd : PDB tm (suc i)) → n ≤‴ i → PDB tm i
 pdb-tgt-i> : (i : ℕ) → {base : Ty c i} → {src tgt : Term base} → {tm : Term (src ⟶ tgt)} → (pd : PDB tm (suc i)) → PDB tgt i
-drop : {i : ℕ} → {ty : Ty c i} → {tm : Term ty} → (pd : PDB tm i) → (nt : Term ty) → PDB nt i
+drop-pd : {i : ℕ} → {ty : Ty c i} → {tm : Term ty} → (pd : PDB tm i) → (nt : Term ty) → PDB nt i
 
 pdb-tgt-i≤ i (AttachMax pd tgt fill) p = ⊥-elim (si≰‴i p)
 pdb-tgt-i≤ i (AttachNM x pd tgt fill) p = AttachNM p (pdb-tgt-i≤ i pd (≤‴-step p)) tgt fill
 pdb-tgt-i≤ i (Restr pd) ≤‴-refl = pdb-tgt-i> i pd
 pdb-tgt-i≤ i (Restr pd) (≤‴-step p) = Restr (pdb-tgt-i≤ i pd p)
 
-pdb-tgt-i> i (AttachMax pd tgt fill) = drop pd tgt
-pdb-tgt-i> i (AttachNM ≤‴-refl pd tgt fill) = drop (pdb-tgt-i≤ i pd ≤‴-refl) tgt
+pdb-tgt-i> i (AttachMax pd tgt fill) = drop-pd pd tgt
+pdb-tgt-i> i (AttachNM ≤‴-refl pd tgt fill) = drop-pd (pdb-tgt-i≤ i pd ≤‴-refl) tgt
 pdb-tgt-i> i (AttachNM (≤‴-step p) pd tgt fill) = ⊥-elim (si≰‴i p)
 pdb-tgt-i> i (Restr pd) = ⊥-elim (si≰‴i (pdb-dim-lemma pd))
 
-drop (Base _) nt = Base nt
-drop (AttachMax pd tgt _) nt = AttachMax pd tgt nt
-drop (AttachNM x pd tgt _) nt = AttachNM x pd tgt nt
-drop (Restr pd) nt = ⊥-elim (si≰‴i (pdb-dim-lemma pd))
+drop-pd (Base _) nt = Base nt
+drop-pd (AttachMax pd tgt _) nt = AttachMax pd tgt nt
+drop-pd (AttachNM x pd tgt _) nt = AttachNM x pd tgt nt
+drop-pd (Restr pd) nt = ⊥-elim (si≰‴i (pdb-dim-lemma pd))
 
 pd-tgt : {i : ℕ} → PD c (suc i) → PD c i
 pd-tgt {_} {i} (mkPD pdb) = mkPD (pdb-tgt-i≤ i pdb (≤⇒≤‴ z≤n))
 
 record PDB′ (c : Ctx) : Set where
+  inductive
   constructor mkPDB′
   field
     {pdb-n} : ℕ
@@ -197,6 +203,7 @@ record parsable-pd {n} {d} {base : Ty c n}
                    {src tgt : Term base}
                    {tm : Term (src ⟶ tgt)}
                    (pd : PDB tm d) : Set where
+  inductive
   constructor parse
   field
     parsed : NECtx
@@ -243,8 +250,8 @@ lower (mkPDB′ {suc n} pdb) = ⊥
 parsable-base : PDB′ c → Set
 parsable-base pdb = (lower pdb) → NECtx
 
-pd-ctx : ∀ {i} → PD c i → NECtx
-pd-ctx {c} (mkPD pdb) = helper (mkPDB′ pdb) tt
+pd-ctx : ∀ {i} → PD c i → Ctx
+pd-ctx {c} (mkPD pdb) = proj₁ (helper (mkPDB′ pdb) tt)
   where
     helper : (pdb : PDB′ c) → parsable-base pdb
     helper = All.wfRec (wf⁺ c) 0ℓ parsable-base go
@@ -265,12 +272,43 @@ pd-ctx {c} (mkPD pdb) = helper (mkPDB′ pdb) tt
             continue : parsable-base continuation
             continue = rec continuation continuation<pb
 
+record CtxSubstitution (c d : Ctx) {n} (ty : Ty d n) : Set where
+  inductive
+  field
+    ⟪_⟫ : Fin (c .size) → Term ty
+    arrSub : (s t : Fin (c .size)) → CtxSubstitution (arr c s t) d (⟪ s ⟫ ⟶ ⟪ t ⟫)
+
+pd-ctx-sub : ∀ {i} → (pd : PD c i) → CtxSubstitution (pd-ctx pd) c ⋆
+pd-ctx-sub = {!!}
+
+mapType : {c d : Ctx} → CtxSubstitution c d ⋆ → Ty c n → Ty d n
+mapType = {!!}
+
+data TermShape : Set where
+  V : TermShape
+  CH : TermShape → TermShape → TermShape
+  CM : TermShape → TermShape → TermShape
+
+term-container : Container 0ℓ 0ℓ
+term-container .Shape = TermShape
+term-container .Position V = ⊤
+term-container .Position (CH _ _) = Bool
+term-container .Position (CM _ _) = Bool
+
+FV : {ty : Ty c n} → Term ty → ⟦ term-container ⟧ (CtxIndex c)
+
+IsComplete : {ty : Ty c n} → Term ty → Set
+IsComplete tm = ∀ i → i ∈ FV tm
+
+purety-to-ty : (p : PureTy c) → Ty c (pt-dim p)
 
 
-purety-to-ty : PureTy c n → Ty c n
 
 data Term {c} where
-  Var : ∀ {n} → (ty : PureTy c n) → Fin (retrieve-size ty) → Term (purety-to-ty ty)
+  Var : (ty : PureTy c) → Fin (retrieve-size ty) → Term (purety-to-ty ty)
+  Coh : {d : ℕ} → (pd : PD c d) → {n : ℕ} → {ty : Ty (pd-ctx pd) n} (s t : Term ty) → (sc : IsComplete s) → (tc : IsComplete t) → Term (mapType (pd-ctx-sub pd) ty)
 
 purety-to-ty ⋆P = ⋆
 purety-to-ty (_⟶P_ {t = t} x y) = Var t x ⟶ Var t y
+
+FV t = {!!}

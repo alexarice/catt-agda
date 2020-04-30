@@ -306,7 +306,7 @@ purety-to-ty : (p : PureTy c) → Ty c (pt-dim p)
 
 data Term {c} where
   Var : (ty : PureTy c) → Fin (retrieve-size ty) → Term (purety-to-ty ty)
-  Coh : {d : ℕ} → (pd : PD c d) → {n : ℕ} → {ty : Ty (pd-ctx pd) n} (s t : Term ty) → (sc : IsComplete s) → (tc : IsComplete t) → Term (mapType (pd-ctx-sub pd) ty)
+  -- Coh : {d : ℕ} → (pd : PD c d) → {n : ℕ} → {ty : Ty (pd-ctx pd) n} (s t : Term ty) → (sc : IsComplete s) → (tc : IsComplete t) → Term (mapType (pd-ctx-sub pd) ty)
 
 purety-to-ty ⋆P = ⋆
 purety-to-ty (_⟶P_ {t = t} x y) = Var t x ⟶ Var t y

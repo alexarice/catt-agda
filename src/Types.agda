@@ -109,20 +109,35 @@ drop-pd (AttachNM pd tgt _) nt = AttachNM pd tgt nt
 pd-tgt : {dim : ℕ} → {pds : PDShape 0 (suc dim)} → PD c pds → PD c (pds-bd-i≤ pds)
 pd-tgt {_} {i} (mkPD pdb) = mkPD (pdb-tgt-i≤ pdb)
 
-record CtxSubstitution (c d : Ctx) (ty : Ty d) : Set where
+record CtxSubstitution (c d : Ctx) : Set where
   inductive
   field
-    ⟪_⟫ : Fin (c .size) → Term ty
-    arrSub : (s t : Fin (c .size)) → CtxSubstitution (arr c s t) d (⟪ s ⟫ ⟶ ⟪ t ⟫)
+    apply : Fin (c .size) → Term ⋆
+    arrSub : (s t : Fin (c .size)) → CtxSubstitution (arr c s t) (arr d (apply s) (apply t))
+
+open CtxSubstitution
+
+_⇛_ : (c d : Ctx) → Set
+c ⇛ d = CtxSubstitution c d ⋆
+
+infixr 3 _∙_
+
+mapType : ∀ {c d : Ctx} {ty : Ty d} → CtxSubstitution c d ty → Ty c → Ty d
+mapTerm : ∀ {c d : Ctx} {ty : Ty d} → (sub : CtxSubstitution c d ty) → {ty₁ : Ty c} → Term ty₁ → Term (mapType sub ty₁)
+
+mapType {ty = ty} sub ⋆ = ty
+mapType sub (_⟶_ {ty = ty} x y) = mapTerm sub x ⟶ mapTerm sub y
+
+compose : ∀ {c d e : Ctx} {ty₁ : Ty d} {ty₂ : Ty e} → (sub : CtxSubstitution d e ty₂) → CtxSubstitution c d ty₁ → CtxSubstitution c e (mapType sub ty₁)
+compose σ τ .apply = mapTerm σ ∘ apply τ
+compose σ τ .arrSub s t = {!!}
 
 pd-ctx-sub : ∀ {d} {pds : PDShape 0 d} → (pd : PD c pds) → CtxSubstitution (pds-ctx pds) c ⋆
 pd-ctx-sub pd = {!!}
 
-mapType : {c d : Ctx} → CtxSubstitution c d ⋆ → Ty c → Ty d
-mapTerm : {c d : Ctx} → (sub : CtxSubstitution c d ⋆) → {ty : Ty c} → Term ty → Term (mapType sub ty)
 
-mapType sub ⋆ = ⋆
-mapType sub (_⟶_ {ty = ty} x y) = mapTerm sub x ⟶ mapTerm sub y
+
+
 
 data TermShape : Set where
   V : TermShape

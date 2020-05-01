@@ -72,10 +72,12 @@ pd-src : {Γ : Ctx} → PD Γ → Ctx
 pd-src (Finish x) = {!!}
   where
     go : {n : ℕ} → (Γ : Ctx) → {A : Ty Γ} → {x : Term Γ A} → PDB n Γ x → Ctx
+
+
     go Γ Base = Γ
     go (Γ , _ , (Gen _ _ ⟶ Var _)) (ExtendMax pdb) = Γ
     go {zero} (Γ , _ , (Gen _ _ ⟶ Var _)) (ExtendNM pdb) = go Γ pdb
-    go {suc n} (Γ , x , y) (ExtendNM pdb) = {!go Γ pdb!} , {!!} , {!!}
+    go {suc n} (Γ , x , y) (ExtendNM pdb) = go Γ pdb , {!!} , {!!}
     go .(_ , _) (Restr pdb) = {!!}
 
 x [ σ ]tm = {!!}

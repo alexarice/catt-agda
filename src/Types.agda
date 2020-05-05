@@ -1,189 +1,250 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --without-K #-}
 
 module Types where
 
 open import Data.Nat
+open import Relation.Binary.PropositionalEquality
+open import Data.Bool
+open import Data.Product hiding (_,_)
+open import Data.Empty
+open import Data.Unit
+open import Induction.WellFounded
+
+open ≡-Reasoning
+
+transport : {A B : Set} → A ≡ B → A → B
+transport refl a = a
 
 data Ctx : Set
 
-data Ty (c : Ctx) : Set
+data Ty : Ctx → ℕ → Set
 
-data Term : (Γ : Ctx) → Ty Γ → Set
-
-data Substitution (Γ : Ctx) : (Δ : Ctx) → Set
+private
+  variable
+    n m submax l dim : ℕ
+    Γ Δ Υ : Ctx
 
 infixl 4 _,_
 data Ctx where
   ∅ : Ctx
-  _,_ : (Γ : Ctx) → (A : Ty Γ) → Ctx
+  _,_ : (Γ : Ctx) → (A : Ty Γ n) → Ctx
 
-data Ty Γ where
-  ⋆ : Ty Γ
-  _⟶_ : {A : Ty Γ} → (t u : Term Γ A) → Ty Γ
+data Term : (Γ : Ctx) → Ty Γ n → Set
 
-_[_]ty : {Γ Δ : Ctx} → Ty Δ → Substitution Γ Δ → Ty Γ
-_[_]tm : {Γ Δ : Ctx} → {A : Ty Δ} → Term Δ A → (σ : Substitution Γ Δ) → Term Γ (A [ σ ]ty)
+data Substitution : (Γ : Ctx) → (Δ : Ctx) → Set
 
-data Substitution Γ where
-  ⟨⟩ : Substitution Γ ∅
-  ⟨_,_⟩ : {Δ : Ctx} → (σ : Substitution Γ Δ) → {A : Ty Δ} → Term Γ (A [ σ ]ty) → Substitution Γ (Δ , A)
+data PD : Ctx → ℕ → Set
+
+data Ty where
+  ⋆ : Ty Γ 0
+  _⟶_ : {A : Ty Γ n} → (t u : Term Γ A) → Ty Γ (suc n)
+
+trans-term : {A B : Ty Γ n} → (A ≡ B) → Term Γ A → Term Γ B
+trans-term p = transport (cong (Term _) p)
+
+trans-over-type : {A B : Ty Γ n} → {x y : Term Γ A} → {a b : Term Γ B} → (p : A ≡ B) → (p₁ : trans-term p x ≡ a) → (p₂ : trans-term p y ≡ b) → (x ⟶ y ≡ a ⟶ b)
+trans-over-type refl refl refl = refl
+
+trans₃ : {X : Set} → {A B C D : X} → (q : A ≡ B) → (p : B ≡ C) → (u : C ≡ D) → A ≡ D
+trans₃ refl refl refl = refl
+
+trans-term-trans₃ : {A B C D : Ty Γ n} → (q : A ≡ B) → (p : B ≡ C) → (u : C ≡ D) → {x : Term Γ A} → trans-term u (trans-term p (trans-term q x)) ≡ trans-term (trans₃ q p u) x
+trans-term-trans₃ refl refl refl = refl
+
+trans-term-over-type : {A B : Ty Γ n} → (p : A ≡ B) → (x y : Term Γ A) → (x ⟶ y ≡ trans-term p x ⟶ trans-term p y)
+trans-term-over-type refl x y = refl
+
+_[_]ty : Ty Δ n → Substitution Γ Δ → Ty Γ n
+_[_]tm : {A : Ty Δ n} → Term Δ A → (σ : Substitution Γ Δ) → Term Γ (A [ σ ]ty)
 
 ⋆ [ σ ]ty = ⋆
 (t ⟶ u) [ σ ]ty = (t [ σ ]tm) ⟶ (u [ σ ]tm)
 
-liftType : {Γ : Ctx} → (A : Ty Γ) → (B : Ty Γ) → Ty (Γ , B)
+data Substitution where
+  ⟨⟩ : Substitution Γ ∅
+  ⟨_,_⟩ : (σ : Substitution Γ Δ) → {A : Ty Δ n} → Term Γ (A [ σ ]ty) → Substitution Γ (Δ , A)
+
+liftType : (A : Ty Γ n) → (B : Ty Γ m) → Ty (Γ , B) n
+
+data Variable : Ctx → Set where
+  V : {A : Ty Γ n} → Variable (Γ , A)
+  G : {A : Ty Γ n} → Variable Γ → Variable (Γ , A)
+
+FVSet : Ctx → Set
+FVSet Γ = Variable Γ → Bool
+
+Bool≡ : Bool → Bool → Bool
+Bool≡ false b = not b
+Bool≡ true b = b
+
+isEqual : FVSet Γ → FVSet Γ → Bool
+isEqual {∅} f g = true
+isEqual {Γ , A} f g = (Bool≡ (f V) (g V)) ∧ (isEqual (λ x → f (G x)) (λ x → f (G x)))
+
+FVCtx : (Γ : Ctx) → FVSet Γ
+FVTerm : {A : Ty Γ n} → Term Γ A → FVSet Γ
+FVType : Ty Γ n → FVSet Γ
+FVSub : Substitution Δ Γ → FVSet Δ
+
+FVSrc : (Γ : Ctx) → (pd : PD Γ n) → FVSet Γ
+FVTgt : (Γ : Ctx) → (pd : PD Γ n) → FVSet Γ
 
 data Term where
-  Var : {Γ : Ctx} → (A : Ty Γ) → Term (Γ , A) (liftType A A)
-  Gen : {Γ : Ctx} → {B : Ty Γ} → (t : Term Γ B) → (A : Ty Γ) → Term (Γ , A) (liftType B A)
+  Var : (A : Ty Γ n) → Term (Γ , A) (liftType A A)
+  Gen : {B : Ty Γ n} → (t : Term Γ B) → (A : Ty Γ m) → Term (Γ , A) (liftType B A)
+  Coh : (pd : PD Γ n) →
+        (A : Ty Γ m) →
+        (cA : T (isEqual (FVCtx Γ) (FVType A))) →
+        (σ : Substitution Δ Γ) →
+        Term Δ (A [ σ ]ty)
+  Comp : (pd : PD Γ n) →
+         (A : Ty Γ n) →
+         (t : Term Γ A) →
+         (u : Term Γ A) →
+         (ct : T (isEqual (FVSrc Γ pd) (FVTerm t))) →
+         (cu : T (isEqual (FVTgt Γ pd) (FVTerm u))) →
+         (σ : Substitution Δ Γ) →
+         Term Δ ((t ⟶ u) [ σ ]ty)
+
+infixl 3 _∪_
+_∪_ : FVSet Γ → FVSet Γ → FVSet Γ
+(f ∪ g) v = f v ∨ g v
+
+allt : FVSet Γ
+allt v = true
+
+allf : FVSet Γ
+allf v = false
+
+FVCtx Γ = allt
+FVTerm (Var A) V = true
+FVTerm (Var A) (G v) = false
+FVTerm (Gen x A) V = false
+FVTerm (Gen x A) (G v) = FVTerm x v
+FVTerm (Coh pd A cA σ) = FVSub σ
+FVTerm (Comp pd A x x₁ ct cu σ) = FVSub σ
+FVType ⋆ = allf
+FVType (_⟶_ {A = A} t u) = FVType A ∪ FVTerm t ∪ FVTerm u
+FVSub ⟨⟩ = allf
+FVSub ⟨ σ , x ⟩ = FVSub σ ∪ FVTerm x
 
 liftType ⋆ A = ⋆
-liftType (t ⟶ u) A = (Gen t A) ⟶ Gen u A
+liftType (t ⟶ u) A = Gen t A ⟶ Gen u A
 
-_∘_ : {Γ Δ Υ : Ctx} → Substitution Δ Γ → Substitution Υ Δ → Substitution Υ Γ
-comp-lemma : {Γ Δ Υ : Ctx} → (σ : Substitution Δ Γ) → (τ : Substitution Υ Δ) → {A : Ty Γ} → Term Υ (A [ σ ]ty [ τ ]ty) → Term Υ (A [ σ ∘ τ ]ty)
-sub-ext : {Γ Δ : Ctx} → (A : Ty Γ) → Substitution Γ Δ → Substitution (Γ , A) Δ
-sub-ext-lemma : {Γ Δ : Ctx} → (A : Ty Γ) → {B : Ty Δ} → (σ : Substitution Γ Δ) → Term Γ (B [ σ ]ty) → Term (Γ , A) (B [ sub-ext A σ ]ty)
-sub-ext A ⟨⟩ = ⟨⟩
-sub-ext A ⟨ σ , x ⟩ = ⟨ sub-ext A σ , sub-ext-lemma A σ x ⟩
+ty-base : Ty Γ (suc n) → Ty Γ n
+ty-base (_⟶_ {A = A} _ _) = A
 
-⟨⟩ ∘ τ = ⟨⟩
-⟨ σ , x ⟩ ∘ τ = ⟨ σ ∘ τ , comp-lemma σ τ (x [ τ ]tm) ⟩
+ty-src : (ty : Ty Γ (suc n)) → Term Γ (ty-base ty)
+ty-src (t ⟶ u) = t
 
-id : (Γ : Ctx) → Substitution Γ Γ
+ty-tgt : (ty : Ty Γ (suc n)) → Term Γ (ty-base ty)
+ty-tgt (t ⟶ u) = u
 
-id-lemma : {Γ : Ctx} → (A : Ty Γ) → Term (Γ , A) (liftType A A) → Term Γ (A [ id Γ ]ty)
-id ∅ = ⟨⟩
-id (Γ , A) = ⟨ sub-ext A (id Γ) , sub-ext-lemma A (id Γ) (id-lemma A (Var A)) ⟩
+-- TermHasSubs : {A : Ty Γ n} → Term Γ A → Set
+-- TermHasSubs (Var A) = ⊥
+-- TermHasSubs (Gen x A) = ⊥
+-- TermHasSubs (Coh pd A cA σ) = ⊤
+-- TermHasSubs (Comp pd A t u ct cu σ) = ⊤
 
-data PDB : (submax : ℕ) → (Γ : Ctx) → {A : Ty Γ} → Term Γ A → Set where
-  Base : PDB 0 (∅ , ⋆) (Var ⋆)
-  ExtendMax : {Γ : Ctx} → {A : Ty Γ} → {x : Term Γ A} → PDB 0 Γ x → PDB 0 (Γ , A , Gen x A ⟶ Var A) (Var (Gen x A ⟶ Var A))
-  ExtendNM : {n : ℕ} → {Γ : Ctx} → {A : Ty Γ} → {x : Term Γ A} → PDB (suc n) Γ x → PDB n (Γ , A , Gen x A ⟶ Var A) (Var (Gen x A ⟶ Var A))
-  Restr : {n : ℕ} → {Γ : Ctx} → {E : Ty Γ} → {A : Ty (Γ , E)} → {x y : Term (Γ , E) A} → PDB n (Γ , E , (x ⟶ y)) (Var (x ⟶ y)) → PDB (suc n) (Γ , E) y
+-- SigSub : Ctx → Set
+-- SigSub Γ = Σ[ Δ ∈ Ctx ] Substitution Γ Δ
 
-data PD : Ctx → Set where
-  Finish : {n : ℕ} → {Γ : Ctx} → {x : Term Γ ⋆} → PDB n Γ x → PD Γ
-
--- pdb-src-i< : {n : ℕ} → {Γ : Ctx} → {A : Ty Γ} → {x : Term Γ A} → PDB (suc (suc n)) Γ x → PDB (suc n) Γ x
--- pdb-src-i≡ : {Γ : Ctx} → {A : Ty Γ} → {x : Term Γ A} → PDB 1 Γ x → PDB 0 Γ x
-
-pd-src : {Γ : Ctx} → PD Γ → Ctx
-pd-src (Finish x) = {!!}
-  where
-    go : {n : ℕ} → (Γ : Ctx) → {A : Ty Γ} → {x : Term Γ A} → PDB n Γ x → Ctx
+-- getSub : {A : Ty Γ n} → (x : Term Γ A) → TermHasSubs x → SigSub Γ
+-- getSub (Coh pd A cA σ) sub = -, σ
+-- getSub (Comp pd A t u ct cu σ) sub = -, σ
 
 
-    go Γ Base = Γ
-    go (Γ , _ , (Gen _ _ ⟶ Var _)) (ExtendMax pdb) = Γ
-    go {zero} (Γ , _ , (Gen _ _ ⟶ Var _)) (ExtendNM pdb) = go Γ pdb
-    go {suc n} (Γ , x , y) (ExtendNM pdb) = go Γ pdb , {!!} , {!!}
-    go .(_ , _) (Restr pdb) = {!!}
 
-x [ σ ]tm = {!!}
+-- infix 3 _<s_
+-- data _<s_ {Γ : Ctx} : SigSub Γ → SigSub Γ → Set where
+--   SubSub : (σ : Substitution Γ Δ) → {A : Ty Δ n} → (x : Term Γ (A [ σ ]ty)) → -, σ <s -, ⟨ σ , x ⟩
+--   TermSub : (σ : Substitution Γ Δ) → {A : Ty Δ n} → (x : Term Γ (A [ σ ]ty)) → (sub : TermHasSubs x) → getSub x sub <s -, ⟨ σ , x ⟩
 
-comp-lemma = {!!}
-sub-ext-lemma = {!!}
-id-lemma = {!!}
+-- wf : (Γ : Ctx) → WellFounded (_<s_ {Γ})
+-- wf Γ = {!!}
+
+{-# TERMINATING #-}
+_∘_ : {Γ Δ Υ : Ctx} → Substitution Υ Δ → Substitution Δ Γ → Substitution Υ Γ
+comp-lemma : (σ : Substitution Δ Γ) → (τ : Substitution Υ Δ) → {A : Ty Γ n} → (A [ τ ∘ σ ]ty) ≡ (A [ σ ]ty [ τ ]ty)
+lifting-lemma : (σ : Substitution Δ Γ) → {A : Ty Γ n} → {B : Ty Γ m} → {x : Term Δ (A [ σ ]ty)} → B [ σ ]ty ≡ liftType B A [ ⟨ σ , x ⟩ ]ty
+
+Var A [ ⟨ σ , tm ⟩ ]tm = trans-term (lifting-lemma σ) tm
+Gen {B = B} x A [ ⟨ σ , tm ⟩ ]tm = trans-term (lifting-lemma σ) (x [ σ ]tm)
+Coh pd A cA σ [ τ ]tm = trans-term (comp-lemma σ τ) (Coh pd A cA (τ ∘ σ))
+Comp pd A t u ct cu σ [ τ ]tm = trans-term (comp-lemma σ τ) (Comp pd A t u ct cu (τ ∘ σ))
+
+τ ∘ ⟨⟩ = ⟨⟩
+τ ∘ ⟨ σ , x ⟩ = ⟨ τ ∘ σ , trans-term (sym (comp-lemma σ τ)) (x [ τ ]tm) ⟩
 
 
--- data PDB {c : Ctx} : {ty : Ty c} → Term ty → {submax : ℕ} → PDShape (ty-dim ty) submax → Set
+-- si : {A : Ty Γ n} → Substitution Γ Δ → Substitution (Γ , A) Δ
+-- si-lemma : (σ : Substitution Γ Δ) → (A : Ty Γ n) → (B : Ty Δ m) → B [ si σ ]ty ≡ liftType (B [ σ ]ty) A
+-- si ⟨⟩ = ⟨⟩
+-- si {A = A} (⟨_,_⟩ σ {B} x) = ⟨ (si σ) , γ ⟩
+--   where
+--     γ : Term (_ , A) (B [ si σ ]ty)
+--     γ rewrite si-lemma σ A B = Gen x A
 
--- data PDB {c} where
---   Base : (t : Term {c} ⋆) → PDB t BaseS
---   AttachMax : {ty : Ty c} →
---               {tm : Term ty} →
---               {pds : PDShape (ty-dim ty) 0} →
---               (pd : PDB tm pds) →
---               (tgt : Term ty) →
---               (fill : Term (tm ⟶ tgt)) →
---               PDB fill (AttachMaxS pds)
---   AttachNM : {ty : Ty c} →
---              {tm : Term ty} →
---              {submax : ℕ} →
---              {pds : PDShape (ty-dim ty) (suc submax)} →
---              (pd : PDB tm pds) →
---              (tgt : Term ty) →
---              (fill : Term (tm ⟶ tgt)) →
---              PDB fill (AttachNMS pds)
---   Restr : {ty : Ty c} →
---           {src : Term ty} →
---           {tgt : Term ty} →
---           {tm : Term (src ⟶ tgt)} →
---           {submax : ℕ} →
---           {pds : PDShape (suc (ty-dim ty)) submax} →
---           (pd : PDB tm pds) →
---           PDB tgt (RestrS pds)
+-- id : (Γ : Ctx) → Substitution Γ Γ
+-- id-lemma : (A : Ty Γ n) → A [ si (id Γ) ]ty ≡ liftType A A
 
--- record PD (c : Ctx) {d : ℕ} (pds : PDShape 0 d) : Set where
---   inductive
---   constructor mkPD
---   field
---     {pd-tm} : Term {c} ⋆
---     getPD : PDB pd-tm pds
+-- id ∅ = ⟨⟩
+-- id (Γ , A) = ⟨ si (id Γ) , γ ⟩
+--   where
+--     γ : Term (Γ , A) (A [ si (id Γ) ]ty)
+--     γ rewrite id-lemma A = Var A
 
--- pdb-src-i< : {submax : ℕ} → {ty : Ty c} → {tm : Term ty} → {pds : PDShape (ty-dim ty) (suc (suc submax))} → (pd : PDB tm pds) → PDB tm (pds-bd-i≤ pds)
--- pdb-src-i≡ : {ty : Ty c} → {tm : Term ty} → {pds : PDShape (ty-dim ty) 1} (pd : PDB tm pds) → Σ[ t ∈ Term ty ] PDB t (pds-bd-i≤ pds)
--- pdb-src-i> : {base : Ty c} → {src tgt : Term base} → {tm : Term (src ⟶ tgt)} → {pds : PDShape (suc (ty-dim base)) 0} → (pd : PDB tm pds) → Σ[ t ∈ Term base ] PDB t (pds-bd-i> pds)
+data PDB : (Γ : Ctx) → (submax : ℕ) → {A : Ty Γ n} → Term Γ A → Set where
+  Base : PDB (∅ , ⋆) 0 (Var ⋆)
+  ExtendMax : {A : Ty Γ n} → {x : Term Γ A} → PDB Γ 0 x → PDB (Γ , A , Gen x A ⟶ Var A) 0 (Var (Gen x A ⟶ Var A))
+  ExtendNM : {A : Ty Γ n} → {x : Term Γ A} → PDB Γ (suc submax) x → PDB (Γ , A , Gen x A ⟶ Var A) submax (Var (Gen x A ⟶ Var A))
+  Restr : {A : Ty Γ (suc n)} → {x : Term Γ A} → PDB Γ submax x → PDB Γ (suc submax) (ty-tgt A)
 
--- pdb-src-i< (AttachNM pd tgt fill) = AttachNM (pdb-src-i< pd) tgt fill
--- pdb-src-i< {_} {zero} (Restr pd) = Restr (proj₂ (pdb-src-i≡ pd))
--- pdb-src-i< {_} {suc submax} (Restr pd) = Restr (pdb-src-i< pd)
+data PD where
+  Finish : {x : Term Γ ⋆} → PDB Γ n x → PD Γ n
 
--- pdb-src-i≡ (AttachNM pd tgt fill) = -, AttachNM (pdb-src-i< pd) tgt fill
--- pdb-src-i≡ (Restr pd) = pdb-src-i> pd
+ew : Bool → FVSet Γ → {A : Ty Γ n} → FVSet (Γ , A)
+ew b f V = b
+ew b f (G v) = f v
 
--- pdb-src-i> (AttachMax pd tgt fill) = -, pd
--- pdb-src-i> (AttachNM pd tgt fill) = pdb-src-i≡ pd
+FVSrc-b : {A : Ty Γ n} → {x : Term Γ A} → (pdb : PDB Γ submax x) → FVSet Γ
+FVSrc-b Base = allf
+FVSrc-b (ExtendMax pdb) = ew false (ew false allt)
+FVSrc-b {submax = zero} (ExtendNM pdb) = ew false (ew false (FVSrc-b pdb))
+FVSrc-b {submax = suc n} (ExtendNM pdb) = ew true (ew true (FVSrc-b pdb))
+FVSrc-b (Restr pdb) = FVSrc-b pdb
 
--- pd-src : {dim : ℕ} → {pds : PDShape 0 (suc dim)} → PD c pds → PD c (pds-bd-i≤ pds)
--- pd-src {_} {zero} (mkPD pdb) = mkPD (proj₂ (pdb-src-i≡ pdb))
--- pd-src {_} {suc i} (mkPD pdb) = mkPD (pdb-src-i< pdb)
+drop′ : {A : Ty Γ n} → FVSet (Γ , A) → FVSet (Γ , A)
+drop′ f V = false
+drop′ f (G v) = f (G v)
 
--- pdb-tgt-i≤ : {submax : ℕ} → {ty : Ty c} → {tm : Term ty} → {pds : PDShape (ty-dim ty) (suc submax)} → (pd : PDB tm pds) → PDB tm (pds-bd-i≤ pds)
--- pdb-tgt-i> : {base : Ty c} → {src tgt : Term base} → {tm : Term (src ⟶ tgt)} → {pds : PDShape (suc (ty-dim base)) 0} → (pd : PDB tm pds) → PDB tgt (pds-bd-i> pds)
--- drop-pd : {ty : Ty c} → {tm : Term ty} → {pds : PDShape (ty-dim ty) 0} (pd : PDB tm pds) → (nt : Term ty) → PDB nt pds
+drop : {A : Ty Γ n} → {x : Term Γ A} → (PDB Γ submax x) → FVSet Γ → FVSet Γ
+drop Base f = drop′ f
+drop (ExtendMax pdb) f = drop′ f
+drop (ExtendNM pdb) f = drop′ f
+drop (Restr pdb) f = drop pdb f
 
--- pdb-tgt-i≤ (AttachNM pd tgt fill) = AttachNM (pdb-tgt-i≤ pd) tgt fill
--- pdb-tgt-i≤ {_} {zero} (Restr pd) = pdb-tgt-i> pd
--- pdb-tgt-i≤ {_} {suc _} (Restr pd) = Restr (pdb-tgt-i≤ pd)
+FVTgt-b : {A : Ty Γ n} → {x : Term Γ A} → (pdb : PDB Γ submax x) → FVSet Γ
+FVTgt-b Base = allf
+FVTgt-b (ExtendMax pdb) = ew false (ew true (drop pdb allt))
+FVTgt-b {submax = zero} (ExtendNM pdb) = ew false (ew true (drop pdb (FVTgt-b pdb)))
+FVTgt-b {submax = suc n} (ExtendNM pdb) = ew true (ew true (FVTgt-b pdb))
+FVTgt-b (Restr pdb) = FVTgt-b pdb
 
--- pdb-tgt-i> (AttachMax pd tgt fill) = drop-pd pd tgt
--- pdb-tgt-i> (AttachNM pd tgt fill) = drop-pd (pdb-tgt-i≤ pd) tgt
+FVSrc Γ (Finish pdb) = FVSrc-b pdb
+FVTgt Γ (Finish pdb) = FVTgt-b pdb
 
--- drop-pd (Base _) nt = Base nt
--- drop-pd (AttachMax pd tgt _) nt = AttachMax pd tgt nt
--- drop-pd (AttachNM pd tgt _) nt = AttachNM pd tgt nt
+comp-term-lemma : {A : Ty Γ n} → (x : Term Γ A) → (σ : Substitution Δ Γ) → (τ : Substitution Υ Δ) → (x [ τ ∘ σ ]tm) ≡ trans-term (sym (comp-lemma σ τ)) ((x [ σ ]tm) [ τ ]tm)
 
--- pd-tgt : {dim : ℕ} → {pds : PDShape 0 (suc dim)} → PD c pds → PD c (pds-bd-i≤ pds)
--- pd-tgt {_} {i} (mkPD pdb) = mkPD (pdb-tgt-i≤ pdb)
 
--- data TermShape : Set where
---   V : TermShape
---   CH : TermShape → TermShape → TermShape
---   CM : TermShape → TermShape → TermShape
+comp-term-lemma (Var ⋆) ⟨ σ , x ⟩ τ = {!refl!}
+comp-term-lemma (Var (t ⟶ u)) ⟨ σ , x ⟩ τ = {!!}
+comp-term-lemma (Gen x A) σ τ = {!!}
+comp-term-lemma (Coh pd A cA σ₁) σ τ = {!!}
+comp-term-lemma (Comp pd A x x₁ ct cu σ₁) σ τ = {!!}
 
--- term-container : Container 0ℓ 0ℓ
--- term-container .Shape = TermShape
--- term-container .Position V = ⊤
--- term-container .Position (CH _ _) = Bool
--- term-container .Position (CM _ _) = Bool
+comp-lemma σ τ {⋆} = refl
+comp-lemma σ τ {t ⟶ u} = {!!} -- trans-over-type (comp-lemma σ τ) (comp-term-lemma t σ τ) (comp-term-lemma u σ τ)
 
--- FV : {ty : Ty c} → Term ty → ⟦ term-container ⟧ (CtxIndex c)
-
--- IsComplete : {ty : Ty c} → Term ty → Set
--- IsComplete tm = ∀ i → i ∈ FV tm
-
--- purety-to-ty : (p : PureTy c) → Ty c
-
--- data Term {c} where
---   Var : (ty : PureTy c) → Fin (retrieve-size ty) → Term (purety-to-ty ty)
---   Coh : ∀ {d} {pds : PDShape 0 d} → (pd : PD c pds) → {ty : Ty (pds-ctx pds)} (s t : Term ty) → (sc : IsComplete s) → (tc : IsComplete t) → Term (mapType (pd-ctx-sub pd) ty)
---   Comp : ∀ {d} {pds : PDShape 0 (suc d)} → (pd : PD c pds) → {ty : Ty (pds-ctx (pds-bd-i≤ pds))} → (s t : Term ty) → (sc : IsComplete s) → (tc : IsComplete t) → Term (mapTerm (pd-ctx-sub (pd-src pd)) s ⟶ mapTerm (pd-ctx-sub (pd-tgt pd)) t)
-
--- purety-to-ty ⋆P = ⋆
--- purety-to-ty (_⟶P_ {t = t} x y) = Var t x ⟶ Var t y
-
--- mapTerm sub x = {!!}
-
--- FV t = {!!}
+lifting-lemma σ {A} {⋆} = refl
+lifting-lemma σ {A} {_⟶_ {A = C} t u} = trans-term-over-type (lifting-lemma σ) (t [ σ ]tm) (u [ σ ]tm)

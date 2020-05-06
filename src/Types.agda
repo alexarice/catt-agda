@@ -234,17 +234,16 @@ FVTgt-b (Restr pdb) = FVTgt-b pdb
 FVSrc Γ (Finish pdb) = FVSrc-b pdb
 FVTgt Γ (Finish pdb) = FVTgt-b pdb
 
-comp-term-lemma : {A : Ty Γ n} → (x : Term Γ A) → (σ : Substitution Δ Γ) → (τ : Substitution Υ Δ) → (x [ τ ∘ σ ]tm) ≡ trans-term (sym (comp-lemma σ τ)) ((x [ σ ]tm) [ τ ]tm)
+comp-term-lemma : {A : Ty Γ n} → (x : Term Γ A) → (σ : Substitution Δ Γ) → (τ : Substitution Υ Δ) → trans-term (comp-lemma σ τ) (x [ τ ∘ σ ]tm) ≡ ((x [ σ ]tm) [ τ ]tm)
 
 
-comp-term-lemma (Var ⋆) ⟨ σ , x ⟩ τ = {!refl!}
-comp-term-lemma (Var (t ⟶ u)) ⟨ σ , x ⟩ τ = {!!}
+comp-term-lemma (Var A) ⟨ σ , x ⟩ τ = {!!}
 comp-term-lemma (Gen x A) σ τ = {!!}
 comp-term-lemma (Coh pd A cA σ₁) σ τ = {!!}
 comp-term-lemma (Comp pd A x x₁ ct cu σ₁) σ τ = {!!}
 
 comp-lemma σ τ {⋆} = refl
-comp-lemma σ τ {t ⟶ u} = {!!} -- trans-over-type (comp-lemma σ τ) (comp-term-lemma t σ τ) (comp-term-lemma u σ τ)
+comp-lemma σ τ {t ⟶ u} = trans-over-type (comp-lemma σ τ) (comp-term-lemma t σ τ) (comp-term-lemma u σ τ)
 
 lifting-lemma σ {A} {⋆} = refl
 lifting-lemma σ {A} {_⟶_ {A = C} t u} = trans-term-over-type (lifting-lemma σ) (t [ σ ]tm) (u [ σ ]tm)

@@ -21,10 +21,12 @@ full : FVSet n
 full n = true
 
 ewf : FVSet n → FVSet (suc n)
-ewf f = helper f false
+ewf f zero = false
+ewf f (suc n) = f n
 
 ewt : FVSet n → FVSet (suc n)
-ewt f = helper f true
+ewt f zero = true
+ewt f (suc n) = f n
 
 sameF : Fin n → Fin n → Bool
 sameF zero zero = true
@@ -54,7 +56,7 @@ Union {suc n} f = (Union (λ x → f (suc x))) ∪ f zero
 FVCtx : Ctx n → FVSet n
 FVTerm : Term n → FVSet n
 FVTy : Ty n → FVSet n
-FVSub : Substitution m n → FVSet m
+FVSub : Sub m n → FVSet m
 
 FVCtx Γ = full
 
@@ -65,4 +67,5 @@ FVTerm (Var f) g = sameF f g
 FVTerm (Coh Γ A σ) = FVSub σ
 FVTerm (Comp Γ A t u σ) = FVSub σ
 
-FVSub σ = Union (λ x → FVTerm (σ x))
+FVSub ⟨⟩ = empty
+FVSub ⟨ σ , x ⟩ = FVSub σ ∪ FVTerm x

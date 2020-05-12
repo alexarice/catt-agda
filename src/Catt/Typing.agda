@@ -82,7 +82,7 @@ data PDB : Ctx n → Term n → Ty n → ℕ → Set where
            {A : Ty n} →
            {x : Term n} →
            PDB Γ x A submax →
-           PDB (extendC (extendC Γ A) ((liftTerm x) ─⟨ (liftType A) ⟩⟶ (Var 0F))) (Var zero) ((liftTerm (liftTerm x)) ─⟨ (liftType (liftType A)) ⟩⟶ (Var 1F)) (pred submax)
+           PDB (extendC (extendC Γ A) ((liftTerm x) ─⟨ (liftType A) ⟩⟶ (Var (fromℕ n)))) (Var zero) ((liftTerm (liftTerm x)) ─⟨ (liftType (liftType A)) ⟩⟶ (Var (inject₁ (fromℕ n)))) (pred submax)
   Restr : {Γ : Ctx n} →
           {f x y : Term n} →
           {A : Ty n} →

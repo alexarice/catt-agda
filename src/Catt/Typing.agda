@@ -37,7 +37,7 @@ data _⊢_ where
   TypeTyArr : {Γ : Ctx n} → {A : Ty n} → {t u : Term n} → Γ ⊢ t ∷ A → Γ ⊢ u ∷ A → Γ ⊢ (t ─⟨ A ⟩⟶ u)
 
 data _⊢_∷_ where
-  TypeTermVar : {Γ : Ctx n} → (x : Fin n) → Γ ⊢ (Var x) ∷ ctx-get Γ x
+  TypeTermVar : {Γ : Ctx n} → (x : Fin n) → Γ ⊢ → Γ ⊢ (Var x) ∷ ctx-get Γ x
   TypeTermCoh : {Γ : Ctx n} →
                 {pd : Γ ⊢pd₀ dim} →
                 {A : Ty n} →

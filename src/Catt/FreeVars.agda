@@ -3,55 +3,40 @@
 module Catt.FreeVars where
 
 open import Data.Nat hiding (_+_)
-open import Data.Fin hiding (_+_)
-open import Data.Bool
+open import Catt.Fin
+open import Catt.Vec.Functional
+open import Data.Unit
+open import Data.Empty
 open import Catt.Syntax
+open import Data.Product
+open import Data.Sum
+open import Relation.Binary.PropositionalEquality
 
 private
   variable
     n m : ℕ
 
-FVSet : ℕ → Set
-FVSet n = Fin n → Bool
+FVSet : ℕ → Set₁
+FVSet n = Vector Set n
 
 empty : FVSet n
-empty n = false
+empty .get f = ⊥
 
 full : FVSet n
-full n = true
+full .get f = ⊤
 
 ewf : FVSet n → FVSet (suc n)
-ewf f zero = false
-ewf f (suc n) = f n
+ewf xs = add xs ⊤
 
 ewt : FVSet n → FVSet (suc n)
-ewt f zero = true
-ewt f (suc n) = f n
+ewt xs = add xs ⊥
 
-sameF : Fin n → Fin n → Bool
-sameF zero zero = true
-sameF zero (suc g) = false
-sameF (suc f) zero = false
-sameF (suc f) (suc g) = sameF f g
+drop : FVSet (suc n) → FVSet (suc n)
+drop f = ewf (front f)
 
-sameB : Bool → Bool → Bool
-sameB false b = not b
-sameB true b = b
-
-bigAnd : (Fin n → Bool) → Bool
-bigAnd {zero} f = true
-bigAnd {suc n} f = f zero ∧ bigAnd λ x → f (suc x)
-
-isEqual : FVSet n → FVSet n → Bool
-isEqual f g = bigAnd (λ x → sameB (f x) (g x))
-
-infixl 4 _∪_
+infixl 60 _∪_
 _∪_ : FVSet n → FVSet n → FVSet n
-(f ∪ g) n = f n ∨ g n
-
-Union : (Fin n → FVSet m) → FVSet m
-Union {zero} f = empty
-Union {suc n} f = (Union (λ x → f (suc x))) ∪ f zero
+(f ∪ g) .get n = get f n ⊎ get g n
 
 FVCtx : Ctx n → FVSet n
 FVTerm : Term n → FVSet n
@@ -63,9 +48,13 @@ FVCtx Γ = full
 FVTy ⋆ = empty
 FVTy (x ─⟨ A ⟩⟶ y) = FVTy A ∪ FVTerm x ∪ FVTerm y
 
-FVTerm (Var f) g = sameF f g
+FVTerm (Var f) .get g = f ≡ g
 FVTerm (Coh Γ A σ) = FVSub σ
-FVTerm (Comp Γ A t u σ) = FVSub σ
 
-FVSub ⟨⟩ = empty
-FVSub ⟨ σ , x ⟩ = FVSub σ ∪ FVTerm x
+FVSub {n = n} σ .get i = Σ[ j ∈ Fin n ] get (FVTerm (get σ j)) i
+
+sameB : ∀ {a} → Set a → Set a → Set a
+sameB a b = (a → b) × (b → a)
+
+_≡fv_ : FVSet n → FVSet n → Set
+f ≡fv g = ∀ i → sameB (get f i) (get g i)

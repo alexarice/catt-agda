@@ -8,7 +8,6 @@ open import Level using (Level; 0ℓ)
 open import Data.Nat
 open import Catt.Vec.Functional
 open import Catt.Vec.Functional.Pointwise
-open import Catt.Vec.Functional.Pointwise.Properties
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 

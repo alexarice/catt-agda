@@ -9,7 +9,6 @@ open import Catt.Fin
 open import Catt.FreeVars
 open import Catt.FreeVars.Properties
 open import Catt.Vec.Functional
-open import Catt.Vec.Functional.Pointwise.Properties hiding (refl)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Catt.Syntax.Equality
 import Relation.Binary.Reasoning.Setoid

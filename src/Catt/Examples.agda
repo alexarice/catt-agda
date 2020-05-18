@@ -4,14 +4,18 @@ module Catt.Examples where
 
 open import Catt.Base
 open import Data.Nat
-open import Data.Fin
-open import Data.Fin.Patterns
+open import Catt.Fin
 
 singleton : Ctx 1
-singleton zero = ⋆
+singleton .get i = ⋆
 
-pd-singleton : PD singleton 0
+singleton-typed : TypedCtx
+singleton-typed .size = 1
+singleton-typed .ctx = singleton
+singleton-typed .typing-ctx = TypeCtxStep singleton (TypeTyStar (TypeCtxBase _))
+
+pd-singleton : singleton ⊢pd₀ 0
 pd-singleton = Finish (Base singleton)
 
 id-on-x : Term 1
-id-on-x = Coh singleton (Var 0F ─⟨ ⋆ ⟩⟶ Var 0F) {!!}
+id-on-x = Coh singleton (Var (fromℕ 0) ─⟨ ⋆ ⟩⟶ Var (fromℕ 0)) (id-sub 1)

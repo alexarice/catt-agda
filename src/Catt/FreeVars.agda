@@ -8,35 +8,34 @@ open import Catt.Vec.Functional
 open import Data.Unit
 open import Data.Empty
 open import Catt.Syntax
-open import Data.Product
-open import Data.Sum
+open import Data.Bool
 open import Relation.Binary.PropositionalEquality
 
 private
   variable
     n m : ℕ
 
-FVSet : ℕ → Set₁
-FVSet n = Vector Set n
+FVSet : ℕ → Set
+FVSet n = Vector Bool n
 
 empty : FVSet n
-empty .get f = ⊥
+empty .get f = false
 
 full : FVSet n
-full .get f = ⊤
+full .get f = true
 
 ewf : FVSet n → FVSet (suc n)
-ewf xs = add xs ⊤
+ewf xs = add xs false
 
 ewt : FVSet n → FVSet (suc n)
-ewt xs = add xs ⊥
+ewt xs = add xs true
 
 drop : FVSet (suc n) → FVSet (suc n)
 drop f = ewf (front f)
 
 infixl 60 _∪_
 _∪_ : FVSet n → FVSet n → FVSet n
-(f ∪ g) .get n = get f n ⊎ get g n
+(f ∪ g) .get n = get f n ∨ get g n
 
 FVCtx : Ctx n → FVSet n
 FVTerm : Term n → FVSet n
@@ -48,13 +47,11 @@ FVCtx Γ = full
 FVTy ⋆ = empty
 FVTy (x ─⟨ A ⟩⟶ y) = FVTy A ∪ FVTerm x ∪ FVTerm y
 
-FVTerm (Var f) .get g = f ≡ g
+FVTerm (Var x) .get i = sameF x i
 FVTerm (Coh Γ A σ) = FVSub σ
 
-FVSub {n = n} σ .get i = Σ[ j ∈ Fin n ] get (FVTerm (get σ j)) i
-
-sameB : ∀ {a} → Set a → Set a → Set a
-sameB a b = (a → b) × (b → a)
+FVSub ⟨⟩ = empty
+FVSub ⟨ σ , t ⟩ = FVSub σ ∪ FVTerm t
 
 _≡fv_ : FVSet n → FVSet n → Set
-f ≡fv g = ∀ i → sameB (get f i) (get g i)
+f ≡fv g = ∀ i → get f i ≡ get g i

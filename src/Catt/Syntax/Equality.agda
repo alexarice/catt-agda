@@ -6,16 +6,14 @@ open import Catt.Syntax
 open import Catt.Fin
 open import Level using (Level; 0ℓ)
 open import Data.Nat
-open import Catt.Vec.Functional
-open import Catt.Vec.Functional.Pointwise
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
 infix 4 _≡ctx_ _≡ty_ _≡tm_ _≡sub_
-_≡ctx_ : ∀ {n} → Rel (Ctx n) 0ℓ
+data _≡ctx_ : ∀ {n} → Rel (Ctx n) 0ℓ
 data _≡ty_ : ∀ {n} → Rel (Ty n) 0ℓ
 data _≡tm_ : ∀ {n} → Rel (Term n) 0ℓ
-_≡sub_ : ∀ {n m} → Rel (Sub n m) 0ℓ
+data _≡sub_ : ∀ {n m} → Rel (Sub n m) 0ℓ
 
 Γ ≡ctx Δ = Pointwise _≡ty_ Γ Δ
 data _≡ty_ where

@@ -19,7 +19,7 @@ singleton-typed .ctx = singleton
 singleton-typed .typing-ctx = singleton-type
 
 pd-singleton : singleton ⊢pd₀ 0
-pd-singleton = Finish (Base singleton)
+pd-singleton = Finish Base
 
 id-on-x : Term 1
 id-on-x = Coh singleton (Var (fromℕ 0) ─⟨ ⋆ ⟩⟶ Var (fromℕ 0)) (id-sub 1)

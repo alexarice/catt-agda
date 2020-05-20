@@ -60,7 +60,7 @@ data _⊢_::_ where
   TypeSubStep : {Δ : Ctx m} {Γ : Ctx n} {σ : Sub m n} → Δ ⊢ σ :: Γ → {A : Ty n} → Γ ⊢ A → {t : Term m} → Δ ⊢ t ∷ (A [ σ ]ty) → Δ ⊢ ⟨ σ , t ⟩ :: Γ , A
 
 data _⊢pd_∷_[_] : Ctx (suc n) → Term (suc n) → Ty (suc n) → ℕ → Set where
-  Base : (Γ : Ctx 1) → Γ ⊢pd (Var (fromℕ 0)) ∷ ⋆ [ 0 ]
+  Base : ∅ , ⋆ ⊢pd (Var (fromℕ 0)) ∷ ⋆ [ 0 ]
   Extend : {Γ : Ctx (suc n)} →
            {A : Ty (suc n)} →
            {x : Term (suc n)} →
@@ -76,14 +76,14 @@ data _⊢pd₀_ where
   Finish : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {dim : ℕ} → Γ ⊢pd x ∷ ⋆ [ dim ] → Γ ⊢pd₀ dim
 
 FVSrc-b : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {A : Ty (suc n)} → Γ ⊢pd x ∷ A [ submax ] → FVSet (suc n)
-FVSrc-b (Base _) = empty
+FVSrc-b Base = empty
 FVSrc-b (Extend {submax = zero} pdb) = ewf (ewf full)
 FVSrc-b (Extend {submax = suc zero} pdb) = ewf (ewf (FVSrc-b pdb))
 FVSrc-b (Extend {submax = suc (suc _)} pdb) = ewt (ewt (FVSrc-b pdb))
 FVSrc-b (Restr pdb) = FVSrc-b pdb
 
 FVTgt-b : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {A : Ty (suc n)} → Γ ⊢pd x ∷ A [ submax ] → FVSet (suc n)
-FVTgt-b (Base _) = empty
+FVTgt-b Base = empty
 FVTgt-b (Extend {submax = zero} pdb) = ewf (ewt (drop full))
 FVTgt-b (Extend {submax = suc zero} pdb) = ewf (ewt (drop (FVTgt-b pdb)))
 FVTgt-b (Extend {submax = suc (suc s)} pdb) = ewt (ewt (FVTgt-b pdb))

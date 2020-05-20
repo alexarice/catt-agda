@@ -1,11 +1,13 @@
 {-# OPTIONS --without-K --safe --exact-split #-}
 
-module Catt.TypeChecking where
+open import Category.Monad
+
+module Catt.TypeChecking {F : Set → Set} (M : RawMonad F) where
 
 open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Typing
-open import Catt.TypeChecking.Monad
+open import Catt.TypeChecking.Monad M
 open import Data.Product renaming (_,_ to _,,_)
 open import Data.Nat
 open import Relation.Nullary

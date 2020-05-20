@@ -6,6 +6,7 @@ open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Typing
 open import Catt.TypeChecking.Monad
+open import Data.Product renaming (_,_ to _,,_)
 open import Data.Nat
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
@@ -29,10 +30,15 @@ ty-typeCheck Γ (t ─⟨ A ⟩⟶ u) = do
   ut ← tm-typeCheck Γ u A
   tc-ok (TypeTyArr tt ut)
 
-tm-typeCheck Γ (Var i) A with A ≡ty? Γ ‼ i
-... | yes refl = TypeTermVar i <$> ctx-typeCheck Γ
-... | no p = tc-fail "Variable of wrong type"
-tm-typeCheck Δ (Coh Γ A σ) B = {!!}
+tm-inferType : (Γ : Ctx n) → (t : Term n) → TCM (Σ[ A ∈ Ty n ] Γ ⊢ t ∷ A)
+tm-inferType Γ (Var i) = (λ x → Γ ‼ i ,, TypeTermVar i x) <$> ctx-typeCheck Γ
+tm-inferType Γ (Coh Γ₁ A σ) = {!!}
+
+tm-typeCheck Γ t A = do
+  inferred ,, p ← tm-inferType Γ t
+  yes refl ← tc-ok (A ≡ty? inferred)
+    where no _ → tc-fail "Inferred type did not match given type"
+  tc-ok p
 
 sub-typeCheck Δ ⟨⟩ ∅ = tc-ok TypeSubEmpty
 sub-typeCheck Δ ⟨ σ , t ⟩ (Γ , A) = do

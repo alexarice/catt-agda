@@ -38,7 +38,7 @@ data _⊢_∷_ where
                 (pd : Γ ⊢pd₀ dim) →
                 {A : Ty (suc n)} →
                 Γ ⊢ A →
-                FVCtx Γ ≡fv FVTy A →
+                FVCtx Γ ≡ FVTy A →
                 {Δ : Ctx m} →
                 {σ : Sub m (suc n)} →
                 Δ ⊢ →
@@ -49,8 +49,8 @@ data _⊢_∷_ where
                  {A : Ty (suc n)} →
                  {t u : Term (suc n)} →
                  Γ ⊢ (t ─⟨ A ⟩⟶ u) →
-                 FVSrc pd ≡fv FVTerm t →
-                 FVTgt pd ≡fv FVTerm u →
+                 FVSrc pd ≡ FVTerm t →
+                 FVTgt pd ≡ FVTerm u →
                  {Δ : Ctx m} →
                  {σ : Sub m (suc n)} →
                  Δ ⊢ →

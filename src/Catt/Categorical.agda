@@ -30,7 +30,7 @@ id-sub-is-id-ty ⋆ = refl
 id-sub-is-id-ty (t ─⟨ A ⟩⟶ u)
   rewrite id-sub-is-id-tm t
   rewrite id-sub-is-id-ty A
-  rewrite id-sub-is-id-tm u = refl -- Arr≡ (id-sub-is-id-tm t) (id-sub-is-id-ty A) (id-sub-is-id-tm u)
+  rewrite id-sub-is-id-tm u = refl
 
 id-sub-is-id-tm (Var (fromℕ n)) = refl
 id-sub-is-id-tm {suc n} (Var (inject x)) = begin
@@ -38,7 +38,7 @@ id-sub-is-id-tm {suc n} (Var (inject x)) = begin
   liftTerm (Var x [ id-sub n ]tm) ≡⟨ cong liftTerm (id-sub-is-id-tm (Var x)) ⟩
   (Var (inject x)) ∎
 id-sub-is-id-tm (Coh Γ A σ)
-  rewrite id-sub-is-id-sub-right σ = refl -- Coh≡ ctx-refl ty-refl (id-sub-is-id-sub-left σ)
+  rewrite id-sub-is-id-sub-right σ = refl
 
 id-sub-is-id-sub-left {n = zero} ⟨⟩ = refl
 id-sub-is-id-sub-left {n = suc n} ⟨ σ , t ⟩ = begin

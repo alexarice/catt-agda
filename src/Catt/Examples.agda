@@ -7,12 +7,12 @@ open import Data.Nat
 open import Catt.Fin
 
 singleton : Ctx 1
-singleton .get i = ⋆
+singleton = ∅ , ⋆
 
 singleton-typed : TypedCtx
 singleton-typed .size = 1
 singleton-typed .ctx = singleton
-singleton-typed .typing-ctx = TypeCtxStep singleton (TypeTyStar (TypeCtxBase _))
+singleton-typed .typing-ctx = TypeCtxStep ∅ (TypeTyStar TypeCtxBase)
 
 pd-singleton : singleton ⊢pd₀ 0
 pd-singleton = Finish (Base singleton)

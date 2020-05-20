@@ -6,6 +6,5 @@ open import Catt.Syntax public
 open import Catt.FreeVars public
 open import Catt.Typing public
 open import Catt.Bundles public
-open import Catt.Vec.Functional using (get) public
 open import Catt.Typing.Properties public
 open import Catt.Categorical public

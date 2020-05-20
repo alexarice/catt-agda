@@ -7,7 +7,6 @@ open import Catt.Typing
 open import Data.Nat
 open import Catt.Fin
 open import Catt.FreeVars
-open import Catt.Vec.Functional
 open import Relation.Binary.PropositionalEquality
 
 private

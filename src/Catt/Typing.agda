@@ -4,12 +4,10 @@ module Catt.Typing where
 
 open import Data.Nat hiding (_+_)
 open import Catt.Fin
-open import Catt.Vec.Functional
 open import Data.Bool
 open import Catt.Syntax
 open import Catt.FreeVars
 open import Relation.Binary.PropositionalEquality
-open import Data.Unit
 
 private
   variable

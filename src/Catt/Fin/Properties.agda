@@ -5,9 +5,17 @@ module Catt.Fin.Properties where
 open import Data.Nat
 open import Catt.Fin
 open import Relation.Unary
+open import Relation.Binary.Definitions using (DecidableEquality)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable.Core
+open import Relation.Binary.PropositionalEquality
 open import Data.Product
+
+_≡f?_ : ∀ {n} → DecidableEquality (Fin n)
+fromℕ n ≡f? fromℕ .n = yes refl
+fromℕ n ≡f? inject j = no λ ()
+inject i ≡f? fromℕ _ = no λ ()
+inject i ≡f? inject j = map′ (cong inject) (λ where refl → refl) (i ≡f? j)
 
 restrict : ∀ {n p} → ((Fin (suc n)) → Set p) → (Fin n → Set p)
 restrict P i = P (inject i)

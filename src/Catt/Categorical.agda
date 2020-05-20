@@ -8,6 +8,7 @@ open import Catt.Typing
 open import Catt.Bundles
 open import Data.Nat
 open import Catt.Fin
+open import Catt.Syntax.Properties
 open import Catt.Typing.Properties
 open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning

@@ -10,5 +10,6 @@ import Catt.Fin
 import Catt.Fin.Properties
 import Catt.FreeVars
 import Catt.Syntax
+import Catt.Syntax.Properties
 import Catt.Typing
 import Catt.Typing.Properties

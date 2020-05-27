@@ -26,7 +26,7 @@ ctx-typeCheck : (Γ : Ctx n) → TCM (Γ ⊢)
 ty-typeCheck : (Γ : Ctx n) → (A : Ty n) → TCM (Γ ⊢ A)
 tm-typeCheck : (Γ : Ctx n) → (t : Term n) → (A : Ty n) → TCM (Γ ⊢ t ∷ A)
 sub-typeCheck : (Δ : Ctx m) → (σ : Sub m n) → (Γ : Ctx n) → TCM (Δ ⊢ σ :: Γ)
-pd-typeCheck : (Γ : Ctx n) → TCM (Γ ⊢pd₀)
+pd-typeCheck : (Γ : Ctx n) → TCM (Σ[ dim ∈ ℕ ] Γ ⊢pd₀ dim)
 pdb-typeCheck : (Γ : Ctx (suc n)) → (A : Ty (suc n)) → TCM (Σ[ submax ∈ ℕ ] Σ[ x ∈ Term (suc n) ] Γ ⊢pd x ∷ A [ submax ])
 
 ctx-typeCheck ∅ = tc-ok TypeCtxBase
@@ -41,27 +41,20 @@ ty-typeCheck Γ (t ─⟨ A ⟩⟶ u) = do
 tm-inferType : (Γ : Ctx n) → (t : Term n) → TCM (Σ[ A ∈ Ty n ] Γ ⊢ t ∷ A)
 tm-inferType Γ (Var i) = (λ x → Γ ‼ i ,, TypeTermVar i x) <$> ctx-typeCheck Γ
 tm-inferType Δ (Coh {zero} Γ A σ) = tc-fail "Pasting diagrams cannot be empty"
-tm-inferType Δ (Coh {suc n} Γ A σ) = typeCoh ∣ typeComp A
-  where
-    typeCoh : TCM (Σ[ B ∈ Ty _ ] Δ ⊢ Coh Γ A σ ∷ B )
-    typeCoh = do
-      Γt ← pd-typeCheck Γ
-      At ← ty-typeCheck Γ A
-      fv ← decToTCM "Free variables did not match" (FVCtx Γ ≡fv? FVTy A)
-      Δt ← ctx-typeCheck Δ
-      σt ← sub-typeCheck Δ σ Γ
-      tc-ok (A [ σ ]ty ,, TypeTermCoh Γt At fv Δt σt)
-
-    typeComp : (B : Ty (suc n)) → TCM (Σ[ C ∈ Ty _ ] Δ ⊢ Coh Γ B σ ∷ C)
-    typeComp ⋆ = tc-fail "Compositions can not have type dimension 0"
-    typeComp B@(t ─⟨ _ ⟩⟶ u) = do
-      Γt ← pd-typeCheck Γ
-      Bt ← ty-typeCheck Γ B
-      fvs ← decToTCM "Source free variables did not match" (FVSrc Γt ≡fv? FVTerm t)
-      fvt ← decToTCM "Target free variables did not match" (FVTgt Γt ≡fv? FVTerm u)
-      Δt ← ctx-typeCheck Δ
-      σt ← sub-typeCheck Δ σ Γ
-      tc-ok (B [ σ ]ty ,, TypeTermComp Γt Bt fvs fvt Δt σt)
+tm-inferType Δ (Coh {suc n} Γ ⋆ σ) = tc-fail "Coherences cannot have type ⋆"
+tm-inferType Δ (Coh {suc n} Γ B@(t ─⟨ A ⟩⟶ u) σ) = do
+  _ ,, Γt ← pd-typeCheck Γ
+  tt ← tm-typeCheck Γ t A
+  ut ← tm-typeCheck Γ u A
+  Δt ← ctx-typeCheck Δ
+  σt ← sub-typeCheck Δ σ Γ
+  let Bt = TypeTyArr tt ut
+      fvs? = decToTCM "Source free variables did not match" (FVSrc Γt ≡fv? FVTerm t)
+      fvt? = decToTCM "Target free variables did not match" (FVTgt Γt ≡fv? FVTerm u)
+      fv? = decToTCM "Free variables did not match" (FVCtx Γ ≡fv? FVTy B)
+  B [ σ ]ty ,,_ <$>
+    (⦇ (λ p → TypeTermCoh Γt Bt p Δt σt) fv? ⦈
+    ∣ ⦇ (λ p q → TypeTermComp Γt Bt p q Δt σt) fvs? fvt? ⦈)
 
 
 tm-typeCheck Γ t A = do
@@ -80,7 +73,7 @@ sub-typeCheck Δ ⟨ σ , t ⟩ (Γ , A) = do
 pd-typeCheck {zero} Γ = tc-fail "Empty context is not a pasting diagram"
 pd-typeCheck {suc n} Γ = do
   (submax ,, x ,, pdb) ← pdb-typeCheck Γ ⋆
-  tc-ok (Finish pdb)
+  tc-ok (submax ,, Finish pdb)
 
 reduce-to-type : ∀ {Γ} {y} {A B} {sm} → Γ ⊢pd y ∷ A [ sm ] → TCM (Σ[ submax ∈ ℕ ] Σ[ x ∈ Term (suc n) ] Γ ⊢pd x ∷ B [ submax ])
 reduce-to-type {y = y} {⋆} {⋆} {sm} pdb = tc-ok (sm ,, y ,, pdb)

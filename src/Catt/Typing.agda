@@ -17,10 +17,10 @@ data _⊢ : Ctx n → Set
 data _⊢_ : Ctx n → Ty n → Set
 data _⊢_∷_ : Ctx n → Term n → Ty n → Set
 data _⊢_::_ : Ctx m → Sub m n → Ctx n → Set
-data _⊢pd₀ : Ctx n → Set
+data _⊢pd₀_ : Ctx n → ℕ → Set
 
-FVSrc : {Γ : Ctx n} → Γ ⊢pd₀ → FVSet n
-FVTgt : {Γ : Ctx n} → Γ ⊢pd₀ → FVSet n
+FVSrc : {Γ : Ctx n} → Γ ⊢pd₀ dim → FVSet n
+FVTgt : {Γ : Ctx n} → Γ ⊢pd₀ dim → FVSet n
 
 data _⊢ where
   TypeCtxBase : ∅ ⊢
@@ -33,7 +33,7 @@ data _⊢_ where
 data _⊢_∷_ where
   TypeTermVar : {Γ : Ctx n} → (x : Fin n) → Γ ⊢ → Γ ⊢ (Var x) ∷ Γ ‼ x
   TypeTermCoh : {Γ : Ctx (suc n)} →
-                (pd : Γ ⊢pd₀) →
+                (pd : Γ ⊢pd₀ dim) →
                 {A : Ty (suc n)} →
                 Γ ⊢ A →
                 FVCtx Γ ≡ FVTy A →
@@ -43,7 +43,7 @@ data _⊢_∷_ where
                 Δ ⊢ σ :: Γ →
                 Δ ⊢ (Coh Γ A σ) ∷ A [ σ ]ty
   TypeTermComp : {Γ : Ctx (suc n)} →
-                 (pd : Γ ⊢pd₀) →
+                 (pd : Γ ⊢pd₀ dim) →
                  {A : Ty (suc n)} →
                  {t u : Term (suc n)} →
                  Γ ⊢ (t ─⟨ A ⟩⟶ u) →
@@ -72,8 +72,8 @@ data _⊢pd_∷_[_] : Ctx (suc n) → Term (suc n) → Ty (suc n) → ℕ → Se
           Γ ⊢pd f ∷ (x ─⟨ A ⟩⟶ y) [ submax ] →
           Γ ⊢pd y ∷ A [ suc submax ]
 
-data _⊢pd₀ where
-  Finish : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {dim : ℕ} → Γ ⊢pd x ∷ ⋆ [ dim ] → Γ ⊢pd₀
+data _⊢pd₀_ where
+  Finish : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {dim : ℕ} → Γ ⊢pd x ∷ ⋆ [ dim ] → Γ ⊢pd₀ dim
 
 FVSrc-b : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {A : Ty (suc n)} → Γ ⊢pd x ∷ A [ submax ] → FVSet (suc n)
 FVSrc-b Base = empty

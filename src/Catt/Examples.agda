@@ -26,3 +26,7 @@ id-on-x = Coh singleton (Var (fromℕ 0) ─⟨ ⋆ ⟩⟶ Var (fromℕ 0)) (id-
 
 id-on-x-type : singleton ⊢ id-on-x ∷ Var (fromℕ 0) ─⟨ ⋆ ⟩⟶ Var (fromℕ 0)
 id-on-x-type = TypeTermCoh pd-singleton (TypeTyArr (TypeTermVar (fromℕ 0) singleton-type) (TypeTermVar (fromℕ 0) singleton-type)) refl singleton-type (TypeSubStep TypeSubEmpty (TypeTyStar TypeCtxBase) (TypeTermVar (fromℕ 0) singleton-type))
+
+
+n-ary-comp : ℕ → ℕ → ℕ → Term
+n-ary-comp n dim codim = ?

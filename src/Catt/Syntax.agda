@@ -66,3 +66,17 @@ Coh Γ A τ [ σ ]tm = Coh Γ A (τ ∘ σ)
 
 ⟨⟩ ∘ τ = ⟨⟩
 ⟨ σ , t ⟩ ∘ τ = ⟨ σ ∘ τ , t [ τ ]tm ⟩
+
+ty-dim : Ty n dim → ℕ
+ty-dim {dim = dim} _ = dim
+
+ty-base : Ty n (suc dim) → Ty n dim
+ty-base (t ─⟨ A ⟩⟶ u) = A
+
+ty-base-n : ∀ x → Ty n (x + dim) → Ty n dim
+ty-base-n zero A = A
+ty-base-n (suc x) A = ty-base-n x (ty-base A)
+
+ty-base-≤ : ∀ {d₁ d₂} → d₁ ≤′ d₂ → Ty n d₂ → Ty n d₁
+ty-base-≤ ≤′-refl A = A
+ty-base-≤ (≤′-step p) A = ty-base-≤ p (ty-base A)

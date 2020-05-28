@@ -8,7 +8,6 @@ open import Catt.Fin
 open import Data.List using (List; []; map) renaming (_∷_ to _::_)
 open import Data.List.NonEmpty renaming (map to maptf)
 open import Catt.Base
-open import Catt.Syntax.Dimension
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 private

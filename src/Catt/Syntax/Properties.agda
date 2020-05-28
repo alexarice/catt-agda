@@ -3,7 +3,6 @@
 module Catt.Syntax.Properties where
 
 open import Catt.Syntax
-open import Catt.Syntax.Dimension
 open import Catt.Fin
 open import Catt.Fin.Properties
 open import Data.Nat

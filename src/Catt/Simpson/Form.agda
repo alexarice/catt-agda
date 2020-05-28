@@ -66,14 +66,12 @@ append-to-form zero {suc dim} x A f@(Com before focus (a :: after)) = add-to-end
 append-to-form (suc submax) {dim} x A (Com before focus after) = Com (map (append-to-form submax (suc submax) A) before) (append-to-form submax x A focus) (map (append-to-form submax (suc submax) A) after)
 
 toFormPdb (ExtendM Base) = [ Base (Var (fromℕ 2)) ((Var (inject (inject (fromℕ 0)))) ─⟨ ⋆ ⟩⟶ (Var (inject (fromℕ 1)))) ]
-toFormPdb {Γ = Γ , B} (ExtendM pdb@(ExtendM _)) with pdb-dim-lemma pdb
-... | refl = [ insert-cell (liftType B) (toFormPdb pdb) ]
-toFormPdb {Γ = Γ , B} (ExtendM pdb@(Extend _)) with pdb-dim-lemma pdb
-... | refl = [ insert-cell (liftType B) (toFormPdb pdb) ]
-toFormPdb {submax = zero} {Γ = Γ , B} (Extend {dim = zero} pdb) with pdb-dim-lemma pdb
-... | refl = add-to-tf-end (Base (Var (fromℕ _)) (liftType B)) (toFormPdb pdb)
-toFormPdb {submax = zero} {Γ = Γ , B} (Extend {dim = suc dim} pdb) with pdb-dim-lemma pdb | toFormPdb pdb
-... | refl | tf = add-to-tf-end (insert-cell (liftType B) (to-top-form (get-tgt-of-form (head tf)))) tf
-toFormPdb {submax = suc n} {Γ = Γ , B} (Extend pdb) with pdb-dim-lemma pdb | toFormPdb pdb
-... | refl | tf = maptf (append-to-form n (suc n) (liftType B)) tf
+toFormPdb {Γ = Γ , B} (ExtendM pdb@(ExtendM _)) = [ insert-cell (liftType B) (toFormPdb pdb) ]
+toFormPdb {Γ = Γ , B} (ExtendM pdb@(Extend _))  = [ insert-cell (liftType B) (toFormPdb pdb) ]
+toFormPdb {submax = zero} {Γ = Γ , B} (Extend {dim = zero} pdb) with toFormPdb pdb
+... | tf = add-to-tf-end (Base (Var (fromℕ _)) (liftType B)) tf
+toFormPdb {submax = zero} {Γ = Γ , B} (Extend {dim = suc dim} pdb) with toFormPdb pdb
+... | tf = add-to-tf-end (insert-cell (liftType B) (to-top-form (get-tgt-of-form (head tf)))) tf
+toFormPdb {submax = suc n} {Γ = Γ , B} (Extend pdb) with toFormPdb pdb
+... | tf = maptf (append-to-form n (suc n) (liftType B)) tf
 toFormPdb (Restr pdb) = toFormPdb pdb

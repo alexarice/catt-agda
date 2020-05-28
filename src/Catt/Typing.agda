@@ -66,12 +66,12 @@ data _⊢pd_∷_[_][_] : Ctx (suc n) → Term (suc n) → Ty (suc n) dim → ℕ
             {A : Ty (suc n) dim} →
             {x : Term (suc n)} →
             Γ ⊢pd x ∷ A [ 0 ][ pdd ] →
-            Γ , A , liftTerm x ─⟨ liftType A ⟩⟶ Var (fromℕ _) ⊢pd (Var (fromℕ _)) ∷ liftTerm (liftTerm x) ─⟨ liftType (liftType A) ⟩⟶ Var (inject (fromℕ _)) [ 0 ][ suc pdd ]
+            Γ , A , liftTerm x ─⟨ liftType A ⟩⟶ Var (fromℕ _) ⊢pd (Var (fromℕ _)) ∷ liftTerm (liftTerm x) ─⟨ liftType (liftType A) ⟩⟶ Var (inject (fromℕ _)) [ 0 ][ suc dim ]
   Extend : {Γ : Ctx (suc n)} →
            {A : Ty (suc n) dim} →
            {x : Term (suc n)} →
-           Γ ⊢pd x ∷ A [ suc submax ][ suc pdd ] →
-           Γ , A , liftTerm x ─⟨ liftType A ⟩⟶ Var (fromℕ _) ⊢pd (Var (fromℕ _)) ∷ liftTerm (liftTerm x) ─⟨ liftType (liftType A) ⟩⟶ Var (inject (fromℕ _)) [ submax ][ suc pdd ]
+           Γ ⊢pd x ∷ A [ suc submax ][ suc (submax + dim) ] →
+           Γ , A , liftTerm x ─⟨ liftType A ⟩⟶ Var (fromℕ _) ⊢pd (Var (fromℕ _)) ∷ liftTerm (liftTerm x) ─⟨ liftType (liftType A) ⟩⟶ Var (inject (fromℕ _)) [ submax ][ suc (submax + dim) ]
   Restr : {Γ : Ctx (suc n)} →
           {f x y : Term (suc n)} →
           {A : Ty (suc n) dim} →

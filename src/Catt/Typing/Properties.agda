@@ -103,8 +103,8 @@ sub-comp-check {Γ = Γ , A} {⟨ σ , t ⟩} {τ} x (TypeSubStep a b c) q = Typ
 
 pdb-dim-lemma : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {A : Ty (suc n) dim} → (Γ ⊢pd x ∷ A [ submax ][ pdd ]) → submax + dim ≡ pdd
 pdb-dim-lemma Base = refl
-pdb-dim-lemma (ExtendM pdb) = cong suc (pdb-dim-lemma pdb)
-pdb-dim-lemma (Extend pdb) = trans (+-suc _ _) (pdb-dim-lemma pdb)
+pdb-dim-lemma (ExtendM pdb) = refl
+pdb-dim-lemma (Extend pdb) = +-suc _ _
 pdb-dim-lemma {dim = dim} (Restr {submax = submax} pdb) = trans (sym (+-suc submax dim)) (pdb-dim-lemma pdb)
 
 

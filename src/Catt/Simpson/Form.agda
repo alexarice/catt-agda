@@ -2,10 +2,11 @@
 
 module Catt.Simpson.Form where
 
-open import Data.Nat
+open import Catt.Nat
+open import Data.Nat.Properties
 open import Catt.Fin
-open import Data.List using (List; []; map)
-open import Data.List.NonEmpty hiding (map)
+open import Data.List using (List; []; map) renaming (_∷_ to _::_)
+open import Data.List.NonEmpty renaming (map to maptf)
 open import Catt.Base
 open import Catt.Syntax.Dimension
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
@@ -13,7 +14,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 private
   variable
     n dim submax dim′ dim″ pdd : ℕ
-
 
 data Form : ℕ → ℕ → ℕ → Set where
   Base : Term n → Ty n (suc dim) → Form n (suc dim) zero
@@ -52,12 +52,28 @@ insert-cell-into-form A (Com before focus after) = Com (map liftForm₂ before) 
 insert-cell : Ty (2 + n) (suc (suc dim)) → TopForm n dim → Form (2 + n) (suc (suc dim)) (suc dim)
 insert-cell A (f ∷ before) = Com (map liftForm₂ before) (insert-cell-into-form A f) []
 
+add-to-end : Form n (suc dim′) dim′ → Form n dim (suc dim′) → Form n dim (suc dim′)
+add-to-end a (Com before focus after) = Com before focus (a :: after)
+
+get-tgt-full : ∀ x → Form n (suc x + suc dim) (suc dim) → Form n (suc dim) (suc dim)
+get-tgt-full zero f = get-tgt-of-form f
+get-tgt-full {dim = dim} (suc x) f = get-tgt-full x (get-tgt-of-form f)
+
+append-to-form : ∀ submax {dim} x → Ty (2 + n) (suc dim) → Form n ((suc x) + dim) (suc submax + dim) → Form (2 + n) (suc x + dim) (suc submax + dim)
+append-to-form zero {zero} x A f = add-to-end (Base (Var (fromℕ (suc _))) A) (liftForm₂ f)
+append-to-form zero {suc dim} x A (Com before focus []) = add-to-end (insert-cell A (to-top-form (get-tgt-full x focus))) (liftForm₂ (Com before focus []))
+append-to-form zero {suc dim} x A f@(Com before focus (a :: after)) = add-to-end (insert-cell A (to-top-form (get-tgt-of-form a))) (liftForm₂ f)
+append-to-form (suc submax) {dim} x A (Com before focus after) = Com (map (append-to-form submax (suc submax) A) before) (append-to-form submax x A focus) (map (append-to-form submax (suc submax) A) after)
+
 toFormPdb (ExtendM Base) = [ Base (Var (fromℕ 2)) ((Var (inject (inject (fromℕ 0)))) ─⟨ ⋆ ⟩⟶ (Var (inject (fromℕ 1)))) ]
-toFormPdb {n} {d} {sm} {pd}{Γ = Γ , _ , B} {x} {A} a@(ExtendM pdb@(ExtendM _)) = [ insert-cell (liftType {!!}) (toFormPdb pdb) ]
-toFormPdb (ExtendM pdb@(Extend _)) = [ insert-cell {!!} (toFormPdb pdb) ]
-toFormPdb {submax = zero} {zero} (Extend pdb) with toFormPdb pdb
-... | tf = add-to-tf-end (Base (Var (fromℕ _)) {!!}) tf
-toFormPdb {submax = zero} {suc dim} (Extend pdb) with toFormPdb pdb
-... | tf = {!!} -- add-to-tf-end (insert-cell {!!} (to-top-form (get-tgt-of-form (head tf)))) ? -- tf
-toFormPdb {submax = suc n} (Extend pdb) = {!!}
+toFormPdb {Γ = Γ , B} (ExtendM pdb@(ExtendM _)) with pdb-dim-lemma pdb
+... | refl = [ insert-cell (liftType B) (toFormPdb pdb) ]
+toFormPdb {Γ = Γ , B} (ExtendM pdb@(Extend _)) with pdb-dim-lemma pdb
+... | refl = [ insert-cell (liftType B) (toFormPdb pdb) ]
+toFormPdb {submax = zero} {Γ = Γ , B} (Extend {dim = zero} pdb) with pdb-dim-lemma pdb
+... | refl = add-to-tf-end (Base (Var (fromℕ _)) (liftType B)) (toFormPdb pdb)
+toFormPdb {submax = zero} {Γ = Γ , B} (Extend {dim = suc dim} pdb) with pdb-dim-lemma pdb | toFormPdb pdb
+... | refl | tf = add-to-tf-end (insert-cell (liftType B) (to-top-form (get-tgt-of-form (head tf)))) tf
+toFormPdb {submax = suc n} {Γ = Γ , B} (Extend pdb) with pdb-dim-lemma pdb | toFormPdb pdb
+... | refl | tf = maptf (append-to-form n (suc n) (liftType B)) tf
 toFormPdb (Restr pdb) = toFormPdb pdb

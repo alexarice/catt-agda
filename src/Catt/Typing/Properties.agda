@@ -5,7 +5,7 @@ module Catt.Typing.Properties where
 open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Typing
-open import Data.Nat
+open import Catt.Nat
 open import Data.Nat.Properties
 open import Catt.Fin
 open import Catt.FreeVars
@@ -14,7 +14,7 @@ open import Data.Product renaming (_,_ to _,,_)
 
 private
   variable
-    n m l o dim submax : ℕ
+    n m l o dim submax pdd : ℕ
     Γ Γ′ Δ Δ′ : Ctx n
     t t′ u : Term n
     A A′ B : Ty n dim
@@ -100,6 +100,18 @@ sub-comp-check x TypeSubEmpty q = TypeSubEmpty
 sub-comp-check {Γ = Γ , A} {⟨ σ , t ⟩} {τ} x (TypeSubStep a b c) q = TypeSubStep (sub-comp-check x a q) b (transport-tm refl (sym (sub-comp-ap-ty A σ τ)) refl (sub-tm-check x q c))
 
 -- Dimension lemmas
+
+pdb-dim-lemma : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {A : Ty (suc n) dim} → (Γ ⊢pd x ∷ A [ submax ][ pdd ]) → submax + dim ≡ pdd
+pdb-dim-lemma Base = refl
+pdb-dim-lemma (ExtendM pdb) = cong suc (pdb-dim-lemma pdb)
+pdb-dim-lemma (Extend pdb) = trans (+-suc _ _) (pdb-dim-lemma pdb)
+pdb-dim-lemma {dim = dim} (Restr {submax = submax} pdb) = trans (sym (+-suc submax dim)) (pdb-dim-lemma pdb)
+
+pdb-dim-lemma′ : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {A : Ty (suc n) dim} → (Γ ⊢pd x ∷ A [ submax ][ pdd ]) → submax +′ dim ≡ pdd
+pdb-dim-lemma′ Base = refl
+pdb-dim-lemma′ (ExtendM pdb) = cong suc (pdb-dim-lemma′ pdb)
+pdb-dim-lemma′ (Extend pdb) = pdb-dim-lemma′ pdb
+pdb-dim-lemma′ (Restr pdb) = pdb-dim-lemma′ pdb
 
 -- liftType-dim : (A : Ty n) → ty-dim (liftType A) ≡ ty-dim A
 -- liftType-dim ⋆ = refl

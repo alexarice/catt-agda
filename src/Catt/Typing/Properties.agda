@@ -5,7 +5,7 @@ module Catt.Typing.Properties where
 open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Typing
-open import Catt.Nat
+open import Data.Nat
 open import Data.Nat.Properties
 open import Catt.Fin
 open import Catt.FreeVars
@@ -107,11 +107,6 @@ pdb-dim-lemma (ExtendM pdb) = cong suc (pdb-dim-lemma pdb)
 pdb-dim-lemma (Extend pdb) = trans (+-suc _ _) (pdb-dim-lemma pdb)
 pdb-dim-lemma {dim = dim} (Restr {submax = submax} pdb) = trans (sym (+-suc submax dim)) (pdb-dim-lemma pdb)
 
-pdb-dim-lemma′ : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {A : Ty (suc n) dim} → (Γ ⊢pd x ∷ A [ submax ][ pdd ]) → submax +′ dim ≡ pdd
-pdb-dim-lemma′ Base = refl
-pdb-dim-lemma′ (ExtendM pdb) = cong suc (pdb-dim-lemma′ pdb)
-pdb-dim-lemma′ (Extend pdb) = pdb-dim-lemma′ pdb
-pdb-dim-lemma′ (Restr pdb) = pdb-dim-lemma′ pdb
 
 -- liftType-dim : (A : Ty n) → ty-dim (liftType A) ≡ ty-dim A
 -- liftType-dim ⋆ = refl

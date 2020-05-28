@@ -2,7 +2,7 @@
 
 module Catt.Simpson.Form where
 
-open import Catt.Nat
+open import Data.Nat
 open import Data.Nat.Properties
 open import Catt.Fin
 open import Data.List using (List; []; map) renaming (_∷_ to _::_)

@@ -23,7 +23,8 @@ open TypedSub public
 
 record TypedTy (Γ : TypedCtx) : Set where
   field
-    {ty} : Ty (size Γ)
+    {ty-dim} : ℕ
+    {ty} : Ty (size Γ) ty-dim
     typing-ty : (ctx Γ) ⊢ ty
 
 open TypedTy public

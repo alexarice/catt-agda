@@ -4,34 +4,35 @@ module Catt.Syntax where
 
 open import Data.Nat
 open import Catt.Fin
+open import Data.Product renaming (_,_ to _,,_)
 
 private
   variable
-    n m l : ℕ
+    n m l dim : ℕ
 
 data Ctx : ℕ → Set
-data Ty : ℕ → Set
+data Ty : ℕ → ℕ → Set
 data Term : ℕ → Set
 data Sub : ℕ → ℕ → Set
 
-liftType : Ty n → Ty (suc n)
+liftType : Ty n dim → Ty (suc n) dim
 liftTerm : Term n → Term (suc n)
 liftSub : Sub m n → Sub (suc m) n
 
 infixl 45 _,_
 data Ctx where
   ∅ : Ctx 0
-  _,_ : (Γ : Ctx n) → (A : Ty n) → Ctx (suc n)
+  _,_ : (Γ : Ctx n) → (A : Ty n dim) → Ctx (suc n)
 
 infix 50 _‼_
-_‼_ : Ctx n → Fin n → Ty n
-(Γ , A) ‼ fromℕ n = liftType A
-(Γ , A) ‼ inject i = liftType (Γ ‼ i)
+_‼_ : Ctx n → Fin n → ∃ (Ty n)
+(Γ , A) ‼ fromℕ n = -, liftType A
+(Γ , A) ‼ inject i = -, liftType (proj₂ (Γ ‼ i))
 
 infix 50 _─⟨_⟩⟶_
 data Ty where
-  ⋆ : Ty n
-  _─⟨_⟩⟶_ : (t : Term n) → (A : Ty n) → (u : Term n) → Ty n
+  ⋆ : Ty n 0
+  _─⟨_⟩⟶_ : (t : Term n) → (A : Ty n dim) → (u : Term n) → Ty n (suc dim)
 
 data Sub where
   ⟨⟩ : Sub m 0
@@ -39,7 +40,7 @@ data Sub where
 
 data Term where
   Var : (x : Fin n) → Term n
-  Coh : (Γ : Ctx n) → (A : Ty n) → (σ : Sub m n) → Term m
+  Coh : (Γ : Ctx n) → (A : Ty n (suc dim)) → (σ : Sub m n) → Term m
 
 liftType ⋆ = ⋆
 liftType (t ─⟨ A ⟩⟶ u) = (liftTerm t) ─⟨ (liftType A) ⟩⟶ (liftTerm u)
@@ -51,7 +52,7 @@ liftSub ⟨⟩ = ⟨⟩
 liftSub ⟨ σ , t ⟩ = ⟨ liftSub σ , liftTerm t ⟩
 
 infixr 30 _[_]ty _[_]tm
-_[_]ty : Ty n → Sub m n → Ty m
+_[_]ty : Ty n dim → Sub m n → Ty m dim
 _[_]tm : Term n → Sub m n → Term m
 infixl 31 _∘_
 _∘_ : Sub m n → Sub l m → Sub l n

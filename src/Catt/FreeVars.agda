@@ -13,7 +13,7 @@ open import Relation.Binary.PropositionalEquality
 
 private
   variable
-    n m : ℕ
+    n m dim : ℕ
 
 FVSet : ℕ → Set
 FVSet = Vec Bool
@@ -43,7 +43,7 @@ _∪_ : FVSet n → FVSet n → FVSet n
 
 FVCtx : Ctx n → FVSet n
 FVTerm : Term n → FVSet n
-FVTy : Ty n → FVSet n
+FVTy : Ty n dim → FVSet n
 FVSub : Sub m n → FVSet m
 
 FVCtx Γ = full

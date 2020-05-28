@@ -15,13 +15,13 @@ open ≡-Reasoning
 
 private
   variable
-    n m : ℕ
+    n m dim : ℕ
 
 id-sub : (n : ℕ) → Sub n n
 id-sub zero = ⟨⟩
 id-sub (suc n) = ⟨ (liftSub (id-sub n)) , Var (fromℕ n) ⟩
 
-id-sub-is-id-ty : (A : Ty n) → A [ id-sub n ]ty ≡ A
+id-sub-is-id-ty : (A : Ty n dim) → A [ id-sub n ]ty ≡ A
 id-sub-is-id-tm : (t : Term n) → t [ id-sub n ]tm ≡ t
 id-sub-is-id-sub-left : (σ : Sub m n) → id-sub n ∘ σ ≡ σ
 id-sub-is-id-sub-right : (σ : Sub m n) → σ ∘ id-sub m ≡ σ
@@ -51,19 +51,6 @@ id-sub-is-id-sub-right ⟨⟩ = refl
 id-sub-is-id-sub-right ⟨ σ , x ⟩
   rewrite id-sub-is-id-sub-right σ
   rewrite id-sub-is-id-tm x = refl
-
--- -- use more general lemma
--- id-sub-lemma-ty : (A : Ty n) → liftType A ≡ A [ front (id-sub (suc n)) ]ty
--- id-sub-lemma-tm : (t : Term n) → liftTerm t ≡ t [ front (id-sub (suc n)) ]tm
--- id-sub-lemma-sub : (σ : Sub m n) → liftSub σ ≡ front (id-sub (suc m)) ∘ σ
-
--- id-sub-lemma-ty ⋆ = Star≡
--- id-sub-lemma-ty (t ─⟨ A ⟩⟶ u) = Arr≡ (id-sub-lemma-tm t) (id-sub-lemma-ty A) (id-sub-lemma-tm u)
-
--- id-sub-lemma-tm (Var x) = tm-refl
--- id-sub-lemma-tm (Coh Γ A σ) = Coh≡ ctx-refl ty-refl (id-sub-lemma-sub σ)
-
--- id-sub-lemma-sub σ i = id-sub-lemma-tm (get σ i)
 
 id-sub-typing : (Γ : Ctx n) → Γ ⊢ → Γ ⊢ id-sub n :: Γ
 id-sub-typing Γ TypeCtxBase = TypeSubEmpty

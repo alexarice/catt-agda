@@ -11,6 +11,8 @@ import Catt.Fin.Properties
 import Catt.FreeVars
 import Catt.FreeVars.Properties
 import Catt.Simpson.Form
+import Catt.Simpson.Form.FromPd
+import Catt.Simpson.Form.Typing
 import Catt.Syntax
 import Catt.Syntax.Properties
 import Catt.Typing

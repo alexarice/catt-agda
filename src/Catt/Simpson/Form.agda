@@ -15,11 +15,12 @@ private
     n dim submax dim′ dim″ pdd : ℕ
 
 data Form : ℕ → ℕ → ℕ → Set where
-  Base : Term n → Ty n (suc dim) → Form n (suc dim) zero
+  Base : Term n → Ty n dim → Form n dim zero
   Com : List (Form n (suc dim′) dim′) → Form n dim dim′ → List (Form n (suc dim′) dim′) → Form n dim (suc dim′)
 
 TopForm : ℕ → ℕ → Set
-TopForm n dim = List⁺ (Form n (suc dim) dim)
+TopForm n zero = Form n 0 0
+TopForm n (suc dim) = List⁺ (Form n (suc dim) dim)
 
 liftForm : Form n dim dim′ → Form (suc n) dim dim′
 liftForm (Base t A) = Base (liftTerm t) (liftType A)
@@ -28,19 +29,31 @@ liftForm (Com before focus after) = Com (map liftForm before) (liftForm focus) (
 liftForm₂ : Form n dim dim′ → Form (2 + n) dim dim′
 liftForm₂ f = liftForm (liftForm f)
 
-add-to-tf-end : Form (2 + n) (suc dim) dim → TopForm n dim → TopForm (2 + n) dim
+add-to-tf-end : Form (2 + n) (suc dim) dim → TopForm n (suc dim) → TopForm (2 + n) (suc dim)
 add-to-tf-end f tf = f ∷ map liftForm₂ (toList tf)
 
-get-tgt-of-form : Form n (suc (suc dim)) dim′ → Form n (suc dim) dim′
+get-tgt-of-form : Form n (suc dim) dim′ → Form n dim dim′
 get-tgt-of-form (Base _ (t ─⟨ A ⟩⟶ u)) = Base u A
 get-tgt-of-form (Com before focus after) = Com before (get-tgt-of-form focus) after
 
-to-top-form : Form n (suc dim) (suc dim) → TopForm n dim
+get-tgt-full : ∀ x → Form n (suc x + dim) dim → Form n dim dim
+get-tgt-full zero f = get-tgt-of-form f
+get-tgt-full {dim = dim} (suc x) f = get-tgt-full x (get-tgt-of-form f)
+
+get-src-of-form : Form n (suc dim) dim′ → Form n dim dim′
+get-src-of-form (Base _ (t ─⟨ A ⟩⟶ u)) = Base t A
+get-src-of-form (Com before focus after) = Com before (get-src-of-form focus) after
+
+get-src-full : ∀ x → Form n (suc x + dim) dim → Form n dim dim
+get-src-full zero f = get-src-of-form f
+get-src-full {dim = dim} (suc x) f = get-src-full x (get-src-of-form f)
+
+to-top-form : Form n dim dim → TopForm n dim
+to-top-form (Base x A) = Base x A
 to-top-form (Com before focus after) = after ++⁺ focus ∷ before
 
-
-toFormPd : {Γ : Ctx n} → (Γ ⊢pd₀ (suc pdd)) → TopForm n pdd
-toFormPdb : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {A : Ty (suc n) dim} → (Γ ⊢pd x ∷ A [ submax ][ suc pdd ]) → TopForm (suc n) pdd
+toFormPd : {Γ : Ctx n} → (Γ ⊢pd₀ (suc pdd)) → TopForm n (suc pdd)
+toFormPdb : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {A : Ty (suc n) dim} → (Γ ⊢pd x ∷ A [ submax ][ suc pdd ]) → TopForm (suc n) (suc pdd)
 
 toFormPd (Finish pdb) = toFormPdb pdb
 
@@ -48,15 +61,11 @@ insert-cell-into-form : Ty (2 + n) (suc dim) → Form n dim dim′ → Form (2 +
 insert-cell-into-form A (Base i B) = Base (Var (fromℕ (suc _))) A
 insert-cell-into-form A (Com before focus after) = Com (map liftForm₂ before) (insert-cell-into-form A focus) (map liftForm₂ after)
 
-insert-cell : Ty (2 + n) (suc (suc dim)) → TopForm n dim → Form (2 + n) (suc (suc dim)) (suc dim)
+insert-cell : Ty (2 + n) (suc (suc dim)) → TopForm n (suc dim) → Form (2 + n) (suc (suc dim)) (suc dim)
 insert-cell A (f ∷ before) = Com (map liftForm₂ before) (insert-cell-into-form A f) []
 
 add-to-end : Form n (suc dim′) dim′ → Form n dim (suc dim′) → Form n dim (suc dim′)
 add-to-end a (Com before focus after) = Com before focus (a :: after)
-
-get-tgt-full : ∀ x → Form n (suc x + suc dim) (suc dim) → Form n (suc dim) (suc dim)
-get-tgt-full zero f = get-tgt-of-form f
-get-tgt-full {dim = dim} (suc x) f = get-tgt-full x (get-tgt-of-form f)
 
 append-to-form : ∀ submax {dim} x → Ty (2 + n) (suc dim) → Form n ((suc x) + dim) (suc submax + dim) → Form (2 + n) (suc x + dim) (suc submax + dim)
 append-to-form zero {zero} x A f = add-to-end (Base (Var (fromℕ (suc _))) A) (liftForm₂ f)

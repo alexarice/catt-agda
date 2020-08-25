@@ -9,3 +9,4 @@ open import Catt.Bundles public
 open import Catt.Typing.Properties public
 open import Catt.Categorical public
 open import Catt.Fin public
+open import Data.Nat public

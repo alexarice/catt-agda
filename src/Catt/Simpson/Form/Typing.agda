@@ -2,7 +2,7 @@
 
 module Catt.Simpson.Form.Typing where
 
-open import Catt.Simpson.Form
+import Catt.Simpson.Form
 open import Catt.Base
 open import Data.Nat
 open import Data.List using (List; []; map) renaming (_∷_ to _::_)

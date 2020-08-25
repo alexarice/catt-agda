@@ -108,6 +108,19 @@ pdb-dim-lemma (Extend pdb) = +-suc _ _
 pdb-dim-lemma {dim = dim} (Restr {submax = submax} pdb) = trans (sym (+-suc submax dim)) (pdb-dim-lemma pdb)
 
 
+reduce-to-dim : ∀ {Γ} {y} {dim} {newDim} {pdd} {A : Ty (suc n) dim} {sm} →
+                (p : newDim ≤′ dim) →
+                Γ ⊢pd y ∷ A [ sm ][ pdd ] → Σ[ submax ∈ ℕ ] Σ[ x ∈ Term (suc n) ] Γ ⊢pd x ∷ (ty-base-≤ p A) [ submax ][ pdd ]
+reduce-to-dim ≤′-refl pdb = -, -, pdb
+reduce-to-dim {A = t ─⟨ A ⟩⟶ u} (≤′-step p) pdb = reduce-to-dim p (Restr pdb)
+
+ty0-is-star : (A : Ty n 0) → ⋆ ≡ A
+ty0-is-star ⋆ = refl
+
+reduce-to-0 : ∀ {Γ} {y} {dim} {pdd} {A : Ty (suc n) dim} {sm} →
+                Γ ⊢pd y ∷ A [ sm ][ pdd ] → Σ[ submax ∈ ℕ ] Σ[ x ∈ Term (suc n) ] Γ ⊢pd x ∷ ⋆ [ submax ][ pdd ]
+reduce-to-0 {Γ = Γ} {A = A} pdb rewrite ty0-is-star (ty-base-≤ z≤′n A)= reduce-to-dim z≤′n pdb
+
 -- liftType-dim : (A : Ty n) → ty-dim (liftType A) ≡ ty-dim A
 -- liftType-dim ⋆ = refl
 -- liftType-dim (t ─⟨ A ⟩⟶ u) = cong suc (liftType-dim A)

@@ -29,6 +29,9 @@ _‼_ : Ctx n → Fin n → ∃ (Ty n)
 (Γ , A) ‼ fromℕ n = -, liftType A
 (Γ , A) ‼ inject i = -, liftType (proj₂ (Γ ‼ i))
 
+last : Ctx (suc n) → ∃ (Ty (suc n))
+last Γ = Γ ‼ fromℕ _
+
 infix 50 _─⟨_⟩⟶_
 data Ty where
   ⋆ : Ty n 0
@@ -80,3 +83,16 @@ ty-base-n (suc x) A = ty-base-n x (ty-base A)
 ty-base-≤ : ∀ {d₁ d₂} → d₁ ≤′ d₂ → Ty n d₂ → Ty n d₁
 ty-base-≤ ≤′-refl A = A
 ty-base-≤ (≤′-step p) A = ty-base-≤ p (ty-base A)
+
+liftTypeN : ∀ m {n dim} → Ty n dim → Ty (m + n) dim
+liftTypeN zero A = A
+liftTypeN (suc m) A = liftType (liftTypeN m A)
+
+TermAndType : ℕ → ℕ → Set
+TermAndType n dim = Term n × Ty n dim
+
+TermAndTypeSrc : ∀ {n dim-1} → TermAndType n (suc dim-1) → TermAndType n dim-1
+TermAndTypeSrc (_ ,, t ─⟨ A ⟩⟶ _) = t ,, A
+
+TermAndTypeTgt : ∀ {n dim-1} → TermAndType n (suc dim-1) → TermAndType n dim-1
+TermAndTypeTgt (_ ,, _ ─⟨ A ⟩⟶ u) = u ,, A

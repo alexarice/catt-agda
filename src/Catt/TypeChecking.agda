@@ -74,12 +74,6 @@ pd-typeCheck {suc n} Γ = do
   (submax ,, x ,, ⋆ ,, pdd  ,, pdb) ← pdb-typeCheck Γ 0
   tc-ok (pdd ,, Finish pdb)
 
-reduce-to-dim : ∀ {Γ} {y} {dim} {newDim} {pdd} {A : Ty (suc n) dim} {sm} →
-                (p : newDim ≤′ dim) →
-                Γ ⊢pd y ∷ A [ sm ][ pdd ] → Σ[ submax ∈ ℕ ] Σ[ x ∈ Term (suc n) ] Γ ⊢pd x ∷ (ty-base-≤ p A) [ submax ][ pdd ]
-reduce-to-dim ≤′-refl pdb = -, -, pdb
-reduce-to-dim {A = t ─⟨ A ⟩⟶ u} (≤′-step p) pdb = reduce-to-dim p (Restr pdb)
-
 extend : (submax : ℕ) →
          {Γ : Ctx (suc n)} →
          {A : Ty (suc n) dim} →

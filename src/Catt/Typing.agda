@@ -6,7 +6,7 @@ open import Data.Nat
 open import Catt.Fin
 open import Data.Bool
 open import Catt.Syntax
-open import Catt.FreeVars
+open import Catt.Pasting
 open import Relation.Binary.PropositionalEquality
 open import Data.Product renaming (_,_ to _,,_)
 
@@ -18,10 +18,6 @@ data _⊢ : Ctx n → Set
 data _⊢_ : Ctx n → Ty n dim → Set
 data _⊢_∷_ : Ctx n → Term n → Ty n dim → Set
 data _⊢_::_ : Ctx m → Sub m n → Ctx n → Set
-data _⊢pd₀_ : Ctx n → ℕ → Set
-
-FVSrc : {Γ : Ctx n} → Γ ⊢pd₀ dim → FVSet n
-FVTgt : {Γ : Ctx n} → Γ ⊢pd₀ dim → FVSet n
 
 data _⊢ where
   TypeCtxBase : ∅ ⊢
@@ -60,26 +56,7 @@ data _⊢_::_ where
   TypeSubEmpty : {Δ : Ctx m} → Δ ⊢ ⟨⟩ :: ∅
   TypeSubStep : {Δ : Ctx m} {Γ : Ctx n} {σ : Sub m n} → Δ ⊢ σ :: Γ → {A : Ty n dim} → Γ ⊢ A → {t : Term m} → Δ ⊢ t ∷ (A [ σ ]ty) → Δ ⊢ ⟨ σ , t ⟩ :: Γ , A
 
-data _⊢pd_∷_[_][_] : Ctx (suc n) → Term (suc n) → Ty (suc n) dim → ℕ → ℕ → Set where
-  Base : ∅ , ⋆ ⊢pd (Var (fromℕ 0)) ∷ ⋆ [ 0 ][ 0 ]
-  ExtendM : {Γ : Ctx (suc n)} →
-            {A : Ty (suc n) dim} →
-            {x : Term (suc n)} →
-            Γ ⊢pd x ∷ A [ 0 ][ pdd ] →
-            Γ , A , liftTerm x ─⟨ liftType A ⟩⟶ Var (fromℕ _) ⊢pd (Var (fromℕ _)) ∷ liftTerm (liftTerm x) ─⟨ liftType (liftType A) ⟩⟶ Var (inject (fromℕ _)) [ 0 ][ suc dim ]
-  Extend : {Γ : Ctx (suc n)} →
-           {A : Ty (suc n) dim} →
-           {x : Term (suc n)} →
-           Γ ⊢pd x ∷ A [ suc submax ][ suc (submax + dim) ] →
-           Γ , A , liftTerm x ─⟨ liftType A ⟩⟶ Var (fromℕ _) ⊢pd (Var (fromℕ _)) ∷ liftTerm (liftTerm x) ─⟨ liftType (liftType A) ⟩⟶ Var (inject (fromℕ _)) [ submax ][ suc (submax + dim) ]
-  Restr : {Γ : Ctx (suc n)} →
-          {f x y : Term (suc n)} →
-          {A : Ty (suc n) dim} →
-          Γ ⊢pd f ∷ (x ─⟨ A ⟩⟶ y) [ submax ][ pdd ] →
-          Γ ⊢pd y ∷ A [ suc submax ][ pdd ]
 
-data _⊢pd₀_ where
-  Finish : {Γ : Ctx (suc n)} → {x : Term (suc n)} → Γ ⊢pd x ∷ ⋆ [ submax ][ dim ] → Γ ⊢pd₀ dim
 
 FVSrc-b : {Γ : Ctx (suc n)} → {x : Term (suc n)} → {A : Ty (suc n) dim} → Γ ⊢pd x ∷ A [ submax ][ pdd ] → FVSet (suc n)
 FVSrc-b Base = empty

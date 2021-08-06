@@ -19,7 +19,7 @@ subtract (suc n) m = pred m
 private
   variable
     Γ Δ : Ctx
-    submax dim : ℕ
+    submax dim dim′ : ℕ
 
 data _⊢pd₀_ : Ctx → ℕ → Set
 
@@ -139,3 +139,8 @@ pd-tgt (Finish pdb) = pdb-tgt pdb tt
 restrict-to-pd : Γ ⊢pd[ submax ][ dim ] → Γ ⊢pd₀ (submax + dim)
 restrict-to-pd {Γ} {dim = zero} pdb = subst (Γ ⊢pd₀_) (sym (+-identityʳ _)) (Finish pdb)
 restrict-to-pd {Γ} {dim = suc dim} pdb = subst (Γ ⊢pd₀_) (sym (+-suc _ dim)) (restrict-to-pd (Restr pdb))
+
+
+-- data SourceFree : (Γ ⊢pd[ submax ][ dim ]) → Term Γ dim′ → Set where
+--   SFBase : (pdb : Γ ⊢pd[ submax ][ suc dim ]) → SourceFree (Restr pdb) (getFocusTerm pdb)
+--   SFStepRestr : (pdb : Γ ⊢pd[ submax ][ suc dim ])

@@ -24,12 +24,18 @@ record TruncateAlg (A : Set) : Set where
 
 open TruncateAlg
 
-glob→trunc : {cells : ℕ → Set} → GlobSet cells → TruncateAlg (Σ ℕ cells)
-glob→trunc {cells} gs .truncate n b (m , x) = go cells m x n (if b then (tgt gs) else (src gs))
-  where
-  go : (c : ℕ → Set) → (m : ℕ) → c m → ℕ → (func : ∀ o → c (suc o) → c o) → Σ ℕ c
-  go c zero x n func = zero , x
-  go c (suc m) x zero func = go c m (func m x) zero func
-  go c (suc m) x (suc n) func = let (m′ , x′) = go (λ a → c (suc a)) m x n λ o → func (suc o) in suc m′ , x′
-glob→trunc gs .dim (m , _) = m
-glob→trunc gs .truncCoh n (m , x) b b′ = {!!}
+-- glob→trunc : {cells : ℕ → Set} → GlobSet cells → TruncateAlg (Σ ℕ cells)
+-- glob→trunc {cells} gs .truncate n b (m , x) = go cells m x n (if b then (tgt gs) else (src gs))
+--   where
+--   go : (c : ℕ → Set) → (m : ℕ) → c m → ℕ → (func : ∀ o → c (suc o) → c o) → Σ ℕ c
+--   go c zero x n func = zero , x
+--   go c (suc m) x zero func = go c m (func m x) zero func
+--   go c (suc m) x (suc n) func = let (m′ , x′) = go (λ a → c (suc a)) m x n λ o → func (suc o) in suc m′ , x′
+-- glob→trunc gs .dim (m , _) = m
+-- glob→trunc gs .truncCoh n (m , x) b b′ = {!!}
+
+data BTree (A : Set) : Set where
+  Leaf : A → BTree A
+  Extend : BTree A → BTree A → A → BTree A
+
+TypedBTree : {A : Set} (TA : TruncateAlg A)

@@ -9,6 +9,16 @@ open import Induction.WellFounded
 open import Relation.Binary.Construct.Closure.Transitive
 open import Relation.Binary.Construct.Closure.Transitive using () renaming ([_] to [_]p; _∷_ to _∷p_) public
 
+ty-src : Ty Γ (suc (suc d)) → Tm Γ (suc (suc d))
+ty-tgt : Ty Γ (suc (suc d)) → Tm Γ (suc (suc d))
+ty-base : Ty Γ (suc (suc d)) → Ty Γ (suc d)
+
+ty-src (s ─⟨ A ⟩⟶ t) = s
+
+ty-tgt (s ─⟨ A ⟩⟶ t) = t
+
+ty-base (s ─⟨ A ⟩⟶ t) = A
+
 data Syntax : Set where
   Context : (Γ : Ctx n d) → Syntax
   Type : (A : Ty Γ n) → Syntax
@@ -18,8 +28,8 @@ data Syntax : Set where
 syntax-dim : Syntax → ℕ
 syntax-dim (Context Γ) = ctx-dim Γ
 syntax-dim (Type A) = ty-dim A
-syntax-dim (Term t) = suc (tm-dim t)
-syntax-dim (Substitution σ) = suc (sub-dim σ)
+syntax-dim (Term t) = tm-dim t
+syntax-dim (Substitution σ) = sub-dim σ
 
 syntax-ctx-length : Syntax → ℕ
 syntax-ctx-length (Context {n} Γ) = n
@@ -55,13 +65,17 @@ data _≺_ : Syntax → Syntax → Set where
 not-possible : (A : Set) → (x : ℕ) → x < 0 → A
 not-possible A x ()
 
+sub-dim-lem : (σ : Sub Γ Δ) → sub-dim σ ≤ suc (ctx-dim Γ)
+sub-dim-lem ⟨⟩ = z≤n
+sub-dim-lem ⟨ σ , t ⟩ = ⊔-monoˡ-≤ (tm-dim t) (sub-dim-lem σ)
+
 wf : WellFounded _≺_
 wf x = acc (access (syntax-dim x) x ≤-refl)
   where
     access-ctx : (n : ℕ) → (Γ : Ctx m d) → (d ≤ n) → (y : Syntax) → y ≺ (Context Γ) → Acc _≺_ y
     access-ty : (n : ℕ) → (A : Ty Γ m) → (m ≤ n) → (y : Syntax) → y ≺ (Type A) → Acc _≺_ y
-    access-tm : (n : ℕ) → (t : Tm Γ m) → (suc m ≤ n) → (y : Syntax) → y ≺ (Term t) → Acc _≺_ y
-    access-sub : (n : ℕ) → (σ : Sub Γ Δ) → (suc (sub-dim σ) ≤ n) → (y : Syntax) → y ≺ (Substitution σ) → Acc _≺_ y
+    access-tm : (n : ℕ) → (t : Tm Γ m) → (m ≤ n) → (y : Syntax) → y ≺ (Term t) → Acc _≺_ y
+    access-sub : (n : ℕ) → (σ : Sub Γ Δ) → (sub-dim σ ≤ n) → (y : Syntax) → y ≺ (Substitution σ) → Acc _≺_ y
     access : (n : ℕ) → (x : Syntax) → (syntax-dim x ≤ n) → (y : Syntax) → y ≺ x → Acc _≺_ y
 
     access-ctx zero ∅ le y (dim ())
@@ -73,21 +87,24 @@ wf x = acc (access (syntax-dim x) x ≤-refl)
     access-ctx (suc n) (Γ , A) le .(Context Γ) ctx1 = acc (access-ctx (suc n) Γ (m⊔n≤o⇒m≤o _ _ le))
     access-ctx (suc n) (Γ , A) le .(Type A) ctx2 = acc (access-ty (suc n) A (m⊔n≤o⇒n≤o _ _ le))
 
-    access-tm zero t () y p
+    access-tm zero (Coh Δ A σ) le y p = not-possible (Acc _≺_ y) (ty-dim A) (m⊔n≤o⇒n≤o (suc _) _ le)
     access-tm (suc n) (Var i) le y (dim p) = acc (access n y (≤-pred (≤-trans p le)))
     access-tm (suc n) (Coh Δ A σ) le y (dim p) = acc (access n y (≤-pred (≤-trans p le)))
-    access-tm (suc n) (Coh Δ A σ) le .(Context Δ) tm1 = acc (access-ctx n Δ (≤-trans (m≤m⊔n _ _) (≤-pred le)))
-    access-tm (suc n) (Coh Δ A σ) le .(Type A) tm2 = acc (access-ty n A (≤-trans (m≤n⊔m _ _) (≤-pred le)))
-    access-tm (suc n) (Coh Δ A σ) le .(Substitution σ) tm3 = acc (access-sub (suc n) σ (≤-trans (s≤s (m≤m⊔n _ _)) le))
+    access-tm (suc n) (Coh Δ A σ) le .(Context Δ) tm1 = acc (access-ctx (suc n) Δ (≤-step (≤-pred (m⊔n≤o⇒m≤o _ (suc _) le))))
+    access-tm (suc n) (Coh Δ A σ) le .(Type A) tm2 = acc (access-ty n A (≤-pred (m⊔n≤o⇒n≤o (suc (ctx-dim Δ)) _ le)))
+    access-tm (suc n) (Coh Δ A σ) le .(Substitution σ) tm3 = acc (access-sub (suc n) σ (≤-trans (sub-dim-lem σ) (m⊔n≤o⇒m≤o _ (suc _) le)))
 
-    access-sub zero σ () y p
+    access-sub zero ⟨⟩ le y (dim ())
+    access-sub zero ⟨ σ , t ⟩ le y (dim p) = not-possible (Acc _≺_ y) (syntax-dim y) (<-transˡ p le)
+    access-sub zero ⟨ σ , t ⟩ le .(Substitution σ) sub1 = acc (access-sub zero σ (m⊔n≤o⇒m≤o _ _ le))
+    access-sub zero ⟨ σ , t ⟩ le .(Term t) sub2 = acc (access-tm zero t (m⊔n≤o⇒n≤o _ (suc _) le))
     access-sub (suc n) ⟨⟩ le y (dim p) = acc (access n y (≤-pred (≤-trans p le)))
     access-sub (suc n) ⟨ σ , t ⟩ le y (dim p) = acc (access n y (≤-pred (≤-trans p le)))
-    access-sub (suc n) ⟨ σ , t ⟩ le .(Substitution σ) sub1 = acc (access-sub (suc n) σ (≤-trans (s≤s (m≤m⊔n _ _)) le))
-    access-sub (suc n) ⟨ σ , t ⟩ le .(Term t) sub2 = acc (access-tm (suc n) t (≤-trans (s≤s (m≤n⊔m _ _)) le))
+    access-sub (suc n) ⟨ σ , t ⟩ le .(Substitution σ) sub1 = acc (access-sub (suc n) σ (m⊔n≤o⇒m≤o _ _ le))
+    access-sub (suc n) ⟨ σ , t ⟩ le .(Term t) sub2 = acc (access-tm (suc n) t (m⊔n≤o⇒n≤o _ _ le))
 
-    access-ty zero ⋆ le y (dim ())
-    access-ty (suc n) ⋆ le y (dim ())
+    access-ty zero ⋆ () y p
+    access-ty (suc n) ⋆ le y (dim p) = acc (access n y (≤-pred (≤-trans p le)))
     access-ty (suc n) (s ─⟨ A ⟩⟶ t) le y (dim p) = acc (access n y (≤-pred (≤-trans p le)))
     access-ty (suc n) (s ─⟨ A ⟩⟶ t) le .(Term s) ty1 = acc (access-tm (suc n) s le)
     access-ty (suc n) (s ─⟨ A ⟩⟶ t) le .(Type A) ty2 = acc (access-ty n A (≤-pred le))

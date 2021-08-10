@@ -6,42 +6,40 @@ open import Data.Nat
 open import Data.Fin
 
 variable
-  n m : ℕ
+  n m d d′ : ℕ
 
-data Ctx : Set
-data Ty : Ctx → ℕ → Set
-data Tm : Ctx → ℕ → Set
-data Sub : Ctx → Ctx → Set
+data Ctx : ℕ → ℕ → Set
+data Ty : Ctx n d → ℕ → Set
+data Tm : Ctx n d → ℕ → Set
+data Sub : Ctx n d → Ctx m d′ → Set
 
 variable
-  Γ Γ′ Δ Υ : Ctx
+  Γ Γ′ Δ Υ : Ctx n d
   A A′ B C : Ty Γ n
   s s′ t t′ u : Tm Γ n
   σ σ′ τ μ : Sub Γ Δ
 
 infixl 25 _,_
 data Ctx where
-  ∅ : Ctx
-  _,_ : (Γ : Ctx) → (A : Ty Γ n) → Ctx
+  ∅ : Ctx 0 0
+  _,_ : (Γ : Ctx m d) → (A : Ty Γ n) → Ctx (suc m) (d ⊔ n)
 
-ctxLength : Ctx → ℕ
-ctxLength ∅ = 0
-ctxLength (Γ , A) = suc (ctxLength Γ)
+ctxLength : (Γ : Ctx n d) → ℕ
+ctxLength {n} Γ = n
 
 ty-dim : Ty Γ n → ℕ
 ty-dim {n = n} A = n
 
-ctx-dim : Ctx → ℕ
-ctx-dim ∅ = 0
-ctx-dim (Γ , A) = ctx-dim Γ ⊔ ty-dim A
+ctx-dim : Ctx n d → ℕ
+ctx-dim {d = d} Γ = d
 
 tm-dim : Tm Γ n → ℕ
 tm-dim {n = n} t = n
 
 sub-dim : Sub Γ Δ → ℕ
-sub-dim {Γ} σ = ctx-dim Γ
+sub-dim {Γ = Γ} σ = ctx-dim Γ
 
-lookupDim : (Γ : Ctx) → Fin (ctxLength Γ) → ℕ
+lookupDim : (Γ : Ctx n d) → Fin n → ℕ
 lookupDim (Γ , A) zero = ty-dim A
 lookupDim (Γ , A) (suc i) = lookupDim Γ i
 
@@ -56,7 +54,7 @@ data Sub where
 
 data Tm where
   Var : (i : (Fin (ctxLength Γ))) → Tm Γ (lookupDim Γ i)
-  Coh : (Δ : Ctx) → (A : Ty Δ m) → (σ : Sub Δ Γ) → Tm Γ (ctx-dim Δ ⊔ m)
+  Coh : (Δ : Ctx n d) → (A : Ty Δ m) → (σ : Sub Δ Γ) → Tm Γ (ctx-dim Δ ⊔ m)
 
 infixr 30 _[_]ty _[_]tm
 _[_]ty : Ty Γ n → Sub Γ Δ → Ty Δ n
@@ -88,14 +86,14 @@ liftSub ⟨ σ , t ⟩ = ⟨ liftSub σ , liftTerm t ⟩
 liftType ⋆ = ⋆
 liftType (s ─⟨ A ⟩⟶ t) = liftTerm s ─⟨ liftType A ⟩⟶ liftTerm t
 
-idSub : (Γ : Ctx) → Sub Γ Γ
+idSub : (Γ : Ctx n d) → Sub Γ Γ
 idSub ∅ = ⟨⟩
 idSub (Γ , A) = ⟨ liftSub (idSub Γ) , Var zero ⟩
 
-projection : (Γ : Ctx) → {A : Ty Γ m} → Sub Γ (Γ , A)
+projection : (Γ : Ctx n d) → {A : Ty Γ m} → Sub Γ (Γ , A)
 projection Γ = liftSub (idSub Γ)
 
 infix 45 _‼_
-_‼_ : (Γ : Ctx) → (i : Fin (ctxLength Γ)) → Ty Γ (lookupDim Γ i)
+_‼_ : (Γ : Ctx n d) → (i : Fin n) → Ty Γ (lookupDim Γ i)
 (Γ , A) ‼ zero = liftType A
 (Γ , A) ‼ suc i = liftType (Γ ‼ i)

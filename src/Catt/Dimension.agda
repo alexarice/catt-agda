@@ -10,7 +10,7 @@ open import Relation.Binary.Construct.Closure.Transitive
 open import Relation.Binary.Construct.Closure.Transitive using () renaming ([_] to [_]p; _∷_ to _∷p_) public
 
 data Syntax : Set where
-  Context : (Γ : Ctx) → Syntax
+  Context : (Γ : Ctx n d) → Syntax
   Type : (A : Ty Γ n) → Syntax
   Term : (t : Tm Γ n) → Syntax
   Substitution : (σ : Sub Γ Δ) → Syntax
@@ -21,11 +21,23 @@ syntax-dim (Type A) = ty-dim A
 syntax-dim (Term t) = suc (tm-dim t)
 syntax-dim (Substitution σ) = suc (sub-dim σ)
 
-syntax-ctx : Syntax → Ctx
+syntax-ctx-length : Syntax → ℕ
+syntax-ctx-length (Context {n} Γ) = n
+syntax-ctx-length (Type {n} A) = n
+syntax-ctx-length (Term {n} t) = n
+syntax-ctx-length (Substitution {Δ = Δ} σ) = ctxLength Δ
+
+syntax-ctx-dim : Syntax → ℕ
+syntax-ctx-dim (Context Γ) = ctx-dim Γ
+syntax-ctx-dim (Type {Γ = Γ} A) = ctx-dim Γ
+syntax-ctx-dim (Term {Γ = Γ} t) = ctx-dim Γ
+syntax-ctx-dim (Substitution {Δ = Δ} σ) = ctx-dim Δ
+
+syntax-ctx : (x : Syntax) → Ctx (syntax-ctx-length x) (syntax-ctx-dim x)
 syntax-ctx (Context Γ) = Γ
-syntax-ctx (Type {Γ} A) = Γ
-syntax-ctx (Term {Γ} t) = Γ
-syntax-ctx (Substitution {Γ} {Δ} σ) = Δ
+syntax-ctx (Type {Γ = Γ} A) = Γ
+syntax-ctx (Term {Γ = Γ} t) = Γ
+syntax-ctx (Substitution {Δ = Δ} σ) = Δ
 
 data _≺_ : Syntax → Syntax → Set where
   dim : {x : Syntax} → {y : Syntax} → (p : syntax-dim x < syntax-dim y) → x ≺ y
@@ -46,7 +58,7 @@ not-possible A x ()
 wf : WellFounded _≺_
 wf x = acc (access (syntax-dim x) x ≤-refl)
   where
-    access-ctx : (n : ℕ) → (Γ : Ctx) → (ctx-dim Γ ≤ n) → (y : Syntax) → y ≺ (Context Γ) → Acc _≺_ y
+    access-ctx : (n : ℕ) → (Γ : Ctx m d) → (d ≤ n) → (y : Syntax) → y ≺ (Context Γ) → Acc _≺_ y
     access-ty : (n : ℕ) → (A : Ty Γ m) → (m ≤ n) → (y : Syntax) → y ≺ (Type A) → Acc _≺_ y
     access-tm : (n : ℕ) → (t : Tm Γ m) → (suc m ≤ n) → (y : Syntax) → y ≺ (Term t) → Acc _≺_ y
     access-sub : (n : ℕ) → (σ : Sub Γ Δ) → (suc (sub-dim σ) ≤ n) → (y : Syntax) → y ≺ (Substitution σ) → Acc _≺_ y

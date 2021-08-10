@@ -1,117 +1,101 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K --safe --exact-split #-}
 
 module Catt.Syntax where
 
 open import Data.Nat
 open import Data.Fin
-open import Data.Product renaming (_,_ to _,,_)
-open import Data.Unit
-open import Data.Empty
 
-
+variable
+  n m : ℕ
 
 data Ctx : Set
 data Ty : Ctx → ℕ → Set
-data Term : Ctx → ℕ → Set
+data Tm : Ctx → ℕ → Set
 data Sub : Ctx → Ctx → Set
 
+variable
+  Γ Γ′ Δ Υ : Ctx
+  A A′ B C : Ty Γ n
+  s s′ t t′ u : Tm Γ n
+  σ σ′ τ μ : Sub Γ Δ
 
-private
-  variable
-    n m l dim : ℕ
-    Γ Δ Υ : Ctx
-
-
-ty-dim : Ty Γ dim → ℕ
-ty-dim {dim = dim} ty = dim
-
-length : Ctx → ℕ
-
-
-
-infixl 45 _,_
+infixl 25 _,_
 data Ctx where
   ∅ : Ctx
-  _,_ : (Γ : Ctx) → (A : Ty Γ dim) → Ctx
+  _,_ : (Γ : Ctx) → (A : Ty Γ n) → Ctx
 
-length ∅ = 0
-length (Γ , A) = suc (length Γ)
+ctxLength : Ctx → ℕ
+ctxLength ∅ = 0
+ctxLength (Γ , A) = suc (ctxLength Γ)
 
-infix 50 _─⟨_⟩⟶_
+ty-dim : Ty Γ n → ℕ
+ty-dim {n = n} A = n
+
+ctx-dim : Ctx → ℕ
+ctx-dim ∅ = 0
+ctx-dim (Γ , A) = ctx-dim Γ ⊔ ty-dim A
+
+tm-dim : Tm Γ n → ℕ
+tm-dim {n = n} t = n
+
+sub-dim : Sub Γ Δ → ℕ
+sub-dim {Γ} σ = ctx-dim Γ
+
+lookupDim : (Γ : Ctx) → Fin (ctxLength Γ) → ℕ
+lookupDim (Γ , A) zero = ty-dim A
+lookupDim (Γ , A) (suc i) = lookupDim Γ i
+
+infix 30 _─⟨_⟩⟶_
 data Ty where
   ⋆ : Ty Γ 0
-  _─⟨_⟩⟶_ : (s : Term Γ dim) → (A : Ty Γ dim) → (t : Term Γ dim) → Ty Γ (suc dim)
+  _─⟨_⟩⟶_ : (s : Tm Γ n) → (A : Ty Γ n) → (t : Tm Γ n) → Ty Γ (suc n)
 
 data Sub where
-  ⟨⟩ : Sub Γ ∅
-  ⟨_,_⟩ : (σ : Sub Γ Δ) → (Term Γ dim) → {A : Ty Δ dim} → Sub Γ (Δ , A)
+  ⟨⟩ : Sub ∅ Δ
+  ⟨_,_⟩ : (σ : Sub Γ Δ) → {A : Ty Γ m} → (t : Tm Δ m) → Sub (Γ , A) Δ
 
-retrieveDim : (Γ : Ctx) → Fin (length Γ) → ℕ
-retrieveDim (_,_ {dim = dim} _ _) zero = dim
-retrieveDim (Γ , A) (suc i) = retrieveDim Γ i
-
-data Term where
-  Var : (i : Fin (length Γ)) → Term Γ (retrieveDim Γ i)
-  Coh : (Δ : Ctx) → (A : Ty Δ dim) → (σ : Sub Γ Δ) → Term Γ dim
+data Tm where
+  Var : (i : (Fin (ctxLength Γ))) → Tm Γ (lookupDim Γ i)
+  Coh : (Δ : Ctx) → (A : Ty Δ m) → (σ : Sub Δ Γ) → Tm Γ (ctx-dim Δ ⊔ m)
 
 infixr 30 _[_]ty _[_]tm
-_[_]ty : Ty Δ dim → Sub Γ Δ → Ty Γ dim
-_[_]tm : Term Δ dim → Sub Γ Δ → Term Γ dim
+_[_]ty : Ty Γ n → Sub Γ Δ → Ty Δ n
+_[_]tm : Tm Γ n → Sub Γ Δ → Tm Δ n
+
 infixl 31 _∘_
-_∘_ : Sub Δ Γ → Sub Υ Δ → Sub Υ Γ
+_∘_ : Sub Δ Υ → Sub Γ Δ → Sub Γ Υ
 
 ⋆ [ σ ]ty = ⋆
-(s ─⟨ A ⟩⟶ t) [ σ ]ty = (s [ σ ]tm) ─⟨ A [ σ ]ty ⟩⟶ (t [ σ ]tm)
+(s ─⟨ A ⟩⟶ t) [ σ ]ty = (s [ σ ]tm) ─⟨ (A [ σ ]ty) ⟩⟶ (t [ σ ]tm)
 
 Var zero [ ⟨ σ , t ⟩ ]tm = t
-Var (suc i) [ ⟨ σ , t ⟩ ]tm = Var i [ σ ]tm
-Coh Γ A τ [ σ ]tm = Coh Γ A (τ ∘ σ)
+Var (suc x) [ ⟨ σ , t ⟩ ]tm = Var x [ σ ]tm
+Coh Δ A τ [ σ ]tm = Coh Δ A (σ ∘ τ)
 
-⟨⟩ ∘ τ = ⟨⟩
-⟨ σ , t ⟩ ∘ τ = ⟨ σ ∘ τ , t [ τ ]tm ⟩
+σ ∘ ⟨⟩ = ⟨⟩
+σ ∘ ⟨ τ , t ⟩ = ⟨ (σ ∘ τ) , t [ σ ]tm ⟩
 
-liftType : Ty Γ dim → {A : Ty Γ n} → Ty (Γ , A) dim
-liftTerm : Term Γ dim → {A : Ty Γ n} → Term (Γ , A) dim
-liftSub : Sub Γ Δ → {A : Ty Γ n} → Sub (Γ , A) Δ
+liftTerm : Tm Γ n → Tm (Γ , A) n
+liftSub : Sub Δ Γ → Sub Δ (Γ , A)
+liftType : Ty Γ n → Ty (Γ , A) n
 
-liftType ⋆ = ⋆
-liftType (s ─⟨ B ⟩⟶ t) = (liftTerm s) ─⟨ (liftType B) ⟩⟶ (liftTerm t)
-
-liftTerm (Var x) = Var (suc x)
+liftTerm (Var i) = Var (suc i)
 liftTerm (Coh Δ A σ) = Coh Δ A (liftSub σ)
 
 liftSub ⟨⟩ = ⟨⟩
-liftSub ⟨ σ , x ⟩ = ⟨ (liftSub σ) , (liftTerm x) ⟩
+liftSub ⟨ σ , t ⟩ = ⟨ liftSub σ , liftTerm t ⟩
 
-idSub : Sub Γ Γ
-idSub {∅} = ⟨⟩
-idSub {Γ , A} = ⟨ liftSub idSub , Var zero ⟩
+liftType ⋆ = ⋆
+liftType (s ─⟨ A ⟩⟶ t) = liftTerm s ─⟨ liftType A ⟩⟶ liftTerm t
+
+idSub : (Γ : Ctx) → Sub Γ Γ
+idSub ∅ = ⟨⟩
+idSub (Γ , A) = ⟨ liftSub (idSub Γ) , Var zero ⟩
+
+projection : (Γ : Ctx) → {A : Ty Γ m} → Sub Γ (Γ , A)
+projection Γ = liftSub (idSub Γ)
 
 infix 45 _‼_
-_‼_ : (Γ : Ctx) → (i : Fin (length Γ)) → Ty Γ (retrieveDim Γ i)
+_‼_ : (Γ : Ctx) → (i : Fin (ctxLength Γ)) → Ty Γ (lookupDim Γ i)
 (Γ , A) ‼ zero = liftType A
 (Γ , A) ‼ suc i = liftType (Γ ‼ i)
-
--- ty-base : Ty n (suc dim) → Ty n dim
--- ty-base (t ─⟨ A ⟩⟶ u) = A
-
--- ty-base-n : ∀ x → Ty n (x + dim) → Ty n dim
--- ty-base-n zero A = A
--- ty-base-n (suc x) A = ty-base-n x (ty-base A)
-
--- ty-base-≤ : ∀ {d₁ d₂} → d₁ ≤′ d₂ → Ty n d₂ → Ty n d₁
--- ty-base-≤ ≤′-refl A = A
--- ty-base-≤ (≤′-step p) A = ty-base-≤ p (ty-base A)
-
--- liftTypeN : ∀ m {n dim} → Ty n dim → Ty (m + n) dim
--- liftTypeN zero A = A
--- liftTypeN (suc m) A = liftType (liftTypeN m A)
-
--- TermAndType : ℕ → ℕ → Set
--- TermAndType n dim = Term n × Ty n dim
-
--- TermAndTypeSrc : ∀ {n dim-1} → TermAndType n (suc dim-1) → TermAndType n dim-1
--- TermAndTypeSrc (_ ,, t ─⟨ A ⟩⟶ _) = t ,, A
-
--- TermAndTypeTgt : ∀ {n dim-1} → TermAndType n (suc dim-1) → TermAndType n dim-1
--- TermAndTypeTgt (_ ,, _ ─⟨ A ⟩⟶ u) = u ,, A

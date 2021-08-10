@@ -1,89 +1,65 @@
-{-# OPTIONS --without-K --safe --postfix-projections #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Catt.Support where
 
-open import Data.Nat hiding (_<_)
-open import Data.Fin hiding (pred)
-open import Data.Fin.Properties
-open import Data.Product renaming (_,_ to _,,_)
+open import Data.Nat hiding (_+_)
+open import Data.Nat.Properties using (≤-refl)
+open import Data.Vec hiding (drop)
+open import Data.Wrap renaming ([_] to [_]w)
 open import Catt.Syntax
-open import Catt.Pasting
-open import Catt.Vars
-open import Data.Empty
-open import Data.Unit
-open import Data.Fin.Patterns
-open import Data.Maybe
-open import Relation.Binary.PropositionalEquality
-open import Relation.Binary.Definitions
+open import Catt.Dimension
+open import Data.Bool
+open import Data.Fin
 
-open Tri
+VarSet′ : Ctx → Set
+VarSet′ Γ = Vec Bool (ctxLength Γ)
 
-private
-  variable
-    Γ Δ : Ctx
-    submax dim : ℕ
+VarSet = Wrap VarSet′
 
-getLast : (σ : Sub Γ Δ) → VSub σ → Maybe (Fin (length Γ))
-getLast ⟨⟩ vσ = nothing
-getLast ⟨ σ , Var i ⟩ vσ = just i
+empty : VarSet Γ
+empty = [ replicate false ]w
 
-Monotone : (σ : Sub Γ Δ) → VSub σ → Set
-Monotone ⟨⟩ vsub = ⊤
-Monotone ⟨ σ , Var i ⟩ (vσ ,, vx) = Monotone σ vσ × maybe′ (λ j → j < i) ⊤ (getLast σ vσ)
+full : VarSet Γ
+full = [ replicate true ]w
 
-record SubCtx (Γ : Ctx) : Set where
-  constructor ⟪_+_+_+_⟫
-  field
-    SrcCtx : Ctx
-    Inc : Sub Γ SrcCtx
-    VInc : VSub Inc
-    Mon : Monotone Inc VInc
+ewt : {A : Ty Γ n} → VarSet Γ → VarSet (Γ , A)
+ewt [ xs ]w = [ true ∷ xs ]w
 
-open SubCtx
+ewf : {A : Ty Γ n} → VarSet Γ → VarSet (Γ , A)
+ewf [ xs ]w = [ false ∷ xs ]w
 
-subCtxUnionCtx : (a b : SubCtx Γ) → Ctx
-subCtxUnionCtx ⟪ ∅ + σ + vσ + mσ ⟫ ⟪ Δ + τ + vτ + mτ ⟫ = Δ
-subCtxUnionCtx ⟪ Υ , A + σ + vσ + mσ ⟫ ⟪ Δ + τ + vτ + mτ ⟫ = {!!}
+drop : VarSet Γ → VarSet Γ
+drop {∅} [ [] ]w = [ [] ]w
+drop {Γ , A} [ x ∷ v ]w = [ false ∷ v ]w
 
-subCtxUnion : (a b : SubCtx Γ) → SubCtx Γ
-subCtxUnion ⟪ ∅ + σ + vσ + mσ ⟫ ⟪ Δ + τ + vτ + mτ ⟫ = ⟪ Δ + τ + vτ + mτ ⟫
-subCtxUnion ⟪ Υ , A + σ + vσ + mσ ⟫ ⟪ ∅ + τ + vτ + mτ ⟫ = ⟪ Υ , A + σ + vσ + mσ ⟫
-subCtxUnion ⟪ Υ , A + ⟨ σ , Var i ⟩ + vσ ,, vx + mσ ,, mi ⟫ ⟪ Δ , B + ⟨ τ , Var j ⟩ + vτ ,, vy + mτ ,, mj ⟫ with <-cmp i j
-... | tri< a ¬b ¬c = {!!} --  with subCtxUnion ⟪ Υ , A + ⟨ σ , Var i ⟩ + vσ ,, vx + mσ ,, mi ⟫ ⟪ Δ + τ + vτ + mτ ⟫
--- ...   | p  = {!!}
+trueAt : Fin (ctxLength Γ) → VarSet Γ
+trueAt {Γ , A} zero = ewt empty
+trueAt {Γ , A} (suc i) = ewf (trueAt i)
 
-... | tri≈ ¬a b ¬c = {!!}
-... | tri> ¬a ¬b c = {!!}
+infixl 60 _∪_
+_∪_ : VarSet Γ → VarSet Γ → VarSet Γ
+([ f ]w ∪ [ g ]w) = [ zipWith _∨_ f g ]w
 
-disk-ctx : ℕ → Ctx
-disk-pdb : (n : ℕ) → (disk-ctx n ⊢pd[ 0 ][ n ])
+supp : (x : Syntax) → VarSet (syntax-ctx x)
+supp = wfRec _ (λ y → VarSet (syntax-ctx y)) γ
+  where
+    γ : (x : Syntax) →
+        ((y : Syntax) → y ≺⁺ x → VarSet (syntax-ctx y)) →
+        VarSet (syntax-ctx x)
+    γ (Context Γ) rec = full
+    γ (Type ⋆) rec = empty
+    γ (Type (s ─⟨ A ⟩⟶ t)) rec = rec (Type A) [ ty2 ]p ∪ rec (Term s) [ ty1 ]p ∪ rec (Term t) [ ty3 ]p
+    γ (Term (Var {Γ} i)) rec = (trueAt i) ∪ (rec (Type (Γ ‼ i)) [ (dim ≤-refl) ]p)
+    γ (Term (Coh Δ A σ)) rec = rec (Substitution σ) [ tm3 ]p
+    γ (Substitution ⟨⟩) rec = empty
+    γ (Substitution ⟨ σ , t ⟩) rec = (rec (Substitution σ) [ sub1 ]p) ∪ (rec (Term t) [ sub2 ]p)
 
-disk-ctx zero = ∅ , ⋆
-disk-ctx (suc n) = extend (disk-pdb n)
+suppCtx : (Γ : Ctx) → VarSet Γ
+suppTm : Tm Γ n → VarSet Γ
+suppTy : Ty Γ n → VarSet Γ
+suppSub : Sub Δ Γ → VarSet Γ
 
-disk-pdb zero = Base
-disk-pdb (suc n) = ExtendM (disk-pdb n)
-
-disk-pd : (n : ℕ) → (disk-ctx n ⊢pd₀ n)
-disk-pd n = restrict-to-pd (disk-pdb n)
-
-disk-sub : VCtx Γ → (t : Term Γ dim) → VTerm t → Sub Γ (disk-ctx dim)
-disk-sub {Γ} vctx x@(Var i) vtm with retrieveDim Γ i | Var i | Γ ‼ i | vLookup vctx i
-... | zero | v | A | vA = ⟨ ⟨⟩ , v ⟩
-... | suc dim | v | s ─⟨ A ⟩⟶ t | vs ,, vt ,, vA = ⟨ ⟨ (disk-sub vctx s vs) , t ⟩ , v ⟩
-
-sub-support-ctx : Δ ⊢pd[ submax ][ dim ] → Sub Γ Δ → Ctx
-support-ctx : Term Γ dim → Ctx
-
-sub-support-ctx Base ⟨ ⟨⟩ , x ⟩ = support-ctx x
-sub-support-ctx (ExtendM pdb) ⟨ ⟨ σ , tgt ⟩ , fill ⟩ = {!!}
-sub-support-ctx (Extend pdb) σ = {!!}
-sub-support-ctx (Restr pdb) σ = {!!}
-
-support-ctx {dim = dim} (Var i) = disk-ctx dim
-support-ctx (Coh Δ A σ) = {!!}
-
-SourceFree : ∀ Γ → VCtx Γ → Fin (length Γ) → Set
-SourceFree (Γ , A) vΓ 0F = ⊤
-SourceFree (Γ , ⋆) (vΓ ,, tt) (suc i) = SourceFree Γ vΓ i
-SourceFree (Γ , Var j ─⟨ A ⟩⟶ t) (vΓ ,, vs ,, vt ,, vA) (suc i) = SourceFree Γ vΓ i × j ≢ i
+suppCtx Γ = supp (Context Γ)
+suppTm t = supp (Term t)
+suppTy A = supp (Type A)
+suppSub σ = supp (Substitution σ)

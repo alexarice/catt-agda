@@ -6,7 +6,7 @@ open import Data.Nat
 open import Data.Fin
 
 variable
-  n m d d′ : ℕ
+  n n′ m m′ d d′ : ℕ
 
 data Ctx : ℕ → ℕ → Set
 data Ty : Ctx n d → ℕ → Set
@@ -56,7 +56,7 @@ sub-dim ⟨ σ , t ⟩ = sub-dim σ ⊔ tm-dim t
 
 data Tm where
   Var : (i : (Fin (ctxLength Γ))) → Tm Γ (suc (lookupDim Γ i))
-  Coh : (Δ : Ctx n d) → (A : Ty Δ m) → (σ : Sub Δ Γ) → Tm Γ (suc (ctx-dim Δ) ⊔ suc m)
+  Coh : (Δ : Ctx (suc n) d) → (A : Ty Δ m) → (σ : Sub Δ Γ) → Tm Γ (suc (ctx-dim Δ) ⊔ suc m)
 
 infixr 30 _[_]ty _[_]tm
 _[_]ty : Ty Γ n → Sub Γ Δ → Ty Δ n

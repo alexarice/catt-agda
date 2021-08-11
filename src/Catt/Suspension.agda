@@ -3,7 +3,9 @@
 module Catt.Suspension where
 
 open import Catt.Syntax
+open import Catt.Syntax.Properties
 open import Catt.Pasting
+open import Catt.Pasting.Properties
 open import Data.Nat
 open import Data.Fin
 open import Data.Fin.Patterns
@@ -53,17 +55,18 @@ suspLiftTm : {A : Ty Γ d′} (t : Tm Γ d) → suspTm (liftTerm {A = A} t) ≡ 
 suspLiftSub : {A : Ty Δ d′} (σ : Sub Γ Δ) → suspSub (liftSub {A = A} σ) ≡ liftSub (suspSub σ)
 
 suspLiftTy ⋆ = refl
-suspLiftTy {A = A} (s ─⟨ B ⟩⟶ t)
-  rewrite suspLiftTm {A = A} s
-  rewrite suspLiftTm {A = A} t
-  rewrite suspLiftTy {A = A} B = refl
+suspLiftTy (s ─⟨ A ⟩⟶ t)
+  = arr-equality (suspLiftTm s)
+                 (suspLiftTy A)
+                 (suspLiftTm t)
+
 suspLiftTm (Var i) = refl
-suspLiftTm {A = A} (Coh Δ B σ)
-  rewrite suspLiftSub {A = A} σ = refl
+suspLiftTm (Coh Δ A σ) = coh-equality refl (suspLiftSub σ)
+
 suspLiftSub ⟨⟩ = refl
 suspLiftSub {A = A} ⟨ σ , t ⟩
-  rewrite suspLiftSub {A = A} σ
-  rewrite suspLiftTm {A = A} t = refl
+  = sub-equality (suspLiftSub σ)
+                 (suspLiftTm t)
 
 susp-pdb : Γ ⊢pd[ submax ][ d ] → suspCtx Γ ⊢pd[ submax ][ suc d ]
 susp-pdb-foc-ty : (pdb : Γ ⊢pd[ submax ][ d ]) → suspTy (getFocusType pdb) ≡ getFocusType (susp-pdb pdb)
@@ -71,55 +74,78 @@ susp-pdb-foc-tm : (pdb : Γ ⊢pd[ submax ][ d ]) → suspTm (getFocusTerm pdb) 
 
 susp-pdb Base = ExtendM Base
 susp-pdb (ExtendM pdb)
-  rewrite suspLiftTm {A = getFocusType pdb} (getFocusTerm pdb)
-  rewrite suspLiftTy {A = getFocusType pdb} (getFocusType pdb)
-  rewrite susp-pdb-foc-tm pdb
-  rewrite susp-pdb-foc-ty pdb
-  = ExtendM (susp-pdb pdb)
+  = extend-pd-eq (susp-pdb pdb)
+                 (susp-pdb-foc-ty pdb)
+                 (arr-equality (trans (suspLiftTm (getFocusTerm pdb))
+                                      (cong liftTerm (susp-pdb-foc-tm pdb)))
+                               (trans (suspLiftTy (getFocusType pdb))
+                                      (cong liftType (susp-pdb-foc-ty pdb)))
+                               refl)
 susp-pdb (Extend pdb)
-  rewrite suspLiftTm {A = getFocusType pdb} (getFocusTerm pdb)
-  rewrite suspLiftTy {A = getFocusType pdb} (getFocusType pdb)
-  rewrite susp-pdb-foc-tm pdb
-  rewrite susp-pdb-foc-ty pdb
-  = Extend (susp-pdb pdb)
+  = extend-pd-eq (susp-pdb pdb)
+                 (susp-pdb-foc-ty pdb)
+                 (arr-equality (trans (suspLiftTm (getFocusTerm pdb))
+                                      (cong liftTerm (susp-pdb-foc-tm pdb)))
+                               (trans (suspLiftTy (getFocusType pdb))
+                                      (cong liftType (susp-pdb-foc-ty pdb)))
+                               refl)
 susp-pdb (Restr pdb) = Restr (susp-pdb pdb)
 
 susp-pdb-foc-tm Base = refl
 susp-pdb-foc-tm (ExtendM pdb)
-  rewrite suspLiftTm {A = getFocusType pdb} (getFocusTerm pdb)
-  rewrite suspLiftTy {A = getFocusType pdb} (getFocusType pdb)
-  rewrite susp-pdb-foc-tm pdb
-  rewrite susp-pdb-foc-ty pdb
-  = refl
+  = extend-pd-eq-foc-tm (susp-pdb pdb)
+                        (susp-pdb-foc-ty pdb)
+                        (arr-equality (trans (suspLiftTm (getFocusTerm pdb))
+                                             (cong liftTerm (susp-pdb-foc-tm pdb)))
+                                      (trans (suspLiftTy (getFocusType pdb))
+                                             (cong liftType (susp-pdb-foc-ty pdb)))
+                                      refl)
 susp-pdb-foc-tm (Extend pdb)
-  rewrite suspLiftTm {A = getFocusType pdb} (getFocusTerm pdb)
-  rewrite suspLiftTy {A = getFocusType pdb} (getFocusType pdb)
-  rewrite susp-pdb-foc-tm pdb
-  rewrite susp-pdb-foc-ty pdb
-  = refl
+  = extend-pd-eq-foc-tm (susp-pdb pdb)
+                        (susp-pdb-foc-ty pdb)
+                        (arr-equality (trans (suspLiftTm (getFocusTerm pdb))
+                                             (cong liftTerm (susp-pdb-foc-tm pdb)))
+                                      (trans (suspLiftTy (getFocusType pdb))
+                                             (cong liftType (susp-pdb-foc-ty pdb)))
+                                      refl)
 susp-pdb-foc-tm (Restr pdb)
-  rewrite susp-tgt-compat (getFocusType pdb)
-  rewrite susp-pdb-foc-ty pdb
-  = refl
+  = trans (susp-tgt-compat (getFocusType pdb))
+          (cong ty-tgt (susp-pdb-foc-ty pdb))
 
 susp-pdb-foc-ty Base = refl
 susp-pdb-foc-ty (ExtendM pdb)
-  rewrite suspLiftTy {A = liftTerm {A = getFocusType pdb} (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ Var 0F} (liftType (getFocusType pdb))
-  rewrite suspLiftTm {A = liftTerm {A = getFocusType pdb} (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ Var 0F} (liftTerm (getFocusTerm pdb))
-  rewrite suspLiftTm {A = getFocusType pdb} (getFocusTerm pdb)
-  rewrite suspLiftTy {A = getFocusType pdb} (getFocusType pdb)
-  rewrite susp-pdb-foc-tm pdb
-  rewrite susp-pdb-foc-ty pdb
-  = refl
+  = trans (arr-equality (trans (suspLiftTm (liftTerm (getFocusTerm pdb)))
+                               (cong liftTerm (trans (suspLiftTm (getFocusTerm pdb))
+                                                     (cong liftTerm (susp-pdb-foc-tm pdb)))))
+                        (trans (suspLiftTy (liftType (getFocusType pdb)))
+                               (cong liftType (trans (suspLiftTy (getFocusType pdb))
+                                                     (cong liftType (susp-pdb-foc-ty pdb)))))
+                        refl)
+          (extend-pd-eq-foc-ty (susp-pdb pdb)
+                               (susp-pdb-foc-ty pdb)
+                               (arr-equality (trans (suspLiftTm (getFocusTerm pdb))
+                                                    (cong liftTerm (susp-pdb-foc-tm pdb)))
+                                             (trans (suspLiftTy (getFocusType pdb))
+                                                    (cong liftType (susp-pdb-foc-ty pdb)))
+                                             refl))
 susp-pdb-foc-ty (Extend pdb)
-  rewrite suspLiftTy {A = liftTerm {A = getFocusType pdb} (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ Var 0F} (liftType (getFocusType pdb))
-  rewrite suspLiftTm {A = liftTerm {A = getFocusType pdb} (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ Var 0F} (liftTerm (getFocusTerm pdb))
-  rewrite suspLiftTm {A = getFocusType pdb} (getFocusTerm pdb)
-  rewrite suspLiftTy {A = getFocusType pdb} (getFocusType pdb)
-  rewrite susp-pdb-foc-tm pdb
-  rewrite susp-pdb-foc-ty pdb
-  = refl
+  = trans (arr-equality (trans (suspLiftTm (liftTerm (getFocusTerm pdb)))
+                               (cong liftTerm (trans (suspLiftTm (getFocusTerm pdb))
+                                                     (cong liftTerm (susp-pdb-foc-tm pdb)))))
+                        (trans (suspLiftTy (liftType (getFocusType pdb)))
+                               (cong liftType (trans (suspLiftTy (getFocusType pdb))
+                                                     (cong liftType (susp-pdb-foc-ty pdb)))))
+                        refl)
+          (extend-pd-eq-foc-ty (susp-pdb pdb)
+                               (susp-pdb-foc-ty pdb)
+                               (arr-equality (trans (suspLiftTm (getFocusTerm pdb))
+                                                    (cong liftTerm (susp-pdb-foc-tm pdb)))
+                                             (trans (suspLiftTy (getFocusType pdb))
+                                                    (cong liftType (susp-pdb-foc-ty pdb)))
+                                             refl))
 susp-pdb-foc-ty (Restr pdb)
-  rewrite susp-base-compat (getFocusType pdb)
-  rewrite susp-pdb-foc-ty pdb
-  = refl
+  = trans (susp-base-compat (getFocusType pdb))
+          (cong ty-base (susp-pdb-foc-ty pdb))
+
+susp-pd : Γ ⊢pd₀ d → suspCtx Γ ⊢pd₀ suc d
+susp-pd (Finish pdb) = Finish (Restr (susp-pdb pdb))

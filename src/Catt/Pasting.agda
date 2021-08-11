@@ -13,15 +13,15 @@ open import Catt.Dimension
 variable
   submax : ℕ
 
-data _⊢pd₀_ : Ctx n d → ℕ → Set
+data _⊢pd₀_ : Ctx (suc n) d → ℕ → Set
 
-data _⊢pd[_][_] : (Γ : Ctx n d) → ℕ → ℕ → Set
+data _⊢pd[_][_] : (Γ : Ctx (suc n) d) → ℕ → ℕ → Set
 
 getFocusType : Γ ⊢pd[ submax ][ d ] → Ty Γ (suc d)
 getFocusTerm : Γ ⊢pd[ submax ][ d ] → Tm Γ (suc (suc d))
 
 -- Uniquely extend a pasting context
-extend : {Γ : Ctx n m} → Γ ⊢pd[ submax ][ d ] → Ctx (suc (suc n)) (m ⊔ suc d ⊔ suc (suc d))
+extend : {Γ : Ctx (suc n) m} → Γ ⊢pd[ submax ][ d ] → Ctx (suc (suc (suc n))) (m ⊔ suc d ⊔ suc (suc d))
 extend {Γ = Γ} pdb = Γ , getFocusType pdb , liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ Var 0F
 
 data _⊢pd[_][_] where
@@ -66,15 +66,15 @@ newDim : ℕ → ℕ → ℕ
 newDim zero d = pred d
 newDim (suc submax) d = d
 
-pdb-bd-len : Γ ⊢pd[ submax ][ d ] → nonZero submax d → ℕ
+pdb-bd-len-1 : Γ ⊢pd[ submax ][ d ] → nonZero submax d → ℕ
 pdb-bd-dim : Γ ⊢pd[ submax ][ d ] → nonZero submax d → ℕ
-pdb-bd-ctx : (pdb : Γ ⊢pd[ submax ][ d ]) → (nz : nonZero submax d) → Ctx (pdb-bd-len pdb nz) (pdb-bd-dim pdb nz)
+pdb-bd-ctx : (pdb : Γ ⊢pd[ submax ][ d ]) → (nz : nonZero submax d) → Ctx (suc (pdb-bd-len-1 pdb nz)) (pdb-bd-dim pdb nz)
 pdb-bd-pd : (pdb : Γ ⊢pd[ submax ][ d ]) → (nz : nonZero submax d) → (pdb-bd-ctx pdb nz ⊢pd[ pred submax ][ newDim submax d ])
 
-pdb-bd-len (ExtendM {n} pdb) nz = n
-pdb-bd-len {submax = zero} (Extend pdb) nz = pdb-bd-len pdb nz
-pdb-bd-len {submax = suc submax} (Extend pdb) nz = suc (suc (pdb-bd-len pdb nz))
-pdb-bd-len (Restr pdb) nz = pdb-bd-len pdb nonZeroTT
+pdb-bd-len-1 (ExtendM {_} {n} pdb) nz = n
+pdb-bd-len-1 {submax = zero} (Extend pdb) nz = pdb-bd-len-1 pdb nz
+pdb-bd-len-1 {submax = suc submax} (Extend pdb) nz = suc (suc (pdb-bd-len-1 pdb nz))
+pdb-bd-len-1 (Restr pdb) nz = pdb-bd-len-1 pdb nonZeroTT
 
 pdb-bd-dim (ExtendM {Γ = Γ} pdb) nz = ctx-dim Γ
 pdb-bd-dim {submax = zero} (Extend pdb) nz = pdb-bd-dim pdb nz
@@ -93,13 +93,13 @@ pdb-bd-pd {submax = suc submax} (Extend pdb) nz = extend-pd (pdb-bd-pd pdb nz)
 pdb-bd-pd (Restr {submax = zero} pdb) nz = pdb-bd-pd pdb nz
 pdb-bd-pd (Restr {submax = suc submax} pdb) nz = Restr (pdb-bd-pd pdb nz)
 
-pd-bd-len : Γ ⊢pd₀ suc d → ℕ
-pd-bd-len (Finish pdb) = pdb-bd-len pdb tt
+pd-bd-len-1 : Γ ⊢pd₀ suc d → ℕ
+pd-bd-len-1 (Finish pdb) = pdb-bd-len-1 pdb tt
 
 pd-bd-d : Γ ⊢pd₀ suc d → ℕ
 pd-bd-d (Finish pdb) = pdb-bd-dim pdb tt
 
-pd-bd-ctx : (pd : Γ ⊢pd₀ suc d) → Ctx (pd-bd-len pd) (pd-bd-d pd)
+pd-bd-ctx : (pd : Γ ⊢pd₀ suc d) → Ctx (suc (pd-bd-len-1 pd)) (pd-bd-d pd)
 pd-bd-ctx (Finish pdb) = pdb-bd-ctx pdb tt
 
 pd-bd-pd : (pd : Γ ⊢pd₀ suc d) → pd-bd-ctx pd ⊢pd₀ d
@@ -147,3 +147,10 @@ supp-src (Finish pdb) = supp-pdb-src pdb tt
 
 supp-tgt : (pd : Γ ⊢pd₀ suc d) → VarSet Γ
 supp-tgt (Finish pdb) = supp-pdb-tgt pdb tt
+
+-- Focus of pd
+pd-focus-tm : (pd : Γ ⊢pd₀ d) → Tm Γ 2
+pd-focus-tm (Finish pdb) = getFocusTerm pdb
+
+pd-focus-ty : (pd : Γ ⊢pd₀ d) → Ty Γ 1
+pd-focus-ty (Finish pdb) = getFocusType pdb

@@ -11,7 +11,7 @@ open import Catt.Support
 open import Catt.Dimension
 
 variable
-  submax : ℕ
+  submax submax′ : ℕ
 
 data _⊢pd₀_ : Ctx (suc n) → ℕ → Set
 

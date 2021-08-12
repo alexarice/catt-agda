@@ -41,3 +41,12 @@ sub-equality refl refl = refl
 
 coh-equality : .{p : ctx-dim Δ ≤ ty-dim A} → .{q : ctx-dim Δ ≤ ty-dim A′} → A ≡ A′ → σ ≡ σ′ → Coh Δ A p σ ≡ Coh Δ A′ q σ′
 coh-equality refl refl = refl
+
+sub-action-≡-ty : A ≡ B → A [ σ ]ty ≡ B [ σ ]ty
+sub-action-≡-ty refl = refl
+
+sub-action-≡-tm : s ≡ t → s [ σ ]tm ≡ t [ σ ]tm
+sub-action-≡-tm refl = refl
+
+sub-action-≡-sub : τ ≡ μ → σ ∘ τ ≡ σ ∘ μ
+sub-action-≡-sub refl = refl

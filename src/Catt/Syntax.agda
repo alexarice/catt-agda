@@ -14,7 +14,7 @@ data Tm : Ctx n → ℕ → Set
 data Sub : Ctx n → Ctx m → Set
 
 variable
-  Γ Γ′ Δ Υ : Ctx n
+  Γ Γ′ Δ Δ′ Υ : Ctx n
   A A′ B C : Ty Γ n
   s s′ t t′ u : Tm Γ n
   σ σ′ τ μ : Sub Γ Δ

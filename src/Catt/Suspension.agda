@@ -5,6 +5,7 @@ module Catt.Suspension where
 open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Syntax.Patterns
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Data.Nat
@@ -124,3 +125,16 @@ susp-pdb-foc-ty (Restr pdb)
 
 susp-pd : Γ ⊢pd₀ d → suspCtx Γ ⊢pd₀ suc d
 susp-pd (Finish pdb) = Finish (Restr (susp-pdb pdb))
+
+susp-ty-lift : (B : Ty Γ d) → suspTy (liftType {A = A} B) ≃ty liftType {A = suspTy A} (suspTy B)
+susp-tm-lift : (t : Tm Γ d) → suspTm (liftTerm {A = A} t) ≃tm liftTerm {A = suspTy A} (suspTm t)
+susp-sub-lift : (σ : Sub Δ Γ) → suspSub (liftSub {A = A} σ) ≃s liftSub {A = suspTy A} (suspSub σ)
+
+susp-ty-lift ⋆ = Arr≃ refl≃tm Star≃ refl≃tm
+susp-ty-lift (s ─⟨ B ⟩⟶ t) = Arr≃ (susp-tm-lift s) (susp-ty-lift B) (susp-tm-lift t)
+
+susp-tm-lift (Var i) = refl≃tm
+susp-tm-lift (Coh Δ A x σ) = Coh≃ refl≃c refl≃ty (susp-sub-lift σ)
+
+susp-sub-lift ⟨⟩ = Ext≃ (Ext≃ Null≃ refl≃tm) refl≃tm
+susp-sub-lift ⟨ σ , t ⟩ = Ext≃ (susp-sub-lift σ) (susp-tm-lift t)

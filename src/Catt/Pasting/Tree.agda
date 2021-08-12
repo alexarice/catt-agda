@@ -5,6 +5,8 @@ module Catt.Pasting.Tree where
 open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Syntax.Patterns
+open import Catt.Syntax.SyntacticEquality
+open import Catt.Dimension
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Suspension
@@ -26,21 +28,7 @@ data Tree : ℕ → Set where
   Sing : Tree 0
   Join : (S : Tree n) → (T : Tree m) → Tree (suc (suc (m + n)))
 
--- Tree to pd conversion
-tree-to-ctx : (T : Tree n) → Ctx (suc n)
-tree-to-pd-dim : Tree n → ℕ
-tree-to-pd : (T : Tree n) → tree-to-ctx T ⊢pd₀ tree-to-pd-dim T
-
-tree-to-ctx Sing = singleton-ctx
-tree-to-ctx (Join S T) = connect-pd (tree-to-pd S) (suspCtx (tree-to-ctx T))
-
-tree-to-pd-dim Sing = 0
-tree-to-pd-dim (Join S T) = connected-dim (tree-to-pd S) (susp-pd (tree-to-pd T))
-
-tree-to-pd Sing = singleton-pd
-tree-to-pd (Join S T) = connect-pd-pd (tree-to-pd S) (susp-pd (tree-to-pd T))
-
--- Pd to tree conversion
+-- Extendability
 n-extendable : ℕ → Tree n → Set
 n-extendable zero T = ⊤
 n-extendable (suc n) Sing = ⊥
@@ -58,6 +46,29 @@ pred-n-extendable : (n : ℕ) → (T : Tree m) → n-extendable (suc n) T → n-
 pred-n-extendable zero T p = tt
 pred-n-extendable (suc n) (Join S T) p = pred-n-extendable n T p
 
+-- Tree to pd conversion
+tree-to-ctx : (T : Tree n) → Ctx (suc n)
+tree-to-pd-dim : Tree n → ℕ
+tree-to-pd : (T : Tree n) → tree-to-ctx T ⊢pd₀ tree-to-pd-dim T
+tree-to-pdb-submax : (d : ℕ) → (T : Tree n) → .(ex : n-extendable d T) → ℕ
+tree-to-pdb : (d : ℕ) → (T : Tree n) → .(ex : n-extendable d T) → tree-to-ctx T ⊢pd[ tree-to-pdb-submax d T ex ][ d ]
+
+tree-to-ctx Sing = singleton-ctx
+tree-to-ctx (Join S T) = connect-pdb (tree-to-pdb zero S tt) (suspCtx (tree-to-ctx T))
+
+tree-to-pdb-submax zero Sing ex = zero
+tree-to-pdb-submax zero (Join S T) ex = new-submax (tree-to-pdb zero S tt) (Restr (susp-pdb (tree-to-pdb zero T ex)))
+tree-to-pdb-submax (suc d) (Join S T) ex = new-submax (tree-to-pdb zero S tt) (susp-pdb (tree-to-pdb d T ex))
+
+tree-to-pdb zero Sing ex = Base
+tree-to-pdb zero (Join S T) ex = connect-pdb-pdb (tree-to-pdb zero S tt) (Restr (susp-pdb (tree-to-pdb zero T ex)))
+tree-to-pdb (suc d) (Join S T) ex = connect-pdb-pdb (tree-to-pdb zero S tt) (susp-pdb (tree-to-pdb d T ex))
+
+tree-to-pd-dim T = tree-to-pdb-submax zero T tt
+
+tree-to-pd T = Finish (tree-to-pdb zero T tt)
+
+-- Pd to tree conversion
 pdb-to-tree : {Γ : Ctx (suc n)} → Γ ⊢pd[ submax ][ d ] → Tree n
 pdb-to-tree-is-n-extendable : (pdb : Γ ⊢pd[ submax ][ d ]) → n-extendable d (pdb-to-tree pdb)
 
@@ -202,3 +213,52 @@ tree-to-pd-to-tree T = ≃-to-≡ (γ T)
                (connect-tree-≃ (γ S)
                                (trans≃ (susp-pd-tree-compat (tree-to-pd T))
                                        (susp-tree-≃ (γ T))))
+
+-- Pd to tree to Pd
+
+tree-to-ctx-extend-tree : (d : ℕ) → (T : Tree n) → (ex : n-extendable d T) → tree-to-ctx (extend-tree d T ex) ≡ extend (tree-to-pdb d T ex)
+tree-to-ctx-extend-tree zero Sing ex = refl
+tree-to-ctx-extend-tree zero (Join S T) ex
+  rewrite ≃ty-to-≡ (⋆-is-only-1-d-ty {A = ty-base
+      (getFocusType
+       (connect-pdb-pdb (tree-to-pdb 0 S _)
+        (susp-pdb (tree-to-pdb 0 T _))))})
+  = ≃c-to-≡ (Add≃ refl≃c
+                  (Arr≃ refl≃tm
+                        ⋆-is-only-1-d-ty
+                        refl≃tm))
+tree-to-ctx-extend-tree (suc d) (Join S T) ex
+  rewrite tree-to-ctx-extend-tree d T ex
+  = ≃c-to-≡ (Add≃ (trans≃c (lem (suspCtx (tree-to-ctx T)))
+                           (Add≃ refl≃c (reflexive≃ty
+                             (trans (sub-action-≡-ty (susp-pdb-foc-ty (tree-to-pdb d T ex)))
+                                    (connect-pdb-foc-ty (tree-to-pdb 0 S tt) (susp-pdb (tree-to-pdb d T ex)))))))
+                  (Arr≃ (trans≃tm (sub-action-≃-tm (susp-tm-lift (getFocusTerm (tree-to-pdb d T ex))))
+                                  (trans≃tm (lem2 (suspTm (getFocusTerm (tree-to-pdb d T ex))))
+                                            (lift-tm-≃ (trans≃tm (sub-action-≃-tm (reflexive≃tm (susp-pdb-foc-tm (tree-to-pdb d T ex)))) (reflexive≃tm (connect-pdb-foc-tm (tree-to-pdb 0 S tt) (susp-pdb (tree-to-pdb d T ex))))))))
+                        (trans≃ty (sub-action-≃-ty (susp-ty-lift (getFocusType (tree-to-pdb d T ex))))
+                                  (trans≃ty (lem3 (suspTy (getFocusType (tree-to-pdb d T ex))))
+                                            (lift-ty-≃ (trans≃ty (sub-action-≃-ty (reflexive≃ty (susp-pdb-foc-ty (tree-to-pdb d T ex)))) (reflexive≃ty (connect-pdb-foc-ty (tree-to-pdb 0 S tt) (susp-pdb (tree-to-pdb d T ex))))))))
+                        (trans≃tm (lem4 (suspCtx (tree-to-ctx T) , suspTy (getFocusType (tree-to-pdb d T _)))) (Var≃ refl))))
+  where
+    lem : (Δ : Ctx (suc n)) {A : Ty Δ m} → connect Γ t (Δ , A) ≃c (connect Γ t Δ) , A [ connect-inc-right Γ t Δ ]ty
+    lem (Δ , B) = refl≃c
+
+    lem2 : ∀ {d} {Δ : Ctx (suc n)} (t : Tm Δ d) {A : Ty Δ d′} → liftTerm t [ connect-inc-right Γ s (Δ , A) ]tm ≃tm liftTerm {A = A [ connect-inc-right Γ s Δ ]ty} (t [ connect-inc-right Γ s Δ ]tm)
+    lem2 {Δ = Δ , B} t = lift-subbed-tm-≃ t (connect-inc-right _ _ (Δ , B))
+
+    lem3 : ∀ {d} {Δ : Ctx (suc n)} (B : Ty Δ d) {A : Ty Δ d′} → liftType B [ connect-inc-right Γ s (Δ , A) ]ty ≃ty liftType {A = A [ connect-inc-right Γ s Δ ]ty} (B [ connect-inc-right Γ s Δ ]ty)
+    lem3 {Δ = Δ , C} B = lift-subbed-ty-≃ B (connect-inc-right _ _ (Δ , C))
+
+    lem4 : (Δ : Ctx (suc (suc n))) → _≃tm_ {Γ′ = connect Γ s Δ} (0V [ connect-inc-right Γ s Δ ]tm) 0V
+    lem4 (Δ , A , B) = Var≃ refl
+
+
+pdb-to-tree-to-ctx : (pdb : Γ ⊢pd[ submax ][ d ]) → tree-to-ctx (pdb-to-tree pdb) ≡ Γ
+pdb-to-tree-to-ctx Base = refl
+pdb-to-tree-to-ctx (Extend {d = d} pdb)
+  = trans (tree-to-ctx-extend-tree d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)) {!!}
+pdb-to-tree-to-ctx (Restr pdb) = pdb-to-tree-to-ctx pdb
+
+pd-to-tree-to-ctx : (pd : Γ ⊢pd₀ d) → tree-to-ctx (pd-to-tree pd) ≡ Γ
+pd-to-tree-to-ctx (Finish pdb) = pdb-to-tree-to-ctx pdb

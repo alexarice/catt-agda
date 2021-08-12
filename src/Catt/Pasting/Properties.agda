@@ -25,3 +25,15 @@ extend-pd-eq-foc-ty : (pdb : Γ ⊢pd[ submax ][ d ])
                     → (q : B ≡ liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
                     → liftTerm (liftTerm (getFocusTerm pdb)) ─⟨ liftType (liftType (getFocusType pdb)) ⟩⟶ 1V ≡ getFocusType (extend-pd-eq pdb p q)
 extend-pd-eq-foc-ty pdb refl refl = refl
+
+submax-irrelevant : (pdb : Γ ⊢pd[ submax ][ d ]) (pdb2 : Γ ⊢pd[ submax′ ][ d ]) → submax ≡ submax′
+submax-irrelevant Base Base = refl
+submax-irrelevant Base (Restr pdb2) = {!!}
+submax-irrelevant (Extend {submax = zero} pdb) pdb2 = {!!}
+submax-irrelevant (Extend {submax = suc submax} pdb) pdb2 = {!!}
+submax-irrelevant (Restr pdb) pdb2 = {!!}
+
+pdb-irrelevant : (pdb : Γ ⊢pd[ submax ][ d ]) (pdb2 : Γ ⊢pd[ submax ][ d ]) → pdb ≡ pdb2
+pdb-irrelevant Base Base = {!!}
+pdb-irrelevant (Extend pdb) pdb2 = {!!}
+pdb-irrelevant (Restr pdb) pdb2 = {!!}

@@ -4,7 +4,7 @@ module Catt.Syntax.Properties where
 
 open import Catt.Syntax
 open import Relation.Binary.PropositionalEquality
-open import Data.Fin
+open import Data.Fin using (Fin;zero;suc)
 open import Data.Nat
 
 lift-subbed-ty : {A : Ty Γ d′} {t : Tm (Δ , C) (suc d′)} (B : Ty Γ d) → (σ : Sub Γ Δ) → (liftType {A = A} B) [ ⟨ liftSub σ , t ⟩ ]ty ≡ liftType (B [ σ ]ty)
@@ -20,7 +20,7 @@ lift-subbed-ty {A = A} {t = t′} (s ─⟨ B ⟩⟶ t) σ
   = refl
 
 lift-subbed-tm (Var i) σ = lift-subbed-var i σ
-lift-subbed-tm {A = A} {t = t} (Coh Δ B τ) σ
+lift-subbed-tm {A = A} {t = t} (Coh Δ B q τ) σ
   rewrite lift-subbed-sub {A = A} {t = t} τ σ
   = refl
 
@@ -39,5 +39,5 @@ arr-equality refl refl refl = refl
 sub-equality : σ ≡ σ′ → t ≡ t′ → ⟨_,_⟩ σ {A} t ≡ ⟨ σ′ , t′ ⟩
 sub-equality refl refl = refl
 
-coh-equality : A ≡ A′ → σ ≡ σ′ → Coh Δ A σ ≡ Coh Δ A′ σ′
+coh-equality : .{p : ctx-dim Δ ≤ ty-dim A} → .{q : ctx-dim Δ ≤ ty-dim A′} → A ≡ A′ → σ ≡ σ′ → Coh Δ A p σ ≡ Coh Δ A′ q σ′
 coh-equality refl refl = refl

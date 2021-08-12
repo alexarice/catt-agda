@@ -10,7 +10,7 @@ open import Catt.Dimension
 open import Data.Bool
 open import Data.Fin
 
-record VarSet (Γ : Ctx n d) : Set where
+record VarSet (Γ : Ctx n) : Set where
   constructor [_]v
   field
     get : Vec Bool (ctxLength Γ)
@@ -49,11 +49,11 @@ supp = wfRec _ (λ y → VarSet (syntax-ctx y)) γ
     γ (Type ⋆) rec = empty
     γ (Type (s ─⟨ A ⟩⟶ t)) rec = rec (Type A) [ ty2 ]p ∪ rec (Term s) [ ty1 ]p ∪ rec (Term t) [ ty3 ]p
     γ (Term (Var {Γ = Γ} i)) rec = (trueAt i) ∪ (rec (Type (Γ ‼ i)) [ (dim ≤-refl) ]p)
-    γ (Term (Coh Δ A σ)) rec = rec (Substitution σ) [ tm3 ]p
+    γ (Term (Coh Δ A p σ)) rec = rec (Substitution σ) [ tm3 ]p
     γ (Substitution ⟨⟩) rec = empty
     γ (Substitution ⟨ σ , t ⟩) rec = (rec (Substitution σ) [ sub1 ]p) ∪ (rec (Term t) [ sub2 ]p)
 
-suppCtx : (Γ : Ctx n d) → VarSet Γ
+suppCtx : (Γ : Ctx n) → VarSet Γ
 suppTm : Tm Γ n → VarSet Γ
 suppTy : Ty Γ n → VarSet Γ
 suppSub : Sub Δ Γ → VarSet Γ

@@ -8,17 +8,19 @@ open import Catt.Syntax.Patterns
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Data.Nat
-open import Data.Fin
+open import Data.Nat.Properties
+open import Data.Fin using (Fin;zero;suc)
 open import Relation.Binary.PropositionalEquality
 open import Catt.Dimension
 
-suspCtx : Ctx n d → Ctx (suc (suc n)) (suc d)
+suspCtx : Ctx n → Ctx (suc (suc n))
 suspTy : Ty Γ n → Ty (suspCtx Γ) (suc n)
 getFst : Tm (suspCtx Γ) 2
 getSnd : Tm (suspCtx Γ) 2
 suspTm : Tm Γ n → Tm (suspCtx Γ) (suc n)
 suspSub : Sub Γ Δ → Sub (suspCtx Γ) (suspCtx Δ)
 lookupSusp : (i : Fin (ctxLength Γ)) → Tm (suspCtx Γ) (suc (suc (lookupDim Γ i)))
+ctx-susp-dim : (Γ : Ctx n) → ctx-dim (suspCtx Γ) ≡ suc (ctx-dim Γ)
 
 suspCtx ∅ = ∅ , ⋆ , ⋆
 suspCtx (Γ , A) = (suspCtx Γ) , (suspTy A)
@@ -33,13 +35,17 @@ getSnd {Γ = ∅} = 0V
 getSnd {Γ = Γ , A} = liftTerm getSnd
 
 suspTm (Var i) = lookupSusp i
-suspTm (Coh Δ A σ) = Coh (suspCtx Δ) (suspTy A) (suspSub σ)
+suspTm (Coh Δ A p σ) = Coh (suspCtx Δ) (suspTy A) (≤-trans (≤-reflexive (ctx-susp-dim Δ)) (s≤s p)) (suspSub σ)
 
 suspSub ⟨⟩ = ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩
 suspSub ⟨ σ , t ⟩ = ⟨ suspSub σ , suspTm t ⟩
 
 lookupSusp {Γ = Γ , A} zero = 0V
 lookupSusp {Γ = Γ , A} (suc i) = liftTerm (lookupSusp i)
+
+ctx-susp-dim ∅ = refl
+ctx-susp-dim (Γ , A)
+  rewrite ctx-susp-dim Γ = refl
 
 susp-src-compat : (A : Ty Γ (suc (suc d))) → suspTm (ty-src A) ≡ ty-src (suspTy A)
 susp-src-compat (s ─⟨ A ⟩⟶ t) = refl
@@ -61,7 +67,7 @@ suspLiftTy (s ─⟨ A ⟩⟶ t)
                  (suspLiftTm t)
 
 suspLiftTm (Var i) = refl
-suspLiftTm (Coh Δ A σ) = coh-equality refl (suspLiftSub σ)
+suspLiftTm (Coh Δ A p σ) = coh-equality refl (suspLiftSub σ)
 
 suspLiftSub ⟨⟩ = refl
 suspLiftSub {A = A} ⟨ σ , t ⟩

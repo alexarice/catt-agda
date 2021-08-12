@@ -13,15 +13,15 @@ open import Catt.Dimension
 variable
   submax : ℕ
 
-data _⊢pd₀_ : Ctx (suc n) d → ℕ → Set
+data _⊢pd₀_ : Ctx (suc n) → ℕ → Set
 
-data _⊢pd[_][_] : (Γ : Ctx (suc n) d) → ℕ → ℕ → Set
+data _⊢pd[_][_] : (Γ : Ctx (suc n)) → ℕ → ℕ → Set
 
 getFocusType : Γ ⊢pd[ submax ][ d ] → Ty Γ (suc d)
 getFocusTerm : Γ ⊢pd[ submax ][ d ] → Tm Γ (suc (suc d))
 
 -- Uniquely extend a pasting context
-extend : {Γ : Ctx (suc n) m} → Γ ⊢pd[ submax ][ d ] → Ctx (suc (suc (suc n))) (m ⊔ suc d ⊔ suc (suc d))
+extend : {Γ : Ctx (suc n)} → Γ ⊢pd[ submax ][ d ] → Ctx (suc (suc (suc n)))
 extend {Γ = Γ} pdb = Γ , getFocusType pdb , liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V
 
 data _⊢pd[_][_] where
@@ -38,8 +38,6 @@ getFocusType (Restr pdb) = ty-base (getFocusType pdb)
 getFocusTerm Base = 0V
 getFocusTerm (Extend pdb) = 0V
 getFocusTerm (Restr pdb) = ty-tgt (getFocusType pdb)
-
-
 
 data _⊢pd₀_ where
   Finish : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Γ ⊢pd₀ submax
@@ -58,20 +56,13 @@ newDim zero d = pred d
 newDim (suc submax) d = d
 
 pdb-bd-len-1 : Γ ⊢pd[ submax ][ d ] → .(nonZero submax d) → ℕ
-pdb-bd-dim : Γ ⊢pd[ submax ][ d ] → .(nonZero submax d) → ℕ
-pdb-bd-ctx : (pdb : Γ ⊢pd[ submax ][ d ]) → .(nz : nonZero submax d) → Ctx (suc (pdb-bd-len-1 pdb nz)) (pdb-bd-dim pdb nz)
+pdb-bd-ctx : (pdb : Γ ⊢pd[ submax ][ d ]) → .(nz : nonZero submax d) → Ctx (suc (pdb-bd-len-1 pdb nz))
 pdb-bd-pd : (pdb : Γ ⊢pd[ submax ][ d ]) → .(nz : nonZero submax d) → (pdb-bd-ctx pdb nz ⊢pd[ pred submax ][ newDim submax d ])
 
-pdb-bd-len-1 (Extend {_} {n} {submax = zero} pdb) nz = n
+pdb-bd-len-1 (Extend {n} {submax = zero} pdb) nz = n
 pdb-bd-len-1 (Extend {submax = suc zero} pdb) nz = pdb-bd-len-1 pdb nz
 pdb-bd-len-1 (Extend {submax = suc (suc submax)} pdb) nz = suc (suc (pdb-bd-len-1 pdb nz))
 pdb-bd-len-1 (Restr pdb) nz = pdb-bd-len-1 pdb nonZeroTT
-
-pdb-bd-dim (Extend {Γ = Γ} {submax = zero} pdb) nz = ctx-dim Γ
-pdb-bd-dim (Extend {submax = suc (zero)} pdb) nz = pdb-bd-dim pdb nz
-pdb-bd-dim {d = suc d} (Extend {submax = suc (suc submax)} pdb) nz =
-  pdb-bd-dim pdb nz ⊔ suc (newDim (suc (suc submax)) d) ⊔ suc (suc (newDim (suc (suc submax)) d))
-pdb-bd-dim (Restr pdb) nz = pdb-bd-dim pdb nonZeroTT
 
 pdb-bd-ctx (Extend {Γ = Γ} {submax = zero} pdb) nz = Γ
 pdb-bd-ctx (Extend {submax = suc zero} pdb) nz = pdb-bd-ctx pdb nz
@@ -87,10 +78,7 @@ pdb-bd-pd (Restr {submax = suc submax} pdb) nz = Restr (pdb-bd-pd pdb nz)
 pd-bd-len-1 : Γ ⊢pd₀ suc d → ℕ
 pd-bd-len-1 (Finish pdb) = pdb-bd-len-1 pdb tt
 
-pd-bd-d : Γ ⊢pd₀ suc d → ℕ
-pd-bd-d (Finish pdb) = pdb-bd-dim pdb tt
-
-pd-bd-ctx : (pd : Γ ⊢pd₀ suc d) → Ctx (suc (pd-bd-len-1 pd)) (pd-bd-d pd)
+pd-bd-ctx : (pd : Γ ⊢pd₀ suc d) → Ctx (suc (pd-bd-len-1 pd))
 pd-bd-ctx (Finish pdb) = pdb-bd-ctx pdb tt
 
 pd-bd-pd : (pd : Γ ⊢pd₀ suc d) → pd-bd-ctx pd ⊢pd₀ d

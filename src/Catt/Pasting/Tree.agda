@@ -68,12 +68,10 @@ pdb-to-tree : Γ ⊢pd[ submax ][ d ] → Tree
 pdb-to-tree-is-n-extendable : (pdb : Γ ⊢pd[ submax ][ d ]) → n-extendable d (pdb-to-tree pdb)
 
 pdb-to-tree Base = Sing
-pdb-to-tree (ExtendM {d = d} pdb) = extend-tree d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)
 pdb-to-tree (Extend {d = d} pdb) = extend-tree d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)
 pdb-to-tree (Restr pdb) = pdb-to-tree pdb
 
 pdb-to-tree-is-n-extendable Base = tt
-pdb-to-tree-is-n-extendable (ExtendM {d = d} pdb) = extended-tree-is-more-extendable d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)
 pdb-to-tree-is-n-extendable (Extend {d = d} pdb) = extended-tree-is-more-extendable d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)
 pdb-to-tree-is-n-extendable (Restr {d = d} pdb) = pred-n-extendable d (pdb-to-tree (Restr pdb)) (pdb-to-tree-is-n-extendable pdb)
 
@@ -82,7 +80,7 @@ pd-to-tree (Finish pdb) = pdb-to-tree pdb
 
 -- Tree to Pd to Tree
 
-pdb-to-tree-extend-pd : (pdb : Γ ⊢pd[ submax ][ d ]) → pdb-to-tree (extend-pd pdb) ≡ extend-tree d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)
+pdb-to-tree-extend-pd : (pdb : Γ ⊢pd[ submax ][ d ]) → pdb-to-tree (Extend pdb) ≡ extend-tree d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)
 pdb-to-tree-extend-pd {submax = zero} pdb = refl
 pdb-to-tree-extend-pd {submax = suc submax} pdb = refl
 
@@ -116,22 +114,6 @@ extend-connect-tree {n = suc n} S (Join T T′) ex = refl
 
 connect-pdb-tree-compat : (pdb : Γ ⊢pd[ d ][ 0 ]) → (pdb2 : Δ ⊢pd[ submax ][ d′ ]) → pdb-to-tree (connect-pdb-pdb pdb pdb2) ≡ connect-tree (pdb-to-tree pdb) (pdb-to-tree pdb2)
 connect-pdb-tree-compat pdb Base = refl
-connect-pdb-tree-compat {Γ = Γ} pdb (ExtendM {Γ = Γ′ , A} pdb2)
-  = trans (pdb-to-tree-extend-pd-eq
-            (connect-pdb-pdb pdb pdb2)
-            (connect-pdb-foc-ty pdb pdb2)
-            (arr-equality (trans (lift-subbed-tm (getFocusTerm pdb2)
-                                                 (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                 (cong liftTerm (connect-pdb-foc-tm pdb pdb2)))
-                          (trans (lift-subbed-ty (getFocusType pdb2)
-                                                 (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                 (cong liftType (connect-pdb-foc-ty pdb pdb2)))
-                          refl))
-          (trans (extend-tree-eq (pdb-to-tree (connect-pdb-pdb pdb pdb2))
-                                 (connect-tree (pdb-to-tree pdb) (pdb-to-tree pdb2))
-                                 (connect-pdb-tree-compat pdb pdb2)
-                                 (pdb-to-tree-is-n-extendable (connect-pdb-pdb pdb pdb2)))
-                 (extend-connect-tree (pdb-to-tree pdb) (pdb-to-tree pdb2) (pdb-to-tree-is-n-extendable pdb2)))
 connect-pdb-tree-compat {Γ = Γ} pdb (Extend {Γ = Γ′ , A} pdb2)
   = trans (pdb-to-tree-extend-pd-eq
             (connect-pdb-pdb pdb pdb2)
@@ -158,19 +140,6 @@ susp-tree T = Join Sing T
 
 susp-pdb-tree-compat : (pdb : Γ ⊢pd[ submax ][ d ]) → pdb-to-tree (susp-pdb pdb) ≡ susp-tree (pdb-to-tree pdb)
 susp-pdb-tree-compat Base = refl
-susp-pdb-tree-compat (ExtendM pdb)
-  = trans (pdb-to-tree-extend-pd-eq
-            (susp-pdb pdb)
-            (susp-pdb-foc-ty pdb)
-            (arr-equality (trans (suspLiftTm (getFocusTerm pdb))
-                                 (cong liftTerm (susp-pdb-foc-tm pdb)))
-                          (trans (suspLiftTy (getFocusType pdb))
-                                 (cong liftType (susp-pdb-foc-ty pdb)))
-                          refl))
-          (extend-tree-eq (pdb-to-tree (susp-pdb pdb))
-                          (susp-tree (pdb-to-tree pdb))
-                          (susp-pdb-tree-compat pdb)
-                          (pdb-to-tree-is-n-extendable (susp-pdb pdb)))
 susp-pdb-tree-compat (Extend pdb)
   = trans (pdb-to-tree-extend-pd-eq
             (susp-pdb pdb)

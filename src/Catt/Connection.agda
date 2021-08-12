@@ -44,7 +44,6 @@ connect-pd (Finish pdb) Δ = connect-pdb pdb Δ
 
 new-submax : {Γ : Ctx (suc n) m} {Δ : Ctx (suc n′) m′} → (pd : Γ ⊢pd[ d ][ 0 ]) → (pdb : Δ ⊢pd[ submax ][ d′ ]) → ℕ
 new-submax {d = d} pdb Base = d
-new-submax pdb (ExtendM pdb2) = pred (new-submax pdb pdb2)
 new-submax pdb (Extend pdb2) = pred (new-submax pdb pdb2)
 new-submax pdb (Restr pdb2) = suc (new-submax pdb pdb2)
 
@@ -53,14 +52,6 @@ connect-pdb-foc-ty : {Γ : Ctx (suc n) m} {Δ : Ctx (suc n′) m′} → (pdb : 
 connect-pdb-foc-tm : {Γ : Ctx (suc n) m} {Δ : Ctx (suc n′) m′} → (pdb : Γ ⊢pd[ d ][ 0 ]) → (pdb2 : Δ ⊢pd[ submax ][ d′ ]) → (getFocusTerm pdb2 [ connect-inc-right Γ (getFocusTerm pdb) Δ ]tm) ≡ getFocusTerm (connect-pdb-pdb pdb pdb2)
 
 connect-pdb-pdb pdb Base = pdb
-connect-pdb-pdb {Γ = Γ} pdb (ExtendM {Γ = Γ′ , A} pdb2)
-  = extend-pd-eq (connect-pdb-pdb pdb pdb2)
-                 (connect-pdb-foc-ty pdb pdb2)
-                 (arr-equality (trans (lift-subbed-tm (getFocusTerm pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                      (cong liftTerm (connect-pdb-foc-tm pdb pdb2)))
-                               (trans (lift-subbed-ty (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                      (cong liftType (connect-pdb-foc-ty pdb pdb2)))
-                               refl)
 connect-pdb-pdb {Γ = Γ} pdb (Extend {Γ = Γ′ , A} pdb2)
   = extend-pd-eq (connect-pdb-pdb pdb pdb2)
                  (connect-pdb-foc-ty pdb pdb2)
@@ -73,21 +64,6 @@ connect-pdb-pdb pdb (Restr pdb2) = Restr (connect-pdb-pdb pdb pdb2)
 
 connect-pdb-foc-ty pdb Base with getFocusType pdb
 ... | ⋆ = refl
-connect-pdb-foc-ty {Γ = Γ} pdb (ExtendM {Γ = Γ′ , A} pdb2)
-  = trans (arr-equality (trans (lift-subbed-tm (liftTerm (getFocusTerm pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , 0V ⟩)
-                               (cong liftTerm (trans (lift-subbed-tm (getFocusTerm pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                                     (cong liftTerm (connect-pdb-foc-tm pdb pdb2)))))
-                        (trans (lift-subbed-ty (liftType (getFocusType pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , 0V ⟩)
-                               (cong liftType (trans (lift-subbed-ty (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                                     (cong liftType (connect-pdb-foc-ty pdb pdb2)))))
-                        refl)
-          (extend-pd-eq-foc-ty (connect-pdb-pdb pdb pdb2)
-                               (connect-pdb-foc-ty pdb pdb2)
-                               (arr-equality (trans (lift-subbed-tm (getFocusTerm pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                                    (cong liftTerm (connect-pdb-foc-tm pdb pdb2)))
-                                             (trans (lift-subbed-ty (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                                    (cong liftType (connect-pdb-foc-ty pdb pdb2)))
-                                             refl))
 connect-pdb-foc-ty {Γ = Γ} pdb (Extend {Γ = Γ′ , A} pdb2)
   = trans (arr-equality (trans (lift-subbed-tm (liftTerm (getFocusTerm pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , 0V ⟩)
                                (cong liftTerm (trans (lift-subbed-tm (getFocusTerm pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
@@ -108,14 +84,6 @@ connect-pdb-foc-ty {Γ = Γ} {Δ = Δ} pdb (Restr pdb2)
           (cong ty-base (connect-pdb-foc-ty pdb pdb2))
 
 connect-pdb-foc-tm pdb Base = refl
-connect-pdb-foc-tm {Γ = Γ} pdb (ExtendM {Γ = Γ′ , A} pdb2)
-  = extend-pd-eq-foc-tm (connect-pdb-pdb pdb pdb2)
-                        (connect-pdb-foc-ty pdb pdb2)
-                        (arr-equality (trans (lift-subbed-tm (getFocusTerm pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                             (cong liftTerm (connect-pdb-foc-tm pdb pdb2)))
-                                      (trans (lift-subbed-ty (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                             (cong liftType (connect-pdb-foc-ty pdb pdb2)))
-                                      refl)
 connect-pdb-foc-tm {Γ = Γ} pdb (Extend {Γ = Γ′ , A} pdb2)
   = extend-pd-eq-foc-tm (connect-pdb-pdb pdb pdb2)
                         (connect-pdb-foc-ty pdb pdb2)

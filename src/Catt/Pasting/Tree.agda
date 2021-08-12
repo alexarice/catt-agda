@@ -10,8 +10,6 @@ open import Catt.Pasting.Properties
 open import Catt.Suspension
 open import Catt.Connection
 open import Data.Nat
-open import Data.List
-open import Data.List.Properties
 open import Data.Empty
 open import Data.Unit
 open import Relation.Binary.PropositionalEquality
@@ -23,7 +21,8 @@ singleton-pd : singleton-ctx ⊢pd₀ 0
 singleton-pd = Finish Base
 
 data Tree : Set where
-  Node : (l : List Tree) → Tree
+  Sing : Tree
+  Join : (S : Tree) → (T : Tree) → Tree
 
 -- Tree to pd conversion
 tree-to-ctx-len-1 : Tree → ℕ
@@ -32,60 +31,43 @@ tree-to-ctx : (T : Tree) → Ctx (suc (tree-to-ctx-len-1 T)) (tree-to-ctx-dim T)
 tree-to-pd-dim : Tree → ℕ
 tree-to-pd : (T : Tree) → tree-to-ctx T ⊢pd₀ tree-to-pd-dim T
 
-list-to-ctx-len-1 : List Tree → ℕ
-list-to-ctx-dim : List Tree → ℕ
-list-to-ctx : (l : List Tree) → Ctx (suc (list-to-ctx-len-1 l)) (list-to-ctx-dim l)
-list-to-pd-dim : List Tree → ℕ
-list-to-pd : (l : List Tree) → list-to-ctx l ⊢pd₀ list-to-pd-dim l
+tree-to-ctx-len-1 Sing = 0
+tree-to-ctx-len-1 (Join S T) = suc (suc (tree-to-ctx-len-1 T + tree-to-ctx-len-1 S))
 
-tree-to-ctx-len-1 (Node l) = list-to-ctx-len-1 l
+tree-to-ctx-dim Sing = 1
+tree-to-ctx-dim (Join S T) = connect-dim (tree-to-ctx S) (pd-focus-tm (tree-to-pd S)) (suspCtx (tree-to-ctx T))
 
-tree-to-ctx-dim (Node l) = list-to-ctx-dim l
+tree-to-ctx Sing = singleton-ctx
+tree-to-ctx (Join S T) = connect-pd (tree-to-pd S) (suspCtx (tree-to-ctx T))
 
-tree-to-ctx (Node l) = list-to-ctx l
+tree-to-pd-dim Sing = 0
+tree-to-pd-dim (Join S T) = connected-dim (tree-to-pd S) (susp-pd (tree-to-pd T))
 
-tree-to-pd-dim (Node l) = list-to-pd-dim l
-
-tree-to-pd (Node l) = list-to-pd l
-
-list-to-ctx-len-1 [] = 0
-list-to-ctx-len-1 (T ∷ l) = suc (suc (tree-to-ctx-len-1 T + list-to-ctx-len-1 l))
-
-list-to-ctx-dim [] = 1
-list-to-ctx-dim (T ∷ l) = connect-dim (list-to-ctx l) (pd-focus-tm (list-to-pd l)) (suspCtx (tree-to-ctx T))
-
-list-to-ctx [] = singleton-ctx
-list-to-ctx (T ∷ l) = connect-pd (list-to-pd l) (suspCtx (tree-to-ctx T))
-
-list-to-pd-dim [] = 0
-list-to-pd-dim (T ∷ l) = connected-dim (list-to-pd l) (susp-pd (tree-to-pd T))
-
-list-to-pd [] = singleton-pd
-list-to-pd (T ∷ l) = connect-pd-pd (list-to-pd l) (susp-pd (tree-to-pd T))
-
+tree-to-pd Sing = singleton-pd
+tree-to-pd (Join S T) = connect-pd-pd (tree-to-pd S) (susp-pd (tree-to-pd T))
 
 -- Pd to tree conversion
 n-extendable : ℕ → Tree → Set
 n-extendable zero T = ⊤
-n-extendable (suc n) (Node []) = ⊥
-n-extendable (suc n) (Node (T ∷ l)) = n-extendable n T
+n-extendable (suc n) Sing = ⊥
+n-extendable (suc n) (Join S T) = n-extendable n T
 
 extend-tree : (n : ℕ) → (T : Tree) → .(n-extendable n T) → Tree
-extend-tree zero (Node l) p = Node (Node [] ∷ l)
-extend-tree (suc n) (Node (T ∷ l)) p = Node (extend-tree n T p ∷ l)
+extend-tree zero T p = Join T Sing
+extend-tree (suc n) (Join S T) p = Join S (extend-tree n T p)
 
 extended-tree-is-more-extendable : (n : ℕ) → (T : Tree) → (p : n-extendable n T) → n-extendable (suc n) (extend-tree n T p)
-extended-tree-is-more-extendable zero (Node l) p = tt
-extended-tree-is-more-extendable (suc n) (Node (T ∷ l)) p = extended-tree-is-more-extendable n T p
+extended-tree-is-more-extendable zero T p = tt
+extended-tree-is-more-extendable (suc n) (Join S T) p = extended-tree-is-more-extendable n T p
 
 pred-n-extendable : (n : ℕ) → (T : Tree) → n-extendable (suc n) T → n-extendable n T
 pred-n-extendable zero T p = tt
-pred-n-extendable (suc n) (Node (T ∷ l)) p = pred-n-extendable n T p
+pred-n-extendable (suc n) (Join S T) p = pred-n-extendable n T p
 
 pdb-to-tree : Γ ⊢pd[ submax ][ d ] → Tree
 pdb-to-tree-is-n-extendable : (pdb : Γ ⊢pd[ submax ][ d ]) → n-extendable d (pdb-to-tree pdb)
 
-pdb-to-tree Base = Node []
+pdb-to-tree Base = Sing
 pdb-to-tree (ExtendM {d = d} pdb) = extend-tree d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)
 pdb-to-tree (Extend {d = d} pdb) = extend-tree d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)
 pdb-to-tree (Restr pdb) = pdb-to-tree pdb
@@ -115,25 +97,25 @@ extend-tree-eq : (S T : Tree) → (p : S ≡ T) → (ex : n-extendable d S)
 extend-tree-eq S .S refl ex = refl
 
 connect-tree : (S T : Tree) → Tree
-connect-tree (Node l) (Node m) = Node (m ++ l)
+connect-tree S Sing = S
+connect-tree S (Join T T′) = Join (connect-tree S T) T′
 
-connect-tree-unit-right : (T : Tree) → T ≡ connect-tree T (Node [])
-connect-tree-unit-right (Node l) = refl
+connect-tree-unit-right : (T : Tree) → T ≡ connect-tree T Sing
+connect-tree-unit-right T = refl
 
 connect-tree-is-extendable : (n : ℕ) → (S T : Tree) → n-extendable n T → n-extendable n (connect-tree S T)
 connect-tree-is-extendable zero S T ex = tt
-connect-tree-is-extendable (suc n) (Node l) (Node (T ∷ m)) ex = ex
-
+connect-tree-is-extendable (suc n) S (Join T T′) ex = ex
 
 extend-connect-tree : (S T : Tree)
                     → (ex : n-extendable n T)
                     → extend-tree n (connect-tree S T) (connect-tree-is-extendable n S T ex)
                       ≡ connect-tree S (extend-tree n T ex)
-extend-connect-tree {n = zero} (Node l) (Node m) ex = refl
-extend-connect-tree {n = suc n} (Node l) (Node (T ∷ m)) ex = refl
+extend-connect-tree {n = zero} S T ex = refl
+extend-connect-tree {n = suc n} S (Join T T′) ex = refl
 
 connect-pdb-tree-compat : (pdb : Γ ⊢pd[ d ][ 0 ]) → (pdb2 : Δ ⊢pd[ submax ][ d′ ]) → pdb-to-tree (connect-pdb-pdb pdb pdb2) ≡ connect-tree (pdb-to-tree pdb) (pdb-to-tree pdb2)
-connect-pdb-tree-compat pdb Base = connect-tree-unit-right (pdb-to-tree pdb)
+connect-pdb-tree-compat pdb Base = refl
 connect-pdb-tree-compat {Γ = Γ} pdb (ExtendM {Γ = Γ′ , A} pdb2)
   = trans (pdb-to-tree-extend-pd-eq
             (connect-pdb-pdb pdb pdb2)
@@ -172,7 +154,7 @@ connect-pd-tree-compat : (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → p
 connect-pd-tree-compat (Finish pdb) (Finish pdb2) = connect-pdb-tree-compat pdb pdb2
 
 susp-tree : Tree → Tree
-susp-tree T = Node (T ∷ [])
+susp-tree T = Join Sing T
 
 susp-pdb-tree-compat : (pdb : Γ ⊢pd[ submax ][ d ]) → pdb-to-tree (susp-pdb pdb) ≡ susp-tree (pdb-to-tree pdb)
 susp-pdb-tree-compat Base = refl
@@ -207,15 +189,11 @@ susp-pdb-tree-compat (Restr pdb) = susp-pdb-tree-compat pdb
 susp-pd-tree-compat : (pd : Γ ⊢pd₀ d) → pd-to-tree (susp-pd pd) ≡ susp-tree (pd-to-tree pd)
 susp-pd-tree-compat (Finish pdb) = susp-pdb-tree-compat pdb
 
-list-to-pd-to-tree : (l : List Tree) → pd-to-tree (list-to-pd l) ≡ Node l
 tree-to-pd-to-tree : (T : Tree) → pd-to-tree (tree-to-pd T) ≡ T
-
-list-to-pd-to-tree [] = refl
-list-to-pd-to-tree (T ∷ l)
-  = trans (connect-pd-tree-compat (list-to-pd l) (susp-pd (tree-to-pd T)))
+tree-to-pd-to-tree Sing = refl
+tree-to-pd-to-tree (Join S T)
+  = trans (connect-pd-tree-compat (tree-to-pd S) (susp-pd (tree-to-pd T)))
           (cong₂ connect-tree
-                 (list-to-pd-to-tree l)
+                 (tree-to-pd-to-tree S)
                  (trans (susp-pd-tree-compat (tree-to-pd T))
                         (cong susp-tree (tree-to-pd-to-tree T))))
-
-tree-to-pd-to-tree (Node l) = list-to-pd-to-tree l

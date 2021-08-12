@@ -4,9 +4,9 @@ module Catt.Pasting where
 
 open import Data.Nat
 open import Catt.Syntax
+open import Catt.Syntax.Patterns
 open import Data.Empty
 open import Data.Unit
-open import Data.Fin.Patterns
 open import Catt.Support
 open import Catt.Dimension
 
@@ -22,7 +22,7 @@ getFocusTerm : Γ ⊢pd[ submax ][ d ] → Tm Γ (suc (suc d))
 
 -- Uniquely extend a pasting context
 extend : {Γ : Ctx (suc n) m} → Γ ⊢pd[ submax ][ d ] → Ctx (suc (suc (suc n))) (m ⊔ suc d ⊔ suc (suc d))
-extend {Γ = Γ} pdb = Γ , getFocusType pdb , liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ Var 0F
+extend {Γ = Γ} pdb = Γ , getFocusType pdb , liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V
 
 data _⊢pd[_][_] where
   Base : ∅ , ⋆ ⊢pd[ 0 ][ 0 ]
@@ -38,9 +38,9 @@ getFocusType {Γ = Γ , A} (ExtendM pdb) = liftType A
 getFocusType {Γ = Γ , A} (Extend pdb) = liftType A
 getFocusType (Restr pdb) = ty-base (getFocusType pdb)
 
-getFocusTerm Base = Var 0F
-getFocusTerm (ExtendM pdb) = Var 0F
-getFocusTerm (Extend pdb) = Var 0F
+getFocusTerm Base = 0V
+getFocusTerm (ExtendM pdb) = 0V
+getFocusTerm (Extend pdb) = 0V
 getFocusTerm (Restr pdb) = ty-tgt (getFocusType pdb)
 
 
@@ -109,7 +109,7 @@ pd-bd-pd (Finish pdb) = Finish (pdb-bd-pd pdb tt)
 pdb-src : (pdb : Γ ⊢pd[ submax ][ d ]) → (nz : nonZero submax d) → Sub (pdb-bd-ctx pdb nz) Γ
 pdb-src (ExtendM pdb) nz = liftSub (liftSub (idSub _))
 pdb-src {submax = zero} (Extend pdb) nz = liftSub (liftSub (pdb-src pdb nz))
-pdb-src {submax = suc submax} (Extend pdb) nz = ⟨ ⟨ liftSub (liftSub (pdb-src pdb nz)) , Var 1F ⟩ , Var 0F ⟩
+pdb-src {submax = suc submax} (Extend pdb) nz = ⟨ ⟨ liftSub (liftSub (pdb-src pdb nz)) , 1V ⟩ , 0V ⟩
 pdb-src (Restr pdb) nz = pdb-src pdb nonZeroTT
 
 replacePdSub : Δ ⊢pd[ 0 ][ d ] → (σ : Sub Δ Γ) → Tm Γ (suc (suc d)) → Sub Δ Γ
@@ -118,9 +118,9 @@ replacePdSub (ExtendM pdb) ⟨ σ , x ⟩ t = ⟨ σ , t ⟩
 replacePdSub (Extend pdb) ⟨ σ , x ⟩ t = ⟨ σ , t ⟩
 
 pdb-tgt : (pdb : Γ ⊢pd[ submax ][ d ]) → (nz : nonZero submax d) → Sub (pdb-bd-ctx pdb nz) Γ
-pdb-tgt (ExtendM pdb) nz = replacePdSub (pdb-bd-pd (ExtendM pdb) nz) (liftSub (liftSub (idSub _))) (Var 1F)
-pdb-tgt {submax = zero} (Extend pdb) nz = replacePdSub (pdb-bd-pd (Extend pdb) nz) (liftSub (liftSub (pdb-tgt pdb nz))) (Var 1F)
-pdb-tgt {submax = suc submax} (Extend pdb) nz = ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb nz)) , Var 1F ⟩ , Var 0F ⟩
+pdb-tgt (ExtendM pdb) nz = replacePdSub (pdb-bd-pd (ExtendM pdb) nz) (liftSub (liftSub (idSub _))) 1V
+pdb-tgt {submax = zero} (Extend pdb) nz = replacePdSub (pdb-bd-pd (Extend pdb) nz) (liftSub (liftSub (pdb-tgt pdb nz))) 1V
+pdb-tgt {submax = suc submax} (Extend pdb) nz = ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb nz)) , 1V ⟩ , 0V ⟩
 pdb-tgt (Restr pdb) nz = pdb-tgt pdb nonZeroTT
 
 pd-src : (pd : Γ ⊢pd₀ (suc d)) → Sub (pd-bd-ctx pd) Γ

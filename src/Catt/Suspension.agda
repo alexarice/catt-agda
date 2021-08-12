@@ -4,11 +4,11 @@ module Catt.Suspension where
 
 open import Catt.Syntax
 open import Catt.Syntax.Properties
+open import Catt.Syntax.Patterns
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Data.Nat
 open import Data.Fin
-open import Data.Fin.Patterns
 open import Relation.Binary.PropositionalEquality
 open import Catt.Dimension
 
@@ -26,10 +26,10 @@ suspCtx (Γ , A) = (suspCtx Γ) , (suspTy A)
 suspTy ⋆ = getFst ─⟨ ⋆ ⟩⟶ getSnd
 suspTy (s ─⟨ A ⟩⟶ t) = suspTm s ─⟨ suspTy A ⟩⟶ suspTm t
 
-getFst {Γ = ∅} = Var 1F
+getFst {Γ = ∅} = 1V
 getFst {Γ = Γ , A} = liftTerm getFst
 
-getSnd {Γ = ∅} = Var 0F
+getSnd {Γ = ∅} = 0V
 getSnd {Γ = Γ , A} = liftTerm getSnd
 
 suspTm (Var i) = lookupSusp i
@@ -38,7 +38,7 @@ suspTm (Coh Δ A σ) = Coh (suspCtx Δ) (suspTy A) (suspSub σ)
 suspSub ⟨⟩ = ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩
 suspSub ⟨ σ , t ⟩ = ⟨ suspSub σ , suspTm t ⟩
 
-lookupSusp {Γ = Γ , A} 0F = Var 0F
+lookupSusp {Γ = Γ , A} zero = 0V
 lookupSusp {Γ = Γ , A} (suc i) = liftTerm (lookupSusp i)
 
 susp-src-compat : (A : Ty Γ (suc (suc d))) → suspTm (ty-src A) ≡ ty-src (suspTy A)

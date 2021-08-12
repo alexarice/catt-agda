@@ -4,12 +4,12 @@ module Catt.Connection where
 
 open import Catt.Syntax
 open import Catt.Syntax.Properties
+open import Catt.Syntax.Patterns
 open import Catt.Dimension
 open import Catt.Dimension.Properties
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Data.Nat
-open import Data.Fin.Patterns
 open import Data.Unit
 open import Data.Empty
 open import Relation.Nullary using (¬_)
@@ -30,7 +30,7 @@ connect Γ x (Δ , A , B) = (connect Γ x (Δ , A)) , B [ connect-inc-right Γ x
 
 connect-inc-right Γ x (∅ , ⋆) = ⟨ ⟨⟩ , x ⟩
 connect-inc-right Γ x (∅ , s ─⟨ A ⟩⟶ t) = ⊥-elim (no-term-in-empty-context s)
-connect-inc-right Γ x (Δ , A , B) = ⟨ liftSub (connect-inc-right Γ x (Δ , A)) , Var 0F ⟩
+connect-inc-right Γ x (Δ , A , B) = ⟨ liftSub (connect-inc-right Γ x (Δ , A)) , 0V ⟩
 
 connect-inc-left : (Γ : Ctx (suc n) d) → (x : Tm Γ 2) → (Δ : Ctx (suc m) d′) → Sub Γ (connect Γ x Δ)
 connect-inc-left Γ x (∅ , A) = idSub Γ
@@ -74,10 +74,10 @@ connect-pdb-pdb pdb (Restr pdb2) = Restr (connect-pdb-pdb pdb pdb2)
 connect-pdb-foc-ty pdb Base with getFocusType pdb
 ... | ⋆ = refl
 connect-pdb-foc-ty {Γ = Γ} pdb (ExtendM {Γ = Γ′ , A} pdb2)
-  = trans (arr-equality (trans (lift-subbed-tm (liftTerm (getFocusTerm pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , (Var 0F) ⟩)
+  = trans (arr-equality (trans (lift-subbed-tm (liftTerm (getFocusTerm pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , 0V ⟩)
                                (cong liftTerm (trans (lift-subbed-tm (getFocusTerm pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
                                                      (cong liftTerm (connect-pdb-foc-tm pdb pdb2)))))
-                        (trans (lift-subbed-ty (liftType (getFocusType pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , (Var 0F) ⟩)
+                        (trans (lift-subbed-ty (liftType (getFocusType pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , 0V ⟩)
                                (cong liftType (trans (lift-subbed-ty (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
                                                      (cong liftType (connect-pdb-foc-ty pdb pdb2)))))
                         refl)
@@ -89,10 +89,10 @@ connect-pdb-foc-ty {Γ = Γ} pdb (ExtendM {Γ = Γ′ , A} pdb2)
                                                     (cong liftType (connect-pdb-foc-ty pdb pdb2)))
                                              refl))
 connect-pdb-foc-ty {Γ = Γ} pdb (Extend {Γ = Γ′ , A} pdb2)
-  = trans (arr-equality (trans (lift-subbed-tm (liftTerm (getFocusTerm pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , (Var 0F) ⟩)
+  = trans (arr-equality (trans (lift-subbed-tm (liftTerm (getFocusTerm pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , 0V ⟩)
                                (cong liftTerm (trans (lift-subbed-tm (getFocusTerm pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
                                                      (cong liftTerm (connect-pdb-foc-tm pdb pdb2)))))
-                        (trans (lift-subbed-ty (liftType (getFocusType pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , (Var 0F) ⟩)
+                        (trans (lift-subbed-ty (liftType (getFocusType pdb2)) ⟨ (liftSub (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A))) , 0V ⟩)
                                (cong liftType (trans (lift-subbed-ty (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
                                                      (cong liftType (connect-pdb-foc-ty pdb pdb2)))))
                         refl)

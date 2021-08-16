@@ -4,11 +4,16 @@ module Catt.Syntax.SyntacticEquality where
 
 open import Catt.Syntax
 open import Catt.Syntax.Properties
+open import Catt.Syntax.Patterns
 open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Fin using (Fin;zero;suc;toℕ)
 open import Data.Fin.Properties using (toℕ-injective)
 open import Relation.Binary.PropositionalEquality
+open import Relation.Nullary
+open import Relation.Nullary.Decidable
+open import Relation.Binary
+open import Function.Equivalence using (equivalence)
 
 data _≃c_ : Ctx n → Ctx m → Set
 data _≃ty_ : Ty Γ n → Ty Γ′ m → Set
@@ -174,6 +179,23 @@ sub-action-≃-tm (Coh≃ p q r) = Coh≃ p q (sub-action-≃-sub r)
 sub-action-≃-sub Null≃ = Null≃
 sub-action-≃-sub (Ext≃ p q) = Ext≃ (sub-action-≃-sub p) (sub-action-≃-tm q)
 
+sub-action-sub-≃-ty : (A : Ty Γ d) → σ ≃s τ → A [ σ ]ty ≃ty A [ τ ]ty
+sub-action-sub-≃-tm : (t : Tm Γ d) → σ ≃s τ → t [ σ ]tm ≃tm t [ τ ]tm
+sub-action-sub-≃-sub : (μ : Sub Γ Δ) → σ ≃s τ → σ ∘ μ ≃s τ ∘ μ
+sub-action-sub-≃-var : (i : Fin n) → σ ≃s τ → Var i [ σ ]tm ≃tm Var i [ τ ]tm
+
+sub-action-sub-≃-ty ⋆ p = Star≃
+sub-action-sub-≃-ty (s ─⟨ A ⟩⟶ t) p = Arr≃ (sub-action-sub-≃-tm s p) (sub-action-sub-≃-ty A p) (sub-action-sub-≃-tm t p)
+
+sub-action-sub-≃-tm (Var i) p = sub-action-sub-≃-var i p
+sub-action-sub-≃-tm (Coh Δ A x σ) p = Coh≃ refl≃c refl≃ty (sub-action-sub-≃-sub σ p)
+
+sub-action-sub-≃-sub ⟨⟩ p = Null≃
+sub-action-sub-≃-sub ⟨ μ , t ⟩ p = Ext≃ (sub-action-sub-≃-sub μ p) (sub-action-sub-≃-tm t p)
+
+sub-action-sub-≃-var zero (Ext≃ p x) = x
+sub-action-sub-≃-var (suc i) (Ext≃ p x) = sub-action-sub-≃-var i p
+
 lift-subbed-ty-≃ : (B : Ty Γ d) → (σ : Sub Γ Δ) → {A : Ty Γ d′} → {t : Tm (Δ , A [ σ ]ty) (suc d′)} → (liftType {A = A} B) [ ⟨ liftSub σ , t ⟩ ]ty ≃ty liftType {A = A [ σ ]ty} (B [ σ ]ty)
 lift-subbed-tm-≃ : (s : Tm Γ d) → (σ : Sub Γ Δ) → {A : Ty Γ d′} → {t : Tm (Δ , A [ σ ]ty) (suc d′)} → (liftTerm {A = A} s) [ ⟨ liftSub σ , t ⟩ ]tm ≃tm liftTerm {A = A [ σ ]ty} (s [ σ ]tm)
 lift-subbed-sub-≃ : (τ : Sub Υ Γ) → (σ : Sub Γ Δ) → {A : Ty Γ d′} → {t : Tm (Δ , A [ σ ]ty) (suc d′)} → ⟨_,_⟩ (liftSub σ) {A = A} t ∘ liftSub τ ≃s liftSub {A = A [ σ ]ty} (σ ∘ τ)
@@ -191,6 +213,23 @@ lift-subbed-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (lift-subbed-sub-≃ τ σ) (lift
 lift-subbed-var-≃ zero ⟨ σ , t ⟩ = refl≃tm
 lift-subbed-var-≃ (suc i) ⟨ σ , t ⟩ = lift-subbed-var-≃ i σ
 
+apply-lifted-sub-ty-≃ : (B : Ty Γ d) → (σ : Sub Γ Δ) → B [ liftSub {A = A} σ ]ty ≃ty liftType {A = A} (B [ σ ]ty)
+apply-lifted-sub-tm-≃ : (t : Tm Γ d) → (σ : Sub Γ Δ) → t [ liftSub {A = A} σ ]tm ≃tm liftTerm {A = A} (t [ σ ]tm)
+apply-lifted-sub-sub-≃ : (τ : Sub Υ Γ) → (σ : Sub Γ Δ) → liftSub {A = A} σ ∘ τ ≃s liftSub {A = A} (σ ∘ τ)
+apply-lifted-sub-var-≃ : (i : Fin (ctxLength Γ)) → (σ : Sub Γ Δ) → Var i [ liftSub {A = A} σ ]tm ≃tm liftTerm {A = A} (Var i [ σ ]tm)
+
+apply-lifted-sub-ty-≃ ⋆ σ = Star≃
+apply-lifted-sub-ty-≃ (s ─⟨ B ⟩⟶ t) σ = Arr≃ (apply-lifted-sub-tm-≃ s σ) (apply-lifted-sub-ty-≃ B σ) (apply-lifted-sub-tm-≃ t σ)
+
+apply-lifted-sub-tm-≃ (Var i) σ = apply-lifted-sub-var-≃ i σ
+apply-lifted-sub-tm-≃ (Coh Δ A x τ) σ = Coh≃ refl≃c refl≃ty (apply-lifted-sub-sub-≃ τ σ)
+
+apply-lifted-sub-sub-≃ ⟨⟩ σ = Null≃
+apply-lifted-sub-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (apply-lifted-sub-sub-≃ τ σ) (apply-lifted-sub-tm-≃ t σ)
+
+apply-lifted-sub-var-≃ {Γ = Γ , A} zero ⟨ σ , t ⟩ = refl≃tm
+apply-lifted-sub-var-≃ {Γ = Γ , A} (suc i) ⟨ σ , t ⟩ = apply-lifted-sub-var-≃ i σ
+
 lift-ty-≃ : B ≃ty C → liftType {A = A} B ≃ty liftType {A = A′} C
 lift-tm-≃ : s ≃tm t → liftTerm {A = A} s ≃tm liftTerm {A = A′} t
 lift-sub-≃ : σ ≃s τ → liftSub {A = A} σ ≃s liftSub {A = A′} τ
@@ -203,3 +242,116 @@ lift-tm-≃ (Coh≃ p q r) = Coh≃ p q (lift-sub-≃ r)
 
 lift-sub-≃ Null≃ = Null≃
 lift-sub-≃ (Ext≃ p q) = Ext≃ (lift-sub-≃ p) (lift-tm-≃ q)
+
+≃c-dec : (Γ : Ctx n) → (Γ′ : Ctx n′) → Dec (Γ ≃c Γ′)
+≃ty-dec : (A : Ty Γ d) → (B : Ty Γ′ d′) → Dec (A ≃ty B)
+≃tm-dec : (s : Tm Γ d) → (t : Tm Γ′ d′) → Dec (s ≃tm t)
+≃s-dec : (σ : Sub Γ Δ) → (τ : Sub Γ′ Δ′) → Dec (σ ≃s τ)
+
+≃c-dec ∅ ∅ = yes Emp≃
+≃c-dec ∅ (Γ′ , A) = no (λ ())
+≃c-dec (Γ , A) ∅ = no (λ ())
+≃c-dec (Γ , A) (Γ′ , B) with ≃c-dec Γ Γ′ | ≃ty-dec A B
+... | yes p | yes q = yes (Add≃ p q)
+... | yes p | no q = no (λ where (Add≃ _ x) → q x)
+... | no p | q = no λ where (Add≃ x _) → p x
+
+≃ty-dec ⋆ ⋆ = yes Star≃
+≃ty-dec ⋆ (s ─⟨ B ⟩⟶ t) = no (λ ())
+≃ty-dec (s ─⟨ A ⟩⟶ t) ⋆ = no (λ ())
+≃ty-dec (s ─⟨ A ⟩⟶ t) (s′ ─⟨ A′ ⟩⟶ t′) with ≃tm-dec s s′ | ≃ty-dec A A′ | ≃tm-dec t t′
+... | yes p | yes q | yes r = yes (Arr≃ p q r)
+... | yes p | yes q | no r = no (λ where (Arr≃ _ _ x) → r x)
+... | yes p | no q | r = no (λ where (Arr≃ _ x _) → q x)
+... | no p | q | r = no (λ where (Arr≃ x _ _) → p x)
+
+≃tm-dec (Var i) (Var j) with toℕ i ≟ toℕ j
+... | yes p = yes (Var≃ p)
+... | no p = no (λ where (Var≃ x) → p x)
+≃tm-dec (Var i) (Coh Δ A x σ) = no (λ ())
+≃tm-dec (Coh Δ A x σ) (Var i) = no (λ ())
+≃tm-dec (Coh Δ A _ σ) (Coh Δ′ A′ _ σ′) with ≃c-dec Δ Δ′ | ≃ty-dec A A′ | ≃s-dec σ σ′
+... | yes p | yes q | yes r = yes (Coh≃ p q r)
+... | yes p | yes q | no r = no λ where (Coh≃ _ _ x) → r x
+... | yes p | no q | r = no λ where (Coh≃ _ x _) → q x
+... | no p | q | r = no λ where (Coh≃ x _ _) → p x
+
+≃s-dec ⟨⟩ ⟨⟩ = yes Null≃
+≃s-dec ⟨⟩ ⟨ τ , t ⟩ = no (λ ())
+≃s-dec ⟨ σ , t ⟩ ⟨⟩ = no (λ ())
+≃s-dec ⟨ σ , s ⟩ ⟨ τ , t ⟩ with ≃s-dec σ τ | ≃tm-dec s t
+... | yes p | yes q = yes (Ext≃ p q)
+... | yes p | no q = no (λ where (Ext≃ _ x) → q x)
+... | no p | q = no (λ where (Ext≃ x _) → p x)
+
+ctx-dec : DecidableEquality (Ctx n)
+ctx-dec Γ Δ = map (equivalence ≃c-to-≡ reflexive≃c) (≃c-dec Γ Δ)
+
+ty-dec : DecidableEquality (Ty Γ n)
+ty-dec A B = map (equivalence ≃ty-to-≡ reflexive≃ty) (≃ty-dec A B)
+
+tm-dec : DecidableEquality (Tm Γ n)
+tm-dec s t = map (equivalence ≃tm-to-≡ reflexive≃tm) (≃tm-dec s t)
+
+sub-dec : DecidableEquality (Sub Γ Δ)
+sub-dec σ τ = map (equivalence ≃s-to-≡ reflexive≃s) (≃s-dec σ τ)
+
+-- categorical properties
+
+id-right-unit : (σ : Sub Γ Δ) → σ ∘ idSub Γ ≃s σ
+lift-sub-comp-lem-sub : (σ : Sub Δ Υ) → (τ : Sub Γ Δ) → {A : Ty Δ d} → ⟨_,_⟩ σ {A} t ∘ liftSub τ ≃s σ ∘ τ
+lift-sub-comp-lem-tm : (σ : Sub Δ Υ) → (s : Tm Δ d′) → {A : Ty Δ d} → liftTerm s [ ⟨_,_⟩ σ {A} t ]tm ≃tm s [ σ ]tm
+lift-sub-comp-lem-ty : (σ : Sub Δ Υ) → (B : Ty Δ d′) → {A : Ty Δ d} → liftType B [ ⟨_,_⟩ σ {A} t ]ty ≃ty B [ σ ]ty
+
+id-right-unit ⟨⟩ = Null≃
+id-right-unit ⟨ σ , t ⟩ = Ext≃ (trans≃s (lift-sub-comp-lem-sub σ (idSub _)) (id-right-unit σ)) refl≃tm
+
+lift-sub-comp-lem-sub σ ⟨⟩ = Null≃
+lift-sub-comp-lem-sub σ ⟨ τ , t ⟩ = Ext≃ (lift-sub-comp-lem-sub σ τ) (lift-sub-comp-lem-tm σ t)
+
+lift-sub-comp-lem-tm σ (Var i) = refl≃tm
+lift-sub-comp-lem-tm σ (Coh Δ A x τ) = Coh≃ refl≃c refl≃ty (lift-sub-comp-lem-sub σ τ)
+
+lift-sub-comp-lem-ty σ ⋆ = Star≃
+lift-sub-comp-lem-ty σ (s ─⟨ B ⟩⟶ t) = Arr≃ (lift-sub-comp-lem-tm σ s) (lift-sub-comp-lem-ty σ B) (lift-sub-comp-lem-tm σ t)
+
+id-left-unit : (σ : Sub Γ Δ) → idSub Δ ∘ σ ≃s σ
+id-on-ty : (B : Ty Γ d) → B [ idSub Γ ]ty ≃ty B
+id-on-tm : (t : Tm Γ d) → t [ idSub Γ ]tm ≃tm t
+id-on-var : (i : Fin n) → Var i [ idSub Γ ]tm ≃tm Var {Γ = Γ} i
+
+id-left-unit ⟨⟩ = Null≃
+id-left-unit ⟨ σ , t ⟩ = Ext≃ (id-left-unit σ) (id-on-tm t)
+
+id-on-ty ⋆ = Star≃
+id-on-ty (s ─⟨ B ⟩⟶ t) = Arr≃ (id-on-tm s) (id-on-ty B) (id-on-tm t)
+
+id-on-tm (Var i) = id-on-var i
+id-on-tm (Coh Δ A x σ) = Coh≃ refl≃c refl≃ty (id-left-unit σ)
+
+id-on-var {Γ = Γ , A} zero = refl≃tm
+id-on-var {Γ = Γ , A} (suc i) = trans≃tm (apply-lifted-sub-var-≃ i (idSub Γ)) (lift-tm-≃ (id-on-var i))
+
+∘-assoc : (σ : Sub Δ Υ) → (τ : Sub Γ Δ) → (μ : Sub Γ′ Γ) → (σ ∘ τ) ∘ μ ≃s σ ∘ (τ ∘ μ)
+assoc-tm : (σ : Sub Δ Υ) → (τ : Sub Γ Δ) → (t : Tm Γ d) → t [ σ ∘ τ ]tm ≃tm (t [ τ ]tm) [ σ ]tm
+assoc-ty : (σ : Sub Δ Υ) → (τ : Sub Γ Δ) → (A : Ty Γ d) → A [ σ ∘ τ ]ty ≃ty (A [ τ ]ty) [ σ ]ty
+assoc-var : (σ : Sub Δ Υ) → (τ : Sub Γ Δ) → (i : Fin (ctxLength Γ)) → Var i [ σ ∘ τ ]tm ≃tm (Var i [ τ ]tm) [ σ ]tm
+
+∘-assoc σ τ ⟨⟩ = Null≃
+∘-assoc σ τ ⟨ μ , t ⟩ = Ext≃ (∘-assoc σ τ μ) (assoc-tm σ τ t)
+
+assoc-tm σ τ (Var i) = assoc-var σ τ i
+assoc-tm σ τ (Coh Δ A x μ) = Coh≃ refl≃c refl≃ty (∘-assoc σ τ μ)
+
+assoc-ty σ τ ⋆ = Star≃
+assoc-ty σ τ (s ─⟨ A ⟩⟶ t) = Arr≃ (assoc-tm σ τ s) (assoc-ty σ τ A) (assoc-tm σ τ t)
+
+assoc-var {Γ = Γ , A} σ ⟨ τ , t ⟩ zero = refl≃tm
+assoc-var {Γ = Γ , A} σ ⟨ τ , t ⟩ (suc i) = assoc-var σ τ i
+
+-- Equal contexts are iso
+
+idSub≃ : Γ ≃c Δ → Sub Γ Δ
+idSub≃ Emp≃ = ⟨⟩
+idSub≃ (Add≃ p x) with ≃ty-preserve-dim x
+... | refl = ⟨ (liftSub (idSub≃ p)) , 0V ⟩

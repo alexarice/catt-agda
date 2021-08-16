@@ -4,9 +4,14 @@ module Catt.Pasting.Properties where
 
 open import Catt.Syntax
 open import Catt.Syntax.Patterns
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Pasting
 open import Relation.Binary.PropositionalEquality
 open import Data.Nat
+open import Data.Nat.Properties
+open import Data.Empty
+open import Relation.Binary
+open import Axiom.UniquenessOfIdentityProofs
 
 extend-pd-eq : (pdb : Γ ⊢pd[ submax ][ d ])
              → A ≡ getFocusType pdb
@@ -26,14 +31,85 @@ extend-pd-eq-foc-ty : (pdb : Γ ⊢pd[ submax ][ d ])
                     → liftTerm (liftTerm (getFocusTerm pdb)) ─⟨ liftType (liftType (getFocusType pdb)) ⟩⟶ 1V ≡ getFocusType (extend-pd-eq pdb p q)
 extend-pd-eq-foc-ty pdb refl refl = refl
 
-submax-irrelevant : (pdb : Γ ⊢pd[ submax ][ d ]) (pdb2 : Γ ⊢pd[ submax′ ][ d ]) → submax ≡ submax′
-submax-irrelevant Base Base = refl
-submax-irrelevant Base (Restr pdb2) = {!!}
-submax-irrelevant (Extend {submax = zero} pdb) pdb2 = {!!}
-submax-irrelevant (Extend {submax = suc submax} pdb) pdb2 = {!!}
-submax-irrelevant (Restr pdb) pdb2 = {!!}
+record PDB : Set where
+  constructor <_>
+  field
+    {pdb-len} : ℕ
+    {pdb-ctx} : Ctx (suc (pdb-len))
+    {pdb-sm} : ℕ
+    {pdb-dm} : ℕ
+    pdb-pdb : pdb-ctx ⊢pd[ pdb-sm ][ pdb-dm ]
+
+open PDB
+
+pdb-dim-lem : {A : Ty Γ d} (pdb : Γ , A ⊢pd[ submax ][ d′ ]) → suc d′ ≤ d
+pdb-dim-lem Base = ≤-refl
+pdb-dim-lem (Extend pdb) = ≤-refl
+pdb-dim-lem (Restr pdb) = ≤-trans (≤-step ≤-refl) (pdb-dim-lem pdb)
+
+PDB-irrel : (pdb pdb2 : PDB) → pdb-ctx pdb ≃c pdb-ctx pdb2 → pdb-dm pdb ≡ pdb-dm pdb2 → pdb ≡ pdb2
+PDB-irrel < Base > < Base > p q = refl
+PDB-irrel < Base > < Restr pdb2 > (Add≃ Emp≃ Star≃) refl = ⊥-elim (1+n≰n (pdb-dim-lem pdb2))
+PDB-irrel < Extend pdb1 > < Extend pdb2 > (Add≃ (Add≃ p x₁) x) q with PDB-irrel < pdb1 > < pdb2 > p (cong pred q)
+... | refl = refl
+PDB-irrel < Extend pdb1 > < Restr pdb2 > (Add≃ p x) refl with pdb-dim-lem pdb2 | ≃ty-preserve-dim x
+... | r | refl = ⊥-elim (1+n≰n r)
+PDB-irrel < Restr pdb1 > < Base > (Add≃ Emp≃ Star≃) refl = ⊥-elim (1+n≰n (pdb-dim-lem pdb1))
+PDB-irrel < Restr pdb1 > < Extend pdb2 > (Add≃ p x) refl with pdb-dim-lem pdb1 | ≃ty-preserve-dim x
+... | r | refl = ⊥-elim (1+n≰n r)
+PDB-irrel < Restr pdb1 > < Restr pdb2 > p q with PDB-irrel < pdb1 > < pdb2 > p (cong suc q)
+... | refl = refl
+
+subst-pdb : (p : n ≡ m) → {Γ : Ctx (suc n)} → {Γ′ : Ctx (suc m)} → subst Ctx (cong suc p) Γ ≡ Γ′ → submax ≡ submax′ → d ≡ d′ → Γ ⊢pd[ submax ][ d ] → Γ′ ⊢pd[ submax′ ][ d′ ]
+subst-pdb refl refl refl refl pdb = pdb
+
+PDB-lem-len : {pdb pdb2 : PDB} → pdb ≡ pdb2 → pdb-len pdb ≡ pdb-len pdb2
+PDB-lem-len refl = refl
+
+PDB-lem-ctx : {pdb pdb2 : PDB} → (p : pdb ≡ pdb2) → subst Ctx (cong suc (PDB-lem-len p)) (pdb-ctx pdb) ≡ pdb-ctx pdb2
+PDB-lem-ctx refl = refl
+
+PDB-lem-ctx≡ : {pdb pdb2 : PDB} → (p : pdb ≡ pdb2) → (q : pdb-len pdb ≡ pdb-len pdb2) → subst Ctx (cong suc q) (pdb-ctx pdb) ≡ pdb-ctx pdb2
+PDB-lem-ctx≡ {pdb} refl q = cong (λ - → subst Ctx (cong suc -) (pdb-ctx pdb)) (≡-irrelevant q refl)
+
+PDB-lem-sm : {pdb pdb2 : PDB} → pdb ≡ pdb2 → pdb-sm pdb ≡ pdb-sm pdb2
+PDB-lem-sm refl = refl
+
+PDB-lem-dm : {pdb pdb2 : PDB} → pdb ≡ pdb2 → pdb-dm pdb ≡ pdb-dm pdb2
+PDB-lem-dm refl = refl
+
+PDB-lem-pdb : {pdb pdb2 : PDB} → (p : pdb ≡ pdb2) → subst-pdb (PDB-lem-len p) (PDB-lem-ctx p) (PDB-lem-sm p) (PDB-lem-dm p) (pdb-pdb pdb) ≡ (pdb-pdb pdb2)
+PDB-lem-pdb refl = refl
+
+ctxn-irrelevant : Irrelevant {A = Ctx n} (_≡_)
+ctxn-irrelevant = Decidable⇒UIP.≡-irrelevant ctx-dec
+
+PDB-lem≡ : {pdb pdb2 : PDB} → (p : pdb ≡ pdb2)
+                           → (q : pdb-len pdb ≡ pdb-len pdb2)
+                           → (r : (x : pdb-len pdb ≡ pdb-len pdb2) → subst Ctx (cong suc x) (pdb-ctx pdb) ≡ pdb-ctx pdb2)
+                           → (s : pdb-sm pdb ≡ pdb-sm pdb2)
+                           → (t : pdb-dm pdb ≡ pdb-dm pdb2)
+                           → subst-pdb q (r q) s t (pdb-pdb pdb) ≡ (pdb-pdb pdb2)
+PDB-lem≡ {pdb} refl q r s t = trans step1 (trans step2 (trans step3 step4))
+  where
+  step1 : subst-pdb q (r q) s t (pdb-pdb pdb) ≡
+          subst-pdb refl (r refl) s t (pdb-pdb pdb)
+  step1 = cong (λ - → subst-pdb - (r -) s t (pdb-pdb pdb)) (≡-irrelevant q refl)
+
+  step2 : subst-pdb refl (r refl) s t (pdb-pdb pdb) ≡
+            subst-pdb refl (r refl) refl t (pdb-pdb pdb)
+  step2 = cong (λ - → subst-pdb refl (r refl) - t (pdb-pdb pdb)) (≡-irrelevant s refl)
+
+  step3 : subst-pdb refl (r refl) refl t (pdb-pdb pdb) ≡
+            subst-pdb refl (r refl) refl refl (pdb-pdb pdb)
+  step3 = cong (λ - → subst-pdb refl (r refl) refl - (pdb-pdb pdb)) (≡-irrelevant t refl)
+
+  step4 : subst-pdb refl (r refl) refl refl (pdb-pdb pdb) ≡ pdb-pdb pdb
+  step4 = cong (λ - → subst-pdb refl - refl refl (pdb-pdb pdb)) (ctxn-irrelevant (r refl) refl)
 
 pdb-irrelevant : (pdb : Γ ⊢pd[ submax ][ d ]) (pdb2 : Γ ⊢pd[ submax ][ d ]) → pdb ≡ pdb2
-pdb-irrelevant Base Base = {!!}
-pdb-irrelevant (Extend pdb) pdb2 = {!!}
-pdb-irrelevant (Restr pdb) pdb2 = {!!}
+pdb-irrelevant {n} {Γ} pdb pdb2 = trans (cong (λ - → subst-pdb refl - refl refl pdb) (ctxn-irrelevant refl (PDB-lem-ctx≡ PDB≡ refl)))
+                                        (PDB-lem≡ PDB≡ refl (PDB-lem-ctx≡ PDB≡) refl refl)
+  where
+    PDB≡ : < pdb > ≡ < pdb2 >
+    PDB≡ = PDB-irrel < pdb > < pdb2 > refl≃c refl

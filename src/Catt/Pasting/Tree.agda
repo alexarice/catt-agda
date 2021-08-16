@@ -253,11 +253,13 @@ tree-to-ctx-extend-tree (suc d) (Join S T) ex
     lem4 : (Δ : Ctx (suc (suc n))) → _≃tm_ {Γ′ = connect Γ s Δ} (0V [ connect-inc-right Γ s Δ ]tm) 0V
     lem4 (Δ , A , B) = Var≃ refl
 
+extend-lem : (pdb : Γ ⊢pd[ submax ][ d ]) → (pdb2 : Γ′ ⊢pd[ submax′ ][ d′ ]) → < pdb > ≡ < pdb2 > → extend pdb ≃c extend pdb2
+extend-lem pdb .pdb refl = refl≃c
 
 pdb-to-tree-to-ctx : (pdb : Γ ⊢pd[ submax ][ d ]) → tree-to-ctx (pdb-to-tree pdb) ≡ Γ
 pdb-to-tree-to-ctx Base = refl
 pdb-to-tree-to-ctx (Extend {d = d} pdb)
-  = trans (tree-to-ctx-extend-tree d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)) {!!}
+  = trans (tree-to-ctx-extend-tree d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)) (≃c-to-≡ (extend-lem (tree-to-pdb d (pdb-to-tree pdb) (pdb-to-tree-is-n-extendable pdb)) pdb (PDB-irrel < tree-to-pdb d (pdb-to-tree pdb) _ > < pdb > (reflexive≃c (pdb-to-tree-to-ctx pdb)) refl)))
 pdb-to-tree-to-ctx (Restr pdb) = pdb-to-tree-to-ctx pdb
 
 pd-to-tree-to-ctx : (pd : Γ ⊢pd₀ d) → tree-to-ctx (pd-to-tree pd) ≡ Γ

@@ -35,6 +35,12 @@ connect-inc-left Γ x (Δ , A , B) = liftSub (connect-inc-left Γ x (Δ , A))
 connect-pdb : {Γ : Ctx (suc n)} (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc n′)) → Ctx (suc (n′ + n))
 connect-pdb {Γ = Γ} pdb Δ = connect Γ (getFocusTerm pdb) Δ
 
+connect-pdb-inc-left : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → Sub Γ (connect-pdb pdb Δ)
+connect-pdb-inc-left {Γ = Γ} pdb Δ = connect-inc-left Γ (getFocusTerm pdb) Δ
+
+connect-pdb-inc-right : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → Sub Δ (connect-pdb pdb Δ)
+connect-pdb-inc-right {Γ = Γ} pdb Δ = connect-inc-right Γ (getFocusTerm pdb) Δ
+
 connect-pd : {Γ : Ctx (suc n)} → (pd : Γ ⊢pd₀ d) → (Δ : Ctx (suc n′)) → Ctx (suc (n′ + n))
 connect-pd (Finish pdb) Δ = connect-pdb pdb Δ
 
@@ -97,3 +103,10 @@ connected-dim (Finish pdb) (Finish pdb2) = new-submax pdb pdb2
 
 connect-pd-pd : {Γ : Ctx (suc n)} {Δ : Ctx (suc n′)} → (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → connect-pd pd Δ ⊢pd₀ connected-dim pd pd2
 connect-pd-pd (Finish pdb) (Finish pdb2) = Finish (connect-pdb-pdb pdb pdb2)
+
+sub-from-connect : {Γ : Ctx (suc n)} {Δ : Ctx (suc m)} → Sub Γ Υ → (t : Tm Γ 2) → Sub Δ Υ → Sub (connect Γ t Δ) Υ
+sub-from-connect σ s ⟨ ⟨⟩ , t ⟩ = σ
+sub-from-connect σ s ⟨ ⟨ τ , u ⟩ , t ⟩ = ⟨ sub-from-connect σ s ⟨ τ , u ⟩ , t ⟩
+
+sub-from-connect-pdb : {Γ : Ctx (suc n)} → (pdb : Γ ⊢pd[ submax ][ 0 ]) → Sub Γ Υ → Sub Δ Υ → Sub (connect-pdb pdb Δ) Υ
+sub-from-connect-pdb pdb σ τ = sub-from-connect σ (getFocusTerm pdb) τ

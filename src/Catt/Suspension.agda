@@ -10,9 +10,10 @@ open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Data.Nat
 open import Data.Nat.Properties
-open import Data.Fin using (Fin;zero;suc)
+open import Data.Fin using (Fin;zero;suc;inject₁;toℕ)
 open import Relation.Binary.PropositionalEquality
 open import Catt.Dimension
+open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁)
 
 suspCtx : Ctx n → Ctx (suc (suc n))
 suspTy : Ty Γ n → Ty (suspCtx Γ) (suc n)
@@ -138,3 +139,28 @@ susp-tm-lift (Coh Δ A x σ) = Coh≃ refl≃c refl≃ty (susp-sub-lift σ)
 
 susp-sub-lift ⟨⟩ = Ext≃ (Ext≃ Null≃ refl≃tm) refl≃tm
 susp-sub-lift ⟨ σ , t ⟩ = Ext≃ (susp-sub-lift σ) (susp-tm-lift t)
+
+lookupSusp-is-inject : (i : Fin (ctxLength Γ)) → lookupSusp {Γ = Γ} i ≃tm Var {Γ = suspCtx Γ} (inject₁ (inject₁ i))
+lookupSusp-is-inject {Γ = Γ , A} zero = Var≃ refl
+lookupSusp-is-inject {Γ = Γ , A} (suc i) = lift-tm-≃ (lookupSusp-is-inject i)
+
+susp-ctx-≃ : Γ ≃c Δ → suspCtx Γ ≃c suspCtx Δ
+susp-ty-≃ : {A : Ty Γ d} {B : Ty Δ d′} → Γ ≃c Δ → A ≃ty B → suspTy A ≃ty suspTy B
+susp-tm-≃ : {s : Tm Γ d} {t : Tm Δ d′} → Γ ≃c Δ → s ≃tm t → suspTm s ≃tm suspTm t
+susp-sub-≃ : {σ : Sub Γ Δ} {τ : Sub Γ′ Δ′} → Δ ≃c Δ′ → σ ≃s τ → suspSub σ ≃s suspSub τ
+
+susp-ctx-≃ Emp≃ = refl≃c
+susp-ctx-≃ (Add≃ p q) = Add≃ (susp-ctx-≃ p) (susp-ty-≃ p q)
+
+susp-ty-≃ p Star≃ with ≃c-preserve-len p
+... | refl with ≃c-to-≡ p
+... | refl = refl≃ty
+susp-ty-≃ p (Arr≃ q r s) = Arr≃ (susp-tm-≃ p q) (susp-ty-≃ p r) (susp-tm-≃ p s)
+
+susp-tm-≃ _ (Var≃ q) = trans≃tm (lookupSusp-is-inject _) (trans≃tm (Var≃ (trans (toℕ-inject₁ (inject₁ _)) (trans (toℕ-inject₁ _) (trans q (sym (trans (toℕ-inject₁ (inject₁ _)) (toℕ-inject₁ _))))))) (sym≃tm (lookupSusp-is-inject _)))
+susp-tm-≃ p (Coh≃ q r s) = Coh≃ (susp-ctx-≃ q) (susp-ty-≃ q r) (susp-sub-≃ p s)
+
+susp-sub-≃ p Null≃ with ≃c-preserve-len p
+... | refl with ≃c-to-≡ p
+... | refl = refl≃s
+susp-sub-≃ p (Ext≃ r s) = Ext≃ (susp-sub-≃ p r) (susp-tm-≃ p s)

@@ -75,13 +75,13 @@ sphere-type-susp (suc n) = Arr≃ (Var≃ refl) (trans≃ty (reflexive≃ty (tra
 
 is-linear : Tree n → Set
 is-linear Sing = ⊤
-is-linear (Join Sing T) = is-linear T
-is-linear (Join (Join S S₁) T) = ⊥
+is-linear (Join S Sing) = is-linear S
+is-linear (Join S (Join _ _)) = ⊥
 
 height-of-linear : (T : Tree n) → .(is-linear T) → ℕ
 height-of-linear Sing il = 0
-height-of-linear (Join Sing T) il = suc (height-of-linear T il)
+height-of-linear (Join S Sing) il = suc (height-of-linear S il)
 
 linear-tree-compat : (T : Tree n) → .(l : is-linear T) → tree-to-ctx T ≃c Disc (height-of-linear T l)
 linear-tree-compat Sing l = Add≃ Emp≃ Star≃
-linear-tree-compat (Join Sing T) l = trans≃c (connect-left-unit (suspCtx (tree-to-ctx T))) (trans≃c (susp-ctx-≃ (linear-tree-compat T l)) (disc-susp (height-of-linear T _)))
+linear-tree-compat (Join S Sing) l = trans≃c (susp-ctx-≃ (linear-tree-compat S l)) (disc-susp (height-of-linear S _))

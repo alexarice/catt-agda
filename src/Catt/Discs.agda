@@ -12,7 +12,7 @@ open import Catt.Dimension
 -- open import Catt.Pasting.Tree
 open import Catt.Globular
 open import Data.Nat
--- open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.PropositionalEquality
 open import Catt.Suspension
 -- open import Catt.Connection.Properties
 open import Data.Empty
@@ -38,16 +38,20 @@ Sphere (suc n) = Disc n , liftType (sphere-type n)
 sphere-type zero = ⋆
 sphere-type (suc n) = 1V ─⟨ liftType (liftType (sphere-type n)) ⟩⟶ 0V
 
-sub-from-disc : (t : Tm n) → .(tm-dim Γ t (suc (suc d))) → Sub (disc-size d) n
-sub-from-sphere : (A : Ty n) → .(ty-dim Γ A (suc d)) → Sub (sphere-size d) n
+sub-≡ : n ≡ m → Sub n m
+sub-≡ refl = idSub _
 
-sub-from-disc {Γ = Γ} t x = ⟨ (sub-from-sphere (tm-to-ty Γ t)) {!!} , t ⟩
+sub-from-disc : (Γ : Ctx n) → (t : Tm n) → .(tm-is-dim Γ t) → Sub (disc-size (tm-dim Γ t)) n
+sub-from-sphere : (Γ : Ctx n) → (A : Ty n) → .(ty-is-dim Γ A) → Sub (sphere-size (ty-dim A)) n
 
-sub-from-sphere {d = zero} ⋆ x = ⟨⟩
-sub-from-sphere {d = suc d} (s ─⟨ A ⟩⟶ t) x = ⟨ (sub-from-disc s (get x)) , {!t!} ⟩
-  where
-    get : ty-dim Γ (s ─⟨ A ⟩⟶ t) d′ → tm-dim Γ s d′
-    get (ArrD x _ _) = x
+sub-from-disc Γ t x = ⟨ sub-from-sphere Γ (tm-to-ty Γ {!t!}) {!!} ∘ {!!} , t ⟩
+
+sub-from-sphere = {!!}
+-- sub-from-disc {Γ = Γ} t x = ⟨ (sub-from-sphere (tm-to-ty Γ t)) {!!} , t ⟩
+
+-- sub-from-sphere {d = zero} ⋆ x = ⟨⟩
+-- sub-from-sphere {d = suc d} (s ─⟨ A ⟩⟶ t) x = ? -- ⟨ (sub-from-disc s (get x)) , t ⟩
+
 
 
 -- disc-susp : (n : ℕ) → suspCtx (Disc n) ≃c Disc (suc n)

@@ -4,84 +4,86 @@ module Catt.Syntax where
 
 open import Data.Nat
 open import Data.Fin using (Fin;zero;suc)
+open import Data.Fin.Patterns
+open import Relation.Nullary
+open import Data.Empty
+open import Data.Nat.Properties
+open import Relation.Binary.PropositionalEquality
 
 variable
   n n′ m m′ d d′ : ℕ
 
 data Ctx : ℕ → Set
-data Ty : Ctx n → ℕ → Set
-data Tm : Ctx n → ℕ → Set
-data Sub : Ctx n → Ctx m → Set
+data Ty : ℕ → Set
+data Tm : ℕ → Set
+data Sub : ℕ → ℕ → Set
 
 variable
   Γ Γ′ Δ Δ′ Υ : Ctx n
-  A A′ B C : Ty Γ n
-  s s′ t t′ u : Tm Γ n
-  σ σ′ τ μ : Sub Γ Δ
+  A A′ B C : Ty n
+  s s′ t t′ u : Tm n
+  σ σ′ τ μ : Sub n m
 
 infixl 25 _,_
 data Ctx where
   ∅ : Ctx 0
-  _,_ : (Γ : Ctx m) → (A : Ty Γ n) → Ctx (suc m)
-
-ctxLength : (Γ : Ctx n) → ℕ
-ctxLength {n} Γ = n
-
-ty-dim : Ty Γ n → ℕ
-ty-dim {n = n} A = n
-
-ctx-dim : Ctx n → ℕ
-ctx-dim ∅ = 0
-ctx-dim (Γ , A) = ctx-dim Γ ⊔ ty-dim A
-
-tm-dim : Tm Γ n → ℕ
-tm-dim {n = n} t = n
-
-sub-dim : Sub Γ Δ → ℕ
-
-lookupDim : (Γ : Ctx n) → Fin n → ℕ
-lookupDim (Γ , A) zero = ty-dim A
-lookupDim (Γ , A) (suc i) = lookupDim Γ i
+  _,_ : (Γ : Ctx m) → (A : Ty m) → Ctx (suc m)
 
 infix 30 _─⟨_⟩⟶_
 data Ty where
-  ⋆ : Ty Γ 1
-  _─⟨_⟩⟶_ : (s : Tm Γ (suc n)) → (A : Ty Γ n) → (t : Tm Γ (suc n)) → Ty Γ (suc n)
+  ⋆ : Ty n
+  _─⟨_⟩⟶_ : (s : Tm n) → (A : Ty n) → (t : Tm n) → Ty n
 
 data Sub where
-  ⟨⟩ : Sub ∅ Δ
-  ⟨_,_⟩ : (σ : Sub Γ Δ) → {A : Ty Γ m} → (t : Tm Δ (suc m)) → Sub (Γ , A) Δ
+  ⟨⟩ : Sub 0 m
+  ⟨_,_⟩ : (σ : Sub n m) → (t : Tm m) → Sub (suc n) m
 
-sub-dim ⟨⟩ = 0
-sub-dim ⟨ σ , t ⟩ = sub-dim σ ⊔ tm-dim t
+
+data Tree : ℕ → Set where
+  Sing : Tree 0
+  Join : (S : Tree n) → (T : Tree m) → Tree (m + suc (suc n))
 
 data Tm where
-  Var : (i : (Fin (ctxLength Γ))) → Tm Γ (suc (lookupDim Γ i))
-  Coh : (Δ : Ctx (suc n)) → (A : Ty Δ m) → .(ctx-dim Δ ≤ m) → (σ : Sub Δ Γ) → Tm Γ (suc m)
+  Var : (i : (Fin n)) → Tm n
+  Coh : (T : Tree n) → (A : Ty (suc n)) → (σ : Sub (suc n) m) → Tm m
+
+pattern 0V = Var 0F
+pattern 1V = Var 1F
+pattern 2V = Var 2F
+pattern 3V = Var 3F
+pattern 4V = Var 4F
+pattern 5V = Var 5F
+pattern 6V = Var 5F
+pattern 7V = Var 6F
+pattern 8V = Var 7F
+pattern 9V = Var 8F
+
+ctxLength : Ctx n → ℕ
+ctxLength {n} Γ = n
 
 infixr 30 _[_]ty _[_]tm
-_[_]ty : Ty Γ n → Sub Γ Δ → Ty Δ n
-_[_]tm : Tm Γ n → Sub Γ Δ → Tm Δ n
+_[_]ty : Ty n → Sub n m → Ty m
+_[_]tm : Tm n → Sub n m → Tm m
 
 infixl 31 _∘_
-_∘_ : Sub Δ Υ → Sub Γ Δ → Sub Γ Υ
+_∘_ : Sub n m → Sub n′ n → Sub n′ m
 
 ⋆ [ σ ]ty = ⋆
 (s ─⟨ A ⟩⟶ t) [ σ ]ty = (s [ σ ]tm) ─⟨ (A [ σ ]ty) ⟩⟶ (t [ σ ]tm)
 
 Var zero [ ⟨ σ , t ⟩ ]tm = t
 Var (suc x) [ ⟨ σ , t ⟩ ]tm = Var x [ σ ]tm
-Coh Δ A p τ [ σ ]tm = Coh Δ A p (σ ∘ τ)
+Coh Δ A τ [ σ ]tm = Coh Δ A (σ ∘ τ)
 
 σ ∘ ⟨⟩ = ⟨⟩
 σ ∘ ⟨ τ , t ⟩ = ⟨ (σ ∘ τ) , t [ σ ]tm ⟩
 
-liftTerm : Tm Γ n → Tm (Γ , A) n
-liftSub : Sub Δ Γ → Sub Δ (Γ , A)
-liftType : Ty Γ n → Ty (Γ , A) n
+liftTerm : Tm n → Tm (suc n)
+liftSub : Sub n m → Sub n (suc m)
+liftType : Ty n → Ty (suc n)
 
 liftTerm (Var i) = Var (suc i)
-liftTerm (Coh Δ A p σ) = Coh Δ A p (liftSub σ)
+liftTerm (Coh Δ A σ) = Coh Δ A (liftSub σ)
 
 liftSub ⟨⟩ = ⟨⟩
 liftSub ⟨ σ , t ⟩ = ⟨ liftSub σ , liftTerm t ⟩
@@ -89,14 +91,11 @@ liftSub ⟨ σ , t ⟩ = ⟨ liftSub σ , liftTerm t ⟩
 liftType ⋆ = ⋆
 liftType (s ─⟨ A ⟩⟶ t) = liftTerm s ─⟨ liftType A ⟩⟶ liftTerm t
 
-idSub : (Γ : Ctx n) → Sub Γ Γ
-idSub ∅ = ⟨⟩
-idSub (Γ , A) = ⟨ liftSub (idSub Γ) , Var zero ⟩
-
-projection : (Γ : Ctx n) → {A : Ty Γ m} → Sub Γ (Γ , A)
-projection Γ = liftSub (idSub Γ)
+idSub : (n : ℕ) → Sub n n
+idSub zero = ⟨⟩
+idSub (suc n) = ⟨ liftSub (idSub n) , 0V ⟩
 
 infix 45 _‼_
-_‼_ : (Γ : Ctx n) → (i : Fin n) → Ty Γ (lookupDim Γ i)
+_‼_ : (Γ : Ctx n) → (i : Fin n) → Ty n
 (Γ , A) ‼ zero = liftType A
 (Γ , A) ‼ suc i = liftType (Γ ‼ i)

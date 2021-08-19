@@ -104,9 +104,9 @@ connected-dim (Finish pdb) (Finish pdb2) = new-submax pdb pdb2
 connect-pd-pd : {Γ : Ctx (suc n)} {Δ : Ctx (suc n′)} → (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → connect-pd pd Δ ⊢pd₀ connected-dim pd pd2
 connect-pd-pd (Finish pdb) (Finish pdb2) = Finish (connect-pdb-pdb pdb pdb2)
 
-sub-from-connect : {Γ : Ctx (suc n)} {Δ : Ctx (suc m)} → Sub Γ Υ → (t : Tm Γ 2) → Sub Δ Υ → Sub (connect Γ t Δ) Υ
+sub-from-connect : Sub Γ Υ → (t : Tm Γ 2) → Sub Δ Υ → Sub (connect Γ t Δ) Υ
 sub-from-connect σ s ⟨ ⟨⟩ , t ⟩ = σ
 sub-from-connect σ s ⟨ ⟨ τ , u ⟩ , t ⟩ = ⟨ sub-from-connect σ s ⟨ τ , u ⟩ , t ⟩
 
-sub-from-connect-pdb : {Γ : Ctx (suc n)} → (pdb : Γ ⊢pd[ submax ][ 0 ]) → Sub Γ Υ → Sub Δ Υ → Sub (connect-pdb pdb Δ) Υ
+sub-from-connect-pdb : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Sub Γ Υ → Sub Δ Υ → Sub (connect-pdb pdb Δ) Υ
 sub-from-connect-pdb pdb σ τ = sub-from-connect σ (getFocusTerm pdb) τ

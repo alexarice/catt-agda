@@ -13,6 +13,7 @@ open import Catt.Globular
 open import Data.Nat
 open import Relation.Binary.PropositionalEquality
 open import Catt.Suspension
+open import Catt.Suspension.Properties
 open import Catt.Connection.Properties
 open import Data.Empty
 open import Data.Unit
@@ -57,21 +58,6 @@ sphere-susp (suc n) = Add≃ (disc-susp n) (trans≃ty (reflexive≃ty (suspLift
 
 sphere-type-susp zero = refl≃ty
 sphere-type-susp (suc n) = Arr≃ (Var≃ refl) (trans≃ty (reflexive≃ty (trans (suspLiftTy (liftType (sphere-type n))) (cong liftType (suspLiftTy (sphere-type n))))) (lift-ty-≃ (lift-ty-≃ (sphere-type-susp n)))) (Var≃ refl)
-
--- disc-is-pdb : (n : ℕ) → Disc n ⊢pd[ 0 ][ n ]
--- disc-is-pdb-foc-ty : (n : ℕ) → liftType (sphere-type n) ≡ getFocusType (disc-is-pdb n)
--- disc-is-pdb-foc-tm : (n : ℕ) → 0V ≡ getFocusTerm (disc-is-pdb n)
-
--- disc-is-pdb zero = Base
--- disc-is-pdb (suc n) = extend-pd-eq (disc-is-pdb n) (disc-is-pdb-foc-ty n) (arr-equality (cong liftTerm (disc-is-pdb-foc-tm n)) (cong liftType (disc-is-pdb-foc-ty n)) refl)
-
--- disc-is-pdb-foc-ty zero = refl
--- disc-is-pdb-foc-ty (suc n) = trans (arr-equality (cong (λ - → liftTerm (liftTerm -)) (disc-is-pdb-foc-tm n)) (cong (λ - → liftType (liftType -)) (disc-is-pdb-foc-ty n)) refl) (extend-pd-eq-foc-ty (disc-is-pdb n) (disc-is-pdb-foc-ty n) (arr-equality (cong liftTerm (disc-is-pdb-foc-tm n)) (cong liftType (disc-is-pdb-foc-ty n)) refl))
-
--- disc-is-pdb-foc-tm zero = refl
--- disc-is-pdb-foc-tm (suc n) = extend-pd-eq-foc-tm (disc-is-pdb n) (disc-is-pdb-foc-ty n) (arr-equality (cong liftTerm (disc-is-pdb-foc-tm n)) (cong liftType (disc-is-pdb-foc-ty n)) refl)
-
--- disc-is-pd : n
 
 is-linear : Tree n → Set
 is-linear Sing = ⊤

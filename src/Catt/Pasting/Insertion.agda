@@ -13,13 +13,17 @@ open import Catt.Pasting.Properties
 open import Catt.Discs
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Suspension
+open import Catt.Suspension.Properties
+open import Catt.Unsuspension
 open import Data.Empty
 open import Data.Unit using (⊤;tt)
 open import Catt.Connection
 open import Catt.Connection.Properties
 open import Data.Product renaming (_,_ to _,,_)
-open import Data.Fin using (Fin; toℕ; zero; suc)
+open import Data.Fin using (Fin; toℕ; zero; suc; fromℕ)
 open import Relation.Binary.PropositionalEquality
+import Relation.Binary.Reasoning.Setoid as Reasoning
+open import Catt.Syntax.Bundles
 
 data Path : Tree n → Set where
   PHere : (T : Tree n) → Path T
@@ -48,149 +52,25 @@ insertion-tree S (PHere .S) T lh = T
 insertion-tree (Join S₁ S₂) (PExt P) (Join T Sing) lh = Join (insertion-tree S₁ P T lh) S₂
 insertion-tree (Join S₁ S₂) (PShift P) T lh = Join S₁ (insertion-tree S₂ P T lh)
 
-
 interior-sub : (S : Tree n) → (P : Path S) → (T : Tree m) → .(lh : has-linear-height (path-length P) T) → Sub (tree-to-ctx T) (tree-to-ctx (insertion-tree S P T lh))
 interior-sub S (PHere .S) T lh = idSub (tree-to-ctx T)
 interior-sub (Join S₁ S₂) (PExt P) (Join T Sing) lh = connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T lh) tt))) (tree-to-ctx S₂) ∘ suspSub (interior-sub S₁ P T lh)
 interior-sub (Join S₁ S₂) (PShift P) T lh = connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)) ∘ interior-sub S₂ P T lh
 
+is-non-empty-path : {T : Tree n} → Path T → Set
+is-non-empty-path (PHere _) = ⊥
+is-non-empty-path (PExt P) = ⊤
+is-non-empty-path (PShift P) = ⊤
+
 is-branching-path : {T : Tree n} → Path T → Set
 is-branching-path (PHere T) = is-linear T
 is-branching-path (PExt P) = is-branching-path P
-is-branching-path (PShift P) = is-branching-path P
+is-branching-path (PShift P) = is-branching-path P × is-non-empty-path P
 
 height-of-branching : {T : Tree n} → (P : Path T) → .(is-branching-path P) → ℕ
 height-of-branching (PHere T) bp = height-of-linear T bp
 height-of-branching (PExt P) bp = suc (height-of-branching P bp)
-height-of-branching (PShift P) bp = height-of-branching P bp
-
-is-unsuspendable-ctx : (Γ : Ctx n) → Set
-unsuspend-ctx : (Γ : Ctx (suc (suc n))) → (us : is-unsuspendable-ctx Γ) → Ctx n
-
-unsuspend-ctx-compat : (Γ : Ctx (suc (suc n))) → (us : is-unsuspendable-ctx Γ) → suspCtx (unsuspend-ctx Γ us) ≃c Γ
-dim-of-unsuspend : (Γ : Ctx (suc (suc n))) → (us : is-unsuspendable-ctx Γ) → suc (ctx-dim (unsuspend-ctx Γ us)) ≡ ctx-dim Γ
-is-unsuspendable-ty : (Γ : Ctx n) → (A : Ty Δ d) → suspCtx Γ ≃c Δ → Set
-unsuspend-ty : (A : Ty Δ d)
-             → (Γ : Ctx n)
-             → (p : suspCtx Γ ≃c Δ)
-             → (ust : is-unsuspendable-ty Γ A p)
-             → Ty Γ (pred d)
-unsuspend-ty-compat : (A : Ty Δ d)
-                    → (Γ : Ctx n)
-                    → (p : suspCtx Γ ≃c Δ)
-                    → (ust : is-unsuspendable-ty Γ A p)
-                    → suspTy (unsuspend-ty A Γ p ust) ≃ty A
-is-unsuspendable-tm : (Γ : Ctx n) → (t : Tm Δ d) → suspCtx Γ ≃c Δ → Set
-unsuspend-tm : (t : Tm Δ d)
-             → (Γ : Ctx n)
-             → (p : suspCtx Γ ≃c Δ)
-             → (ust : is-unsuspendable-tm Γ t p)
-             → Tm Γ (pred d)
-unsuspend-tm-compat : (t : Tm Δ d)
-                    → (Γ : Ctx n)
-                    → (p : suspCtx Γ ≃c Δ)
-                    → (ust : is-unsuspendable-tm Γ t p)
-                    → suspTm (unsuspend-tm t Γ p ust) ≃tm t
-is-unsuspendable-sub : (Γ : Ctx n) → (Δ : Ctx m) → Sub Γ′ Δ′ → suspCtx Γ ≃c Γ′ → suspCtx Δ ≃c Δ′ → Set
-unsuspend-sub : (σ : Sub Γ′ Δ′)
-              → (Γ : Ctx n)
-              → (Δ : Ctx m)
-              → (p : suspCtx Γ ≃c Γ′)
-              → (q : suspCtx Δ ≃c Δ′)
-              → (is-unsuspendable-sub Γ Δ σ p q)
-              → Sub Γ Δ
-unsuspend-sub-compat : (σ : Sub Γ′ Δ′)
-                     → (Γ : Ctx n)
-                     → (Δ : Ctx m)
-                     → (p : suspCtx Γ ≃c Γ′)
-                     → (q : suspCtx Δ ≃c Δ′)
-                     → (uss : is-unsuspendable-sub Γ Δ σ p q)
-                     → suspSub (unsuspend-sub σ Γ Δ p q uss) ≃s σ
-
-is-unsuspendable-ctx ∅ = ⊥
-is-unsuspendable-ctx (∅ , A) = ⊥
-is-unsuspendable-ctx (∅ , ⋆ , ⋆) = ⊤
-is-unsuspendable-ctx (∅ , ⋆ , _ ─⟨ _ ⟩⟶ _) = ⊥
-is-unsuspendable-ctx (∅ , _ ─⟨ _ ⟩⟶ _ , _) = ⊥
-is-unsuspendable-ctx (Γ , A , B , C) = Σ[ p ∈ is-unsuspendable-ctx (Γ , A , B) ] is-unsuspendable-ty (unsuspend-ctx (Γ , A , B) p) C (unsuspend-ctx-compat (Γ , A , B) p)
-
-unsuspend-ctx (∅ , ⋆ , ⋆) usc = ∅
-unsuspend-ctx (Γ , A , B , C) usc = (unsuspend-ctx (Γ , A , B) (proj₁ usc)) , unsuspend-ty C (unsuspend-ctx (Γ , A , B) (proj₁ usc)) (unsuspend-ctx-compat (Γ , A , B) _) (proj₂ usc)
-
-unsuspend-ctx-compat (∅ , ⋆ , ⋆) us = refl≃c
-unsuspend-ctx-compat (Γ , A , B , C) us = Add≃ (unsuspend-ctx-compat (Γ , A , B) (proj₁ us)) (unsuspend-ty-compat C (unsuspend-ctx (Γ , A , B) _) (unsuspend-ctx-compat (Γ , A , B) _) (proj₂ us))
-
-dim-of-unsuspend (∅ , ⋆ , ⋆) us = refl
-dim-of-unsuspend (Γ , A , B , C) us = cong₂ _⊔_ {u = suc (pred (ty-dim C))} (dim-of-unsuspend (Γ , A , B) (proj₁ us)) (suc[pred[n]]≡n (lem C))
-  where
-    lem : (A : Ty Γ′ n′) → n′ ≢ 0
-    lem ⋆ ()
-    lem (s ─⟨ A ⟩⟶ t) ()
-
-is-unsuspendable-ty Γ ⋆ p = ⊥
-is-unsuspendable-ty Γ (s ─⟨ ⋆ ⟩⟶ t) p = getFst {Γ = Γ} ≃tm s × getSnd {Γ = Γ} ≃tm t
-is-unsuspendable-ty Γ (s ─⟨ A@(_ ─⟨ _ ⟩⟶ _) ⟩⟶ t) p = is-unsuspendable-ty Γ A p × is-unsuspendable-tm Γ s p × is-unsuspendable-tm Γ t p
-
-unsuspend-ty (s ─⟨ ⋆ ⟩⟶ t) Γ p x = ⋆
-unsuspend-ty (s ─⟨ A@(_ ─⟨ _ ⟩⟶ _) ⟩⟶ t) Γ p x = (unsuspend-tm s Γ p (proj₁ (proj₂ x))) ─⟨ unsuspend-ty A Γ p (proj₁ x) ⟩⟶ unsuspend-tm t Γ p (proj₂ (proj₂ x))
-
-unsuspend-ty-compat (s ─⟨ ⋆ ⟩⟶ t) Γ p x = Arr≃ (proj₁ x) Star≃ (proj₂ x)
-unsuspend-ty-compat (s ─⟨ A@(_ ─⟨ _ ⟩⟶ _) ⟩⟶ t) Γ p x = Arr≃ (unsuspend-tm-compat s Γ p (proj₁ (proj₂ x))) (unsuspend-ty-compat A Γ p (proj₁ x)) (unsuspend-tm-compat t Γ p (proj₂ (proj₂ x)))
-
-is-unsuspendable-tm Γ (Var i) p = toℕ i < ctxLength Γ
-is-unsuspendable-tm Γ (Coh {n = zero} Δ A x σ) p = ⊥
-is-unsuspendable-tm Γ (Coh {n = suc zero} Δ A x σ) p = ⊥
-is-unsuspendable-tm Γ (Coh {n = suc (suc n)} Δ A x σ) p = Σ[ q ∈ is-unsuspendable-ctx Δ ] is-unsuspendable-ty (unsuspend-ctx Δ q) A (unsuspend-ctx-compat Δ q) × is-unsuspendable-sub (unsuspend-ctx Δ q) Γ σ (unsuspend-ctx-compat Δ q) p
-
-unsuspend-var : (Γ : Ctx n)
-              → {Δ : Ctx m}
-              → (i : Fin m)
-              → .(toℕ i < n)
-              → (suspCtx Γ ≃c Δ)
-              → Tm Γ (lookupDim Δ i)
-unsuspend-var (Γ , A) zero x (Add≃ p x₁) with ≃ty-preserve-dim x₁
-... | refl = 0V
-unsuspend-var (Γ , A) (suc i) x (Add≃ p _) = liftTerm (unsuspend-var Γ i (≤-pred x) p)
-
-unsuspend-var-compat : (Γ : Ctx n)
-                     → {Δ : Ctx m}
-                     → (i : Fin m)
-                     → .(p : toℕ i < n)
-                     → (q : suspCtx Γ ≃c Δ)
-                     → suspTm (unsuspend-var Γ i p q) ≃tm Var {Γ = Δ} i
-unsuspend-var-compat (Γ , A) zero p (Add≃ q x) with ≃ty-preserve-dim x
-... | refl = Var≃ refl
-unsuspend-var-compat (Γ , A) (suc i) p (Add≃ q x) = trans≃tm (reflexive≃tm (suspLiftTm (unsuspend-var Γ i (≤-pred p) q))) (lift-tm-≃ (unsuspend-var-compat Γ i (≤-pred p) q))
-
-unsuspend-tm (Var i) Γ p x = unsuspend-var Γ i x p
-unsuspend-tm (Coh {n = suc (suc n)} {m = (suc m)} Δ A x σ) Γ p y = Coh (unsuspend-ctx Δ (proj₁ y)) (unsuspend-ty A (unsuspend-ctx Δ (proj₁ y)) (unsuspend-ctx-compat Δ (proj₁ y)) (proj₁ (proj₂ y))) (≤-pred (≤-trans (≤-reflexive (dim-of-unsuspend Δ (proj₁ y))) x)) (unsuspend-sub σ (unsuspend-ctx Δ (proj₁ y)) Γ (unsuspend-ctx-compat Δ (proj₁ y)) p (proj₂ (proj₂ y)))
-
-unsuspend-tm-compat (Var i) Γ p x = unsuspend-var-compat Γ i x p
-unsuspend-tm-compat (Coh {n = suc (suc n)} {m = (suc m)} Δ A x₁ σ) Γ p x = Coh≃ (unsuspend-ctx-compat Δ (proj₁ x)) (unsuspend-ty-compat A (unsuspend-ctx Δ (proj₁ x)) (unsuspend-ctx-compat Δ (proj₁ x)) (proj₁ (proj₂ x))) (unsuspend-sub-compat σ (unsuspend-ctx Δ (proj₁ x)) Γ (unsuspend-ctx-compat Δ (proj₁ x)) p (proj₂ (proj₂ x)))
-
-is-unsuspendable-sub Γ Δ ⟨ ⟨⟩ , t ⟩ p q = ⊥
-is-unsuspendable-sub Γ Δ ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ p q = getFst {Γ = Δ} ≃tm s × getSnd {Γ = Δ} ≃tm t
-is-unsuspendable-sub ∅ Δ ⟨ ⟨ ⟨ σ , t₂ ⟩ , t₁ ⟩ , t ⟩ (Add≃ (Add≃ () x₁) x) q
-is-unsuspendable-sub (Γ , A) Δ ⟨ ⟨ ⟨ σ , u ⟩ , s ⟩ , t ⟩ (Add≃ p _) q = is-unsuspendable-sub Γ Δ ⟨ ⟨ σ , u ⟩ , s ⟩ p q × is-unsuspendable-tm Δ t q
-
-subst-dim-tm : Tm Γ n → m ≡ n → Tm Γ m
-subst-dim-tm t refl = t
-
-subst-dim-tm-≃ : (t : Tm Γ n) → (p : m ≡ n) → subst-dim-tm t p ≃tm t
-subst-dim-tm-≃ t refl = refl≃tm
-
-unsuspend-sub ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ ∅ Δ p q x = ⟨⟩
-unsuspend-sub ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ (Γ , A) Δ p q x with cong (λ - → pred (pred -)) (≃c-preserve-len p)
-... | ()
-unsuspend-sub ⟨ ⟨ ⟨ σ , t₂ ⟩ , t₁ ⟩ , t ⟩ ∅ Δ (Add≃ (Add≃ () x₂) x₁) q x
-unsuspend-sub (⟨_,_⟩ {m = m} ⟨ ⟨ σ , u ⟩ , s ⟩ t) (_,_ {n = n} Γ A) Δ (Add≃ p y) q x = ⟨ (unsuspend-sub ⟨ ⟨ σ , u ⟩ , s ⟩ Γ Δ p q (proj₁ x)) , subst-dim-tm (unsuspend-tm t Δ q (proj₂ x)) (≃ty-preserve-dim y) ⟩
-
-
-unsuspend-sub-compat ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ ∅ Δ p q x = Ext≃ (Ext≃ Null≃ (proj₁ x)) (proj₂ x)
-unsuspend-sub-compat ⟨ ⟨ ⟨⟩ , t₁ ⟩ , t ⟩ (Γ , A) Δ p q x with cong (λ - → pred (pred -)) (≃c-preserve-len p)
-... | ()
-unsuspend-sub-compat ⟨ ⟨ ⟨ σ , t₂ ⟩ , t₁ ⟩ , t ⟩ ∅ Δ (Add≃ (Add≃ () x₂) x₁) q x
-unsuspend-sub-compat (⟨_,_⟩ {m = m} ⟨ ⟨ σ , u ⟩ , s ⟩ t) (_,_ {n = n} Γ A) Δ (Add≃ p x₁) q x = Ext≃ (unsuspend-sub-compat ⟨ ⟨ σ , u ⟩ , s ⟩ Γ Δ p q (proj₁ x)) (trans≃tm (susp-tm-≃ refl≃c (subst-dim-tm-≃ (unsuspend-tm t Δ q (proj₂ x)) (≃ty-preserve-dim x₁))) (unsuspend-tm-compat t Δ q (proj₂ x)))
+height-of-branching (PShift P) bp = height-of-branching P (proj₁ bp)
 
 type-has-linear-height : (n : ℕ) → {d : ℕ} → (T : Tree m) → .(lh : has-linear-height n T) → (A : Ty (tree-to-ctx T) d) → Set
 type-has-linear-height zero T lh A = ⊤
@@ -213,4 +93,171 @@ exterior-sub (Join S₁ S₂) (PExt P) bp (Join T Sing) lh A x tlh =
 exterior-sub (Join S₁ S₂) (PShift P) bp T lh A x tlh =
   sub-from-connect-pdb (Restr (susp-pdb (tree-to-pdb zero S₁ tt)))
                        (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)))
-                       (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)) ∘ exterior-sub S₂ P bp T lh A x tlh)
+                       (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)) ∘ exterior-sub S₂ P (proj₁ bp) T lh A x tlh)
+
+exterior-sub-fst-var : (S : Tree n)
+                     → (P : Path S)
+                     → .(bp : is-branching-path P)
+                     → .(is-non-empty-path P)
+                     → (T : Tree m)
+                     → .(lh : has-linear-height (path-length P) T)
+                     → (A : Ty (tree-to-ctx T) (suc (height-of-branching P bp)))
+                     → .(x : ctx-dim (tree-to-ctx T) ≤ suc (height-of-branching P bp))
+                     → (tlh : type-has-linear-height (path-length P) T lh A)
+                     → Var {Γ = tree-to-ctx (insertion-tree S P T lh)} (fromℕ _) ≃tm Var (fromℕ _) [ exterior-sub S P bp T lh A x tlh ]tm
+exterior-sub-fst-var (Join S₁ S₂) (PExt P) bp ne (Join T Sing) lh A x tlh = begin
+  < Var (fromℕ (insertion-tree-size (Join S₁ S₂) (PExt P) (Join T Sing) _)) >tm ≈˘⟨ connect-pdb-inc-left-fst-var ((Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _)))) (tree-to-ctx S₂) ⟩
+  < Var (fromℕ (suc (suc (insertion-tree-size S₁ P T _)))) [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _))) (tree-to-ctx S₂) ]tm >tm
+    ≈˘⟨ sub-action-≃-tm (susp-fst-var (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh))) refl≃s ⟩
+  < (Var (fromℕ (suc (suc _))) [ suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh)) ]tm) [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _))) (tree-to-ctx S₂) ]tm >tm
+    ≈˘⟨ assoc-tm (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T lh) _))) (tree-to-ctx S₂)) (suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh))) (Var (fromℕ _)) ⟩
+  < Var (fromℕ _) [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T lh) _))) (tree-to-ctx S₂) ∘ suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh)) ]tm >tm
+    ≈˘⟨ sub-from-connect-pdb-fst-var (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _))) (tree-to-ctx S₂) ∘ suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh))) (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _))) (tree-to-ctx S₂)) ⟩
+  < Var (fromℕ _) [ sub-from-connect-pdb (Restr (susp-pdb (tree-to-pdb zero S₁ _)))
+                                          (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _))) (tree-to-ctx S₂) ∘ suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh)))
+                                          (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _))) (tree-to-ctx S₂)) ]tm >tm ≡⟨⟩
+  < Var (fromℕ (_ + suc (suc _))) [ exterior-sub (Join S₁ S₂) (PExt P) _ (Join T Sing) _ A x tlh ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+exterior-sub-fst-var (Join S₁ S₂) (PShift P) bp ne T lh A x tlh = begin
+  < Var (fromℕ (insertion-tree-size (Join S₁ S₂) (PShift P) T _)) >tm ≈˘⟨ connect-pdb-inc-left-fst-var (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)) ⟩
+  < Var (fromℕ _) [ (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T lh))) ]tm >tm ≈˘⟨ sub-from-connect-pdb-fst-var (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _))) (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ∘ exterior-sub S₂ P _ T _ A _ tlh) ⟩
+  < Var (fromℕ _) [ sub-from-connect-pdb (Restr (susp-pdb (tree-to-pdb zero S₁ _)))
+                                         (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)))
+                                         (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ∘ exterior-sub S₂ P (proj₁ bp) T lh A x tlh) ]tm >tm
+       ≡⟨⟩
+  < Var (fromℕ (_ + suc (suc _))) [ exterior-sub (Join S₁ S₂) (PShift P) bp T lh A x tlh ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+
+linear-to-var : (T : Tree n) → .(l : is-linear T) → Tm (tree-to-ctx T) (suc (suc (height-of-linear T l)))
+linear-to-var Sing l = 0V
+linear-to-var (Join T Sing) l = suspTm (linear-to-var T l)
+
+linear-to-var-is-0V : (T : Tree n) → .(l : is-linear T) → linear-to-var T l ≃tm Var {Γ = tree-to-ctx T} zero
+linear-to-var-is-0V Sing l = refl≃tm
+linear-to-var-is-0V (Join T Sing) l = trans≃tm (susp-tm-≃ refl≃c (linear-to-var-is-0V T l)) lem
+  where
+    lem : lookupSusp {Γ = Γ} zero ≃tm Var {Γ = suspCtx Γ} zero
+    lem {Γ = Γ , A} = refl≃tm
+
+branching-path-to-var : (T : Tree n) → (P : Path T) → .(bp : is-branching-path P) → Tm (tree-to-ctx T) (suc (suc (height-of-branching P bp)))
+branching-path-to-var T (PHere .T) bp = linear-to-var T bp
+branching-path-to-var (Join S T) (PExt P) bp = suspTm (branching-path-to-var S P bp) [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S tt))) (tree-to-ctx T) ]tm
+branching-path-to-var (Join S T) (PShift P) bp = branching-path-to-var T P (proj₁ bp) [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S tt))) (tree-to-ctx T) ]tm
+
+disc-to-outer : (T : Tree n) → (P : Path T) → .(bp : is-branching-path P) → Sub (Disc (height-of-branching P bp)) (tree-to-ctx T)
+disc-to-outer T P bp = sub-from-disc (branching-path-to-var T P bp)
+
+disc-to-inner : (T : Tree n) → .(ctx-dim (tree-to-ctx T) ≤ suc d) → (A : Ty (tree-to-ctx T) (suc d)) → Sub (Disc d) (tree-to-ctx T)
+disc-to-inner T x A = sub-from-disc (Coh (tree-to-ctx T) A x (idSub (tree-to-ctx T)))
+
+insertion-comm : (S : Tree n)
+               → (P : Path S)
+               → .(bp : is-branching-path P)
+               → (T : Tree m)
+               → .(lh : has-linear-height (path-length P) T)
+               → (A : Ty (tree-to-ctx T) (suc (height-of-branching P bp)))
+               → .(x : ctx-dim (tree-to-ctx T) ≤ suc (height-of-branching P bp))
+               → (tlh : type-has-linear-height (path-length P) T lh A)
+               → 0V [ interior-sub S P T lh ∘ disc-to-inner T x A ]tm ≃tm 0V [ exterior-sub S P bp T lh A x tlh ∘ disc-to-outer S P bp ]tm
+
+insertion-comm S (PHere .S) bp T lh A x tlh = begin
+  < 0V [ interior-sub S (PHere S) T _ ∘ disc-to-inner T _ A ]tm >tm ≡⟨⟩
+  < 0V [ idSub (tree-to-ctx T) ∘ sub-from-disc (Coh (tree-to-ctx T) A _ (idSub (tree-to-ctx T))) ]tm >tm ≈⟨ assoc-tm (idSub (tree-to-ctx T)) (sub-from-disc (Coh (tree-to-ctx T) A _ (idSub (tree-to-ctx T)))) 0V ⟩
+  < (0V [ sub-from-disc (Coh (tree-to-ctx T) A x (idSub (tree-to-ctx T))) ]tm) [ idSub (tree-to-ctx T) ]tm >tm ≈⟨ id-on-tm (0V [ sub-from-disc (Coh (tree-to-ctx T) A _ (idSub (tree-to-ctx T))) ]tm) ⟩
+  < 0V [ sub-from-disc (Coh (tree-to-ctx T) A x (idSub (tree-to-ctx T))) ]tm >tm ≡⟨⟩
+  < Coh (tree-to-ctx T) A x (idSub (tree-to-ctx T)) >tm ≡⟨⟩
+  < 0V [ sub-from-disc (Coh (tree-to-ctx T) A _ (idSub (tree-to-ctx T))) ]tm >tm ≈˘⟨ sub-action-≃-tm (idSub≃-on-tm (linear-tree-compat S bp) (Var≃ refl)) refl≃s ⟩
+  < 0V [ idSub≃ (linear-tree-compat S _) ]tm [ sub-from-disc (Coh (tree-to-ctx T) A _ (idSub (tree-to-ctx T))) ]tm >tm ≈˘⟨ assoc-tm (sub-from-disc (Coh (tree-to-ctx T) A _ (idSub (tree-to-ctx T)))) (idSub≃ (linear-tree-compat S _)) 0V ⟩
+  < 0V [ sub-from-disc (Coh (tree-to-ctx T) A _ (idSub (tree-to-ctx T))) ∘ idSub≃ (linear-tree-compat S _) ]tm >tm ≈˘⟨ sub-action-≃-tm (linear-to-var-is-0V S bp) refl≃s ⟩
+  < linear-to-var S _ [ sub-from-disc (Coh (tree-to-ctx T) A _ (idSub (tree-to-ctx T))) ∘ idSub≃ (linear-tree-compat S _) ]tm >tm ≡⟨⟩
+  < 0V [ sub-from-disc (linear-to-var S _) ]tm [ sub-from-disc (Coh (tree-to-ctx T) A _ (idSub (tree-to-ctx T))) ∘ idSub≃ (linear-tree-compat S _) ]tm >tm ≈˘⟨ assoc-tm (sub-from-disc (Coh (tree-to-ctx T) A x (idSub (tree-to-ctx T))) ∘ idSub≃ (linear-tree-compat S _)) (sub-from-disc (linear-to-var S _)) 0V ⟩
+  < 0V [ sub-from-disc (Coh (tree-to-ctx T) A x (idSub (tree-to-ctx T))) ∘ idSub≃ (linear-tree-compat S _) ∘ sub-from-disc (linear-to-var S _) ]tm >tm ≡⟨⟩
+  < 0V [ exterior-sub S (PHere S) _ T _ A _ tlh ∘ disc-to-outer S (PHere S) _ ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+insertion-comm (Join S₁ S₂) (PExt P) bp (Join T Sing) lh A x tlh = begin
+  < 0V [ interior-sub (Join S₁ S₂) (PExt P) (Join T Sing) _ ∘ disc-to-inner (Join T Sing) _ A ]tm >tm ≡⟨⟩
+  < 0V [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T lh) tt))) (tree-to-ctx S₂) ∘ suspSub (interior-sub S₁ P T lh) ∘ sub-from-disc (Coh (tree-to-ctx (Join T Sing)) A x (idSub (tree-to-ctx (Join T Sing)))) ]tm >tm ≡⟨⟩
+  < Coh (tree-to-ctx (Join T Sing)) A x (idSub (tree-to-ctx (Join T Sing))) [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T lh) tt))) (tree-to-ctx S₂) ∘ suspSub (interior-sub S₁ P T lh) ]tm >tm
+    ≈⟨ assoc-tm (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T lh) tt))) (tree-to-ctx S₂)) (suspSub (interior-sub S₁ P T lh)) (Coh (tree-to-ctx (Join T Sing)) A x (idSub (tree-to-ctx (Join T Sing)))) ⟩
+  < Coh (tree-to-ctx (Join T Sing)) A _ (idSub (tree-to-ctx (Join T Sing))) [ suspSub (interior-sub S₁ P T _) ]tm [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _))) (tree-to-ctx S₂) ]tm >tm
+    ≈⟨ sub-action-≃-tm lem refl≃s ⟩
+  < suspTm (branching-path-to-var S₁ P _) [ suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh)) ]tm [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _))) (tree-to-ctx S₂) ]tm >tm
+    ≈˘⟨ assoc-tm (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _))) (tree-to-ctx S₂)) (suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh))) (suspTm (branching-path-to-var S₁ P _)) ⟩
+  < suspTm (branching-path-to-var S₁ P _) [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T _) _))) (tree-to-ctx S₂) ∘ suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh)) ]tm >tm
+    ≈˘⟨ sub-action-≃-tm (refl≃tm {s = suspTm (branching-path-to-var S₁ P _)}) (sub-from-connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) ((connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T lh) tt))) (tree-to-ctx S₂)) ∘ suspSub (exterior-sub S₁ P bp T lh (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) (≤-pred (≤-trans (≤-reflexive (sym (ctx-susp-dim (tree-to-ctx T)))) x)) (proj₂ tlh))) (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T lh) tt))) (tree-to-ctx S₂))) ⟩
+  < suspTm (branching-path-to-var S₁ P _) [ sub-from-connect-pdb (Restr (susp-pdb (tree-to-pdb zero S₁ tt)))
+                                                                 ((connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T lh) tt))) (tree-to-ctx S₂)) ∘ suspSub (exterior-sub S₁ P bp T lh (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) (≤-pred (≤-trans (≤-reflexive (sym (ctx-susp-dim (tree-to-ctx T)))) x)) (proj₂ tlh)))
+                                                                 (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T lh) tt))) (tree-to-ctx S₂))
+                                            ∘ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx S₂) ]tm >tm ≡⟨⟩
+  < suspTm (branching-path-to-var S₁ P _) [ exterior-sub (Join S₁ S₂) (PExt P) _ (Join T Sing) _ A x tlh ∘ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx S₂) ]tm >tm
+    ≈⟨ assoc-tm (exterior-sub (Join S₁ S₂) (PExt P) _ (Join T Sing) _ A x tlh) (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx S₂)) (suspTm (branching-path-to-var S₁ P bp)) ⟩
+  < suspTm (branching-path-to-var S₁ P bp) [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx S₂) ]tm [ exterior-sub (Join S₁ S₂) (PExt P) _ (Join T Sing) _ A x tlh ]tm >tm ≡⟨⟩
+  < branching-path-to-var (Join S₁ S₂) (PExt P) _ [ exterior-sub (Join S₁ S₂) (PExt P) _ (Join T Sing) _ A x tlh ]tm >tm ≡⟨⟩
+  < 0V [ sub-from-disc (branching-path-to-var (Join S₁ S₂) (PExt P) _) ]tm [ exterior-sub (Join S₁ S₂) (PExt P) _ (Join T Sing) _ A x tlh ]tm >tm
+    ≈˘⟨ assoc-tm (exterior-sub (Join S₁ S₂) (PExt P) _ (Join T Sing) _ A x tlh) (sub-from-disc (branching-path-to-var (Join S₁ S₂) (PExt P) bp)) 0V ⟩
+  < 0V [ exterior-sub (Join S₁ S₂) (PExt P) _ (Join T Sing) _ A x tlh ∘ sub-from-disc (branching-path-to-var (Join S₁ S₂) (PExt P) bp) ]tm >tm ≡⟨⟩
+  < 0V [ exterior-sub (Join S₁ S₂) (PExt P) _ (Join T Sing) _ A x tlh ∘ disc-to-outer (Join S₁ S₂) (PExt P) _ ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+    lem : (Coh (tree-to-ctx (Join T Sing)) A _ (idSub (tree-to-ctx (Join T Sing))) [ suspSub (interior-sub S₁ P T _) ]tm) ≃tm (suspTm (branching-path-to-var S₁ P _) [ suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh)) ]tm)
+    lem = begin
+      < Coh (suspCtx (tree-to-ctx T)) A _ (suspSub (interior-sub S₁ P T _) ∘ idSub (suspCtx (tree-to-ctx T))) >tm
+        ≈˘⟨ Coh≃ refl≃c
+                (unsuspend-ty-compat A (tree-to-ctx T) refl≃c (proj₁ tlh))
+                (trans≃s (susp-functorial (interior-sub S₁ P T _) (idSub (tree-to-ctx T)))
+                         (sub-action-≃-sub (susp-functorial-id (tree-to-ctx T)) refl≃s)) ⟩
+      < Coh (suspCtx (tree-to-ctx T)) (suspTy (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh))) _ (suspSub (interior-sub S₁ P T _ ∘ idSub (tree-to-ctx T))) >tm ≡⟨⟩
+      < suspTm (0V [ interior-sub S₁ P T _ ∘ disc-to-inner T (≤-pred (≤-trans (≤-reflexive (sym (ctx-susp-dim (tree-to-ctx T)))) x)) (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) ]tm)
+        >tm ≈⟨ susp-tm-≃ refl≃c (insertion-comm S₁ P bp T lh (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) (≤-pred
+                                                                                                                   (≤-trans (≤-reflexive (sym (ctx-susp-dim (tree-to-ctx T)))) x)) (proj₂ tlh)) ⟩
+      < suspTm (0V [ exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh) ∘ disc-to-outer S₁ P bp ]tm) >tm ≡⟨⟩
+      < suspTm (branching-path-to-var S₁ P _ [ exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh) ]tm) >tm
+        ≈⟨ susp-functorial-tm (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh)) (branching-path-to-var S₁ P _) ⟩
+      < suspTm (branching-path-to-var S₁ P _) [ suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh)) ]tm >tm ∎
+
+insertion-comm (Join S₁ S₂) (PShift P) bp T lh A x tlh = begin
+  < 0V [ interior-sub (Join S₁ S₂) (PShift P) T _ ∘ disc-to-inner T _ A ]tm >tm ≡⟨⟩
+  < 0V [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)) ∘ interior-sub S₂ P T lh ∘
+       disc-to-inner T x A ]tm >tm ≈⟨ sub-action-≃-tm (refl≃tm {s = 0V}) (∘-assoc (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh))) (interior-sub S₂ P T lh) (disc-to-inner T x A)) ⟩
+  < 0V [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)) ∘ (interior-sub S₂ P T lh ∘
+       disc-to-inner T x A) ]tm >tm ≈⟨ assoc-tm (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh))) (interior-sub S₂ P T lh ∘ disc-to-inner T x A) 0V ⟩
+  < 0V [ interior-sub S₂ P T _ ∘ disc-to-inner T _ A ]tm [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ]tm >tm ≈⟨ sub-action-≃-tm (insertion-comm S₂ P (proj₁ bp) T lh A x tlh) (refl≃s {σ = connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _))}) ⟩
+  < 0V [ exterior-sub S₂ P (proj₁ bp) T lh A x tlh ∘ disc-to-outer S₂ P (proj₁ bp) ]tm [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ]tm >tm ≈˘⟨ sub-action-≃-tm (assoc-tm (exterior-sub S₂ P (proj₁ bp) T lh A x tlh) (disc-to-outer S₂ P (proj₁ bp)) 0V) refl≃s ⟩
+  < 0V [ disc-to-outer S₂ P (proj₁ bp) ]tm [ exterior-sub S₂ P _ T _ A _ tlh ]tm [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ]tm >tm ≈˘⟨ assoc-tm (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _))) (exterior-sub S₂ P _ T _ A _ tlh) (0V [ disc-to-outer S₂ P (proj₁ bp) ]tm) ⟩
+  < 0V [ disc-to-outer S₂ P (proj₁ bp) ]tm [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ∘ exterior-sub S₂ P _ T _ A _ tlh ]tm >tm ≡⟨⟩
+  < branching-path-to-var S₂ P _ [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ∘ exterior-sub S₂ P _ T _ A _ tlh ]tm >tm
+    ≈˘⟨ sub-action-≃-tm (refl≃tm {s = branching-path-to-var S₂ P _}) (sub-from-connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx  (insertion-tree S₂ P T lh))) ((connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)) ∘ exterior-sub S₂ P (proj₁ bp) T lh A x tlh)) lem) ⟩
+  < branching-path-to-var S₂ P _ [
+      sub-from-connect-pdb (Restr (susp-pdb (tree-to-pdb zero S₁ tt)))
+                       (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)))
+                       (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)) ∘ exterior-sub S₂ P (proj₁ bp) T lh A x tlh)
+      ∘ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx S₂) ]tm >tm ≡⟨⟩
+  < branching-path-to-var S₂ P _ [ exterior-sub (Join S₁ S₂) (PShift P) bp T lh A x tlh ∘ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx S₂) ]tm >tm ≈⟨ assoc-tm (exterior-sub (Join S₁ S₂) (PShift P) bp T _ A _ tlh) (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx S₂)) (branching-path-to-var S₂ P (proj₁ bp)) ⟩
+  < branching-path-to-var S₂ P _ [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx S₂) ]tm [ exterior-sub (Join S₁ S₂) (PShift P) bp T _ A _ tlh ]tm >tm ≡⟨⟩
+  < 0V [ sub-from-disc (branching-path-to-var S₂ P _ [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx S₂) ]tm) ]tm [ exterior-sub (Join S₁ S₂) (PShift P) bp T _ A _ tlh ]tm >tm ≈˘⟨ assoc-tm (exterior-sub (Join S₁ S₂) (PShift P) bp T _ A _ tlh) (sub-from-disc (branching-path-to-var S₂ P (proj₁ bp) [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx S₂) ]tm)) 0V ⟩
+  < 0V [ exterior-sub (Join S₁ S₂) (PShift P) bp T _ A _ tlh ∘ sub-from-disc (branching-path-to-var S₂ P (proj₁ bp) [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx S₂) ]tm) ]tm >tm ≡⟨⟩
+  < 0V [ exterior-sub (Join S₁ S₂) (PShift P) bp T _ A _ tlh ∘ disc-to-outer (Join S₁ S₂) (PShift P) bp ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+
+    lem : (getFocusTerm (Restr (susp-pdb (tree-to-pdb zero S₁ _))) [
+             connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ _)))
+             (tree-to-ctx (insertion-tree S₂ P T _))
+             ]tm)
+            ≃tm
+            (Var (fromℕ _) [
+             connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _)))
+             (tree-to-ctx (insertion-tree S₂ P T _))
+             ∘ exterior-sub S₂ P _ T _ A _ tlh
+             ]tm)
+    lem = begin
+      < getFocusTerm (Restr (susp-pdb (tree-to-pdb zero S₁ _))) [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ]tm >tm
+        ≈⟨ connect-pdb-inc-fst-var (Restr (susp-pdb (tree-to-pdb zero S₁ tt))) (tree-to-ctx (insertion-tree S₂ P T lh)) ⟩
+      < Var (fromℕ (insertion-tree-size S₂ P T _)) [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ]tm >tm
+        ≈⟨ sub-action-≃-tm (exterior-sub-fst-var S₂ P (proj₁ bp) (proj₂ bp) T lh A x tlh) (refl≃s {σ = connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _))}) ⟩
+      < (Var (fromℕ _) [ exterior-sub S₂ P _ T _ A _ tlh ]tm) [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ]tm >tm
+        ≈˘⟨ assoc-tm (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _))) (exterior-sub S₂ P _ T _ A _ tlh) (Var (fromℕ _)) ⟩
+      < Var (fromℕ _) [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁ _))) (tree-to-ctx (insertion-tree S₂ P T _)) ∘ exterior-sub S₂ P _ T _ A _ tlh ]tm >tm ∎

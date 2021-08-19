@@ -10,6 +10,7 @@ open import Catt.Dimension
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Suspension
+open import Catt.Suspension.Properties
 open import Catt.Connection
 open import Data.Nat
 open import Data.Nat.Properties

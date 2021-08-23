@@ -12,6 +12,10 @@ open import Data.Nat.Properties
 open import Data.Empty
 open import Relation.Binary
 open import Axiom.UniquenessOfIdentityProofs
+open import Catt.Variables
+open import Data.Unit using (tt)
+open import Catt.Globular
+open import Data.Product renaming (_,_ to _,,_)
 
 extend-pd-eq : (pdb : Γ ⊢pd[ submax ][ d ])
              → A ≡ getFocusType pdb
@@ -113,3 +117,19 @@ pdb-irrelevant {n} {Γ} pdb pdb2 = trans (cong (λ - → subst-pdb refl - refl r
   where
     PDB≡ : < pdb > ≡ < pdb2 >
     PDB≡ = PDB-irrel < pdb > < pdb2 > refl≃c refl
+
+pdb-is-globular : (pdb : Γ ⊢pd[ submax ][ d ]) → ctx-is-globular Γ
+focus-term-is-var : (pdb : Γ ⊢pd[ submax ][ d ]) → isVar (getFocusTerm pdb)
+focus-ty-is-globular : (pdb : Γ ⊢pd[ submax ][ d ]) → ty-is-globular (getFocusType pdb)
+
+pdb-is-globular Base = tt ,, tt
+pdb-is-globular (Extend pdb) = ((pdb-is-globular pdb) ,, focus-ty-is-globular pdb) ,, liftTerm-preserve-isVar (getFocusTerm pdb) (focus-term-is-var pdb) ,, (liftType-preserve-is-globular (getFocusType pdb) (focus-ty-is-globular pdb) ,, tt)
+pdb-is-globular (Restr pdb) = pdb-is-globular pdb
+
+focus-term-is-var Base = tt
+focus-term-is-var (Extend pdb) = tt
+focus-term-is-var (Restr pdb) = ty-globular-tgt (getFocusType pdb) (focus-ty-is-globular pdb)
+
+focus-ty-is-globular Base = tt
+focus-ty-is-globular (Extend pdb) = liftTerm-preserve-isVar (liftTerm (getFocusTerm pdb)) (liftTerm-preserve-isVar (getFocusTerm pdb) (focus-term-is-var pdb)) ,, liftType-preserve-is-globular (liftType (getFocusType pdb)) (liftType-preserve-is-globular (getFocusType pdb) (focus-ty-is-globular pdb)) ,, tt
+focus-ty-is-globular (Restr pdb) = ty-globular-base (getFocusType pdb) (focus-ty-is-globular pdb)

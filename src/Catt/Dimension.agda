@@ -9,16 +9,6 @@ open import Induction.WellFounded
 open import Relation.Binary.Construct.Closure.Transitive
 open import Relation.Binary.Construct.Closure.Transitive using () renaming ([_] to [_]p; _∷_ to _∷p_) public
 
-ty-src : Ty Γ (suc (suc d)) → Tm Γ (suc (suc d))
-ty-tgt : Ty Γ (suc (suc d)) → Tm Γ (suc (suc d))
-ty-base : Ty Γ (suc (suc d)) → Ty Γ (suc d)
-
-ty-src (s ─⟨ A ⟩⟶ t) = s
-
-ty-tgt (s ─⟨ A ⟩⟶ t) = t
-
-ty-base (s ─⟨ A ⟩⟶ t) = A
-
 data Syntax : Set where
   Context : (Γ : Ctx n) → Syntax
   Type : (A : Ty Γ n) → Syntax

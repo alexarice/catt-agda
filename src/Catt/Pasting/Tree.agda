@@ -6,7 +6,7 @@ open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Syntax.Patterns
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Dimension
+open import Catt.Globular
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Suspension

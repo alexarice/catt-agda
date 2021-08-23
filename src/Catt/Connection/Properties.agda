@@ -6,6 +6,7 @@ open import Catt.Syntax
 open import Catt.Syntax.Patterns
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Pasting
+open import Catt.Pasting.Properties
 open import Catt.Connection
 open import Data.Nat
 open import Data.Fin
@@ -13,6 +14,9 @@ open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
 open import Catt.Syntax.Bundles
+open import Catt.Variables
+open import Data.Sum
+open import Data.Product renaming (_,_ to _,,_)
 
 -- connect left unit
 
@@ -72,3 +76,28 @@ sub-from-connect-fst-var σ t ⟨ ⟨ τ , s ⟩ , u ⟩ = sub-from-connect-fst-
 
 sub-from-connect-pdb-fst-var : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (σ : Sub Γ Υ) → (τ : Sub Δ Υ) → Var (fromℕ _) [ sub-from-connect-pdb pdb σ τ ]tm ≃tm Var (fromℕ _) [ σ ]tm
 sub-from-connect-pdb-fst-var pdb σ τ = sub-from-connect-fst-var σ (getFocusTerm pdb) τ
+
+connect-var-split : (Γ : Ctx (suc n)) → (t : Tm Γ 2) → (Δ : Ctx (suc m)) → VarSplit (connect Γ t Δ) (connect-inc-left Γ t Δ) (connect-inc-right Γ t Δ)
+connect-var-split Γ t (∅ , A) i = inj₁ (i ,, id-on-tm (Var i))
+connect-var-split Γ t (Δ , A , B) zero = inj₂ (zero ,, Var≃ refl)
+connect-var-split Γ t (Δ , A , B) (suc i) with connect-var-split Γ t (Δ , A) i
+... | inj₁ (j ,, p) = inj₁ (j ,, trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left Γ t (Δ , A))) (lift-tm-≃ p))
+... | inj₂ (j ,, p) = inj₂ (suc j ,, trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right Γ t (Δ , A))) (lift-tm-≃ p))
+
+connect-pdb-var-split : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → VarSplit (connect-pdb pdb Δ) (connect-pdb-inc-left pdb Δ) (connect-pdb-inc-right pdb Δ)
+connect-pdb-var-split pdb Δ = connect-var-split _ (getFocusTerm pdb) Δ
+
+connect-inc-left-var-to-var : (Γ : Ctx (suc n)) → (t : Tm Γ 2) → (Δ : Ctx (suc m)) → varToVar (connect-inc-left Γ t Δ)
+connect-inc-left-var-to-var Γ t (∅ , A) = id-is-var-to-var Γ
+connect-inc-left-var-to-var Γ t (Δ , A , B) = liftSub-preserve-var-to-var (connect-inc-left Γ t (Δ , A)) (connect-inc-left-var-to-var Γ t (Δ , A))
+
+connect-pdb-inc-left-var-to-var : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → varToVar (connect-pdb-inc-left pdb Δ)
+connect-pdb-inc-left-var-to-var pdb Δ = connect-inc-left-var-to-var _ (getFocusTerm pdb) Δ
+
+connect-inc-right-var-to-var : (Γ : Ctx (suc n)) → (t : Tm Γ 2) → (Δ : Ctx (suc m)) → .(isVar t) → varToVar (connect-inc-right Γ t Δ)
+connect-inc-right-var-to-var Γ t (∅ , ⋆) v = extend-var-to-var ⟨⟩ _ t v
+connect-inc-right-var-to-var Γ t (∅ , s ─⟨ A ⟩⟶ t₁) v = ⊥-elim (no-term-in-empty-context s)
+connect-inc-right-var-to-var Γ t (Δ , A , B) v = liftSub-preserve-var-to-var (connect-inc-right Γ t (Δ , A)) (connect-inc-right-var-to-var Γ t (Δ , A) v)
+
+connect-pdb-inc-right-var-to-var : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → varToVar (connect-pdb-inc-right pdb Δ)
+connect-pdb-inc-right-var-to-var pdb Δ = connect-inc-right-var-to-var _ (getFocusTerm pdb) Δ (focus-term-is-var pdb)

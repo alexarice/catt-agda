@@ -9,6 +9,7 @@ open import Data.Empty
 open import Data.Unit
 open import Catt.Support
 open import Catt.Dimension
+open import Catt.Globular
 
 variable
   submax submax′ : ℕ

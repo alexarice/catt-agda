@@ -5,8 +5,8 @@ module Catt.Connection where
 open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Syntax.Patterns
-open import Catt.Dimension
-open import Catt.Dimension.Properties
+open import Catt.Globular
+open import Catt.Globular.Properties
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Data.Nat

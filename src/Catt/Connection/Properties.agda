@@ -9,7 +9,8 @@ open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Connection
 open import Data.Nat
-open import Data.Fin
+open import Data.Nat.Properties
+open import Data.Fin using (Fin; zero; suc; fromℕ)
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
@@ -101,3 +102,26 @@ connect-inc-right-var-to-var Γ t (Δ , A , B) v = liftSub-preserve-var-to-var (
 
 connect-pdb-inc-right-var-to-var : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → varToVar (connect-pdb-inc-right pdb Δ)
 connect-pdb-inc-right-var-to-var pdb Δ = connect-inc-right-var-to-var _ (getFocusTerm pdb) Δ (focus-term-is-var pdb)
+
+ty-dim-≥-1 : Ty Γ d → d ≥ 1
+ty-dim-≥-1 ⋆ = ≤-refl
+ty-dim-≥-1 (s ─⟨ A ⟩⟶ t) = s≤s z≤n
+
+non-empty-context-dim-≥-1 : (Γ : Ctx (suc n)) → ctx-dim Γ ≥ 1
+non-empty-context-dim-≥-1 (Γ , A) = m≤n⇒m≤o⊔n (ctx-dim Γ) (ty-dim-≥-1 A)
+
+connect-ctx-dim : (Γ : Ctx (suc n)) → (t : Tm Γ 2) → (Δ : Ctx (suc m)) → ctx-dim (connect Γ t Δ) ≡ ctx-dim Γ ⊔ ctx-dim Δ
+connect-ctx-dim Γ t (∅ , ⋆) = sym (m≥n⇒m⊔n≡m (non-empty-context-dim-≥-1 Γ))
+connect-ctx-dim Γ t (∅ , s ─⟨ A ⟩⟶ t₁) = ⊥-elim (no-term-in-empty-context s)
+connect-ctx-dim Γ t (Δ , A , B) = begin
+  ctx-dim (connect Γ t (Δ , A , B)) ≡⟨⟩
+  ctx-dim (connect Γ t (Δ , A)) ⊔
+      ty-dim (B [ connect-inc-right Γ t (Δ , A) ]ty) ≡⟨ cong (_⊔ ty-dim B) (connect-ctx-dim Γ t (Δ , A)) ⟩
+  (ctx-dim Γ ⊔ ctx-dim (Δ , A)) ⊔ ty-dim B ≡⟨ ⊔-assoc (ctx-dim Γ) (ctx-dim (Δ , A)) (ty-dim B) ⟩
+  ctx-dim Γ ⊔ (ctx-dim (Δ , A) ⊔ ty-dim B) ≡⟨⟩
+  ctx-dim Γ ⊔ ctx-dim (Δ , A , B) ∎
+  where
+    open ≡-Reasoning
+
+connect-pdb-ctx-dim : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → ctx-dim (connect-pdb pdb Δ) ≡ ctx-dim Γ ⊔ ctx-dim Δ
+connect-pdb-ctx-dim pdb Δ = connect-ctx-dim _ (getFocusTerm pdb) Δ

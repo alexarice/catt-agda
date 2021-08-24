@@ -12,6 +12,7 @@ open import Catt.Pasting.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Connection
+open import Catt.Connection.Properties
 open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Empty
@@ -312,3 +313,27 @@ pdb-to-tree-to-ctx (Restr pdb) = pdb-to-tree-to-ctx pdb
 
 pd-to-tree-to-ctx : (pd : Γ ⊢pd₀ d) → tree-to-ctx (pd-to-tree pd) ≡ Γ
 pd-to-tree-to-ctx (Finish pdb) = pdb-to-tree-to-ctx pdb
+
+-- Ctx dimensions
+
+tree-dim : (Tree n) → ℕ
+tree-dim Sing = 0
+tree-dim (Join S T) = suc (tree-dim S) ⊔ tree-dim T
+
+tree-to-ctx-dim : (T : Tree n) → ctx-dim (tree-to-ctx T) ≡ suc (tree-dim T)
+tree-to-ctx-dim Sing = refl
+tree-to-ctx-dim (Join S T) = begin
+  ctx-dim (connect-pdb (Restr (susp-pdb (tree-to-pdb zero S _))) (tree-to-ctx T)) ≡⟨ connect-pdb-ctx-dim (Restr (susp-pdb (tree-to-pdb zero S tt))) (tree-to-ctx T) ⟩
+  ctx-dim (suspCtx (tree-to-ctx S)) ⊔ ctx-dim (tree-to-ctx T) ≡⟨ cong (_⊔ ctx-dim (tree-to-ctx T)) (ctx-susp-dim (tree-to-ctx S)) ⟩
+  suc (ctx-dim (tree-to-ctx S)) ⊔ ctx-dim (tree-to-ctx T) ≡⟨ cong₂ (λ a b → suc a ⊔ b) (tree-to-ctx-dim S) (tree-to-ctx-dim T) ⟩
+  suc (suc (tree-dim S) ⊔ tree-dim T) ∎
+  where
+    open ≡-Reasoning
+
+pd-to-tree-dim : (pd : Γ ⊢pd₀ d) → suc (tree-dim (pd-to-tree pd)) ≡ ctx-dim Γ
+pd-to-tree-dim {Γ = Γ} pd = begin
+  suc (tree-dim (pd-to-tree pd)) ≡˘⟨ tree-to-ctx-dim (pd-to-tree pd) ⟩
+  ctx-dim (tree-to-ctx (pd-to-tree pd)) ≡⟨ cong ctx-dim (pd-to-tree-to-ctx pd) ⟩
+  ctx-dim Γ ∎
+  where
+    open ≡-Reasoning

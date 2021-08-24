@@ -9,6 +9,8 @@ open import Catt.Syntax
 open import Catt.Dimension
 open import Data.Bool
 open import Data.Fin
+open import Data.Empty
+open import Data.Unit
 
 record VarSet (Γ : Ctx n) : Set where
   constructor [_]v
@@ -62,3 +64,8 @@ suppCtx Γ = supp (Context Γ)
 suppTm t = supp (Term t)
 suppTy A = supp (Type A)
 suppSub σ = supp (Substitution σ)
+
+data _≃vs_ : VarSet Γ → VarSet Γ → Set where
+  ≃VEmp : _≃vs_ {Γ = ∅} [ [] ]v [ [] ]v
+  ≃VTrue : ∀ {xs ys : VarSet Γ} → xs ≃vs ys → ewt {A = A} xs ≃vs ewt ys
+  ≃VFalse : ∀ {xs ys : VarSet Γ} → xs ≃vs ys → ewf {A = A} xs ≃vs ewf ys

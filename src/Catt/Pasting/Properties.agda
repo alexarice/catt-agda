@@ -35,6 +35,30 @@ extend-pd-eq-foc-ty : (pdb : Γ ⊢pd[ submax ][ d ])
                     → liftTerm (liftTerm (getFocusTerm pdb)) ─⟨ liftType (liftType (getFocusType pdb)) ⟩⟶ 1V ≡ getFocusType (extend-pd-eq pdb p q)
 extend-pd-eq-foc-ty pdb refl refl = refl
 
+pdb-dim-is-ctx-dim : Γ ⊢pd[ submax ][ d ] → ctx-dim Γ ≡ suc (d + submax)
+pdb-dim-is-ctx-dim Base = refl
+pdb-dim-is-ctx-dim (Extend {Γ = Γ} {submax = submax} {d = d} pdb) = begin
+  ctx-dim Γ ⊔ suc d ⊔ suc (suc d) ≡⟨ ⊔-assoc (ctx-dim Γ) (suc d) (suc (suc d)) ⟩
+  ctx-dim Γ ⊔ (suc d ⊔ suc (suc d)) ≡⟨ cong (ctx-dim Γ ⊔_) (m≤n⇒m⊔n≡n (s≤s (n≤1+n d))) ⟩
+  ctx-dim Γ ⊔ suc (suc d) ≡⟨ cong (_⊔ suc (suc d)) (pdb-dim-is-ctx-dim pdb) ⟩
+  suc (d + submax) ⊔ suc (suc d) ≡⟨ cong suc (lem d submax) ⟩
+  suc (suc (d + (submax ∸ 1))) ∎
+  where
+    open ≡-Reasoning
+    lem : ∀ d submax → d + submax ⊔ suc d ≡ suc (d + (pred submax))
+    lem d zero = begin
+      d + zero ⊔ suc d ≡⟨ m≤n⇒m⊔n≡n (≤-trans (≤-reflexive (+-identityʳ d)) (n≤1+n d)) ⟩
+      suc d ≡˘⟨ cong suc (+-identityʳ d) ⟩
+      suc (d + zero) ∎
+    lem d (suc submax) = begin
+      d + suc submax ⊔ suc d ≡⟨ cong (_⊔ suc d) (+-suc d submax) ⟩
+      suc (d + submax) ⊔ suc d ≡⟨ m≥n⇒m⊔n≡m (s≤s (m≤m+n d submax)) ⟩
+      suc (d + submax) ∎
+pdb-dim-is-ctx-dim (Restr pdb) = trans (pdb-dim-is-ctx-dim pdb) (sym (cong suc (+-suc _ _)))
+
+pd-dim-is-ctx-dim : Γ ⊢pd₀ d → ctx-dim Γ ≡ suc d
+pd-dim-is-ctx-dim (Finish pdb) = pdb-dim-is-ctx-dim pdb
+
 record PDB : Set where
   constructor <_>
   field

@@ -50,3 +50,7 @@ sub-action-≡-tm refl = refl
 
 sub-action-≡-sub : τ ≡ μ → σ ∘ τ ≡ σ ∘ μ
 sub-action-≡-sub refl = refl
+
+sub-from-function : ((i : Fin (ctxLength Γ)) → Tm Δ (suc (lookupDim Γ i))) → Sub Γ Δ
+sub-from-function {Γ = ∅} f = ⟨⟩
+sub-from-function {Γ = Γ , A} f = ⟨ (sub-from-function (λ i → f (suc i))) , f zero ⟩

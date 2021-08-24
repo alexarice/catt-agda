@@ -27,6 +27,7 @@ open import Catt.Syntax.Bundles
 open import Data.Sum
 open import Catt.Variables
 open import Catt.Globular
+open import Catt.Syntax.Properties
 
 data Path : Tree n → Set where
   PHere : (T : Tree n) → Path T
@@ -148,6 +149,12 @@ branching-path-to-var : (T : Tree n) → (P : Path T) → .(bp : is-branching-pa
 branching-path-to-var T (PHere .T) bp = linear-to-var T bp
 branching-path-to-var (Join S T) (PExt P) bp = suspTm (branching-path-to-var S P bp) [ connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S tt))) (tree-to-ctx T) ]tm
 branching-path-to-var (Join S T) (PShift P) bp = branching-path-to-var T P (proj₁ bp) [ connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S tt))) (tree-to-ctx T) ]tm
+
+branching-path-to-var-pd : (pd : Γ ⊢pd₀ d) → (P : Path (pd-to-tree pd)) → .(bp : is-branching-path P) → Tm Γ (suc (suc (height-of-branching P bp)))
+branching-path-to-var-pd pd P bp = lem (pd-to-tree-to-ctx pd) (branching-path-to-var (pd-to-tree pd) P bp)
+  where
+    lem : Δ ≡ Δ′ → Tm Δ d → Tm Δ′ d
+    lem refl t = t
 
 disc-to-outer : (T : Tree n) → (P : Path T) → .(bp : is-branching-path P) → Sub (Disc (height-of-branching P bp)) (tree-to-ctx T)
 disc-to-outer T P bp = sub-from-disc (branching-path-to-var T P bp)
@@ -455,3 +462,34 @@ insertion-var-split (Join S₁ S₂) (PShift P) bp T lh A x tlh i with connect-p
       < Var j [ connect-inc-right (suspCtx (tree-to-ctx S₁)) (ty-tgt (getFocusType (susp-pdb (tree-to-pdb 0 S₁ _)))) (tree-to-ctx (insertion-tree S₂ P T _)) ]tm
         >tm ≈⟨ p ⟩
       < Var i >tm ∎
+
+sub-from-insertion : (S : Tree n)
+                   → (P : Path S)
+                   → .(bp : is-branching-path P)
+                   → (T : Tree m)
+                   → .(lh : has-linear-height (path-length P) T)
+                   → (A : Ty (tree-to-ctx T) (suc (height-of-branching P bp)))
+                   → .(x : ctx-dim (tree-to-ctx T) ≤ suc (height-of-branching P bp))
+                   → (tlh : type-has-linear-height (path-length P) T lh A)
+                   → (σ : Sub (tree-to-ctx S) Γ)
+                   → (τ : Sub (tree-to-ctx T) Γ)
+                   → Sub (tree-to-ctx (insertion-tree S P T lh)) Γ
+sub-from-insertion S P bp T lh A x tlh σ τ = sub-from-function γ
+  where
+    γ : (i : Fin (ctxLength (tree-to-ctx (insertion-tree S P T _)))) →
+          Tm _ (suc (lookupDim (tree-to-ctx (insertion-tree S P T _)) i))
+    γ i with insertion-var-split S P bp T lh A x tlh i
+    ... | inj₁ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = Var j [ σ ]tm
+    ... | inj₂ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = Var j [ τ ]tm
+
+
+insertion-reduces-dim : (S : Tree n)
+                      → (P : Path S)
+                      → (T : Tree m)
+                      → .(bp : is-branching-path P)
+                      → .(lh : has-linear-height (path-length P) T)
+                      → height-of-branching P bp ≥ tree-dim T
+                      → tree-dim (insertion-tree S P T lh) ≤ tree-dim S
+insertion-reduces-dim S (PHere .S) T bp lh p = ≤-trans p (≤-reflexive (height-of-linear-is-tree-dim S bp))
+insertion-reduces-dim (Join S₁ S₂) (PExt P) (Join T Sing) bp lh p = ⊔-monoˡ-≤ (tree-dim S₂) (s≤s (insertion-reduces-dim S₁ P T bp lh (≤-pred p)))
+insertion-reduces-dim (Join S₁ S₂) (PShift P) T bp lh p = ⊔-monoʳ-≤ (suc (tree-dim S₁)) (insertion-reduces-dim S₂ P T (proj₁ bp) lh p)

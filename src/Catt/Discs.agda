@@ -64,6 +64,7 @@ is-linear Sing = ⊤
 is-linear (Join S Sing) = is-linear S
 is-linear (Join S (Join _ _)) = ⊥
 
+-- Use tree-dim
 height-of-linear : (T : Tree n) → .(is-linear T) → ℕ
 height-of-linear Sing il = 0
 height-of-linear (Join S Sing) il = suc (height-of-linear S il)
@@ -71,3 +72,7 @@ height-of-linear (Join S Sing) il = suc (height-of-linear S il)
 linear-tree-compat : (T : Tree n) → .(l : is-linear T) → tree-to-ctx T ≃c Disc (height-of-linear T l)
 linear-tree-compat Sing l = Add≃ Emp≃ Star≃
 linear-tree-compat (Join S Sing) l = trans≃c (susp-ctx-≃ (linear-tree-compat S l)) (disc-susp (height-of-linear S _))
+
+height-of-linear-is-tree-dim : (T : Tree n) → .(lh : is-linear T) → height-of-linear T lh ≡ tree-dim T
+height-of-linear-is-tree-dim Sing lh = refl
+height-of-linear-is-tree-dim (Join T Sing) lh = cong suc (height-of-linear-is-tree-dim T lh)

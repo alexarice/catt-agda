@@ -463,6 +463,22 @@ insertion-var-split (Join S₁ S₂) (PShift P) bp T lh A x tlh i with connect-p
         >tm ≈⟨ p ⟩
       < Var i >tm ∎
 
+sub-from-insertion-func : (S : Tree n)
+                       → (P : Path S)
+                       → .(bp : is-branching-path P)
+                       → (T : Tree m)
+                       → .(lh : has-linear-height (path-length P) T)
+                       → (A : Ty (tree-to-ctx T) (suc (height-of-branching P bp)))
+                       → .(x : ctx-dim (tree-to-ctx T) ≤ suc (height-of-branching P bp))
+                       → (tlh : type-has-linear-height (path-length P) T lh A)
+                       → (σ : Sub (tree-to-ctx S) Γ)
+                       → (τ : Sub (tree-to-ctx T) Γ)
+                       → (i : Fin (ctxLength (tree-to-ctx (insertion-tree S P T _))))
+                       → Tm _ (suc (lookupDim (tree-to-ctx (insertion-tree S P T _)) i))
+sub-from-insertion-func S P bp T lh A x tlh σ τ i with insertion-var-split S P bp T lh A x tlh i
+... | inj₁ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = Var j [ σ ]tm
+... | inj₂ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = Var j [ τ ]tm
+
 sub-from-insertion : (S : Tree n)
                    → (P : Path S)
                    → .(bp : is-branching-path P)
@@ -474,13 +490,8 @@ sub-from-insertion : (S : Tree n)
                    → (σ : Sub (tree-to-ctx S) Γ)
                    → (τ : Sub (tree-to-ctx T) Γ)
                    → Sub (tree-to-ctx (insertion-tree S P T lh)) Γ
-sub-from-insertion S P bp T lh A x tlh σ τ = sub-from-function γ
-  where
-    γ : (i : Fin (ctxLength (tree-to-ctx (insertion-tree S P T _)))) →
-          Tm _ (suc (lookupDim (tree-to-ctx (insertion-tree S P T _)) i))
-    γ i with insertion-var-split S P bp T lh A x tlh i
-    ... | inj₁ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = Var j [ σ ]tm
-    ... | inj₂ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = Var j [ τ ]tm
+sub-from-insertion S P bp T lh A x tlh σ τ = sub-from-function (sub-from-insertion-func S P bp T lh A x tlh σ τ)
+
 
 
 insertion-reduces-dim : (S : Tree n)
@@ -493,3 +504,47 @@ insertion-reduces-dim : (S : Tree n)
 insertion-reduces-dim S (PHere .S) T bp lh p = ≤-trans p (≤-reflexive (height-of-linear-is-tree-dim S bp))
 insertion-reduces-dim (Join S₁ S₂) (PExt P) (Join T Sing) bp lh p = ⊔-monoˡ-≤ (tree-dim S₂) (s≤s (insertion-reduces-dim S₁ P T bp lh (≤-pred p)))
 insertion-reduces-dim (Join S₁ S₂) (PShift P) T bp lh p = ⊔-monoʳ-≤ (suc (tree-dim S₁)) (insertion-reduces-dim S₂ P T (proj₁ bp) lh p)
+
+lift-sub-from-insertion : (S : Tree n)
+                        → (P : Path S)
+                        → .(bp : is-branching-path P)
+                        → (T : Tree m)
+                        → .(lh : has-linear-height (path-length P) T)
+                        → (A : Ty (tree-to-ctx T) (suc (height-of-branching P bp)))
+                        → .(x : ctx-dim (tree-to-ctx T) ≤ suc (height-of-branching P bp))
+                        → (tlh : type-has-linear-height (path-length P) T lh A)
+                        → (σ : Sub (tree-to-ctx S) Γ)
+                        → (τ : Sub (tree-to-ctx T) Γ)
+                        → liftSub {A = B} (sub-from-insertion S P bp T lh A x tlh σ τ) ≃s sub-from-insertion S P bp T lh A x tlh (liftSub {A = B} σ) (liftSub τ)
+lift-sub-from-insertion S P bp T lh A x tlh σ τ = trans≃s (lift-sub-from-function _) (sub-from-function-≃ _ _ γ)
+  where
+    γ : (i : Fin (ctxLength (tree-to-ctx (insertion-tree S P T _))))
+      → liftTerm (sub-from-insertion-func S P _ T _ A _ tlh σ τ i)
+        ≃tm sub-from-insertion-func S P _ T _ A _ tlh (liftSub σ) (liftSub τ) i
+    γ i with insertion-var-split S P bp T lh A x tlh i
+    ... | inj₁ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = sym≃tm (apply-lifted-sub-tm-≃ (Var j) σ)
+    ... | inj₂ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = sym≃tm (apply-lifted-sub-tm-≃ (Var j) τ)
+
+sub-from-insertion-≃ : (S : Tree n)
+                     → (P : Path S)
+                     → .(bp : is-branching-path P)
+                     → (T : Tree m)
+                     → .(lh : has-linear-height (path-length P) T)
+                     → (A : Ty (tree-to-ctx T) (suc (height-of-branching P bp)))
+                     → .(x : ctx-dim (tree-to-ctx T) ≤ suc (height-of-branching P bp))
+                     → (tlh : type-has-linear-height (path-length P) T lh A)
+                     → {σ : Sub (tree-to-ctx S) Γ}
+                     → {σ′ : Sub (tree-to-ctx S) Δ}
+                     → {τ : Sub (tree-to-ctx T) Γ}
+                     → {τ′ : Sub (tree-to-ctx T) Δ}
+                     → σ ≃s σ′
+                     → τ ≃s τ′
+                     → sub-from-insertion S P bp T lh A x tlh σ τ ≃s sub-from-insertion S P bp T lh A x tlh σ′ τ′
+sub-from-insertion-≃ S P bp T lh A x tlh σeq τeq = sub-from-function-≃ _ _ γ
+  where
+    γ : (i : Fin (ctxLength (tree-to-ctx (insertion-tree S P T _))))
+      → sub-from-insertion-func S P _ T _ A _ tlh _ _ i
+        ≃tm sub-from-insertion-func S P _ T _ A _ tlh _ _ i
+    γ i with insertion-var-split S P bp T lh A x tlh i
+    ... | inj₁ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = sub-action-≃-tm (refl≃tm {s = Var j}) σeq
+    ... | inj₂ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = sub-action-≃-tm (refl≃tm {s = Var j}) τeq

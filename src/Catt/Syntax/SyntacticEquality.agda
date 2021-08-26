@@ -432,3 +432,15 @@ idSub≃-on-tm p (Coh≃ q r s) = Coh≃ q r (idSub≃-on-sub p s)
 
 idSub≃-on-sub p Null≃ = Null≃
 idSub≃-on-sub p (Ext≃ q r) = Ext≃ (idSub≃-on-sub p q) (idSub≃-on-tm p r)
+
+sub-from-function-≃ : (f : (i : Fin (ctxLength Γ)) → Tm Δ (suc (lookupDim Γ i)))
+                    → (f2 : (i : Fin (ctxLength Γ)) → Tm Υ (suc (lookupDim Γ i)))
+                    → ((i : Fin (ctxLength Γ)) → f i ≃tm f2 i)
+                    → sub-from-function {Γ = Γ} f ≃s sub-from-function {Γ = Γ} f2
+sub-from-function-≃ {Γ = ∅} f f2 eq = Null≃
+sub-from-function-≃ {Γ = Γ , A} f f2 eq = Ext≃ (sub-from-function-≃ (λ i → f (suc i)) (λ i → f2 (suc i)) (λ i → eq (suc i))) (eq zero)
+
+lift-sub-from-function : (f : (i : Fin (ctxLength Γ)) → Tm Δ (suc (lookupDim Γ i)))
+                       → liftSub {A = A} (sub-from-function {Γ = Γ} f) ≃s sub-from-function {Γ = Γ} (λ i → liftTerm {A = A} (f i))
+lift-sub-from-function {Γ = ∅} f = Null≃
+lift-sub-from-function {Γ = Γ , A} f = Ext≃ (lift-sub-from-function (λ i → f (suc i))) refl≃tm

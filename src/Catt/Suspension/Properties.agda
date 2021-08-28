@@ -5,6 +5,7 @@ module Catt.Suspension.Properties where
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
+open import Catt.Syntax.Properties
 open import Catt.Pasting
 open import Catt.Suspension
 open import Catt.Globular
@@ -26,6 +27,12 @@ getFst-is-Fst {Γ = Γ , A} = lift-tm-≃ getFst-is-Fst
 getSnd-is-Snd : getSnd {Γ = Γ} ≃tm Var {Γ = suspCtx Γ} (inject₁ (fromℕ _))
 getSnd-is-Snd {Γ = ∅} = Var≃ refl
 getSnd-is-Snd {Γ = Γ , A} = lift-tm-≃ getSnd-is-Snd
+
+getFst-across-ctx : {Γ : Ctx n} → {Δ : Ctx m} → n ≡ m → getFst {Γ = Γ} ≃tm getFst {Γ = Δ}
+getFst-across-ctx p = trans≃tm getFst-is-Fst (trans≃tm (Var≃ (cong (λ - → suc (toℕ (fromℕ -))) p)) (sym≃tm getFst-is-Fst))
+
+getSnd-across-ctx : {Γ : Ctx n} → {Δ : Ctx m} → n ≡ m → getSnd {Γ = Γ} ≃tm getSnd {Γ = Δ}
+getSnd-across-ctx p = trans≃tm getSnd-is-Snd (trans≃tm (Var≃ (cong (λ - → toℕ (inject₁ (fromℕ -))) p)) (sym≃tm getSnd-is-Snd))
 
 susp-ty-lift : (B : Ty Γ d) → suspTy (liftType {A = A} B) ≃ty liftType {A = suspTy A} (suspTy B)
 susp-tm-lift : (t : Tm Γ d) → suspTm (liftTerm {A = A} t) ≃tm liftTerm {A = suspTy A} (suspTm t)
@@ -171,3 +178,27 @@ susp-var-split {Γ = Γ} {σ = σ} {τ = τ} vs i with suc (ctxLength Γ) ≟ to
       < suspTm (Var (lower₁ (lower₁ i p) q)) >tm ≈⟨ lookupSusp-is-inject (lower₁ (lower₁ i p) q) ⟩
       < Var (inject₁ (inject₁ (lower₁ (lower₁ i p) q))) >tm ≈⟨ Var≃ (cong toℕ (trans (cong inject₁ (inject₁-lower₁ (lower₁ i p) q)) (inject₁-lower₁ i p))) ⟩
       < Var i >tm ∎
+
+susp-function : (f : (i : Fin (ctxLength Γ)) → Tm Δ (suc (lookupDim Γ i))) → (i : Fin (ctxLength (suspCtx Γ))) → Tm (suspCtx Δ) (suc (lookupDim (suspCtx Γ) i))
+susp-function {Γ = ∅} f zero = getSnd
+susp-function {Γ = ∅} f (suc zero) = getFst
+susp-function {Γ = Γ , A} f zero = suspTm (f zero)
+susp-function {Γ = Γ , A} f (suc i) = susp-function {Γ = Γ} (λ j → f (suc j)) i
+
+susp-function-prop : (f : (i : Fin (ctxLength Γ)) → Tm Δ (suc (lookupDim Γ i))) → (i : Fin (ctxLength Γ)) → susp-function {Γ = Γ} f (inject₁ (inject₁ i)) ≃tm suspTm (f i)
+susp-function-prop {Γ = Γ , A} f zero = refl≃tm
+susp-function-prop {Γ = Γ , A} f (suc i) = susp-function-prop {Γ = Γ} (λ j → f (suc j)) i
+
+sub-from-function-susp : {Γ : Ctx n} → (f : (i : Fin (ctxLength Γ)) → Tm Δ (suc (lookupDim Γ i)))
+                       → sub-from-function {Γ = suspCtx Γ} (susp-function {Γ = Γ} f) ≃s suspSub {Γ = Γ} (sub-from-function f)
+sub-from-function-susp {Γ = ∅} f = refl≃s
+sub-from-function-susp {Γ = Γ , A} f = Ext≃ (sub-from-function-susp (λ i → f (suc i))) refl≃tm
+
+suspension-vars : (Γ : Ctx n) → (i : Fin (ctxLength (suspCtx Γ))) → ((i ≡ fromℕ _) ⊎ (i ≡ inject₁ (fromℕ _))) ⊎ Σ[ j ∈ Fin (ctxLength Γ) ] i ≡ inject₁ (inject₁ j)
+suspension-vars ∅ zero = inj₁ (inj₂ refl)
+suspension-vars ∅ (suc zero) = inj₁ (inj₁ refl)
+suspension-vars (Γ , A) zero = inj₂ (zero ,, refl)
+suspension-vars (Γ , A) (suc i) with suspension-vars Γ i
+... | inj₁ (inj₁ x) = inj₁ (inj₁ (cong suc x))
+... | inj₁ (inj₂ y) = inj₁ (inj₂ (cong suc y))
+... | inj₂ (j ,, p) = inj₂ ((suc j) ,, (cong suc p))

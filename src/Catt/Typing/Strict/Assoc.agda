@@ -19,6 +19,7 @@ open import Data.Unit using (⊤;tt)
 import Relation.Binary.Reasoning.Setoid as Reasoning
 open import Relation.Nullary
 open import Catt.Suspension
+open import Catt.Suspension.Properties
 
 record InsertionData : Set where
   field
@@ -180,17 +181,17 @@ props i .lift-rule a tc eq = begin
       < Coh (tree-to-ctx (a .id-T)) (a .id-C) _ (liftSub (a .id-τ)) >tm ∎
 props i .susp-rule a ty eq = begin
   < Coh (suspCtx (tree-to-ctx (a .id-S))) (suspTy (a .id-A)) _
-      (suspSub (a .id-σ)) >tm ≈⟨ Ins≈ (susp-tree (a .id-S)) (ty zero) (PExt (a .id-P)) (a .id-bp) (susp-tree (a .id-T)) (ty (suc zero)) {!!} (a .id-lh) {!!} ⟩
+      (suspSub (a .id-σ)) >tm ≈⟨ Ins≈ (susp-tree (a .id-S)) (ty zero) (PExt (a .id-P)) (a .id-bp) (susp-tree (a .id-T)) (ty (suc zero)) lem (a .id-lh) (type-has-linear-height-susp (a .id-T) (a .id-lh) (a .id-tlh)) ⟩
   < Coh (tree-to-ctx (insertion-tree (susp-tree (a .id-S)) (PExt (a .id-P)) (susp-tree (a .id-T)) _))
     (suspTy (a .id-A) [
      exterior-sub (susp-tree (a .id-S)) (PExt (a .id-P)) _
-     (susp-tree (a .id-T)) _ (suspTy (a .id-C)) _ _
+     (susp-tree (a .id-T)) _ (suspTy (a .id-C)) (≤-trans (≤-reflexive (ctx-susp-dim (tree-to-ctx (a .id-T)))) (s≤s (a .id-y))) (type-has-linear-height-susp (a .id-T) (a .id-lh) (a .id-tlh))
      ]ty)
     _
     (sub-from-insertion (susp-tree (a .id-S)) (PExt (a .id-P)) _
      (susp-tree (a .id-T)) _ (suspTy (a .id-C)) _ _ (suspSub (a .id-σ))
      (suspSub (a .id-τ)))
-    >tm ≈⟨ reflexive≈tm (Coh≃ {!!} {!!} {!!}) ⟩
+    >tm ≈⟨ reflexive≈tm (Coh≃ refl≃c {!!} {!!}) ⟩
   < Coh
       (suspCtx
        (tree-to-ctx (insertion-tree (a .id-S) (a .id-P) (a .id-T) _)))
@@ -203,10 +204,17 @@ props i .susp-rule a ty eq = begin
       (suspSub
        (sub-from-insertion (a .id-S) (a .id-P) _ (a .id-T) _ (a .id-C) _
         (a .id-tlh) (a .id-σ) (a .id-τ))) >tm ∎
-  -- < Catt.Suspension.suspTm (insertionRule .lhs a) >tm ≡⟨⟩
-  -- < (Coh (suspCtx (a .id-S)) (suspTy (a .id-A)) _ (suspSub (a .id-σ))) >tm
-  --   ≈⟨ Ins≈ (ty zero) (pd-dim-lem (susp-pd (a .id-pd))) {!!} {!!} {!!} {!!} {!!} {!!} {!!} ⟩
-  -- {!!} ≈⟨ {!!} ⟩
-  -- {!!} ∎
   where
     open Reasoning tm-setoid-≈
+
+    lem : (branching-path-to-var (susp-tree (a .id-S)) (PExt (a .id-P)) _ [
+             suspSub (a .id-σ) ]tm)
+            ≈tm
+            Coh (tree-to-ctx (susp-tree (a .id-T))) (suspTy (a .id-C)) _
+            (suspSub (a .id-τ))
+    lem = begin
+      < suspTm (branching-path-to-var (a .id-S) (a .id-P) _) [ idSub (suspCtx (tree-to-ctx (a .id-S))) ]tm [ suspSub (a .id-σ) ]tm >tm
+        ≈⟨ reflexive≈tm (sub-action-≃-tm (id-on-tm (suspTm (branching-path-to-var (a .id-S) (a .id-P) _))) refl≃s) ⟩
+      < suspTm (branching-path-to-var (a .id-S) (a .id-P) _) [ suspSub (a .id-σ) ]tm >tm ≈⟨ reflexive≈tm (sym≃tm (susp-functorial-tm (a .id-σ) (branching-path-to-var (a .id-S) (a .id-P) (a .id-bp)))) ⟩
+      < suspTm (branching-path-to-var (a .id-S) (a .id-P) _ [ a .id-σ ]tm) >tm ≈⟨ eq zero ⟩
+      < Coh (tree-to-ctx (susp-tree (a .id-T))) (suspTy (a .id-C)) _ (suspSub (a .id-τ)) >tm ∎

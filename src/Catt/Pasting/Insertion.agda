@@ -20,7 +20,7 @@ open import Data.Unit using (⊤;tt)
 open import Catt.Connection
 open import Catt.Connection.Properties
 open import Data.Product renaming (_,_ to _,,_)
-open import Data.Fin using (Fin; toℕ; zero; suc; fromℕ)
+open import Data.Fin using (Fin; toℕ; zero; suc; fromℕ; inject₁)
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
 open import Catt.Syntax.Bundles
@@ -548,3 +548,44 @@ sub-from-insertion-≃ S P bp T lh A x tlh σeq τeq = sub-from-function-≃ _ _
     γ i with insertion-var-split S P bp T lh A x tlh i
     ... | inj₁ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = sub-action-≃-tm (refl≃tm {s = Var j}) σeq
     ... | inj₂ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = sub-action-≃-tm (refl≃tm {s = Var j}) τeq
+
+type-has-linear-height-≃ : (T : Tree m) → {A : Ty (tree-to-ctx T) d} → {B : Ty (tree-to-ctx T) d} → A ≃ty B → .(lh : has-linear-height n T) → type-has-linear-height n T lh A → type-has-linear-height n T lh B
+type-has-linear-height-≃ T p lh tlh with ≃ty-to-≡ p
+... | refl = tlh
+
+type-has-linear-height-susp : (T : Tree m) → {A : Ty (tree-to-ctx T) d} → .(lh : has-linear-height n T) → type-has-linear-height n T lh A → type-has-linear-height (suc n) (susp-tree T) lh (suspTy A)
+type-has-linear-height-susp T lh tlh = (suspension-is-unsuspendable-ty (tree-to-ctx T) _ refl≃c) ,, type-has-linear-height-≃ T (sym≃ty (unsusp-susp-compat-ty (tree-to-ctx T) _ refl≃c)) lh tlh
+
+sub-from-insertion-func-susp : (S : Tree n)
+                             → (P : Path S)
+                             → .(bp : is-branching-path P)
+                             → (T : Tree m)
+                             → .(lh : has-linear-height (path-length P) T)
+                             → (A : Ty (tree-to-ctx T) (suc (height-of-branching P bp)))
+                             → .(x : ctx-dim (tree-to-ctx T) ≤ suc (height-of-branching P bp))
+                             → (tlh : type-has-linear-height (path-length P) T lh A)
+                             → (σ : Sub (tree-to-ctx S) Γ)
+                             → (τ : Sub (tree-to-ctx T) Γ)
+                             → (i : Fin (ctxLength (tree-to-ctx (insertion-tree (susp-tree S) (PExt P) (susp-tree T) _))))
+                             → sub-from-insertion-func (Join S Sing) (PExt P) bp (Join T Sing) lh (suspTy A) (≤-trans (≤-reflexive (ctx-susp-dim (tree-to-ctx T))) (s≤s x)) (type-has-linear-height-susp T lh tlh) (suspSub σ) (suspSub τ) i ≃tm susp-function {Γ = tree-to-ctx (insertion-tree S P T lh)} (sub-from-insertion-func S P bp T lh A x tlh σ τ) i
+sub-from-insertion-func-susp S P bp T lh A x tlh σ τ i with suspension-vars (tree-to-ctx (insertion-tree S P T lh)) i
+... | inj₁ p = {!!}
+... | inj₂ (j ,, refl) = begin
+  < (sub-from-insertion-func (Join S Sing) (PExt P) bp (Join T Sing) lh (suspTy A) (≤-trans (≤-reflexive (ctx-susp-dim (tree-to-ctx T))) (s≤s x)) (type-has-linear-height-susp T lh tlh) (suspSub σ) (suspSub τ) (inject₁ (inject₁ j))) >tm ≈⟨ {!!} ⟩
+  < suspTm (sub-from-insertion-func S P _ T _ A _ tlh σ τ j) >tm ≈˘⟨ susp-function-prop {Γ = tree-to-ctx (insertion-tree S P T lh)} (sub-from-insertion-func S P bp T lh A x tlh σ τ) j ⟩
+  < susp-function {Γ = tree-to-ctx (insertion-tree S P T lh)} (sub-from-insertion-func S P bp T lh A x tlh σ τ) (inject₁ (inject₁ j)) >tm ∎
+  where
+    open Reasoning tm-setoid
+
+sub-from-insertion-susp : (S : Tree n)
+                        → (P : Path S)
+                        → .(bp : is-branching-path P)
+                        → (T : Tree m)
+                        → .(lh : has-linear-height (path-length P) T)
+                        → (A : Ty (tree-to-ctx T) (suc (height-of-branching P bp)))
+                        → .(x : ctx-dim (tree-to-ctx T) ≤ suc (height-of-branching P bp))
+                        → (tlh : type-has-linear-height (path-length P) T lh A)
+                        → (σ : Sub (tree-to-ctx S) Γ)
+                        → (τ : Sub (tree-to-ctx T) Γ)
+                        → sub-from-insertion (susp-tree S) (PExt P) bp (susp-tree T) lh (suspTy A) (≤-trans (≤-reflexive (ctx-susp-dim (tree-to-ctx T))) (s≤s x)) (type-has-linear-height-susp T lh tlh) (suspSub σ) (suspSub τ) ≃s suspSub (sub-from-insertion S P bp T lh A x tlh σ τ)
+sub-from-insertion-susp S P bp T lh A x tlh σ τ = trans≃s (sub-from-function-≃ (sub-from-insertion-func (susp-tree S) (PExt P) bp (susp-tree T) lh (suspTy A) (≤-trans (≤-reflexive (ctx-susp-dim (tree-to-ctx T))) (s≤s x)) (type-has-linear-height-susp T _ tlh) (suspSub σ) (suspSub τ)) (susp-function {Γ = tree-to-ctx (insertion-tree S P T lh)} (sub-from-insertion-func S P bp T lh A x tlh σ τ)) (sub-from-insertion-func-susp S P bp T lh A x tlh σ τ)) (sub-from-function-susp (sub-from-insertion-func S P bp T lh A x tlh σ τ))

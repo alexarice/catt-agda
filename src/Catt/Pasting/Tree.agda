@@ -326,9 +326,9 @@ pd-to-tree-to-ctx (Finish pdb) = pdb-to-tree-to-ctx pdb
 
 -- Ctx dimensions
 
--- tree-dim : (Tree n) → ℕ
--- tree-dim Sing = 0
--- tree-dim (Join S T) = suc (tree-dim S) ⊔ tree-dim T
+tree-dim : (Tree n) → ℕ
+tree-dim Sing = 0
+tree-dim (Join S T) = suc (tree-dim S) ⊔ tree-dim T
 
 -- tree-to-ctx-dim : (T : Tree n) → ctx-dim (tree-to-ctx T) ≡ suc (tree-dim T)
 -- tree-to-ctx-dim Sing = refl

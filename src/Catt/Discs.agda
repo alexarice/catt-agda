@@ -3,7 +3,6 @@
 module Catt.Discs where
 
 open import Catt.Syntax
-open import Catt.Syntax.Patterns
 open import Catt.Syntax.Properties
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Pasting
@@ -28,7 +27,7 @@ sphere-size (suc n) = suc (disc-size n)
 
 Disc : (n : ℕ) → Ctx (disc-size n)
 Sphere : (n : ℕ) → Ctx (sphere-size n)
-sphere-type : (n : ℕ) → Ty (Sphere n) (suc n)
+sphere-type : (n : ℕ) → Ty (Sphere n) n
 
 Disc n = Sphere n , sphere-type n
 
@@ -38,13 +37,13 @@ Sphere (suc n) = Disc n , liftType (sphere-type n)
 sphere-type zero = ⋆
 sphere-type (suc n) = 1V ─⟨ liftType (liftType (sphere-type n)) ⟩⟶ 0V
 
-sub-from-disc : Tm Γ (suc (suc d)) → Sub (Disc d) Γ
-sub-from-sphere : Ty Γ (suc d) → Sub (Sphere d) Γ
+sub-from-disc : (t : Tm Γ) → Sub (Disc (get-tm-height t)) Γ
+sub-from-sphere : Ty Γ d → Sub (Sphere d) Γ
 
 sub-from-disc t = ⟨ (sub-from-sphere (tm-to-ty t)) , t ⟩
 
 sub-from-sphere ⋆ = ⟨⟩
-sub-from-sphere {d = suc d} (s ─⟨ A ⟩⟶ t) = ⟨ sub-from-disc s , t ⟩
+sub-from-sphere {d = suc d} (s ─⟨ A ⟩⟶ t) = ⟨ ⟨ sub-from-sphere A , s ⟩ , t ⟩
 
 disc-susp : (n : ℕ) → suspCtx (Disc n) ≃c Disc (suc n)
 sphere-susp : (n : ℕ) → suspCtx (Sphere n) ≃c Sphere (suc n)
@@ -54,10 +53,10 @@ disc-susp zero = refl≃c
 disc-susp (suc n) = Add≃ (sphere-susp (suc n)) (sphere-type-susp (suc n))
 
 sphere-susp zero = refl≃c
-sphere-susp (suc n) = Add≃ (disc-susp n) (trans≃ty (reflexive≃ty (suspLiftTy (sphere-type n))) (lift-ty-≃ (sphere-type-susp n)))
+sphere-susp (suc n) = Add≃ (disc-susp n) (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n)))
 
 sphere-type-susp zero = refl≃ty
-sphere-type-susp (suc n) = Arr≃ (Var≃ refl) (trans≃ty (reflexive≃ty (trans (suspLiftTy (liftType (sphere-type n))) (cong liftType (suspLiftTy (sphere-type n))))) (lift-ty-≃ (lift-ty-≃ (sphere-type-susp n)))) (Var≃ refl)
+sphere-type-susp (suc n) = Arr≃ (Var≃ refl) (trans≃ty (susp-ty-lift (liftType (sphere-type n))) (lift-ty-≃ (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n))))) (Var≃ refl)
 
 is-linear : Tree n → Set
 is-linear Sing = ⊤

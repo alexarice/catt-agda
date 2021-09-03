@@ -55,6 +55,12 @@ getFst-across-ctx p = trans≃tm getFst-is-Fst (trans≃tm (Var≃ (cong (λ - �
 getSnd-across-ctx : {Γ : Ctx n} → {Δ : Ctx m} → n ≡ m → getSnd {Γ = Γ} ≃tm getSnd {Γ = Δ}
 getSnd-across-ctx p = trans≃tm getSnd-is-Snd (trans≃tm (Var≃ (cong (λ - → toℕ (inject₁ (fromℕ -))) p)) (sym≃tm getSnd-is-Snd))
 
+getFst-Lem : suspCtx Γ ≃c suspCtx Δ → getFst {Γ = Γ} ≃tm getFst {Γ = Δ}
+getFst-Lem p = getFst-across-ctx (cong (λ - → pred (pred -)) (≃c-preserve-length p))
+
+getSnd-Lem : suspCtx Γ ≃c suspCtx Δ → getSnd {Γ = Γ} ≃tm getSnd {Γ = Δ}
+getSnd-Lem p = getSnd-across-ctx (cong (λ - → pred (pred -)) (≃c-preserve-length p))
+
 susp-fst-var : (σ : Sub Γ Δ) → Var (fromℕ _) [ suspSub σ ]tm ≃tm Var {Γ = suspCtx Δ} (fromℕ _)
 susp-fst-var ⟨⟩ = getFst-is-Fst
 susp-fst-var ⟨ σ , t ⟩ = susp-fst-var σ

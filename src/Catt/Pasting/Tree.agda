@@ -3,64 +3,62 @@
 module Catt.Pasting.Tree where
 
 open import Catt.Syntax
-open import Catt.Syntax.Properties
-open import Catt.Syntax.Patterns
-open import Catt.Syntax.SyntacticEquality
-open import Catt.Globular
+-- open import Catt.Syntax.Properties
+-- open import Catt.Syntax.SyntacticEquality
+-- open import Catt.Globular
 open import Catt.Pasting
-open import Catt.Pasting.Properties
-open import Catt.Suspension
-open import Catt.Suspension.Properties
-open import Catt.Connection
-open import Catt.Connection.Properties
+-- open import Catt.Pasting.Properties
+-- open import Catt.Suspension
+-- open import Catt.Suspension.Properties
+-- open import Catt.Connection
+-- open import Catt.Connection.Properties
 open import Data.Nat
-open import Data.Nat.Properties
+-- open import Data.Nat.Properties
 open import Data.Empty
 open import Data.Unit
-open import Relation.Binary.PropositionalEquality
-open import Data.Vec
+-- open import Relation.Binary.PropositionalEquality
+-- open import Data.Vec
 
-singleton-ctx : Ctx 1
+singleton-ctx : Ctx
 singleton-ctx = ∅ , ⋆
 
 singleton-pd : singleton-ctx ⊢pd₀ 0
 singleton-pd = Finish Base
 
-data Tree : ℕ → Set where
-  Sing : Tree 0
-  Join : (S : Tree n) → (T : Tree m) → Tree (m + suc (suc n))
+data Tree : Set where
+  Sing : Tree
+  Join : (S : Tree) → (T : Tree) → Tree
 
 -- Extendability
-n-extendable : ℕ → Tree n → Set
+n-extendable : ℕ → Tree → Set
 n-extendable zero T = ⊤
 n-extendable (suc n) Sing = ⊥
 n-extendable (suc n) (Join S Sing) = n-extendable n S
 n-extendable (suc n) (Join S T@(Join _ _)) = n-extendable (suc n) T
 
-extend-tree : (n : ℕ) → (T : Tree m) → .(n-extendable n T) → Tree (suc (suc m))
+extend-tree : (n : ℕ) → (T : Tree) → .(n-extendable n T) → Tree
 extend-tree zero Sing p = Join Sing Sing
 extend-tree zero (Join S Sing) p = Join S (Join Sing Sing)
 extend-tree zero (Join S T@(Join _ _)) p = Join S (extend-tree zero T p)
 extend-tree (suc n) (Join S Sing) p = Join (extend-tree n S p) Sing
 extend-tree (suc n) (Join S T@(Join _ _)) p = Join S (extend-tree (suc n) T p)
 
-join-tree-preserves-extendable : (n : ℕ) → (S : Tree m) → (T : Tree m′) → (p : n-extendable n T) → n-extendable n (Join S T)
+join-tree-preserves-extendable : (n : ℕ) → (S : Tree) → (T : Tree) → (p : n-extendable n T) → n-extendable n (Join S T)
 join-tree-preserves-extendable zero S T p = tt
 join-tree-preserves-extendable (suc n) S T@(Join _ _) p = p
 
-extended-tree-is-more-extendable : (n : ℕ) → (T : Tree m) → (p : n-extendable n T) → n-extendable (suc n) (extend-tree n T p)
+extended-tree-is-more-extendable : (n : ℕ) → (T : Tree) → (p : n-extendable n T) → n-extendable (suc n) (extend-tree n T p)
 extended-tree-is-more-extendable zero Sing p = tt
 extended-tree-is-more-extendable zero (Join S Sing) p = tt
 extended-tree-is-more-extendable zero (Join S T@(Join _ _)) p = join-tree-preserves-extendable 1 S (extend-tree zero T p) (extended-tree-is-more-extendable zero T p)
 extended-tree-is-more-extendable (suc n) (Join S Sing) p = extended-tree-is-more-extendable n S p
 extended-tree-is-more-extendable (suc n) (Join S T@(Join _ _)) p = join-tree-preserves-extendable (suc (suc n)) S (extend-tree (suc n) T p) (extended-tree-is-more-extendable (suc n) T p)
 
-pred-n-extendable : (n : ℕ) → (T : Tree m) → n-extendable (suc n) T → n-extendable n T
+pred-n-extendable : (n : ℕ) → (T : Tree) → n-extendable (suc n) T → n-extendable n T
 pred-n-extendable zero T p = tt
 pred-n-extendable (suc n) (Join S Sing) p = pred-n-extendable n S p
 pred-n-extendable (suc n) (Join S T@(Join _ _)) p = pred-n-extendable (suc n) T p
-
-
+{-
 -- Tree to pd conversion
 tree-to-ctx : (T : Tree n) → Ctx (suc n)
 tree-to-pd-dim : Tree n → ℕ
@@ -337,3 +335,5 @@ pd-to-tree-dim {Γ = Γ} pd = begin
   ctx-dim Γ ∎
   where
     open ≡-Reasoning
+
+-}

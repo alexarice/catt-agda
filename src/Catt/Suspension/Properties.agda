@@ -34,44 +34,6 @@ getFst-across-ctx p = trans≃tm getFst-is-Fst (trans≃tm (Var≃ (cong (λ - �
 getSnd-across-ctx : {Γ : Ctx n} → {Δ : Ctx m} → n ≡ m → getSnd {Γ = Γ} ≃tm getSnd {Γ = Δ}
 getSnd-across-ctx p = trans≃tm getSnd-is-Snd (trans≃tm (Var≃ (cong (λ - → toℕ (inject₁ (fromℕ -))) p)) (sym≃tm getSnd-is-Snd))
 
-susp-ty-lift : (B : Ty Γ d) → suspTy (liftType {A = A} B) ≃ty liftType {A = suspTy A} (suspTy B)
-susp-tm-lift : (t : Tm Γ d) → suspTm (liftTerm {A = A} t) ≃tm liftTerm {A = suspTy A} (suspTm t)
-susp-sub-lift : (σ : Sub Δ Γ) → suspSub (liftSub {A = A} σ) ≃s liftSub {A = suspTy A} (suspSub σ)
-
-susp-ty-lift ⋆ = Arr≃ refl≃tm Star≃ refl≃tm
-susp-ty-lift (s ─⟨ B ⟩⟶ t) = Arr≃ (susp-tm-lift s) (susp-ty-lift B) (susp-tm-lift t)
-
-susp-tm-lift (Var i) = refl≃tm
-susp-tm-lift (Coh Δ A x σ) = Coh≃ refl≃c refl≃ty (susp-sub-lift σ)
-
-susp-sub-lift ⟨⟩ = Ext≃ (Ext≃ Null≃ refl≃tm) refl≃tm
-susp-sub-lift ⟨ σ , t ⟩ = Ext≃ (susp-sub-lift σ) (susp-tm-lift t)
-
-lookupSusp-is-inject : (i : Fin (ctxLength Γ)) → lookupSusp {Γ = Γ} i ≃tm Var {Γ = suspCtx Γ} (inject₁ (inject₁ i))
-lookupSusp-is-inject {Γ = Γ , A} zero = Var≃ refl
-lookupSusp-is-inject {Γ = Γ , A} (suc i) = lift-tm-≃ (lookupSusp-is-inject i)
-
-susp-ctx-≃ : Γ ≃c Δ → suspCtx Γ ≃c suspCtx Δ
-susp-ty-≃ : {A : Ty Γ d} {B : Ty Δ d′} → Γ ≃c Δ → A ≃ty B → suspTy A ≃ty suspTy B
-susp-tm-≃ : {s : Tm Γ d} {t : Tm Δ d′} → Γ ≃c Δ → s ≃tm t → suspTm s ≃tm suspTm t
-susp-sub-≃ : {σ : Sub Γ Δ} {τ : Sub Γ′ Δ′} → Δ ≃c Δ′ → σ ≃s τ → suspSub σ ≃s suspSub τ
-
-susp-ctx-≃ Emp≃ = refl≃c
-susp-ctx-≃ (Add≃ p q) = Add≃ (susp-ctx-≃ p) (susp-ty-≃ p q)
-
-susp-ty-≃ p Star≃ with ≃c-preserve-len p
-... | refl with ≃c-to-≡ p
-... | refl = refl≃ty
-susp-ty-≃ p (Arr≃ q r s) = Arr≃ (susp-tm-≃ p q) (susp-ty-≃ p r) (susp-tm-≃ p s)
-
-susp-tm-≃ _ (Var≃ q) = trans≃tm (lookupSusp-is-inject _) (trans≃tm (Var≃ (trans (toℕ-inject₁ (inject₁ _)) (trans (toℕ-inject₁ _) (trans q (sym (trans (toℕ-inject₁ (inject₁ _)) (toℕ-inject₁ _))))))) (sym≃tm (lookupSusp-is-inject _)))
-susp-tm-≃ p (Coh≃ q r s) = Coh≃ (susp-ctx-≃ q) (susp-ty-≃ q r) (susp-sub-≃ p s)
-
-susp-sub-≃ p Null≃ with ≃c-preserve-len p
-... | refl with ≃c-to-≡ p
-... | refl = refl≃s
-susp-sub-≃ p (Ext≃ r s) = Ext≃ (susp-sub-≃ p r) (susp-tm-≃ p s)
-
 susp-fst-var : (σ : Sub Γ Δ) → Var (fromℕ _) [ suspSub σ ]tm ≃tm Var {Γ = suspCtx Δ} (fromℕ _)
 susp-fst-var ⟨⟩ = getFst-is-Fst
 susp-fst-var ⟨ σ , t ⟩ = susp-fst-var σ

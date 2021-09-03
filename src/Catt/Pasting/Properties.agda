@@ -3,7 +3,6 @@
 module Catt.Pasting.Properties where
 
 open import Catt.Syntax
-open import Catt.Syntax.Patterns
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Pasting
 open import Relation.Binary.PropositionalEquality
@@ -12,29 +11,45 @@ open import Data.Nat.Properties
 open import Data.Empty
 open import Relation.Binary
 open import Axiom.UniquenessOfIdentityProofs
-open import Catt.Variables
+-- open import Catt.Variables
 open import Data.Unit using (tt)
-open import Catt.Globular
+-- open import Catt.Globular
 open import Data.Product renaming (_,_ to _,,_)
 
 extend-pd-eq : (pdb : Γ ⊢pd[ submax ][ d ])
-             → A ≡ getFocusType pdb
-             → B ≡ liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V
+             → A ≃ty getFocusType pdb
+             → B ≃ty liftTerm {A = getFocusType pdb} (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V
              → Γ , A , B ⊢pd[ pred submax ][ suc d ]
-extend-pd-eq pdb refl refl = Extend pdb
+extend-pd-eq pdb p q
+  rewrite ≃ty-to-≡ p
+  rewrite ≃ty-to-≡ q = Extend pdb
 
 extend-pd-eq-foc-tm : (pdb : Γ ⊢pd[ submax ][ d ])
-                    → (p : A ≡ getFocusType pdb)
-                    → (q : B ≡ liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
-                    → 0V ≡ getFocusTerm (extend-pd-eq pdb p q)
-extend-pd-eq-foc-tm pdb refl refl = refl
+                    → (p : A ≃ty getFocusType pdb)
+                    → (q : B ≃ty liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
+                    → 0V {Γ = Γ , A , B} ≃tm getFocusTerm (extend-pd-eq pdb p q)
+extend-pd-eq-foc-tm pdb p q with ≃ty-to-≡ p
+... | refl with ≃ty-to-≡ q
+... | refl = Var≃ refl
 
 extend-pd-eq-foc-ty : (pdb : Γ ⊢pd[ submax ][ d ])
-                    → (p : A ≡ getFocusType pdb)
-                    → (q : B ≡ liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
-                    → liftTerm (liftTerm (getFocusTerm pdb)) ─⟨ liftType (liftType (getFocusType pdb)) ⟩⟶ 1V ≡ getFocusType (extend-pd-eq pdb p q)
-extend-pd-eq-foc-ty pdb refl refl = refl
+                    → (p : A ≃ty getFocusType pdb)
+                    → (q : B ≃ty liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
+                    → liftType {A = B} B ≃ty getFocusType (extend-pd-eq pdb p q)
+extend-pd-eq-foc-ty pdb p q with ≃ty-to-≡ p
+... | refl with ≃ty-to-≡ q
+... | refl = refl≃ty
 
+pdb-is-non-empty : Γ ⊢pd[ submax ][ d ] → NonZero′ (ctxLength Γ)
+pdb-is-non-empty Base = it
+pdb-is-non-empty (Extend pdb) = it
+pdb-is-non-empty (Restr pdb) = pdb-is-non-empty pdb
+
+pdb-0-focus-ty-is-⋆ : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (⋆ {Γ = Γ}) ≃ty getFocusType pdb
+pdb-0-focus-ty-is-⋆ pdb with getFocusType pdb | getFocusTypeDim pdb
+... | ⋆ | x = Star≃
+
+{-
 pdb-dim-is-ctx-dim : Γ ⊢pd[ submax ][ d ] → ctx-dim Γ ≡ suc (d + submax)
 pdb-dim-is-ctx-dim Base = refl
 pdb-dim-is-ctx-dim (Extend {Γ = Γ} {submax = submax} {d = d} pdb) = begin
@@ -157,3 +172,4 @@ focus-term-is-var (Restr pdb) = ty-globular-tgt (getFocusType pdb) (focus-ty-is-
 focus-ty-is-globular Base = tt
 focus-ty-is-globular (Extend pdb) = liftTerm-preserve-isVar (liftTerm (getFocusTerm pdb)) (liftTerm-preserve-isVar (getFocusTerm pdb) (focus-term-is-var pdb)) ,, liftType-preserve-is-globular (liftType (getFocusType pdb)) (liftType-preserve-is-globular (getFocusType pdb) (focus-ty-is-globular pdb)) ,, tt
 focus-ty-is-globular (Restr pdb) = ty-globular-base (getFocusType pdb) (focus-ty-is-globular pdb)
+-}

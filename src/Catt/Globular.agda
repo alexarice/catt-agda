@@ -3,22 +3,12 @@
 module Catt.Globular where
 
 open import Catt.Syntax
-open import Catt.Dimension
+-- open import Catt.Dimension
 open import Data.Nat
 open import Catt.Variables
 open import Data.Unit
 open import Data.Empty
 open import Data.Product renaming (_,_ to _,,_)
-
-ty-src : Ty Γ (suc (suc d)) → Tm Γ (suc (suc d))
-ty-tgt : Ty Γ (suc (suc d)) → Tm Γ (suc (suc d))
-ty-base : Ty Γ (suc (suc d)) → Ty Γ (suc d)
-
-ty-src (s ─⟨ A ⟩⟶ t) = s
-
-ty-tgt (s ─⟨ A ⟩⟶ t) = t
-
-ty-base (s ─⟨ A ⟩⟶ t) = A
 
 tm-to-ty : Tm Γ (suc d) → Ty Γ d
 tm-to-ty {Γ = Γ} (Var i) = Γ ‼ i

@@ -125,12 +125,6 @@ is-unsuspendable-sub Γ Δ ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ p q = getFst {Γ = Δ}
 is-unsuspendable-sub ∅ Δ ⟨ ⟨ ⟨ σ , t₂ ⟩ , t₁ ⟩ , t ⟩ (Add≃ (Add≃ () x₁) x) q
 is-unsuspendable-sub (Γ , A) Δ ⟨ ⟨ ⟨ σ , u ⟩ , s ⟩ , t ⟩ (Add≃ p _) q = is-unsuspendable-sub Γ Δ ⟨ ⟨ σ , u ⟩ , s ⟩ p q × is-unsuspendable-tm Δ t q
 
-subst-dim-tm : Tm Γ n → m ≡ n → Tm Γ m
-subst-dim-tm t refl = t
-
-subst-dim-tm-≃ : (t : Tm Γ n) → (p : m ≡ n) → subst-dim-tm t p ≃tm t
-subst-dim-tm-≃ t refl = refl≃tm
-
 unsuspend-sub ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ ∅ Δ p q x = ⟨⟩
 unsuspend-sub ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ (Γ , A) Δ p q x with cong (λ - → pred (pred -)) (≃c-preserve-len p)
 ... | ()

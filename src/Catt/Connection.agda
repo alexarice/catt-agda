@@ -16,7 +16,7 @@ open import Relation.Nullary using (¬_)
 open import Relation.Binary.PropositionalEquality
 
 connect : (Γ : Ctx) → (x : Tm Γ) → (Δ : Ctx) → .⦃ NonZero′ (ctxLength Δ) ⦄ → Ctx
-connect-inc-right : (Γ : Ctx) → (x : Tm Γ) → (Δ : Ctx) → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub Δ (connect Γ x Δ) ⋆
+connect-inc-right : (Γ : Ctx) → (x : Tm Γ) → (Δ : Ctx) → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub Δ (connect Γ x Δ)
 
 connect Γ x (∅ , A) = Γ
 connect Γ x (Δ , A , B) = (connect Γ x (Δ , A)) , B [ connect-inc-right Γ x (Δ , A) ]ty
@@ -24,17 +24,17 @@ connect Γ x (Δ , A , B) = (connect Γ x (Δ , A)) , B [ connect-inc-right Γ x
 connect-inc-right Γ x (∅ , A) = ⟨ ⟨⟩ , x ⟩
 connect-inc-right Γ x (Δ , A , B) = ⟨ liftSub (connect-inc-right Γ x (Δ , A)) , 0V ⟩
 
-connect-inc-left : (Γ : Ctx) → (x : Tm Γ) → (Δ : Ctx) → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub Γ (connect Γ x Δ) ⋆
+connect-inc-left : (Γ : Ctx) → (x : Tm Γ) → (Δ : Ctx) → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub Γ (connect Γ x Δ)
 connect-inc-left Γ x (∅ , A) = idSub Γ
 connect-inc-left Γ x (Δ , A , B) = liftSub (connect-inc-left Γ x (Δ , A))
 
 connect-pdb : {Γ : Ctx} (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx) → .⦃ NonZero′ (ctxLength Δ) ⦄ → Ctx
 connect-pdb {Γ = Γ} pdb Δ = connect Γ (getFocusTerm pdb) Δ
 
-connect-pdb-inc-left : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx) → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub Γ (connect-pdb pdb Δ) ⋆
+connect-pdb-inc-left : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx) → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub Γ (connect-pdb pdb Δ)
 connect-pdb-inc-left {Γ = Γ} pdb Δ = connect-inc-left Γ (getFocusTerm pdb) Δ
 
-connect-pdb-inc-right : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx) → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub Δ (connect-pdb pdb Δ) ⋆
+connect-pdb-inc-right : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx) → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub Δ (connect-pdb pdb Δ)
 connect-pdb-inc-right {Γ = Γ} pdb Δ = connect-inc-right Γ (getFocusTerm pdb) Δ
 
 connect-pd : (pd : Γ ⊢pd₀ d) → (Δ : Ctx) → .⦃ NonZero′ (ctxLength Δ) ⦄ → Ctx
@@ -79,8 +79,7 @@ connect-pdb-foc-ty pdb (Extend {Γ = Γ , A} pdb2) | ne
                                         (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2)))
                                         (Var≃ refl)))
 connect-pdb-foc-ty {Γ = Γ} {Δ = Δ} pdb (Restr pdb2)
-  = trans≃ty {!!} (ty-base-≃ (connect-pdb-foc-ty pdb pdb2) ⦃ {!!} ⦄ ⦃ getFocusTypeDim (connect-pdb-pdb pdb pdb2) ⦄) -- trans (base-subbed (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) Δ))
-      --    (cong ty-base (connect-pdb-foc-ty pdb pdb2))
+  = trans≃ty (ty-base-subbed (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) Δ ⦃ pdb-is-non-empty pdb2 ⦄)) (ty-base-≃ (connect-pdb-foc-ty pdb pdb2))
 
 connect-pdb-foc-tm pdb Base = refl≃tm
 connect-pdb-foc-tm pdb (Extend {Γ = Γ} pdb2) with pdb-is-non-empty pdb2
@@ -91,21 +90,17 @@ connect-pdb-foc-tm pdb (Extend {Γ = Γ , A} pdb2) | ne
                               (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2)))
                               (Var≃ refl))
 connect-pdb-foc-tm {Γ = Γ} {Δ = Δ} pdb (Restr pdb2)
-  = trans≃tm {!!} (ty-tgt-≃ (connect-pdb-foc-ty pdb pdb2) ⦃ {!!} ⦄ ⦃ getFocusTypeDim (connect-pdb-pdb pdb pdb2) ⦄) -- trans (tgt-subbed (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) Δ))
-      --    (cong ty-tgt (connect-pdb-foc-ty pdb pdb2))
+  = trans≃tm (ty-tgt-subbed (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) Δ ⦃ pdb-is-non-empty pdb2 ⦄)) (ty-tgt-≃ (connect-pdb-foc-ty pdb pdb2))
 
-{-
-
-connected-dim : {Γ : Ctx (suc n)} {Δ : Ctx (suc n′)} → (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → ℕ
+connected-dim : {Γ : Ctx} {Δ : Ctx} → (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → ℕ
 connected-dim (Finish pdb) (Finish pdb2) = new-submax pdb pdb2
 
-connect-pd-pd : {Γ : Ctx (suc n)} {Δ : Ctx (suc n′)} → (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → connect-pd pd Δ ⊢pd₀ connected-dim pd pd2
+connect-pd-pd : {Γ : Ctx} {Δ : Ctx} → (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → connect-pd pd Δ ⦃ pd-is-non-empty pd2 ⦄ ⊢pd₀ connected-dim pd pd2
 connect-pd-pd (Finish pdb) (Finish pdb2) = Finish (connect-pdb-pdb pdb pdb2)
 
-sub-from-connect : Sub Γ Υ → (t : Tm Γ 2) → Sub Δ Υ → Sub (connect Γ t Δ) Υ
+sub-from-connect : Sub Γ Υ → (t : Tm Γ) → Sub Δ Υ → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub (connect Γ t Δ) Υ
 sub-from-connect σ s ⟨ ⟨⟩ , t ⟩ = σ
 sub-from-connect σ s ⟨ ⟨ τ , u ⟩ , t ⟩ = ⟨ sub-from-connect σ s ⟨ τ , u ⟩ , t ⟩
 
-sub-from-connect-pdb : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Sub Γ Υ → Sub Δ Υ → Sub (connect-pdb pdb Δ) Υ
+sub-from-connect-pdb : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Sub Γ Υ → Sub Δ Υ → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub (connect-pdb pdb Δ) Υ
 sub-from-connect-pdb pdb σ τ = sub-from-connect σ (getFocusTerm pdb) τ
--}

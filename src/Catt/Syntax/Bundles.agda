@@ -9,7 +9,8 @@ record TY : Set where
   constructor <_>ty
   field
     {ty-ctx} : Ctx
-    ty : Ty ty-ctx
+    {ty-d} : ℕ
+    ty : Ty ty-ctx ty-d
 
 open TY public
 
@@ -26,7 +27,6 @@ record SUB : Set where
   field
     {s-ctx-1} : Ctx
     {s-ctx-2} : Ctx
-    {s-ty} : Ty s-ctx-2
-    sub : Sub s-ctx-1 s-ctx-2 s-ty
+    sub : Sub s-ctx-1 s-ctx-2
 
 open SUB public

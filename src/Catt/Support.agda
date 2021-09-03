@@ -24,10 +24,10 @@ empty = [ replicate false ]v
 full : VarSet Γ
 full = [ replicate true ]v
 
-ewt : {A : Ty Γ} → VarSet Γ → VarSet (Γ , A)
+ewt : {A : Ty Γ d} → VarSet Γ → VarSet (Γ , A)
 ewt [ xs ]v = [ true ∷ xs ]v
 
-ewf : {A : Ty Γ} → VarSet Γ → VarSet (Γ , A)
+ewf : {A : Ty Γ d} → VarSet Γ → VarSet (Γ , A)
 ewf [ xs ]v = [ false ∷ xs ]v
 
 drop : VarSet Γ → VarSet Γ
@@ -59,8 +59,8 @@ supp = wfRec _ (λ y → VarSet (syntax-ctx y)) γ
 
 suppCtx : (Γ : Ctx) → ⦃ _ : CtxDim Γ d ⦄ → VarSet Γ
 suppTm : .⦃ _ : CtxDim Γ d ⦄ → (t : Tm Γ) → ⦃ TmDim t n ⦄ → VarSet Γ
-suppTy : .⦃ _ : CtxDim Γ d ⦄ → (A : Ty Γ) → ⦃ TyDim A n ⦄ → VarSet Γ
-suppSub : .⦃ _ : CtxDim Δ d′ ⦄ → .⦃ _ : CtxDim Γ d ⦄ → (σ : Sub Δ Γ A) → ⦃ _ : SubDim σ n ⦄ → VarSet Γ
+suppTy : .⦃ _ : CtxDim Γ d ⦄ → (A : Ty Γ d′) → ⦃ TyDim A n ⦄ → VarSet Γ
+suppSub : .⦃ _ : CtxDim Δ d′ ⦄ → .⦃ _ : CtxDim Γ d ⦄ → (σ : Sub Δ Γ) → ⦃ _ : SubDim σ n ⦄ → VarSet Γ
 
 suppCtx Γ = supp (Context Γ)
 suppTm t = supp (Term t)

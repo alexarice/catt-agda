@@ -16,38 +16,48 @@ open import Data.Unit using (tt)
 -- open import Catt.Globular
 open import Data.Product renaming (_,_ to _,,_)
 
+subst-pdb : (pdb : Γ ⊢pd[ submax ][ d ]) → Δ ≃c Γ → Δ ⊢pd[ submax ][ d ]
+subst-pdb pdb c with ≃c-to-≡ c
+... | refl = pdb
+
+subst-pdb-foc-tm : (pdb : Γ ⊢pd[ submax ][ d ]) → (p : Δ ≃c Γ) → getFocusTerm pdb ≃tm getFocusTerm (subst-pdb pdb p)
+subst-pdb-foc-tm pdb c with ≃c-to-≡ c
+... | refl = refl≃tm
+
+subst-pdb-foc-ty : (pdb : Γ ⊢pd[ submax ][ d ]) → (p : Δ ≃c Γ) → getFocusType pdb ≃ty getFocusType (subst-pdb pdb p)
+subst-pdb-foc-ty pdb c with ≃c-to-≡ c
+... | refl = refl≃ty
+
 extend-pd-eq : (pdb : Γ ⊢pd[ submax ][ d ])
              → A ≃ty getFocusType pdb
              → B ≃ty liftTerm {A = getFocusType pdb} (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V
              → Γ , A , B ⊢pd[ pred submax ][ suc d ]
-extend-pd-eq pdb p q
-  rewrite ≃ty-to-≡ p
-  rewrite ≃ty-to-≡ q = Extend pdb
+extend-pd-eq pdb p q = subst-pdb (Extend pdb) (Add≃ (Add≃ refl≃c p) q)
 
 extend-pd-eq-foc-tm : (pdb : Γ ⊢pd[ submax ][ d ])
                     → (p : A ≃ty getFocusType pdb)
                     → (q : B ≃ty liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
                     → 0V {Γ = Γ , A , B} ≃tm getFocusTerm (extend-pd-eq pdb p q)
-extend-pd-eq-foc-tm pdb p q with ≃ty-to-≡ p
-... | refl with ≃ty-to-≡ q
-... | refl = Var≃ refl
+extend-pd-eq-foc-tm pdb p q = trans≃tm (Var≃ refl) (subst-pdb-foc-tm (Extend pdb) (Add≃ (Add≃ refl≃c p) q))
+
 
 extend-pd-eq-foc-ty : (pdb : Γ ⊢pd[ submax ][ d ])
                     → (p : A ≃ty getFocusType pdb)
                     → (q : B ≃ty liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
                     → liftType {A = B} B ≃ty getFocusType (extend-pd-eq pdb p q)
-extend-pd-eq-foc-ty pdb p q with ≃ty-to-≡ p
-... | refl with ≃ty-to-≡ q
-... | refl = refl≃ty
+extend-pd-eq-foc-ty pdb p q = trans≃ty (lift-ty-≃ q) (subst-pdb-foc-ty (Extend pdb) (Add≃ (Add≃ refl≃c p) q))
 
-pdb-is-non-empty : Γ ⊢pd[ submax ][ d ] → NonZero′ (ctxLength Γ)
+pdb-is-non-empty : (pdb : Γ ⊢pd[ submax ][ d ]) → NonZero′ (ctxLength Γ)
 pdb-is-non-empty Base = it
 pdb-is-non-empty (Extend pdb) = it
 pdb-is-non-empty (Restr pdb) = pdb-is-non-empty pdb
 
+pd-is-non-empty : (pd : Γ ⊢pd₀ d) → NonZero′ (ctxLength Γ)
+pd-is-non-empty (Finish pdb) = pdb-is-non-empty pdb
+
 pdb-0-focus-ty-is-⋆ : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (⋆ {Γ = Γ}) ≃ty getFocusType pdb
-pdb-0-focus-ty-is-⋆ pdb with getFocusType pdb | getFocusTypeDim pdb
-... | ⋆ | x = Star≃
+pdb-0-focus-ty-is-⋆ pdb with getFocusType pdb
+... | ⋆ = Star≃
 
 {-
 pdb-dim-is-ctx-dim : Γ ⊢pd[ submax ][ d ] → ctx-dim Γ ≡ suc (d + submax)

@@ -22,9 +22,8 @@ data _⊢pd₀_ : Ctx → ℕ → Set
 
 data _⊢pd[_][_] : (Γ : Ctx) → ℕ → ℕ → Set
 
-getFocusType : Γ ⊢pd[ submax ][ d ] → Ty Γ
+getFocusType : Γ ⊢pd[ submax ][ d ] → Ty Γ d
 getFocusTerm : Γ ⊢pd[ submax ][ d ] → Tm Γ
-getFocusTypeDim : (pdb : Γ ⊢pd[ submax ][ d ]) → TyHeight (getFocusType pdb) d
 
 -- Uniquely extend a pasting context
 extend : {Γ : Ctx} → Γ ⊢pd[ submax ][ d ] → Ctx
@@ -41,15 +40,11 @@ data _⊢pd[_][_] where
 
 getFocusType Base = ⋆
 getFocusType {Γ = Γ , A} (Extend pdb) = liftType A
-getFocusType (Restr pdb) = ty-base (getFocusType pdb) ⦃ getFocusTypeDim pdb ⦄
-
-getFocusTypeDim Base = it
-getFocusTypeDim (Extend pdb) = TyHeightS ⦃ lift-height-ty ⦃ lift-height-ty ⦃ getFocusTypeDim pdb ⦄ ⦄ ⦄
-getFocusTypeDim (Restr pdb) = ty-base-height (getFocusType pdb) ⦃ getFocusTypeDim pdb ⦄
+getFocusType (Restr pdb) = ty-base (getFocusType pdb)
 
 getFocusTerm Base = 0V
 getFocusTerm (Extend pdb) = 0V
-getFocusTerm (Restr pdb) = ty-tgt (getFocusType pdb) ⦃ getFocusTypeDim pdb ⦄
+getFocusTerm (Restr pdb) = ty-tgt (getFocusType pdb)
 
 data _⊢pd₀_ where
   Finish : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Γ ⊢pd₀ submax
@@ -97,7 +92,7 @@ pd-bd-pd : (pd : Γ ⊢pd₀ suc d) → pd-bd-ctx pd ⊢pd₀ d
 pd-bd-pd (Finish pdb) = Finish (pdb-bd-pd pdb)
 
 -- Source and Target
-pdb-src : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → Sub (pdb-bd-ctx pdb) Γ ⋆
+pdb-src : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → Sub (pdb-bd-ctx pdb) Γ
 pdb-src (Extend {submax = zero} pdb) = liftSub (liftSub (idSub _))
 pdb-src (Extend {submax = suc zero} pdb) = liftSub (liftSub (pdb-src pdb))
 pdb-src (Extend {submax = suc (suc submax)} pdb) = ⟨ ⟨ liftSub (liftSub (pdb-src pdb)) , 1V ⟩ , 0V ⟩
@@ -107,20 +102,20 @@ is-zero : ℕ → Set
 is-zero zero = ⊤
 is-zero (suc n) = ⊥
 
-replacePdSub : Δ ⊢pd[ submax ][ d ] → (σ : Sub Δ Γ ⋆) → Tm Γ → .(is-zero submax) → Sub Δ Γ ⋆
+replacePdSub : Δ ⊢pd[ submax ][ d ] → (σ : Sub Δ Γ) → Tm Γ → .(is-zero submax) → Sub Δ Γ
 replacePdSub Base ⟨ σ , x ⟩ t iz = ⟨ σ , t ⟩
 replacePdSub (Extend pdb) ⟨ σ , x ⟩ t iz = ⟨ σ , t ⟩
 
-pdb-tgt : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → Sub (pdb-bd-ctx pdb) Γ ⋆
+pdb-tgt : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → Sub (pdb-bd-ctx pdb) Γ
 pdb-tgt (Extend {submax = zero} pdb) = replacePdSub (pdb-bd-pd (Extend pdb)) (liftSub (liftSub (idSub _))) 1V tt
 pdb-tgt (Extend {submax = suc zero} pdb) = replacePdSub (pdb-bd-pd (Extend pdb)) (liftSub (liftSub (pdb-tgt pdb))) 1V tt
 pdb-tgt (Extend {submax = suc (suc submax)} pdb) = ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ , 0V ⟩
 pdb-tgt (Restr pdb) = pdb-tgt pdb ⦃ nonZeroTT ⦄
 
-pd-src : (pd : Γ ⊢pd₀ (suc d)) → Sub (pd-bd-ctx pd) Γ ⋆
+pd-src : (pd : Γ ⊢pd₀ (suc d)) → Sub (pd-bd-ctx pd) Γ
 pd-src (Finish pdb) = pdb-src pdb
 
-pd-tgt : (pd : Γ ⊢pd₀ (suc d)) → Sub (pd-bd-ctx pd) Γ ⋆
+pd-tgt : (pd : Γ ⊢pd₀ (suc d)) → Sub (pd-bd-ctx pd) Γ
 pd-tgt (Finish pdb) = pdb-tgt pdb
 
 
@@ -147,5 +142,5 @@ supp-tgt (Finish pdb) = supp-pdb-tgt pdb
 pd-focus-tm : (pd : Γ ⊢pd₀ d) → Tm Γ
 pd-focus-tm (Finish pdb) = getFocusTerm pdb
 
-pd-focus-ty : (pd : Γ ⊢pd₀ d) → Ty Γ
+pd-focus-ty : (pd : Γ ⊢pd₀ d) → Ty Γ 0
 pd-focus-ty (Finish pdb) = getFocusType pdb

@@ -20,6 +20,29 @@ open import Relation.Nullary
 open import Data.Sum
 open import Data.Product renaming (_,_ to _,,_)
 
+convertIndex-inj : (i : Fin (ctxLength Γ)) → (j : Fin (ctxLength Δ)) → toℕ i ≡ toℕ j → toℕ (convertIndex i) ≡ toℕ (convertIndex j)
+convertIndex-inj {Γ , A} {Δ , A₁} zero zero p = p
+convertIndex-inj {Γ , A} {Δ , A₁} (suc i) (suc j) p = cong suc (convertIndex-inj i j (cong pred p))
+
+susp-ctx-≃ : Γ ≃c Δ → suspCtx Γ ≃c suspCtx Δ
+susp-ty-≃ : {A : Ty Γ} {B : Ty Δ} → Γ ≃c Δ → A ≃ty B → suspTy A ≃ty suspTy B
+susp-tm-≃ : {s : Tm Γ} {t : Tm Δ} → Γ ≃c Δ → s ≃tm t → suspTm s ≃tm suspTm t
+susp-sub-≃ : {σ : Sub Γ Δ ⋆} → {τ : Sub Γ′ Δ′ ⋆} → Δ ≃c Δ′ → σ ≃s τ → suspSub σ ≃s suspSub τ
+
+susp-ctx-≃ Emp≃ = refl≃c
+susp-ctx-≃ (Add≃ p q) = Add≃ (susp-ctx-≃ p) (susp-ty-≃ p q)
+
+susp-ty-≃ p Star≃ with ≃c-to-≡ p
+... | refl = refl≃ty
+susp-ty-≃ p (Arr≃ q r s) = Arr≃ (susp-tm-≃ p q) (susp-ty-≃ p r) (susp-tm-≃ p s)
+
+susp-tm-≃ _ (Var≃ q) = Var≃ (convertIndex-inj _ _ q)
+susp-tm-≃ p (Coh≃ q r s) = Coh≃ (susp-ctx-≃ q) (susp-ty-≃ q r) (susp-sub-≃ p s)
+
+susp-sub-≃ p (Null≃ q)with ≃c-to-≡ p
+... | refl = refl≃s
+susp-sub-≃ p (Ext≃ r s) = Ext≃ (susp-sub-≃ p r) (susp-tm-≃ p s)
+
 getFst-is-Fst : getFst {Γ = Γ} ≃tm Var {Γ = suspCtx Γ} (fromℕ _)
 getFst-is-Fst {Γ = ∅} = Var≃ refl
 getFst-is-Fst {Γ = Γ , A} = lift-tm-≃ getFst-is-Fst

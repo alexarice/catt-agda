@@ -9,14 +9,9 @@ open import Catt.Dimension
 open import Data.Fin using (Fin;zero;suc)
 open import Data.Nat
 
-
-lift-height-ty : {A : Ty Γ} → ⦃ TyHeight A d ⦄ → TyHeight (liftType {A = B} A) d
-lift-height-ty {A = ⋆} ⦃ TyHeightB ⦄ = TyHeightB
-lift-height-ty {A = s ─⟨ A ⟩⟶ t} ⦃ TyHeightS ⦄ = TyHeightS ⦃ lift-height-ty ⦄
-
-lift-dim-ty : .⦃ _ : CtxDim Γ n ⦄ → {A : Ty Γ} → ⦃ TyDim A d ⦄ → ⦃ _ : TyDim B d′ ⦄ → TyDim (liftType {A = B} A) d
+lift-dim-ty : .⦃ _ : CtxDim Γ n ⦄ → {A : Ty Γ m} → ⦃ TyDim A d ⦄ → ⦃ _ : TyDim B d′ ⦄ → TyDim (liftType {A = B} A) d
 lift-dim-tm : .⦃ _ : CtxDim Γ n ⦄ → {t : Tm Γ} → ⦃ TmDim t d ⦄ → ⦃ _ : TyDim A d′ ⦄ → TmDim (liftTerm {A = A} t) d
-lift-dim-sub : .⦃ _ : CtxDim Γ n ⦄ → .⦃ _ : CtxDim Δ m ⦄ → {σ : Sub Γ Δ A} → ⦃ SubDim σ d ⦄ → ⦃ _ : TyDim B d′ ⦄ → SubDim (liftSub {A = B} σ) d
+lift-dim-sub : .⦃ _ : CtxDim Γ n ⦄ → .⦃ _ : CtxDim Δ m ⦄ → {σ : Sub Γ Δ} → ⦃ SubDim σ d ⦄ → ⦃ _ : TyDim B d′ ⦄ → SubDim (liftSub {A = B} σ) d
 
 lift-dim-ty {A = ⋆} ⦃ TyDimB ⦄ = TyDimB
 lift-dim-ty {A = s ─⟨ A ⟩⟶ t} ⦃ TyDimS ⦄ = TyDimS ⦃ _ ⦄ ⦃ lift-dim-tm {t = s} ⦄ ⦃ lift-dim-ty ⦄ ⦃ lift-dim-tm  ⦄
@@ -69,13 +64,13 @@ sub-equality refl refl = refl
 coh-equality : A ≡ A′ → σ ≡ σ′ → Coh Δ A σ ≡ Coh Δ A′ σ′
 coh-equality refl refl = refl
 
-sub-action-≡-ty : {σ : Sub Γ Δ ⋆} → A ≡ B → A [ σ ]ty ≡ B [ σ ]ty
+sub-action-≡-ty : {σ : Sub Γ Δ} → A ≡ B → A [ σ ]ty ≡ B [ σ ]ty
 sub-action-≡-ty refl = refl
 
-sub-action-≡-tm : {σ : Sub Γ Δ ⋆} → s ≡ t → s [ σ ]tm ≡ t [ σ ]tm
+sub-action-≡-tm : {σ : Sub Γ Δ} → s ≡ t → s [ σ ]tm ≡ t [ σ ]tm
 sub-action-≡-tm refl = refl
 
-sub-action-≡-sub : {σ : Sub Γ Δ ⋆} → τ ≡ μ → σ ∘ τ ≡ σ ∘ μ
+sub-action-≡-sub : {σ : Sub Γ Δ} → τ ≡ μ → σ ∘ τ ≡ σ ∘ μ
 sub-action-≡-sub refl = refl
 
 -- sub-from-function : ((i : Fin (ctxLength Γ)) → Tm Δ) → Sub Γ Δ ⋆

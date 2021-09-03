@@ -7,30 +7,40 @@ open import Data.Fin.Patterns
 open import Data.Nat
 open import Data.Nat.Properties
 open import Relation.Binary.PropositionalEquality
+open import Data.Bool using (T; not)
+
+record NonZero′ (n : ℕ) : Set where
+  field
+    nonZero : T (not (n ≡ᵇ 0))
+
+-- Instances
+
+instance
+  nonZero : ∀ {n} → NonZero′ (suc n)
+  nonZero = _
 
 variable
   n n′ m m′ l l′ d d′ : ℕ
 
-data Ctx : Set
-data Ty : Ctx → ℕ → Set
-data Tm : Ctx → Set
-data Sub : Ctx → (Δ : Ctx) → Set
+data Ctx : ℕ → Set
+data Ty : Ctx n → ℕ → Set
+data Tm : Ctx n → Set
+data Sub : Ctx n → Ctx m → Set
 
 
 variable
-  Γ Γ′ Δ Δ′ Υ : Ctx
+  Γ Γ′ Δ Δ′ Υ : Ctx n
   A A′ B C : Ty Γ d
   s s′ t t′ u : Tm Γ
   σ σ′ τ μ : Sub Γ Δ
 
 infixl 25 _,_
 data Ctx where
-  ∅ : Ctx
-  _,_ : (Γ : Ctx) → (A : Ty Γ d) → Ctx
+  ∅ : Ctx 0
+  _,_ : (Γ : Ctx n) → (A : Ty Γ d) → Ctx (suc n)
 
-ctxLength : (Γ : Ctx) → ℕ
-ctxLength ∅ = 0
-ctxLength (Γ , A) = suc (ctxLength Γ)
+ctxLength : (Γ : Ctx n) → ℕ
+ctxLength {n = n} Γ = n
 
 infix 30 _─⟨_⟩⟶_
 data Ty where
@@ -43,7 +53,7 @@ data Sub where
 
 data Tm where
   Var : (i : (Fin (ctxLength Γ))) → Tm Γ
-  Coh : (Δ : Ctx) → (A : Ty Δ d) → (σ : Sub Δ Γ) → Tm Γ
+  Coh : (Δ : Ctx (suc n)) → (A : Ty Δ d) → (σ : Sub Δ Γ) → Tm Γ
 
 pattern 0V {Γ} = Var {Γ = Γ} 0F
 pattern 1V {Γ} = Var {Γ = Γ} 1F
@@ -128,15 +138,15 @@ Coh Δ A τ [ σ ]tm = Coh Δ A (σ ∘ τ)
 σ ∘ ⟨⟩ = ⟨⟩
 σ ∘ ⟨ τ , t ⟩ = ⟨ (σ ∘ τ) , t [ σ ]tm ⟩
 
-idSub : (Γ : Ctx) → Sub Γ Γ
+idSub : (Γ : Ctx n) → Sub Γ Γ
 idSub ∅ = ⟨⟩
 idSub (Γ , A) = ⟨ liftSub (idSub Γ) , Var zero ⟩
 
-lookupHeight : (Γ : Ctx) → (i : Fin (ctxLength Γ)) → ℕ
+lookupHeight : (Γ : Ctx n) → (i : Fin n) → ℕ
 lookupHeight (Γ , A) zero = ty-dim A
 lookupHeight (Γ , A) (suc i) = lookupHeight Γ i
 
 infix 45 _‼_
-_‼_ : (Γ : Ctx) → (i : Fin (ctxLength Γ)) → Ty Γ (lookupHeight Γ i)
+_‼_ : (Γ : Ctx n) → (i : Fin n) → Ty Γ (lookupHeight Γ i)
 (Γ , A) ‼ zero = liftType A
 (Γ , A) ‼ suc i = liftType (Γ ‼ i)

@@ -22,7 +22,7 @@ lift-dim-tm {t = Coh Δ A σ} ⦃ TmDimC ⦄ = TmDimC ⦃ _ ⦄ ⦃ it ⦄ ⦃ i
 lift-dim-sub {σ = ⟨⟩} ⦃ SubDimB ⦄ = SubDimB
 lift-dim-sub {σ = ⟨ σ , t ⟩} ⦃ SubDimS ⦄ = SubDimS ⦃ _ ⦄ ⦃ _ ⦄ ⦃ lift-dim-sub ⦄ ⦃ it ⦄ ⦃ lift-dim-tm ⦄
 
-lookupD : (Γ : Ctx) → ⦃ _ : CtxDim Γ d ⦄ → (i : Fin (ctxLength Γ)) → TyDim (Γ ‼ i) (lookupDim Γ i)
+lookupD : (Γ : Ctx n) → ⦃ _ : CtxDim Γ d ⦄ → (i : Fin (ctxLength Γ)) → TyDim (Γ ‼ i) (lookupDim Γ i)
 lookupD (Γ , A) ⦃ CtxDimS ⦄ zero = lift-dim-ty
 lookupD (Γ , A) ⦃ CtxDimS ⦄ (suc i) = lift-dim-ty ⦃ it ⦄ ⦃ lookupD Γ i ⦄
 

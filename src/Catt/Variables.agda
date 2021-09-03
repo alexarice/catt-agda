@@ -10,18 +10,19 @@ open import Catt.Syntax.SyntacticEquality
 open import Data.Unit
 open import Data.Empty
 open import Data.Nat
+open import Relation.Binary.PropositionalEquality
 
 VarSplit : (Γ : Ctx n) → (σ : Sub Δ Γ) → (τ : Sub Υ Γ) → Set
 VarSplit {Δ = Δ} {Υ = Υ} Γ σ τ = ∀ (i : Fin (ctxLength Γ)) → (Σ[ j ∈ Fin (ctxLength Δ) ] (Var j [ σ ]tm ≃tm Var {Γ = Γ} i)) ⊎ (Σ[ j ∈ Fin (ctxLength Υ) ] (Var j [ τ ]tm ≃tm Var {Γ = Γ} i))
 
-isVar : Tm Γ d → Set
+isVar : Tm Γ → Set
 isVar (Var i) = ⊤
-isVar (Coh Δ A x σ) = ⊥
+isVar (Coh Δ A σ) = ⊥
 
 varToVar : Sub Γ Δ → Set
 varToVar ⟨⟩ = ⊤
 varToVar ⟨ σ , Var i ⟩ = varToVar σ
-varToVar ⟨ σ , Coh Δ A x σ₁ ⟩ = ⊥
+varToVar ⟨ σ , Coh Δ A σ₁ ⟩ = ⊥
 
 ty-is-globular : Ty Γ d → Set
 ty-is-globular ⋆ = ⊤
@@ -43,7 +44,7 @@ liftSub-preserve-var-to-var : (σ : Sub Γ Δ) → .(varToVar σ) → varToVar (
 liftSub-preserve-var-to-var ⟨⟩ v = tt
 liftSub-preserve-var-to-var ⟨ σ , Var i ⟩ v = liftSub-preserve-var-to-var σ v
 
-liftTerm-preserve-isVar : (t : Tm Γ d) → .(isVar t) → isVar (liftTerm {A = A} t)
+liftTerm-preserve-isVar : (t : Tm Γ) → .(isVar t) → isVar (liftTerm {A = A} t)
 liftTerm-preserve-isVar (Var i) v = tt
 
 liftType-preserve-is-globular : (A : Ty Γ d) → (ty-is-globular A) → ty-is-globular (liftType {A = B} A)
@@ -54,5 +55,5 @@ id-is-var-to-var : (Γ : Ctx n) → varToVar (idSub Γ)
 id-is-var-to-var ∅ = tt
 id-is-var-to-var (Γ , A) = liftSub-preserve-var-to-var (idSub Γ) (id-is-var-to-var Γ)
 
-extend-var-to-var : (σ : Sub Γ Δ) → (varToVar σ) → {A : Ty Γ d} → (t : Tm Δ (suc d)) → .(isVar t) → varToVar (⟨_,_⟩ σ {A} t)
+extend-var-to-var : (σ : Sub Γ Δ) → (varToVar σ) → {A : Ty Γ d} → (t : Tm Δ) → .(isVar t) → varToVar (⟨_,_⟩ σ {A} t)
 extend-var-to-var σ v (Var i) vt = v

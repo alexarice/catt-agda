@@ -3,7 +3,6 @@
 module Catt.Pasting.Insertion where
 
 open import Catt.Syntax
-open import Catt.Syntax.Patterns
 open import Catt.Dimension
 open import Data.Nat
 open import Data.Nat.Properties

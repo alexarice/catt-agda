@@ -11,7 +11,7 @@ open import Data.Fin using (Fin; zero; suc)
 open import Relation.Binary.Construct.Closure.Transitive
 open import Relation.Binary.Construct.Closure.Transitive using () renaming ([_] to [_]p; _∷_ to _∷p_) public
 
-data CtxDim : Ctx → ℕ → Set
+data CtxDim : Ctx n → ℕ → Set
 data TyDim : .⦃ CtxDim Γ d ⦄ → Ty Γ d′ → ℕ → Set
 data TmDim : .⦃ CtxDim Γ d ⦄ → Tm Γ → ℕ → Set
 data SubDim : .⦃ CtxDim Γ d ⦄ → .⦃ CtxDim Δ d′ ⦄ → Sub Γ Δ → ℕ → Set
@@ -20,7 +20,7 @@ data CtxDim where
   instance CtxDimB : CtxDim ∅ 0
   instance CtxDimS : ⦃ _ : CtxDim Γ n ⦄ → ⦃ TyDim A m ⦄ → CtxDim (Γ , A) (n ⊔ m)
 
-lookupDim : (Γ : Ctx) → ⦃ CtxDim Γ n ⦄ → (i : Fin (ctxLength Γ)) → ℕ
+lookupDim : (Γ : Ctx m) → ⦃ CtxDim Γ n ⦄ → (i : Fin (ctxLength Γ)) → ℕ
 lookupDim (Γ , A) ⦃ CtxDimS {m = m} ⦄ zero = m
 lookupDim (Γ , A) ⦃ CtxDimS ⦄ (suc i) = lookupDim Γ i
 
@@ -37,7 +37,7 @@ data SubDim where
   instance SubDimS : .⦃ _ : CtxDim Γ d ⦄ → .⦃ _ : CtxDim Δ d′ ⦄ → { σ : Sub Γ Δ} → ⦃ SubDim σ n ⦄ → ⦃ _ : TyDim A m ⦄ → ⦃ TmDim t (suc m) ⦄ → SubDim (⟨_,_⟩ σ {A} t) (n ⊔ suc m)
 
 data Syntax : Set where
-  Context : (Γ : Ctx) → ⦃ c : CtxDim Γ n ⦄ → Syntax
+  Context : (Γ : Ctx m) → ⦃ c : CtxDim Γ n ⦄ → Syntax
   Type : (A : Ty Γ d′) → .⦃ _ : CtxDim Γ d ⦄ → ⦃ c : TyDim A n ⦄ → Syntax
   Term : (t : Tm Γ) → .⦃ _ : CtxDim Γ d ⦄ → ⦃ c : TmDim t n ⦄ → Syntax
   Substitution : (σ : Sub Γ Δ) → .⦃ _ : CtxDim Γ d ⦄ → .⦃ _ : CtxDim Δ d′ ⦄ → ⦃ c : SubDim σ n ⦄ → Syntax
@@ -48,7 +48,13 @@ syntax-dim (Type {n = n} A) = n
 syntax-dim (Term {n = n} t) = n
 syntax-dim (Substitution {n = n} σ) = n
 
-syntax-ctx : Syntax → Ctx
+syntax-ctx-length : Syntax → ℕ
+syntax-ctx-length (Context Γ) = ctxLength Γ
+syntax-ctx-length (Type {Γ = Γ} A) = ctxLength Γ
+syntax-ctx-length (Term {Γ = Γ} t) = ctxLength Γ
+syntax-ctx-length (Substitution {Δ = Δ} σ) = ctxLength Δ
+
+syntax-ctx : (S : Syntax) → Ctx (syntax-ctx-length S)
 syntax-ctx (Context Γ) = Γ
 syntax-ctx (Type {Γ = Γ} A) = Γ
 syntax-ctx (Term {Γ = Γ} t) = Γ
@@ -73,7 +79,7 @@ not-possible A x ()
 wf : WellFounded _≺_
 wf x = acc (access (syntax-dim x) x ≤-refl)
   where
-    access-ctx : (n : ℕ) → (Γ : Ctx) → {d : ℕ} → ⦃ _ : CtxDim Γ d ⦄ → .(d ≤ n) → (y : Syntax) → y ≺ (Context Γ) → Acc _≺_ y
+    access-ctx : (n : ℕ) → (Γ : Ctx m) → {d : ℕ} → ⦃ _ : CtxDim Γ d ⦄ → .(d ≤ n) → (y : Syntax) → y ≺ (Context Γ) → Acc _≺_ y
     access-ty : (n : ℕ) → (A : Ty Γ m) → .⦃ _ : CtxDim Γ d′ ⦄ → {d : ℕ} → ⦃ _ : TyDim A d ⦄ → .(d ≤ n) → (y : Syntax) → y ≺ (Type A) → Acc _≺_ y
     access-tm : (n : ℕ) → (t : Tm Γ) → .⦃ _ : CtxDim Γ d′ ⦄ → {d : ℕ} → ⦃ _ : TmDim t d ⦄ → .(d ≤ n) → (y : Syntax) → y ≺ (Term t) → Acc _≺_ y
     access-sub : (n : ℕ) → (σ : Sub Γ Δ) → .⦃ _ : CtxDim Γ d′ ⦄ → .⦃ _ : CtxDim Δ m ⦄ → {d : ℕ} → ⦃ _ : SubDim σ d ⦄ → .(d ≤ n) → (y : Syntax) → y ≺ (Substitution σ) → Acc _≺_ y

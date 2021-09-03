@@ -13,7 +13,7 @@ open import Data.Fin
 open import Data.Empty
 open import Data.Unit
 
-record VarSet (Γ : Ctx) : Set where
+record VarSet (Γ : Ctx n) : Set where
   constructor [_]v
   field
     get : Vec Bool (ctxLength Γ)
@@ -31,8 +31,8 @@ ewf : {A : Ty Γ d} → VarSet Γ → VarSet (Γ , A)
 ewf [ xs ]v = [ false ∷ xs ]v
 
 drop : VarSet Γ → VarSet Γ
-drop {∅} [ [] ]v = [ [] ]v
-drop {_ , _} [ x ∷ v ]v = [ false ∷ v ]v
+drop {zero} [ [] ]v = [ [] ]v
+drop {suc n} [ x ∷ v ]v = [ false ∷ v ]v
 
 trueAt : Fin (ctxLength Γ) → VarSet Γ
 trueAt {Γ = Γ , A} zero = ewt empty
@@ -57,7 +57,7 @@ supp = wfRec _ (λ y → VarSet (syntax-ctx y)) γ
     γ (Substitution ⟨⟩) rec = empty
     γ (Substitution ⟨ σ , t ⟩ ⦃ c = SubDimS ⦄) rec = (rec (Substitution σ) [ sub1 ]p) ∪ (rec (Term t) [ sub2 ]p)
 
-suppCtx : (Γ : Ctx) → ⦃ _ : CtxDim Γ d ⦄ → VarSet Γ
+suppCtx : (Γ : Ctx n) → ⦃ _ : CtxDim Γ d ⦄ → VarSet Γ
 suppTm : .⦃ _ : CtxDim Γ d ⦄ → (t : Tm Γ) → ⦃ TmDim t n ⦄ → VarSet Γ
 suppTy : .⦃ _ : CtxDim Γ d ⦄ → (A : Ty Γ d′) → ⦃ TyDim A n ⦄ → VarSet Γ
 suppSub : .⦃ _ : CtxDim Δ d′ ⦄ → .⦃ _ : CtxDim Γ d ⦄ → (σ : Sub Δ Γ) → ⦃ _ : SubDim σ n ⦄ → VarSet Γ

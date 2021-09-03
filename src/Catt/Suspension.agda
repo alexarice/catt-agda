@@ -15,13 +15,12 @@ open import Relation.Binary.PropositionalEquality
 -- open import Catt.Globular
 -- open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁)
 
-suspCtx : Ctx → Ctx
+suspCtx : Ctx n → Ctx (2 + n)
 suspTy : Ty Γ d → Ty (suspCtx Γ) (suc d)
 getFst : Tm (suspCtx Γ)
 getSnd : Tm (suspCtx Γ)
 suspTm : Tm Γ → Tm (suspCtx Γ)
 suspSub : Sub Γ Δ → Sub (suspCtx Γ) (suspCtx Δ)
-convertIndex : (i : Fin (ctxLength Γ)) → Fin (ctxLength (suspCtx Γ))
 
 suspCtx ∅ = ∅ , ⋆ , ⋆
 suspCtx (Γ , A) = (suspCtx Γ) , (suspTy A)
@@ -35,14 +34,11 @@ getFst {Γ = Γ , A} = liftTerm getFst
 getSnd {Γ = ∅} = 0V
 getSnd {Γ = Γ , A} = liftTerm getSnd
 
-suspTm (Var i) = Var (convertIndex i)
+suspTm (Var i) = Var (inject₁ (inject₁ i))
 suspTm (Coh Δ A σ) = Coh (suspCtx Δ) (suspTy A) (suspSub σ)
 
 suspSub ⟨⟩ = ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩
 suspSub ⟨ σ , t ⟩ = ⟨ suspSub σ , suspTm t ⟩
-
-convertIndex {Γ , A} zero = zero
-convertIndex {Γ , A} (suc i) = suc (convertIndex i)
 
 susp-ty-lift : (B : Ty Γ d) → suspTy (liftType {A = A} B) ≃ty liftType {A = suspTy A} (suspTy B)
 susp-tm-lift : (t : Tm Γ) → suspTm (liftTerm {A = A} t) ≃tm liftTerm {A = suspTy A} (suspTm t)
@@ -66,24 +62,6 @@ susp-tgt-compat (s ─⟨ A ⟩⟶ t) = refl≃tm
 susp-base-compat : (A : Ty Γ (suc d)) → suspTy (ty-base A) ≃ty ty-base (suspTy A)
 susp-base-compat (s ─⟨ A ⟩⟶ t) = refl≃ty
 
--- suspLiftTy : {A : Ty Γ d′} (B : Ty Γ d) → suspTy (liftType {A = A} B) ≡ liftType (suspTy B)
--- suspLiftTm : {A : Ty Γ d′} (t : Tm Γ d) → suspTm (liftTerm {A = A} t) ≡ liftTerm (suspTm t)
--- suspLiftSub : {A : Ty Δ d′} (σ : Sub Γ Δ) → suspSub (liftSub {A = A} σ) ≡ liftSub (suspSub σ)
-
--- suspLiftTy ⋆ = refl
--- suspLiftTy (s ─⟨ A ⟩⟶ t)
---   = arr-equality (suspLiftTm s)
---                  (suspLiftTy A)
---                  (suspLiftTm t)
-
--- suspLiftTm (Var i) = refl
--- suspLiftTm (Coh Δ A p σ) = coh-equality refl (suspLiftSub σ)
-
--- suspLiftSub ⟨⟩ = refl
--- suspLiftSub {A = A} ⟨ σ , t ⟩
---   = sub-equality (suspLiftSub σ)
---                  (suspLiftTm t)
-
 susp-pdb : Γ ⊢pd[ submax ][ d ] → suspCtx Γ ⊢pd[ submax ][ suc d ]
 susp-pdb-foc-ty : (pdb : Γ ⊢pd[ submax ][ d ]) → suspTy (getFocusType pdb) ≃ty getFocusType (susp-pdb pdb)
 susp-pdb-foc-tm : (pdb : Γ ⊢pd[ submax ][ d ]) → suspTm (getFocusTerm pdb) ≃tm getFocusTerm (susp-pdb pdb)
@@ -95,11 +73,6 @@ susp-pdb (Extend pdb)
                  (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-tm pdb)))
                        (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb)))
                        (Var≃ refl))
-                 -- (arr-equality (trans (suspLiftTm (getFocusTerm pdb))
-                 --                      (cong liftTerm (susp-pdb-foc-tm pdb)))
-                 --               (trans (suspLiftTy (getFocusType pdb))
-                 --                      (cong liftType (susp-pdb-foc-ty pdb)))
-                 --               refl)
 susp-pdb (Restr pdb) = Restr (susp-pdb pdb)
 
 susp-pdb-foc-tm Base = Var≃ refl

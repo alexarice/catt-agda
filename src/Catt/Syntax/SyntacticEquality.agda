@@ -17,7 +17,7 @@ open import Relation.Binary
 open import Function.Equivalence using (equivalence)
 open import Data.Product renaming (_,_ to _,,_) using (Σ; proj₁; proj₂)
 
-data _≃c_ : Ctx → Ctx → Set
+data _≃c_ : Ctx n → Ctx m → Set
 data _≃ty_ : Ty Γ d → Ty Γ′ d′ → Set
 data _≃tm_ : Tm Γ → Tm Γ′ → Set
 data _≃s_ : Sub Γ Δ → Sub Γ′ Δ′ → Set
@@ -102,8 +102,8 @@ reflexive≃s : σ ≡ τ → σ ≃s τ
 reflexive≃s refl = refl≃s
 
 ctx-setoid : Setoid _ _
-ctx-setoid = record { Carrier = Ctx
-                    ; _≈_ = λ x y → x ≃c y
+ctx-setoid = record { Carrier = CTX
+                    ; _≈_ = λ x y → ctx x ≃c ctx y
                     ; isEquivalence = record { refl = refl≃c
                                              ; sym = sym≃c
                                              ; trans = trans≃c
@@ -141,6 +141,10 @@ sub-setoid = record { Carrier = SUB
 ≃ty-preserve-height Star≃ = refl
 ≃ty-preserve-height (Arr≃ x p x₁) = cong suc (≃ty-preserve-height p)
 
+≃c-preserve-length : Γ ≃c Δ → ctxLength Γ ≡ ctxLength Δ
+≃c-preserve-length Emp≃ = refl
+≃c-preserve-length (Add≃ p x) = cong suc (≃c-preserve-length p)
+
 ≃c-to-≡ : Γ ≃c Δ → Γ ≡ Δ
 ≃ty-to-≡ : {A : Ty Γ d} {B : Ty Γ d} → A ≃ty B → A ≡ B
 ≃ty-to-subst-≡ : {A : Ty Γ d} {B : Ty Γ d′} → (p : A ≃ty B) → (q : d ≡ d′) → subst (Ty Γ) q A ≡ B
@@ -153,7 +157,7 @@ sub-setoid = record { Carrier = SUB
   rewrite ≃c-to-≡ p
   = lem (≃ty-preserve-height q) (≃ty-to-subst-≡ q (≃ty-preserve-height q))
   where
-    lem : {Γ : Ctx} → {A : Ty Γ d} {B : Ty Γ d′} → (p : d ≡ d′) → subst (Ty Γ) p A ≡ B → Γ , A ≡ Γ , B
+    lem : {Γ : Ctx n} → {A : Ty Γ d} {B : Ty Γ d′} → (p : d ≡ d′) → subst (Ty Γ) p A ≡ B → Γ , A ≡ Γ , B
     lem refl refl = refl
 
 ≃ty-to-≡ p = ≃ty-to-subst-≡ p refl
@@ -166,8 +170,8 @@ sub-setoid = record { Carrier = SUB
 
 ≃tm-to-≡ (Var≃ x) with toℕ-injective x
 ... | refl = refl
-≃tm-to-≡ (Coh≃ p q r) with ≃ty-preserve-height q
-... | refl
+≃tm-to-≡ (Coh≃ p q r) with ≃c-preserve-length p | ≃ty-preserve-height q
+... | refl | refl
   rewrite ≃c-to-≡ p
   rewrite ≃ty-to-≡ q
   rewrite ≃s-to-≡ r = refl
@@ -266,7 +270,7 @@ apply-lifted-sub-var-≃ {Γ = Γ , A} (suc i) ⟨ σ , t ⟩ = apply-lifted-sub
 ‼-≃ zero zero p (Add≃ q x) = lift-ty-≃ x
 ‼-≃ (suc i) (suc j) p (Add≃ q x) = lift-ty-≃ (‼-≃ i j (cong pred p) q)
 
-≃c-dec : (Γ : Ctx) → (Γ′ : Ctx) → Dec (Γ ≃c Γ′)
+≃c-dec : (Γ : Ctx n) → (Γ′ : Ctx m) → Dec (Γ ≃c Γ′)
 ≃ty-dec : (A : Ty Γ d) → (B : Ty Γ′ d′) → Dec (A ≃ty B)
 ≃tm-dec : (s : Tm Γ) → (t : Tm Γ′) → Dec (s ≃tm t)
 ≃s-dec : (σ : Sub Γ Δ) → (τ : Sub Γ′ Δ′) → Dec (σ ≃s τ)
@@ -308,7 +312,7 @@ apply-lifted-sub-var-≃ {Γ = Γ , A} (suc i) ⟨ σ , t ⟩ = apply-lifted-sub
 ... | no p | q = no (λ where (Ext≃ x _) → p x)
 
 
-ctx-dec : DecidableEquality (Ctx)
+ctx-dec : DecidableEquality (Ctx n)
 ctx-dec Γ Δ = map (equivalence ≃c-to-≡ reflexive≃c) (≃c-dec Γ Δ)
 
 ty-dec : DecidableEquality (Ty Γ d)
@@ -395,6 +399,10 @@ idSub≃-on-tm p (Coh≃ q r s) = Coh≃ q r (idSub≃-on-sub p s)
 
 idSub≃-on-sub p Null≃ = Null≃
 idSub≃-on-sub p (Ext≃ q r) = Ext≃ (idSub≃-on-sub p q) (idSub≃-on-tm p r)
+
+⋆-is-only-0-d-ty : {A : Ty Γ 0} → (⋆ {Γ = Γ}) ≃ty A
+⋆-is-only-0-d-ty {A = ⋆} = Star≃
+
 {-
 -- sub-from-function-≃ : (f : (i : Fin (ctxLength Γ)) → Tm Δ (suc (lookupDim Γ i)))
 --                     → (f2 : (i : Fin (ctxLength Γ)) → Tm Υ (suc (lookupDim Γ i)))

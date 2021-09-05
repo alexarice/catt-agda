@@ -4,8 +4,8 @@ module Catt.Connection where
 
 open import Catt.Syntax
 open import Catt.Syntax.Properties
--- open import Catt.Globular
--- open import Catt.Globular.Properties
+open import Catt.Globular
+open import Catt.Globular.Properties
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Pasting
 open import Catt.Pasting.Properties
@@ -40,6 +40,12 @@ connect-pdb-inc-right {Γ = Γ} pdb Δ = connect-inc-right Γ (getFocusTerm pdb)
 connect-pd : {Γ : Ctx (suc n)} → (pd : Γ ⊢pd₀ d) → (Δ : Ctx (suc m)) → Ctx (suc (m + n))
 connect-pd (Finish pdb) Δ = connect-pdb pdb Δ
 
+connect-pd-inc-left : (pd : Γ ⊢pd₀ d) → (Δ : Ctx (suc m)) → Sub Γ (connect-pd pd Δ)
+connect-pd-inc-left (Finish pdb) Δ = connect-pdb-inc-left pdb Δ
+
+connect-pd-inc-right : (pd : Γ ⊢pd₀ d) → (Δ : Ctx (suc m)) → Sub Δ (connect-pd pd Δ)
+connect-pd-inc-right (Finish pdb) Δ = connect-pdb-inc-right pdb Δ
+
 new-submax : {Γ : Ctx (suc n)} {Δ : Ctx (suc m)} → (pd : Γ ⊢pd[ d ][ 0 ]) → (pdb : Δ ⊢pd[ submax ][ d′ ]) → ℕ
 new-submax {d = d} pdb Base = d
 new-submax pdb (Extend pdb2) = pred (new-submax pdb pdb2)
@@ -57,14 +63,7 @@ connect-pdb-pdb pdb (Extend {Γ = Γ , A} pdb2) | ne
                  (Arr≃ (trans≃tm (lift-subbed-tm-≃ (getFocusTerm pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-tm-≃ (connect-pdb-foc-tm pdb pdb2)))
                        (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2)))
                        (Var≃ refl))
--- extend-pd-eq (connect-pdb-pdb pdb pdb2)
-      --            (connect-pdb-foc-ty pdb pdb2)
 
-                 -- (arr-equality (trans (lift-subbed-tm (getFocusTerm pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                 --                      (cong liftTerm (connect-pdb-foc-tm pdb pdb2)))
-                 --               (trans (lift-subbed-ty (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                 --                      (cong liftType (connect-pdb-foc-ty pdb pdb2)))
-                 --               refl)
 connect-pdb-pdb pdb (Restr pdb2) = Restr (connect-pdb-pdb pdb pdb2)
 
 connect-pdb-foc-ty pdb Base = pdb-0-focus-ty-is-⋆ pdb
@@ -98,9 +97,12 @@ connected-dim (Finish pdb) (Finish pdb2) = new-submax pdb pdb2
 connect-pd-pd : {Γ : Ctx (suc n)} {Δ : Ctx (suc m)} → (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → connect-pd pd Δ ⊢pd₀ connected-dim pd pd2
 connect-pd-pd (Finish pdb) (Finish pdb2) = Finish (connect-pdb-pdb pdb pdb2)
 
-sub-from-connect : Sub Γ Υ → (t : Tm Γ) → Sub Δ Υ → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub (connect Γ t Δ) Υ
+sub-from-connect : Sub Γ Υ → (t : Tm Γ) → Sub Δ Υ → Sub (connect Γ t Δ) Υ
 sub-from-connect σ s ⟨ ⟨⟩ , t ⟩ = σ
 sub-from-connect σ s ⟨ ⟨ τ , u ⟩ , t ⟩ = ⟨ sub-from-connect σ s ⟨ τ , u ⟩ , t ⟩
 
-sub-from-connect-pdb : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Sub Γ Υ → Sub Δ Υ → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → Sub (connect-pdb pdb Δ) Υ
+sub-from-connect-pdb : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Sub Γ Υ → Sub Δ Υ → Sub (connect-pdb pdb Δ) Υ
 sub-from-connect-pdb pdb σ τ = sub-from-connect σ (getFocusTerm pdb) τ
+
+sub-from-connect-pd : (pd : Γ ⊢pd₀ d) → Sub Γ Υ → Sub Δ Υ → Sub (connect-pd pd Δ) Υ
+sub-from-connect-pd (Finish pdb) σ τ = sub-from-connect-pdb pdb σ τ

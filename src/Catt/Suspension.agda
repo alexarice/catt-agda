@@ -12,7 +12,8 @@ open import Data.Nat
 -- open import Data.Nat.Properties
 open import Data.Fin using (Fin;zero;suc;inject₁;toℕ)
 open import Relation.Binary.PropositionalEquality
--- open import Catt.Globular
+open import Catt.Globular
+open import Catt.Globular.Properties
 -- open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁)
 
 suspCtx : Ctx n → Ctx (2 + n)

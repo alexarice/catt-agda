@@ -45,6 +45,9 @@ sub-from-disc t = ⟨ (sub-from-sphere (tm-to-ty t)) , t ⟩
 sub-from-sphere ⋆ = ⟨⟩
 sub-from-sphere {d = suc d} (s ─⟨ A ⟩⟶ t) = ⟨ ⟨ sub-from-sphere A , s ⟩ , t ⟩
 
+disc-≡ : d ≡ d′ → Disc d ≃c Disc d′
+disc-≡ refl = refl≃c
+
 disc-susp : (n : ℕ) → suspCtx (Disc n) ≃c Disc (suc n)
 sphere-susp : (n : ℕ) → suspCtx (Sphere n) ≃c Sphere (suc n)
 sphere-type-susp : (n : ℕ) → suspTy (sphere-type n) ≃ty sphere-type (suc n)
@@ -64,14 +67,14 @@ is-linear (Join S Sing) = is-linear S
 is-linear (Join S (Join _ _)) = ⊥
 
 -- Use tree-dim
-height-of-linear : (T : Tree n) → .(is-linear T) → ℕ
-height-of-linear Sing il = 0
-height-of-linear (Join S Sing) il = suc (height-of-linear S il)
+height-of-linear : (T : Tree n) → .⦃ is-linear T ⦄ → ℕ
+height-of-linear Sing = 0
+height-of-linear (Join S Sing) = suc (height-of-linear S)
 
-linear-tree-compat : (T : Tree n) → .(l : is-linear T) → tree-to-ctx T ≃c Disc (height-of-linear T l)
-linear-tree-compat Sing l = Add≃ Emp≃ Star≃
-linear-tree-compat (Join S Sing) l = trans≃c (susp-ctx-≃ (linear-tree-compat S l)) (disc-susp (height-of-linear S _))
+linear-tree-compat : (T : Tree n) → .⦃ _ : is-linear T ⦄ → tree-to-ctx T ≃c Disc (height-of-linear T)
+linear-tree-compat Sing = Add≃ Emp≃ Star≃
+linear-tree-compat (Join S Sing) = trans≃c (susp-ctx-≃ (linear-tree-compat S)) (disc-susp (height-of-linear S))
 
-height-of-linear-is-tree-dim : (T : Tree n) → .(lh : is-linear T) → height-of-linear T lh ≡ tree-dim T
-height-of-linear-is-tree-dim Sing lh = refl
-height-of-linear-is-tree-dim (Join T Sing) lh = cong suc (height-of-linear-is-tree-dim T lh)
+height-of-linear-is-tree-dim : (T : Tree n) → .⦃ _ : is-linear T ⦄ → height-of-linear T ≡ tree-dim T
+height-of-linear-is-tree-dim Sing = refl
+height-of-linear-is-tree-dim (Join T Sing) = cong suc (height-of-linear-is-tree-dim T)

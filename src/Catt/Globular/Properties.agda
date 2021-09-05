@@ -9,18 +9,18 @@ open import Data.Nat
 open import Data.Fin using (Fin;suc;zero)
 open import Relation.Binary.PropositionalEquality
 
-src-subbed : (A : Ty Γ (suc (suc d))) → (σ : Sub Γ Δ) → (ty-src A) [ σ ]tm ≡ ty-src (A [ σ ]ty)
-src-subbed (s ─⟨ A ⟩⟶ t) σ = refl
+-- src-subbed_:_(A_:_Ty_Γ_(suc_(suc_d)))_→_(σ_:_Sub_Γ_Δ)_→_(ty-src_A)_[_σ_]tm_≡_ty-src_(A_[_σ_]ty)
+-- src-subbed_(s_─⟨_A_⟩⟶_t)_σ_=_refl
 
-tgt-subbed : (A : Ty Γ (suc (suc d))) → (σ : Sub Γ Δ) → ty-tgt A [ σ ]tm ≡ ty-tgt (A [ σ ]ty)
-tgt-subbed (s ─⟨ A ⟩⟶ t) σ = refl
+-- tgt-subbed_:_(A_:_Ty_Γ_(suc_(suc_d)))_→_(σ_:_Sub_Γ_Δ)_→_ty-tgt_A_[_σ_]tm_≡_ty-tgt_(A_[_σ_]ty)
+-- tgt-subbed_(s_─⟨_A_⟩⟶_t)_σ_=_refl
 
-base-subbed : (A : Ty Γ (suc (suc d))) → (σ : Sub Γ Δ) → ty-base A [ σ ]ty ≡ ty-base (A [ σ ]ty)
-base-subbed (s ─⟨ A ⟩⟶ t) σ = refl
+-- base-subbed_:_(A_:_Ty_Γ_(suc_(suc_d)))_→_(σ_:_Sub_Γ_Δ)_→_ty-base_A_[_σ_]ty_≡_ty-base_(A_[_σ_]ty)
+-- base-subbed_(s_─⟨_A_⟩⟶_t)_σ_=_refl
 
-tm-to-ty-≃ : {s : Tm Γ (suc d)} {t : Tm Δ (suc d′)} → Γ ≃c Δ → s ≃tm t → tm-to-ty s ≃ty tm-to-ty t
-tm-to-ty-≃ p (Var≃ x) = ‼-≃ _ _ x p
-tm-to-ty-≃ p (Coh≃ q r s) = sub-action-≃-ty r s
+-- tm-to-ty-≃ : {s : Tm Γ (suc d)} {t : Tm Δ (suc d′)} → Γ ≃c Δ → s ≃tm t → tm-to-ty s ≃ty tm-to-ty t
+-- tm-to-ty-≃ p (Var≃ x) = ‼-≃ _ _ x p
+-- tm-to-ty-≃ p (Coh≃ q r s) = sub-action-≃-ty r s
 
 ty-src-≃ : A ≃ty B → ty-src A ≃tm ty-src B
 ty-src-≃ (Arr≃ p q r) = p

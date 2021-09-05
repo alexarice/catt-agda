@@ -194,14 +194,14 @@ lift-tm-≃ (Coh≃ p q r) = Coh≃ p q (lift-sub-≃ r)
 lift-sub-≃ Null≃ = Null≃
 lift-sub-≃ (Ext≃ p q) = Ext≃ (lift-sub-≃ p) (lift-tm-≃ q)
 
-ty-base-≃ : A ≃ty B → ty-base A ≃ty ty-base B
-ty-base-≃ (Arr≃ _ p _) = p
+-- ty-base-≃ : A ≃ty B → ty-base A ≃ty ty-base B
+-- ty-base-≃ (Arr≃ _ p _) = p
 
-ty-src-≃ : A ≃ty B → ty-src A ≃tm ty-src B
-ty-src-≃ (Arr≃ p _ _) = p
+-- ty-src-≃ : A ≃ty B → ty-src A ≃tm ty-src B
+-- ty-src-≃ (Arr≃ p _ _) = p
 
-ty-tgt-≃ : A ≃ty B → ty-tgt A ≃tm ty-tgt B
-ty-tgt-≃ (Arr≃ _ _ p) = p
+-- ty-tgt-≃ : A ≃ty B → ty-tgt A ≃tm ty-tgt B
+-- ty-tgt-≃ (Arr≃ _ _ p) = p
 
 ty-base-subbed : (A : Ty Γ (suc d)) → (σ : Sub Γ Δ) → ty-base A [ σ ]ty ≃ty ty-base (A [ σ ]ty)
 ty-base-subbed (s ─⟨ A ⟩⟶ t) σ = refl≃ty

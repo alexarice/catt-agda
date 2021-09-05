@@ -8,8 +8,8 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
 open import Catt.Pasting
 open import Catt.Suspension
--- open import Catt.Globular
--- open import Catt.Globular.Properties
+open import Catt.Globular
+open import Catt.Globular.Properties
 open import Data.Nat
 open import Data.Fin using (Fin;zero;suc;inject₁;toℕ;fromℕ;lower₁)
 open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁)
@@ -122,6 +122,10 @@ suspSub-preserve-focus-tm pdb pdb2 σ = begin
   < getFocusTerm (Restr (susp-pdb pdb2)) >tm ∎
   where
     open Reasoning tm-setoid
+
+lookupHeight-suspCtx : (Γ : Ctx n) → (i : Fin (ctxLength Γ)) → suc (lookupHeight Γ i) ≡ lookupHeight (suspCtx Γ) (inject₁ (inject₁ i))
+lookupHeight-suspCtx (Γ , A) zero = refl
+lookupHeight-suspCtx (Γ , A) (suc i) = lookupHeight-suspCtx Γ i
 
 -- inject-susp-sub : (σ : Sub Γ Δ) → (i : Fin (ctxLength Γ)) → Var (inject₁ (inject₁ i)) [ suspSub σ ]tm ≃tm suspTm (Var i [ σ ]tm)
 -- inject-susp-sub ⟨ σ , t ⟩ zero = refl≃tm

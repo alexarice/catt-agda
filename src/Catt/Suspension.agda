@@ -10,7 +10,7 @@ open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Data.Nat
 -- open import Data.Nat.Properties
-open import Data.Fin using (Fin;zero;suc;inject₁;toℕ)
+open import Data.Fin using (Fin;zero;suc;inject₁;toℕ;fromℕ)
 open import Relation.Binary.PropositionalEquality
 open import Catt.Globular
 open import Catt.Globular.Properties
@@ -18,40 +18,38 @@ open import Catt.Globular.Properties
 
 suspCtx : Ctx n → Ctx (2 + n)
 suspTy : Ty Γ d → Ty (suspCtx Γ) (suc d)
-getFst : Tm (suspCtx Γ)
-getSnd : Tm (suspCtx Γ)
+getFst : (Γ : Ctx n) → Tm (suspCtx Γ)
+getSnd : (Γ : Ctx n) → Tm (suspCtx Γ)
 suspTm : Tm Γ → Tm (suspCtx Γ)
 suspSub : Sub Γ Δ → Sub (suspCtx Γ) (suspCtx Δ)
 
 suspCtx ∅ = ∅ , ⋆ , ⋆
 suspCtx (Γ , A) = (suspCtx Γ) , (suspTy A)
 
-suspTy ⋆ = getFst ─⟨ ⋆ ⟩⟶ getSnd
+suspTy ⋆ = getFst _ ─⟨ ⋆ ⟩⟶ getSnd _
 suspTy (s ─⟨ A ⟩⟶ t) = suspTm s ─⟨ suspTy A ⟩⟶ suspTm t
 
-getFst {Γ = ∅} = 1V
-getFst {Γ = Γ , A} = liftTerm getFst
+getFst Γ = Var (fromℕ _)
 
-getSnd {Γ = ∅} = 0V
-getSnd {Γ = Γ , A} = liftTerm getSnd
+getSnd Γ = Var (inject₁ (fromℕ _))
 
 suspTm (Var i) = Var (inject₁ (inject₁ i))
 suspTm (Coh Δ A σ) = Coh (suspCtx Δ) (suspTy A) (suspSub σ)
 
-suspSub ⟨⟩ = ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩
+suspSub ⟨⟩ = ⟨ ⟨ ⟨⟩ , getFst _ ⟩ , getSnd _ ⟩
 suspSub ⟨ σ , t ⟩ = ⟨ suspSub σ , suspTm t ⟩
 
 susp-ty-lift : (B : Ty Γ d) → suspTy (liftType {A = A} B) ≃ty liftType {A = suspTy A} (suspTy B)
 susp-tm-lift : (t : Tm Γ) → suspTm (liftTerm {A = A} t) ≃tm liftTerm {A = suspTy A} (suspTm t)
 susp-sub-lift : (σ : Sub Δ Γ) → suspSub (liftSub {A = A} σ) ≃s liftSub {A = suspTy A} (suspSub σ)
 
-susp-ty-lift ⋆ = Arr≃ refl≃tm Star≃ refl≃tm
+susp-ty-lift ⋆ = Arr≃ refl≃tm (Star≃ refl≃c) refl≃tm
 susp-ty-lift (s ─⟨ B ⟩⟶ t) = Arr≃ (susp-tm-lift s) (susp-ty-lift B) (susp-tm-lift t)
 
 susp-tm-lift (Var i) = refl≃tm
 susp-tm-lift (Coh Δ A σ) = Coh≃ refl≃c refl≃ty (susp-sub-lift σ)
 
-susp-sub-lift ⟨⟩ = Ext≃ (Ext≃ Null≃ refl≃tm) refl≃tm
+susp-sub-lift ⟨⟩ = Ext≃ (Ext≃ (Null≃ refl≃c) refl≃tm) refl≃tm
 susp-sub-lift ⟨ σ , t ⟩ = Ext≃ (susp-sub-lift σ) (susp-tm-lift t)
 
 susp-src-compat : (A : Ty Γ (suc d)) → suspTm (ty-src A) ≃tm ty-src (suspTy A)
@@ -71,18 +69,18 @@ susp-pdb Base = Extend Base
 susp-pdb (Extend pdb)
   = extend-pd-eq (susp-pdb pdb)
                  (susp-pdb-foc-ty pdb)
-                 (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-tm pdb)))
-                       (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb)))
-                       (Var≃ refl))
+                 (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-ty pdb) (susp-pdb-foc-tm pdb)))
+                       (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb) (susp-pdb-foc-ty pdb)))
+                       (Var≃ (Add≃ refl≃c (susp-pdb-foc-ty pdb)) refl))
 susp-pdb (Restr pdb) = Restr (susp-pdb pdb)
 
-susp-pdb-foc-tm Base = Var≃ refl
+susp-pdb-foc-tm Base = refl≃tm
 susp-pdb-foc-tm (Extend pdb)
   = extend-pd-eq-foc-tm (susp-pdb pdb)
                         (susp-pdb-foc-ty pdb)
-                        (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-tm pdb)))
-                              (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb)))
-                              (Var≃ refl))
+                        (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-ty pdb) (susp-pdb-foc-tm pdb)))
+                              (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb) (susp-pdb-foc-ty pdb)))
+                              (Var≃ (Add≃ refl≃c (susp-pdb-foc-ty pdb)) refl))
 susp-pdb-foc-tm (Restr pdb)
   = trans≃tm (susp-tgt-compat (getFocusType pdb)) (ty-tgt-≃ (susp-pdb-foc-ty pdb))
 
@@ -90,12 +88,12 @@ susp-pdb-foc-ty Base = refl≃ty
 susp-pdb-foc-ty (Extend pdb)
   = trans≃ty (Arr≃ (susp-tm-lift (liftTerm (getFocusTerm pdb)))
                    (susp-ty-lift (liftType (getFocusType pdb)))
-                   (Var≃ refl))
+                   refl≃tm)
              (extend-pd-eq-foc-ty (susp-pdb pdb)
                                   (susp-pdb-foc-ty pdb)
-                                  (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-tm pdb)))
-                                        (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb)))
-                                        (Var≃ refl)))
+                                  (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-ty pdb) (susp-pdb-foc-tm pdb)))
+                                        (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb) (susp-pdb-foc-ty pdb)))
+                                        (Var≃ (Add≃ refl≃c (susp-pdb-foc-ty pdb)) refl)))
 susp-pdb-foc-ty (Restr pdb)
   = trans≃ty (susp-base-compat (getFocusType pdb)) (ty-base-≃ (susp-pdb-foc-ty pdb))
 

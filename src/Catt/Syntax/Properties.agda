@@ -73,7 +73,6 @@ sub-action-≡-tm refl = refl
 sub-action-≡-sub : {σ : Sub Γ Δ} → τ ≡ μ → σ ∘ τ ≡ σ ∘ μ
 sub-action-≡-sub refl = refl
 
--- sub-from-function : ((i : Fin (ctxLength Γ)) → Tm Δ) → Sub Γ Δ ⋆
--- sub-from-function {Γ = ∅} f = ⟨⟩
--- sub-from-function {Γ = Γ , A} f = ⟨ (sub-from-function (λ i → f (suc i))) , f zero ⟩
---
+sub-from-function : ((i : Fin (ctxLength Γ)) → Tm Δ) → Sub Γ Δ
+sub-from-function {Γ = ∅} f = ⟨⟩
+sub-from-function {Γ = Γ , A} f = ⟨ (sub-from-function (λ i → f (suc i))) , f zero ⟩

@@ -80,13 +80,13 @@ unsuspend-ctx-compat (Γ , A , B , C) ⦃ us ⦄ = Add≃ (unsuspend-ctx-compat 
 --     lem (s ─⟨ A ⟩⟶ t) ()
 
 is-unsuspendable-ty Γ ⋆ p = ⊥
-is-unsuspendable-ty Γ (s ─⟨ ⋆ ⟩⟶ t) p = getFst {Γ = Γ} ≃tm s × getSnd {Γ = Γ} ≃tm t
+is-unsuspendable-ty Γ (s ─⟨ ⋆ ⟩⟶ t) p = getFst Γ ≃tm s × getSnd Γ ≃tm t
 is-unsuspendable-ty Γ (s ─⟨ A@(_ ─⟨ _ ⟩⟶ _) ⟩⟶ t) p = is-unsuspendable-ty Γ A p × is-unsuspendable-tm Γ s p × is-unsuspendable-tm Γ t p
 
 unsuspend-ty (s ─⟨ ⋆ ⟩⟶ t) Γ p = ⋆
 unsuspend-ty (s ─⟨ A@(_ ─⟨ _ ⟩⟶ _) ⟩⟶ t) Γ p ⦃ x ⦄ = (unsuspend-tm s Γ p ⦃ proj₁ (proj₂ x) ⦄) ─⟨ unsuspend-ty A Γ p ⦃ proj₁ x ⦄ ⟩⟶ unsuspend-tm t Γ p ⦃ proj₂ (proj₂ x) ⦄
 
-unsuspend-ty-compat (s ─⟨ ⋆ ⟩⟶ t) Γ p ⦃ x ⦄ = Arr≃ (recompute (≃tm-dec getFst s) (proj₁ x)) Star≃ (recompute (≃tm-dec getSnd t) (proj₂ x))
+unsuspend-ty-compat (s ─⟨ ⋆ ⟩⟶ t) Γ p ⦃ x ⦄ = Arr≃ (recompute (≃tm-dec (getFst Γ) s) (proj₁ x)) (Star≃ p) (recompute (≃tm-dec (getSnd Γ) t) (proj₂ x))
 unsuspend-ty-compat (s ─⟨ A@(_ ─⟨ _ ⟩⟶ _) ⟩⟶ t) Γ p ⦃ x ⦄ = Arr≃ (unsuspend-tm-compat s Γ p ⦃ proj₁ (proj₂ x) ⦄) (unsuspend-ty-compat A Γ p ⦃ proj₁ x ⦄) (unsuspend-tm-compat t Γ p ⦃ proj₂ (proj₂ x) ⦄)
 
 is-unsuspendable-tm Γ (Var i) p = toℕ i < ctxLength Γ
@@ -97,7 +97,7 @@ is-unsuspendable-tm Γ (Coh {n = suc (suc n)} Δ A σ) p = Σ[ q ∈ is-unsuspen
 unsuspend-tm (Var i) Γ p = Var (fromℕ< (recompute (toℕ i <? ctxLength Γ) it))
 unsuspend-tm (Coh {n = suc (suc n)} Δ A σ) Γ p ⦃ x ⦄ = Coh (unsuspend-ctx Δ ⦃ proj₁ x ⦄) (unsuspend-ty A (unsuspend-ctx Δ ⦃ proj₁ x ⦄) (unsuspend-ctx-compat Δ ⦃ proj₁ x ⦄) ⦃ proj₁ (proj₂ x) ⦄) (unsuspend-sub σ (unsuspend-ctx Δ ⦃ proj₁ x ⦄) Γ (unsuspend-ctx-compat Δ ⦃ proj₁ x ⦄) p ⦃ proj₂ (proj₂ x) ⦄)
 
-unsuspend-tm-compat (Var i) Γ p = Var≃ (begin
+unsuspend-tm-compat (Var i) Γ p = Var≃ p (begin
   toℕ (inject₁ (inject₁ (fromℕ< (recompute (toℕ i <? ctxLength Γ) _)))) ≡⟨ toℕ-inject₁ _ ⟩
   toℕ (inject₁ (fromℕ< (recompute (toℕ i <? ctxLength Γ) _))) ≡⟨ toℕ-inject₁ _ ⟩
   toℕ (fromℕ< (recompute (toℕ i <? ctxLength Γ) _)) ≡⟨ toℕ-fromℕ< _ ⟩
@@ -107,7 +107,7 @@ unsuspend-tm-compat (Var i) Γ p = Var≃ (begin
 unsuspend-tm-compat (Coh {n = suc (suc n)} Δ A σ) Γ p ⦃ x ⦄ = Coh≃ (unsuspend-ctx-compat Δ ⦃ proj₁ x ⦄) (unsuspend-ty-compat A (unsuspend-ctx Δ ⦃ proj₁ x ⦄) (unsuspend-ctx-compat Δ ⦃ proj₁ x ⦄) ⦃ proj₁ (proj₂ x) ⦄) (unsuspend-sub-compat σ (unsuspend-ctx Δ ⦃ proj₁ x ⦄) Γ (unsuspend-ctx-compat Δ ⦃ proj₁ x ⦄) p ⦃ proj₂ (proj₂ x) ⦄)
 
 is-unsuspendable-sub Γ Δ ⟨ ⟨⟩ , t ⟩ p q = ⊥
-is-unsuspendable-sub Γ Δ ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ p q = getFst {Γ = Δ} ≃tm s × getSnd {Γ = Δ} ≃tm t
+is-unsuspendable-sub Γ Δ ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ p q = getFst Δ ≃tm s × getSnd Δ ≃tm t
 is-unsuspendable-sub ∅ Δ ⟨ ⟨ ⟨ σ , t₂ ⟩ , t₁ ⟩ , t ⟩ (Add≃ (Add≃ () x₁) x) q
 is-unsuspendable-sub (Γ , A) Δ ⟨ ⟨ ⟨ σ , u ⟩ , s ⟩ , t ⟩ (Add≃ p _) q = is-unsuspendable-sub Γ Δ ⟨ ⟨ σ , u ⟩ , s ⟩ p q × is-unsuspendable-tm Δ t q
 
@@ -117,7 +117,7 @@ unsuspend-sub ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ (Γ , A) Δ p q with cong (λ - →
 unsuspend-sub ⟨ ⟨ ⟨ σ , t₂ ⟩ , t₁ ⟩ , t ⟩ ∅ Δ (Add≃ (Add≃ () x₂) x₁) q
 unsuspend-sub ⟨ ⟨ ⟨ σ , u ⟩ , s ⟩ , t ⟩ (Γ , A) Δ (Add≃ p y) q ⦃ x ⦄ = ⟨ unsuspend-sub ⟨ ⟨ σ , u ⟩ , s ⟩ Γ Δ p q ⦃ proj₁ x ⦄ , unsuspend-tm t Δ q ⦃ proj₂ x ⦄ ⟩
 
-unsuspend-sub-compat ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ ∅ Δ p q ⦃ x ⦄ = Ext≃ (Ext≃ Null≃ (recompute (≃tm-dec getFst s) (proj₁ x))) (recompute (≃tm-dec getSnd t) (proj₂ x))
+unsuspend-sub-compat ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ ∅ Δ p q ⦃ x ⦄ = Ext≃ (Ext≃ (Null≃ q) (recompute (≃tm-dec (getFst Δ) s) (proj₁ x))) (recompute (≃tm-dec (getSnd Δ) t) (proj₂ x))
 -- Ext≃ (Ext≃ Null≃ (proj₁ x)) (proj₂ x)
 unsuspend-sub-compat ⟨ ⟨ ⟨⟩ , t₁ ⟩ , t ⟩ (Γ , A) Δ p q with cong (λ - → pred (pred -)) (≃c-preserve-length p)
 ... | ()
@@ -170,7 +170,7 @@ susp-inj-ctx {Γ = Γ , A} {Δ = ∅} (Add≃ p x) with ≃c-preserve-length p
 ... | ()
 susp-inj-ctx {Γ = Γ , A} {Δ = Δ , B} (Add≃ p x) = Add≃ (susp-inj-ctx p) (susp-inj-ty x)
 
-susp-inj-ty {A = ⋆} {B = ⋆} p = Star≃
+susp-inj-ty {A = ⋆} {B = ⋆} (Arr≃ x (Star≃ p) x₁) = Star≃ (susp-inj-ctx p)
 susp-inj-ty {A = ⋆} {B = s ─⟨ ⋆ ⟩⟶ t} (Arr≃ x p x₁) with ≃ty-preserve-height p
 ... | ()
 susp-inj-ty {A = ⋆} {B = s ─⟨ s₁ ─⟨ B ⟩⟶ t₁ ⟩⟶ t} (Arr≃ x p x₁) with ≃ty-preserve-height p
@@ -182,10 +182,10 @@ susp-inj-ty {A = s ─⟨ s₁ ─⟨ A ⟩⟶ t₁ ⟩⟶ t} {B = ⋆} p with �
 susp-inj-ty {A = s ─⟨ ⋆ ⟩⟶ t} {B = s₁ ─⟨ B ⟩⟶ t₁} (Arr≃ x p y) = Arr≃ (susp-inj-tm x) (susp-inj-ty p) (susp-inj-tm y)
 susp-inj-ty {A = s ─⟨ s₂ ─⟨ A ⟩⟶ t₂ ⟩⟶ t} {B = s₁ ─⟨ B ⟩⟶ t₁} (Arr≃ x p y) = Arr≃ (susp-inj-tm x) (susp-inj-ty p) (susp-inj-tm y)
 
-susp-inj-tm {s = Var i} {t = Var j} (Var≃ x) = Var≃ (begin
+susp-inj-tm {s = Var i} {t = Var j} (Var≃ x y) = Var≃ (susp-inj-ctx x) (begin
   toℕ i ≡˘⟨ toℕ-inject₁ _ ⟩
   toℕ (inject₁ i) ≡˘⟨ toℕ-inject₁ _ ⟩
-  toℕ (inject₁ (inject₁ i)) ≡⟨ x ⟩
+  toℕ (inject₁ (inject₁ i)) ≡⟨ y ⟩
   toℕ (inject₁ (inject₁ j)) ≡⟨ toℕ-inject₁ _ ⟩
   toℕ (inject₁ j) ≡⟨ toℕ-inject₁ _ ⟩
   toℕ j ∎)
@@ -195,7 +195,7 @@ susp-inj-tm {s = Var i} {t = Coh Δ A σ} ()
 susp-inj-tm {s = Coh Δ A σ} {t = Var i} ()
 susp-inj-tm {s = Coh Δ A σ} {t = Coh Δ₁ A₁ σ₁} (Coh≃ p q r) = Coh≃ (susp-inj-ctx p) (susp-inj-ty q) (susp-inj-sub r)
 
-susp-inj-sub {σ = ⟨⟩} {τ = ⟨⟩} p = Null≃
+susp-inj-sub {σ = ⟨⟩} {τ = ⟨⟩} p = Null≃ (susp-inj-ctx (≃s-to-codomain-≃c p))
 susp-inj-sub {σ = ⟨⟩} {τ = ⟨ ⟨⟩ , t ⟩} (Ext≃ (Ext≃ () x₁) x)
 susp-inj-sub {σ = ⟨⟩} {τ = ⟨ ⟨ τ , t₁ ⟩ , t ⟩} (Ext≃ (Ext≃ () x₁) x)
 susp-inj-sub {σ = ⟨ ⟨⟩ , t ⟩} {τ = ⟨⟩} (Ext≃ (Ext≃ () x₁) x)

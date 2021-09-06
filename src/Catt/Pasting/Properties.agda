@@ -11,9 +11,9 @@ open import Data.Nat.Properties
 open import Data.Empty
 open import Relation.Binary
 open import Axiom.UniquenessOfIdentityProofs
--- open import Catt.Variables
+open import Catt.Variables
 open import Data.Unit using (tt)
--- open import Catt.Globular
+open import Catt.Globular
 open import Data.Product renaming (_,_ to _,,_)
 
 subst-pdb : (pdb : Γ ⊢pd[ submax ][ d ]) → Δ ≃c Γ → Δ ⊢pd[ submax ][ d ]
@@ -41,14 +41,14 @@ extend-pd-eq-foc-tm : (pdb : Γ ⊢pd[ submax ][ d ])
                     → (p : A ≃ty getFocusType pdb)
                     → (q : B ≃ty liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
                     → 0V {Γ = Γ , A , B} ≃tm getFocusTerm (extend-pd-eq pdb p q)
-extend-pd-eq-foc-tm pdb p q = trans≃tm (Var≃ refl) (subst-pdb-foc-tm (Extend pdb) (Add≃ (Add≃ refl≃c p) q))
+extend-pd-eq-foc-tm pdb p q = trans≃tm (Var≃ (Add≃ (Add≃ refl≃c p) q) refl) (subst-pdb-foc-tm (Extend pdb) (Add≃ (Add≃ refl≃c p) q))
 
 
 extend-pd-eq-foc-ty : (pdb : Γ ⊢pd[ submax ][ d ])
                     → (p : A ≃ty getFocusType pdb)
                     → (q : B ≃ty liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
                     → liftType {A = B} B ≃ty getFocusType (extend-pd-eq pdb p q)
-extend-pd-eq-foc-ty pdb p q = trans≃ty (lift-ty-≃ q) (subst-pdb-foc-ty (Extend pdb) (Add≃ (Add≃ refl≃c p) q))
+extend-pd-eq-foc-ty pdb p q = trans≃ty (lift-ty-≃ q q) (subst-pdb-foc-ty (Extend pdb) (Add≃ (Add≃ refl≃c p) q))
 
 pdb-is-non-empty : (pdb : Γ ⊢pd[ submax ][ d ]) → NonZero′ (ctxLength Γ)
 pdb-is-non-empty Base = it
@@ -60,7 +60,7 @@ pd-is-non-empty (Finish pdb) = pdb-is-non-empty pdb
 
 pdb-0-focus-ty-is-⋆ : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (⋆ {Γ = Γ}) ≃ty getFocusType pdb
 pdb-0-focus-ty-is-⋆ pdb with getFocusType pdb
-... | ⋆ = Star≃
+... | ⋆ = Star≃ refl≃c
 
 -- pdb-dim-is-ctx-dim : Γ ⊢pd[ submax ][ d ] → ctx-dim Γ ≡ suc (d + submax)
 -- pdb-dim-is-ctx-dim Base = refl
@@ -104,12 +104,12 @@ pdb-dim-lem (Restr pdb) = ≤-trans (≤-step ≤-refl) (pdb-dim-lem pdb)
 
 PDB-irrel : (pdb pdb2 : PDB) → pdb-ctx pdb ≃c pdb-ctx pdb2 → pdb-dm pdb ≡ pdb-dm pdb2 → pdb ≡ pdb2
 PDB-irrel < Base > < Base > p q = refl
-PDB-irrel < Base > < Restr pdb2 > (Add≃ Emp≃ Star≃) refl = ⊥-elim (1+n≰n (pdb-dim-lem pdb2))
+PDB-irrel < Base > < Restr pdb2 > (Add≃ Emp≃ (Star≃ x)) refl = ⊥-elim (1+n≰n (pdb-dim-lem pdb2))
 PDB-irrel < Extend pdb1 > < Extend pdb2 > (Add≃ (Add≃ p x₁) x) q with PDB-irrel < pdb1 > < pdb2 > p (cong pred q)
 ... | refl = refl
 PDB-irrel < Extend pdb1 > < Restr pdb2 > (Add≃ p x) refl with pdb-dim-lem pdb2 | ≃ty-preserve-height x
 ... | r | refl = ⊥-elim (1+n≰n r)
-PDB-irrel < Restr pdb1 > < Base > (Add≃ Emp≃ Star≃) refl = ⊥-elim (1+n≰n (pdb-dim-lem pdb1))
+PDB-irrel < Restr pdb1 > < Base > (Add≃ Emp≃ (Star≃ x)) refl = ⊥-elim (1+n≰n (pdb-dim-lem pdb1))
 PDB-irrel < Restr pdb1 > < Extend pdb2 > (Add≃ p x) refl with pdb-dim-lem pdb1 | ≃ty-preserve-height x
 ... | r | refl = ⊥-elim (1+n≰n r)
 PDB-irrel < Restr pdb1 > < Restr pdb2 > p q with PDB-irrel < pdb1 > < pdb2 > p (cong suc q)
@@ -169,18 +169,18 @@ pdb-irrelevant {n} {Γ} pdb pdb2 = trans (cong (λ - → subst-pdb-≡ refl - re
     PDB≡ : < pdb > ≡ < pdb2 >
     PDB≡ = PDB-irrel < pdb > < pdb2 > refl≃c refl
 
--- pdb-is-globular : (pdb : Γ ⊢pd[ submax ][ d ]) → ctx-is-globular Γ
--- focus-term-is-var : (pdb : Γ ⊢pd[ submax ][ d ]) → isVar (getFocusTerm pdb)
--- focus-ty-is-globular : (pdb : Γ ⊢pd[ submax ][ d ]) → ty-is-globular (getFocusType pdb)
+pdb-is-globular : (pdb : Γ ⊢pd[ submax ][ d ]) → ctx-is-globular Γ
+focus-term-is-var : (pdb : Γ ⊢pd[ submax ][ d ]) → isVar (getFocusTerm pdb)
+focus-ty-is-globular : (pdb : Γ ⊢pd[ submax ][ d ]) → ty-is-globular (getFocusType pdb)
 
--- pdb-is-globular Base = tt ,, tt
--- pdb-is-globular (Extend pdb) = ((pdb-is-globular pdb) ,, focus-ty-is-globular pdb) ,, liftTerm-preserve-isVar (getFocusTerm pdb) (focus-term-is-var pdb) ,, (liftType-preserve-is-globular (getFocusType pdb) (focus-ty-is-globular pdb) ,, tt)
--- pdb-is-globular (Restr pdb) = pdb-is-globular pdb
+pdb-is-globular Base = tt ,, tt
+pdb-is-globular (Extend pdb) = ((pdb-is-globular pdb) ,, focus-ty-is-globular pdb) ,, liftTerm-preserve-isVar (getFocusTerm pdb) (focus-term-is-var pdb) ,, (liftType-preserve-is-globular (getFocusType pdb) (focus-ty-is-globular pdb) ,, tt)
+pdb-is-globular (Restr pdb) = pdb-is-globular pdb
 
--- focus-term-is-var Base = tt
--- focus-term-is-var (Extend pdb) = tt
--- focus-term-is-var (Restr pdb) = ty-globular-tgt (getFocusType pdb) (focus-ty-is-globular pdb)
+focus-term-is-var Base = tt
+focus-term-is-var (Extend pdb) = tt
+focus-term-is-var (Restr pdb) = ty-globular-tgt (getFocusType pdb) (focus-ty-is-globular pdb)
 
--- focus-ty-is-globular Base = tt
--- focus-ty-is-globular (Extend pdb) = liftTerm-preserve-isVar (liftTerm (getFocusTerm pdb)) (liftTerm-preserve-isVar (getFocusTerm pdb) (focus-term-is-var pdb)) ,, liftType-preserve-is-globular (liftType (getFocusType pdb)) (liftType-preserve-is-globular (getFocusType pdb) (focus-ty-is-globular pdb)) ,, tt
--- focus-ty-is-globular (Restr pdb) = ty-globular-base (getFocusType pdb) (focus-ty-is-globular pdb)
+focus-ty-is-globular Base = tt
+focus-ty-is-globular (Extend pdb) = liftTerm-preserve-isVar (liftTerm (getFocusTerm pdb)) (liftTerm-preserve-isVar (getFocusTerm pdb) (focus-term-is-var pdb)) ,, liftType-preserve-is-globular (liftType (getFocusType pdb)) (liftType-preserve-is-globular (getFocusType pdb) (focus-ty-is-globular pdb)) ,, tt
+focus-ty-is-globular (Restr pdb) = ty-globular-base (getFocusType pdb) (focus-ty-is-globular pdb)

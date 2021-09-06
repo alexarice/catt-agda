@@ -23,13 +23,3 @@ tm-to-ty (Coh Δ A σ) = A [ σ ]ty
 
 -- tm-tgt : Tm Γ (suc (suc (suc d))) → Tm Γ (suc (suc d))
 -- tm-tgt t = ty-tgt (tm-to-ty t)
-
-ty-globular-src : (A : Ty Γ (suc (suc d))) → (ty-is-globular A) → isVar (ty-src A)
-ty-globular-tgt : (A : Ty Γ (suc (suc d))) → (ty-is-globular A) → isVar (ty-tgt A)
-ty-globular-base : (A : Ty Γ (suc (suc d))) → (ty-is-globular A) → ty-is-globular (ty-base A)
-
-ty-globular-src (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = vs
-
-ty-globular-tgt (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = vt
-
-ty-globular-base (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = gA

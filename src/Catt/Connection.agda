@@ -60,9 +60,9 @@ connect-pdb-pdb pdb (Extend {Γ = Γ} pdb2) with pdb-is-non-empty pdb2
 connect-pdb-pdb pdb (Extend {Γ = Γ , A} pdb2) | ne
   = extend-pd-eq (connect-pdb-pdb pdb pdb2)
                  (connect-pdb-foc-ty pdb pdb2)
-                 (Arr≃ (trans≃tm (lift-subbed-tm-≃ (getFocusTerm pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-tm-≃ (connect-pdb-foc-tm pdb pdb2)))
-                       (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2)))
-                       (Var≃ refl))
+                 (Arr≃ (trans≃tm (lift-subbed-tm-≃ (getFocusTerm pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-tm-≃ (connect-pdb-foc-ty pdb pdb2) (connect-pdb-foc-tm pdb pdb2)))
+                       (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2) (connect-pdb-foc-ty pdb pdb2)))
+                       (Var≃ (Add≃ refl≃c (connect-pdb-foc-ty pdb pdb2)) refl))
 
 connect-pdb-pdb pdb (Restr pdb2) = Restr (connect-pdb-pdb pdb pdb2)
 
@@ -71,12 +71,12 @@ connect-pdb-foc-ty pdb (Extend {Γ = Γ} pdb2) with pdb-is-non-empty pdb2
 connect-pdb-foc-ty pdb (Extend {Γ = Γ , A} pdb2) | ne
   = trans≃ty (Arr≃ (lift-subbed-tm-≃ (liftTerm (getFocusTerm pdb2)) (connect-inc-right _ (getFocusTerm pdb) (Γ , A , getFocusType pdb2)))
                    (lift-subbed-ty-≃ (liftType (getFocusType pdb2)) (connect-inc-right _ (getFocusTerm pdb) (Γ , A , getFocusType pdb2)))
-                   (Var≃ refl))
+                   (Var≃ refl≃c refl))
              (extend-pd-eq-foc-ty (connect-pdb-pdb pdb pdb2)
                                   (connect-pdb-foc-ty pdb pdb2)
-                                  (Arr≃ (trans≃tm (lift-subbed-tm-≃ (getFocusTerm pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-tm-≃ (connect-pdb-foc-tm pdb pdb2)))
-                                        (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2)))
-                                        (Var≃ refl)))
+                                  (Arr≃ (trans≃tm (lift-subbed-tm-≃ (getFocusTerm pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-tm-≃ (connect-pdb-foc-ty pdb pdb2) (connect-pdb-foc-tm pdb pdb2)))
+                                        (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2) (connect-pdb-foc-ty pdb pdb2)))
+                                        (Var≃ (Add≃ refl≃c (connect-pdb-foc-ty pdb pdb2)) refl)))
 connect-pdb-foc-ty {Γ = Γ} {Δ = Δ} pdb (Restr pdb2)
   = trans≃ty (ty-base-subbed (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) Δ)) (ty-base-≃ (connect-pdb-foc-ty pdb pdb2))
 
@@ -85,9 +85,9 @@ connect-pdb-foc-tm pdb (Extend {Γ = Γ} pdb2) with pdb-is-non-empty pdb2
 connect-pdb-foc-tm pdb (Extend {Γ = Γ , A} pdb2) | ne
   = extend-pd-eq-foc-tm (connect-pdb-pdb pdb pdb2)
                         (connect-pdb-foc-ty pdb pdb2)
-                        (Arr≃ (trans≃tm (lift-subbed-tm-≃ (getFocusTerm pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-tm-≃ (connect-pdb-foc-tm pdb pdb2)))
-                              (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2)))
-                              (Var≃ refl))
+                        (Arr≃ (trans≃tm (lift-subbed-tm-≃ (getFocusTerm pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-tm-≃ (connect-pdb-foc-ty pdb pdb2) (connect-pdb-foc-tm pdb pdb2)))
+                              (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2) (connect-inc-right _ (getFocusTerm pdb) (Γ , A))) (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2) (connect-pdb-foc-ty pdb pdb2)))
+                              (Var≃ (Add≃ refl≃c (connect-pdb-foc-ty pdb pdb2)) refl))
 connect-pdb-foc-tm {Γ = Γ} {Δ = Δ} pdb (Restr pdb2)
   = trans≃tm (ty-tgt-subbed (getFocusType pdb2) (connect-inc-right Γ (getFocusTerm pdb) Δ)) (ty-tgt-≃ (connect-pdb-foc-ty pdb pdb2))
 

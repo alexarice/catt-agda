@@ -202,11 +202,11 @@ connect-pdb-tree-compat {Γ = Γ} pdb (Extend {Γ = Γ′ , A} {d = d} pdb2) | n
                                       (connect-pdb-foc-ty pdb pdb2)
                                       (Arr≃ (trans≃tm (lift-subbed-tm-≃ (getFocusTerm pdb2)
                                                                         (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                                      (lift-tm-≃ (connect-pdb-foc-tm pdb pdb2)))
+                                                      (lift-tm-≃ (connect-pdb-foc-ty pdb pdb2) (connect-pdb-foc-tm pdb pdb2)))
                                             (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2)
                                                                         (connect-inc-right Γ (getFocusTerm pdb) (Γ′ , A)))
-                                                      (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2)))
-                                            (Var≃ refl)))
+                                                      (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2) (connect-pdb-foc-ty pdb pdb2)))
+                                            (Var≃ (Add≃ refl≃c (connect-pdb-foc-ty pdb pdb2)) refl)))
             (trans≃ (extend-tree-eq (connect-pdb-tree-compat pdb pdb2) ⦃ pdb-to-tree-is-n-extendable (connect-pdb-pdb pdb pdb2) ⦄)
                     ( extend-connect-tree (pdb-to-tree pdb) (pdb-to-tree pdb2) ⦃ pdb-to-tree-is-n-extendable pdb2 ⦄ ))
 connect-pdb-tree-compat pdb (Restr pdb2) = connect-pdb-tree-compat pdb pdb2
@@ -226,10 +226,10 @@ susp-pdb-tree-compat (Extend pdb) = let
   instance _ = pdb-to-tree-is-n-extendable (susp-pdb pdb)
   in trans≃ (pdb-to-tree-extend-pd-eq (susp-pdb pdb) (susp-pdb-foc-ty pdb)
                                       (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb))
-                                                      (lift-tm-≃ (susp-pdb-foc-tm pdb)))
+                                                      (lift-tm-≃ (susp-pdb-foc-ty pdb) (susp-pdb-foc-tm pdb)))
                                             (trans≃ty (susp-ty-lift (getFocusType pdb))
-                                                      (lift-ty-≃ (susp-pdb-foc-ty pdb)))
-                                            (Var≃ refl)))
+                                                      (lift-ty-≃ (susp-pdb-foc-ty pdb) (susp-pdb-foc-ty pdb)))
+                                            (Var≃ (Add≃ refl≃c (susp-pdb-foc-ty pdb)) refl)))
             (extend-tree-eq (susp-pdb-tree-compat pdb) )
 susp-pdb-tree-compat (Restr pdb) = susp-pdb-tree-compat pdb
 
@@ -251,21 +251,23 @@ tree-to-pd-to-tree T = ≃-to-≡ (γ T)
 
 tree-to-ctx-extend-tree : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄ → tree-to-ctx (extend-tree d T) ≃c extend (tree-to-pdb d T)
 tree-to-ctx-extend-tree zero Sing = refl≃c
-tree-to-ctx-extend-tree zero (Join S Sing) = Add≃ (Add≃ refl≃c ⋆-is-only-0-d-ty) (Arr≃ (lift-tm-≃ refl≃tm) (lift-ty-≃ ⋆-is-only-0-d-ty) (Var≃ refl))
+tree-to-ctx-extend-tree zero (Join S Sing) = Add≃ (Add≃ refl≃c ⋆-is-only-0-d-ty) (Arr≃ (lift-tm-≃ ⋆-is-only-0-d-ty refl≃tm) (lift-ty-≃ ⋆-is-only-0-d-ty ⋆-is-only-0-d-ty) (Var≃ (Add≃ refl≃c ⋆-is-only-0-d-ty) refl))
 tree-to-ctx-extend-tree zero (Join S T@(Join _ _))
   = trans≃c (connect-≃ refl≃c refl≃tm (tree-to-ctx-extend-tree zero T))
-            (Add≃ (trans≃c (lem (tree-to-ctx T))
-                           (Add≃ refl≃c
-                                 (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb zero S)))
-                                                     (tree-to-pdb 0 T))))
+            (Add≃ x
                   (Arr≃ (trans≃tm (lem2 (getFocusTerm (tree-to-pdb 0 T)))
-                                  (lift-tm-≃ (connect-pdb-foc-tm (Restr (susp-pdb (tree-to-pdb 0 S))) (tree-to-pdb 0 T))))
+                                  (lift-tm-≃ (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb 0 S))) (tree-to-pdb 0 T)) (connect-pdb-foc-tm (Restr (susp-pdb (tree-to-pdb 0 S))) (tree-to-pdb 0 T))))
                         (trans≃ty (lem3 (getFocusType (tree-to-pdb 0 T)))
-                                  (lift-ty-≃ (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb 0 S))) (tree-to-pdb 0 T))))
-                        (trans≃tm (lem4 (tree-to-ctx T , getFocusType (tree-to-pdb 0 T))) (Var≃ refl))))
+                                  (lift-ty-≃ (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb 0 S))) (tree-to-pdb 0 T)) (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb 0 S))) (tree-to-pdb 0 T))))
+                        (trans≃tm (lem4 (tree-to-ctx T , getFocusType (tree-to-pdb 0 T))) (Var≃ x refl))))
   where
     lem : (Δ : Ctx (suc n)) → {A : Ty Δ m} → connect Γ t (Δ , A) ≃c (connect Γ t Δ) , A [ connect-inc-right Γ t Δ ]ty
     lem (Δ , B) = refl≃c
+
+    x = trans≃c (lem (tree-to-ctx T))
+                           (Add≃ refl≃c
+                                 (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb zero S)))
+                                                     (tree-to-pdb 0 T)))
 
     lem2 : ∀ {Δ : Ctx (suc n)} → (t : Tm Δ) {A : Ty Δ d′} → liftTerm t [ connect-inc-right Γ s (Δ , A) ]tm ≃tm liftTerm {A = A [ connect-inc-right Γ s Δ ]ty} (t [ connect-inc-right Γ s Δ ]tm)
     lem2 {Δ = Δ , B} t = lift-subbed-tm-≃ t (connect-inc-right _ _ (Δ , B))
@@ -274,33 +276,35 @@ tree-to-ctx-extend-tree zero (Join S T@(Join _ _))
     lem3 {Δ = Δ , C} B = lift-subbed-ty-≃ B (connect-inc-right _ _ (Δ , C))
 
     lem4 : (Δ : Ctx (2 + n)) → (0V [ connect-inc-right Γ s Δ ]tm) ≃tm (0V {Γ = connect Γ s Δ})
-    lem4 (Δ , A , B) = Var≃ refl
+    lem4 (Δ , A , B) = refl≃tm
 
 tree-to-ctx-extend-tree (suc d) (Join S Sing)
   = trans≃c (susp-ctx-≃ (tree-to-ctx-extend-tree d S))
             (Add≃ (Add≃ refl≃c
                         (susp-pdb-foc-ty (tree-to-pdb d S)))
                   (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm (tree-to-pdb d S)))
-                                  (lift-tm-≃ (susp-pdb-foc-tm (tree-to-pdb d S))))
+                                  (lift-tm-≃ (susp-pdb-foc-ty (tree-to-pdb d S)) (susp-pdb-foc-tm (tree-to-pdb d S))))
                         (trans≃ty (susp-ty-lift (getFocusType (tree-to-pdb d S)))
-                                  (lift-ty-≃ (susp-pdb-foc-ty (tree-to-pdb d S))))
-                        (Var≃ refl)))
+                                  (lift-ty-≃ (susp-pdb-foc-ty (tree-to-pdb d S)) (susp-pdb-foc-ty (tree-to-pdb d S))))
+                        (Var≃ (Add≃ refl≃c (susp-pdb-foc-ty (tree-to-pdb d S))) refl)))
 tree-to-ctx-extend-tree (suc d) (Join S T@(Join T₁ _))
   = trans≃c (connect-≃ refl≃c refl≃tm (tree-to-ctx-extend-tree (suc d) T))
-            (Add≃ (trans≃c (lem (tree-to-ctx T))
-                           (Add≃ refl≃c
-                                 (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb 0 S)))
-                                                     (tree-to-pdb (suc d) T))))
+            (Add≃ x
                   (Arr≃ (trans≃tm (lem2 (getFocusTerm (tree-to-pdb (suc d) T)))
-                                  (lift-tm-≃ (connect-pdb-foc-tm (Restr (susp-pdb (tree-to-pdb 0 S)))
+                                  (lift-tm-≃ (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb 0 S))) (tree-to-pdb (suc d) T)) (connect-pdb-foc-tm (Restr (susp-pdb (tree-to-pdb 0 S)))
                                                                  (tree-to-pdb (suc d) T))))
                         (trans≃ty (lem3 (getFocusType (tree-to-pdb (suc d) T)))
-                                  (lift-ty-≃ (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb 0 S)))
+                                  (lift-ty-≃ (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb 0 S))) (tree-to-pdb (suc d) T)) (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb 0 S)))
                                                                  (tree-to-pdb (suc d) T))))
-                        (trans≃tm (lem4 (tree-to-ctx T , getFocusType (tree-to-pdb (suc d) T))) (Var≃ refl))))
+                        (trans≃tm (lem4 (tree-to-ctx T , getFocusType (tree-to-pdb (suc d) T))) (Var≃ x refl))))
   where
     lem : (Δ : Ctx (suc n)) {A : Ty Δ m} → connect Γ t (Δ , A) ≃c (connect Γ t Δ) , A [ connect-inc-right Γ t Δ ]ty
     lem (Δ , B) = refl≃c
+
+    x = trans≃c (lem (tree-to-ctx T))
+                           (Add≃ refl≃c
+                                 (connect-pdb-foc-ty (Restr (susp-pdb (tree-to-pdb 0 S)))
+                                                     (tree-to-pdb (suc d) T)))
 
     lem2 : {Δ : Ctx (suc n)} (t : Tm Δ) {A : Ty Δ d′} → liftTerm t [ connect-inc-right Γ s (Δ , A) ]tm ≃tm liftTerm {A = A [ connect-inc-right Γ s Δ ]ty} (t [ connect-inc-right Γ s Δ ]tm)
     lem2 {Δ = Δ , B} t = lift-subbed-tm-≃ t (connect-inc-right _ _ (Δ , B))
@@ -309,7 +313,7 @@ tree-to-ctx-extend-tree (suc d) (Join S T@(Join T₁ _))
     lem3 {Δ = Δ , C} B = lift-subbed-ty-≃ B (connect-inc-right _ _ (Δ , C))
 
     lem4 : (Δ : Ctx (suc (suc n))) → _≃tm_ {Γ′ = connect Γ s Δ} (0V [ connect-inc-right Γ s Δ ]tm) 0V
-    lem4 (Δ , A , B) = Var≃ refl
+    lem4 (Δ , A , B) = refl≃tm
 
 extend-lem : (pdb : Γ ⊢pd[ submax ][ d ]) → (pdb2 : Γ′ ⊢pd[ submax′ ][ d′ ]) → < pdb > ≡ < pdb2 > → extend pdb ≃c extend pdb2
 extend-lem pdb .pdb refl = refl≃c

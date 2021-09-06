@@ -17,15 +17,16 @@ open import Catt.Syntax.Bundles
 open import Catt.Variables
 open import Data.Sum
 open import Data.Product renaming (_,_ to _,,_)
+open import Data.Unit using (⊤; tt)
 
-connect-≃ : Γ ≃c Γ′ → t ≃tm t′ → Δ ≃c Δ′ → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → .⦃ _ : NonZero′ (ctxLength Δ′) ⦄ → connect Γ t Δ ≃c connect Γ′ t′ Δ′
-connect-inc-right-≃ : Γ ≃c Γ′ → t ≃tm t′ → Δ ≃c Δ′ → .⦃ _ : NonZero′ (ctxLength Δ) ⦄ → .⦃ _ : NonZero′ (ctxLength Δ′) ⦄ → connect-inc-right Γ t Δ ≃s connect-inc-right Γ′ t′ Δ′
+connect-≃ : Γ ≃c Γ′ → t ≃tm t′ → Δ ≃c Δ′ → connect Γ t Δ ≃c connect Γ′ t′ Δ′
+connect-inc-right-≃ : Γ ≃c Γ′ → t ≃tm t′ → Δ ≃c Δ′ → connect-inc-right Γ t Δ ≃s connect-inc-right Γ′ t′ Δ′
 
 connect-≃ p q (Add≃ Emp≃ r) = p
 connect-≃ p q (Add≃ (Add≃ r s) t) = Add≃ (connect-≃ p q (Add≃ r s)) (sub-action-≃-ty t (connect-inc-right-≃ p q (Add≃ r s)))
 
-connect-inc-right-≃ p q (Add≃ Emp≃ r) = Ext≃ Null≃ q
-connect-inc-right-≃ p q (Add≃ (Add≃ r s) t) = Ext≃ (lift-sub-≃ (connect-inc-right-≃ p q (Add≃ r s))) (Var≃ refl)
+connect-inc-right-≃ p q (Add≃ Emp≃ r) = Ext≃ (Null≃ p) q
+connect-inc-right-≃ p q (Add≃ (Add≃ r s) t) = Ext≃ (lift-sub-≃ (sub-action-≃-ty t (connect-inc-right-≃ p q (Add≃ r s))) (connect-inc-right-≃ p q (Add≃ r s))) (Var≃ (connect-≃ p q (Add≃ (Add≃ r s) t)) refl)
 
 connect-is-non-empty : ⦃ _ : NonZero′ (ctxLength Γ) ⦄ ⦃ _ : NonZero′ (ctxLength Δ) ⦄ → NonZero′ (ctxLength (connect Γ t Δ))
 connect-is-non-empty {Δ = ∅ , A} = it
@@ -53,7 +54,7 @@ sub-from-connect-pdb-inc-left : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (σ : Sub Γ
 sub-from-connect-pdb-inc-left pdb σ τ = sub-from-connect-inc-left σ (getFocusTerm pdb) τ
 
 sub-from-connect-inc-right : (σ : Sub Γ Υ) → (t : Tm Γ) → (τ : Sub Δ Υ) → (t [ σ ]tm ≃tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ t τ ∘ connect-inc-right Γ t Δ ≃s τ
-sub-from-connect-inc-right {Δ = ∅ , A} σ t ⟨ ⟨⟩ , s ⟩ p = Ext≃ Null≃ p
+sub-from-connect-inc-right {Δ = ∅ , A} σ t ⟨ ⟨⟩ , s ⟩ p = Ext≃ (Null≃ refl≃c) p
 sub-from-connect-inc-right {Δ = Δ , A , B} σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≃ (trans≃s (lift-sub-comp-lem-sub (sub-from-connect σ t ⟨ τ , s ⟩) (connect-inc-right _ t (Δ , A))) (sub-from-connect-inc-right σ t ⟨ τ , s ⟩ p)) refl≃tm
 
 sub-from-connect-pdb-inc-right : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (σ : Sub Γ Υ) → (τ : Sub Δ Υ) → (getFocusTerm pdb [ σ ]tm ≃tm (Var (fromℕ _) [ τ ]tm)) → sub-from-connect-pdb pdb σ τ ∘ connect-pdb-inc-right pdb Δ ≃s τ
@@ -69,7 +70,7 @@ connect-inc-fst-var : (Γ : Ctx (suc n)) → (t : Tm Γ) → (Δ : Ctx (suc m)) 
 connect-inc-fst-var Γ t (∅ , A) = id-on-tm t
 connect-inc-fst-var Γ t (Δ , A , B) = begin
   < t [ connect-inc-left Γ t (Δ , A , B) ]tm >tm ≈⟨ apply-lifted-sub-tm-≃ t (connect-inc-left Γ t (Δ , A)) ⟩
-  < liftTerm (t [ connect-inc-left Γ t (Δ , A) ]tm) >tm ≈⟨ lift-tm-≃ (connect-inc-fst-var Γ t (Δ , A)) ⟩
+  < liftTerm (t [ connect-inc-left Γ t (Δ , A) ]tm) >tm ≈⟨ lift-tm-≃ refl≃ty (connect-inc-fst-var Γ t (Δ , A)) ⟩
   < liftTerm (Var (fromℕ _) [ connect-inc-right Γ t (Δ , A) ]tm) >tm ≈˘⟨ apply-lifted-sub-tm-≃ (Var (fromℕ _)) (connect-inc-right Γ t (Δ , A)) ⟩
   < Var (fromℕ (suc _)) [ connect-inc-right Γ t (Δ , A , B) ]tm >tm ∎
   where
@@ -84,7 +85,7 @@ connect-pd-inc-fst-var (Finish pdb) Δ = connect-pdb-inc-fst-var pdb Δ
 
 connect-inc-left-fst-var : (Γ : Ctx (suc n)) → (t : Tm Γ) → (Δ : Ctx (suc m)) → Var (fromℕ _) [ connect-inc-left Γ t Δ ]tm ≃tm Var {Γ = connect Γ t Δ} (fromℕ _)
 connect-inc-left-fst-var Γ t (∅ , A) = id-on-tm (Var (fromℕ _))
-connect-inc-left-fst-var Γ t (Δ , A , B) = trans≃tm (apply-lifted-sub-tm-≃ (Var (fromℕ _)) (connect-inc-left Γ t (Δ , A))) (lift-tm-≃ (connect-inc-left-fst-var Γ t (Δ , A)))
+connect-inc-left-fst-var Γ t (Δ , A , B) = trans≃tm (apply-lifted-sub-tm-≃ (Var (fromℕ _)) (connect-inc-left Γ t (Δ , A))) (lift-tm-≃ refl≃ty (connect-inc-left-fst-var Γ t (Δ , A)))
 
 connect-pdb-inc-left-fst-var : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → Var (fromℕ _) [ connect-pdb-inc-left pdb Δ ]tm ≃tm Var {Γ = connect-pdb pdb Δ } (fromℕ _)
 connect-pdb-inc-left-fst-var pdb Δ = connect-inc-left-fst-var _ (getFocusTerm pdb) Δ
@@ -103,32 +104,65 @@ sub-from-connect-pd-fst-var : (pd : Γ ⊢pd₀ d) → (σ : Sub Γ Υ) → (τ 
   Var (fromℕ _) [ sub-from-connect-pd pd σ τ ]tm ≃tm Var (fromℕ _) [ σ ]tm
 sub-from-connect-pd-fst-var (Finish pdb) σ τ = sub-from-connect-pdb-fst-var pdb σ τ
 
-{-
-connect-var-split : (Γ : Ctx (suc n)) → (t : Tm Γ 2) → (Δ : Ctx (suc m)) → VarSplit (connect Γ t Δ) (connect-inc-left Γ t Δ) (connect-inc-right Γ t Δ)
-connect-var-split Γ t (∅ , A) i = inj₁ (i ,, id-on-tm (Var i))
-connect-var-split Γ t (Δ , A , B) zero = inj₂ (zero ,, Var≃ refl)
+connect-var-split : (Γ : Ctx (suc n)) → (t : Tm Γ) → (Δ : Ctx (suc m)) → VarSplit (connect Γ t Δ) Γ Δ
+connect-var-split Γ t (∅ , A) i = inj₁ i
+connect-var-split Γ t (Δ , A , B) zero = inj₂ zero
 connect-var-split Γ t (Δ , A , B) (suc i) with connect-var-split Γ t (Δ , A) i
-... | inj₁ (j ,, p) = inj₁ (j ,, trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left Γ t (Δ , A))) (lift-tm-≃ p))
-... | inj₂ (j ,, p) = inj₂ (suc j ,, trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right Γ t (Δ , A))) (lift-tm-≃ p))
+... | inj₁ j = inj₁ j
+... | inj₂ j = inj₂ (suc j)
 
-connect-pdb-var-split : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → VarSplit (connect-pdb pdb Δ) (connect-pdb-inc-left pdb Δ) (connect-pdb-inc-right pdb Δ)
+connect-pdb-var-split : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → VarSplit (connect-pdb pdb Δ) Γ Δ
 connect-pdb-var-split pdb Δ = connect-var-split _ (getFocusTerm pdb) Δ
 
-connect-inc-left-var-to-var : (Γ : Ctx (suc n)) → (t : Tm Γ 2) → (Δ : Ctx (suc m)) → varToVar (connect-inc-left Γ t Δ)
+connect-pd-var-split : (pd : Γ ⊢pd₀ d) → (Δ : Ctx (suc m)) → VarSplit (connect-pd pd Δ) Γ Δ
+connect-pd-var-split (Finish pdb) Δ = connect-pdb-var-split pdb Δ
+
+connect-var-split-right : (Γ : Ctx (suc n)) → (t : Tm Γ) → (Δ : Ctx (suc m)) → VarSplit (connect Γ t Δ) Γ Δ
+connect-var-split-right Γ t (∅ , A) zero = inj₂ zero
+connect-var-split-right Γ t (∅ , A) (suc i) = inj₁ (suc i)
+connect-var-split-right Γ t (Δ , A , B) zero = inj₂ zero
+connect-var-split-right Γ t (Δ , A , B) (suc i) with connect-var-split-right Γ t (Δ , A) i
+... | inj₁ j = inj₁ j
+... | inj₂ j = inj₂ (suc j)
+
+connect-pdb-var-split-right : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → VarSplit (connect-pdb pdb Δ) Γ Δ
+connect-pdb-var-split-right pdb Δ = connect-var-split-right _ (getFocusTerm pdb) Δ
+
+connect-pd-var-split-right : (pd : Γ ⊢pd₀ d) → (Δ : Ctx (suc m)) → VarSplit (connect-pd pd Δ) Γ Δ
+connect-pd-var-split-right (Finish pdb) Δ = connect-pdb-var-split-right pdb Δ
+
+
+-- connect-var-split : (Γ : Ctx (suc n)) → (t : Tm Γ 2) → (Δ : Ctx (suc m)) → VarSplit (connect Γ t Δ) (connect-inc-left Γ t Δ) (connect-inc-right Γ t Δ)
+-- connect-var-split Γ t (∅ , A) i = inj₁ (i ,, id-on-tm (Var i))
+-- connect-var-split Γ t (Δ , A , B) zero = inj₂ (zero ,, Var≃ refl)
+-- connect-var-split Γ t (Δ , A , B) (suc i) with connect-var-split Γ t (Δ , A) i
+-- ... | inj₁ (j ,, p) = inj₁ (j ,, trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left Γ t (Δ , A))) (lift-tm-≃ p))
+-- ... | inj₂ (j ,, p) = inj₂ (suc j ,, trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right Γ t (Δ , A))) (lift-tm-≃ p))
+
+-- connect-pdb-var-split : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → VarSplit (connect-pdb pdb Δ) (connect-pdb-inc-left pdb Δ) (connect-pdb-inc-right pdb Δ)
+-- connect-pdb-var-split pdb Δ = connect-var-split _ (getFocusTerm pdb) Δ
+
+connect-inc-left-var-to-var : (Γ : Ctx (suc n)) → (t : Tm Γ) → (Δ : Ctx (suc m)) → varToVar (connect-inc-left Γ t Δ)
 connect-inc-left-var-to-var Γ t (∅ , A) = id-is-var-to-var Γ
-connect-inc-left-var-to-var Γ t (Δ , A , B) = liftSub-preserve-var-to-var (connect-inc-left Γ t (Δ , A)) (connect-inc-left-var-to-var Γ t (Δ , A))
+connect-inc-left-var-to-var Γ t (Δ , A , B) = liftSub-preserve-var-to-var (connect-inc-left Γ t (Δ , A)) ⦃ connect-inc-left-var-to-var Γ t (Δ , A) ⦄
 
 connect-pdb-inc-left-var-to-var : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → varToVar (connect-pdb-inc-left pdb Δ)
 connect-pdb-inc-left-var-to-var pdb Δ = connect-inc-left-var-to-var _ (getFocusTerm pdb) Δ
 
-connect-inc-right-var-to-var : (Γ : Ctx (suc n)) → (t : Tm Γ 2) → (Δ : Ctx (suc m)) → .(isVar t) → varToVar (connect-inc-right Γ t Δ)
-connect-inc-right-var-to-var Γ t (∅ , ⋆) v = extend-var-to-var ⟨⟩ _ t v
-connect-inc-right-var-to-var Γ t (∅ , s ─⟨ A ⟩⟶ t₁) v = ⊥-elim (no-term-in-empty-context s)
-connect-inc-right-var-to-var Γ t (Δ , A , B) v = liftSub-preserve-var-to-var (connect-inc-right Γ t (Δ , A)) (connect-inc-right-var-to-var Γ t (Δ , A) v)
+connect-pd-inc-left-var-to-var : (pd : Γ ⊢pd₀ d) → (Δ : Ctx (suc m)) → varToVar (connect-pd-inc-left pd Δ)
+connect-pd-inc-left-var-to-var (Finish pdb) = connect-pdb-inc-left-var-to-var pdb
+
+connect-inc-right-var-to-var : (Γ : Ctx (suc n)) → (t : Tm Γ) → (Δ : Ctx (suc m)) → .⦃ isVar t ⦄ → varToVar (connect-inc-right Γ t Δ)
+connect-inc-right-var-to-var Γ t (∅ , A) = extend-var-to-var ⟨⟩ t
+connect-inc-right-var-to-var Γ t (Δ , A , B) = liftSub-preserve-var-to-var (connect-inc-right Γ t (Δ , A)) ⦃ connect-inc-right-var-to-var Γ t (Δ , A) ⦄
 
 connect-pdb-inc-right-var-to-var : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → varToVar (connect-pdb-inc-right pdb Δ)
-connect-pdb-inc-right-var-to-var pdb Δ = connect-inc-right-var-to-var _ (getFocusTerm pdb) Δ (focus-term-is-var pdb)
+connect-pdb-inc-right-var-to-var pdb Δ = connect-inc-right-var-to-var _ (getFocusTerm pdb) Δ ⦃ focus-term-is-var pdb ⦄
 
+connect-pd-inc-right-var-to-var : (pd : Γ ⊢pd₀ d) → (Δ : Ctx (suc m)) → varToVar (connect-pd-inc-right pd Δ)
+connect-pd-inc-right-var-to-var (Finish pdb) = connect-pdb-inc-right-var-to-var pdb
+
+{-
 ty-dim-≥-1 : Ty Γ d → d ≥ 1
 ty-dim-≥-1 ⋆ = ≤-refl
 ty-dim-≥-1 (s ─⟨ A ⟩⟶ t) = s≤s z≤n

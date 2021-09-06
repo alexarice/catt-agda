@@ -56,10 +56,10 @@ disc-susp zero = refl≃c
 disc-susp (suc n) = Add≃ (sphere-susp (suc n)) (sphere-type-susp (suc n))
 
 sphere-susp zero = refl≃c
-sphere-susp (suc n) = Add≃ (disc-susp n) (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n)))
+sphere-susp (suc n) = Add≃ (disc-susp n) (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n) (sphere-type-susp n)))
 
 sphere-type-susp zero = refl≃ty
-sphere-type-susp (suc n) = Arr≃ (Var≃ refl) (trans≃ty (susp-ty-lift (liftType (sphere-type n))) (lift-ty-≃ (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n))))) (Var≃ refl)
+sphere-type-susp (suc n) = Arr≃ (Var≃ (sphere-susp (suc n)) refl) (trans≃ty (susp-ty-lift (liftType (sphere-type n))) (lift-ty-≃ (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n) (sphere-type-susp n))) (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n) (sphere-type-susp n))))) (Var≃ (sphere-susp (suc n)) refl)
 
 is-linear : Tree n → Set
 is-linear Sing = ⊤
@@ -72,7 +72,7 @@ height-of-linear Sing = 0
 height-of-linear (Join S Sing) = suc (height-of-linear S)
 
 linear-tree-compat : (T : Tree n) → .⦃ _ : is-linear T ⦄ → tree-to-ctx T ≃c Disc (height-of-linear T)
-linear-tree-compat Sing = Add≃ Emp≃ Star≃
+linear-tree-compat Sing = Add≃ Emp≃ (Star≃ Emp≃)
 linear-tree-compat (Join S Sing) = trans≃c (susp-ctx-≃ (linear-tree-compat S)) (disc-susp (height-of-linear S))
 
 height-of-linear-is-tree-dim : (T : Tree n) → .⦃ _ : is-linear T ⦄ → height-of-linear T ≡ tree-dim T

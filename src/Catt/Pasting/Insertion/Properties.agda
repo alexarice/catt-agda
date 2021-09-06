@@ -182,19 +182,6 @@ insertion-eq (Join S₁ S₂) (PExt P) (Join T Sing) A ⦃ tlh ⦄ = let
                             (sub-action-≃-sub (susp-functorial-id (tree-to-ctx T)) refl≃s)) ⟩
       < Coh (tree-to-ctx (Join T Sing)) A (idSub (tree-to-ctx (Join T Sing)))
           [ suspSub (interior-sub S₁ P T) ]tm >tm ∎
-      -- < Coh (suspCtx (tree-to-ctx T)) A _ (suspSub (interior-sub S₁ P T _) ∘ idSub (suspCtx (tree-to-ctx T))) >tm
-      --   ≈˘⟨ Coh≃ refl≃c
-      --           (unsuspend-ty-compat A (tree-to-ctx T) refl≃c (proj₁ tlh))
-      --           (trans≃s (susp-functorial (interior-sub S₁ P T _) (idSub (tree-to-ctx T)))
-      --                    (sub-action-≃-sub (susp-functorial-id (tree-to-ctx T)) refl≃s)) ⟩
-      -- < Coh (suspCtx (tree-to-ctx T)) (suspTy (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh))) _ (suspSub (interior-sub S₁ P T _ ∘ idSub (tree-to-ctx T))) >tm ≡⟨⟩
-      -- < suspTm (0V [ interior-sub S₁ P T _ ∘ disc-to-inner T (≤-pred (≤-trans (≤-reflexive (sym (ctx-susp-dim (tree-to-ctx T)))) x)) (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) ]tm)
-      --   >tm ≈⟨ susp-tm-≃ refl≃c (insertion-comm S₁ P bp T lh (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) (≤-pred
-      --                                                                                                              (≤-trans (≤-reflexive (sym (ctx-susp-dim (tree-to-ctx T)))) x)) (proj₂ tlh)) ⟩
-      -- < suspTm (0V [ exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh) ∘ disc-to-outer S₁ P bp ]tm) >tm ≡⟨⟩
-      -- < suspTm (branching-path-to-var S₁ P _ [ exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh) ]tm) >tm
-      --   ≈⟨ susp-functorial-tm (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh)) (branching-path-to-var S₁ P _) ⟩
-      -- < suspTm (branching-path-to-var S₁ P _) [ suspSub (exterior-sub S₁ P _ T _ (unsuspend-ty A (tree-to-ctx T) refl≃c (proj₁ tlh)) _ (proj₂ tlh)) ]tm >tm ∎
 insertion-eq (Join S₁ S₂) (PShift P) ⦃ bp ⦄ T A = let
   instance .l : is-branching-path P
            l = proj₁ bp

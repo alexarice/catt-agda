@@ -163,9 +163,9 @@ susp-inj-sub {σ = ⟨ ⟨⟩ , t ⟩} {τ = ⟨ τ , t₁ ⟩} (Ext≃ p x) = E
 susp-inj-sub {σ = ⟨ ⟨ σ , t₂ ⟩ , t ⟩} {τ = ⟨ τ , t₁ ⟩} (Ext≃ p x) = Ext≃ (susp-inj-sub p) (susp-inj-tm x)
 
 unsusp-susp-compat-ctx : (Γ : Ctx n) → unsuspend-ctx (suspCtx Γ) ⦃ suspension-is-unsuspendable-ctx Γ ⦄ ≃c Γ
-unsusp-susp-compat-ty : (A : Ty (suc (suc n)) d) → unsuspend-ty (suspTy A) ⦃ suspension-is-unsuspendable-ty A ⦄ ≃ty A
-unsusp-susp-compat-tm : (t : Tm (suc (suc n))) → unsuspend-tm (suspTm t) ⦃ suspension-is-unsuspendable-tm t ⦄ ≃tm t
-unsusp-susp-compat-sub : (σ : Sub (suc (suc n)) (suc (suc m))) → (unsuspend-sub (suspSub σ) ⦃ suspension-is-unsuspendable-sub σ ⦄) ≃s σ
+unsusp-susp-compat-ty : (A : Ty n d) → unsuspend-ty (suspTy A) ⦃ suspension-is-unsuspendable-ty A ⦄ ≃ty A
+unsusp-susp-compat-tm : (t : Tm n) → unsuspend-tm (suspTm t) ⦃ suspension-is-unsuspendable-tm t ⦄ ≃tm t
+unsusp-susp-compat-sub : (σ : Sub n m) → (unsuspend-sub (suspSub σ) ⦃ suspension-is-unsuspendable-sub σ ⦄) ≃s σ
 
 unsusp-susp-compat-ctx Γ = susp-inj-ctx (unsuspend-ctx-compat (suspCtx Γ) ⦃ suspension-is-unsuspendable-ctx Γ ⦄)
 

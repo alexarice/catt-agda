@@ -4,4 +4,4 @@ module Catt.Typing.Weak where
 
 open import Data.Empty
 
-open import Catt.Typing ⊥ (λ ()) public
+open import Catt.Typing 0 (λ ()) public

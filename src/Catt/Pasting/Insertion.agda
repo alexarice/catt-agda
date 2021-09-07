@@ -379,26 +379,6 @@ insertion-reduces-dim S (PHere .S) T bp lh p = ≤-trans p (≤-reflexive (heigh
 insertion-reduces-dim (Join S₁ S₂) (PExt P) (Join T Sing) bp lh p = ⊔-monoˡ-≤ (tree-dim S₂) (s≤s (insertion-reduces-dim S₁ P T bp lh (≤-pred p)))
 insertion-reduces-dim (Join S₁ S₂) (PShift P) T bp lh p = ⊔-monoʳ-≤ (suc (tree-dim S₁)) (insertion-reduces-dim S₂ P T (proj₁ bp) lh p)
 
-lift-sub-from-insertion : (S : Tree n)
-                        → (P : Path S)
-                        → .(bp : is-branching-path P)
-                        → (T : Tree m)
-                        → .(lh : has-linear-height (path-length P) T)
-                        → (A : Ty (tree-to-ctx T) (suc (height-of-branching P bp)))
-                        → .(x : ctx-dim (tree-to-ctx T) ≤ suc (height-of-branching P bp))
-                        → (tlh : type-has-linear-height (path-length P) T lh A)
-                        → (σ : Sub (tree-to-ctx S) Γ)
-                        → (τ : Sub (tree-to-ctx T) Γ)
-                        → liftSub {A = B} (sub-from-insertion S P bp T lh A x tlh σ τ) ≃s sub-from-insertion S P bp T lh A x tlh (liftSub {A = B} σ) (liftSub τ)
-lift-sub-from-insertion S P bp T lh A x tlh σ τ = trans≃s (lift-sub-from-function _) (sub-from-function-≃ _ _ γ)
-  where
-    γ : (i : Fin (ctxLength (tree-to-ctx (insertion-tree S P T _))))
-      → liftTerm (sub-from-insertion-func S P _ T _ A _ tlh σ τ i)
-        ≃tm sub-from-insertion-func S P _ T _ A _ tlh (liftSub σ) (liftSub τ) i
-    γ i with insertion-var-split S P bp T lh A x tlh i
-    ... | inj₁ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = sym≃tm (apply-lifted-sub-tm-≃ (Var j) σ)
-    ... | inj₂ (j ,, p) rewrite sym (≃tm-preserve-dim refl≃c p) = sym≃tm (apply-lifted-sub-tm-≃ (Var j) τ)
-
 sub-from-insertion-≃ : (S : Tree n)
                      → (P : Path S)
                      → .(bp : is-branching-path P)
@@ -426,9 +406,6 @@ sub-from-insertion-≃ S P bp T lh A x tlh σeq τeq = sub-from-function-≃ _ _
 type-has-linear-height-≃ : (T : Tree m) → {A : Ty (tree-to-ctx T) d} → {B : Ty (tree-to-ctx T) d} → A ≃ty B → .(lh : has-linear-height n T) → type-has-linear-height n T lh A → type-has-linear-height n T lh B
 type-has-linear-height-≃ T p lh tlh with ≃ty-to-≡ p
 ... | refl = tlh
-
-type-has-linear-height-susp : (T : Tree m) → {A : Ty (tree-to-ctx T) d} → .(lh : has-linear-height n T) → type-has-linear-height n T lh A → type-has-linear-height (suc n) (susp-tree T) lh (suspTy A)
-type-has-linear-height-susp T lh tlh = (suspension-is-unsuspendable-ty (tree-to-ctx T) _ refl≃c) ,, type-has-linear-height-≃ T (sym≃ty (unsusp-susp-compat-ty (tree-to-ctx T) _ refl≃c)) lh tlh
 
 sub-from-insertion-func-susp : (S : Tree n)
                              → (P : Path S)

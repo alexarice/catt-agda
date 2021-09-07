@@ -20,7 +20,7 @@ instance
   nonZero = _
 
 variable
-  n n′ m m′ l l′ d d′ : ℕ
+  n n′ m m′ l l′ d d′ d″ : ℕ
 
 data Ctx : ℕ → Set
 data Ty : ℕ → ℕ → Set
@@ -30,7 +30,7 @@ data Sub : ℕ → ℕ → Set
 
 variable
   Γ Γ′ Δ Δ′ Υ : Ctx n
-  A A′ B C : Ty n d
+  A A′ B C D : Ty n d
   s s′ t t′ u : Tm n
   σ σ′ τ μ : Sub n m
 

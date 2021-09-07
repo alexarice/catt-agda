@@ -1,19 +1,24 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
 open import Catt.Typing.Base
+open import Data.Fin
+open import Data.Nat
 
-module Catt.Typing.Properties.Base (Index : Set) (rule : Index → Rule) where
+module Catt.Typing.Properties.Base (index : ℕ) (rule : Fin index → Rule) where
 
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing Index rule
+open import Catt.Typing index rule
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary
 open import Catt.Suspension
 open import Catt.Pasting
 open import Catt.Pasting.Properties
-open import Data.Nat
+
+private
+  Index : Set
+  Index = Fin index
 
 refl≈c : Γ ≈c Γ
 refl≈ty : A ≈ty A
@@ -23,13 +28,13 @@ refl≈s : σ ≈s σ
 refl≈c {Γ = ∅} = Emp≈
 refl≈c {Γ = Γ , A} = Add≈ refl≈c refl≈ty
 
-refl≈ty {A = ⋆} = Star≈ refl≈c
+refl≈ty {A = ⋆} = Star≈ refl
 refl≈ty {A = s ─⟨ A ⟩⟶ t} = Arr≈ refl≈tm refl≈ty refl≈tm
 
-refl≈tm {t = Var i} = Var≈ refl≈c refl
+refl≈tm {t = Var i} = Var≈ refl refl
 refl≈tm {t = Coh Δ A σ} = Coh≈ refl≈c refl≈ty refl≈s
 
-refl≈s {σ = ⟨⟩} = Null≈ refl≈c
+refl≈s {σ = ⟨⟩} = Null≈ refl
 refl≈s {σ = ⟨ σ , t ⟩} = Ext≈ refl≈s refl≈tm
 
 reflexive≈c : Γ ≃c Δ → Γ ≈c Δ
@@ -40,13 +45,13 @@ reflexive≈s : σ ≃s τ → σ ≈s τ
 reflexive≈c Emp≃ = Emp≈
 reflexive≈c (Add≃ eq x) = Add≈ (reflexive≈c eq) (reflexive≈ty x)
 
-reflexive≈ty (Star≃ x) = Star≈ (reflexive≈c x)
+reflexive≈ty (Star≃ x) = Star≈ x
 reflexive≈ty (Arr≃ p q r) = Arr≈ (reflexive≈tm p) (reflexive≈ty q) (reflexive≈tm r)
 
-reflexive≈tm (Var≃ x y) = Var≈ (reflexive≈c x) y
+reflexive≈tm (Var≃ x y) = Var≈ x y
 reflexive≈tm (Coh≃ p q r) = Coh≈ (reflexive≈c p) (reflexive≈ty q) (reflexive≈s r)
 
-reflexive≈s (Null≃ x) = Null≈ (reflexive≈c x)
+reflexive≈s (Null≃ x) = Null≈ x
 reflexive≈s (Ext≃ eq x) = Ext≈ (reflexive≈s eq) (reflexive≈tm x)
 
 sym≈c : Γ ≈c Δ → Δ ≈c Γ
@@ -57,12 +62,12 @@ sym≈s : σ ≈s τ → τ ≈s σ
 sym≈c Emp≈ = Emp≈
 sym≈c (Add≈ eq x) = Add≈ (sym≈c eq) (sym≈ty x)
 
-sym≈ty (Star≈ x) = Star≈ (sym≈c x)
+sym≈ty (Star≈ x) = Star≈ (sym x)
 sym≈ty (Arr≈ p q r) = Arr≈ (sym≈tm p) (sym≈ty q) (sym≈tm r)
 
 sym≈tm eq = Sym≈ eq
 
-sym≈s (Null≈ x) = Null≈ (sym≈c x)
+sym≈s (Null≈ x) = Null≈ (sym x)
 sym≈s (Ext≈ eq x) = Ext≈ (sym≈s eq) (sym≈tm x)
 
 trans≈c : Γ ≈c Δ → Δ ≈c Υ → Γ ≈c Υ
@@ -73,12 +78,12 @@ trans≈s : σ ≈s τ → τ ≈s μ → σ ≈s μ
 trans≈c Emp≈ Emp≈ = Emp≈
 trans≈c (Add≈ eq x) (Add≈ eq′ y) = Add≈ (trans≈c eq eq′) (trans≈ty x y)
 
-trans≈ty (Star≈ x) (Star≈ y) = (Star≈ (trans≈c x y))
+trans≈ty (Star≈ x) (Star≈ y) = Star≈ (trans x y)
 trans≈ty (Arr≈ p q r) (Arr≈ p′ q′ r′) = Arr≈ (trans≈tm p p′) (trans≈ty q q′) (trans≈tm r r′)
 
 trans≈tm eq eq′ = Trans≈ eq eq′
 
-trans≈s (Null≈ x) (Null≈ y) = Null≈ (trans≈c x y)
+trans≈s (Null≈ x) (Null≈ y) = Null≈ (trans x y)
 trans≈s (Ext≈ eq x) (Ext≈ eq′ y) = Ext≈ (trans≈s eq eq′) (trans≈tm x y)
 
 ctx-setoid-≈ : Setoid _ _
@@ -121,9 +126,9 @@ sub-setoid-≈ = record { Carrier = SUB
 ≈c-preserve-len Emp≈ = refl
 ≈c-preserve-len (Add≈ p x) = cong suc (≈c-preserve-len p)
 
-≈s-to-codomain-≈c : {σ : Sub Γ Δ} → {τ : Sub Γ′ Δ′} → σ ≈s τ → Δ ≈c Δ′
-≈s-to-codomain-≈c (Null≈ x) = x
-≈s-to-codomain-≈c (Ext≈ p x) = ≈s-to-codomain-≈c p
+≈s-to-codomain-≡ : {σ : Sub n m} → {τ : Sub n′ m′} → σ ≈s τ → m ≡ m′
+≈s-to-codomain-≡ (Null≈ x) = x
+≈s-to-codomain-≡ (Ext≈ p x) = ≈s-to-codomain-≡ p
 
 -- pd-dim-lem : Δ ⊢pd₀ d → Δ ⊢pd₀ pred (ctx-dim Δ)
 -- pd-dim-lem pd with cong pred (sym (pd-dim-is-ctx-dim pd))
@@ -135,20 +140,17 @@ sub-setoid-≈ = record { Carrier = SUB
 
 record Props (i : Index) : Set where
   field
-    ctx-eq : (a : rule i .Args)
-           → (tct : (j : rule i .tctIndex) → Typing-Tm ((rule i .tctCtx j a)) (rule i .tct j a) (rule i .tctTy j a))
-           → (eqt : (j : rule i .eqtIndex) → ((rule i .eqtlhs j a)) ≈tm (rule i .eqtrhs j a))
-           → rule i .lhsCtx a ≈c rule i .rhsCtx a
-    lift-rule : ∀ {d} {d′}
-              → (a : rule i .Args)
-              → (tct : ∀ {d} (j : rule i .tctIndex) → {A : Ty (rule i .tctCtx j a) d} → Typing-Tm ((rule i .tctCtx j a) , A) (liftTerm (rule i .tct j a)) (liftType (rule i .tctTy j a)))
-              → (eqt : ∀ {d} {d′} (j : rule i .eqtIndex) → {A : Ty (rule i .eqtlhsCtx j a) d} → {B : Ty (rule i .eqtrhsCtx j a) d′} → (liftTerm {A = A} (rule i .eqtlhs j a)) ≈tm (liftTerm {A = B} (rule i .eqtrhs j a)))
-              → {A : Ty (rule i .lhsCtx a) d}
-              → {B : Ty (rule i .rhsCtx a) d′}
-              → (liftTerm {A = A} (rule i .lhs a)) ≈tm (liftTerm {A = B} (rule i .rhs a))
+    -- ctx-eq : (a : rule i .Args)
+    --        → (tct : (j : rule i .tctIndex) → Typing-Tm ((rule i .tctCtx j a)) (rule i .tct j a) (rule i .tctTy j a))
+    --        → (eqt : (j : rule i .eqtIndex) → ((rule i .eqtlhs j a)) ≈tm (rule i .eqtrhs j a))
+    --        → rule i .lhsCtx a ≈c rule i .rhsCtx a
+    lift-rule : (a : rule i .Args)
+              → (tct : ∀ {d} (j : tctIndex (rule i)) → {A : Ty (rule i .tctLen j a) d} → Typing-Tm ((rule i .tctCtx j a) , A) (liftTerm (rule i .tct j a)) (liftType (rule i .tctTy j a)))
+              → (eqt : (j : eqtIndex (rule i)) → (liftTerm (rule i .eqtlhs j a)) ≈tm (liftTerm (rule i .eqtrhs j a)))
+              → (liftTerm (rule i .lhs a)) ≈tm (liftTerm (rule i .rhs a))
     susp-rule : (a : rule i .Args)
-              → (tct : (j : rule i .tctIndex) → Typing-Tm (suspCtx (rule i .tctCtx j a)) (suspTm (rule i .tct j a)) (suspTy (rule i .tctTy j a)))
-              → (eqt : (j : rule i .eqtIndex) → (suspTm (rule i .eqtlhs j a)) ≈tm (suspTm (rule i .eqtrhs j a)))
+              → (tct : (j : tctIndex (rule i)) → Typing-Tm (suspCtx (rule i .tctCtx j a)) (suspTm (rule i .tct j a)) (suspTy (rule i .tctTy j a)))
+              → (eqt : (j : eqtIndex (rule i)) → (suspTm (rule i .eqtlhs j a)) ≈tm (suspTm (rule i .eqtrhs j a)))
               → suspTm (rule i .lhs a) ≈tm suspTm (rule i .rhs a)
 
 open Props public

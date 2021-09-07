@@ -428,19 +428,18 @@ idSub≃-on-sub p ⟨ σ , t ⟩ = Ext≃ (idSub≃-on-sub p σ) (idSub≃-on-tm
 ⋆-is-only-0-d-ty : {A : Ty n 0} → (⋆ {n = n}) ≃ty A
 ⋆-is-only-0-d-ty {A = ⋆} = Star≃ refl
 
-{-
--- sub-from-function-≃ : (f : (i : Fin (ctxLength Γ)) → Tm Δ (suc (lookupDim Γ i)))
---                     → (f2 : (i : Fin (ctxLength Γ)) → Tm Υ (suc (lookupDim Γ i)))
---                     → ((i : Fin (ctxLength Γ)) → f i ≃tm f2 i)
---                     → sub-from-function {Γ = Γ} f ≃s sub-from-function {Γ = Γ} f2
--- sub-from-function-≃ {Γ = ∅} f f2 eq = Null≃
--- sub-from-function-≃ {Γ = Γ , A} f f2 eq = Ext≃ (sub-from-function-≃ (λ i → f (suc i)) (λ i → f2 (suc i)) (λ i → eq (suc i))) (eq zero)
 
--- lift-sub-from-function : (f : (i : Fin (ctxLength Γ)) → Tm Δ (suc (lookupDim Γ i)))
---                        → liftSub {A = A} (sub-from-function {Γ = Γ} f) ≃s sub-from-function {Γ = Γ} (λ i → liftTerm {A = A} (f i))
--- lift-sub-from-function {Γ = ∅} f = Null≃
--- lift-sub-from-function {Γ = Γ , A} f = Ext≃ (lift-sub-from-function (λ i → f (suc i))) refl≃tm
+sub-from-function-≃ : (f : (i : Fin n) → Tm m)
+                    → (f2 : (i : Fin n) → Tm m)
+                    → ((i : Fin n) → f i ≃tm f2 i)
+                    → sub-from-function f ≃s sub-from-function f2
+sub-from-function-≃ {n = zero} f f2 eq = Null≃ refl
+sub-from-function-≃ {n = suc n} f f2 eq = Ext≃ (sub-from-function-≃ (λ i → f (suc i)) (λ i → f2 (suc i)) (λ i → eq (suc i))) (eq zero)
+
+lift-sub-from-function : (f : (i : Fin n) → Tm m)
+                       → liftSub (sub-from-function f) ≃s sub-from-function (λ i → liftTerm (f i))
+lift-sub-from-function {n = zero} f = Null≃ refl
+lift-sub-from-function {n = suc n} f = Ext≃ (lift-sub-from-function (λ i → f (suc i))) refl≃tm
 
 -- subst-dim-tm-≃ : (t : Tm Γ n) → (p : m ≡ n) → subst-dim-tm t p ≃tm t
 -- subst-dim-tm-≃ t refl = refl≃tm
--}

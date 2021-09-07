@@ -10,13 +10,13 @@ open import Data.Unit
 open import Data.Empty
 open import Data.Product renaming (_,_ to _,,_)
 
-get-tm-height : Tm Γ → ℕ
-get-tm-height {Γ = Γ} (Var i) = lookupHeight Γ i
-get-tm-height (Coh {d = d} Δ A σ) = d
+get-tm-height : Ctx n → Tm n → ℕ
+get-tm-height Γ (Var i) = lookupHeight Γ i
+get-tm-height Γ (Coh {d = d} Δ A σ) = d
 
-tm-to-ty : (t : Tm Γ) → Ty Γ (get-tm-height t)
-tm-to-ty {Γ = Γ} (Var i) = Γ ‼ i
-tm-to-ty (Coh Δ A σ) = A [ σ ]ty
+tm-to-ty : (Γ : Ctx n) → (t : Tm n) → Ty n (get-tm-height Γ t)
+tm-to-ty Γ (Var i) = Γ ‼ i
+tm-to-ty Γ (Coh Δ A σ) = A [ σ ]ty
 
 -- tm-src : Tm Γ (suc (suc (suc d))) → Tm Γ (suc (suc d))
 -- tm-src t = ty-src (tm-to-ty t)

@@ -17,9 +17,8 @@ record TY : Set where
   constructor <_>ty
   field
     {ty-ctx-n} : ℕ
-    {ty-ctx} : Ctx ty-ctx-n
     {ty-d} : ℕ
-    ty : Ty ty-ctx ty-d
+    ty : Ty ty-ctx-n ty-d
 
 open TY public
 
@@ -27,8 +26,7 @@ record TM : Set where
   constructor <_>tm
   field
     {tm-ctx-n} : ℕ
-    {tm-ctx} : Ctx tm-ctx-n
-    tm : Tm tm-ctx
+    tm : Tm tm-ctx-n
 
 open TM public
 
@@ -36,9 +34,7 @@ record SUB : Set where
   constructor <_>s
   field
     {s-ctx-1-n} : ℕ
-    {s-ctx-1} : Ctx s-ctx-1-n
     {s-ctx-2-n} : ℕ
-    {s-ctx-2} : Ctx s-ctx-2-n
-    sub : Sub s-ctx-1 s-ctx-2
+    sub : Sub s-ctx-1-n s-ctx-2-n
 
 open SUB public

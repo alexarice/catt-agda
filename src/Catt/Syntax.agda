@@ -23,55 +23,55 @@ variable
   n n′ m m′ l l′ d d′ : ℕ
 
 data Ctx : ℕ → Set
-data Ty : Ctx n → ℕ → Set
-data Tm : Ctx n → Set
-data Sub : Ctx n → Ctx m → Set
+data Ty : ℕ → ℕ → Set
+data Tm : ℕ → Set
+data Sub : ℕ → ℕ → Set
 
 
 variable
   Γ Γ′ Δ Δ′ Υ : Ctx n
-  A A′ B C : Ty Γ d
-  s s′ t t′ u : Tm Γ
-  σ σ′ τ μ : Sub Γ Δ
+  A A′ B C : Ty n d
+  s s′ t t′ u : Tm n
+  σ σ′ τ μ : Sub n m
 
 infixl 25 _,_
 data Ctx where
   ∅ : Ctx 0
-  _,_ : (Γ : Ctx n) → (A : Ty Γ d) → Ctx (suc n)
+  _,_ : (Γ : Ctx n) → (A : Ty n d) → Ctx (suc n)
 
 ctxLength : (Γ : Ctx n) → ℕ
 ctxLength {n = n} Γ = n
 
 infix 30 _─⟨_⟩⟶_
 data Ty where
-  ⋆ : Ty Γ 0
-  _─⟨_⟩⟶_ : (s : Tm Γ) → (A : Ty Γ n) → (t : Tm Γ) → Ty Γ (suc n)
+  ⋆ : Ty n 0
+  _─⟨_⟩⟶_ : (s : Tm n) → (A : Ty n d) → (t : Tm n) → Ty n (suc d)
 
 data Sub where
-  ⟨⟩ : Sub ∅ Δ
-  ⟨_,_⟩ : (σ : Sub Γ Δ) → {A : Ty Γ n} → (t : Tm Δ) → Sub (Γ , A) Δ
+  ⟨⟩ : Sub 0 n
+  ⟨_,_⟩ : (σ : Sub n m) → (t : Tm m) → Sub (suc n) m
 
 data Tm where
-  Var : (i : (Fin (ctxLength Γ))) → Tm Γ
-  Coh : (Δ : Ctx (suc n)) → (A : Ty Δ d) → (σ : Sub Δ Γ) → Tm Γ
+  Var : (i : (Fin n)) → Tm n
+  Coh : (Δ : Ctx (suc n)) → (A : Ty (suc n) d) → (σ : Sub (suc n) m) → Tm m
 
-pattern 0V {Γ} = Var {Γ = Γ} 0F
-pattern 1V {Γ} = Var {Γ = Γ} 1F
-pattern 2V {Γ} = Var {Γ = Γ} 2F
-pattern 3V {Γ} = Var {Γ = Γ} 3F
-pattern 4V {Γ} = Var {Γ = Γ} 4F
-pattern 5V {Γ} = Var {Γ = Γ} 5F
-pattern 6V {Γ} = Var {Γ = Γ} 6F
-pattern 7V {Γ} = Var {Γ = Γ} 7F
-pattern 8V {Γ} = Var {Γ = Γ} 8F
-pattern 9V {Γ} = Var {Γ = Γ} 9F
+pattern 0V {n} = Var {n} 0F
+pattern 1V {n} = Var {n} 1F
+pattern 2V {n} = Var {n} 2F
+pattern 3V {n} = Var {n} 3F
+pattern 4V {n} = Var {n} 4F
+pattern 5V {n} = Var {n} 5F
+pattern 6V {n} = Var {n} 6F
+pattern 7V {n} = Var {n} 7F
+pattern 8V {n} = Var {n} 8F
+pattern 9V {n} = Var {n} 9F
 
 it : ∀ {a} {A : Set a} → {{A}} → A
 it {{x}} = x
 
-liftTerm : Tm Γ → Tm (Γ , A)
-liftType : Ty Γ d → Ty (Γ , A) d
-liftSub : Sub Δ Γ → Sub Δ (Γ , A)
+liftTerm : Tm n → Tm (suc n)
+liftType : Ty n d → Ty (suc n) d
+liftSub : Sub n m → Sub n (suc m)
 
 liftType ⋆ = ⋆
 liftType (s ─⟨ A ⟩⟶ t) = liftTerm s ─⟨ liftType A ⟩⟶ liftTerm t
@@ -82,22 +82,22 @@ liftTerm (Coh Δ A σ) = Coh Δ A (liftSub σ)
 liftSub ⟨⟩ = ⟨⟩
 liftSub ⟨ σ , t ⟩ = ⟨ liftSub σ , liftTerm t ⟩
 
-ty-dim : Ty Γ d → ℕ
+ty-dim : Ty n d → ℕ
 ty-dim {d = d} A = d
 
-ty-base : (A : Ty Γ (suc d)) → Ty Γ d
+ty-base : (A : Ty n (suc d)) → Ty n d
 ty-base (s ─⟨ A ⟩⟶ t) = A
 
 -- ty-base-dim : .⦃ _ : CtxDim Γ d′ ⦄ → ⦃ x : TyDim {Γ = Γ} A (suc (suc d)) ⦄ → TyDim (ty-base A) (suc d)
 -- ty-base-dim {d = _} ⦃ x = TyDimS ⦄ = it
 
-ty-src : (A : Ty Γ (suc d)) → Tm Γ
+ty-src : (A : Ty n (suc d)) → Tm n
 ty-src (s ─⟨ A ⟩⟶ t) = s
 
 -- ty-src-dim  : .⦃ _ : CtxDim Γ d′ ⦄ → ⦃ x : TyDim {Γ = Γ} A (suc (suc d)) ⦄ → TmDim (ty-src A) (suc (suc d))
 -- ty-src-dim {d = _} ⦃ x = TyDimS ⦄ = it
 
-ty-tgt : (A : Ty Γ (suc d)) → Tm Γ
+ty-tgt : (A : Ty n (suc d)) → Tm n
 ty-tgt (s ─⟨ A ⟩⟶ t) = t
 
 -- ty-tgt-dim  : .⦃ _ : CtxDim Γ d′ ⦄ → ⦃ x : TyDim {Γ = Γ} A (suc (suc d)) ⦄ → TmDim (ty-tgt A) (suc (suc d))
@@ -121,11 +121,11 @@ ty-tgt (s ─⟨ A ⟩⟶ t) = t
 
 
 infixr 30 _[_]ty _[_]tm
-_[_]ty : Ty Γ d → Sub Γ Δ → Ty Δ d
-_[_]tm : Tm Γ → Sub Γ Δ → Tm Δ
+_[_]ty : Ty n d → Sub n m → Ty m d
+_[_]tm : Tm n → Sub n m → Tm m
 
 infixl 31 _∘_
-_∘_ : Sub Δ Υ → Sub Γ Δ → Sub Γ Υ
+_∘_ : Sub n l → Sub m n → Sub m l
 
 ⋆ [ σ ]ty = ⋆
 (s ─⟨ A ⟩⟶ t) [ σ ]ty = (s [ σ ]tm) ─⟨ (A [ σ ]ty) ⟩⟶ (t [ σ ]tm)
@@ -138,15 +138,15 @@ Coh Δ A τ [ σ ]tm = Coh Δ A (σ ∘ τ)
 σ ∘ ⟨⟩ = ⟨⟩
 σ ∘ ⟨ τ , t ⟩ = ⟨ (σ ∘ τ) , t [ σ ]tm ⟩
 
-idSub : (Γ : Ctx n) → Sub Γ Γ
-idSub ∅ = ⟨⟩
-idSub (Γ , A) = ⟨ liftSub (idSub Γ) , Var zero ⟩
+idSub : (n : ℕ) → Sub n n
+idSub zero = ⟨⟩
+idSub (suc n) = ⟨ liftSub (idSub n) , Var zero ⟩
 
 lookupHeight : (Γ : Ctx n) → (i : Fin n) → ℕ
 lookupHeight (Γ , A) zero = ty-dim A
 lookupHeight (Γ , A) (suc i) = lookupHeight Γ i
 
 infix 45 _‼_
-_‼_ : (Γ : Ctx n) → (i : Fin n) → Ty Γ (lookupHeight Γ i)
+_‼_ : (Γ : Ctx n) → (i : Fin n) → Ty n (lookupHeight Γ i)
 (Γ , A) ‼ zero = liftType A
 (Γ , A) ‼ suc i = liftType (Γ ‼ i)

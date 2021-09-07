@@ -28,71 +28,72 @@ susp-sub-≃ : σ ≃s τ → suspSub σ ≃s suspSub τ
 susp-ctx-≃ Emp≃ = refl≃c
 susp-ctx-≃ (Add≃ p q) = Add≃ (susp-ctx-≃ p) (susp-ty-≃ q)
 
-susp-ty-≃ (Star≃ x) with ≃c-preserve-length x
-... | refl with ≃c-to-≡ x
+susp-ty-≃ (Star≃ x) with x
 ... | refl = refl≃ty
 susp-ty-≃ (Arr≃ q r s) = Arr≃ (susp-tm-≃ q) (susp-ty-≃ r) (susp-tm-≃ s)
 
-susp-tm-≃ (Var≃ p q) = Var≃ (susp-ctx-≃ p) (trans (toℕ-inject₁ (inject₁ _)) (trans (toℕ-inject₁ _) (trans q (sym (trans (toℕ-inject₁ (inject₁ _)) (toℕ-inject₁ _))))))
+susp-tm-≃ (Var≃ p q) = Var≃ (cong suc (cong suc p)) (trans (toℕ-inject₁ (inject₁ _)) (trans (toℕ-inject₁ _) (trans q (sym (trans (toℕ-inject₁ (inject₁ _)) (toℕ-inject₁ _))))))
 susp-tm-≃ (Coh≃ q r s) = Coh≃ (susp-ctx-≃ q) (susp-ty-≃ r) (susp-sub-≃ s)
 
-susp-sub-≃ (Null≃ x) with ≃c-preserve-length x
-... | refl with ≃c-to-≡ x
+susp-sub-≃ (Null≃ x) with x
 ... | refl = refl≃s
 susp-sub-≃ (Ext≃ r s) = Ext≃ (susp-sub-≃ r) (susp-tm-≃ s)
 
-getFst-Lem : suspCtx Γ ≃c suspCtx Δ → getFst Γ ≃tm getFst Δ
-getFst-Lem p = Var≃ p (cong (λ - → suc (toℕ (fromℕ (pred (pred -))))) (≃c-preserve-length p))
 
-getSnd-Lem : suspCtx Γ ≃c suspCtx Δ → getSnd Γ ≃tm getSnd Δ
-getSnd-Lem p = Var≃ p (cong (λ - → toℕ (inject₁ (fromℕ (pred (pred -))))) (≃c-preserve-length p))
+getFst-Lem : suspCtx Γ ≃c suspCtx Δ → getFst {n = ctxLength Γ} ≃tm getFst {n = ctxLength Δ}
+getFst-Lem p = Var≃ (≃c-preserve-length p) (cong (λ - → suc (toℕ (fromℕ (pred (pred -))))) (≃c-preserve-length p))
 
-susp-fst-var : (σ : Sub Γ Δ) → Var (fromℕ _) [ suspSub σ ]tm ≃tm Var {Γ = suspCtx Δ} (fromℕ _)
+getSnd-Lem : suspCtx Γ ≃c suspCtx Δ → getSnd {n = ctxLength Γ} ≃tm getSnd {n = ctxLength Δ}
+getSnd-Lem p = Var≃ (≃c-preserve-length p) (cong (λ - → toℕ (inject₁ (fromℕ (pred (pred -))))) (≃c-preserve-length p))
+
+susp-fst-var : (σ : Sub n m) → Var (fromℕ _) [ suspSub σ ]tm ≃tm Var {2 + m} (fromℕ _)
 susp-fst-var ⟨⟩ = refl≃tm
 susp-fst-var ⟨ σ , t ⟩ = susp-fst-var σ
 
-susp-snd-var : (σ : Sub Γ Δ) → Var (inject₁ (fromℕ _)) [ suspSub σ ]tm ≃tm Var {Γ = suspCtx Δ} (inject₁ (fromℕ _))
+susp-snd-var : (σ : Sub n m) → Var (inject₁ (fromℕ _)) [ suspSub σ ]tm ≃tm Var {2 + m} (inject₁ (fromℕ _))
 susp-snd-var ⟨⟩ = refl≃tm
 susp-snd-var ⟨ σ , t ⟩ = susp-snd-var σ
 
 susp-‼ : (Γ : Ctx n) → (i : Fin (ctxLength Γ)) → suspCtx Γ ‼ inject₁ (inject₁ i) ≃ty suspTy (Γ ‼ i)
 susp-‼ (Γ , A) zero = sym≃ty (susp-ty-lift A)
-susp-‼ (Γ , A) (suc i) = trans≃ty (lift-ty-≃ refl≃ty (susp-‼ Γ i)) (sym≃ty (susp-ty-lift (Γ ‼ i)))
+susp-‼ (Γ , A) (suc i) = trans≃ty (lift-ty-≃ (susp-‼ Γ i)) (sym≃ty (susp-ty-lift (Γ ‼ i)))
 
-susp-sub-preserve-getFst : {Γ : Ctx n} → {Δ : Ctx m} → (σ : Sub Γ Δ) → getFst Δ ≃tm getFst Γ [ suspSub σ ]tm
+susp-sub-preserve-getFst : (σ : Sub n m) → getFst {n = m} ≃tm getFst [ suspSub σ ]tm
 susp-sub-preserve-getFst ⟨⟩ = refl≃tm
-susp-sub-preserve-getFst {Γ = Γ , A} ⟨ σ , t ⟩ = trans≃tm (susp-sub-preserve-getFst σ) (sym≃tm (lift-sub-comp-lem-tm {t = suspTm t} (suspSub σ) (getFst Γ) {suspTy A}))
+susp-sub-preserve-getFst ⟨ σ , t ⟩ = trans≃tm (susp-sub-preserve-getFst σ) (sym≃tm (lift-sub-comp-lem-tm {t = suspTm t} (suspSub σ) (getFst)))
 
-susp-sub-preserve-getSnd : {Γ : Ctx n} → {Δ : Ctx m} → (σ : Sub Γ Δ) → getSnd Δ ≃tm getSnd Γ [ suspSub σ ]tm
+susp-sub-preserve-getSnd : (σ : Sub n m) → getSnd {n = m} ≃tm getSnd [ suspSub σ ]tm
 susp-sub-preserve-getSnd ⟨⟩ = refl≃tm
-susp-sub-preserve-getSnd {Γ = Γ , A} ⟨ σ , t ⟩ = trans≃tm (susp-sub-preserve-getSnd σ) (sym≃tm (lift-sub-comp-lem-tm {t = suspTm t} (suspSub σ) (getSnd Γ) {suspTy A}))
+susp-sub-preserve-getSnd ⟨ σ , t ⟩ = trans≃tm (susp-sub-preserve-getSnd σ) (sym≃tm (lift-sub-comp-lem-tm {t = suspTm t} (suspSub σ) (getSnd)))
 
-susp-functorial : (σ : Sub Δ Υ) → (τ : Sub Γ Δ) → suspSub (σ ∘ τ) ≃s suspSub σ ∘ suspSub τ
-susp-functorial-tm : (σ : Sub Δ Υ) → (t : Tm Δ) → suspTm (t [ σ ]tm) ≃tm suspTm t [ suspSub σ ]tm
-susp-functorial-ty : (σ : Sub Δ Υ) → (A : Ty Δ d) → suspTy (A [ σ ]ty) ≃ty suspTy A [ suspSub σ ]ty
 
-susp-functorial σ ⟨⟩ = Ext≃ (Ext≃ (Null≃ refl≃c) (susp-sub-preserve-getFst σ)) (susp-sub-preserve-getSnd σ)
+susp-functorial : (σ : Sub m l) → (τ : Sub n m) → suspSub (σ ∘ τ) ≃s suspSub σ ∘ suspSub τ
+susp-functorial-tm : (σ : Sub m l) → (t : Tm m) → suspTm (t [ σ ]tm) ≃tm suspTm t [ suspSub σ ]tm
+susp-functorial-ty : (σ : Sub m l) → (A : Ty m d) → suspTy (A [ σ ]ty) ≃ty suspTy A [ suspSub σ ]ty
+
+susp-functorial σ ⟨⟩ = Ext≃ (Ext≃ (Null≃ refl) (susp-sub-preserve-getFst σ)) (susp-sub-preserve-getSnd σ)
 susp-functorial σ ⟨ τ , t ⟩ = Ext≃ (susp-functorial σ τ) (susp-functorial-tm σ t)
 
 susp-functorial-tm σ (Var i) = lem σ i
   where
-    lem : {Γ : Ctx n} → (σ : Sub Γ Δ) → (i : Fin (ctxLength Γ)) → suspTm (Var i [ σ ]tm) ≃tm (Var (inject₁ (inject₁ i)) [ suspSub σ ]tm)
+    lem : (σ : Sub n m) → (i : Fin n) → suspTm (Var i [ σ ]tm) ≃tm (Var (inject₁ (inject₁ i)) [ suspSub σ ]tm)
     lem ⟨ σ , t ⟩ zero = refl≃tm
     lem ⟨ σ , t ⟩ (suc i) = lem σ i
 susp-functorial-tm σ (Coh Δ A τ) = Coh≃ refl≃c refl≃ty (susp-functorial σ τ)
 
-susp-functorial-ty σ ⋆ = Arr≃ (susp-sub-preserve-getFst σ) (Star≃ refl≃c) (susp-sub-preserve-getSnd σ)
+susp-functorial-ty σ ⋆ = Arr≃ (susp-sub-preserve-getFst σ) (Star≃ refl) (susp-sub-preserve-getSnd σ)
 susp-functorial-ty σ (s ─⟨ A ⟩⟶ t) = Arr≃ (susp-functorial-tm σ s) (susp-functorial-ty σ A) (susp-functorial-tm σ t)
 
-susp-functorial-id : (Γ : Ctx n) → suspSub (idSub Γ) ≃s idSub (suspCtx Γ)
-susp-functorial-id ∅ = refl≃s
-susp-functorial-id (Γ , A) = Ext≃ (trans≃s (susp-sub-lift (idSub Γ)) (lift-sub-≃ refl≃ty (susp-functorial-id Γ))) refl≃tm
+susp-functorial-id : (n : ℕ) → suspSub (idSub n) ≃s idSub (2 + n)
+susp-functorial-id zero = refl≃s
+susp-functorial-id (suc n) = Ext≃ (trans≃s (susp-sub-lift (idSub n)) (lift-sub-≃ (susp-functorial-id n))) refl≃tm
 
-suspSub-preserve-star : {Γ : Ctx n} → (σ : Sub Γ Δ) → suspTy ⋆ [ suspSub σ ]ty ≃ty suspTy (⋆ {Γ = Δ})
+
+suspSub-preserve-star : (σ : Sub n m) → suspTy ⋆ [ suspSub σ ]ty ≃ty suspTy (⋆ {n = m})
 suspSub-preserve-star ⟨⟩ = refl≃ty
-suspSub-preserve-star {Γ = Γ , A} ⟨ σ , t ⟩ = trans≃ty (lift-sub-comp-lem-ty {t = suspTm t} (suspSub σ) (getFst Γ ─⟨ ⋆ ⟩⟶ getSnd Γ) {suspTy A}) (suspSub-preserve-star σ)
+suspSub-preserve-star ⟨ σ , t ⟩ = trans≃ty (lift-sub-comp-lem-ty {t = suspTm t} (suspSub σ) (getFst ─⟨ ⋆ ⟩⟶ getSnd)) (suspSub-preserve-star σ)
 
-suspSub-preserve-focus-ty : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ])→ (σ : Sub Γ Δ) → getFocusType (susp-pdb pdb) [ suspSub σ ]ty ≃ty getFocusType (susp-pdb pdb2)
+suspSub-preserve-focus-ty : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ])→ (σ : Sub (ctxLength Γ) (ctxLength Δ)) → getFocusType (susp-pdb pdb) [ suspSub σ ]ty ≃ty getFocusType (susp-pdb pdb2)
 suspSub-preserve-focus-ty pdb pdb2 σ = begin
   < getFocusType (susp-pdb pdb) [ suspSub σ ]ty >ty ≈˘⟨ sub-action-≃-ty (susp-pdb-foc-ty pdb) refl≃s ⟩
   < suspTy (getFocusType pdb) [ suspSub σ ]ty >ty ≈˘⟨ sub-action-≃-ty (susp-ty-≃ ⋆-is-only-0-d-ty) refl≃s ⟩
@@ -103,7 +104,7 @@ suspSub-preserve-focus-ty pdb pdb2 σ = begin
   where
     open Reasoning ty-setoid
 
-suspSub-preserve-focus-tm : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ]) → (σ : Sub Γ Δ) → getFocusTerm (Restr (susp-pdb pdb)) [ suspSub σ ]tm ≃tm getFocusTerm (Restr (susp-pdb pdb2))
+suspSub-preserve-focus-tm : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ]) → (σ : Sub (ctxLength Γ) (ctxLength Δ)) → getFocusTerm (Restr (susp-pdb pdb)) [ suspSub σ ]tm ≃tm getFocusTerm (Restr (susp-pdb pdb2))
 suspSub-preserve-focus-tm pdb pdb2 σ = begin
   < getFocusTerm (Restr (susp-pdb pdb)) [ suspSub σ ]tm >tm ≡⟨⟩
   < ty-tgt (getFocusType (susp-pdb pdb)) [ suspSub σ ]tm >tm ≈⟨ ty-tgt-subbed (getFocusType (susp-pdb pdb)) (suspSub σ) ⟩
@@ -121,17 +122,17 @@ lookupHeight-suspCtx (Γ , A) (suc i) = lookupHeight-suspCtx Γ i
 -- inject-susp-sub ⟨ σ , t ⟩ zero = refl≃tm
 -- inject-susp-sub ⟨ σ , t ⟩ (suc i) = inject-susp-sub σ i
 
-suspension-vars : (Γ : Ctx n) → (i : Fin (ctxLength (suspCtx Γ))) → ((i ≡ fromℕ _) ⊎ (i ≡ inject₁ (fromℕ _))) ⊎ Σ[ j ∈ Fin (ctxLength Γ) ] i ≡ inject₁ (inject₁ j)
-suspension-vars ∅ zero = inj₁ (inj₂ refl)
-suspension-vars ∅ (suc zero) = inj₁ (inj₁ refl)
-suspension-vars (Γ , A) zero = inj₂ (zero ,, refl)
-suspension-vars (Γ , A) (suc i) with suspension-vars Γ i
+suspension-vars : (i : Fin (2 + n)) → ((i ≡ fromℕ _) ⊎ (i ≡ inject₁ (fromℕ _))) ⊎ Σ[ j ∈ Fin n ] i ≡ inject₁ (inject₁ j)
+suspension-vars {n = zero} zero = inj₁ (inj₂ refl)
+suspension-vars {n = zero} (suc zero) = inj₁ (inj₁ refl)
+suspension-vars {n = suc n} zero = inj₂ (zero ,, refl)
+suspension-vars {n = suc n} (suc i) with suspension-vars i
 ... | inj₁ (inj₁ x) = inj₁ (inj₁ (cong suc x))
 ... | inj₁ (inj₂ y) = inj₁ (inj₂ (cong suc y))
 ... | inj₂ (j ,, p) = inj₂ ((suc j) ,, (cong suc p))
 
-susp-var-split : VarSplit Γ Δ Υ → VarSplit (suspCtx Γ) (suspCtx Δ) (suspCtx Υ)
-susp-var-split {Γ = Γ} vs i with suspension-vars Γ i
+susp-var-split : VarSplit n m l → VarSplit (2 + n) (2 + m) (2 + l)
+susp-var-split vs i with suspension-vars i
 ... | inj₁ (inj₁ _) = inj₂ (fromℕ _)
 ... | inj₁ (inj₂ _) = inj₂ (inject₁ (fromℕ _))
 ... | inj₂ (j ,, _) with vs j

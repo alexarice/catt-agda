@@ -5,26 +5,26 @@ module Catt.Syntax.Properties where
 open import Catt.Syntax
 
 open import Relation.Binary.PropositionalEquality
-open import Catt.Dimension
+-- open import Catt.Dimension
 open import Data.Fin using (Fin;zero;suc)
 open import Data.Nat
 
-lift-dim-ty : .⦃ _ : CtxDim Γ n ⦄ → {A : Ty Γ m} → ⦃ TyDim A d ⦄ → ⦃ _ : TyDim B d′ ⦄ → TyDim (liftType {A = B} A) d
-lift-dim-tm : .⦃ _ : CtxDim Γ n ⦄ → {t : Tm Γ} → ⦃ TmDim t d ⦄ → ⦃ _ : TyDim A d′ ⦄ → TmDim (liftTerm {A = A} t) d
-lift-dim-sub : .⦃ _ : CtxDim Γ n ⦄ → .⦃ _ : CtxDim Δ m ⦄ → {σ : Sub Γ Δ} → ⦃ SubDim σ d ⦄ → ⦃ _ : TyDim B d′ ⦄ → SubDim (liftSub {A = B} σ) d
+-- lift-dim-ty : .⦃ _ : CtxDim Γ n ⦄ → {A : Ty Γ m} → ⦃ TyDim A d ⦄ → ⦃ _ : TyDim B d′ ⦄ → TyDim (liftType {A = B} A) d
+-- lift-dim-tm : .⦃ _ : CtxDim Γ n ⦄ → {t : Tm Γ} → ⦃ TmDim t d ⦄ → ⦃ _ : TyDim A d′ ⦄ → TmDim (liftTerm {A = A} t) d
+-- lift-dim-sub : .⦃ _ : CtxDim Γ n ⦄ → .⦃ _ : CtxDim Δ m ⦄ → {σ : Sub Γ Δ} → ⦃ SubDim σ d ⦄ → ⦃ _ : TyDim B d′ ⦄ → SubDim (liftSub {A = B} σ) d
 
-lift-dim-ty {A = ⋆} ⦃ TyDimB ⦄ = TyDimB
-lift-dim-ty {A = s ─⟨ A ⟩⟶ t} ⦃ TyDimS ⦄ = TyDimS ⦃ _ ⦄ ⦃ lift-dim-tm {t = s} ⦄ ⦃ lift-dim-ty ⦄ ⦃ lift-dim-tm  ⦄
+-- lift-dim-ty {A = ⋆} ⦃ TyDimB ⦄ = TyDimB
+-- lift-dim-ty {A = s ─⟨ A ⟩⟶ t} ⦃ TyDimS ⦄ = TyDimS ⦃ _ ⦄ ⦃ lift-dim-tm {t = s} ⦄ ⦃ lift-dim-ty ⦄ ⦃ lift-dim-tm  ⦄
 
-lift-dim-tm {Γ = Γ} {t = Var i} ⦃ TmDimV ⦄ = TmDimV
-lift-dim-tm {t = Coh Δ A σ} ⦃ TmDimC ⦄ = TmDimC ⦃ _ ⦄ ⦃ it ⦄ ⦃ it ⦄ ⦃ lift-dim-sub ⦄
+-- lift-dim-tm {Γ = Γ} {t = Var i} ⦃ TmDimV ⦄ = TmDimV
+-- lift-dim-tm {t = Coh Δ A σ} ⦃ TmDimC ⦄ = TmDimC ⦃ _ ⦄ ⦃ it ⦄ ⦃ it ⦄ ⦃ lift-dim-sub ⦄
 
-lift-dim-sub {σ = ⟨⟩} ⦃ SubDimB ⦄ = SubDimB
-lift-dim-sub {σ = ⟨ σ , t ⟩} ⦃ SubDimS ⦄ = SubDimS ⦃ _ ⦄ ⦃ _ ⦄ ⦃ lift-dim-sub ⦄ ⦃ it ⦄ ⦃ lift-dim-tm ⦄
+-- lift-dim-sub {σ = ⟨⟩} ⦃ SubDimB ⦄ = SubDimB
+-- lift-dim-sub {σ = ⟨ σ , t ⟩} ⦃ SubDimS ⦄ = SubDimS ⦃ _ ⦄ ⦃ _ ⦄ ⦃ lift-dim-sub ⦄ ⦃ it ⦄ ⦃ lift-dim-tm ⦄
 
-lookupD : (Γ : Ctx n) → ⦃ _ : CtxDim Γ d ⦄ → (i : Fin (ctxLength Γ)) → TyDim (Γ ‼ i) (lookupDim Γ i)
-lookupD (Γ , A) ⦃ CtxDimS ⦄ zero = lift-dim-ty
-lookupD (Γ , A) ⦃ CtxDimS ⦄ (suc i) = lift-dim-ty ⦃ it ⦄ ⦃ lookupD Γ i ⦄
+-- lookupD : (Γ : Ctx n) → ⦃ _ : CtxDim Γ d ⦄ → (i : Fin (ctxLength Γ)) → TyDim (Γ ‼ i) (lookupDim Γ i)
+-- lookupD (Γ , A) ⦃ CtxDimS ⦄ zero = lift-dim-ty
+-- lookupD (Γ , A) ⦃ CtxDimS ⦄ (suc i) = lift-dim-ty ⦃ it ⦄ ⦃ lookupD Γ i ⦄
 
 -- lift-subbed-ty : {A : Ty Γ} {t : Tm (Δ , C)} → (B : Ty Γ) → (σ : Sub Γ Δ ⋆) → ((liftType {A = A} B) [ ⟨ liftSub σ , t ⟩ ]ty) ⦃ TyDimB ⦄ ≡ liftType (B [ σ ]ty)
 
@@ -55,24 +55,24 @@ lookupD (Γ , A) ⦃ CtxDimS ⦄ (suc i) = lift-dim-ty ⦃ it ⦄ ⦃ lookupD Γ
 --   = {!!} -- refl
 
 
-arr-equality : s ≡ s′ → A ≡ A′ → t ≡ t′ → s ─⟨ A ⟩⟶ t ≡ s′ ─⟨ A′ ⟩⟶ t′
-arr-equality refl refl refl = refl
+-- arr-equality : s ≡ s′ → A ≡ A′ → t ≡ t′ → s ─⟨ A ⟩⟶ t ≡ s′ ─⟨ A′ ⟩⟶ t′
+-- arr-equality refl refl refl = refl
 
-sub-equality : σ ≡ σ′ → t ≡ t′ → ⟨_,_⟩ σ {A} t ≡ ⟨ σ′ , t′ ⟩
-sub-equality refl refl = refl
+-- sub-equality : σ ≡ σ′ → t ≡ t′ → ⟨_,_⟩ σ {A} t ≡ ⟨ σ′ , t′ ⟩
+-- sub-equality refl refl = refl
 
-coh-equality : A ≡ A′ → σ ≡ σ′ → Coh Δ A σ ≡ Coh Δ A′ σ′
-coh-equality refl refl = refl
+-- coh-equality : A ≡ A′ → σ ≡ σ′ → Coh Δ A σ ≡ Coh Δ A′ σ′
+-- coh-equality refl refl = refl
 
-sub-action-≡-ty : {σ : Sub Γ Δ} → A ≡ B → A [ σ ]ty ≡ B [ σ ]ty
-sub-action-≡-ty refl = refl
+-- sub-action-≡-ty : {σ : Sub Γ Δ} → A ≡ B → A [ σ ]ty ≡ B [ σ ]ty
+-- sub-action-≡-ty refl = refl
 
-sub-action-≡-tm : {σ : Sub Γ Δ} → s ≡ t → s [ σ ]tm ≡ t [ σ ]tm
-sub-action-≡-tm refl = refl
+-- sub-action-≡-tm : {σ : Sub Γ Δ} → s ≡ t → s [ σ ]tm ≡ t [ σ ]tm
+-- sub-action-≡-tm refl = refl
 
-sub-action-≡-sub : {σ : Sub Γ Δ} → τ ≡ μ → σ ∘ τ ≡ σ ∘ μ
-sub-action-≡-sub refl = refl
+-- sub-action-≡-sub : {σ : Sub Γ Δ} → τ ≡ μ → σ ∘ τ ≡ σ ∘ μ
+-- sub-action-≡-sub refl = refl
 
-sub-from-function : ((i : Fin (ctxLength Γ)) → Tm Δ) → Sub Γ Δ
-sub-from-function {Γ = ∅} f = ⟨⟩
-sub-from-function {Γ = Γ , A} f = ⟨ (sub-from-function (λ i → f (suc i))) , f zero ⟩
+sub-from-function : ((i : Fin n) → Tm m) → Sub n m
+sub-from-function {n = zero} f = ⟨⟩
+sub-from-function {n = suc n} f = ⟨ (sub-from-function (λ i → f (suc i))) , f zero ⟩

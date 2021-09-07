@@ -5,7 +5,7 @@ module Catt.Pasting where
 open import Data.Nat
 open import Catt.Syntax
 open import Catt.Syntax.Properties
-open import Catt.Dimension
+-- open import Catt.Dimension
 open import Data.Empty
 open import Data.Unit
 open import Catt.Support
@@ -20,8 +20,8 @@ data _⊢pd₀_ : Ctx (suc n) → ℕ → Set
 
 data _⊢pd[_][_] : (Γ : Ctx (suc n)) → ℕ → ℕ → Set
 
-getFocusType : Γ ⊢pd[ submax ][ d ] → Ty Γ d
-getFocusTerm : Γ ⊢pd[ submax ][ d ] → Tm Γ
+getFocusType : Γ ⊢pd[ submax ][ d ] → Ty (ctxLength Γ) d
+getFocusTerm : Γ ⊢pd[ submax ][ d ] → Tm (ctxLength Γ)
 
 -- Uniquely extend a pasting context
 extend : {Γ : Ctx (suc n)} → Γ ⊢pd[ submax ][ d ] → Ctx (3 + n)
@@ -86,7 +86,7 @@ pd-bd-pd : (pd : Γ ⊢pd₀ suc d) → pd-bd-ctx pd ⊢pd₀ d
 pd-bd-pd (Finish pdb) = Finish (pdb-bd-pd pdb)
 
 -- Source and Target
-pdb-src : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → Sub (pdb-bd-ctx pdb) Γ
+pdb-src : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → Sub (suc (pdb-bd-len-1 pdb)) (ctxLength Γ)
 pdb-src (Extend {submax = zero} pdb) = liftSub (liftSub (idSub _))
 pdb-src (Extend {submax = suc zero} pdb) = liftSub (liftSub (pdb-src pdb))
 pdb-src (Extend {submax = suc (suc submax)} pdb) = ⟨ ⟨ liftSub (liftSub (pdb-src pdb)) , 1V ⟩ , 0V ⟩
@@ -96,45 +96,45 @@ is-zero : ℕ → Set
 is-zero zero = ⊤
 is-zero (suc n) = ⊥
 
-replacePdSub : Δ ⊢pd[ submax ][ d ] → (σ : Sub Δ Γ) → Tm Γ → .(is-zero submax) → Sub Δ Γ
-replacePdSub Base ⟨ σ , x ⟩ t iz = ⟨ σ , t ⟩
-replacePdSub (Extend pdb) ⟨ σ , x ⟩ t iz = ⟨ σ , t ⟩
+replacePdSub : Δ ⊢pd[ submax ][ d ] → (σ : Sub (ctxLength Δ) n) → Tm n → .⦃ is-zero submax ⦄ → Sub (ctxLength Δ) n
+replacePdSub Base ⟨ σ , x ⟩ t = ⟨ σ , t ⟩
+replacePdSub (Extend pdb) ⟨ σ , x ⟩ t = ⟨ σ , t ⟩
 
-pdb-tgt : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → Sub (pdb-bd-ctx pdb) Γ
-pdb-tgt (Extend {submax = zero} pdb) = replacePdSub (pdb-bd-pd (Extend pdb)) (liftSub (liftSub (idSub _))) 1V tt
-pdb-tgt (Extend {submax = suc zero} pdb) = replacePdSub (pdb-bd-pd (Extend pdb)) (liftSub (liftSub (pdb-tgt pdb))) 1V tt
+pdb-tgt : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → Sub (suc (pdb-bd-len-1 pdb)) (ctxLength Γ)
+pdb-tgt (Extend {submax = zero} pdb) = replacePdSub (pdb-bd-pd (Extend pdb)) (liftSub (liftSub (idSub _))) 1V
+pdb-tgt (Extend {submax = suc zero} pdb) = replacePdSub (pdb-bd-pd (Extend pdb)) (liftSub (liftSub (pdb-tgt pdb))) 1V
 pdb-tgt (Extend {submax = suc (suc submax)} pdb) = ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ , 0V ⟩
 pdb-tgt (Restr pdb) = pdb-tgt pdb
 
-pd-src : (pd : Γ ⊢pd₀ (suc d)) → Sub (pd-bd-ctx pd) Γ
+pd-src : (pd : Γ ⊢pd₀ (suc d)) → Sub (suc (pd-bd-len-1 pd)) (ctxLength Γ)
 pd-src (Finish pdb) = pdb-src pdb
 
-pd-tgt : (pd : Γ ⊢pd₀ (suc d)) → Sub (pd-bd-ctx pd) Γ
+pd-tgt : (pd : Γ ⊢pd₀ (suc d)) → Sub (suc (pd-bd-len-1 pd)) (ctxLength Γ)
 pd-tgt (Finish pdb) = pdb-tgt pdb
 
 
 -- Source and target variables
-supp-pdb-src : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ NonZero′ (submax + d) ⦄ → VarSet Γ
+supp-pdb-src : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ NonZero′ (submax + d) ⦄ → VarSet (ctxLength Γ)
 supp-pdb-src (Extend {submax = zero} pdb) = ewf (ewf full)
 supp-pdb-src (Extend {submax = suc zero} pdb) = ewf (ewf (supp-pdb-src pdb))
 supp-pdb-src (Extend {submax = suc (suc submax)} pdb) = ewt (ewt (supp-pdb-src pdb))
 supp-pdb-src (Restr pdb) = supp-pdb-src pdb
 
-supp-pdb-tgt : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → VarSet Γ
+supp-pdb-tgt : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → VarSet (ctxLength Γ)
 supp-pdb-tgt (Extend {submax = zero} pdb) = ewf (ewt (drop full))
 supp-pdb-tgt (Extend {submax = suc zero} pdb) = ewf (ewt (drop (supp-pdb-tgt pdb)))
 supp-pdb-tgt (Extend {submax = suc (suc submax)} pdb) = ewt (ewt (supp-pdb-tgt pdb))
 supp-pdb-tgt (Restr pdb) = supp-pdb-tgt pdb
 
-supp-src : (pd : Γ ⊢pd₀ suc d) → VarSet Γ
+supp-src : (pd : Γ ⊢pd₀ suc d) → VarSet (ctxLength Γ)
 supp-src (Finish pdb) = supp-pdb-src pdb
 
-supp-tgt : (pd : Γ ⊢pd₀ suc d) → VarSet Γ
+supp-tgt : (pd : Γ ⊢pd₀ suc d) → VarSet (ctxLength Γ)
 supp-tgt (Finish pdb) = supp-pdb-tgt pdb
 
 -- Focus of pd
-pd-focus-tm : (pd : Γ ⊢pd₀ d) → Tm Γ
+pd-focus-tm : (pd : Γ ⊢pd₀ d) → Tm (ctxLength Γ)
 pd-focus-tm (Finish pdb) = getFocusTerm pdb
 
-pd-focus-ty : (pd : Γ ⊢pd₀ d) → Ty Γ 0
+pd-focus-ty : (pd : Γ ⊢pd₀ d) → Ty (ctxLength Γ) 0
 pd-focus-ty (Finish pdb) = getFocusType pdb

@@ -7,41 +7,44 @@ open import Data.Nat.Properties using (≤-refl)
 open import Data.Vec hiding (drop ; [_])
 open import Catt.Syntax
 open import Catt.Syntax.Properties
-open import Catt.Dimension
+-- open import Catt.Dimension
 open import Data.Bool
 open import Data.Fin
 open import Data.Empty
 open import Data.Unit
 open import Catt.Globular
 
-record VarSet (Γ : Ctx n) : Set where
-  constructor [_]v
-  field
-    get : Vec Bool (ctxLength Γ)
+-- record VarSet (Γ : Ctx n) : Set where
+--   constructor [_]v
+--   field
+--     get : Vec Bool (ctxLength Γ)
 
-empty : VarSet Γ
-empty = [ replicate false ]v
+VarSet : ℕ → Set
+VarSet = Vec Bool
 
-full : VarSet Γ
-full = [ replicate true ]v
+empty : VarSet n
+empty = replicate false
 
-ewt : {A : Ty Γ d} → VarSet Γ → VarSet (Γ , A)
-ewt [ xs ]v = [ true ∷ xs ]v
+full : VarSet n
+full = replicate true
 
-ewf : {A : Ty Γ d} → VarSet Γ → VarSet (Γ , A)
-ewf [ xs ]v = [ false ∷ xs ]v
+ewt : VarSet n → VarSet (suc n)
+ewt xs = true ∷ xs
 
-drop : VarSet Γ → VarSet Γ
-drop {zero} [ [] ]v = [ [] ]v
-drop {suc n} [ x ∷ v ]v = [ false ∷ v ]v
+ewf : VarSet n → VarSet (suc n)
+ewf xs = false ∷ xs
 
-trueAt : Fin (ctxLength Γ) → VarSet Γ
-trueAt {Γ = Γ , A} zero = ewt empty
-trueAt {Γ = Γ , A} (suc i) = ewf (trueAt i)
+drop : VarSet n → VarSet n
+drop {zero} [] = []
+drop {suc n} (x ∷ v) = false ∷ v
+
+trueAt : Fin n → VarSet n
+trueAt {n = suc n} zero = ewt empty
+trueAt {n = suc n} (suc i) = ewf (trueAt i)
 
 infixl 60 _∪_
-_∪_ : VarSet Γ → VarSet Γ → VarSet Γ
-([ f ]v ∪ [ g ]v) = [ zipWith _∨_ f g ]v
+_∪_ : VarSet n → VarSet n → VarSet n
+(f ∪ g) = zipWith _∨_ f g
 
 
 -- supp : (x : Syntax) → VarSet (syntax-ctx x)
@@ -58,10 +61,10 @@ _∪_ : VarSet Γ → VarSet Γ → VarSet Γ
 --     γ (Substitution ⟨⟩) rec = empty
 --     γ (Substitution ⟨ σ , t ⟩ ⦃ c = SubDimS ⦄) rec = (rec (Substitution σ) [ sub1 ]p) ∪ (rec (Term t) [ sub2 ]p)
 
-FVCtx : (Γ : Ctx n) → VarSet Γ
-FVTm : (t : Tm Γ) → VarSet Γ
-FVTy : (A : Ty Γ d′) → VarSet Γ
-FVSub : (σ : Sub Δ Γ) → VarSet Γ
+FVCtx : (Γ : Ctx n) → VarSet n
+FVTm : (t : Tm n) → VarSet n
+FVTy : (A : Ty n d′) → VarSet n
+FVSub : (σ : Sub n m) → VarSet m
 
 FVCtx Γ = full
 FVTm (Var i) = trueAt i
@@ -81,7 +84,7 @@ FVSub ⟨ σ , t ⟩ = FVSub σ ∪ FVTm t
 -- suppTy A = supp (Type A)
 -- suppSub σ = supp (Substitution σ)
 
-data _≃vs_ : VarSet Γ → VarSet Γ → Set where
-  ≃VEmp : _≃vs_ {Γ = ∅} [ [] ]v [ [] ]v
-  ≃VTrue : ∀ {xs ys : VarSet Γ} → xs ≃vs ys → ewt {A = A} xs ≃vs ewt ys
-  ≃VFalse : ∀ {xs ys : VarSet Γ} → xs ≃vs ys → ewf {A = A} xs ≃vs ewf ys
+data _≃vs_ : VarSet n → VarSet n → Set where
+  ≃VEmp : [] ≃vs []
+  ≃VTrue : ∀ {xs ys : VarSet n} → xs ≃vs ys → ewt xs ≃vs ewt ys
+  ≃VFalse : ∀ {xs ys : VarSet n} → xs ≃vs ys → ewf xs ≃vs ewf ys

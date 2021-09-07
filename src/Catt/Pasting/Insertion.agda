@@ -3,7 +3,7 @@
 module Catt.Pasting.Insertion where
 
 open import Catt.Syntax
-open import Catt.Dimension
+-- open import Catt.Dimension
 open import Data.Nat
 open import Data.Nat.Properties
 open import Catt.Pasting
@@ -55,10 +55,10 @@ insertion-tree S (PHere .S) T = T
 insertion-tree (Join S₁ S₂) (PExt P) (Join T Sing) = Join (insertion-tree S₁ P T) S₂
 insertion-tree (Join S₁ S₂) (PShift P) T = Join S₁ (insertion-tree S₂ P T)
 
-interior-sub : (S : Tree n) → (P : Path S) → (T : Tree m) → .⦃ _ : has-linear-height (path-length P) T ⦄ → Sub (tree-to-ctx T) (tree-to-ctx (insertion-tree S P T))
-interior-sub S (PHere .S) T = idSub (tree-to-ctx T)
-interior-sub (Join S₁ S₂) (PExt P) (Join T Sing) = connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero (insertion-tree S₁ P T)))) (tree-to-ctx S₂) ∘ suspSub (interior-sub S₁ P T)
-interior-sub (Join S₁ S₂) (PShift P) T = connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁))) (tree-to-ctx (insertion-tree S₂ P T)) ∘ interior-sub S₂ P T
+interior-sub : (S : Tree n) → (P : Path S) → (T : Tree m) → .⦃ _ : has-linear-height (path-length P) T ⦄ → Sub (suc m) (suc (insertion-tree-size S P T))
+interior-sub S (PHere .S) T = idSub (suc _)
+interior-sub (Join S₁ S₂) (PExt P) (Join T Sing) = connect-pd-inc-left (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-size S₂) ∘ suspSub (interior-sub S₁ P T)
+interior-sub (Join S₁ S₂) (PShift P) T = connect-pd-inc-right (susp-pd (tree-to-pd S₁)) (insertion-tree-size S₂ P T) ∘ interior-sub S₂ P T
 
 is-non-empty-path : {T : Tree n} → Path T → Set
 is-non-empty-path (PHere _) = ⊥
@@ -75,32 +75,32 @@ height-of-branching (PHere T) = height-of-linear T
 height-of-branching (PExt P) = suc (height-of-branching P)
 height-of-branching (PShift P) ⦃ bp ⦄ = height-of-branching P ⦃ proj₁ bp ⦄
 
-branching-path-to-var : (T : Tree n) → (P : Path T) → .⦃ bp : is-branching-path P ⦄ → Tm (tree-to-ctx T)
-branching-path-to-var T (PHere .T) = 0V -- linear-to-var T bp
-branching-path-to-var (Join S T) (PExt P) = suspTm (branching-path-to-var S P) [ connect-pd-inc-left (susp-pd (tree-to-pd S)) (tree-to-ctx T) ]tm
-branching-path-to-var (Join S T) (PShift P) ⦃ bp ⦄ = branching-path-to-var T P ⦃ proj₁ bp ⦄ [ connect-pd-inc-right (susp-pd (tree-to-pd S)) (tree-to-ctx T) ]tm
+branching-path-to-var : (T : Tree n) → (P : Path T) → .⦃ bp : is-branching-path P ⦄ → Tm (suc n)
+branching-path-to-var T (PHere .T) = 0V
+branching-path-to-var (Join S T) (PExt P) = suspTm (branching-path-to-var S P) [ connect-pd-inc-left (susp-pd (tree-to-pd S)) (tree-size T) ]tm
+branching-path-to-var (Join S T) (PShift P) ⦃ bp ⦄ = branching-path-to-var T P ⦃ proj₁ bp ⦄ [ connect-pd-inc-right (susp-pd (tree-to-pd S)) (tree-size T) ]tm
 
-type-has-linear-height : (n : ℕ) → {d : ℕ} → (T : Tree m) → .⦃ lh : has-linear-height n T ⦄ → (A : Ty (tree-to-ctx T) d) → Set
+type-has-linear-height : (n : ℕ) → (T : Tree m) → .⦃ lh : has-linear-height n T ⦄ → (A : Ty (suc m) d) → Set
 type-has-linear-height zero T A = ⊤
-type-has-linear-height (suc n) (Join T Sing) A = Σ[ p ∈ is-unsuspendable-ty (tree-to-ctx T) A refl≃c ] type-has-linear-height n T (unsuspend-ty A (tree-to-ctx T) refl≃c ⦃ p ⦄)
+type-has-linear-height (suc n) (Join T Sing) A = Σ[ p ∈ is-unsuspendable-ty A ] type-has-linear-height n T (unsuspend-ty A ⦃ p ⦄)
 
 exterior-sub : (S : Tree n)
              → (P : Path S)
              → .⦃ _ : is-branching-path P ⦄
              → (T : Tree m)
              → .⦃ _ : has-linear-height (path-length P) T ⦄
-             → (A : Ty (tree-to-ctx T) (height-of-branching P))
+             → (A : Ty (suc m) (height-of-branching P))
              → .⦃ type-has-linear-height (path-length P) T A ⦄
-             → Sub (tree-to-ctx S) (tree-to-ctx (insertion-tree S P T))
-exterior-sub S (PHere .S) T A = sub-from-disc (Coh (tree-to-ctx T) A (idSub (tree-to-ctx T))) ∘ idSub≃ (linear-tree-compat S)
+             → Sub (suc n) (suc (insertion-tree-size S P T))
+exterior-sub S (PHere .S) T A = sub-from-disc (tree-to-ctx T) (Coh (tree-to-ctx T) A (idSub (suc _))) ∘ idSub≃ (linear-tree-compat S)
 exterior-sub (Join S₁ S₂) (PExt P) (Join T Sing) A ⦃ tlh ⦄ =
   sub-from-connect-pdb (Restr (susp-pdb (tree-to-pdb zero S₁)))
-                       ((connect-pd-inc-left (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-to-ctx S₂)) ∘ suspSub (exterior-sub S₁ P T (unsuspend-ty A (tree-to-ctx T) refl≃c ⦃ proj₁ tlh ⦄) ⦃ proj₂ tlh ⦄))
-                       (connect-pd-inc-right (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-to-ctx S₂))
+                       (connect-pd-inc-left (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-size S₂) ∘ suspSub (exterior-sub S₁ P T (unsuspend-ty A ⦃ proj₁ tlh ⦄) ⦃ proj₂ tlh ⦄))
+                       (connect-pd-inc-right (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-size S₂))
 exterior-sub (Join S₁ S₂) (PShift P) ⦃ bp ⦄ T A =
   sub-from-connect-pdb (Restr (susp-pdb (tree-to-pdb zero S₁)))
-                       (connect-pdb-inc-left (Restr (susp-pdb (tree-to-pdb zero S₁))) (tree-to-ctx (insertion-tree S₂ P T)))
-                       (connect-pdb-inc-right (Restr (susp-pdb (tree-to-pdb zero S₁))) (tree-to-ctx (insertion-tree S₂ P T)) ∘ exterior-sub S₂ P ⦃ proj₁ bp ⦄ T A)
+                       (connect-pd-inc-left (susp-pd (tree-to-pd S₁)) (tree-size (insertion-tree S₂ P T)))
+                       (connect-pd-inc-right (susp-pd (tree-to-pd S₁)) (tree-size (insertion-tree S₂ P T)) ∘ exterior-sub S₂ P ⦃ proj₁ bp ⦄ T A)
 
 -- linear-to-var : (T : Tree n) → .⦃ _ : is-linear T ⦄ → Tm (tree-to-ctx T)
 -- linear-to-var Sing = 0V
@@ -131,32 +131,26 @@ exterior-sub (Join S₁ S₂) (PShift P) ⦃ bp ⦄ T A =
 -- disc-to-outer : (T : Tree n) → (P : Path T) → .⦃ _ : is-branching-path P ⦄ → Sub (Disc (height-of-branching P)) (tree-to-ctx T)
 -- disc-to-outer T P = sub-from-disc (branching-path-to-var T P) ∘ idSub≃ (disc-≡ {!!})
 
-disc-to-inner : (T : Tree n) → (A : Ty (tree-to-ctx T) d) → Sub (Disc d) (tree-to-ctx T)
-disc-to-inner T A = sub-from-disc (Coh (tree-to-ctx T) A (idSub (tree-to-ctx T)))
+disc-to-inner : (T : Tree n) → (A : Ty (suc n) d) → Sub (disc-size d) (suc n)
+disc-to-inner T A = sub-from-disc (tree-to-ctx T) (Coh (tree-to-ctx T) A (idSub (suc _)))
 
 insertion-var-split : (S : Tree n)
                     → (P : Path S)
                     → .⦃ bp : is-branching-path P ⦄
                     → (T : Tree m)
                     → .⦃ lh : has-linear-height (path-length P) T ⦄
-                    -- → (A : Ty (tree-to-ctx T) (height-of-branching P))
-                    -- → .⦃ tlh : type-has-linear-height (path-length P) T A ⦄
-                    → VarSplit (tree-to-ctx (insertion-tree S P T)) (tree-to-ctx S) (tree-to-ctx T)
+                    → VarSplit (suc (insertion-tree-size S P T)) (suc n) (suc m)
 insertion-var-split S (PHere .S) T i = inj₂ i
-insertion-var-split (Join S₁ S₂) (PExt P) (Join T Sing) i with connect-pd-var-split (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-to-ctx S₂) i
-... | inj₂ j = inj₁ (varToVarFunction (connect-pd-inc-right (susp-pd (tree-to-pd S₁)) (tree-to-ctx S₂)) ⦃ connect-pd-inc-right-var-to-var (susp-pd (tree-to-pd S₁)) (tree-to-ctx S₂) ⦄ j)
-... | inj₁ j with susp-var-split {Γ = tree-to-ctx (insertion-tree S₁ P T)}
-                                 {Δ = tree-to-ctx S₁}
-                                 {Υ = tree-to-ctx T}
-                                 (insertion-var-split S₁ P T) j
-... | inj₁ k = inj₁ (varToVarFunction (connect-pd-inc-left (susp-pd (tree-to-pd S₁)) (tree-to-ctx S₂)) ⦃ connect-pd-inc-left-var-to-var (susp-pd (tree-to-pd S₁)) (tree-to-ctx S₂) ⦄ k)
+insertion-var-split (Join S₁ S₂) (PExt P) (Join T Sing) i with connect-pd-var-split (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-size S₂) i
+... | inj₂ j = inj₁ (varToVarFunction (connect-pd-inc-right (susp-pd (tree-to-pd S₁)) (tree-size S₂)) ⦃ connect-pd-inc-right-var-to-var (susp-pd (tree-to-pd S₁)) (tree-size S₂) ⦄ j)
+... | inj₁ j with susp-var-split (insertion-var-split S₁ P T) j
+... | inj₁ k = inj₁ (varToVarFunction (connect-pd-inc-left (susp-pd (tree-to-pd S₁)) (tree-size S₂)) ⦃ connect-pd-inc-left-var-to-var (susp-pd (tree-to-pd S₁)) (tree-size S₂) ⦄ k)
 ... | inj₂ k = inj₂ k
-insertion-var-split (Join S₁ S₂) (PShift P) ⦃ bp ⦄ T i with connect-pd-var-split-right (susp-pd (tree-to-pd S₁)) (tree-to-ctx (insertion-tree S₂ P T)) i
-... | inj₁ j = inj₁ (varToVarFunction (connect-pd-inc-left (susp-pd (tree-to-pd S₁)) (tree-to-ctx S₂)) ⦃ connect-pd-inc-left-var-to-var (susp-pd (tree-to-pd S₁)) (tree-to-ctx S₂) ⦄ j)
+insertion-var-split (Join S₁ S₂) (PShift P) ⦃ bp ⦄ T i with connect-pd-var-split-right (susp-pd (tree-to-pd S₁)) (tree-size (insertion-tree S₂ P T)) i
+... | inj₁ j = inj₁ (varToVarFunction (connect-pd-inc-left (susp-pd (tree-to-pd S₁)) (tree-size S₂)) ⦃ connect-pd-inc-left-var-to-var (susp-pd (tree-to-pd S₁)) (tree-size S₂) ⦄ j)
 ... | inj₂ j with insertion-var-split S₂ P ⦃ proj₁ bp ⦄ T j
-... | inj₁ k = inj₁ (varToVarFunction (connect-pd-inc-right (susp-pd (tree-to-pd S₁)) (tree-to-ctx S₂)) ⦃ connect-pd-inc-right-var-to-var (susp-pd (tree-to-pd S₁)) (tree-to-ctx S₂) ⦄ k)
+... | inj₁ k = inj₁ (varToVarFunction (connect-pd-inc-right (susp-pd (tree-to-pd S₁)) (tree-size S₂)) ⦃ connect-pd-inc-right-var-to-var (susp-pd (tree-to-pd S₁)) (tree-size S₂) ⦄ k)
 ... | inj₂ k = inj₂ k
-
 {-
 insertion-var-split : (S : Tree n)
                     → (P : Path S)
@@ -349,16 +343,15 @@ insertion-var-split (Join S₁ S₂) (PShift P) bp T lh A x tlh i with connect-p
       < Var i >tm ∎
 -}
 
-
 sub-from-insertion-func : (S : Tree n)
                         → (P : Path S)
                         → .⦃ bp : is-branching-path P ⦄
                         → (T : Tree m)
                         → .⦃ lh : has-linear-height (path-length P) T ⦄
-                        → (σ : Sub (tree-to-ctx S) Γ)
-                        → (τ : Sub (tree-to-ctx T) Γ)
-                        → (i : Fin (ctxLength (tree-to-ctx (insertion-tree S P T))))
-                        → Tm Γ
+                        → (σ : Sub (suc n) l)
+                        → (τ : Sub (suc m) l)
+                        → (i : Fin (suc (insertion-tree-size S P T)))
+                        → Tm l
 sub-from-insertion-func S P T σ τ i with insertion-var-split S P T i
 ... | inj₁ j = Var j [ σ ]tm
 ... | inj₂ j = Var j [ τ ]tm
@@ -368,9 +361,9 @@ sub-from-insertion : (S : Tree n)
                    → .⦃ bp : is-branching-path P ⦄
                    → (T : Tree m)
                    → .⦃ lh : has-linear-height (path-length P) T ⦄
-                   → (σ : Sub (tree-to-ctx S) Γ)
-                   → (τ : Sub (tree-to-ctx T) Γ)
-                   → Sub (tree-to-ctx (insertion-tree S P T)) Γ
+                   → (σ : Sub (suc n) l)
+                   → (τ : Sub (suc m) l)
+                   → Sub (suc (insertion-tree-size S P T)) l
 sub-from-insertion S P T σ τ = sub-from-function (sub-from-insertion-func S P T σ τ)
 
 {-

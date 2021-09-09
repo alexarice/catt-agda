@@ -26,11 +26,6 @@ suspSupp : VarSet n → VarSet (2 + n)
 suspSupp [] = full
 suspSupp (x ∷ vs) = x ∷ suspSupp vs
 
--- suspSupp′ : VarSet n → VarSet (2 + n)
--- suspSupp′ {n = zero} vs = empty
--- suspSupp′ {n = suc n} (ewt vs) = ewt (suspSupp vs)
--- suspSupp′ {n = suc n} (ewf vs) = ewf (suspSupp vs)
-
 suspSupp∪ : (vs vs′ : VarSet n) → suspSupp vs ∪ suspSupp vs′ ≡ suspSupp (vs ∪ vs′)
 suspSupp∪ emp emp = refl
 suspSupp∪ (x ∷ xs) (y ∷ ys) = cong₂ _∷_ refl (suspSupp∪ xs ys)

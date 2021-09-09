@@ -49,3 +49,29 @@ lift-tm-equality (Rule≈ i a tc eqt) = props i .lift-rule a (λ j {A} → lift-
 
 lift-sub-equality (Null≈ x) = Null≈ (cong suc x)
 lift-sub-equality (Ext≈ eq x) = Ext≈ (lift-sub-equality eq) (lift-tm-equality x)
+
+apply-sub-ty-typing : Typing-Ty Γ A → Typing-Sub Γ Δ σ → Typing-Ty Δ (A [ σ ]ty)
+apply-sub-tm-typing : Typing-Tm Γ t A → Typing-Sub Γ Δ σ → Typing-Tm Δ (t [ σ ]tm) (A [ σ ]ty)
+apply-sub-sub-typing : Typing-Sub Υ Γ τ → Typing-Sub Γ Δ σ → Typing-Sub Υ Δ (σ ∘ τ)
+
+apply-sub-ty-typing TyStar σty = TyStar
+apply-sub-ty-typing (TyArr sty Aty tty) σty = TyArr (apply-sub-tm-typing sty σty) (apply-sub-ty-typing Aty σty) (apply-sub-tm-typing tty σty)
+
+apply-sub-tm-typing (TyVar zero x) (TyExt σty Aty tty) = term-conversion tty {!!}
+apply-sub-tm-typing (TyVar (suc i) x) (TyExt σty Aty tty) = term-conversion (apply-sub-tm-typing (TyVar i refl≈ty) σty) {!!}
+apply-sub-tm-typing (TyCoh pd w x y z) σty = TyCoh pd w (apply-sub-sub-typing x σty) y {!!}
+apply-sub-tm-typing (TyComp pd v w x y z) σty = TyComp pd v (apply-sub-sub-typing w σty) x y {!!}
+
+apply-sub-sub-typing TyNull σty = TyNull
+apply-sub-sub-typing {Υ = Υ} {Γ = Γ} {Δ = Δ} (TyExt τty Aty tty) σty = TyExt (apply-sub-sub-typing τty σty) Aty (term-conversion (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ _))))
+
+apply-sub-ty-eq : A ≈ty B → A [ σ ]ty ≈ty B [ σ ]ty
+apply-sub-tm-eq : s ≈tm t → s [ σ ]tm ≈tm t [ σ ]tm
+apply-sub-sub-eq : τ ≈s μ → σ ∘ τ ≈s σ ∘ μ
+
+apply-sub-ty-eq (Star≈ x) = Star≈ refl
+apply-sub-ty-eq (Arr≈ p q r) = Arr≈ (apply-sub-tm-eq p) (apply-sub-ty-eq q) (apply-sub-tm-eq r)
+
+apply-sub-tm-eq p = {!!}
+
+apply-sub-sub-eq p = {!!}

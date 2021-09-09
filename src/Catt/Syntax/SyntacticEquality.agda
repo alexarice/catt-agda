@@ -16,6 +16,7 @@ open import Relation.Nullary.Decidable
 open import Relation.Binary
 open import Function.Equivalence using (equivalence)
 open import Data.Product renaming (_,_ to _,,_) using (Σ; proj₁; proj₂)
+open import Data.Empty
 
 data _≃c_ : Ctx n → Ctx m → Set
 data _≃ty_ : Ty n d → Ty m d′ → Set
@@ -427,6 +428,12 @@ idSub≃-on-sub p ⟨ σ , t ⟩ = Ext≃ (idSub≃-on-sub p σ) (idSub≃-on-tm
 ⋆-is-only-0-d-ty : {A : Ty n 0} → (⋆ {n = n}) ≃ty A
 ⋆-is-only-0-d-ty {A = ⋆} = Star≃ refl
 
+no-term-in-empty-context : ¬ Tm 0
+no-term-in-empty-context (Coh Δ A ⟨ σ , t ⟩) = no-term-in-empty-context t
+
+⋆-is-only-ty-in-empty-context : (A : Ty 0 d) → A ≃ty ⋆ {n = 0}
+⋆-is-only-ty-in-empty-context ⋆ = refl≃ty
+⋆-is-only-ty-in-empty-context (s ─⟨ A ⟩⟶ t) = ⊥-elim (no-term-in-empty-context s)
 
 sub-from-function-≃ : (f : (i : Fin n) → Tm m)
                     → (f2 : (i : Fin n) → Tm m)

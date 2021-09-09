@@ -65,22 +65,27 @@ susp-pdb : Γ ⊢pd[ submax ][ d ] → suspCtx Γ ⊢pd[ submax ][ suc d ]
 susp-pdb-foc-ty : (pdb : Γ ⊢pd[ submax ][ d ]) → suspTy (getFocusType pdb) ≃ty getFocusType (susp-pdb pdb)
 susp-pdb-foc-tm : (pdb : Γ ⊢pd[ submax ][ d ]) → suspTm (getFocusTerm pdb) ≃tm getFocusTerm (susp-pdb pdb)
 
+susp-pdb-≃-lem : (pdb : Γ ⊢pd[ submax ][ d ]) → (suspTm (liftTerm (getFocusTerm pdb)) ─⟨
+                                                   suspTy (liftType (getFocusType pdb)) ⟩⟶ 0V)
+                                                  ≃ty
+                                                  (liftTerm (getFocusTerm (susp-pdb pdb)) ─⟨
+                                                   liftType (getFocusType (susp-pdb pdb)) ⟩⟶ 0V)
+susp-pdb-≃-lem pdb = Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-tm pdb)))
+                          (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb)))
+                          (Var≃ refl refl)
+
 susp-pdb Base = Extend Base
 susp-pdb (Extend pdb)
   = extend-pd-eq (susp-pdb pdb)
                  (susp-pdb-foc-ty pdb)
-                 (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-tm pdb)))
-                       (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb)))
-                       (Var≃ refl refl))
+                 (susp-pdb-≃-lem pdb)
 susp-pdb (Restr pdb) = Restr (susp-pdb pdb)
 
 susp-pdb-foc-tm Base = refl≃tm
 susp-pdb-foc-tm (Extend pdb)
   = extend-pd-eq-foc-tm (susp-pdb pdb)
                         (susp-pdb-foc-ty pdb)
-                        (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-tm pdb)))
-                              (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb)))
-                              (Var≃ refl refl))
+                        (susp-pdb-≃-lem pdb)
 susp-pdb-foc-tm (Restr pdb)
   = trans≃tm (susp-tgt-compat (getFocusType pdb)) (ty-tgt-≃ (susp-pdb-foc-ty pdb))
 
@@ -91,9 +96,7 @@ susp-pdb-foc-ty (Extend pdb)
                    refl≃tm)
              (extend-pd-eq-foc-ty (susp-pdb pdb)
                                   (susp-pdb-foc-ty pdb)
-                                  (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lift-tm-≃ (susp-pdb-foc-tm pdb)))
-                                        (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb)))
-                                        (Var≃ refl refl)))
+                                  (susp-pdb-≃-lem pdb))
 susp-pdb-foc-ty (Restr pdb)
   = trans≃ty (susp-base-compat (getFocusType pdb)) (ty-base-≃ (susp-pdb-foc-ty pdb))
 

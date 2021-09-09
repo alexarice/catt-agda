@@ -60,8 +60,8 @@ data Typing-Ctx where
 
 data Typing-Tm where
   TyVar : {Γ : Ctx n} → (i : Fin n) → {B : Ty n d} → (Γ ‼ i) ≈ty B → Typing-Tm Γ (Var i) B
-  TyCoh : Δ ⊢pd₀ d → Typing-Ty Δ A → Typing-Sub Δ Γ σ → full ≃vs FVTy A → (A [ σ ]ty) ≈ty B → Typing-Tm Γ (Coh Δ A σ) B
-  TyComp : (pd : Δ ⊢pd₀ (suc d)) → Typing-Ty Δ (s ─⟨ A ⟩⟶ t) → Typing-Sub Δ Γ σ → FVTm s ∪ FVTy A ≃vs supp-src pd → FVTm t ∪ FVTy A ≃vs supp-tgt pd → ((s ─⟨ A ⟩⟶ t) [ σ ]ty) ≈ty B → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ t) σ) B
+  TyCoh : Δ ⊢pd₀ d → Typing-Ty Δ A → Typing-Sub Δ Γ σ → FVTy A ≡ full → (A [ σ ]ty) ≈ty B → Typing-Tm Γ (Coh Δ A σ) B
+  TyComp : (pd : Δ ⊢pd₀ (suc d)) → Typing-Ty Δ (s ─⟨ A ⟩⟶ t) → Typing-Sub Δ Γ σ → FVTy A ∪ FVTm s ≡ supp-src pd → FVTy A ∪ FVTm t ≡ supp-tgt pd → ((s ─⟨ A ⟩⟶ t) [ σ ]ty) ≈ty B → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ t) σ) B
 
 data Typing-Ty where
   TyStar : Typing-Ty Γ ⋆

@@ -9,7 +9,7 @@ open import Catt.Pasting.Properties
 open import Catt.Connection
 open import Data.Nat
 open import Data.Nat.Properties
-open import Data.Fin using (Fin; zero; suc; fromℕ)
+open import Data.Fin using (Fin; zero; suc; fromℕ; toℕ)
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
@@ -18,6 +18,9 @@ open import Catt.Variables
 open import Data.Sum
 open import Data.Product renaming (_,_ to _,,_)
 open import Data.Unit using (⊤; tt)
+open import Data.Bool using (Bool; true; false; T; if_then_else_; not)
+open import Data.Bool.Properties using (T?)
+open import Relation.Nullary
 
 connect-≃ : Γ ≃c Γ′ → t ≃tm t′ → Δ ≃c Δ′ → connect Γ t Δ ≃c connect Γ′ t′ Δ′
 connect-inc-right-≃ : {t : Tm (suc n)} → {t′ : Tm (suc n′)} → n ≡ n′ → t ≃tm t′ → m ≡ m′ → connect-inc-right t m ≃s connect-inc-right t′ m′
@@ -113,25 +116,65 @@ connect-var-split t (suc m) (suc i) with connect-var-split t m i
 ... | inj₁ j = inj₁ j
 ... | inj₂ j = inj₂ (suc j)
 
+connect-var-split-compat : (t : Tm (suc n)) → (m : ℕ) → VarSplitCompat (connect-inc-left t m) (connect-inc-right t m) (connect-var-split t m)
+connect-var-split-compat t zero i = id-on-tm (Var i)
+connect-var-split-compat t (suc m) zero = refl≃tm
+connect-var-split-compat t (suc m) (suc i) with connect-var-split t m i | connect-var-split-compat t m i
+... | inj₁ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left t m)) (lift-tm-≃ p)
+... | inj₂ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right t m)) (lift-tm-≃ p)
+
 connect-pdb-var-split : {Γ : Ctx (suc n)} → (pdb : Γ ⊢pd[ submax ][ 0 ]) → (m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
 connect-pdb-var-split pdb = connect-var-split (getFocusTerm pdb)
+
+connect-pdb-var-split-compat : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (m : ℕ) → VarSplitCompat (connect-pdb-inc-left pdb m) (connect-pdb-inc-right pdb m) (connect-pdb-var-split pdb m)
+connect-pdb-var-split-compat pdb = connect-var-split-compat (getFocusTerm pdb)
 
 connect-pd-var-split : {Γ : Ctx (suc n)} → (pd : Γ ⊢pd₀ d) → (m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
 connect-pd-var-split (Finish pdb) Δ = connect-pdb-var-split pdb Δ
 
-connect-var-split-right : (t : Tm (suc n)) → (m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
-connect-var-split-right t zero zero = inj₂ zero
-connect-var-split-right t zero (suc i) = inj₁ (suc i)
+connect-pd-var-split-compat : (pd : Γ ⊢pd₀ d) → (m : ℕ) → VarSplitCompat (connect-pd-inc-left pd m) (connect-pd-inc-right pd m) (connect-pd-var-split pd m)
+connect-pd-var-split-compat (Finish pdb) = connect-pdb-var-split-compat pdb
+
+connect-var-split-right : (t : Tm (suc n)) → .⦃ isVar t ⦄ → (m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
+connect-var-split-right t zero i with toℕ (getVarFin t) ≡ᵇ toℕ i
+... | true = inj₂ zero
+... | false = inj₁ i
 connect-var-split-right t (suc m) zero = inj₂ zero
 connect-var-split-right t (suc m) (suc i) with connect-var-split-right t m i
 ... | inj₁ j = inj₁ j
 ... | inj₂ j = inj₂ (suc j)
 
+-- record Reveal_·_is-bool_ {A : Set}
+--                     (f : (x : A) → Bool) (x : A) (y : Bool):
+--                     Set where
+--   constructor [_]
+--   field eq : if y then T (f x) else T (not (f x))
+
+-- inspect-bool : ∀ {A : Set} (f : (x : A) → Bool) (x : A) → Reveal f · x is-bool f x
+-- inspect-bool f x with f x | inspect f x
+-- ... | false | [ eq ] = [ subst (λ - → T (not -)) (sym eq) tt ]
+-- ... | true | [ eq ] = [ subst T (sym eq) tt ]
+
+connect-var-split-right-compat : (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → (m : ℕ) → VarSplitCompat (connect-inc-left t m) (connect-inc-right t m) (connect-var-split-right t m)
+connect-var-split-right-compat t zero i with toℕ (getVarFin t) ≡ᵇ toℕ i | inspect (λ i → toℕ (getVarFin t) ≡ᵇ toℕ i) i
+... | false | p = id-on-tm (Var i)
+... | true | [ eq ] = trans≃tm (getVarFinProp t) (Var≃ refl (≡ᵇ⇒≡ (toℕ (getVarFin t)) (toℕ i) (subst T (sym eq) tt)))
+connect-var-split-right-compat t (suc m) zero = refl≃tm
+connect-var-split-right-compat t (suc m) (suc i) with connect-var-split-right t m i | connect-var-split-right-compat t m i
+... | inj₁ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left t m)) (lift-tm-≃ p)
+... | inj₂ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right t m)) (lift-tm-≃ p)
+
 connect-pdb-var-split-right : {Γ : Ctx (suc n)} → (pdb : Γ ⊢pd[ submax ][ 0 ]) → (m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
-connect-pdb-var-split-right pdb = connect-var-split-right (getFocusTerm pdb)
+connect-pdb-var-split-right pdb = connect-var-split-right (getFocusTerm pdb) ⦃ focus-term-is-var pdb ⦄
+
+connect-pdb-var-split-right-compat : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (m : ℕ) → VarSplitCompat (connect-pdb-inc-left pdb m) (connect-pdb-inc-right pdb m) (connect-pdb-var-split-right pdb m)
+connect-pdb-var-split-right-compat pdb = connect-var-split-right-compat (getFocusTerm pdb) ⦃ focus-term-is-var pdb ⦄
 
 connect-pd-var-split-right : {Γ : Ctx (suc n)} → (pd : Γ ⊢pd₀ d) → (m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
 connect-pd-var-split-right (Finish pdb) = connect-pdb-var-split-right pdb
+
+connect-pd-var-split-right-compat : (pd : Γ ⊢pd₀ d) → (m : ℕ) → VarSplitCompat (connect-pd-inc-left pd m) (connect-pd-inc-right pd m) (connect-pd-var-split-right pd m)
+connect-pd-var-split-right-compat (Finish pdb) = connect-pdb-var-split-right-compat pdb
 
 -- connect-var-split : (Γ : Ctx (suc n)) → (t : Tm Γ 2) → (Δ : Ctx (suc m)) → VarSplit (connect Γ t Δ) (connect-inc-left Γ t Δ) (connect-inc-right Γ t Δ)
 -- connect-var-split Γ t (∅ , A) i = inj₁ (i ,, id-on-tm (Var i))

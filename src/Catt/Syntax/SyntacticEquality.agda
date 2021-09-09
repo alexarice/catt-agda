@@ -155,7 +155,6 @@ sub-setoid = record { Carrier = SUB
 ≃tm-to-≡ : s ≃tm t → s ≡ t
 ≃s-to-≡ : σ ≃s τ → σ ≡ τ
 
-
 ≃c-to-≡ Emp≃ = refl
 ≃c-to-≡ (Add≃ p q)
   rewrite ≃c-to-≡ p
@@ -441,5 +440,12 @@ lift-sub-from-function : (f : (i : Fin n) → Tm m)
 lift-sub-from-function {n = zero} f = Null≃ refl
 lift-sub-from-function {n = suc n} f = Ext≃ (lift-sub-from-function (λ i → f (suc i))) refl≃tm
 
--- subst-dim-tm-≃ : (t : Tm Γ n) → (p : m ≡ n) → subst-dim-tm t p ≃tm t
--- subst-dim-tm-≃ t refl = refl≃tm
+sub-≃-term-wise : (σ : Sub n m) → (τ : Sub n m) → ((i : Fin n) → Var i [ σ ]tm ≃tm Var i [ τ ]tm) → σ ≃s τ
+sub-≃-term-wise ⟨⟩ ⟨⟩ f = Null≃ refl
+sub-≃-term-wise ⟨ σ , t ⟩ ⟨ τ , s ⟩ f = Ext≃ (sub-≃-term-wise σ τ (λ i → f (suc i))) (f zero)
+
+sub-from-function-prop : (f : (i : Fin n) → Tm m)
+                       → (i : Fin n)
+                       → Var i [ sub-from-function f ]tm ≃tm f i
+sub-from-function-prop f zero = refl≃tm
+sub-from-function-prop f (suc i) = sub-from-function-prop (λ j → f (suc j)) i

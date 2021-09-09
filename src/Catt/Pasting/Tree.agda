@@ -134,8 +134,7 @@ subst-extendable-≃ (suc n) (Join≃ p q@(Join≃ _ _)) = subst-extendable-≃ 
     γ (Join≃ q r) = trans (subst-Tree (≃-to-same-n q) (≃-to-same-n r) _ _) (cong₂ Join (γ q) (γ r))
 
 subst-pdb-tree : (pdb : Γ ⊢pd[ submax ][ d ]) → (p : Δ ≃c Γ) → pdb-to-tree (subst-pdb pdb p) ≃ pdb-to-tree pdb
-subst-pdb-tree pdb p with ≃c-preserve-length p
-... | refl with ≃c-to-≡ p
+subst-pdb-tree pdb p with ≃c-to-≡ p
 ... | refl = refl≃
 
 pdb-to-tree-extend-pd-eq : (pdb : Γ ⊢pd[ submax ][ d ])

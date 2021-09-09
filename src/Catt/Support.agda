@@ -28,11 +28,9 @@ empty = replicate false
 full : VarSet n
 full = replicate true
 
-ewt : VarSet n → VarSet (suc n)
-ewt xs = true ∷ xs
-
-ewf : VarSet n → VarSet (suc n)
-ewf xs = false ∷ xs
+pattern ewt xs = true ∷ xs
+pattern ewf xs = false ∷ xs
+pattern emp = []
 
 drop : VarSet n → VarSet n
 drop {zero} [] = []
@@ -84,7 +82,7 @@ FVSub ⟨ σ , t ⟩ = FVSub σ ∪ FVTm t
 -- suppTy A = supp (Type A)
 -- suppSub σ = supp (Substitution σ)
 
-data _≃vs_ : VarSet n → VarSet n → Set where
-  ≃VEmp : [] ≃vs []
-  ≃VTrue : ∀ {xs ys : VarSet n} → xs ≃vs ys → ewt xs ≃vs ewt ys
-  ≃VFalse : ∀ {xs ys : VarSet n} → xs ≃vs ys → ewf xs ≃vs ewf ys
+-- data _≃vs_ : VarSet n → VarSet n → Set where
+--   ≃VEmp : [] ≃vs []
+--   ≃VTrue : ∀ {xs ys : VarSet n} → xs ≃vs ys → ewt xs ≃vs ewt ys
+--   ≃VFalse : ∀ {xs ys : VarSet n} → xs ≃vs ys → ewf xs ≃vs ewf ys

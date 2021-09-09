@@ -12,13 +12,14 @@ open import Catt.Globular
 open import Catt.Globular.Properties
 open import Data.Nat
 open import Data.Fin using (Fin;zero;suc;inject₁;toℕ;fromℕ;lower₁)
-open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁)
+open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁;inject₁-injective)
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
 open import Catt.Variables
 open import Relation.Nullary
 open import Data.Sum
 open import Data.Product renaming (_,_ to _,,_)
+open import Data.Empty
 
 susp-ctx-≃ : Γ ≃c Δ → suspCtx Γ ≃c suspCtx Δ
 susp-ty-≃ : A ≃ty B → suspTy A ≃ty suspTy B
@@ -46,25 +47,17 @@ getFst-Lem p = Var≃ (≃c-preserve-length p) (cong (λ - → suc (toℕ (from�
 getSnd-Lem : suspCtx Γ ≃c suspCtx Δ → getSnd {n = ctxLength Γ} ≃tm getSnd {n = ctxLength Δ}
 getSnd-Lem p = Var≃ (≃c-preserve-length p) (cong (λ - → toℕ (inject₁ (fromℕ (pred (pred -))))) (≃c-preserve-length p))
 
-susp-fst-var : (σ : Sub n m) → Var (fromℕ _) [ suspSub σ ]tm ≃tm Var {2 + m} (fromℕ _)
-susp-fst-var ⟨⟩ = refl≃tm
-susp-fst-var ⟨ σ , t ⟩ = susp-fst-var σ
-
-susp-snd-var : (σ : Sub n m) → Var (inject₁ (fromℕ _)) [ suspSub σ ]tm ≃tm Var {2 + m} (inject₁ (fromℕ _))
-susp-snd-var ⟨⟩ = refl≃tm
-susp-snd-var ⟨ σ , t ⟩ = susp-snd-var σ
-
 susp-‼ : (Γ : Ctx n) → (i : Fin (ctxLength Γ)) → suspCtx Γ ‼ inject₁ (inject₁ i) ≃ty suspTy (Γ ‼ i)
 susp-‼ (Γ , A) zero = sym≃ty (susp-ty-lift A)
 susp-‼ (Γ , A) (suc i) = trans≃ty (lift-ty-≃ (susp-‼ Γ i)) (sym≃ty (susp-ty-lift (Γ ‼ i)))
 
 susp-sub-preserve-getFst : (σ : Sub n m) → getFst {n = m} ≃tm getFst [ suspSub σ ]tm
 susp-sub-preserve-getFst ⟨⟩ = refl≃tm
-susp-sub-preserve-getFst ⟨ σ , t ⟩ = trans≃tm (susp-sub-preserve-getFst σ) (sym≃tm (lift-sub-comp-lem-tm {t = suspTm t} (suspSub σ) (getFst)))
+susp-sub-preserve-getFst ⟨ σ , t ⟩ = susp-sub-preserve-getFst σ
 
 susp-sub-preserve-getSnd : (σ : Sub n m) → getSnd {n = m} ≃tm getSnd [ suspSub σ ]tm
 susp-sub-preserve-getSnd ⟨⟩ = refl≃tm
-susp-sub-preserve-getSnd ⟨ σ , t ⟩ = trans≃tm (susp-sub-preserve-getSnd σ) (sym≃tm (lift-sub-comp-lem-tm {t = suspTm t} (suspSub σ) (getSnd)))
+susp-sub-preserve-getSnd ⟨ σ , t ⟩ = susp-sub-preserve-getSnd σ
 
 
 susp-functorial : (σ : Sub m l) → (τ : Sub n m) → suspSub (σ ∘ τ) ≃s suspSub σ ∘ suspSub τ
@@ -104,8 +97,8 @@ suspSub-preserve-focus-ty pdb pdb2 σ = begin
   where
     open Reasoning ty-setoid
 
-suspSub-preserve-focus-tm : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ]) → (σ : Sub (ctxLength Γ) (ctxLength Δ)) → getFocusTerm (Restr (susp-pdb pdb)) [ suspSub σ ]tm ≃tm getFocusTerm (Restr (susp-pdb pdb2))
-suspSub-preserve-focus-tm pdb pdb2 σ = begin
+suspSub-preserve-focus-tm : (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → (σ : Sub (ctxLength Γ) (ctxLength Δ)) → pd-focus-tm (susp-pd pd) [ suspSub σ ]tm ≃tm pd-focus-tm (susp-pd pd2)
+suspSub-preserve-focus-tm (Finish pdb) (Finish pdb2) σ = begin
   < getFocusTerm (Restr (susp-pdb pdb)) [ suspSub σ ]tm >tm ≡⟨⟩
   < ty-tgt (getFocusType (susp-pdb pdb)) [ suspSub σ ]tm >tm ≈⟨ ty-tgt-subbed (getFocusType (susp-pdb pdb)) (suspSub σ) ⟩
   < ty-tgt (getFocusType (susp-pdb pdb) [ suspSub σ ]ty) >tm ≈⟨ ty-tgt-≃ (suspSub-preserve-focus-ty pdb pdb2 σ) ⟩
@@ -118,9 +111,9 @@ lookupHeight-suspCtx : (Γ : Ctx n) → (i : Fin (ctxLength Γ)) → suc (lookup
 lookupHeight-suspCtx (Γ , A) zero = refl
 lookupHeight-suspCtx (Γ , A) (suc i) = lookupHeight-suspCtx Γ i
 
--- inject-susp-sub : (σ : Sub Γ Δ) → (i : Fin (ctxLength Γ)) → Var (inject₁ (inject₁ i)) [ suspSub σ ]tm ≃tm suspTm (Var i [ σ ]tm)
--- inject-susp-sub ⟨ σ , t ⟩ zero = refl≃tm
--- inject-susp-sub ⟨ σ , t ⟩ (suc i) = inject-susp-sub σ i
+inject-susp-sub : (σ : Sub n m) → (i : Fin n) → Var (inject₁ (inject₁ i)) [ suspSub σ ]tm ≃tm suspTm (Var i [ σ ]tm)
+inject-susp-sub ⟨ σ , t ⟩ zero = refl≃tm
+inject-susp-sub ⟨ σ , t ⟩ (suc i) = inject-susp-sub σ i
 
 suspension-vars : (i : Fin (2 + n)) → ((i ≡ fromℕ _) ⊎ (i ≡ inject₁ (fromℕ _))) ⊎ Σ[ j ∈ Fin n ] i ≡ inject₁ (inject₁ j)
 suspension-vars {n = zero} zero = inj₁ (inj₂ refl)
@@ -138,6 +131,45 @@ susp-var-split vs i with suspension-vars i
 ... | inj₂ (j ,, _) with vs j
 ... | inj₁ j = inj₁ (inject₁ (inject₁ j))
 ... | inj₂ j = inj₂ (inject₁ (inject₁ j))
+
+susp-var-split-compat : {vs : VarSplit n m l} → VarSplitCompat σ τ vs → VarSplitCompat (suspSub σ) (suspSub τ) (susp-var-split vs)
+susp-var-split-compat {σ = σ} {τ = τ} {vs = vs} vsc i with suspension-vars i
+... | inj₁ (inj₁ refl) = sym≃tm (susp-sub-preserve-getFst τ)
+... | inj₁ (inj₂ refl) = sym≃tm (susp-sub-preserve-getSnd τ)
+... | inj₂ (j ,, refl) with vs j | vsc j
+... | inj₁ k | p = trans≃tm (inject-susp-sub σ k) (susp-tm-≃ p)
+... | inj₂ k | p = trans≃tm (inject-susp-sub τ k) (susp-tm-≃ p)
+
+module _  where
+  private
+    minus1 : ∀ {n} → Fin (suc (suc n)) → Fin (suc n)
+    minus1 zero = zero
+    minus1 (suc i) = i
+
+    lem : (n : ℕ) → (k : Fin n) → fromℕ n ≢ (inject₁ k)
+    lem zero ()
+    lem (suc n) (suc k) p = lem n k (cong minus1 p)
+
+  susp-var-split-fst : (vs : VarSplit n m l) → susp-var-split vs (fromℕ _) ≡ inj₂ (fromℕ _)
+  susp-var-split-fst {n = n} vs with suspension-vars (fromℕ (suc n))
+  ... | inj₁ (inj₁ x) = refl
+  ... | inj₁ (inj₂ y) = ⊥-elim (lem (suc n) (fromℕ n) y)
+  ... | inj₂ (k ,, p) = ⊥-elim (lem (suc n) (inject₁ k) p)
+
+  susp-var-split-snd : (vs : VarSplit n m l) → susp-var-split vs (inject₁ (fromℕ _)) ≡ inj₂ (inject₁ (fromℕ _))
+  susp-var-split-snd {n = n} vs with suspension-vars (inject₁ (fromℕ n))
+  ... | inj₁ (inj₁ x) = ⊥-elim (lem (suc n) (fromℕ n) (sym x))
+  ... | inj₁ (inj₂ y) = refl
+  ... | inj₂ (k ,, p) = ⊥-elim (lem n k (inject₁-injective p))
+
+  susp-var-split-inject : (vs : VarSplit n m l) → (k : Fin n) → susp-var-split vs (inject₁ (inject₁ k)) ≡ Data.Sum.map (λ - → inject₁ (inject₁ -)) (λ - → inject₁ (inject₁ -)) (vs k)
+  susp-var-split-inject vs k with suspension-vars (inject₁ (inject₁ k))
+  ... | inj₁ (inj₁ x) = ⊥-elim (lem (suc _) (inject₁ k) (sym x))
+  ... | inj₁ (inj₂ y) = ⊥-elim (lem _ k (sym (inject₁-injective y)))
+  ... | inj₂ (j ,, p) with (inject₁-injective (inject₁-injective p))
+  ... | refl with vs j
+  ... | inj₁ x = refl
+  ... | inj₂ y = refl
 
 -- susp-var-split : VarSplit Γ σ τ → VarSplit (suspCtx Γ) (suspSub σ) (suspSub τ)
 -- susp-var-split {Γ = Γ} {σ = σ} {τ = τ} vs i with suc (ctxLength Γ) ≟ toℕ i

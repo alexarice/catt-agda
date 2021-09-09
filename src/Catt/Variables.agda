@@ -26,6 +26,12 @@ isVar : Tm n → Set
 isVar (Var i) = ⊤
 isVar (Coh Δ A σ) = ⊥
 
+getVarFin : (t : Tm n) → .⦃ isVar t ⦄ → Fin n
+getVarFin (Var j) = j
+
+getVarFinProp : (t : Tm n) → .⦃ _ : isVar t ⦄ → t ≃tm Var (getVarFin t)
+getVarFinProp (Var j) = refl≃tm
+
 varToVar : Sub n m → Set
 varToVar ⟨⟩ = ⊤
 varToVar ⟨ σ , Var i ⟩ = varToVar σ
@@ -71,6 +77,14 @@ liftType-preserve-is-globular (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = liftTerm-
 id-is-var-to-var : (n : ℕ) → varToVar (idSub n)
 id-is-var-to-var zero = tt
 id-is-var-to-var (suc n) = liftSub-preserve-var-to-var (idSub n) ⦃ id-is-var-to-var n ⦄
+
+varToVarFunction-lift : (σ : Sub n m) → .⦃ _ : varToVar σ ⦄ → (i : Fin n) → varToVarFunction (liftSub σ) ⦃ liftSub-preserve-var-to-var σ ⦄ i ≡ suc (varToVarFunction σ i)
+varToVarFunction-lift ⟨ σ , Var j ⟩ zero = refl
+varToVarFunction-lift ⟨ σ , Var j ⟩ (suc i) = varToVarFunction-lift σ i
+
+varToVarFunction-idSub : (n : ℕ) → (i : Fin n) → varToVarFunction (idSub n) ⦃ id-is-var-to-var n ⦄ i ≡ i
+varToVarFunction-idSub (suc n) zero = refl
+varToVarFunction-idSub (suc n) (suc i) = trans (varToVarFunction-lift (idSub n) ⦃ id-is-var-to-var n ⦄ i) (cong suc (varToVarFunction-idSub n i))
 
 extend-var-to-var : (σ : Sub n m) → ⦃ varToVar σ ⦄ → (t : Tm m) → .⦃ isVar t ⦄ → varToVar ⟨ σ , t ⟩
 extend-var-to-var σ ⦃ v ⦄ (Var i) = v

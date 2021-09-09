@@ -28,13 +28,13 @@ refl≈s : σ ≈s σ
 refl≈c {Γ = ∅} = Emp≈
 refl≈c {Γ = Γ , A} = Add≈ refl≈c refl≈ty
 
-refl≈ty {A = ⋆} = Star≈ refl
+refl≈ty {A = ⋆} = Star≈
 refl≈ty {A = s ─⟨ A ⟩⟶ t} = Arr≈ refl≈tm refl≈ty refl≈tm
 
-refl≈tm {t = Var i} = Var≈ refl refl
+refl≈tm {t = Var i} = Var≈ refl
 refl≈tm {t = Coh Δ A σ} = Coh≈ refl≈c refl≈ty refl≈s
 
-refl≈s {σ = ⟨⟩} = Null≈ refl
+refl≈s {σ = ⟨⟩} = Null≈
 refl≈s {σ = ⟨ σ , t ⟩} = Ext≈ refl≈s refl≈tm
 
 reflexive≈c : Γ ≃c Δ → Γ ≈c Δ
@@ -45,13 +45,14 @@ reflexive≈s : σ ≃s τ → σ ≈s τ
 reflexive≈c Emp≃ = Emp≈
 reflexive≈c (Add≃ eq x) = Add≈ (reflexive≈c eq) (reflexive≈ty x)
 
-reflexive≈ty (Star≃ x) = Star≈ x
+reflexive≈ty (Star≃ x) = Star≈
 reflexive≈ty (Arr≃ p q r) = Arr≈ (reflexive≈tm p) (reflexive≈ty q) (reflexive≈tm r)
 
-reflexive≈tm (Var≃ x y) = Var≈ x y
-reflexive≈tm (Coh≃ p q r) = Coh≈ (reflexive≈c p) (reflexive≈ty q) (reflexive≈s r)
+reflexive≈tm (Var≃ x y) = Var≈ y
+reflexive≈tm (Coh≃ p q r) with ≃c-preserve-length p
+... | refl = Coh≈ (reflexive≈c p) (reflexive≈ty q) (reflexive≈s r)
 
-reflexive≈s (Null≃ x) = Null≈ x
+reflexive≈s (Null≃ x) = Null≈
 reflexive≈s (Ext≃ eq x) = Ext≈ (reflexive≈s eq) (reflexive≈tm x)
 
 sym≈c : Γ ≈c Δ → Δ ≈c Γ
@@ -62,12 +63,12 @@ sym≈s : σ ≈s τ → τ ≈s σ
 sym≈c Emp≈ = Emp≈
 sym≈c (Add≈ eq x) = Add≈ (sym≈c eq) (sym≈ty x)
 
-sym≈ty (Star≈ x) = Star≈ (sym x)
+sym≈ty Star≈ = Star≈
 sym≈ty (Arr≈ p q r) = Arr≈ (sym≈tm p) (sym≈ty q) (sym≈tm r)
 
 sym≈tm eq = Sym≈ eq
 
-sym≈s (Null≈ x) = Null≈ (sym x)
+sym≈s Null≈ = Null≈
 sym≈s (Ext≈ eq x) = Ext≈ (sym≈s eq) (sym≈tm x)
 
 trans≈c : Γ ≈c Δ → Δ ≈c Υ → Γ ≈c Υ
@@ -78,57 +79,57 @@ trans≈s : σ ≈s τ → τ ≈s μ → σ ≈s μ
 trans≈c Emp≈ Emp≈ = Emp≈
 trans≈c (Add≈ eq x) (Add≈ eq′ y) = Add≈ (trans≈c eq eq′) (trans≈ty x y)
 
-trans≈ty (Star≈ x) (Star≈ y) = Star≈ (trans x y)
+trans≈ty Star≈ Star≈ = Star≈
 trans≈ty (Arr≈ p q r) (Arr≈ p′ q′ r′) = Arr≈ (trans≈tm p p′) (trans≈ty q q′) (trans≈tm r r′)
 
 trans≈tm eq eq′ = Trans≈ eq eq′
 
-trans≈s (Null≈ x) (Null≈ y) = Null≈ (trans x y)
+trans≈s Null≈ Null≈ = Null≈
 trans≈s (Ext≈ eq x) (Ext≈ eq′ y) = Ext≈ (trans≈s eq eq′) (trans≈tm x y)
 
-ctx-setoid-≈ : Setoid _ _
-ctx-setoid-≈ = record { Carrier = CTX
-                    ; _≈_ = λ x y → ctx x ≈c ctx y
-                    ; isEquivalence = record { refl = refl≈c
-                                             ; sym = sym≈c
-                                             ; trans = trans≈c
-                                             }
-                    }
+-- ctx-setoid-≈ : Setoid _ _
+-- ctx-setoid-≈ = record { Carrier = CTX
+--                     ; _≈_ = λ x y → ctx x ≈c ctx y
+--                     ; isEquivalence = record { refl = refl≈c
+--                                              ; sym = sym≈c
+--                                              ; trans = trans≈c
+--                                              }
+--                     }
 
-ty-setoid-≈ : Setoid _ _
-ty-setoid-≈ = record { Carrier = TY
-                    ; _≈_ = λ x y → ty x ≈ty ty y
-                    ; isEquivalence = record { refl = refl≈ty
-                                             ; sym = sym≈ty
-                                             ; trans = trans≈ty
-                                             }
-                    }
+-- ty-setoid-≈ : Setoid _ _
+-- ty-setoid-≈ = record { Carrier = TY
+--                     ; _≈_ = λ x y → ty x ≈ty ty y
+--                     ; isEquivalence = record { refl = refl≈ty
+--                                              ; sym = sym≈ty
+--                                              ; trans = trans≈ty
+--                                              }
+--                     }
 
-tm-setoid-≈ : Setoid _ _
-tm-setoid-≈ = record { Carrier = TM
-                    ; _≈_ = λ x y → tm x ≈tm tm y
-                    ; isEquivalence = record { refl = refl≈tm
-                                             ; sym = sym≈tm
-                                             ; trans = trans≈tm
-                                             }
-                    }
+-- tm-setoid-≈ : Setoid _ _
+-- tm-setoid-≈ = record { Carrier = TM
+--                     ; _≈_ = λ x y → tm x ≈tm tm y
+--                     ; isEquivalence = record { refl = refl≈tm
+--                                              ; sym = sym≈tm
+--                                              ; trans = trans≈tm
+--                                              }
+--                     }
 
-sub-setoid-≈ : Setoid _ _
-sub-setoid-≈ = record { Carrier = SUB
-                    ; _≈_ = λ x y → sub x ≈s sub y
-                    ; isEquivalence = record { refl = refl≈s
-                                             ; sym = sym≈s
-                                             ; trans = trans≈s
-                                             }
-                    }
+-- sub-setoid-≈ : Setoid _ _
+-- sub-setoid-≈ = record { Carrier = SUB
+--                     ; _≈_ = λ x y → sub x ≈s sub y
+--                     ; isEquivalence = record { refl = refl≈s
+--                                              ; sym = sym≈s
+--                                              ; trans = trans≈s
+--                                              }
+--                     }
 
-≈c-preserve-len : Γ ≈c Δ → ctxLength Γ ≡ ctxLength Δ
-≈c-preserve-len Emp≈ = refl
-≈c-preserve-len (Add≈ p x) = cong suc (≈c-preserve-len p)
+-- ≈c-preserve-len : Γ ≈c Δ → ctxLength Γ ≡ ctxLength Δ
+-- ≈c-preserve-len Emp≈ = refl
+-- ≈c-preserve-len (Add≈ p x) = cong suc (≈c-preserve-len p)
 
-≈s-to-codomain-≡ : {σ : Sub n m} → {τ : Sub n′ m′} → σ ≈s τ → m ≡ m′
-≈s-to-codomain-≡ (Null≈ x) = x
-≈s-to-codomain-≡ (Ext≈ p x) = ≈s-to-codomain-≡ p
+-- ≈s-to-codomain-≡ : {σ : Sub n m} → {τ : Sub n′ m′} → σ ≈s τ → m ≡ m′
+-- ≈s-to-codomain-≡ (Null≈ x) = x
+-- ≈s-to-codomain-≡ (Ext≈ p x) = ≈s-to-codomain-≡ p
 
 -- pd-dim-lem : Δ ⊢pd₀ d → Δ ⊢pd₀ pred (ctx-dim Δ)
 -- pd-dim-lem pd with cong pred (sym (pd-dim-is-ctx-dim pd))

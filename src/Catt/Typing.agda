@@ -22,10 +22,10 @@ private
   Index : Set
   Index = Fin index
 
-data _≈c_ : (Γ : Ctx m) → (Δ : Ctx m′) → Set
-data _≈tm_ : Tm n → Tm m → Set
-data _≈ty_ : Ty n d → Ty m d′ → Set
-data _≈s_ : (σ : Sub n m) → (τ : Sub n′ m′) → Set
+data _≈c_ : (Γ : Ctx m) → (Δ : Ctx m) → Set
+data _≈tm_ : Tm n → Tm n → Set
+data _≈ty_ : Ty n d → Ty n d′ → Set
+data _≈s_ : (σ : Sub n m) → (τ : Sub n m) → Set
 data Typing-Ctx : (Γ : Ctx m) → Set
 data Typing-Tm : (Γ : Ctx m) → Tm m → Ty m d → Set
 data Typing-Ty : (Γ : Ctx m) → Ty m d → Set
@@ -36,7 +36,7 @@ data _≈c_ where
   Add≈ : Γ ≈c Γ′ → A ≈ty A′ → (Γ , A) ≈c (Γ′ , A′)
 
 data _≈tm_ where
-  Var≈ : n ≡ m → {i : Fin n} → {j : Fin m} → (toℕ i ≡ toℕ j) → (Var i) ≈tm (Var j)
+  Var≈ : {i j : Fin n} → (toℕ i ≡ toℕ j) → (Var i) ≈tm (Var j)
   Sym≈ : s ≈tm t → t ≈tm s
   Trans≈ : s ≈tm t → t ≈tm u → s ≈tm u
   Coh≈ : Δ ≈c Γ → A ≈ty B → σ ≈s τ → (Coh Δ A σ) ≈tm (Coh Γ B τ)
@@ -47,11 +47,11 @@ data _≈tm_ where
         → (rule i .lhs a) ≈tm (rule i .rhs a)
 
 data _≈ty_ where
-  Star≈ : n ≡ m → (⋆ {n = n}) ≈ty (⋆ {n = m})
+  Star≈ : (⋆ {n = n}) ≈ty ⋆
   Arr≈ : s ≈tm s′ → A ≈ty A′ → t ≈tm t′ → (s ─⟨ A ⟩⟶ t) ≈ty (s′ ─⟨ A′ ⟩⟶ t′)
 
 data _≈s_ where
-  Null≈ : n ≡ m → ⟨⟩ {n = n} ≈s ⟨⟩ {n = m}
+  Null≈ : ⟨⟩ {n = n} ≈s ⟨⟩
   Ext≈ : σ ≈s τ → s ≈tm t → ⟨ σ , s ⟩ ≈s ⟨ τ , t ⟩
 
 data Typing-Ctx where

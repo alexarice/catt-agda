@@ -37,17 +37,17 @@ lift-tm-typing (TyComp {s = s} {A = A} {t = t} pd p q r u v) = TyComp pd p (lift
 lift-sub-typing TyNull = TyNull
 lift-sub-typing (TyExt p q r) = TyExt (lift-sub-typing p) q (term-conversion (lift-tm-typing r) (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ _ _))))
 
-lift-ty-equality (Star≈ x) = Star≈ (cong suc x)
+lift-ty-equality Star≈ = Star≈
 lift-ty-equality (Arr≈ q r s) = Arr≈ (lift-tm-equality q) (lift-ty-equality r) (lift-tm-equality s)
 
-lift-tm-equality (Var≈ x y) = Var≈ (cong suc x) (cong suc y)
+lift-tm-equality (Var≈ x) = Var≈ (cong suc x)
 lift-tm-equality (Sym≈ eq) = Sym≈ (lift-tm-equality eq)
 lift-tm-equality (Trans≈ eq eq′) = Trans≈ (lift-tm-equality eq) (lift-tm-equality eq′)
 
 lift-tm-equality (Coh≈ q r s) = Coh≈ q r (lift-sub-equality s)
 lift-tm-equality (Rule≈ i a tc eqt) = props i .lift-rule a (λ j {A} → lift-tm-typing (tc j)) λ j → lift-tm-equality (eqt j)
 
-lift-sub-equality (Null≈ x) = Null≈ (cong suc x)
+lift-sub-equality Null≈ = Null≈
 lift-sub-equality (Ext≈ eq x) = Ext≈ (lift-sub-equality eq) (lift-tm-equality x)
 
 apply-sub-ty-typing : Typing-Ty Γ A → Typing-Sub Γ Δ σ → Typing-Ty Δ (A [ σ ]ty)
@@ -69,9 +69,13 @@ apply-sub-ty-eq : A ≈ty B → A [ σ ]ty ≈ty B [ σ ]ty
 apply-sub-tm-eq : s ≈tm t → s [ σ ]tm ≈tm t [ σ ]tm
 apply-sub-sub-eq : τ ≈s μ → σ ∘ τ ≈s σ ∘ μ
 
-apply-sub-ty-eq (Star≈ x) = Star≈ refl
+apply-sub-ty-eq Star≈ = Star≈
 apply-sub-ty-eq (Arr≈ p q r) = Arr≈ (apply-sub-tm-eq p) (apply-sub-ty-eq q) (apply-sub-tm-eq r)
 
-apply-sub-tm-eq p = {!!}
+apply-sub-tm-eq (Var≈ x) = ?
+apply-sub-tm-eq (Sym≈ p) = ?
+apply-sub-tm-eq (Trans≈ p p₁) = ?
+apply-sub-tm-eq (Coh≈ x x₁ x₂) = ?
+apply-sub-tm-eq (Rule≈ i a tct₁ eqt) = ?
 
 apply-sub-sub-eq p = {!!}

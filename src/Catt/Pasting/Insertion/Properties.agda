@@ -709,3 +709,31 @@ sub-from-insertion-susp S P T σ τ
       < suspTm (sub-from-insertion-func S P T σ τ k) >tm ≈˘⟨ susp-tm-≃ (sub-from-function-prop (sub-from-insertion-func S P T σ τ) k) ⟩
       < suspTm (Var k [ sub-from-insertion S P T σ τ ]tm) >tm ≈˘⟨ inject-susp-sub (sub-from-insertion S P T σ τ) k ⟩
       < Var (inject₁ (inject₁ k)) [ suspSub (sub-from-insertion S P T σ τ) ]tm >tm ∎
+
+sub-from-insertion-sub : (S : Tree n)
+                        → (P : Path S)
+                        → .⦃ bp : is-branching-path P ⦄
+                        → (T : Tree m)
+                        → .⦃ lh : has-linear-height (path-length P) T ⦄
+                        → (σ : Sub (suc n) l)
+                        → (τ : Sub (suc m) l)
+                        → (μ : Sub l l′)
+                        → sub-from-insertion S P T (μ ∘ σ) (μ ∘ τ) ≃s μ ∘ sub-from-insertion S P T σ τ
+sub-from-insertion-sub S P T σ τ μ = sub-≃-term-wise (sub-from-insertion S P T (μ ∘ σ) (μ ∘ τ)) (μ ∘ sub-from-insertion S P T σ τ) λ i → begin
+  < Var i [ sub-from-insertion S P T (μ ∘ σ) (μ ∘ τ) ]tm >tm ≈⟨ sub-from-function-prop (sub-from-insertion-func S P T (μ ∘ σ) (μ ∘ τ)) i ⟩
+  < sub-from-insertion-func S P T (μ ∘ σ) (μ ∘ τ) i >tm ≈⟨ lem i ⟩
+  < sub-from-insertion-func S P T σ τ i [ μ ]tm >tm ≈˘⟨ sub-action-≃-tm (sub-from-function-prop (sub-from-insertion-func S P T σ τ) i) refl≃s ⟩
+  < Var i [ sub-from-insertion S P T σ τ ]tm
+          [ μ ]tm >tm
+    ≈˘⟨ assoc-tm μ (sub-from-insertion S P T σ τ) (Var i) ⟩
+  < Var i [ μ ∘ sub-from-insertion S P T σ τ ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+
+    lem : (i : Fin (suc (insertion-tree-size S P T)))
+        → sub-from-insertion-func S P T (μ ∘ σ) (μ ∘ τ) i
+            ≃tm
+          sub-from-insertion-func S P T σ τ i [ μ ]tm
+    lem i with insertion-var-split S P T i
+    ... | inj₁ j = assoc-tm μ σ (Var j)
+    ... | inj₂ j = assoc-tm μ τ (Var j)

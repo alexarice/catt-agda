@@ -22,46 +22,50 @@ private
   Index : Set
   Index = Fin index
 
-data _≈c_ : (Γ : Ctx m) → (Δ : Ctx m) → Set
-data _≈tm_ : Tm n → Tm n → Set
-data _≈ty_ : Ty n d → Ty n d′ → Set
-data _≈s_ : (σ : Sub n m) → (τ : Sub n m) → Set
+-- data _≈c_ : (Γ : Ctx m) → (Δ : Ctx m) → Set
+data _≈[_]tm_ : Tm n → Ctx n → Tm n → Set
+data _≈[_]ty_ : Ty n d → Ctx n → Ty n d′ → Set
+data _≈[_]s_ : (σ : Sub n m) → Ctx m → (τ : Sub n m) → Set
 data Typing-Ctx : (Γ : Ctx m) → Set
 data Typing-Tm : (Γ : Ctx m) → Tm m → Ty m d → Set
 data Typing-Ty : (Γ : Ctx m) → Ty m d → Set
 data Typing-Sub : (Γ : Ctx m) → (Δ : Ctx n) → Sub m n → Set
 
-data _≈c_ where
-  Emp≈ : ∅ ≈c ∅
-  Add≈ : Γ ≈c Γ′ → A ≈ty A′ → (Γ , A) ≈c (Γ′ , A′)
+-- data _≈c_ where
+--   Emp≈ : ∅ ≈c ∅
+--   Add≈ : Γ ≈c Γ′ → A ≈ty A′ → (Γ , A) ≈c (Γ′ , A′)
 
-data _≈tm_ where
-  Var≈ : {i j : Fin n} → (toℕ i ≡ toℕ j) → (Var i) ≈tm (Var j)
-  Sym≈ : s ≈tm t → t ≈tm s
-  Trans≈ : s ≈tm t → t ≈tm u → s ≈tm u
-  Coh≈ : Δ ≈c Γ → A ≈ty B → σ ≈s τ → (Coh Δ A σ) ≈tm (Coh Γ B τ)
+data _≈[_]tm_ where
+  Var≈ : {i j : Fin n} → (toℕ i ≡ toℕ j) → (Var i) ≈[ Γ ]tm (Var j)
+  Sym≈ : s ≈[ Γ ]tm t → t ≈[ Γ ]tm s
+  Trans≈ : s ≈[ Γ ]tm t → t ≈[ Γ ]tm u → s ≈[ Γ ]tm u
+  Coh≈ : A ≈[ Δ ]ty B → σ ≈[ Γ ]s τ → (Coh Δ A σ) ≈[ Γ ]tm (Coh Δ B τ)
   Rule≈ : (i : Index)
         → (a : rule i .Args)
-        → (tct : (j : (tctIndex (rule i))) → Typing-Tm (rule i .tctCtx j a) (rule i .tct j a) (rule i .tctTy j a))
-        → (eqt : (j : eqtIndex (rule i)) → (rule i .eqtlhs j a) ≈tm (rule i .eqtrhs j a))
-        → (rule i .lhs a) ≈tm (rule i .rhs a)
+        → (eqt : (j : eqtIndex (rule i)) → (rule i .eqtlhs j a) ≈[ rule i .eqtCtx j a ]tm (rule i .eqtrhs j a))
+        → {C : Ty (rule i .len a) d}
+        → Typing-Tm (rule i .tgtCtx a) (rule i .lhs a) C
+        → (rule i .lhs a) ≈[ rule i .tgtCtx a ]tm (rule i .rhs a)
 
-data _≈ty_ where
-  Star≈ : (⋆ {n = n}) ≈ty ⋆
-  Arr≈ : s ≈tm s′ → A ≈ty A′ → t ≈tm t′ → (s ─⟨ A ⟩⟶ t) ≈ty (s′ ─⟨ A′ ⟩⟶ t′)
+data _≈[_]ty_ where
+  Star≈ : (⋆ {n = n}) ≈[ Γ ]ty ⋆
+  Arr≈ : s ≈[ Γ ]tm s′ → A ≈[ Γ ]ty A′ → t ≈[ Γ ]tm t′ → (s ─⟨ A ⟩⟶ t) ≈[ Γ ]ty (s′ ─⟨ A′ ⟩⟶ t′)
 
-data _≈s_ where
-  Null≈ : ⟨⟩ {n = n} ≈s ⟨⟩
-  Ext≈ : σ ≈s τ → s ≈tm t → ⟨ σ , s ⟩ ≈s ⟨ τ , t ⟩
+data _≈[_]s_ where
+  Null≈ : ⟨⟩ {n = n} ≈[ Δ ]s ⟨⟩
+  Ext≈ : σ ≈[ Δ ]s τ → s ≈[ Δ ]tm t → ⟨ σ , s ⟩ ≈[ Δ ]s ⟨ τ , t ⟩
 
 data Typing-Ctx where
   TyEmp : Typing-Ctx ∅
   TyAdd : Typing-Ctx Γ → Typing-Ty Γ A → Typing-Ctx (Γ , A)
 
 data Typing-Tm where
-  TyVar : {Γ : Ctx n} → (i : Fin n) → {B : Ty n d} → (Γ ‼ i) ≈ty B → Typing-Tm Γ (Var i) B
-  TyCoh : Δ ⊢pd₀ d → Typing-Ty Δ A → Typing-Sub Δ Γ σ → FVTy A ≡ full → (A [ σ ]ty) ≈ty B → Typing-Tm Γ (Coh Δ A σ) B
-  TyComp : (pd : Δ ⊢pd₀ (suc d)) → Typing-Ty Δ (s ─⟨ A ⟩⟶ t) → Typing-Sub Δ Γ σ → FVTy A ∪ FVTm s ≡ supp-src pd → FVTy A ∪ FVTm t ≡ supp-tgt pd → ((s ─⟨ A ⟩⟶ t) [ σ ]ty) ≈ty B → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ t) σ) B
+  -- TyVar : {Γ : Ctx n} → (i : Fin n) → {B : Ty n d} → (Γ ‼ i) ≈[ Γ ]ty B → Typing-Tm Γ (Var i) B
+  TyVarZ : liftType A ≈[ Γ , A ]ty B → Typing-Tm (Γ , A) 0V B
+  TyVarS : (i : Fin (ctxLength Γ)) → Typing-Tm Γ (Var i) A → liftType A ≈[ Γ , C ]ty B → Typing-Tm (Γ , C) (Var (suc i)) B
+  TyCoh : Δ ⊢pd₀ d → Typing-Ty Δ A → Typing-Sub Δ Γ σ → FVTy A ≡ full → (A [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh Δ A σ) B
+  TyComp : (pd : Δ ⊢pd₀ (suc d)) → Typing-Ty Δ (s ─⟨ A ⟩⟶ t) → Typing-Sub Δ Γ σ → FVTy A ∪ FVTm s ≡ supp-src pd → FVTy A ∪ FVTm t ≡ supp-tgt pd → ((s ─⟨ A ⟩⟶ t) [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ t) σ) B
+  -- TyConv : Typing-Tm Γ t A → A ≈[ Γ ]ty B → Typing-Tm Γ t B
 
 data Typing-Ty where
   TyStar : Typing-Ty Γ ⋆
@@ -69,4 +73,4 @@ data Typing-Ty where
 
 data Typing-Sub where
   TyNull : Typing-Sub ∅ Δ ⟨⟩
-  TyExt : Typing-Sub Γ Δ σ → Typing-Ty Γ A → Typing-Tm Δ t (A [ σ ]ty) → Typing-Sub (Γ , A) Δ ⟨ σ , t ⟩
+  TyExt : Typing-Sub Γ Δ σ → Typing-Tm Δ t (A [ σ ]ty) → Typing-Sub (Γ , A) Δ ⟨ σ , t ⟩

@@ -111,25 +111,27 @@ suspSuppSrc (Finish pdb) = suspSuppSrcPdb pdb
 suspSuppTgt : (pd : Γ ⊢pd₀ (suc d)) → suspSupp (supp-tgt pd) ≡ supp-tgt (susp-pd pd)
 suspSuppTgt (Finish pdb) = suspSuppTgtPdb pdb
 
-suspCtxTy : Typing-Ctx Γ → Typing-Ctx (suspCtx Γ)
+-- suspCtxTy : Typing-Ctx Γ → Typing-Ctx (suspCtx Γ)
 suspTyTy : Typing-Ty Γ A → Typing-Ty (suspCtx Γ) (suspTy A)
 suspTmTy : Typing-Tm Γ t A → Typing-Tm (suspCtx Γ) (suspTm t) (suspTy A)
 suspSubTy : Typing-Sub Γ Δ σ → Typing-Sub (suspCtx Γ) (suspCtx Δ) (suspSub σ)
 getFstTy : {Γ : Ctx n} → Typing-Tm (suspCtx Γ) (getFst) ⋆
 getSndTy : {Γ : Ctx n} → Typing-Tm (suspCtx Γ) (getSnd) ⋆
 
-suspCtxEq : Γ ≈c Δ → suspCtx Γ ≈c suspCtx Δ
-suspTyEq : A ≈ty B → suspTy A ≈ty suspTy B
-suspTmEq : s ≈tm t → suspTm s ≈tm suspTm t
-suspSubEq : σ ≈s τ → suspSub σ ≈s suspSub τ
+-- suspCtxEq : Γ ≈c Δ → suspCtx Γ ≈c suspCtx Δ
+suspTyEq : A ≈[ Γ ]ty B → suspTy A ≈[ suspCtx Γ ]ty suspTy B
+suspTmEq : s ≈[ Γ ]tm t → suspTm s ≈[ suspCtx Γ ]tm suspTm t
+suspSubEq : σ ≈[ Γ ]s τ → suspSub σ ≈[ suspCtx Γ ]s suspSub τ
 
-suspCtxTy TyEmp = TyAdd (TyAdd TyEmp TyStar) TyStar
-suspCtxTy (TyAdd ty x) = TyAdd (suspCtxTy ty) (suspTyTy x)
+-- suspCtxTy TyEmp = TyAdd (TyAdd TyEmp TyStar) TyStar
+-- suspCtxTy (TyAdd ty x) = TyAdd (suspCtxTy ty) (suspTyTy x)
 
 suspTyTy TyStar = TyArr getFstTy TyStar getSndTy
 suspTyTy (TyArr p q r) = TyArr (suspTmTy p) (suspTyTy q) (suspTmTy r)
 
-suspTmTy {Γ = Γ} (TyVar i x) = TyVar (inject₁ (inject₁ i)) (trans≈ty (reflexive≈ty (susp-‼ Γ i)) (suspTyEq x))
+-- suspTmTy {Γ = Γ} (TyVar i x) = TyVar (inject₁ (inject₁ i)) (trans≈ty (reflexive≈ty (susp-‼ Γ i)) (suspTyEq x))
+suspTmTy (TyVarZ x) = TyVarZ (trans≈ty (reflexive≈ty (sym≃ty (susp-ty-lift _))) (suspTyEq x))
+suspTmTy (TyVarS i tvi x) = TyVarS (inject₁ (inject₁ i)) (suspTmTy tvi) (trans≈ty (reflexive≈ty (sym≃ty (susp-ty-lift _))) (suspTyEq x))
 suspTmTy (TyCoh {A = A} p q r s t) = TyCoh (susp-pd p) (suspTyTy q) (suspSubTy r) (lem) (trans≈ty (reflexive≈ty (sym≃ty (susp-functorial-ty _ _))) (suspTyEq t))
   where
     open ≡-Reasoning
@@ -160,23 +162,23 @@ suspTmTy (TyComp {s = s} {A = A} {t = t} {σ = σ} pd p q r x y) = TyComp (susp-
 suspSubTy TyNull = TyExt (TyExt TyNull TyStar getFstTy) TyStar getSndTy
 suspSubTy (TyExt p q r) = TyExt (suspSubTy p) (suspTyTy q) (term-conversion (suspTmTy r) (reflexive≈ty (susp-functorial-ty _ _)))
 
-getFstTy {Γ = ∅} = TyVar (suc zero) (Star≈ refl)
+getFstTy {Γ = ∅} = TyVarS zero (TyVarZ Star≈) Star≈
 getFstTy {Γ = Γ , A} = lift-tm-typing getFstTy
 
-getSndTy {Γ = ∅} = TyVar zero (Star≈ refl)
+getSndTy {Γ = ∅} = TyVarZ Star≈
 getSndTy {Γ = Γ , A} = lift-tm-typing getSndTy
 
-suspCtxEq Emp≈ = refl≈c
-suspCtxEq (Add≈ eq x) = Add≈ (suspCtxEq eq) (suspTyEq x)
+-- suspCtxEq Emp≈ = refl≈c
+-- suspCtxEq (Add≈ eq x) = Add≈ (suspCtxEq eq) (suspTyEq x)
 
-suspTyEq (Star≈ refl) = refl≈ty
+suspTyEq Star≈ = refl≈ty
 
 suspTyEq (Arr≈ q r s) = Arr≈ (suspTmEq q) (suspTyEq r) (suspTmEq s)
 
-suspTmEq (Var≈ x y) = Var≈ (cong suc (cong suc x)) (begin
+suspTmEq (Var≈ x) = Var≈ (begin
   toℕ (inject₁ (inject₁ _)) ≡⟨ toℕ-inject₁ (inject₁ _) ⟩
   toℕ (inject₁ _) ≡⟨ toℕ-inject₁ _ ⟩
-  toℕ _ ≡⟨ y ⟩
+  toℕ _ ≡⟨ x ⟩
   toℕ _ ≡˘⟨ toℕ-inject₁ _ ⟩
   toℕ (inject₁ _) ≡˘⟨ toℕ-inject₁ (inject₁ _) ⟩
   toℕ (inject₁ (inject₁ _)) ∎)
@@ -184,8 +186,8 @@ suspTmEq (Var≈ x y) = Var≈ (cong suc (cong suc x)) (begin
     open ≡-Reasoning
 suspTmEq (Sym≈ eq) = Sym≈ (suspTmEq eq)
 suspTmEq (Trans≈ eq eq′) = Trans≈ (suspTmEq eq) (suspTmEq eq′)
-suspTmEq (Coh≈ p q r) = Coh≈ (suspCtxEq p) (suspTyEq q) (suspSubEq r)
-suspTmEq (Rule≈ i a tct eqt) = props i .susp-rule a (λ j → suspTmTy (tct j)) (λ j → suspTmEq (eqt j))
+suspTmEq (Coh≈ q r) = Coh≈ (suspTyEq q) (suspSubEq r)
+suspTmEq (Rule≈ i a eqt tc) = props i .susp-rule a (λ j → suspTmEq (eqt j)) (suspTmTy tc)
 
-suspSubEq (Null≈ refl) = refl≈s
+suspSubEq Null≈ = refl≈s
 suspSubEq (Ext≈ p x) = Ext≈ (suspSubEq p) (suspTmEq x)

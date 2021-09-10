@@ -22,6 +22,14 @@ record TY : Set where
 
 open TY public
 
+record TY′ (n : ℕ) : Set where
+  constructor <_>ty′
+  field
+    {ty-d′} : ℕ
+    ty′ : Ty n ty-d′
+
+open TY′ public
+
 record TM : Set where
   constructor <_>tm
   field

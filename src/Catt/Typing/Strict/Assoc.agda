@@ -33,16 +33,12 @@ record InsertionData : Set where
     id-d : ℕ
     id-A : Ty (suc id-n) id-d
     id-σ : Sub (suc id-n) id-l
-    id-d′ : ℕ
-    id-C : Ty id-l id-d′
     id-P : Path id-S
     .⦃ id-bp ⦄ : is-branching-path id-P
     id-m : ℕ
     id-T : Tree id-m
     id-B : Ty (suc id-m) (height-of-branching id-P)
     id-τ : Sub (suc id-m) id-l
-    id-d″ : ℕ
-    id-D : Ty id-l id-d″
     .⦃ id-lh ⦄ : has-linear-height (path-length id-P) id-T
     .⦃ id-tlh ⦄ : type-has-linear-height (path-length id-P) id-T id-B
 
@@ -50,24 +46,24 @@ module _ where
   open InsertionData
   insertionRule : Rule
   insertionRule .Args = InsertionData
-  insertionRule .tctCount = 2
+  -- insertionRule .tctCount = 2
   insertionRule .eqtCount = 1
-  insertionRule .tgtHeight zero a = a .id-d′
-  insertionRule .tgtHeight (suc i) a = a .id-d″
-  insertionRule .tctLen zero a = a .id-l
-  insertionRule .tctLen (suc i) a = a .id-l
-  insertionRule .tct zero a = Coh (tree-to-ctx (a .id-S)) (a .id-A) (a .id-σ)
-  insertionRule .tct (suc i) a = Coh (tree-to-ctx (a .id-T)) (a .id-B) (a .id-τ)
-  insertionRule .tctTy zero a = a .id-C
-  insertionRule .tctTy (suc i) a = a .id-D
-  insertionRule .tctCtx zero a = a .id-Γ
-  insertionRule .tctCtx (suc i) a = a .id-Γ
-  insertionRule .eqtlhsLen zero a = a .id-l
+  -- insertionRule .tgtHeight zero a = a .id-d′
+  -- insertionRule .tgtHeight (suc i) a = a .id-d″
+  -- insertionRule .tctLen zero a = a .id-l
+  -- insertionRule .tctLen (suc i) a = a .id-l
+  -- insertionRule .tct zero a = Coh (tree-to-ctx (a .id-S)) (a .id-A) (a .id-σ)
+  -- insertionRule .tct (suc i) a = Coh (tree-to-ctx (a .id-T)) (a .id-B) (a .id-τ)
+  -- insertionRule .tctTy zero a = a .id-C
+  -- insertionRule .tctTy (suc i) a = a .id-D
+  -- insertionRule .tctCtx zero a = a .id-Γ
+  -- insertionRule .tctCtx (suc i) a = a .id-Γ
+  insertionRule .eqtLen zero a = a .id-l
+  insertionRule .eqtCtx zero a = a .id-Γ
   insertionRule .eqtlhs zero a = branching-path-to-var (a .id-S) (a .id-P) [ a .id-σ ]tm
-  insertionRule .eqtrhsLen zero a = a .id-l
   insertionRule .eqtrhs zero a = Coh (tree-to-ctx (a .id-T)) (a .id-B) (a .id-τ)
-  insertionRule .lhsLen a = a .id-l
-  insertionRule .rhsLen a = a .id-l
+  insertionRule .len a = a .id-l
+  insertionRule .tgtCtx a = a .id-Γ
   insertionRule .lhs a = Coh (tree-to-ctx (a .id-S)) (a .id-A) (a .id-σ)
   insertionRule .rhs a = Coh (tree-to-ctx (insertion-tree (a .id-S) (a .id-P) (a .id-T)))
                              (a .id-A [ exterior-sub (a .id-S) (a .id-P) (a .id-T) (a .id-B) ]ty)
@@ -79,33 +75,27 @@ module _ where
                    → (σ : Sub (suc n) l)
                    → (P : Path S)
                    → .⦃ bp : is-branching-path P ⦄
-                   → (C : Ty l d′)
                    → (T : Tree m)
                    → (B : Ty (suc m) (height-of-branching P))
                    → (τ : Sub (suc m) l)
                    → .⦃ lh : has-linear-height (path-length P) T ⦄
                    → .⦃ tlh : type-has-linear-height (path-length P) T B ⦄
-                   → (D : Ty l d″)
                    → InsertionData
-  insertionBuilder Γ S A σ P C T B τ D .id-l = _
-  insertionBuilder Γ S A σ P C T B τ D .id-Γ = Γ
-  insertionBuilder Γ S A σ P C T B τ D .id-n = _
-  insertionBuilder Γ S A σ P C T B τ D .id-S = S
-  insertionBuilder Γ S A σ P C T B τ D .id-d = _
-  insertionBuilder Γ S A σ P C T B τ D .id-A = A
-  insertionBuilder Γ S A σ P C T B τ D .id-σ = σ
-  insertionBuilder Γ S A σ P C T B τ D .id-d′ = _
-  insertionBuilder Γ S A σ P C T B τ D .id-C = C
-  insertionBuilder Γ S A σ P C T B τ D .id-P = P
-  insertionBuilder Γ S A σ P C T B τ D .id-bp = it
-  insertionBuilder Γ S A σ P C T B τ D .id-m = _
-  insertionBuilder Γ S A σ P C T B τ D .id-T = T
-  insertionBuilder Γ S A σ P C T B τ D .id-B = B
-  insertionBuilder Γ S A σ P C T B τ D .id-τ = τ
-  insertionBuilder Γ S A σ P C T B τ D .id-d″ = _
-  insertionBuilder Γ S A σ P C T B τ D .id-D = D
-  insertionBuilder Γ S A σ P C T B τ D .id-lh = it
-  insertionBuilder Γ S A σ P C T B τ D .id-tlh = it
+  insertionBuilder Γ S A σ P T B τ .id-l = _
+  insertionBuilder Γ S A σ P T B τ .id-Γ = Γ
+  insertionBuilder Γ S A σ P T B τ .id-n = _
+  insertionBuilder Γ S A σ P T B τ .id-S = S
+  insertionBuilder Γ S A σ P T B τ .id-d = _
+  insertionBuilder Γ S A σ P T B τ .id-A = A
+  insertionBuilder Γ S A σ P T B τ .id-σ = σ
+  insertionBuilder Γ S A σ P T B τ .id-P = P
+  insertionBuilder Γ S A σ P T B τ .id-bp = it
+  insertionBuilder Γ S A σ P T B τ .id-m = _
+  insertionBuilder Γ S A σ P T B τ .id-T = T
+  insertionBuilder Γ S A σ P T B τ .id-B = B
+  insertionBuilder Γ S A σ P T B τ .id-τ = τ
+  insertionBuilder Γ S A σ P T B τ .id-lh = it
+  insertionBuilder Γ S A σ P T B τ .id-tlh = it
 
 open import Catt.Typing 1 (λ x → insertionRule)
 
@@ -115,34 +105,28 @@ Ins≈ : (S : Tree n)
      → .⦃ bp : is-branching-path P ⦄
      → (T : Tree m)
      → {B : Ty (suc m) (height-of-branching P)}
-     → (ty2 : Typing-Tm Γ (Coh (tree-to-ctx T) B τ) D)
-     → (branching-path-to-var S P [ σ ]tm) ≈tm (Coh (tree-to-ctx T) B τ)
+     → (branching-path-to-var S P [ σ ]tm) ≈[ Γ ]tm (Coh (tree-to-ctx T) B τ)
      → .⦃ lh : has-linear-height (path-length P) T ⦄
      → .⦃ tlh : type-has-linear-height (path-length P) T B ⦄
-     → (Coh (tree-to-ctx S) A σ) ≈tm
+     → (Coh (tree-to-ctx S) A σ) ≈[ Γ ]tm
        (Coh (tree-to-ctx (insertion-tree S P T))
             (A [ exterior-sub S P T B ]ty)
             (sub-from-insertion S P T σ τ))
-Ins≈ {Γ = Γ} {A = A} {σ = σ} {C = C} {τ = τ} {D = D} S ty P T {B} ty2 eq
-  = Rule≈ zero
-          (insertionBuilder Γ S A σ P C T B τ D)
-          (λ where zero → ty
-                   (suc j) → ty2)
-          λ where zero → eq
-
+Ins≈ {Γ = Γ} {A = A} {σ = σ} {τ = τ} S ty P T {B} p
+  = Rule≈ zero (insertionBuilder Γ S A σ P T B τ) (λ where zero → p) ty
 
 open import Catt.Typing.Properties.Base 1 (λ x → insertionRule)
 
 props : (i : Fin 1) → Props i
-props i .lift-rule a tc eq = begin
-  < liftTerm (insertionRule .lhs a) >tm ≡⟨⟩
-  < (Coh (tree-to-ctx id-S) id-A (liftSub id-σ)) >tm
-    ≈⟨ Ins≈ id-S (tc zero {A = ⋆}) id-P id-T (tc (suc zero)) lem ⟩
-  < Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
+props i .lift-rule a eq tc = begin
+  liftTerm (insertionRule .lhs a) ≡⟨⟩
+  Coh (tree-to-ctx id-S) id-A (liftSub id-σ)
+    ≈⟨ Ins≈ id-S tc id-P id-T lem ⟩
+  Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
         (id-A [ exterior-sub id-S id-P id-T id-B ]ty)
         (sub-from-insertion id-S id-P id-T (liftSub id-σ) (liftSub id-τ))
-    >tm ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (sym≃s lem2)) ⟩
-  < liftTerm (insertionRule .rhs a) >tm ∎
+    ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (sym≃s lem2)) ⟩
+  liftTerm (insertionRule .rhs a) ∎
 
   where
     open InsertionData a
@@ -152,26 +136,25 @@ props i .lift-rule a tc eq = begin
       < sub-from-insertion id-S id-P id-T (liftSub id-σ) (liftSub id-τ) >s ∎
       where
         open Reasoning sub-setoid
-    open Reasoning tm-setoid-≈
-    lem : (branching-path-to-var id-S id-P [ liftSub id-σ ]tm) ≈tm Coh (tree-to-ctx id-T) id-B (liftSub id-τ)
+    open Reasoning (tm-setoid-≈ (id-Γ , _))
+    lem : (branching-path-to-var id-S id-P [ liftSub id-σ ]tm) ≈[ id-Γ , _ ]tm Coh (tree-to-ctx id-T) id-B (liftSub id-τ)
     lem = begin
-      < branching-path-to-var id-S id-P [ liftSub id-σ ]tm >tm
+      branching-path-to-var id-S id-P [ liftSub id-σ ]tm
         ≈⟨ reflexive≈tm (apply-lifted-sub-tm-≃ (branching-path-to-var id-S id-P) id-σ) ⟩
-      < liftTerm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm ≈⟨ eq zero ⟩
-      < Coh (tree-to-ctx id-T) id-B (liftSub id-τ) >tm ∎
-
-props i .susp-rule a ty eq = let
+      liftTerm (branching-path-to-var id-S id-P [ id-σ ]tm) ≈⟨ eq zero ⟩
+      Coh (tree-to-ctx id-T) id-B (liftSub id-τ) ∎
+props i .susp-rule a eq tc = let
   instance _ = type-has-linear-height-susp (path-length id-P) id-T id-B
   in begin
-  < Coh (suspCtx (tree-to-ctx id-S)) (suspTy id-A) (suspSub id-σ) >tm
-    ≈⟨ Ins≈ (susp-tree id-S) (ty zero) (PExt id-P) (susp-tree id-T) (ty (suc zero)) lem ⟩
-  < Coh (tree-to-ctx (insertion-tree (susp-tree id-S) (PExt id-P) (susp-tree id-T)))
+  Coh (suspCtx (tree-to-ctx id-S)) (suspTy id-A) (suspSub id-σ)
+  ≈⟨ Ins≈ (susp-tree id-S) tc (PExt id-P) (susp-tree id-T) lem ⟩
+  Coh (tree-to-ctx (insertion-tree (susp-tree id-S) (PExt id-P) (susp-tree id-T)))
         (suspTy id-A [ exterior-sub (susp-tree id-S) (PExt id-P) (susp-tree id-T) (suspTy id-B) ]ty)
         (sub-from-insertion (susp-tree id-S) (PExt id-P) (susp-tree id-T) (suspSub id-σ) (suspSub id-τ))
-    >tm ≈⟨ reflexive≈tm (Coh≃ refl≃c lem-ty (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
-  < Coh (suspCtx (tree-to-ctx (insertion-tree id-S id-P id-T)))
+    ≈⟨ reflexive≈tm (Coh≃ refl≃c lem-ty (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
+  Coh (suspCtx (tree-to-ctx (insertion-tree id-S id-P id-T)))
         (suspTy (id-A [ exterior-sub id-S id-P id-T id-B ]ty))
-        (suspSub (sub-from-insertion id-S id-P id-T id-σ id-τ)) >tm ∎
+        (suspSub (sub-from-insertion id-S id-P id-T id-σ id-τ)) ∎
   where
     open InsertionData a
 
@@ -189,19 +172,42 @@ props i .susp-rule a ty eq = let
       where
         open Reasoning ty-setoid
 
-    open Reasoning tm-setoid-≈
+    open Reasoning (tm-setoid-≈ (suspCtx id-Γ))
 
     lem : branching-path-to-var (susp-tree id-S) (PExt id-P) [ suspSub id-σ ]tm
-            ≈tm
+            ≈[ suspCtx id-Γ ]tm
           Coh (tree-to-ctx (susp-tree id-T)) (suspTy id-B) (suspSub id-τ)
     lem = begin
-      < branching-path-to-var (susp-tree id-S) (PExt id-P) [ suspSub id-σ ]tm >tm ≡⟨⟩
-      < suspTm (branching-path-to-var id-S id-P)
+      branching-path-to-var (susp-tree id-S) (PExt id-P) [ suspSub id-σ ]tm ≡⟨⟩
+      suspTm (branching-path-to-var id-S id-P)
           [ idSub (3 + id-n) ]tm
-          [ suspSub id-σ ]tm >tm
+          [ suspSub id-σ ]tm
         ≈⟨ reflexive≈tm (sub-action-≃-tm (id-on-tm (suspTm (branching-path-to-var id-S id-P))) refl≃s) ⟩
-      < suspTm (branching-path-to-var id-S id-P) [ suspSub id-σ ]tm >tm
+      suspTm (branching-path-to-var id-S id-P) [ suspSub id-σ ]tm
         ≈˘⟨ reflexive≈tm (susp-functorial-tm id-σ (branching-path-to-var id-S id-P)) ⟩
-      < suspTm (branching-path-to-var id-S id-P
-        [ a .InsertionData.id-σ ]tm) >tm ≈⟨ eq zero ⟩
-      < Coh (tree-to-ctx (susp-tree id-T)) (suspTy id-B) (suspSub id-τ) >tm ∎
+      suspTm (branching-path-to-var id-S id-P
+        [ a .InsertionData.id-σ ]tm) ≈⟨ eq zero ⟩
+      Coh (tree-to-ctx (susp-tree id-T)) (suspTy id-B) (suspSub id-τ) ∎
+
+props i .sub-rule a eqt {σ = σ} {Δ = Δ} σty tc = begin
+  insertionRule .lhs a [ σ ]tm ≡⟨⟩
+  Coh (tree-to-ctx id-S) id-A (σ ∘ id-σ)
+    ≈⟨ Ins≈ {τ = σ ∘ id-τ} id-S tc id-P id-T lem ⟩
+  Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
+      (id-A [ exterior-sub id-S id-P id-T id-B ]ty)
+      (sub-from-insertion id-S id-P id-T (σ ∘ id-σ) (σ ∘ id-τ)) ≈⟨ Coh≈ refl≈ty (reflexive≈s (sub-from-insertion-sub id-S id-P id-T id-σ id-τ σ)) ⟩
+  Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
+      (id-A [ exterior-sub id-S id-P id-T id-B ]ty)
+      (σ ∘ sub-from-insertion id-S id-P id-T id-σ id-τ) ≡⟨⟩
+  insertionRule .rhs a [ σ ]tm ∎
+  where
+    open InsertionData a
+    open Reasoning (tm-setoid-≈ Δ)
+
+    lem : (branching-path-to-var id-S id-P [ σ ∘ id-σ ]tm)
+            ≈[ Δ ]tm
+          Coh (tree-to-ctx id-T) id-B (σ ∘ id-τ)
+    lem = begin
+      branching-path-to-var id-S id-P [ σ ∘ id-σ ]tm ≈⟨ reflexive≈tm (assoc-tm σ id-σ (branching-path-to-var id-S id-P)) ⟩
+      branching-path-to-var id-S id-P [ id-σ ]tm [ σ ]tm ≈⟨ eqt zero σty ⟩
+      Coh (tree-to-ctx id-T) id-B (σ ∘ id-τ) ∎

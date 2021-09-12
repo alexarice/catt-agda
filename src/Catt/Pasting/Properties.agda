@@ -3,6 +3,7 @@
 module Catt.Pasting.Properties where
 
 open import Catt.Syntax
+open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Pasting
 open import Relation.Binary.PropositionalEquality
@@ -16,6 +17,7 @@ open import Catt.Variables
 open import Data.Unit using (tt)
 open import Catt.Globular
 open import Data.Product renaming (_,_ to _,,_)
+import Relation.Binary.Reasoning.Setoid as Reasoning
 
 subst-pdb : {Γ Δ : Ctx (suc n)} → (pdb : Γ ⊢pd[ submax ][ d ]) → Δ ≃c Γ → Δ ⊢pd[ submax ][ d ]
 subst-pdb pdb c with ≃c-to-≡ c
@@ -216,3 +218,278 @@ focus-term-is-var (Restr pdb) = ty-globular-tgt (getFocusType pdb) (focus-ty-is-
 focus-ty-is-globular Base = tt
 focus-ty-is-globular (Extend pdb) = liftTerm-preserve-isVar (liftTerm (getFocusTerm pdb)) (liftTerm-preserve-isVar (getFocusTerm pdb) (focus-term-is-var pdb)) ,, liftType-preserve-is-globular (liftType (getFocusType pdb)) (liftType-preserve-is-globular (getFocusType pdb) (focus-ty-is-globular pdb)) ,, tt
 focus-ty-is-globular (Restr pdb) = ty-globular-base (getFocusType pdb) (focus-ty-is-globular pdb)
+
+replacePdSub-lem : (σ : Sub (suc n) l)
+                 → (τ : Sub m n)
+                 → (t : Tm l)
+                 → σ ∘ liftSub τ ≃s replacePdSub σ t ∘ liftSub τ
+replacePdSub-lem ⟨ σ , t ⟩ τ _ = trans≃s (lift-sub-comp-lem-sub σ τ) (sym≃s (lift-sub-comp-lem-sub σ τ))
+
+
+pdb-globular-lem-1 : (pdb : Γ ⊢pd[ submax ][ d ])
+                   → .⦃ _ : is-zero submax ⦄
+                   → .⦃ _ : NonZero′ (submax + d) ⦄
+                   → (σ : Sub (ctxLength Γ) l)
+                   → (τ : Sub (ctxLength Γ) l)
+                   → (t : Tm (suc (suc l)))
+                   → σ ∘ pdb-src pdb ≃s τ ∘ pdb-src pdb
+                   → liftSub (liftSub σ) ∘ pdb-src pdb ≃s (replacePdSub (liftSub (liftSub τ)) t) ∘ pdb-src pdb
+pdb-globular-lem-1 (Extend {submax = zero} pdb) ⟨ σ , x ⟩ ⟨ τ , y ⟩ t (Ext≃ p q) = Ext≃ l1 l2
+  where
+    l1 : (liftSub (liftSub ⟨ σ , x ⟩) ∘
+            liftSub (liftSub (liftSub (idSub _))))
+           ≃s
+           (replacePdSub (liftSub (liftSub ⟨ τ , y ⟩)) t ∘
+            liftSub (liftSub (liftSub (idSub _))))
+    l1 = begin
+      < liftSub (liftSub ⟨ σ , x ⟩) ∘ liftSub (liftSub (liftSub (idSub _))) >s
+        ≈⟨ apply-lifted-sub-sub-≃ (liftSub (liftSub (liftSub (idSub _)))) ⟨ liftSub σ , liftTerm x ⟩ ⟩
+      < liftSub (⟨ liftSub σ , liftTerm x ⟩ ∘ liftSub (liftSub (liftSub (idSub _)))) >s
+        ≈⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (liftSub (liftSub (liftSub (idSub _)))) ⟨ σ , x ⟩) ⟩
+      < liftSub (liftSub (⟨ σ , x ⟩ ∘ liftSub (liftSub (liftSub (idSub _))))) >s
+        ≈⟨ lift-sub-≃ (lift-sub-≃ p) ⟩
+      < liftSub (liftSub (⟨ τ , y ⟩ ∘ liftSub (liftSub (liftSub (idSub _))))) >s
+        ≈˘⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (liftSub (liftSub (liftSub (idSub _)))) ⟨ τ , y ⟩) ⟩
+      < liftSub (⟨ liftSub τ , liftTerm y ⟩ ∘ liftSub (liftSub (liftSub (idSub _)))) >s
+        ≈˘⟨ apply-lifted-sub-sub-≃ (liftSub (liftSub (liftSub (idSub _)))) ⟨ liftSub τ , liftTerm y ⟩ ⟩
+      < liftSub (liftSub ⟨ τ , y ⟩) ∘ liftSub (liftSub (liftSub (idSub _))) >s
+        ≈⟨ replacePdSub-lem (liftSub (liftSub ⟨ τ , y ⟩)) (liftSub (liftSub (idSub _))) t ⟩
+      < replacePdSub (liftSub (liftSub ⟨ τ , y ⟩)) t ∘ liftSub (liftSub (liftSub (idSub _))) >s ∎
+      where
+        open Reasoning sub-setoid
+
+    l2 : 2V [ liftSub (liftSub ⟨ σ , x ⟩) ]tm
+           ≃tm
+         2V [ replacePdSub (liftSub (liftSub ⟨ τ , y ⟩)) t ]tm
+    l2 = begin
+      < 1V [ liftSub (liftSub σ) ]tm >tm ≈⟨ apply-lifted-sub-tm-≃ 1V (liftSub σ) ⟩
+      < liftTerm (1V [ liftSub σ ]tm) >tm ≈⟨ lift-tm-≃ (apply-lifted-sub-tm-≃ 1V σ) ⟩
+      < liftTerm (liftTerm (1V [ σ ]tm)) >tm ≈⟨ lift-tm-≃ (lift-tm-≃ q) ⟩
+      < liftTerm (liftTerm (1V [ τ ]tm)) >tm ≈˘⟨ lift-tm-≃ (apply-lifted-sub-tm-≃ 1V τ) ⟩
+      < (liftTerm (1V [ liftSub τ ]tm)) >tm ≈˘⟨ apply-lifted-sub-tm-≃ 1V (liftSub τ) ⟩
+      < 1V [ liftSub (liftSub τ) ]tm
+        >tm ≈⟨ sub-action-≃-tm (refl≃tm {s = 1V}) (replacePdSub-lem (liftSub (liftSub ⟨ τ , y ⟩)) (idSub _) t) ⟩
+      < 1V [ replacePdSub (liftSub (liftSub ⟨ τ , y ⟩)) t ∘ liftSub (idSub _) ]tm >tm ≡⟨⟩
+      < 2V [ replacePdSub (liftSub (liftSub ⟨ τ , y ⟩)) t ]tm >tm ∎
+      where
+        open Reasoning tm-setoid
+pdb-globular-lem-1 (Extend {submax = suc zero} pdb) ⟨ σ , x ⟩ ⟨ τ , y ⟩ t p = begin
+  < ⟨ liftSub (liftSub σ) , liftTerm (liftTerm x) ⟩ ∘ liftSub (liftSub (pdb-src pdb)) >s
+    ≈⟨ apply-lifted-sub-sub-≃ (liftSub (liftSub (pdb-src pdb))) ⟨ liftSub σ , liftTerm x ⟩ ⟩
+  < liftSub (⟨ liftSub σ , liftTerm x ⟩ ∘ liftSub (liftSub (pdb-src pdb))) >s
+    ≈⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (liftSub (liftSub (pdb-src pdb))) ⟨ σ , x ⟩) ⟩
+  < liftSub (liftSub (⟨ σ , x ⟩ ∘ liftSub (liftSub (pdb-src pdb)))) >s
+    ≈⟨ lift-sub-≃ (lift-sub-≃ p) ⟩
+  < liftSub (liftSub (⟨ τ , y ⟩ ∘ liftSub (liftSub (pdb-src pdb)))) >s
+    ≈˘⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (liftSub (liftSub (pdb-src pdb))) ⟨ τ , y ⟩) ⟩
+  < liftSub (liftSub ⟨ τ , y ⟩ ∘ liftSub (liftSub (pdb-src pdb))) >s
+    ≈˘⟨ apply-lifted-sub-sub-≃ (liftSub (liftSub (pdb-src pdb))) (liftSub ⟨ τ , y ⟩) ⟩
+  < liftSub (liftSub ⟨ τ , y ⟩) ∘ liftSub (liftSub (pdb-src pdb)) >s ≈⟨ lift-sub-comp-lem-sub (liftSub (liftSub τ)) (liftSub (pdb-src pdb)) ⟩
+  < liftSub (liftSub τ) ∘ liftSub (pdb-src pdb) >s ≈˘⟨ lift-sub-comp-lem-sub (liftSub (liftSub τ)) (liftSub (pdb-src pdb)) ⟩
+  < ⟨ liftSub (liftSub τ) , t ⟩ ∘ liftSub (liftSub (pdb-src pdb)) >s ∎
+  where
+    open Reasoning sub-setoid
+
+open import Data.Fin using (Fin; suc; zero)
+pdb-globular-1 : (pdb : Γ ⊢pd[ submax ][ d ])
+               → .⦃ nz : NonZero′ (submax + d) ⦄
+               → .⦃ nz2 : NonZero′ ((pred submax) + (newDim submax d)) ⦄
+               → pdb-src pdb ∘ pdb-src (pdb-bd-pd pdb) ≃s pdb-tgt pdb ∘ pdb-src (pdb-bd-pd pdb)
+pdb-globular-1 (Extend {submax = zero} pdb) = pdb-globular-lem-1 pdb (idSub _) (idSub _) 1V refl≃s
+pdb-globular-1 (Extend {submax = suc zero} pdb) = pdb-globular-lem-1 (pdb-bd-pd pdb) (pdb-src pdb) (pdb-tgt pdb) 1V (pdb-globular-1 pdb)
+pdb-globular-1 (Extend {submax = suc (suc zero)} pdb) = begin
+  < ⟨ ⟨ liftSub (liftSub (pdb-src pdb)) , 1V ⟩ , 0V ⟩
+       ∘ liftSub (liftSub (pdb-src (pdb-bd-pd pdb))) >s ≈⟨ lift-sub-comp-lem-sub ⟨ liftSub (liftSub (pdb-src pdb)) , 1V ⟩ (liftSub (pdb-src (pdb-bd-pd pdb))) ⟩
+  < ⟨ liftSub (liftSub (pdb-src pdb)) , 1V ⟩ ∘
+    liftSub (pdb-src (pdb-bd-pd pdb)) >s
+    ≈⟨ lift-sub-comp-lem-sub (liftSub (liftSub (pdb-src pdb))) (pdb-src (pdb-bd-pd pdb)) ⟩
+  < liftSub (liftSub (pdb-src pdb)) ∘ pdb-src (pdb-bd-pd pdb) >s ≈⟨ apply-lifted-sub-sub-≃ (pdb-src (pdb-bd-pd pdb)) (liftSub (pdb-src pdb)) ⟩
+  < liftSub (liftSub (pdb-src pdb) ∘ pdb-src (pdb-bd-pd pdb)) >s ≈⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (pdb-src (pdb-bd-pd pdb)) (pdb-src pdb)) ⟩
+  < liftSub (liftSub (pdb-src pdb ∘ pdb-src (pdb-bd-pd pdb))) >s ≈⟨ lift-sub-≃ (lift-sub-≃ (pdb-globular-1 pdb)) ⟩
+  < liftSub (liftSub (pdb-tgt pdb ∘ pdb-src (pdb-bd-pd pdb))) >s
+    ≈˘⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (pdb-src (pdb-bd-pd pdb)) (pdb-tgt pdb)) ⟩
+  < liftSub (liftSub (pdb-tgt pdb) ∘ pdb-src (pdb-bd-pd pdb)) >s
+    ≈˘⟨ apply-lifted-sub-sub-≃ (pdb-src (pdb-bd-pd pdb)) (liftSub (pdb-tgt pdb)) ⟩
+  < liftSub (liftSub (pdb-tgt pdb)) ∘ pdb-src (pdb-bd-pd pdb) >s
+    ≈˘⟨ lift-sub-comp-lem-sub (liftSub (liftSub (pdb-tgt pdb))) (pdb-src (pdb-bd-pd pdb)) ⟩
+  < ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ ∘
+      liftSub (pdb-src (pdb-bd-pd pdb)) >s
+    ≈˘⟨ lift-sub-comp-lem-sub ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ (liftSub (pdb-src (pdb-bd-pd pdb))) ⟩
+  < ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ , 0V ⟩
+       ∘ liftSub (liftSub (pdb-src (pdb-bd-pd pdb))) >s ∎
+  where
+    open Reasoning sub-setoid
+pdb-globular-1 (Extend {submax = suc (suc (suc submax))} pdb) = Ext≃ (Ext≃ lem refl≃tm) refl≃tm
+  where
+    open Reasoning sub-setoid
+    lem : ⟨ ⟨ liftSub (liftSub (pdb-src pdb)) , 1V ⟩ , 0V ⟩
+            ∘ liftSub (liftSub (pdb-src (pdb-bd-pd pdb)))
+            ≃s
+          ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ , 0V ⟩
+            ∘ liftSub (liftSub (pdb-src (pdb-bd-pd pdb)))
+    lem = begin
+      < ⟨ ⟨ liftSub (liftSub (pdb-src pdb)) , 1V ⟩ , 0V ⟩
+          ∘ liftSub (liftSub (pdb-src (pdb-bd-pd pdb))) >s
+        ≈⟨ lift-sub-comp-lem-sub ⟨ liftSub (liftSub (pdb-src pdb)) , 1V ⟩ (liftSub (pdb-src (pdb-bd-pd pdb))) ⟩
+      < ⟨ liftSub (liftSub (pdb-src pdb)) , 1V ⟩ ∘
+          liftSub (pdb-src (pdb-bd-pd pdb)) >s
+        ≈⟨ lift-sub-comp-lem-sub (liftSub (liftSub (pdb-src pdb))) (pdb-src (pdb-bd-pd pdb)) ⟩
+      < liftSub (liftSub (pdb-src pdb)) ∘ pdb-src (pdb-bd-pd pdb) >s
+        ≈⟨ apply-lifted-sub-sub-≃ (pdb-src (pdb-bd-pd pdb)) (liftSub (pdb-src pdb)) ⟩
+      < liftSub (liftSub (pdb-src pdb) ∘ pdb-src (pdb-bd-pd pdb)) >s ≈⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (pdb-src (pdb-bd-pd pdb)) (pdb-src pdb)) ⟩
+      < liftSub (liftSub (pdb-src pdb ∘ pdb-src (pdb-bd-pd pdb))) >s ≈⟨ lift-sub-≃ (lift-sub-≃ (pdb-globular-1 pdb)) ⟩
+      < liftSub (liftSub (pdb-tgt pdb ∘ pdb-src (pdb-bd-pd pdb))) >s
+        ≈˘⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (pdb-src (pdb-bd-pd pdb)) (pdb-tgt pdb)) ⟩
+      < liftSub (liftSub (pdb-tgt pdb) ∘ pdb-src (pdb-bd-pd pdb)) >s
+        ≈˘⟨ apply-lifted-sub-sub-≃ (pdb-src (pdb-bd-pd pdb)) (liftSub (pdb-tgt pdb)) ⟩
+      < liftSub (liftSub (pdb-tgt pdb)) ∘ pdb-src (pdb-bd-pd pdb) >s
+        ≈˘⟨ lift-sub-comp-lem-sub (liftSub (liftSub (pdb-tgt pdb))) (pdb-src (pdb-bd-pd pdb)) ⟩
+      < ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ ∘
+          liftSub (pdb-src (pdb-bd-pd pdb)) >s
+        ≈˘⟨ lift-sub-comp-lem-sub ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ (liftSub (pdb-src (pdb-bd-pd pdb))) ⟩
+      < ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ , 0V ⟩
+          ∘ liftSub (liftSub (pdb-src (pdb-bd-pd pdb))) >s ∎
+pdb-globular-1 (Restr {submax = zero} pdb) = pdb-globular-1 pdb
+pdb-globular-1 (Restr {submax = suc submax} pdb) = pdb-globular-1 pdb
+
+pd-globular-1 : (pd : Γ ⊢pd₀ suc (suc d))
+              → pd-src pd ∘ pd-src (pd-bd-pd pd) ≃s pd-tgt pd ∘ pd-src (pd-bd-pd pd)
+pd-globular-1 (Finish pdb) = pdb-globular-1 pdb
+
+pdb-globular-lem-2 : (pdb : Γ ⊢pd[ submax ][ d ])
+                   → .⦃ _ : is-zero submax ⦄
+                   → .⦃ _ : NonZero′ (submax + d) ⦄
+                   → (σ : Sub (ctxLength Γ) l)
+                   → (τ : Sub (ctxLength Γ) l)
+                   → (t : Tm (suc (suc l)))
+                   → σ ∘ pdb-tgt pdb ≃s τ ∘ pdb-tgt pdb
+                   → liftSub (liftSub σ) ∘ pdb-tgt pdb ≃s replacePdSub (liftSub (liftSub τ)) t ∘ pdb-tgt pdb
+pdb-globular-lem-2 (Extend {submax = zero} pdb) ⟨ σ , x ⟩ ⟨ τ , y ⟩ t (Ext≃ p q) = Ext≃ l1 l2
+  where
+    l1 : ⟨ liftSub (liftSub σ) , liftTerm (liftTerm x) ⟩
+           ∘ liftSub (liftSub (liftSub (idSub _)))
+           ≃s
+         ⟨ liftSub (liftSub τ) , t ⟩
+           ∘ liftSub (liftSub (liftSub (idSub _)))
+    l1 = begin
+      < ⟨ liftSub (liftSub σ) , liftTerm (liftTerm x) ⟩ ∘ liftSub (liftSub (liftSub (idSub _))) >s
+        ≈⟨ apply-lifted-sub-sub-≃ (liftSub (liftSub (liftSub (idSub _)))) ⟨ liftSub σ , liftTerm x ⟩ ⟩
+      < liftSub (⟨ liftSub σ , liftTerm x ⟩ ∘ liftSub (liftSub (liftSub (idSub _)))) >s
+        ≈⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (liftSub (liftSub (liftSub (idSub _)))) ⟨ σ , x ⟩) ⟩
+      < liftSub (liftSub (⟨ σ , x ⟩ ∘ liftSub (liftSub (liftSub (idSub _))))) >s
+        ≈⟨ lift-sub-≃ (lift-sub-≃ p) ⟩
+      < liftSub (liftSub (⟨ τ , y ⟩ ∘ liftSub (liftSub (liftSub (idSub _))))) >s
+        ≈˘⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (liftSub (liftSub (liftSub (idSub _)))) ⟨ τ , y ⟩) ⟩
+      < liftSub (liftSub ⟨ τ , y ⟩ ∘ liftSub (liftSub (liftSub (idSub _)))) >s
+        ≈˘⟨ apply-lifted-sub-sub-≃ (liftSub (liftSub (liftSub (idSub _)))) (liftSub ⟨ τ , y ⟩) ⟩
+      < liftSub (liftSub ⟨ τ , y ⟩) ∘ liftSub (liftSub (liftSub (idSub _))) >s
+        ≈⟨ lift-sub-comp-lem-sub (liftSub (liftSub τ)) (liftSub (liftSub (idSub _))) ⟩
+      < liftSub (liftSub τ) ∘ liftSub (liftSub (idSub _)) >s
+        ≈˘⟨ lift-sub-comp-lem-sub (liftSub (liftSub τ)) (liftSub (liftSub (idSub _))) ⟩
+      < ⟨ liftSub (liftSub τ) , t ⟩ ∘ liftSub (liftSub (liftSub (idSub _))) >s ∎
+      where
+         open Reasoning sub-setoid
+
+    l2 : 0V [ liftSub (liftSub σ) ]tm ≃tm 0V [ liftSub (liftSub τ) ]tm
+    l2 = begin
+      < 0V [ liftSub (liftSub σ) ]tm >tm ≈⟨ apply-lifted-sub-tm-≃ 0V (liftSub σ) ⟩
+      < liftTerm (0V [ liftSub σ ]tm) >tm ≈⟨ lift-tm-≃ (apply-lifted-sub-tm-≃ 0V σ) ⟩
+      < liftTerm (liftTerm (0V [ σ ]tm)) >tm ≈⟨ lift-tm-≃ (lift-tm-≃ q) ⟩
+      < liftTerm (liftTerm (0V [ τ ]tm)) >tm ≈˘⟨ lift-tm-≃ (apply-lifted-sub-tm-≃ 0V τ) ⟩
+      < liftTerm (0V [ liftSub τ ]tm) >tm ≈˘⟨ apply-lifted-sub-tm-≃ 0V (liftSub τ) ⟩
+      < 0V [ liftSub (liftSub τ) ]tm >tm ∎
+      where
+        open Reasoning tm-setoid
+pdb-globular-lem-2 (Extend {submax = suc zero} pdb) ⟨ σ , x ⟩ ⟨ τ , y ⟩ t p with pdb-tgt pdb
+... | ⟨ μ , z ⟩ = begin
+  < (⟨ liftSub (liftSub σ) , liftTerm (liftTerm x) ⟩ ∘ ⟨ liftSub (liftSub μ) , 1V ⟩) >s
+    ≈⟨ apply-lifted-sub-sub-≃ ⟨ liftSub (liftSub μ) , 1V ⟩ ⟨ liftSub σ , liftTerm x ⟩ ⟩
+  < liftSub (⟨ liftSub σ , liftTerm x ⟩ ∘ ⟨ liftSub (liftSub μ) , 1V ⟩) >s
+    ≈⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (⟨ liftSub (liftSub μ) , 1V ⟩) ⟨ σ , x ⟩) ⟩
+  < liftSub (liftSub (⟨ σ , x ⟩ ∘ ⟨ liftSub (liftSub μ) , 1V ⟩)) >s
+    ≈⟨ lift-sub-≃ (lift-sub-≃ p) ⟩
+  < (liftSub (liftSub (⟨ τ , y ⟩ ∘ ⟨ liftSub (liftSub μ) , 1V ⟩))) >s
+    ≈˘⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (⟨ liftSub (liftSub μ) , 1V ⟩) ⟨ τ , y ⟩) ⟩
+  < liftSub (liftSub ⟨ τ , y ⟩ ∘ ⟨ liftSub (liftSub μ) , 1V ⟩) >s
+    ≈˘⟨ apply-lifted-sub-sub-≃ (⟨ liftSub (liftSub μ) , 1V ⟩) (liftSub ⟨ τ , y ⟩) ⟩
+  < liftSub (liftSub ⟨ τ , y ⟩) ∘ ⟨ liftSub (liftSub μ) , 1V ⟩ >s
+    ≈⟨ lift-sub-comp-lem-sub (liftSub (liftSub τ)) ⟨ liftSub μ , 0V ⟩ ⟩
+  < liftSub (liftSub τ) ∘ ⟨ liftSub μ , 0V ⟩ >s
+    ≈˘⟨ lift-sub-comp-lem-sub (liftSub (liftSub τ)) ⟨ liftSub μ , 0V ⟩ ⟩
+  < ⟨ liftSub (liftSub τ) , t ⟩ ∘ ⟨ liftSub (liftSub μ) , 1V ⟩ >s ∎
+  where
+    open Reasoning sub-setoid
+
+
+pdb-globular-2 : (pdb : Γ ⊢pd[ submax ][ d ])
+               → .⦃ nz : NonZero′ (submax + d) ⦄
+               → .⦃ nz2 : NonZero′ ((pred submax) + (newDim submax d)) ⦄
+               → pdb-src pdb ∘ pdb-tgt (pdb-bd-pd pdb) ≃s pdb-tgt pdb ∘ pdb-tgt (pdb-bd-pd pdb)
+pdb-globular-2 (Extend {submax = zero} pdb) = pdb-globular-lem-2 pdb (idSub _) (idSub _) 1V refl≃s
+pdb-globular-2 (Extend {submax = suc zero} pdb) = pdb-globular-lem-2 (pdb-bd-pd pdb) (pdb-src pdb) (pdb-tgt pdb) 1V (pdb-globular-2 pdb)
+pdb-globular-2 (Extend {submax = suc (suc zero)} pdb) with pdb-tgt (pdb-bd-pd pdb) | pdb-globular-2 pdb
+... | ⟨ μ , z ⟩ | Ext≃ p q = Ext≃ lem refl≃tm
+  where
+    open Reasoning sub-setoid
+    lem : ⟨ ⟨ liftSub (liftSub (pdb-src pdb)) , Var (suc zero) ⟩ , Var zero ⟩ ∘ liftSub (liftSub μ)
+            ≃s
+          ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb)) , Var (suc zero) ⟩ , Var zero ⟩ ∘ liftSub (liftSub μ)
+    lem = begin
+      < ⟨ ⟨ liftSub (liftSub (pdb-src pdb)) , Var (suc zero) ⟩ , Var zero ⟩ ∘ liftSub (liftSub μ) >s
+        ≈⟨ lift-sub-comp-lem-sub ⟨ liftSub (liftSub (pdb-src pdb)) , Var (suc zero) ⟩ (liftSub μ) ⟩
+      < ⟨ liftSub (liftSub (pdb-src pdb)) , Var (suc zero) ⟩ ∘ liftSub μ >s
+        ≈⟨ lift-sub-comp-lem-sub (liftSub (liftSub (pdb-src pdb))) μ ⟩
+      < liftSub (liftSub (pdb-src pdb)) ∘ μ >s
+        ≈⟨ apply-lifted-sub-sub-≃ μ (liftSub (pdb-src pdb)) ⟩
+      < liftSub (liftSub (pdb-src pdb) ∘ μ) >s
+        ≈⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ μ (pdb-src pdb)) ⟩
+      < liftSub (liftSub (pdb-src pdb ∘ μ)) >s
+        ≈⟨ lift-sub-≃ (lift-sub-≃ p) ⟩
+      < liftSub (liftSub (pdb-tgt pdb ∘ μ)) >s
+        ≈˘⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ μ (pdb-tgt pdb)) ⟩
+      < liftSub (liftSub (pdb-tgt pdb) ∘ μ) >s
+        ≈˘⟨ apply-lifted-sub-sub-≃ μ (liftSub (pdb-tgt pdb)) ⟩
+      < liftSub (liftSub (pdb-tgt pdb)) ∘ μ >s
+        ≈˘⟨ lift-sub-comp-lem-sub (liftSub (liftSub (pdb-tgt pdb))) μ ⟩
+      < ⟨ liftSub (liftSub (pdb-tgt pdb)) , Var (suc zero) ⟩ ∘ liftSub μ
+        >s
+        ≈˘⟨ lift-sub-comp-lem-sub ⟨ liftSub (liftSub (pdb-tgt pdb)) , Var (suc zero) ⟩ (liftSub μ) ⟩
+      < ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb)) , Var (suc zero) ⟩ , Var zero ⟩ ∘ liftSub (liftSub μ) >s ∎
+pdb-globular-2 (Extend {submax = suc (suc (suc submax))} pdb) = Ext≃ (Ext≃ lem refl≃tm) refl≃tm
+  where
+    open Reasoning sub-setoid
+    lem : ⟨ ⟨ liftSub (liftSub (pdb-src pdb)) , 1V ⟩ , 0V ⟩
+            ∘ liftSub (liftSub (pdb-tgt (pdb-bd-pd pdb)))
+            ≃s
+          ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ , 0V ⟩
+            ∘ liftSub (liftSub (pdb-tgt (pdb-bd-pd pdb)))
+    lem = begin
+      < ⟨ ⟨ liftSub (liftSub (pdb-src pdb)) , Var (suc zero) ⟩ , Var zero ⟩
+          ∘ liftSub (liftSub (pdb-tgt (pdb-bd-pd pdb))) >s
+        ≈⟨ lift-sub-comp-lem-sub ⟨ liftSub (liftSub (pdb-src pdb)) , Var (suc zero) ⟩ (liftSub (pdb-tgt (pdb-bd-pd pdb))) ⟩
+      < ⟨ liftSub (liftSub (pdb-src pdb)) , Var (suc zero) ⟩
+          ∘ liftSub (pdb-tgt (pdb-bd-pd pdb)) >s
+        ≈⟨ lift-sub-comp-lem-sub (liftSub (liftSub (pdb-src pdb))) (pdb-tgt (pdb-bd-pd pdb)) ⟩
+      < liftSub (liftSub (pdb-src pdb)) ∘ pdb-tgt (pdb-bd-pd pdb) >s
+        ≈⟨ apply-lifted-sub-sub-≃ (pdb-tgt (pdb-bd-pd pdb)) (liftSub (pdb-src pdb)) ⟩
+      < liftSub (liftSub (pdb-src pdb) ∘ pdb-tgt (pdb-bd-pd pdb)) >s
+        ≈⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (pdb-tgt (pdb-bd-pd pdb)) (pdb-src pdb)) ⟩
+      < liftSub (liftSub (pdb-src pdb ∘ pdb-tgt (pdb-bd-pd pdb))) >s
+        ≈⟨ lift-sub-≃ (lift-sub-≃ (pdb-globular-2 pdb)) ⟩
+      < liftSub (liftSub (pdb-tgt pdb ∘ pdb-tgt (pdb-bd-pd pdb))) >s
+        ≈˘⟨ lift-sub-≃ (apply-lifted-sub-sub-≃ (pdb-tgt (pdb-bd-pd pdb)) (pdb-tgt pdb)) ⟩
+      < liftSub (liftSub (pdb-tgt pdb) ∘ pdb-tgt (pdb-bd-pd pdb)) >s
+        ≈˘⟨ apply-lifted-sub-sub-≃ (pdb-tgt (pdb-bd-pd pdb)) (liftSub (pdb-tgt pdb)) ⟩
+      < liftSub (liftSub (pdb-tgt pdb)) ∘ pdb-tgt (pdb-bd-pd pdb) >s
+        ≈˘⟨ lift-sub-comp-lem-sub (liftSub (liftSub (pdb-tgt pdb))) (pdb-tgt (pdb-bd-pd pdb)) ⟩
+      < ⟨ liftSub (liftSub (pdb-tgt pdb)) , Var (suc zero) ⟩
+          ∘ liftSub (pdb-tgt (pdb-bd-pd pdb)) >s
+        ≈˘⟨ lift-sub-comp-lem-sub ⟨ liftSub (liftSub (pdb-tgt pdb)) , Var (suc zero) ⟩ (liftSub (pdb-tgt (pdb-bd-pd pdb))) ⟩
+      < ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb)) , Var (suc zero) ⟩ , Var zero ⟩
+          ∘ liftSub (liftSub (pdb-tgt (pdb-bd-pd pdb))) >s ∎
+pdb-globular-2 (Restr {submax = zero} pdb) = pdb-globular-2 pdb
+pdb-globular-2 (Restr {submax = suc submax} pdb) = pdb-globular-2 pdb
+
+pd-globular-2 : (pd : Γ ⊢pd₀ suc (suc d))
+              → pd-src pd ∘ pd-tgt (pd-bd-pd pd) ≃s pd-tgt pd ∘ pd-tgt (pd-bd-pd pd)
+pd-globular-2 (Finish pdb) = pdb-globular-2 pdb

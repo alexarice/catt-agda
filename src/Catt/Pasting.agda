@@ -96,13 +96,12 @@ is-zero : ℕ → Set
 is-zero zero = ⊤
 is-zero (suc n) = ⊥
 
-replacePdSub : Δ ⊢pd[ submax ][ d ] → (σ : Sub (ctxLength Δ) n) → Tm n → .⦃ is-zero submax ⦄ → Sub (ctxLength Δ) n
-replacePdSub Base ⟨ σ , x ⟩ t = ⟨ σ , t ⟩
-replacePdSub (Extend pdb) ⟨ σ , x ⟩ t = ⟨ σ , t ⟩
+replacePdSub : (σ : Sub (suc m) n) → Tm n → Sub (suc m) n
+replacePdSub ⟨ σ , x ⟩ t = ⟨ σ , t ⟩
 
 pdb-tgt : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → Sub (suc (pdb-bd-len-1 pdb)) (ctxLength Γ)
-pdb-tgt (Extend {submax = zero} pdb) = replacePdSub (pdb-bd-pd (Extend pdb)) (liftSub (liftSub (idSub _))) 1V
-pdb-tgt (Extend {submax = suc zero} pdb) = replacePdSub (pdb-bd-pd (Extend pdb)) (liftSub (liftSub (pdb-tgt pdb))) 1V
+pdb-tgt (Extend {submax = zero} pdb) = replacePdSub (liftSub (liftSub (idSub _))) 1V
+pdb-tgt (Extend {submax = suc zero} pdb) = replacePdSub (liftSub (liftSub (pdb-tgt pdb))) 1V
 pdb-tgt (Extend {submax = suc (suc submax)} pdb) = ⟨ ⟨ liftSub (liftSub (pdb-tgt pdb)) , 1V ⟩ , 0V ⟩
 pdb-tgt (Restr pdb) = pdb-tgt pdb
 

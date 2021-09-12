@@ -32,6 +32,16 @@ unsuspend-sub-Ty : Typing-Sub Γ Δ σ
                  → .⦃ _ : is-unsuspendable-sub σ ⦄
                  → Typing-Sub (unsuspend-ctx Γ) (unsuspend-ctx Δ) (unsuspend-sub σ)
 
+is-unsuspendable-ty-eq : A ≈[ Γ ]ty B
+                       → ⦃ _ : is-unsuspendable-ty A ⦄
+                       → is-unsuspendable-ty
+
+unsuspend-ty-eq : A ≈[ Γ ]ty B
+                → .⦃ _ : is-unsuspendable-ctx Γ ⦄
+                → .⦃ _ : is-unsuspendable-ty A ⦄
+                → unsuspend-ty A ≈[ unsuspend-ctx Γ ]ty unsuspend-ty B ⦃ {!!} ⦄
+unsuspend-ty-eq = {!!}
+
 unsuspend-ctx-Ty (TyAdd (TyAdd TyEmp TyStar) TyStar) = TyEmp
 unsuspend-ctx-Ty (TyAdd (TyAdd (TyAdd Γty z) y) x) ⦃ us ⦄ = TyAdd (unsuspend-ctx-Ty (TyAdd (TyAdd Γty z) y) ⦃ proj₁ us ⦄) (unsuspend-ty-Ty x ⦃ proj₁ us ⦄ ⦃ proj₂ us ⦄)
 
@@ -45,9 +55,9 @@ unsuspend-ty-Ty (TyArr sty Aty@(TyArr _ _ _) tty) ⦃ usc ⦄ ⦃ usy ⦄ = let
            z = proj₂ (proj₂ usy)
   in TyArr (unsuspend-tm-Ty sty) (unsuspend-ty-Ty Aty) (unsuspend-tm-Ty tty)
 
-unsuspend-tm-Ty (TyVarZ {A = A} x) = {!!}
-unsuspend-tm-Ty (TyVarS i tty x) = {!!}
-unsuspend-tm-Ty (TyCoh {Δ = Δ , A , B , C} pd w x y z) ⦃ uΓ ⦄ ⦃ u ⦄ ⦃ _ ⦄ = TyCoh (unsuspend-pd pd ⦃ proj₁ u ⦄) (unsuspend-ty-Ty w ⦃ proj₁ u ⦄ ⦃ proj₁ (proj₂ u) ⦄) (unsuspend-sub-Ty x ⦃ proj₁ u ⦄ ⦃ uΓ ⦄ ⦃ {!proj₂ (proj₂ u)!} ⦄) {!!} {!!}
+unsuspend-tm-Ty (TyVarZ {Γ = Γ , C , B} x) = TyVarZ {!!}
+unsuspend-tm-Ty (TyVarS {Γ = Γ , C , B} i tty x) ⦃ a ⦄ ⦃ b ⦄ ⦃ c ⦄ = TyVarS (fromℕ<Irrel (≤-pred it)) (unsuspend-tm-Ty tty ⦃ proj₁ a ⦄ ⦃ ≤-pred b ⦄ ⦃ {!!} ⦄) {!!}
+unsuspend-tm-Ty (TyCoh {Δ = Δ , A , B , C} pd w x y z) ⦃ uΓ ⦄ ⦃ u ⦄ ⦃ _ ⦄ = TyCoh (unsuspend-pd pd ⦃ proj₁ u ⦄) (unsuspend-ty-Ty w ⦃ proj₁ u ⦄ ⦃ proj₁ (proj₂ u) ⦄) (unsuspend-sub-Ty x ⦃ proj₁ u ⦄ ⦃ uΓ ⦄ ⦃ proj₂ (proj₂ u) ⦄) {!!} {!!}
 unsuspend-tm-Ty (TyComp pd v w x y z) = {!!}
 
 unsuspend-sub-Ty (TyExt {A = B} (TyExt {A = A} TyNull y) x) with B | A

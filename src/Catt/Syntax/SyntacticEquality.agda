@@ -456,3 +456,16 @@ sub-from-function-prop : (f : (i : Fin n) → Tm m)
                        → Var i [ sub-from-function f ]tm ≃tm f i
 sub-from-function-prop f zero = refl≃tm
 sub-from-function-prop f (suc i) = sub-from-function-prop (λ j → f (suc j)) i
+
+liftType-inj : liftType A ≃ty liftType B → A ≃ty B
+liftTerm-inj : liftTerm s ≃tm liftTerm t → s ≃tm t
+liftSub-inj : liftSub σ ≃s liftSub τ → σ ≃s τ
+
+liftType-inj {A = ⋆} {B = ⋆} (Star≃ refl) = refl≃ty
+liftType-inj {A = s ─⟨ A ⟩⟶ t} {B = s′ ─⟨ B ⟩⟶ t′} (Arr≃ p q r) = Arr≃ (liftTerm-inj p) (liftType-inj q) (liftTerm-inj r)
+
+liftTerm-inj {s = Var i} {t = Var j} (Var≃ refl p) = Var≃ refl (cong pred p)
+liftTerm-inj {s = Coh Δ A σ} {t = Coh Δ′ A′ σ′} (Coh≃ p q r) = Coh≃ p q (liftSub-inj r)
+
+liftSub-inj {σ = ⟨⟩} {τ = ⟨⟩} (Null≃ refl) = refl≃s
+liftSub-inj {σ = ⟨ σ , t ⟩} {τ = ⟨ τ , s ⟩} (Ext≃ p q) = Ext≃ (liftSub-inj p) (liftTerm-inj q)

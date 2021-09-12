@@ -94,13 +94,13 @@ exterior-sub : (S : Tree n)
              → Sub (suc n) (suc (insertion-tree-size S P T))
 exterior-sub S (PHere .S) T A = sub-from-disc (tree-to-ctx T) (Coh (tree-to-ctx T) A (idSub (suc _))) ∘ idSub≃ (linear-tree-compat S)
 exterior-sub (Join S₁ S₂) (PExt P) (Join T Sing) A ⦃ tlh ⦄ =
-  sub-from-connect-pdb (Restr (susp-pdb (tree-to-pdb zero S₁)))
-                       (connect-pd-inc-left (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-size S₂) ∘ suspSub (exterior-sub S₁ P T (unsuspend-ty A ⦃ proj₁ tlh ⦄) ⦃ proj₂ tlh ⦄))
-                       (connect-pd-inc-right (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-size S₂))
+  sub-from-connect-pd (susp-pd (tree-to-pd S₁))
+                      (connect-pd-inc-left (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-size S₂) ∘ suspSub (exterior-sub S₁ P T (unsuspend-ty A ⦃ proj₁ tlh ⦄) ⦃ proj₂ tlh ⦄))
+                      (connect-pd-inc-right (susp-pd (tree-to-pd (insertion-tree S₁ P T))) (tree-size S₂))
 exterior-sub (Join S₁ S₂) (PShift P) ⦃ bp ⦄ T A =
-  sub-from-connect-pdb (Restr (susp-pdb (tree-to-pdb zero S₁)))
-                       (connect-pd-inc-left (susp-pd (tree-to-pd S₁)) (tree-size (insertion-tree S₂ P T)))
-                       (connect-pd-inc-right (susp-pd (tree-to-pd S₁)) (tree-size (insertion-tree S₂ P T)) ∘ exterior-sub S₂ P ⦃ proj₁ bp ⦄ T A)
+  sub-from-connect-pd (susp-pd (tree-to-pd S₁))
+                      (connect-pd-inc-left (susp-pd (tree-to-pd S₁)) (tree-size (insertion-tree S₂ P T)))
+                      (connect-pd-inc-right (susp-pd (tree-to-pd S₁)) (tree-size (insertion-tree S₂ P T)) ∘ exterior-sub S₂ P ⦃ proj₁ bp ⦄ T A)
 
 -- linear-to-var : (T : Tree n) → .⦃ _ : is-linear T ⦄ → Tm (tree-to-ctx T)
 -- linear-to-var Sing = 0V

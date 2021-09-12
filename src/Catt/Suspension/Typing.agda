@@ -159,8 +159,8 @@ suspTmTy (TyComp {s = s} {A = A} {t = t} {σ = σ} pd p q r x y) = TyComp (susp-
       suspSupp (supp-tgt pd) ≡⟨ suspSuppTgt pd ⟩
       supp-tgt (susp-pd pd) ∎
 
-suspSubTy TyNull = TyExt (TyExt TyNull TyStar getFstTy) TyStar getSndTy
-suspSubTy (TyExt p q r) = TyExt (suspSubTy p) (suspTyTy q) (term-conversion (suspTmTy r) (reflexive≈ty (susp-functorial-ty _ _)))
+suspSubTy TyNull = TyExt (TyExt TyNull getFstTy) getSndTy
+suspSubTy (TyExt p r) = TyExt (suspSubTy p) (term-conversion (suspTmTy r) (reflexive≈ty (susp-functorial-ty _ _)))
 
 getFstTy {Γ = ∅} = TyVarS zero (TyVarZ Star≈) Star≈
 getFstTy {Γ = Γ , A} = lift-tm-typing getFstTy

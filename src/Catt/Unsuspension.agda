@@ -70,13 +70,21 @@ is-unsuspendable-tm (Coh {n = zero} Δ A σ) = ⊥
 is-unsuspendable-tm (Coh {n = suc zero} Δ A σ) = ⊥
 is-unsuspendable-tm (Coh {n = suc (suc n)} Δ A σ) = is-unsuspendable-ctx Δ × is-unsuspendable-ty A × is-unsuspendable-sub σ
 
-unsuspend-tm {n = n} (Var i) = Var (fromℕ< (recompute (toℕ i <? n) it))
+fromℕ<Irrel : ∀ {m n} → .(m < n) → Fin n
+fromℕ<Irrel {zero}  {suc n} m≤n = zero
+fromℕ<Irrel {suc m} {suc n} m≤n = suc (fromℕ<Irrel (≤-pred m≤n))
+
+toℕ-fromℕ<Irrel : ∀ {m n} .(m<n : m < n) → toℕ (fromℕ<Irrel m<n) ≡ m
+toℕ-fromℕ<Irrel {zero} {suc n} m≤n = refl
+toℕ-fromℕ<Irrel {suc m} {suc n} m≤n = cong suc (toℕ-fromℕ<Irrel (≤-pred m≤n))
+
+unsuspend-tm {n = n} (Var i) = Var (fromℕ<Irrel it)
 unsuspend-tm (Coh {n = suc (suc n)} Δ A σ) ⦃ x ⦄ = Coh (unsuspend-ctx Δ ⦃ proj₁ x ⦄) (unsuspend-ty A ⦃ proj₁ (proj₂ x) ⦄) (unsuspend-sub σ ⦃ proj₂ (proj₂ x) ⦄)
 
 unsuspend-tm-compat {n = n} (Var i) = Var≃ refl (begin
-  toℕ (inject₁ (inject₁ (fromℕ< (recompute (toℕ i <? n) _)))) ≡⟨ toℕ-inject₁ _ ⟩
-  toℕ (inject₁ (fromℕ< (recompute (toℕ i <? n) _))) ≡⟨ toℕ-inject₁ _ ⟩
-  toℕ (fromℕ< (recompute (toℕ i <? n) _)) ≡⟨ toℕ-fromℕ< _ ⟩
+  toℕ (inject₁ (inject₁ (fromℕ<Irrel _))) ≡⟨ toℕ-inject₁ _ ⟩
+  toℕ (inject₁ (fromℕ<Irrel _)) ≡⟨ toℕ-inject₁ _ ⟩
+  toℕ (fromℕ<Irrel _) ≡⟨ toℕ-fromℕ<Irrel _ ⟩
   toℕ i ∎)
   where
     open ≡-Reasoning

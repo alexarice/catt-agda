@@ -14,6 +14,8 @@ open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Relation.Binary.PropositionalEquality
 open import Data.Fin.Properties using (toℕ-injective)
+import Relation.Binary.Reasoning.Setoid as Reasoning
+open import Catt.Syntax.Bundles
 
 term-conversion : Typing-Tm Γ t A → A ≈[ Γ ]ty B → Typing-Tm Γ t B
 -- term-conversion (TyVar i x) eq = TyVar i (trans≈ty x eq)
@@ -21,6 +23,10 @@ term-conversion (TyVarZ x) eq = TyVarZ (trans≈ty x eq)
 term-conversion (TyVarS i tvi x) eq = TyVarS i tvi (trans≈ty x eq)
 term-conversion (TyCoh p q r s t) eq = TyCoh p q r s (trans≈ty t eq)
 term-conversion (TyComp pd p q r s t) eq = TyComp pd p q r s (trans≈ty t eq)
+
+-- type-conversion : Typing-Ty Γ A → A ≈[ Γ ]ty B → Typing-Ty Γ B
+-- type-conversion TyStar Star≈ = TyStar
+-- type-conversion (TyArr sty Aty tty) (Arr≈ p q r) = TyArr {!!} {!!} {!!}
 
 lift-ty-typing : Typing-Ty Γ A → Typing-Ty (Γ , B) (liftType A)
 lift-tm-typing : Typing-Tm Γ t A → Typing-Tm (Γ , B) (liftTerm t) (liftType A)
@@ -100,9 +106,22 @@ apply-sub-eq-tm (Coh Δ A σ) eq = Coh≈ refl≈ty (apply-sub-eq-sub σ eq)
 apply-sub-eq-sub ⟨⟩ eq = Null≈
 apply-sub-eq-sub ⟨ μ , t ⟩ eq = Ext≈ (apply-sub-eq-sub μ eq) (apply-sub-eq-tm t eq)
 
-id-ty : {Γ : Ctx n} → Typing-Sub Γ Γ (idSub n)
-id-ty {Γ = ∅} = TyNull
-id-ty {Γ = Γ , A} = TyExt (lift-sub-typing id-ty) (TyVarZ (reflexive≈ty (trans≃ty (sym≃ty (id-on-ty (liftType _))) (lift-sub-comp-lem-ty (liftSub (idSub _)) _))))
+id-Ty : {Γ : Ctx n} → Typing-Sub Γ Γ (idSub n)
+id-Ty {Γ = ∅} = TyNull
+id-Ty {Γ = Γ , A} = TyExt (lift-sub-typing id-Ty) (TyVarZ (reflexive≈ty (trans≃ty (sym≃ty (id-on-ty (liftType _))) (lift-sub-comp-lem-ty (liftSub (idSub _)) _))))
+
+idSub≃-Ty : (p : Γ ≃c Δ) → Typing-Sub Γ Δ (idSub≃ p)
+idSub≃-Ty Emp≃ = TyNull
+idSub≃-Ty (Add≃ {A = A} {A′ = A′} p x) = TyExt (lift-sub-typing (idSub≃-Ty p)) (TyVarZ (reflexive≈ty lem))
+  where
+    open Reasoning ty-setoid
+
+    lem : liftType A′ ≃ty (A [ liftSub (idSub≃ p) ]ty)
+    lem = begin
+      < liftType A′ >ty ≈˘⟨ lift-ty-≃ x ⟩
+      < liftType A >ty ≈˘⟨ lift-ty-≃ (idSub≃-on-ty p A) ⟩
+      < liftType (A [ idSub≃ p ]ty) >ty ≈˘⟨ apply-lifted-sub-ty-≃ A (idSub≃ p) ⟩
+      < A [ liftSub (idSub≃ p) ]ty >ty ∎
 
 ty-base-Ty : Typing-Ty Γ A → Typing-Ty Γ (ty-base A)
 ty-base-Ty (TyArr sty Aty tty) = Aty

@@ -43,7 +43,7 @@ sub-from-sphere : Ty n d → Sub (sphere-size d) n
 sub-from-disc Γ t = ⟨ (sub-from-sphere (tm-to-ty Γ t)) , t ⟩
 
 sub-from-sphere ⋆ = ⟨⟩
-sub-from-sphere {d = suc d} (s ─⟨ A ⟩⟶ t) = ⟨ ⟨ sub-from-sphere A , s ⟩ , t ⟩
+sub-from-sphere (s ─⟨ A ⟩⟶ t) = ⟨ ⟨ sub-from-sphere A , s ⟩ , t ⟩
 
 disc-≡ : d ≡ d′ → Disc d ≃c Disc d′
 disc-≡ refl = refl≃c

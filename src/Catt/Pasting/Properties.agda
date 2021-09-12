@@ -8,6 +8,7 @@ open import Catt.Pasting
 open import Relation.Binary.PropositionalEquality
 open import Data.Nat
 open import Data.Nat.Properties
+open import Data.Unit using (⊤; tt)
 open import Data.Empty
 open import Relation.Binary
 open import Axiom.UniquenessOfIdentityProofs
@@ -118,6 +119,20 @@ pdb-dim-lem : {A : Ty (ctxLength Γ) d} (pdb : Γ , A ⊢pd[ submax ][ d′ ]) �
 pdb-dim-lem Base = ≤-refl
 pdb-dim-lem (Extend pdb) = ≤-refl
 pdb-dim-lem (Restr pdb) = ≤-trans (≤-step ≤-refl) (pdb-dim-lem pdb)
+
+isEven : ℕ → Set
+isOdd : ℕ → Set
+
+isEven zero = ⊤
+isEven (suc n) = isOdd n
+
+isOdd zero = ⊥
+isOdd (suc n) = isEven n
+
+pdb-len-lem : Γ ⊢pd[ submax ][ d ] → isOdd (ctxLength Γ)
+pdb-len-lem Base = tt
+pdb-len-lem (Extend pdb) = pdb-len-lem pdb
+pdb-len-lem (Restr pdb) = pdb-len-lem pdb
 
 PDB-irrel : (pdb pdb2 : PDB) → pdb-ctx pdb ≃c pdb-ctx pdb2 → pdb-dm pdb ≡ pdb-dm pdb2 → pdb ≡ pdb2
 PDB-irrel < Base > < Base > p q = refl

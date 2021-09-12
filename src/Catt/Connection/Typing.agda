@@ -31,7 +31,7 @@ connect-inc-right-Ty tty (∅ , A) with ≃ty-preserve-height (⋆-is-only-ty-in
 connect-inc-right-Ty tty (Δ , A , B) = TyExt (lift-sub-typing (connect-inc-right-Ty tty (Δ , A))) (TyVarZ (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ _ (connect-inc-right _ _)))))
 
 connect-inc-left-Ty : {Γ : Ctx (suc n)} → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → (Δ : Ctx (suc m)) → Typing-Sub Γ (connect Γ t Δ) (connect-inc-left t m)
-connect-inc-left-Ty tty (∅ , A) = id-ty
+connect-inc-left-Ty tty (∅ , A) = id-Ty
 connect-inc-left-Ty tty (Δ , A , B) = lift-sub-typing (connect-inc-left-Ty tty (Δ , A))
 
 connect-pdb-Ty : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Typing-Ctx Δ → Typing-Ctx (connect-pdb pdb Δ)

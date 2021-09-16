@@ -15,7 +15,9 @@ open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Connection.Properties
 open import Data.Empty
-open import Data.Unit
+open import Data.Unit using (⊤; tt)
+open import Relation.Nullary
+
 
 disc-size : ℕ → ℕ
 sphere-size : ℕ → ℕ
@@ -45,8 +47,9 @@ sub-from-disc Γ t = ⟨ (sub-from-sphere (tm-to-ty Γ t)) , t ⟩
 sub-from-sphere ⋆ = ⟨⟩
 sub-from-sphere (s ─⟨ A ⟩⟶ t) = ⟨ ⟨ sub-from-sphere A , s ⟩ , t ⟩
 
-disc-≡ : d ≡ d′ → Disc d ≃c Disc d′
-disc-≡ refl = refl≃c
+disc-≡ : .(d ≡ d′) → Disc d ≃c Disc d′
+disc-≡ p with recompute (_ ≟ _) p
+... | refl = refl≃c
 
 disc-susp : (n : ℕ) → suspCtx (Disc n) ≃c Disc (suc n)
 sphere-susp : (n : ℕ) → suspCtx (Sphere n) ≃c Sphere (suc n)
@@ -66,10 +69,23 @@ is-linear Sing = ⊤
 is-linear (Join S Sing) = is-linear S
 is-linear (Join S (Join _ _)) = ⊥
 
+is-linear-dec : (T : Tree n) → Dec (is-linear T)
+is-linear-dec Sing = yes tt
+is-linear-dec (Join S Sing) = is-linear-dec S
+is-linear-dec (Join S (Join T T₁)) = no (λ x → x)
+
 -- Use tree-dim
 height-of-linear : (T : Tree n) → .⦃ is-linear T ⦄ → ℕ
 height-of-linear Sing = 0
 height-of-linear (Join S Sing) = suc (height-of-linear S)
+
+extend-is-linear : (T : Tree n) → .⦃ _ : is-linear T ⦄ → d ≡ height-of-linear T → .⦃ _ : n-extendable d T ⦄ → is-linear (extend-tree d T)
+extend-is-linear Sing refl = tt
+extend-is-linear {d = suc d} (Join S Sing) p = extend-is-linear S (cong pred p)
+
+extend-lin-height-suc : (T : Tree n) → .⦃ _ : is-linear T ⦄ → (p : d ≡ height-of-linear T) → .⦃ _ : n-extendable d T ⦄ → height-of-linear (extend-tree d T) ⦃ extend-is-linear T p ⦄ ≡ suc (height-of-linear T)
+extend-lin-height-suc Sing refl = refl
+extend-lin-height-suc {d = suc d} (Join T Sing) p = cong suc (extend-lin-height-suc T (cong pred p))
 
 linear-tree-compat : (T : Tree n) → .⦃ _ : is-linear T ⦄ → tree-to-ctx T ≃c Disc (height-of-linear T)
 linear-tree-compat Sing = Add≃ Emp≃ (Star≃ refl)

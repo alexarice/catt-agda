@@ -14,7 +14,7 @@ open import Data.Fin using (Fin;zero;suc;inject₁;toℕ;fromℕ)
 open import Relation.Binary.PropositionalEquality
 open import Catt.Globular
 open import Catt.Globular.Properties
--- open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁)
+open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁)
 
 suspCtx : Ctx n → Ctx (2 + n)
 suspTy : Ty n d → Ty (2 + n) (suc d)
@@ -38,6 +38,25 @@ suspTm (Coh Δ A σ) = Coh (suspCtx Δ) (suspTy A) (suspSub σ)
 
 suspSub ⟨⟩ = ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩
 suspSub ⟨ σ , t ⟩ = ⟨ suspSub σ , suspTm t ⟩
+
+susp-ctx-≃ : Γ ≃c Δ → suspCtx Γ ≃c suspCtx Δ
+susp-ty-≃ : A ≃ty B → suspTy A ≃ty suspTy B
+susp-tm-≃ : s ≃tm t → suspTm s ≃tm suspTm t
+susp-sub-≃ : σ ≃s τ → suspSub σ ≃s suspSub τ
+
+susp-ctx-≃ Emp≃ = refl≃c
+susp-ctx-≃ (Add≃ p q) = Add≃ (susp-ctx-≃ p) (susp-ty-≃ q)
+
+susp-ty-≃ (Star≃ x) with x
+... | refl = refl≃ty
+susp-ty-≃ (Arr≃ q r s) = Arr≃ (susp-tm-≃ q) (susp-ty-≃ r) (susp-tm-≃ s)
+
+susp-tm-≃ (Var≃ p q) = Var≃ (cong suc (cong suc p)) (trans (toℕ-inject₁ (inject₁ _)) (trans (toℕ-inject₁ _) (trans q (sym (trans (toℕ-inject₁ (inject₁ _)) (toℕ-inject₁ _))))))
+susp-tm-≃ (Coh≃ q r s) = Coh≃ (susp-ctx-≃ q) (susp-ty-≃ r) (susp-sub-≃ s)
+
+susp-sub-≃ (Null≃ x) with x
+... | refl = refl≃s
+susp-sub-≃ (Ext≃ r s) = Ext≃ (susp-sub-≃ r) (susp-tm-≃ s)
 
 susp-ty-lift : (B : Ty n d) → suspTy (liftType B) ≃ty liftType (suspTy B)
 susp-tm-lift : (t : Tm n) → suspTm (liftTerm t) ≃tm liftTerm (suspTm t)
@@ -74,29 +93,22 @@ susp-pdb-≃-lem pdb = Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb)) (lif
                           (trans≃ty (susp-ty-lift (getFocusType pdb)) (lift-ty-≃ (susp-pdb-foc-ty pdb)))
                           (Var≃ refl refl)
 
-susp-pdb Base = Extend Base
-susp-pdb (Extend pdb)
-  = extend-pd-eq (susp-pdb pdb)
-                 (susp-pdb-foc-ty pdb)
-                 (susp-pdb-≃-lem pdb)
+susp-pdb Base = Extend Base refl≃ty refl≃ty
+susp-pdb (Extend pdb p q)
+  = Extend (susp-pdb pdb)
+           (trans≃ty (susp-ty-≃ p) (susp-pdb-foc-ty pdb))
+           (trans≃ty (susp-ty-≃ q) (susp-pdb-≃-lem pdb))
 susp-pdb (Restr pdb) = Restr (susp-pdb pdb)
 
 susp-pdb-foc-tm Base = refl≃tm
-susp-pdb-foc-tm (Extend pdb)
-  = extend-pd-eq-foc-tm (susp-pdb pdb)
-                        (susp-pdb-foc-ty pdb)
-                        (susp-pdb-≃-lem pdb)
+susp-pdb-foc-tm (Extend pdb p q)
+  = refl≃tm
 susp-pdb-foc-tm (Restr pdb)
   = trans≃tm (susp-tgt-compat (getFocusType pdb)) (ty-tgt-≃ (susp-pdb-foc-ty pdb))
 
 susp-pdb-foc-ty Base = refl≃ty
-susp-pdb-foc-ty (Extend pdb)
-  = trans≃ty (Arr≃ (susp-tm-lift (liftTerm (getFocusTerm pdb)))
-                   (susp-ty-lift (liftType (getFocusType pdb)))
-                   refl≃tm)
-             (extend-pd-eq-foc-ty (susp-pdb pdb)
-                                  (susp-pdb-foc-ty pdb)
-                                  (susp-pdb-≃-lem pdb))
+susp-pdb-foc-ty (Extend pdb p q)
+  = susp-ty-lift _
 susp-pdb-foc-ty (Restr pdb)
   = trans≃ty (susp-base-compat (getFocusType pdb)) (ty-base-≃ (susp-pdb-foc-ty pdb))
 

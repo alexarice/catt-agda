@@ -39,17 +39,57 @@ connect-inc-right-≃ {m = suc m} refl q refl = Ext≃ (lift-sub-≃ (connect-in
 
 -- connect left unit
 
--- connect-left-unit : (Γ : Ctx) → .⦃ _ : NonZero′ (ctxLength Γ) ⦄ → connect (∅ , ⋆) 0V Γ ≃c Γ
--- connect-inc-right-left-unit : (Γ : Ctx) → .⦃ _ : NonZero′ (ctxLength Γ) ⦄ → connect-inc-right (∅ , ⋆) 0V Γ ≃s idSub Γ
+connect-left-unit : (Γ : Ctx (suc n)) → connect (∅ , ⋆) 0V Γ ≃c Γ
+connect-inc-right-left-unit : (m : ℕ) → connect-inc-right 0V m ≃s idSub (suc m)
 
--- connect-left-unit (∅ , A) = Add≃ Emp≃ {!!}
--- connect-left-unit (Γ , A , B) = Add≃ (connect-left-unit (Γ , A)) (trans≃ty (sub-action-≃-ty refl≃ty (connect-inc-right-left-unit (Γ , A))) (id-on-ty B))
+connect-left-unit (∅ , A) = Add≃ Emp≃ (sym≃ty (⋆-is-only-ty-in-empty-context A))
+connect-left-unit (Γ , A , B) = Add≃ (connect-left-unit (Γ , A)) (trans≃ty (sub-action-≃-ty refl≃ty (connect-inc-right-left-unit _)) (id-on-ty B))
 
--- connect-inc-right-left-unit (∅ , A) = {!!}
--- connect-inc-right-left-unit (Γ , A , B) = Ext≃ (lift-sub-≃ (connect-inc-right-left-unit (Γ , A))) (Var≃ refl)
+connect-inc-right-left-unit zero = refl≃s
+connect-inc-right-left-unit (suc m) = Ext≃ (lift-sub-≃ (connect-inc-right-left-unit m)) (Var≃ (cong suc (cong suc (+-identityʳ m))) refl)
 
--- connect-pdb-left-unit : (Γ : Ctx) → .⦃ _ : NonZero′ (ctxLength Γ) ⦄ → connect-pdb Base Γ ≃c Γ
--- connect-pdb-left-unit Γ = connect-left-unit Γ
+connect-pdb-left-unit : (Γ : Ctx (suc n)) → connect-pdb Base Γ ≃c Γ
+connect-pdb-left-unit Γ = connect-left-unit Γ
+
+connect-inc-right-assoc : (t : Tm (suc l)) → (s : Tm (suc m)) → (n : ℕ)
+                        → connect-inc-right (s [ connect-inc-right t m ]tm) n
+                          ≃s
+                          connect-inc-right t (n + m) ∘ connect-inc-right s n
+connect-inc-right-assoc t s zero = refl≃s
+connect-inc-right-assoc t s (suc n) = Ext≃ lem (Var≃ (cong suc (cong suc (sym (+-assoc n _ _)))) refl)
+  where
+    open Reasoning sub-setoid
+    lem : liftSub (connect-inc-right (s [ connect-inc-right t _ ]tm) n) ≃s
+          (connect-inc-right t (suc n + _) ∘ liftSub (connect-inc-right s n))
+    lem = begin
+      < liftSub (connect-inc-right (s [ connect-inc-right t _ ]tm) n) >s
+        ≈⟨ lift-sub-≃ (connect-inc-right-assoc t s n) ⟩
+      < liftSub (connect-inc-right t (n + _) ∘ connect-inc-right s n) >s
+        ≈˘⟨ apply-lifted-sub-sub-≃ (connect-inc-right s n) (connect-inc-right t (n + _)) ⟩
+      < liftSub (connect-inc-right t (n + _)) ∘ connect-inc-right s n >s
+        ≈˘⟨ lift-sub-comp-lem-sub (liftSub (connect-inc-right t (n + _))) (connect-inc-right s n) ⟩
+      < ⟨ liftSub (connect-inc-right t (n + _)) , Var zero ⟩ ∘ liftSub (connect-inc-right s n) >s ∎
+
+connect-assoc : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → (s : Tm (suc m)) → (Υ : Ctx (suc l))
+              → connect (connect Γ t Δ) (s [ connect-inc-right t m ]tm) Υ ≃c connect Γ t (connect Δ s Υ)
+connect-assoc Γ t Δ s (∅ , A) = refl≃c
+connect-assoc Γ t (Δ , A′) s (∅ , B , A) = Add≃ refl≃c (assoc-ty _ _ A)
+connect-assoc Γ t (Δ , A′) s (Υ , C , B , A) = Add≃ (connect-assoc Γ t (Δ , A′) s (Υ , C , B)) (begin
+  < A [ connect-inc-right (s [ connect-inc-right t _ ]tm) (ctxLength (Υ , C)) ]ty
+    >ty ≈⟨ sub-action-≃-ty (refl≃ty {A = A}) (connect-inc-right-assoc t s _) ⟩
+  < A [ connect-inc-right t (ctxLength (connect (Δ , A′) s (Υ , C)))
+      ∘ connect-inc-right s (ctxLength (Υ , C)) ]ty >ty
+    ≈⟨ assoc-ty _ _ A ⟩
+  < A [ connect-inc-right s (ctxLength (Υ , C)) ]ty
+      [ connect-inc-right t (ctxLength (connect (Δ , A′) s (Υ , C))) ]ty >ty ∎)
+  where
+    open Reasoning ty-setoid
+
+connect-pdb-assoc : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ]) → (Υ : Ctx (suc l)) → connect-pdb (connect-pdb-pdb pdb pdb2) Υ ≃c connect-pdb pdb (connect-pdb pdb2 Υ)
+connect-pdb-assoc {Γ = Γ} {Δ = Δ} pdb pdb2 Υ = trans≃c (connect-≃ (refl≃c {Γ = connect Γ (getFocusTerm pdb) Δ}) (sym≃tm (connect-pdb-foc-tm pdb pdb2)) (refl≃c {Γ = Υ})) (connect-assoc _ (getFocusTerm pdb) _ (getFocusTerm pdb2) Υ)
+
+connect-pd-assoc : (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → (Υ : Ctx (suc l)) → connect-pd (connect-pd-pd pd pd2) Υ ≃c connect-pd pd (connect-pd pd2 Υ)
+connect-pd-assoc (Finish pdb) (Finish pdb2) = connect-pdb-assoc pdb pdb2
 
 sub-from-connect-inc-left : (σ : Sub (suc n) l) → (t : Tm (suc n)) → (τ : Sub (suc m) l) → sub-from-connect σ t τ ∘ connect-inc-left t m ≃s σ
 sub-from-connect-inc-left σ t τ@(⟨ ⟨⟩ , s ⟩) = id-right-unit (sub-from-connect σ t τ)
@@ -71,6 +111,34 @@ sub-from-connect-pdb-inc-right pdb σ τ p = sub-from-connect-inc-right σ (getF
 sub-from-connect-pd-inc-right : (pd : Γ ⊢pd₀ d) → (σ : Sub (ctxLength Γ) l) → (τ : Sub (suc m) l) → (pd-focus-tm pd [ σ ]tm ≃tm (Var (fromℕ _) [ τ ]tm)) → sub-from-connect-pd pd σ τ ∘ connect-pd-inc-right pd m ≃s τ
 sub-from-connect-pd-inc-right (Finish pdb) σ τ p = sub-from-connect-pdb-inc-right pdb σ τ p
 
+sub-between-connects-inc-left : (σ : Sub (suc n) (suc l))
+                              → (t : Tm (suc n))
+                              → (τ : Sub (suc m) (suc l′))
+                              → (s : Tm (suc l))
+                              → sub-between-connects σ t τ s ∘ connect-inc-left t m
+                              ≃s connect-inc-left s l′ ∘ σ
+sub-between-connects-inc-left {l′ = l′} σ t τ s = sub-from-connect-inc-left (connect-inc-left s l′ ∘ σ) t (connect-inc-right s l′ ∘ τ)
+
+sub-between-connect-pdbs-inc-left : {Γ : Ctx (suc n)}
+                                 → (pdb : Γ ⊢pd[ submax ][ 0 ])
+                                 → {Δ : Ctx (suc l)}
+                                 → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ])
+                                 → (σ : Sub (suc n) (suc l))
+                                 → (τ : Sub (suc m) (suc l′))
+                                 → sub-between-connect-pdbs pdb pdb2 σ τ ∘ connect-pdb-inc-left pdb m
+                                 ≃s connect-pdb-inc-left pdb2 l′ ∘ σ
+sub-between-connect-pdbs-inc-left pdb pdb2 σ τ = sub-between-connects-inc-left σ (getFocusTerm pdb) τ (getFocusTerm pdb2)
+
+sub-between-connect-pds-inc-left : {Γ : Ctx (suc n)}
+                                 → (pd : Γ ⊢pd₀ d)
+                                 → {Δ : Ctx (suc l)}
+                                 → (pd2 : Δ ⊢pd₀ d′)
+                                 → (σ : Sub (suc n) (suc l))
+                                 → (τ : Sub (suc m) (suc l′))
+                                 → sub-between-connect-pds pd pd2 σ τ ∘ connect-pd-inc-left pd m
+                                 ≃s connect-pd-inc-left pd2 l′ ∘ σ
+sub-between-connect-pds-inc-left (Finish pdb) (Finish pdb2) = sub-between-connect-pdbs-inc-left pdb pdb2
+
 connect-inc-fst-var : (t : Tm (suc n)) → (m : ℕ) → t [ connect-inc-left t m ]tm ≃tm Var (fromℕ _) [ connect-inc-right t m ]tm
 connect-inc-fst-var t zero = id-on-tm t
 connect-inc-fst-var t (suc m) = begin
@@ -87,6 +155,53 @@ connect-pdb-inc-fst-var pdb = connect-inc-fst-var (getFocusTerm pdb)
 connect-pd-inc-fst-var : (pd : Γ ⊢pd₀ d) → (m : ℕ)
   → pd-focus-tm pd [ connect-pd-inc-left pd m ]tm ≃tm Var (fromℕ _) [ connect-pd-inc-right pd m ]tm
 connect-pd-inc-fst-var (Finish pdb) = connect-pdb-inc-fst-var pdb
+
+sub-between-connects-inc-right : (σ : Sub (suc n) (suc l))
+                               → (t : Tm (suc n))
+                               → (τ : Sub (suc m) (suc l′))
+                               → (s : Tm (suc l))
+                               → t [ σ ]tm ≃tm s
+                               → Var (fromℕ _) [ τ ]tm ≃tm Var (fromℕ l′)
+                               → sub-between-connects σ t τ s ∘ connect-inc-right t m
+                               ≃s connect-inc-right s l′ ∘ τ
+sub-between-connects-inc-right {l′ = l′} σ t τ s p q = sub-from-connect-inc-right (connect-inc-left s l′ ∘ σ ) t (connect-inc-right s l′ ∘ τ) (begin
+  < t [ connect-inc-left s l′ ∘ σ ]tm >tm
+    ≈⟨ assoc-tm (connect-inc-left s l′) σ t ⟩
+  < (t [ σ ]tm) [ connect-inc-left s l′ ]tm >tm
+    ≈⟨ sub-action-≃-tm p refl≃s ⟩
+  < s [ connect-inc-left s l′ ]tm >tm
+    ≈⟨ connect-inc-fst-var s l′ ⟩
+  < Var (fromℕ l′) [ connect-inc-right s l′ ]tm >tm
+    ≈˘⟨ sub-action-≃-tm q refl≃s ⟩
+  < (Var (fromℕ _) [ τ ]tm) [ connect-inc-right s l′ ]tm >tm
+    ≈˘⟨ assoc-tm (connect-inc-right s l′) τ (Var (fromℕ _)) ⟩
+  < Var (fromℕ _) [ connect-inc-right s l′ ∘ τ ]tm >tm ∎)
+  where
+    open Reasoning tm-setoid
+
+sub-between-connect-pdbs-inc-right : {Γ : Ctx (suc n)}
+                                   → (pdb : Γ ⊢pd[ submax ][ 0 ])
+                                   → {Δ : Ctx (suc l)}
+                                   → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ])
+                                   → (σ : Sub (suc n) (suc l))
+                                   → (τ : Sub (suc m) (suc l′))
+                                   → getFocusTerm pdb [ σ ]tm ≃tm getFocusTerm pdb2
+                                   → Var (fromℕ _) [ τ ]tm ≃tm Var (fromℕ l′)
+                                   → sub-between-connect-pdbs pdb pdb2 σ τ ∘ connect-pdb-inc-right pdb m
+                                   ≃s connect-pdb-inc-right pdb2 l′ ∘ τ
+sub-between-connect-pdbs-inc-right pdb pdb2 σ τ = sub-between-connects-inc-right σ (getFocusTerm pdb) τ (getFocusTerm pdb2)
+
+sub-between-connect-pds-inc-right : {Γ : Ctx (suc n)}
+                                   → (pd : Γ ⊢pd₀ d)
+                                   → {Δ : Ctx (suc l)}
+                                   → (pd2 : Δ ⊢pd₀ d′)
+                                   → (σ : Sub (suc n) (suc l))
+                                   → (τ : Sub (suc m) (suc l′))
+                                   → pd-focus-tm pd [ σ ]tm ≃tm pd-focus-tm pd2
+                                   → Var (fromℕ _) [ τ ]tm ≃tm Var (fromℕ l′)
+                                   → sub-between-connect-pds pd pd2 σ τ ∘ connect-pd-inc-right pd m
+                                   ≃s connect-pd-inc-right pd2 l′ ∘ τ
+sub-between-connect-pds-inc-right (Finish pdb) (Finish pdb2) = sub-between-connect-pdbs-inc-right pdb pdb2
 
 connect-inc-left-fst-var : (t : Tm (suc n)) → (m : ℕ) → Var (fromℕ _) [ connect-inc-left t m ]tm ≃tm Var {suc (m + n)} (fromℕ _)
 connect-inc-left-fst-var t zero = id-on-tm (Var (fromℕ _))
@@ -108,6 +223,115 @@ sub-from-connect-pdb-fst-var pdb σ τ = sub-from-connect-fst-var σ (getFocusTe
 sub-from-connect-pd-fst-var : (pd : Γ ⊢pd₀ d) → (σ : Sub (ctxLength Γ) l) → (τ : Sub (suc m) l) →
   Var (fromℕ _) [ sub-from-connect-pd pd σ τ ]tm ≃tm Var (fromℕ _) [ σ ]tm
 sub-from-connect-pd-fst-var (Finish pdb) σ τ = sub-from-connect-pdb-fst-var pdb σ τ
+
+sub-between-connects-fst-var : (σ : Sub (suc n) (suc l))
+                             → (t : Tm (suc n))
+                             → (τ : Sub (suc m) (suc l′))
+                             → (s : Tm (suc l))
+                             → Var (fromℕ _) [ σ ]tm ≃tm Var (fromℕ l)
+                             → Var (fromℕ _) [ sub-between-connects σ t τ s ]tm ≃tm Var (fromℕ (l′ + l))
+sub-between-connects-fst-var {l′ = l′} σ t τ s p = begin
+  < Var (fromℕ _)
+    [ sub-from-connect (connect-inc-left s l′ ∘ σ) t (connect-inc-right s l′ ∘ τ) ]tm >tm
+    ≈⟨ sub-from-connect-fst-var (connect-inc-left s l′ ∘ σ) t (connect-inc-right s l′ ∘ τ) ⟩
+  < Var (fromℕ _) [ connect-inc-left s l′ ∘ σ ]tm >tm
+    ≈⟨ assoc-tm (connect-inc-left s l′) σ (Var (fromℕ _)) ⟩
+  < Var (fromℕ _) [ σ ]tm [ connect-inc-left s l′ ]tm >tm
+    ≈⟨ sub-action-≃-tm p refl≃s ⟩
+  < Var (fromℕ _) [ connect-inc-left s l′ ]tm >tm
+    ≈⟨ connect-inc-left-fst-var s l′ ⟩
+  < Var (fromℕ _) >tm ∎
+  where
+    open Reasoning tm-setoid
+
+sub-between-connect-pdbs-fst-var : {Γ : Ctx (suc n)}
+                                 → (pdb : Γ ⊢pd[ submax ][ 0 ])
+                                 → {Δ : Ctx (suc l)}
+                                 → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ])
+                                 → (σ : Sub (suc n) (suc l))
+                                 → (τ : Sub (suc m) (suc l′))
+                                 → Var (fromℕ _) [ σ ]tm ≃tm Var (fromℕ l)
+                                 → Var (fromℕ _) [ sub-between-connect-pdbs pdb pdb2 σ τ ]tm ≃tm Var (fromℕ (l′ + l))
+sub-between-connect-pdbs-fst-var pdb pdb2 σ τ = sub-between-connects-fst-var σ (getFocusTerm pdb) τ (getFocusTerm pdb2)
+
+sub-between-connect-pds-fst-var : {Γ : Ctx (suc n)}
+                                 → (pd : Γ ⊢pd₀ d)
+                                 → {Δ : Ctx (suc l)}
+                                 → (pd2 : Δ ⊢pd₀ d′)
+                                 → (σ : Sub (suc n) (suc l))
+                                 → (τ : Sub (suc m) (suc l′))
+                                 → Var (fromℕ _) [ σ ]tm ≃tm Var (fromℕ l)
+                                 → Var (fromℕ _) [ sub-between-connect-pds pd pd2 σ τ ]tm ≃tm Var (fromℕ (l′ + l))
+sub-between-connect-pds-fst-var (Finish pdb) (Finish pdb2) = sub-between-connect-pdbs-fst-var pdb pdb2
+
+sub-between-connects-comp : (σ : Sub (suc n) (suc l))
+                          → (t : Tm (suc n))
+                          → (τ : Sub (suc m) (suc l′))
+                          → (s : Tm (suc l))
+                          → (σ′ : Sub (suc l) (suc n′))
+                          → (u : Tm (suc n′))
+                          → (τ′ : Sub (suc l′) (suc m′))
+                          → s [ σ′ ]tm ≃tm u
+                          → Var (fromℕ l′) [ τ′ ]tm ≃tm Var (fromℕ m′)
+                          → sub-between-connects σ′ s τ′ u ∘ sub-between-connects σ t τ s
+                          ≃s sub-between-connects (σ′ ∘ σ) t (τ′ ∘ τ) u
+sub-between-connects-comp {l′ = l′} {m′ = m′} σ t ⟨ ⟨⟩ , x ⟩ s σ′ u τ′ p q = begin
+  < sub-from-connect (connect-inc-left u m′ ∘ σ′) s (connect-inc-right u m′ ∘ τ′)
+    ∘ (connect-inc-left s l′ ∘ σ) >s
+    ≈˘⟨ ∘-assoc (sub-from-connect (connect-inc-left u m′ ∘ σ′) s
+                  (connect-inc-right u m′ ∘ τ′)) (connect-inc-left s l′) σ ⟩
+  < sub-from-connect (connect-inc-left u m′ ∘ σ′) s (connect-inc-right u m′ ∘ τ′)
+    ∘ connect-inc-left s l′
+    ∘ σ >s
+    ≈⟨ sub-action-≃-sub refl≃s (sub-from-connect-inc-left (connect-inc-left u m′ ∘ σ′) s (connect-inc-right u m′ ∘ τ′)) ⟩
+  < connect-inc-left u m′ ∘ σ′ ∘ σ >s
+    ≈⟨ ∘-assoc (connect-inc-left u m′) σ′ σ ⟩
+  < connect-inc-left u m′ ∘ (σ′ ∘ σ) >s ∎
+  where
+    open Reasoning sub-setoid
+sub-between-connects-comp {l′ = l′} {m′ = m′} σ t ⟨ ⟨ τ , y ⟩ , x ⟩ s σ′ u τ′ p q = Ext≃ (sub-between-connects-comp σ t ⟨ τ , y ⟩ s σ′ u τ′ p q) (begin
+  < x [ connect-inc-right s l′ ]tm
+      [ sub-between-connects σ′ s τ′ u ]tm >tm
+    ≈˘⟨ assoc-tm (sub-between-connects σ′ s τ′ u) (connect-inc-right s l′) x ⟩
+  < x [ sub-between-connects σ′ s τ′ u ∘ connect-inc-right s l′ ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = x}) (sub-between-connects-inc-right σ′ s τ′ u p q) ⟩
+  < x [ connect-inc-right u m′ ∘ τ′ ]tm >tm
+    ≈⟨ assoc-tm (connect-inc-right u m′) τ′ x ⟩
+  < x [ τ′ ]tm [ connect-inc-right u m′ ]tm >tm ∎)
+  where
+    open Reasoning tm-setoid
+
+sub-between-connect-pdbs-comp : {Γ : Ctx (suc n)}
+                              → (pdb : Γ ⊢pd[ submax ][ 0 ])
+                              → {Δ : Ctx (suc l)}
+                              → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ])
+                              → {Υ : Ctx (suc n′)}
+                              → (pdb3 : Υ ⊢pd[ submax″ ][ 0 ])
+                              → (σ : Sub (suc n) (suc l))
+                              → (τ : Sub (suc m) (suc l′))
+                              → (σ′ : Sub (suc l) (suc n′))
+                              → (τ′ : Sub (suc l′) (suc m′))
+                              → getFocusTerm pdb2 [ σ′ ]tm ≃tm getFocusTerm pdb3
+                              → Var (fromℕ l′) [ τ′ ]tm ≃tm Var (fromℕ m′)
+                              → sub-between-connect-pdbs pdb2 pdb3 σ′ τ′ ∘ sub-between-connect-pdbs pdb pdb2 σ τ
+                              ≃s sub-between-connect-pdbs pdb pdb3 (σ′ ∘ σ) (τ′ ∘ τ)
+sub-between-connect-pdbs-comp pdb pdb2 pdb3 σ τ σ′ τ′ = sub-between-connects-comp σ (getFocusTerm pdb) τ (getFocusTerm pdb2) σ′ (getFocusTerm pdb3) τ′
+
+sub-between-connect-pds-comp : {Γ : Ctx (suc n)}
+                              → (pd : Γ ⊢pd₀ d)
+                              → {Δ : Ctx (suc l)}
+                              → (pd2 : Δ ⊢pd₀ d′)
+                              → {Υ : Ctx (suc n′)}
+                              → (pd3 : Υ ⊢pd₀ d″)
+                              → (σ : Sub (suc n) (suc l))
+                              → (τ : Sub (suc m) (suc l′))
+                              → (σ′ : Sub (suc l) (suc n′))
+                              → (τ′ : Sub (suc l′) (suc m′))
+                              → pd-focus-tm pd2 [ σ′ ]tm ≃tm pd-focus-tm pd3
+                              → Var (fromℕ l′) [ τ′ ]tm ≃tm Var (fromℕ m′)
+                              → sub-between-connect-pds pd2 pd3 σ′ τ′ ∘ sub-between-connect-pds pd pd2 σ τ
+                              ≃s sub-between-connect-pds pd pd3 (σ′ ∘ σ) (τ′ ∘ τ)
+sub-between-connect-pds-comp (Finish pdb) (Finish pdb2) (Finish pdb3) = sub-between-connect-pdbs-comp pdb pdb2 pdb3
 
 connect-var-split : (t : Tm (suc n)) → (m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
 connect-var-split t zero i = inj₁ i

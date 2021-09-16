@@ -12,10 +12,6 @@ open import Catt.Pasting
 open import Data.Nat
 open import Data.Nat.Properties
 open import Relation.Binary.PropositionalEquality
-open import Data.Nat.Induction
-open import Catt.Pasting.Insertion
-open import Catt.Pasting.Tree
-open import Catt.Pasting.Properties
 open import Catt.Support
 
 private
@@ -61,10 +57,10 @@ data Typing-Ctx where
 
 data Typing-Tm where
   -- TyVar : {Γ : Ctx n} → (i : Fin n) → {B : Ty n d} → (Γ ‼ i) ≈[ Γ ]ty B → Typing-Tm Γ (Var i) B
-  TyVarZ : liftType A ≈[ Γ , A ]ty B → Typing-Tm (Γ , A) 0V B
+  TyVarZ : Γ ‼ zero ≈[ Γ ]ty B → Typing-Tm Γ 0V B
   TyVarS : (i : Fin (ctxLength Γ)) → Typing-Tm Γ (Var i) A → liftType A ≈[ Γ , C ]ty B → Typing-Tm (Γ , C) (Var (suc i)) B
   TyCoh : Δ ⊢pd₀ d → Typing-Ty Δ A → Typing-Sub Δ Γ σ → FVTy A ≡ full → (A [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh Δ A σ) B
-  TyComp : (pd : Δ ⊢pd₀ (suc d)) → Typing-Ty Δ (s ─⟨ A ⟩⟶ t) → Typing-Sub Δ Γ σ → FVTy A ∪ FVTm s ≡ supp-src pd → FVTy A ∪ FVTm t ≡ supp-tgt pd → ((s ─⟨ A ⟩⟶ t) [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ t) σ) B
+  TyComp : (pd : Δ ⊢pd₀ d) → .⦃ _ : NonZero′ d ⦄ → Typing-Ty Δ (s ─⟨ A ⟩⟶ t) → Typing-Sub Δ Γ σ → FVTy A ∪ FVTm s ≡ supp-src pd → FVTy A ∪ FVTm t ≡ supp-tgt pd → ((s ─⟨ A ⟩⟶ t) [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ t) σ) B
   -- TyConv : Typing-Tm Γ t A → A ≈[ Γ ]ty B → Typing-Tm Γ t B
 
 data Typing-Ty where

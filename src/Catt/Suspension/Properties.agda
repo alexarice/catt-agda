@@ -7,6 +7,7 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
 open import Catt.Pasting
+open import Catt.Pasting.Properties
 open import Catt.Suspension
 open import Catt.Globular
 open import Catt.Globular.Properties
@@ -20,26 +21,6 @@ open import Relation.Nullary
 open import Data.Sum
 open import Data.Product renaming (_,_ to _,,_)
 open import Data.Empty
-
-susp-ctx-≃ : Γ ≃c Δ → suspCtx Γ ≃c suspCtx Δ
-susp-ty-≃ : A ≃ty B → suspTy A ≃ty suspTy B
-susp-tm-≃ : s ≃tm t → suspTm s ≃tm suspTm t
-susp-sub-≃ : σ ≃s τ → suspSub σ ≃s suspSub τ
-
-susp-ctx-≃ Emp≃ = refl≃c
-susp-ctx-≃ (Add≃ p q) = Add≃ (susp-ctx-≃ p) (susp-ty-≃ q)
-
-susp-ty-≃ (Star≃ x) with x
-... | refl = refl≃ty
-susp-ty-≃ (Arr≃ q r s) = Arr≃ (susp-tm-≃ q) (susp-ty-≃ r) (susp-tm-≃ s)
-
-susp-tm-≃ (Var≃ p q) = Var≃ (cong suc (cong suc p)) (trans (toℕ-inject₁ (inject₁ _)) (trans (toℕ-inject₁ _) (trans q (sym (trans (toℕ-inject₁ (inject₁ _)) (toℕ-inject₁ _))))))
-susp-tm-≃ (Coh≃ q r s) = Coh≃ (susp-ctx-≃ q) (susp-ty-≃ r) (susp-sub-≃ s)
-
-susp-sub-≃ (Null≃ x) with x
-... | refl = refl≃s
-susp-sub-≃ (Ext≃ r s) = Ext≃ (susp-sub-≃ r) (susp-tm-≃ s)
-
 
 getFst-Lem : suspCtx Γ ≃c suspCtx Δ → getFst {n = ctxLength Γ} ≃tm getFst {n = ctxLength Δ}
 getFst-Lem p = Var≃ (≃c-preserve-length p) (cong (λ - → suc (toℕ (fromℕ (pred (pred -))))) (≃c-preserve-length p))
@@ -58,6 +39,18 @@ susp-sub-preserve-getFst ⟨ σ , t ⟩ = susp-sub-preserve-getFst σ
 susp-sub-preserve-getSnd : (σ : Sub n m) → getSnd {n = m} ≃tm getSnd [ suspSub σ ]tm
 susp-sub-preserve-getSnd ⟨⟩ = refl≃tm
 susp-sub-preserve-getSnd ⟨ σ , t ⟩ = susp-sub-preserve-getSnd σ
+
+susp-pd-focus-tm-is-getSnd : (pd : Γ ⊢pd₀ d) → pd-focus-tm (susp-pd pd) ≃tm getSnd {n = ctxLength Γ}
+susp-pd-focus-tm-is-getSnd (Finish pdb) = begin
+  < ty-tgt (getFocusType (susp-pdb pdb)) >tm
+    ≈˘⟨ ty-tgt-≃ (susp-pdb-foc-ty pdb) ⟩
+  < ty-tgt (suspTy (getFocusType pdb)) >tm
+    ≈˘⟨ ty-tgt-≃ (susp-ty-≃ (⋆-is-only-0-d-ty {A = getFocusType pdb})) ⟩
+  < ty-tgt (suspTy ⋆) >tm
+    ≡⟨⟩
+  < getSnd >tm ∎
+  where
+    open Reasoning tm-setoid
 
 
 susp-functorial : (σ : Sub m l) → (τ : Sub n m) → suspSub (σ ∘ τ) ≃s suspSub σ ∘ suspSub τ
@@ -226,3 +219,119 @@ module _  where
 --                        → sub-from-function {Γ = suspCtx Γ} (susp-function {Γ = Γ} f) ≃s suspSub {Γ = Γ} (sub-from-function f)
 -- sub-from-function-susp {Γ = ∅} f = refl≃s
 -- sub-from-function-susp {Γ = Γ , A} f = Ext≃ (sub-from-function-susp (λ i → f (suc i))) refl≃tm
+
+susp-pdb-bd : (pdb : Γ ⊢pd[ submax ][ d ])
+            → .⦃ _ : NonZero′ (submax + d) ⦄
+            → pdb-bd-ctx (susp-pdb pdb) ≃c (suspCtx (pdb-bd-ctx pdb))
+susp-pdb-bd (Extend {submax = zero} pdb p q) = refl≃c
+susp-pdb-bd (Extend {submax = suc zero} pdb p q) = susp-pdb-bd pdb
+  where
+    open Reasoning ctx-setoid
+susp-pdb-bd (Extend {submax = suc (suc submax)} pdb p q) = trans≃c (extend-on-eq-ctx (pdb-bd-pd (susp-pdb pdb)) (susp-pdb (pdb-bd-pd pdb)) (susp-pdb-bd pdb)) (sym≃c (Add≃ (Add≃ refl≃c (susp-pdb-foc-ty (pdb-bd-pd pdb))) (susp-pdb-≃-lem (pdb-bd-pd pdb))))
+  where
+    open Reasoning ctx-setoid
+susp-pdb-bd (Restr pdb) = susp-pdb-bd pdb
+
+susp-pd-bd : (pd : Γ ⊢pd₀ suc d) → pd-bd-ctx (susp-pd pd) ≃c suspCtx (pd-bd-ctx pd)
+susp-pd-bd (Finish pdb) = susp-pdb-bd pdb
+
+susp-pdb-src : (pdb : Γ ⊢pd[ submax ][ d ])
+             → .⦃ _ : NonZero′ (submax + d) ⦄
+             → pdb-src (susp-pdb pdb) ≃s (suspSub (pdb-src pdb))
+susp-pdb-src (Extend {submax = zero} pdb p q) = begin
+  < pdb-src (susp-pdb (Extend pdb p q)) >s ≡⟨⟩
+  < liftSub (liftSub (idSub _)) >s
+    ≈˘⟨ lift-sub-≃ (lift-sub-≃ (susp-functorial-id (suc _))) ⟩
+  < liftSub (liftSub (suspSub (idSub (suc _)))) >s
+    ≈˘⟨ lift-sub-≃ (susp-sub-lift (idSub _)) ⟩
+  < liftSub (suspSub (liftSub (idSub _))) >s
+    ≈˘⟨ susp-sub-lift (liftSub (idSub _)) ⟩
+  < suspSub (liftSub (liftSub (idSub _))) >s ≡⟨⟩
+  < suspSub (pdb-src (Extend pdb p q)) >s ∎
+  where
+    open Reasoning sub-setoid
+susp-pdb-src (Extend {submax = suc zero} pdb p q) = begin
+  < liftSub (liftSub (pdb-src (susp-pdb pdb))) >s
+    ≈⟨ lift-sub-≃ (lift-sub-≃ (susp-pdb-src pdb)) ⟩
+  < liftSub (liftSub (suspSub (pdb-src pdb))) >s
+    ≈˘⟨ lift-sub-≃ (susp-sub-lift (pdb-src pdb)) ⟩
+  < liftSub (suspSub (liftSub (pdb-src pdb))) >s
+    ≈˘⟨ susp-sub-lift (liftSub (pdb-src pdb)) ⟩
+  < suspSub (liftSub (liftSub (pdb-src pdb))) >s ∎
+  where
+    open Reasoning sub-setoid
+susp-pdb-src (Extend {submax = suc (suc submax)} pdb p q) = Ext≃ (Ext≃ lem refl≃tm) refl≃tm
+  where
+    open Reasoning sub-setoid
+    lem : liftSub (liftSub (pdb-src (susp-pdb pdb))) ≃s
+          suspSub (liftSub (liftSub (pdb-src pdb)))
+    lem = begin
+      < liftSub (liftSub (pdb-src (susp-pdb pdb))) >s
+        ≈⟨ lift-sub-≃ (lift-sub-≃ (susp-pdb-src pdb)) ⟩
+      < liftSub (liftSub (suspSub (pdb-src pdb))) >s
+        ≈˘⟨ lift-sub-≃ (susp-sub-lift (pdb-src pdb)) ⟩
+      < liftSub (suspSub (liftSub (pdb-src pdb))) >s
+        ≈˘⟨ susp-sub-lift (liftSub (pdb-src pdb)) ⟩
+      < suspSub (liftSub (liftSub (pdb-src pdb))) >s ∎
+susp-pdb-src (Restr pdb) = susp-pdb-src pdb
+
+susp-pd-src : (pd : Γ ⊢pd₀ suc d) → pd-src (susp-pd pd) ≃s suspSub (pd-src pd)
+susp-pd-src (Finish pdb) = susp-pdb-src pdb
+
+
+susp-replacePdSub : (σ : Sub (suc m) n) → (t : Tm n) → suspSub (replacePdSub σ t) ≃s replacePdSub (suspSub σ) (suspTm t)
+susp-replacePdSub ⟨ σ , x ⟩ t = refl≃s
+
+susp-pdb-tgt : (pdb : Γ ⊢pd[ submax ][ d ])
+             → .⦃ _ : NonZero′ (submax + d) ⦄
+             → pdb-tgt (susp-pdb pdb) ≃s (suspSub (pdb-tgt pdb))
+susp-pdb-tgt (Extend {submax = zero} pdb p q) = Ext≃ lem refl≃tm
+  where
+    open Reasoning sub-setoid
+    lem : liftSub (liftSub (liftSub (idSub _))) ≃s
+          suspSub (liftSub (liftSub (liftSub (idSub _))))
+    lem = begin
+      < liftSub (liftSub (liftSub (idSub (suc (suc _))))) >s
+        ≈˘⟨ lift-sub-≃ (lift-sub-≃ (lift-sub-≃ (susp-functorial-id _))) ⟩
+      < liftSub (liftSub (liftSub (suspSub (idSub _)))) >s
+        ≈˘⟨ lift-sub-≃ (lift-sub-≃ (susp-sub-lift (idSub _))) ⟩
+      < liftSub (liftSub (suspSub (liftSub (idSub _)))) >s
+        ≈˘⟨ lift-sub-≃ (susp-sub-lift (liftSub (idSub _))) ⟩
+      < liftSub (suspSub (liftSub (liftSub (idSub _)))) >s
+        ≈˘⟨ susp-sub-lift (liftSub (liftSub (idSub _))) ⟩
+      < suspSub (liftSub (liftSub (liftSub (idSub _)))) >s ∎
+susp-pdb-tgt (Extend {submax = suc zero} pdb p q) = begin
+  < replacePdSub (liftSub (liftSub (pdb-tgt (susp-pdb pdb)))) 1V >s
+    ≈⟨ replacePdSub-≃ lem refl≃tm ⟩
+  < replacePdSub (suspSub (liftSub (liftSub (pdb-tgt pdb)))) 1V >s
+    ≈˘⟨ susp-replacePdSub (liftSub (liftSub (pdb-tgt pdb))) 1V ⟩
+  < suspSub (replacePdSub (liftSub (liftSub (pdb-tgt pdb))) 1V) >s ∎
+  where
+    open Reasoning sub-setoid
+    lem : liftSub (liftSub (pdb-tgt (susp-pdb pdb))) ≃s
+          suspSub (liftSub (liftSub (pdb-tgt pdb)))
+    lem = begin
+      < liftSub (liftSub (pdb-tgt (susp-pdb pdb))) >s
+        ≈⟨ lift-sub-≃ (lift-sub-≃ (susp-pdb-tgt pdb)) ⟩
+      < liftSub (liftSub (suspSub (pdb-tgt pdb))) >s
+        ≈˘⟨ lift-sub-≃ (susp-sub-lift (pdb-tgt pdb)) ⟩
+      < liftSub (suspSub (liftSub (pdb-tgt pdb))) >s
+        ≈˘⟨ susp-sub-lift (liftSub (pdb-tgt pdb)) ⟩
+      < suspSub (liftSub (liftSub (pdb-tgt pdb))) >s ∎
+susp-pdb-tgt (Extend {submax = suc (suc submax)} pdb p q) = Ext≃ (Ext≃ lem refl≃tm) refl≃tm
+  where
+    open Reasoning sub-setoid
+    lem : liftSub (liftSub (pdb-tgt (susp-pdb pdb))) ≃s
+          suspSub (liftSub (liftSub (pdb-tgt pdb)))
+    lem = begin
+      < liftSub (liftSub (pdb-tgt (susp-pdb pdb))) >s
+        ≈⟨ lift-sub-≃ (lift-sub-≃ (susp-pdb-tgt pdb)) ⟩
+      < liftSub (liftSub (suspSub (pdb-tgt pdb))) >s
+        ≈˘⟨ lift-sub-≃ (susp-sub-lift (pdb-tgt pdb)) ⟩
+      < liftSub (suspSub (liftSub (pdb-tgt pdb))) >s
+        ≈˘⟨ susp-sub-lift (liftSub (pdb-tgt pdb)) ⟩
+      < suspSub (liftSub (liftSub (pdb-tgt pdb))) >s ∎
+susp-pdb-tgt (Restr pdb) = susp-pdb-tgt pdb
+
+susp-pd-tgt : (pd : Γ ⊢pd₀ suc d) → pd-tgt (susp-pd pd) ≃s suspSub (pd-tgt pd)
+susp-pd-tgt (Finish pdb) = susp-pdb-tgt pdb

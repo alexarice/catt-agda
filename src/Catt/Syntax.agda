@@ -29,7 +29,7 @@ data Sub : ℕ → ℕ → Set
 
 
 variable
-  Γ Γ′ Δ Δ′ Υ : Ctx n
+  Γ Γ′ Δ Δ′ Υ Θ : Ctx n
   A A′ B C D : Ty n d
   s s′ t t′ u : Tm n
   σ σ′ τ μ : Sub n m

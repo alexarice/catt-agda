@@ -76,3 +76,44 @@ sub-from-connect-pdb-Ty pdb = sub-from-connect-Ty
 
 sub-from-connect-pd-Ty : (pd : Γ ⊢pd₀ d) → Typing-Sub Γ Υ σ → Typing-Sub Δ Υ τ → (pd-focus-tm pd [ σ ]tm ≈[ Υ ]tm Var (fromℕ _) [ τ ]tm) → Typing-Sub (connect-pd pd Δ) Υ (sub-from-connect-pd pd σ τ)
 sub-from-connect-pd-Ty (Finish pdb) = sub-from-connect-pdb-Ty pdb
+
+sub-between-connects-Ty : Typing-Sub Γ Δ σ
+                        → Typing-Tm Γ t ⋆
+                        → Typing-Sub Υ Θ τ
+                        → Typing-Tm Δ s ⋆
+                        → t [ σ ]tm ≈[ Δ ]tm s
+                        → Var (fromℕ _) [ τ ]tm ≈[ Θ ]tm Var (fromℕ l′)
+                        → Typing-Sub (connect Γ t Υ) (connect Δ s Θ) (sub-between-connects σ t τ s)
+sub-between-connects-Ty {Δ = Δ} {σ = σ} {t = t} {Θ = Θ} {τ = τ} {s = s} σty tty τty sty p q
+  = sub-from-connect-Ty (apply-sub-sub-typing σty (connect-inc-left-Ty sty Θ)) (apply-sub-sub-typing τty (connect-inc-right-Ty sty Θ)) (begin
+  t [ connect-inc-left s _ ∘ σ ]tm
+    ≈⟨ reflexive≈tm (assoc-tm (connect-inc-left s _) σ t) ⟩
+  t [ σ ]tm [ connect-inc-left s _ ]tm
+    ≈⟨ apply-sub-tm-eq (connect-inc-left-Ty sty Θ) p ⟩
+  s [ connect-inc-left s _ ]tm
+    ≈⟨ reflexive≈tm (connect-inc-fst-var s _) ⟩
+  Var (fromℕ _) [ connect-inc-right s _ ]tm
+    ≈˘⟨ apply-sub-tm-eq (connect-inc-right-Ty sty Θ) q ⟩
+  Var (fromℕ _) [ τ ]tm [ connect-inc-right s _ ]tm
+    ≈˘⟨ reflexive≈tm (assoc-tm (connect-inc-right s _) τ (Var (fromℕ _))) ⟩
+  Var (fromℕ _) [ connect-inc-right s _ ∘ τ ]tm ∎)
+  where
+    open Reasoning (tm-setoid-≈ (connect Δ s Θ))
+
+sub-between-connect-pdbs-Ty : (pdb1 : Γ ⊢pd[ submax ][ 0 ])
+                            → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ])
+                            → Typing-Sub Γ Δ σ
+                            → Typing-Sub Υ Θ τ
+                            → getFocusTerm pdb1 [ σ ]tm ≈[ Δ ]tm getFocusTerm pdb2
+                            → Var (fromℕ _) [ τ ]tm ≈[ Θ ]tm Var (fromℕ _)
+                            → Typing-Sub (connect-pdb pdb1 Υ) (connect-pdb pdb2 Θ) (sub-between-connect-pdbs pdb1 pdb2 σ τ)
+sub-between-connect-pdbs-Ty pdb1 pdb2 σty τty = sub-between-connects-Ty σty (term-conversion (pdb-focus-tm-Ty pdb1) (reflexive≈ty (sym≃ty (⋆-is-only-0-d-ty)))) τty (term-conversion (pdb-focus-tm-Ty pdb2) (reflexive≈ty (sym≃ty (⋆-is-only-0-d-ty))))
+
+sub-between-connect-pds-Ty : (pd1 : Γ ⊢pd₀ d)
+                           → (pd2 : Δ ⊢pd₀ d′)
+                           → Typing-Sub Γ Δ σ
+                           → Typing-Sub Υ Θ τ
+                           → pd-focus-tm pd1 [ σ ]tm ≈[ Δ ]tm pd-focus-tm pd2
+                           → Var (fromℕ _) [ τ ]tm ≈[ Θ ]tm Var (fromℕ _)
+                           → Typing-Sub (connect-pd pd1 Υ) (connect-pd pd2 Θ) (sub-between-connect-pds pd1 pd2 σ τ)
+sub-between-connect-pds-Ty (Finish pdb1) (Finish pdb2) = sub-between-connect-pdbs-Ty pdb1 pdb2

@@ -3,6 +3,7 @@
 module Catt.Pasting.Tree where
 
 open import Catt.Syntax
+open import Catt.Syntax.Bundles
 -- open import Catt.Syntax.Properties
 open import Catt.Syntax.SyntacticEquality
 -- open import Catt.Globular
@@ -18,6 +19,7 @@ open import Data.Empty
 open import Data.Unit
 open import Relation.Binary.PropositionalEquality
 open import Catt.Variables
+import Relation.Binary.Reasoning.Setoid as Reasoning
 -- open import Data.Vec
 
 singleton-ctx : Ctx 1
@@ -92,11 +94,11 @@ pdb-to-tree : {Γ : Ctx (suc n)} → Γ ⊢pd[ submax ][ d ] → Tree n
 pdb-to-tree-is-n-extendable : (pdb : Γ ⊢pd[ submax ][ d ]) → n-extendable d (pdb-to-tree pdb)
 
 pdb-to-tree Base = Sing
-pdb-to-tree (Extend {d = d} pdb) = extend-tree d (pdb-to-tree pdb) ⦃ pdb-to-tree-is-n-extendable pdb ⦄
+pdb-to-tree (Extend {d = d} pdb p q) = extend-tree d (pdb-to-tree pdb) ⦃ pdb-to-tree-is-n-extendable pdb ⦄
 pdb-to-tree (Restr pdb) = pdb-to-tree pdb
 
 pdb-to-tree-is-n-extendable Base = tt
-pdb-to-tree-is-n-extendable (Extend {d = d} pdb) = extended-tree-is-more-extendable d (pdb-to-tree pdb) ⦃ pdb-to-tree-is-n-extendable pdb ⦄
+pdb-to-tree-is-n-extendable (Extend {d = d} pdb p q) = extended-tree-is-more-extendable d (pdb-to-tree pdb) ⦃ pdb-to-tree-is-n-extendable pdb ⦄
 pdb-to-tree-is-n-extendable (Restr {d = d} pdb) = pred-n-extendable d (pdb-to-tree (Restr pdb)) ⦃ pdb-to-tree-is-n-extendable pdb ⦄
 
 pd-to-tree : {Γ : Ctx (suc n)} → Γ ⊢pd₀ d → Tree n
@@ -133,15 +135,15 @@ subst-extendable-≃ (suc n) (Join≃ p q@(Join≃ _ _)) = subst-extendable-≃ 
     γ Sing≃ = refl
     γ (Join≃ q r) = trans (subst-Tree (≃-to-same-n q) (≃-to-same-n r) _ _) (cong₂ Join (γ q) (γ r))
 
-subst-pdb-tree : (pdb : Γ ⊢pd[ submax ][ d ]) → (p : Δ ≃c Γ) → pdb-to-tree (subst-pdb pdb p) ≃ pdb-to-tree pdb
-subst-pdb-tree pdb p with ≃c-to-≡ p
-... | refl = refl≃
+-- subst-pdb-tree : (pdb : Γ ⊢pd[ submax ][ d ]) → (p : Δ ≃c Γ) → pdb-to-tree (subst-pdb pdb p) ≃ pdb-to-tree pdb
+-- subst-pdb-tree pdb p with ≃c-to-≡ p
+-- ... | refl = refl≃
 
-pdb-to-tree-extend-pd-eq : (pdb : Γ ⊢pd[ submax ][ d ])
-                         → (p : A ≃ty getFocusType pdb)
-                         → (q : B ≃ty liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
-                         → pdb-to-tree (extend-pd-eq pdb p q) ≃ extend-tree d (pdb-to-tree pdb) ⦃ pdb-to-tree-is-n-extendable pdb ⦄
-pdb-to-tree-extend-pd-eq pdb p q = subst-pdb-tree (Extend pdb) (Add≃ (Add≃ refl≃c p) q)
+-- pdb-to-tree-extend-pd-eq : (pdb : Γ ⊢pd[ submax ][ d ])
+--                          → (p : A ≃ty getFocusType pdb)
+--                          → (q : B ≃ty liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V)
+--                          → pdb-to-tree (extend-pd-eq pdb p q) ≃ extend-tree d (pdb-to-tree pdb) ⦃ pdb-to-tree-is-n-extendable pdb ⦄
+-- pdb-to-tree-extend-pd-eq pdb p q = subst-pdb-tree (Extend pdb) (Add≃ (Add≃ refl≃c p) q)
 
 extend-tree-eq : {S : Tree n} → {T : Tree m} → (p : S ≃ T) → .⦃ ex : n-extendable d S ⦄
                → extend-tree d S ≃ extend-tree d T ⦃ subst-extendable-≃ d p ⦄
@@ -194,22 +196,11 @@ extend-connect-tree {n = n} (Join S S′) T ⦃ ex ⦄ = let
 
 connect-pdb-tree-compat : (pdb : Γ ⊢pd[ d ][ 0 ]) → (pdb2 : Δ ⊢pd[ submax ][ d′ ]) → pdb-to-tree (connect-pdb-pdb pdb pdb2) ≃ connect-tree (pdb-to-tree pdb) (pdb-to-tree pdb2)
 connect-pdb-tree-compat pdb Base = connect-tree-unit-right (pdb-to-tree (connect-pdb-pdb pdb Base))
-connect-pdb-tree-compat {Γ = Γ} pdb (Extend {Γ = Γ′ , A} {d = d} pdb2) = let
+connect-pdb-tree-compat {Γ = Γ} pdb (Extend {Γ = Γ′ , A} {d = d} pdb2 p q) = let
   instance _ = pdb-to-tree-is-n-extendable (connect-pdb-pdb pdb pdb2)
-  instance _ = pdb-to-tree-is-n-extendable pdb
   instance _ = pdb-to-tree-is-n-extendable pdb2
-  instance _ = connect-tree-is-extendable d (pdb-to-tree pdb) (pdb-to-tree pdb2)
-  in trans≃ (pdb-to-tree-extend-pd-eq (connect-pdb-pdb pdb pdb2)
-                                      (connect-pdb-foc-ty pdb pdb2)
-                                      (Arr≃ (trans≃tm (lift-subbed-tm-≃ (getFocusTerm pdb2)
-                                                                        (connect-pdb-inc-right pdb (ctxLength Γ′))) -- (Γ′ , A)))
-                                                      (lift-tm-≃ (connect-pdb-foc-tm pdb pdb2)))
-                                            (trans≃ty (lift-subbed-ty-≃ (getFocusType pdb2)
-                                                                        (connect-pdb-inc-right pdb (ctxLength Γ′)))
-                                                      (lift-ty-≃ (connect-pdb-foc-ty pdb pdb2)))
-                                            (Var≃ refl refl)))
-            (trans≃ (extend-tree-eq (connect-pdb-tree-compat pdb pdb2) ⦃ pdb-to-tree-is-n-extendable (connect-pdb-pdb pdb pdb2) ⦄)
-                    ( extend-connect-tree (pdb-to-tree pdb) (pdb-to-tree pdb2) ⦃ pdb-to-tree-is-n-extendable pdb2 ⦄ ))
+  in trans≃ (extend-tree-eq (connect-pdb-tree-compat pdb pdb2))
+            (extend-connect-tree (pdb-to-tree pdb) (pdb-to-tree pdb2))
 connect-pdb-tree-compat pdb (Restr pdb2) = connect-pdb-tree-compat pdb pdb2
 
 connect-pd-tree-compat : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (pd : Γ ⊢pd₀ d) → (pd2 : Δ ⊢pd₀ d′) → pd-to-tree (connect-pd-pd pd pd2) ≃ connect-tree (pd-to-tree pd) (pd-to-tree pd2)
@@ -223,15 +214,9 @@ susp-tree-≃ p = Join≃ p Sing≃
 
 susp-pdb-tree-compat : (pdb : Γ ⊢pd[ submax ][ d ]) → pdb-to-tree (susp-pdb pdb) ≃ susp-tree (pdb-to-tree pdb)
 susp-pdb-tree-compat Base = refl≃
-susp-pdb-tree-compat (Extend pdb) = let
+susp-pdb-tree-compat (Extend pdb p q) = let
   instance _ = pdb-to-tree-is-n-extendable (susp-pdb pdb)
-  in trans≃ (pdb-to-tree-extend-pd-eq (susp-pdb pdb) (susp-pdb-foc-ty pdb)
-                                      (Arr≃ (trans≃tm (susp-tm-lift (getFocusTerm pdb))
-                                                      (lift-tm-≃ (susp-pdb-foc-tm pdb)))
-                                            (trans≃ty (susp-ty-lift (getFocusType pdb))
-                                                      (lift-ty-≃ (susp-pdb-foc-ty pdb)))
-                                            (Var≃ refl refl)))
-            (extend-tree-eq (susp-pdb-tree-compat pdb) )
+  in extend-tree-eq (susp-pdb-tree-compat pdb)
 susp-pdb-tree-compat (Restr pdb) = susp-pdb-tree-compat pdb
 
 susp-pd-tree-compat : (pd : Γ ⊢pd₀ d) → pd-to-tree (susp-pd pd) ≃ susp-tree (pd-to-tree pd)
@@ -299,9 +284,9 @@ extend-lem pdb .pdb refl = refl≃c
 
 pdb-to-tree-to-ctx : (pdb : Γ ⊢pd[ submax ][ d ]) → tree-to-ctx (pdb-to-tree pdb) ≃c Γ
 pdb-to-tree-to-ctx Base = refl≃c
-pdb-to-tree-to-ctx (Extend {d = d} pdb) = let
+pdb-to-tree-to-ctx (Extend {d = d} pdb p q) = let
   instance _ = pdb-to-tree-is-n-extendable pdb
-  in trans≃c (tree-to-ctx-extend-tree d (pdb-to-tree pdb)) (extend-lem (tree-to-pdb d (pdb-to-tree pdb)) pdb (PDB-irrel < tree-to-pdb d (pdb-to-tree pdb) > < pdb > (pdb-to-tree-to-ctx pdb) refl))
+  in trans≃c (tree-to-ctx-extend-tree d (pdb-to-tree pdb)) (trans≃c (extend-lem (tree-to-pdb d (pdb-to-tree pdb)) pdb (PDB-irrel < tree-to-pdb d (pdb-to-tree pdb) > < pdb > (pdb-to-tree-to-ctx pdb) refl)) (sym≃c (Add≃ (Add≃ refl≃c p) q)))
 pdb-to-tree-to-ctx (Restr pdb) = pdb-to-tree-to-ctx pdb
 
 pd-to-tree-to-ctx : (pd : Γ ⊢pd₀ d) → tree-to-ctx (pd-to-tree pd) ≃c Γ
@@ -313,20 +298,14 @@ tree-dim : (Tree n) → ℕ
 tree-dim Sing = 0
 tree-dim (Join S T) = suc (tree-dim S) ⊔ tree-dim T
 
--- tree-to-ctx-dim : (T : Tree n) → ctx-dim (tree-to-ctx T) ≡ suc (tree-dim T)
--- tree-to-ctx-dim Sing = refl
--- tree-to-ctx-dim (Join S T) = begin
---   ctx-dim (connect-pdb (Restr (susp-pdb (tree-to-pdb zero S _))) (tree-to-ctx T)) ≡⟨ connect-pdb-ctx-dim (Restr (susp-pdb (tree-to-pdb zero S tt))) (tree-to-ctx T) ⟩
---   ctx-dim (suspCtx (tree-to-ctx S)) ⊔ ctx-dim (tree-to-ctx T) ≡⟨ cong (_⊔ ctx-dim (tree-to-ctx T)) (ctx-susp-dim (tree-to-ctx S)) ⟩
---   suc (ctx-dim (tree-to-ctx S)) ⊔ ctx-dim (tree-to-ctx T) ≡⟨ cong₂ (λ a b → suc a ⊔ b) (tree-to-ctx-dim S) (tree-to-ctx-dim T) ⟩
---   suc (suc (tree-dim S) ⊔ tree-dim T) ∎
---   where
---     open ≡-Reasoning
-
--- pd-to-tree-dim : (pd : Γ ⊢pd₀ d) → suc (tree-dim (pd-to-tree pd)) ≡ ctx-dim Γ
--- pd-to-tree-dim {Γ = Γ} pd = begin
---   suc (tree-dim (pd-to-tree pd)) ≡˘⟨ tree-to-ctx-dim (pd-to-tree pd) ⟩
---   ctx-dim (tree-to-ctx (pd-to-tree pd)) ≡⟨ cong ctx-dim (pd-to-tree-to-ctx pd) ⟩
---   ctx-dim Γ ∎
---   where
---     open ≡-Reasoning
+connect-tree-to-ctx : (S : Tree n) → (T : Tree m)
+                    → tree-to-ctx (connect-tree S T) ≃c connect-pd (tree-to-pd S) (tree-to-ctx T)
+connect-tree-to-ctx Sing T = sym≃c (connect-pdb-left-unit (tree-to-ctx T))
+connect-tree-to-ctx (Join S S₁) T = begin
+  < connect-pd (susp-pd (tree-to-pd S)) (tree-to-ctx (connect-tree S₁ T)) >c
+    ≈⟨ connect-≃ refl≃c refl≃tm (connect-tree-to-ctx S₁ T) ⟩
+  < connect-pd (susp-pd (tree-to-pd S)) (connect-pd (tree-to-pd S₁) (tree-to-ctx T)) >c
+    ≈˘⟨ connect-pd-assoc (susp-pd (tree-to-pd S)) (tree-to-pd S₁) (tree-to-ctx T) ⟩
+  < connect-pd (connect-pd-pd (susp-pd (tree-to-pd S)) (tree-to-pd S₁)) (tree-to-ctx T) >c ∎
+  where
+    open Reasoning ctx-setoid

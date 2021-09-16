@@ -74,6 +74,22 @@ liftType-preserve-is-globular : (A : Ty n d) → (ty-is-globular A) → ty-is-gl
 liftType-preserve-is-globular ⋆ g = tt
 liftType-preserve-is-globular (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = liftTerm-preserve-isVar s vs ,, liftType-preserve-is-globular A gA ,, liftTerm-preserve-isVar t vt
 
+≃c-preserve-globular : Γ ≃c Δ → ctx-is-globular Γ → ctx-is-globular Δ
+≃ty-preserve-globular : A ≃ty B → ty-is-globular A → ty-is-globular B
+≃tm-preserve-isVar : s ≃tm t → isVar s → isVar t
+≃s-preserve-var-to-var : σ ≃s τ → varToVar σ → varToVar τ
+
+≃c-preserve-globular Emp≃ c = tt
+≃c-preserve-globular (Add≃ p x) (c ,, d) = ≃c-preserve-globular p c ,, ≃ty-preserve-globular x d
+
+≃ty-preserve-globular (Star≃ x) c = tt
+≃ty-preserve-globular (Arr≃ p q r) (a ,, b ,, c) = ≃tm-preserve-isVar p a ,, ≃ty-preserve-globular q b ,, ≃tm-preserve-isVar r c
+
+≃tm-preserve-isVar (Var≃ x x₁) c = tt
+
+≃s-preserve-var-to-var (Null≃ x) c = tt
+≃s-preserve-var-to-var (Ext≃ p (Var≃ x x₁)) c = ≃s-preserve-var-to-var p c
+
 id-is-var-to-var : (n : ℕ) → varToVar (idSub n)
 id-is-var-to-var zero = tt
 id-is-var-to-var (suc n) = liftSub-preserve-var-to-var (idSub n) ⦃ id-is-var-to-var n ⦄
@@ -88,3 +104,10 @@ varToVarFunction-idSub (suc n) (suc i) = trans (varToVarFunction-lift (idSub n) 
 
 extend-var-to-var : (σ : Sub n m) → ⦃ varToVar σ ⦄ → (t : Tm m) → .⦃ isVar t ⦄ → varToVar ⟨ σ , t ⟩
 extend-var-to-var σ ⦃ v ⦄ (Var i) = v
+
+idSub≃-var-to-var : (p : Γ ≃c Δ) → varToVar (idSub≃ p)
+idSub≃-var-to-var Emp≃ = tt
+idSub≃-var-to-var (Add≃ p x) = liftSub-preserve-var-to-var (idSub≃ p) ⦃ idSub≃-var-to-var p ⦄
+
+idSub≃-func : (p : Γ ≃c Δ) → Fin (ctxLength Γ) → Fin (ctxLength Δ)
+idSub≃-func p = varToVarFunction (idSub≃ p) ⦃ idSub≃-var-to-var p ⦄

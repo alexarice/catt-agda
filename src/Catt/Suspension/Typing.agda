@@ -94,22 +94,22 @@ suspSuppDrop : (xs : VarSet (suc n)) → suspSupp (drop xs) ≡ drop (suspSupp x
 suspSuppDrop (x ∷ xs) = refl
 
 suspSuppSrcPdb : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ _ : NonZero′ (submax + d) ⦄ → suspSupp (supp-pdb-src pdb) ≡ supp-pdb-src (susp-pdb pdb)
-suspSuppSrcPdb (Extend {submax = zero} pdb) = trans (cong ewf (cong ewf suspSuppFull)) (supp-pdb-src-≃ (susp-pdb pdb) (susp-pdb-foc-ty pdb) (susp-pdb-≃-lem pdb))
-suspSuppSrcPdb (Extend {submax = suc zero} pdb) = trans (cong ewf (cong ewf (suspSuppSrcPdb pdb))) (supp-pdb-src-≃ (susp-pdb pdb) (susp-pdb-foc-ty pdb) (susp-pdb-≃-lem pdb))
-suspSuppSrcPdb (Extend {submax = suc (suc submax)} pdb) = trans (cong ewt (cong ewt (suspSuppSrcPdb pdb))) (supp-pdb-src-≃ (susp-pdb pdb) (susp-pdb-foc-ty pdb) (susp-pdb-≃-lem pdb))
+suspSuppSrcPdb (Extend {submax = zero} pdb p q) = cong ewf (cong ewf suspSuppFull)
+suspSuppSrcPdb (Extend {submax = suc zero} pdb p q) = cong ewf (cong ewf (suspSuppSrcPdb pdb))
+suspSuppSrcPdb (Extend {submax = suc (suc submax)} pdb p q) = cong ewt (cong ewt (suspSuppSrcPdb pdb))
 suspSuppSrcPdb (Restr pdb) = suspSuppSrcPdb pdb
 
 suspSuppTgtPdb : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ _ : NonZero′ (submax + d) ⦄ → suspSupp (supp-pdb-tgt pdb) ≡ supp-pdb-tgt (susp-pdb pdb)
-suspSuppTgtPdb (Extend {submax = zero} pdb) = trans (cong (λ - → ewf (ewt (ewf -))) suspSuppFull) (supp-pdb-tgt-≃ (susp-pdb pdb) (susp-pdb-foc-ty pdb) (susp-pdb-≃-lem pdb))
-suspSuppTgtPdb (Extend {submax = suc zero} pdb) = trans (cong ewf (cong ewt (trans (suspSuppDrop (supp-pdb-tgt pdb)) (cong drop (suspSuppTgtPdb pdb))))) (supp-pdb-tgt-≃ (susp-pdb pdb) (susp-pdb-foc-ty pdb) (susp-pdb-≃-lem pdb))
-suspSuppTgtPdb (Extend {submax = suc (suc submax)} pdb) = trans (cong ewt (cong ewt (suspSuppTgtPdb pdb))) (supp-pdb-tgt-≃ (susp-pdb pdb) (susp-pdb-foc-ty pdb) (susp-pdb-≃-lem pdb))
+suspSuppTgtPdb (Extend {submax = zero} pdb p q) = cong (λ - → ewf (ewt (ewf -))) suspSuppFull
+suspSuppTgtPdb (Extend {submax = suc zero} pdb p q) = cong ewf (cong ewt (trans (suspSuppDrop (supp-pdb-tgt pdb)) (cong drop (suspSuppTgtPdb pdb))))
+suspSuppTgtPdb (Extend {submax = suc (suc submax)} pdb p q) = cong ewt (cong ewt (suspSuppTgtPdb pdb))
 suspSuppTgtPdb (Restr pdb) = suspSuppTgtPdb pdb
 
-suspSuppSrc : (pd : Γ ⊢pd₀ (suc d)) → suspSupp (supp-src pd) ≡ supp-src (susp-pd pd)
-suspSuppSrc (Finish pdb) = suspSuppSrcPdb pdb
+suspSuppSrc : (pd : Γ ⊢pd₀ d) → .⦃ _ : NonZero′ d ⦄ → suspSupp (supp-src pd) ≡ supp-src (susp-pd pd)
+suspSuppSrc {d = suc d} (Finish pdb) = suspSuppSrcPdb pdb
 
-suspSuppTgt : (pd : Γ ⊢pd₀ (suc d)) → suspSupp (supp-tgt pd) ≡ supp-tgt (susp-pd pd)
-suspSuppTgt (Finish pdb) = suspSuppTgtPdb pdb
+suspSuppTgt : (pd : Γ ⊢pd₀ d) → .⦃ _ : NonZero′ d ⦄ → suspSupp (supp-tgt pd) ≡ supp-tgt (susp-pd pd)
+suspSuppTgt {d = suc d} (Finish pdb) = suspSuppTgtPdb pdb
 
 -- suspCtxTy : Typing-Ctx Γ → Typing-Ctx (suspCtx Γ)
 suspTyTy : Typing-Ty Γ A → Typing-Ty (suspCtx Γ) (suspTy A)
@@ -129,8 +129,7 @@ suspSubEq : σ ≈[ Γ ]s τ → suspSub σ ≈[ suspCtx Γ ]s suspSub τ
 suspTyTy TyStar = TyArr getFstTy TyStar getSndTy
 suspTyTy (TyArr p q r) = TyArr (suspTmTy p) (suspTyTy q) (suspTmTy r)
 
--- suspTmTy {Γ = Γ} (TyVar i x) = TyVar (inject₁ (inject₁ i)) (trans≈ty (reflexive≈ty (susp-‼ Γ i)) (suspTyEq x))
-suspTmTy (TyVarZ x) = TyVarZ (trans≈ty (reflexive≈ty (sym≃ty (susp-ty-lift _))) (suspTyEq x))
+suspTmTy {Γ = Γ , A} (TyVarZ {Γ = .(Γ , A)} x) = TyVarZ (trans≈ty (reflexive≈ty (sym≃ty (susp-ty-lift A))) (suspTyEq x))
 suspTmTy (TyVarS i tvi x) = TyVarS (inject₁ (inject₁ i)) (suspTmTy tvi) (trans≈ty (reflexive≈ty (sym≃ty (susp-ty-lift _))) (suspTyEq x))
 suspTmTy (TyCoh {A = A} p q r s t) = TyCoh (susp-pd p) (suspTyTy q) (suspSubTy r) (lem) (trans≈ty (reflexive≈ty (sym≃ty (susp-functorial-ty _ _))) (suspTyEq t))
   where

@@ -8,12 +8,12 @@ open import Catt.Syntax.Bundles
 open import Catt.Suspension.Base
 open import Data.Nat
 open import Data.Nat.Properties
-open import Data.Fin using (Fin;zero;suc;toℕ;inject₁)
+open import Data.Fin using (Fin;zero;suc;toℕ;inject₁;fromℕ)
 open import Data.Fin.Properties using (toℕ-injective)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
-open import Relation.Binary
+open import Relation.Binary hiding (Irrelevant)
 open import Function.Equivalence using (equivalence)
 open import Data.Product renaming (_,_ to _,,_) using (Σ; proj₁; proj₂)
 open import Data.Empty
@@ -32,7 +32,7 @@ data _≃ty_ where
   Arr≃ : s ≃tm s′ → A ≃ty A′ → t ≃tm t′ → s ─⟨ A ⟩⟶ t ≃ty s′ ─⟨ A′ ⟩⟶ t′
 
 data _≃tm_ where
-  Var≃ : n ≡ m → {i : Fin n} → {j : Fin m} → toℕ i ≡ toℕ j → Var i ≃tm Var j
+  Var≃ : {i : Fin n} → {j : Fin m} → n ≡ m → toℕ i ≡ toℕ j → Var i ≃tm Var j
   Coh≃ : Δ ≃c Δ′ → A ≃ty A′ → σ ≃s σ′ → Coh Δ A σ ≃tm Coh Δ′ A′ σ′
 
 data _≃s_ where
@@ -335,6 +335,29 @@ tm-dec s t = map (equivalence ≃tm-to-≡ reflexive≃tm) (≃tm-dec s t)
 sub-dec : DecidableEquality (Sub n m)
 sub-dec σ τ = map (equivalence ≃s-to-≡ reflexive≃s) (≃s-dec σ τ)
 
+≃c-irrel : Irrelevant (Γ ≃c Δ)
+≃ty-irrel : Irrelevant (A ≃ty B)
+≃tm-irrel : Irrelevant (s ≃tm t)
+≃s-irrel : Irrelevant (σ ≃s τ)
+
+≃c-irrel Emp≃ Emp≃ = refl
+≃c-irrel (Add≃ p x) (Add≃ q y) = cong₂ Add≃ (≃c-irrel p q) (≃ty-irrel x y)
+
+≃ty-irrel (Star≃ x) (Star≃ y) = cong Star≃ (≡-irrelevant x y)
+≃ty-irrel (Arr≃ p q r) (Arr≃ p′ q′ r′) = lem (≃tm-irrel p p′) (≃ty-irrel q q′) (≃tm-irrel r r′)
+  where
+    lem : {a b : s ≃tm s′} {c d : A ≃ty A′} {e f : t ≃tm t′} → a ≡ b → c ≡ d → e ≡ f → Arr≃ a c e ≡ Arr≃ b d f
+    lem refl refl refl = refl
+
+≃tm-irrel (Var≃ p q) (Var≃ p′ q′) = cong₂ Var≃ (≡-irrelevant p p′) (≡-irrelevant q q′)
+≃tm-irrel (Coh≃ p q r) (Coh≃ p′ q′ r′) = lem (≃c-irrel p p′) (≃ty-irrel q q′) (≃s-irrel r r′)
+  where
+    lem : {a b : Γ ≃c Δ} {c d : A ≃ty A′} {e f : σ ≃s τ} → a ≡ b → c ≡ d → e ≡ f → Coh≃ a c e ≡ Coh≃ b d f
+    lem refl refl refl = refl
+
+≃s-irrel (Null≃ x) (Null≃ y) = cong Null≃ (≡-irrelevant x y)
+≃s-irrel (Ext≃ p x) (Ext≃ q y) = cong₂ Ext≃ (≃s-irrel p q) (≃tm-irrel x y)
+
 -- categorical properties
 
 id-right-unit : (σ : Sub n m) → σ ∘ idSub n ≃s σ
@@ -411,6 +434,10 @@ idSub≃-on-tm p (Coh Δ A σ) = Coh≃ refl≃c refl≃ty (idSub≃-on-sub p σ
 
 idSub≃-on-sub p ⟨⟩ = Null≃ (sym (≃c-preserve-length p))
 idSub≃-on-sub p ⟨ σ , t ⟩ = Ext≃ (idSub≃-on-sub p σ) (idSub≃-on-tm p t)
+
+idSub≃-fst-var : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (p : Γ ≃c Δ) → Var (fromℕ n) [ idSub≃ p ]tm ≃tm Var (fromℕ m)
+idSub≃-fst-var (Add≃ Emp≃ x) = refl≃tm
+idSub≃-fst-var (Add≃ (Add≃ p y) x) = trans≃tm (apply-lifted-sub-tm-≃ (Var (fromℕ _)) (idSub≃ (Add≃ p y))) (lift-tm-≃ (idSub≃-fst-var (Add≃ p y)))
 
 -- idSub≃-on-ty p (Star≃ x) = Star≃ (trans≃c (sym≃c p) x)
 -- idSub≃-on-ty p (Arr≃ q r s) = Arr≃ (idSub≃-on-tm p q) (idSub≃-on-ty p r) (idSub≃-on-tm p s)

@@ -7,11 +7,11 @@ open import Data.Fin.Patterns
 open import Data.Nat
 open import Data.Nat.Properties
 open import Relation.Binary.PropositionalEquality
-open import Data.Bool using (T; not)
+open import Data.Bool using (not) renaming (T to Truth)
 
 record NonZero′ (n : ℕ) : Set where
   field
-    nonZero : T (not (n ≡ᵇ 0))
+    nonZero : Truth (not (n ≡ᵇ 0))
 
 -- Instances
 
@@ -22,6 +22,10 @@ instance
 variable
   n n′ m m′ l l′ d d′ d″ : ℕ
 
+data Tree : ℕ → Set where
+  Sing : Tree 0
+  Join : (S : Tree n) → (T : Tree m) → Tree (m + (2 + n))
+
 data Ctx : ℕ → Set
 data Ty : ℕ → ℕ → Set
 data Tm : ℕ → Set
@@ -29,6 +33,7 @@ data Sub : ℕ → ℕ → Set
 
 
 variable
+  S S′ T T′ U U′ : Tree n
   Γ Γ′ Δ Δ′ Υ Θ : Ctx n
   A A′ B C D : Ty n d
   s s′ t t′ u : Tm n
@@ -53,7 +58,7 @@ data Sub where
 
 data Tm where
   Var : (i : (Fin n)) → Tm n
-  Coh : (Δ : Ctx (suc n)) → (A : Ty (suc n) d) → (σ : Sub (suc n) m) → Tm m
+  Coh : (S : Tree n) → (A : Ty (suc n) d) → (σ : Sub (suc n) m) → Tm m
 
 pattern 0V {n} = Var {n} 0F
 pattern 1V {n} = Var {n} 1F
@@ -77,7 +82,7 @@ liftType ⋆ = ⋆
 liftType (s ─⟨ A ⟩⟶ t) = liftTerm s ─⟨ liftType A ⟩⟶ liftTerm t
 
 liftTerm (Var i) = Var (suc i)
-liftTerm (Coh Δ A σ) = Coh Δ A (liftSub σ)
+liftTerm (Coh S A σ) = Coh S A (liftSub σ)
 
 liftSub ⟨⟩ = ⟨⟩
 liftSub ⟨ σ , t ⟩ = ⟨ liftSub σ , liftTerm t ⟩
@@ -150,3 +155,7 @@ infix 45 _‼_
 _‼_ : (Γ : Ctx n) → (i : Fin n) → Ty n (lookupHeight Γ i)
 (Γ , A) ‼ zero = liftType A
 (Γ , A) ‼ suc i = liftType (Γ ‼ i)
+
+sub-from-function : ((i : Fin n) → Tm m) → Sub n m
+sub-from-function {n = zero} f = ⟨⟩
+sub-from-function {n = suc n} f = ⟨ (sub-from-function (λ i → f (suc i))) , f zero ⟩

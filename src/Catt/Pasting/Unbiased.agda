@@ -60,16 +60,6 @@ unbiased-type {d = suc d} pd = (unbiased-term (pd-bd-pd pd) [ pd-src pd ]tm) ─
 
 -- try two
 
-tree-bd-len : (d : ℕ) → (T : Tree n) → ℕ
-tree-bd-len zero T = 0
-tree-bd-len (suc d) Sing = 0
-tree-bd-len (suc d) (Join S T) = tree-bd-len (suc d) T + (2 + tree-bd-len d S)
-
-tree-bd : (d : ℕ) → (T : Tree n) → Tree (tree-bd-len d T)
-tree-bd zero T = Sing
-tree-bd (suc d) Sing = Sing
-tree-bd (suc d) (Join S T) = Join (tree-bd d S) (tree-bd (suc d) T)
-
 tree-last-var : (T : Tree n) → Tm (suc (tree-size T))
 tree-last-var Sing = Var zero
 tree-last-var (Join S T) = tree-last-var T [ connect-pd-inc-right (susp-pd (tree-to-pd S)) (tree-size T) ]tm

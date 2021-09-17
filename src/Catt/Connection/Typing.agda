@@ -9,11 +9,12 @@ module Catt.Connection.Typing (index : ℕ) (rule : Fin index → Rule) (props :
 
 open import Catt.Typing index rule
 open import Catt.Typing.Properties index rule props
-open import Catt.Pasting.Typing index rule props
+open import Catt.Suspension.Typing index rule props
+open import Catt.Suspension
+open import Catt.Suspension.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Pasting
 open import Catt.Connection
 open import Catt.Connection.Properties
 open import Relation.Binary.PropositionalEquality
@@ -34,23 +35,14 @@ connect-inc-left-Ty : {Γ : Ctx (suc n)} → {t : Tm (suc n)} → Typing-Tm Γ t
 connect-inc-left-Ty tty (∅ , A) = id-Ty
 connect-inc-left-Ty tty (Δ , A , B) = lift-sub-typing (connect-inc-left-Ty tty (Δ , A))
 
-connect-pdb-Ty : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Typing-Ctx Δ → Typing-Ctx (connect-pdb pdb Δ)
-connect-pdb-Ty pdb = connect-Ty (pdb-to-Ty pdb) (term-conversion (pdb-focus-tm-Ty pdb) (reflexive≈ty (sym≃ty ⋆-is-only-0-d-ty)))
+connect-susp-Ty : Typing-Ctx Γ → Typing-Ctx Δ → Typing-Ctx (connect-susp Γ Δ)
+connect-susp-Ty Γty Δty = connect-Ty (suspCtxTy Γty) getSndTy Δty
 
-connect-pdb-inc-left-Ty : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → Typing-Sub Γ (connect-pdb pdb Δ) (connect-pdb-inc-left pdb m)
-connect-pdb-inc-left-Ty pdb = connect-inc-left-Ty (term-conversion (pdb-focus-tm-Ty pdb) (reflexive≈ty (sym≃ty ⋆-is-only-0-d-ty)))
+connect-susp-inc-left-Ty : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → Typing-Sub (suspCtx Γ) (connect-susp Γ Δ) (connect-susp-inc-left n m)
+connect-susp-inc-left-Ty Γ Δ = connect-inc-left-Ty getSndTy Δ
 
-connect-pdb-inc-right-Ty : (pdb : Γ ⊢pd[ submax ][ 0 ]) → (Δ : Ctx (suc m)) → Typing-Sub Δ (connect-pdb pdb Δ) (connect-pdb-inc-right pdb m)
-connect-pdb-inc-right-Ty pdb = connect-inc-right-Ty (term-conversion (pdb-focus-tm-Ty pdb) (reflexive≈ty (sym≃ty ⋆-is-only-0-d-ty)))
-
-connect-pd-Ty : (pd : Γ ⊢pd₀ d) → Typing-Ctx Δ → Typing-Ctx (connect-pd pd Δ)
-connect-pd-Ty (Finish pdb) = connect-pdb-Ty pdb
-
-connect-pd-inc-left-Ty : (pd : Γ ⊢pd₀ d) → (Δ : Ctx (suc m)) → Typing-Sub Γ (connect-pd pd Δ) (connect-pd-inc-left pd m)
-connect-pd-inc-left-Ty (Finish pdb) = connect-pdb-inc-left-Ty pdb
-
-connect-pd-inc-right-Ty : (pd : Γ ⊢pd₀ d) → (Δ : Ctx (suc m)) → Typing-Sub Δ (connect-pd pd Δ) (connect-pd-inc-right pd m)
-connect-pd-inc-right-Ty (Finish pdb) = connect-pdb-inc-right-Ty pdb
+connect-susp-inc-right-Ty : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → Typing-Sub Δ (connect-susp Γ Δ) (connect-susp-inc-right n m)
+connect-susp-inc-right-Ty Γ Δ = connect-inc-right-Ty getSndTy Δ
 
 sub-from-connect-inc-right-≈ : (σ : Sub (suc n) l) → (t : Tm (suc n)) → (τ : Sub (suc m) l) → {Γ : Ctx l} → (t [ σ ]tm ≈[ Γ ]tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ t τ ∘ connect-inc-right t m ≈[ Γ ]s τ
 sub-from-connect-inc-right-≈ σ t ⟨ ⟨⟩ , s ⟩ p = Ext≈ Null≈ p
@@ -70,12 +62,6 @@ sub-from-connect-Ty {Υ = Υ} {σ = σ} {t = t} σty (TyExt {A = A} (TyExt {σ =
         ≈⟨ reflexive≈ty (assoc-ty _ _ _) ⟩
       < ((A [ connect-inc-right t _ ]ty) [ sub-from-connect σ t ⟨ τ , s ⟩
           ]ty) >ty′ ∎
-
-sub-from-connect-pdb-Ty : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Typing-Sub Γ Υ σ → Typing-Sub Δ Υ τ → (getFocusTerm pdb [ σ ]tm ≈[ Υ ]tm Var (fromℕ _) [ τ ]tm) → Typing-Sub (connect-pdb pdb Δ) Υ (sub-from-connect-pdb pdb σ τ)
-sub-from-connect-pdb-Ty pdb = sub-from-connect-Ty
-
-sub-from-connect-pd-Ty : (pd : Γ ⊢pd₀ d) → Typing-Sub Γ Υ σ → Typing-Sub Δ Υ τ → (pd-focus-tm pd [ σ ]tm ≈[ Υ ]tm Var (fromℕ _) [ τ ]tm) → Typing-Sub (connect-pd pd Δ) Υ (sub-from-connect-pd pd σ τ)
-sub-from-connect-pd-Ty (Finish pdb) = sub-from-connect-pdb-Ty pdb
 
 sub-between-connects-Ty : Typing-Sub Γ Δ σ
                         → Typing-Tm Γ t ⋆
@@ -100,20 +86,8 @@ sub-between-connects-Ty {Δ = Δ} {σ = σ} {t = t} {Θ = Θ} {τ = τ} {s = s} 
   where
     open Reasoning (tm-setoid-≈ (connect Δ s Θ))
 
-sub-between-connect-pdbs-Ty : (pdb1 : Γ ⊢pd[ submax ][ 0 ])
-                            → (pdb2 : Δ ⊢pd[ submax′ ][ 0 ])
-                            → Typing-Sub Γ Δ σ
-                            → Typing-Sub Υ Θ τ
-                            → getFocusTerm pdb1 [ σ ]tm ≈[ Δ ]tm getFocusTerm pdb2
-                            → Var (fromℕ _) [ τ ]tm ≈[ Θ ]tm Var (fromℕ _)
-                            → Typing-Sub (connect-pdb pdb1 Υ) (connect-pdb pdb2 Θ) (sub-between-connect-pdbs pdb1 pdb2 σ τ)
-sub-between-connect-pdbs-Ty pdb1 pdb2 σty τty = sub-between-connects-Ty σty (term-conversion (pdb-focus-tm-Ty pdb1) (reflexive≈ty (sym≃ty (⋆-is-only-0-d-ty)))) τty (term-conversion (pdb-focus-tm-Ty pdb2) (reflexive≈ty (sym≃ty (⋆-is-only-0-d-ty))))
-
-sub-between-connect-pds-Ty : (pd1 : Γ ⊢pd₀ d)
-                           → (pd2 : Δ ⊢pd₀ d′)
-                           → Typing-Sub Γ Δ σ
-                           → Typing-Sub Υ Θ τ
-                           → pd-focus-tm pd1 [ σ ]tm ≈[ Δ ]tm pd-focus-tm pd2
-                           → Var (fromℕ _) [ τ ]tm ≈[ Θ ]tm Var (fromℕ _)
-                           → Typing-Sub (connect-pd pd1 Υ) (connect-pd pd2 Θ) (sub-between-connect-pds pd1 pd2 σ τ)
-sub-between-connect-pds-Ty (Finish pdb1) (Finish pdb2) = sub-between-connect-pdbs-Ty pdb1 pdb2
+sub-between-connect-susps-Ty : Typing-Sub Γ Δ σ
+                             → Typing-Sub Υ Θ τ
+                             → Var (fromℕ _) [ τ ]tm ≈[ Θ ]tm Var (fromℕ _)
+                             → Typing-Sub (connect-susp Γ Υ) (connect-susp Δ Θ) (sub-between-connect-susps σ τ)
+sub-between-connect-susps-Ty {σ = σ} σty τty p = sub-between-connects-Ty (suspSubTy σty) getSndTy τty getSndTy (reflexive≈tm (sym≃tm (susp-sub-preserve-getSnd σ))) p

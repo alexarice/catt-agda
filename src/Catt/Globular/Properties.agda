@@ -18,9 +18,9 @@ open import Relation.Binary.PropositionalEquality
 -- base-subbed_:_(A_:_Ty_Γ_(suc_(suc_d)))_→_(σ_:_Sub_Γ_Δ)_→_ty-base_A_[_σ_]ty_≡_ty-base_(A_[_σ_]ty)
 -- base-subbed_(s_─⟨_A_⟩⟶_t)_σ_=_refl
 
--- tm-to-ty-≃ : {s : Tm Γ (suc d)} {t : Tm Δ (suc d′)} → Γ ≃c Δ → s ≃tm t → tm-to-ty s ≃ty tm-to-ty t
--- tm-to-ty-≃ p (Var≃ x) = ‼-≃ _ _ x p
--- tm-to-ty-≃ p (Coh≃ q r s) = sub-action-≃-ty r s
+tm-to-ty-≃ : Γ ≃c Δ → s ≃tm t → tm-to-ty Γ s ≃ty tm-to-ty Δ t
+tm-to-ty-≃ p (Var≃ x y) = ‼-≃ _ _ y p
+tm-to-ty-≃ p (Coh≃ q r s) = sub-action-≃-ty r s
 
 ty-src-≃ : A ≃ty B → ty-src A ≃tm ty-src B
 ty-src-≃ (Arr≃ p q r) = p

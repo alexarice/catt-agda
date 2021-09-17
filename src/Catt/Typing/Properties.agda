@@ -21,8 +21,8 @@ term-conversion : Typing-Tm Γ t A → A ≈[ Γ ]ty B → Typing-Tm Γ t B
 -- term-conversion (TyVar i x) eq = TyVar i (trans≈ty x eq)
 term-conversion (TyVarZ x) eq = TyVarZ (trans≈ty x eq)
 term-conversion (TyVarS i tvi x) eq = TyVarS i tvi (trans≈ty x eq)
-term-conversion (TyCoh p q r s t) eq = TyCoh p q r s (trans≈ty t eq)
-term-conversion (TyComp pd p q r s t) eq = TyComp pd p q r s (trans≈ty t eq)
+term-conversion (TyCoh q r s t) eq = TyCoh q r s (trans≈ty t eq)
+term-conversion (TyComp p q r s t) eq = TyComp p q r s (trans≈ty t eq)
 
 -- type-conversion : Typing-Ty Γ A → A ≈[ Γ ]ty B → Typing-Ty Γ B
 -- type-conversion TyStar Star≈ = TyStar
@@ -42,8 +42,8 @@ lift-ty-typing (TyArr p q r) = TyArr (lift-tm-typing p) (lift-ty-typing q) (lift
 -- lift-tm-typing (TyVar i x) = TyVar (suc i) (lift-ty-equality x)
 lift-tm-typing (TyVarZ x) = TyVarS zero (TyVarZ x) refl≈ty
 lift-tm-typing (TyVarS i tvi x) = TyVarS (suc i) (TyVarS i tvi x) refl≈ty
-lift-tm-typing (TyCoh pd q r s t) = TyCoh pd q (lift-sub-typing r) s (trans≈ty (reflexive≈ty (apply-lifted-sub-ty-≃ _ _)) (lift-ty-equality t))
-lift-tm-typing (TyComp {s = s} {A = A} {t = t} pd p q r u v) = TyComp pd p (lift-sub-typing q) r u (trans≈ty (reflexive≈ty (apply-lifted-sub-ty-≃ (s ─⟨ A ⟩⟶ t) _)) (lift-ty-equality v))
+lift-tm-typing (TyCoh q r s t) = TyCoh q (lift-sub-typing r) s (trans≈ty (reflexive≈ty (apply-lifted-sub-ty-≃ _ _)) (lift-ty-equality t))
+lift-tm-typing (TyComp {s = s} {A = A} {t = t} p q r u v) = TyComp p (lift-sub-typing q) r u (trans≈ty (reflexive≈ty (apply-lifted-sub-ty-≃ (s ─⟨ A ⟩⟶ t) _)) (lift-ty-equality v))
 
 lift-sub-typing TyNull = TyNull
 lift-sub-typing (TyExt p r) = TyExt (lift-sub-typing p) (term-conversion (lift-tm-typing r) (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ _ _))))
@@ -73,8 +73,8 @@ apply-sub-ty-typing (TyArr sty Aty tty) σty = TyArr (apply-sub-tm-typing sty σ
 
 apply-sub-tm-typing (TyVarZ x) (TyExt {t = t} σty tty) = term-conversion tty (trans≈ty (sym≈ty (reflexive≈ty (lift-sub-comp-lem-ty {t = t} _ _))) (apply-sub-ty-eq (TyExt σty tty) x))
 apply-sub-tm-typing (TyVarS i tvi x) (TyExt {t = t} σty tty) = term-conversion (apply-sub-tm-typing tvi σty) (trans≈ty (sym≈ty (reflexive≈ty (lift-sub-comp-lem-ty {t = t} _ _))) (apply-sub-ty-eq (TyExt σty tty) x))
-apply-sub-tm-typing (TyCoh pd w x y z) σty = TyCoh pd w (apply-sub-sub-typing x σty) y (trans≈ty (reflexive≈ty (assoc-ty _ _ _)) (apply-sub-ty-eq σty z))
-apply-sub-tm-typing (TyComp {s = s} {t = t} pd v w x y z) σty = TyComp pd v (apply-sub-sub-typing w σty) x y (trans≈ty (reflexive≈ty (assoc-ty _ _ (s ─⟨ _ ⟩⟶ t))) (apply-sub-ty-eq σty z))
+apply-sub-tm-typing (TyCoh w x y z) σty = TyCoh w (apply-sub-sub-typing x σty) y (trans≈ty (reflexive≈ty (assoc-ty _ _ _)) (apply-sub-ty-eq σty z))
+apply-sub-tm-typing (TyComp {s = s} {t = t} v w x y z) σty = TyComp v (apply-sub-sub-typing w σty) x y (trans≈ty (reflexive≈ty (assoc-ty _ _ (s ─⟨ _ ⟩⟶ t))) (apply-sub-ty-eq σty z))
 
 apply-sub-sub-typing TyNull σty = TyNull
 apply-sub-sub-typing {Υ = Υ} {Γ = Γ} {Δ = Δ} (TyExt τty tty) σty = TyExt (apply-sub-sub-typing τty σty) (term-conversion (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ _))))

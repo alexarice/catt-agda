@@ -44,21 +44,6 @@ infixl 60 _∪_
 _∪_ : VarSet n → VarSet n → VarSet n
 (f ∪ g) = zipWith _∨_ f g
 
-
--- supp : (x : Syntax) → VarSet (syntax-ctx x)
--- supp = wfRec _ (λ y → VarSet (syntax-ctx y)) γ
---   where
---     γ : (x : Syntax) →
---         ((y : Syntax) → y ≺⁺ x → VarSet (syntax-ctx y)) →
---         VarSet (syntax-ctx x)
---     γ (Context Γ) rec = full
---     γ (Type ⋆) rec = empty
---     γ (Type (s ─⟨ A ⟩⟶ t) ⦃ c = TyDimS ⦄) rec = rec (Type A) [ ty2 ]p ∪ rec (Term s) [ ty1 ]p ∪ rec (Term t) [ ty3 ]p
---     γ (Term (Var {Γ = Γ} i) ⦃ c = TmDimV ⦄) rec = (trueAt i) ∪ (rec (Type (Γ ‼ i) ⦃ c = lookupD Γ i ⦄) [ (dim ≤-refl) ]p)
---     γ (Term (Coh Δ A σ) ⦃ c = TmDimC ⦄) rec = rec (Substitution σ) [ tm3 ]p
---     γ (Substitution ⟨⟩) rec = empty
---     γ (Substitution ⟨ σ , t ⟩ ⦃ c = SubDimS ⦄) rec = (rec (Substitution σ) [ sub1 ]p) ∪ (rec (Term t) [ sub2 ]p)
-
 FVCtx : (Γ : Ctx n) → VarSet n
 FVTm : (t : Tm n) → VarSet n
 FVTy : (A : Ty n d′) → VarSet n
@@ -72,17 +57,7 @@ FVTy (s ─⟨ A ⟩⟶ t) = FVTy A ∪ FVTm s ∪ FVTm t
 FVSub ⟨⟩ = empty
 FVSub ⟨ σ , t ⟩ = FVSub σ ∪ FVTm t
 
--- suppCtx : (Γ : Ctx n) → VarSet Γ
--- suppTm : (t : Tm Γ) → VarSet Γ
--- suppTy : (A : Ty Γ d′) → VarSet Γ
--- suppSub : (σ : Sub Δ Γ) → VarSet Γ
-
--- suppCtx Γ = supp (Context Γ)
--- suppTm t = supp (Term t)
--- suppTy A = supp (Type A)
--- suppSub σ = supp (Substitution σ)
-
--- data _≃vs_ : VarSet n → VarSet n → Set where
---   ≃VEmp : [] ≃vs []
---   ≃VTrue : ∀ {xs ys : VarSet n} → xs ≃vs ys → ewt xs ≃vs ewt ys
---   ≃VFalse : ∀ {xs ys : VarSet n} → xs ≃vs ys → ewf xs ≃vs ewf ys
+TransportVarSet : VarSet n → Sub n m → VarSet m
+TransportVarSet xs ⟨⟩ = empty
+TransportVarSet (ewf xs) ⟨ σ , t ⟩ = TransportVarSet xs σ
+TransportVarSet (ewt xs) ⟨ σ , t ⟩ = TransportVarSet xs σ ∪ FVTm t

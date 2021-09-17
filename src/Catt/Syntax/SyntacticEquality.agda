@@ -5,7 +5,6 @@ module Catt.Syntax.SyntacticEquality where
 open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Syntax.Bundles
-open import Catt.Suspension.Base
 open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Fin using (Fin;zero;suc;toℕ;inject₁;fromℕ)
@@ -15,8 +14,11 @@ open import Relation.Nullary
 open import Relation.Nullary.Decidable
 open import Relation.Binary hiding (Irrelevant)
 open import Function.Equivalence using (equivalence)
-open import Data.Product renaming (_,_ to _,,_) using (Σ; proj₁; proj₂)
 open import Data.Empty
+
+data _≃_ : Tree n → Tree m → Set where
+  Sing≃ : Sing ≃ Sing
+  Join≃ : {S : Tree n} → {S′ : Tree n′} → {T : Tree m} → {T′ : Tree m′} → S ≃ S′ → T ≃ T′ → Join S T ≃ Join S′ T′
 
 data _≃c_ : Ctx n → Ctx m → Set
 data _≃ty_ : Ty n d → Ty m d′ → Set
@@ -33,16 +35,20 @@ data _≃ty_ where
 
 data _≃tm_ where
   Var≃ : {i : Fin n} → {j : Fin m} → n ≡ m → toℕ i ≡ toℕ j → Var i ≃tm Var j
-  Coh≃ : Δ ≃c Δ′ → A ≃ty A′ → σ ≃s σ′ → Coh Δ A σ ≃tm Coh Δ′ A′ σ′
+  Coh≃ : S ≃ S′ → A ≃ty A′ → σ ≃s σ′ → Coh S A σ ≃tm Coh S′ A′ σ′
 
 data _≃s_ where
   Null≃ : n ≡ m → ⟨⟩ {n = n} ≃s ⟨⟩ {n = m}
   Ext≃ : σ ≃s σ′ → t ≃tm t′ → ⟨ σ , t ⟩ ≃s ⟨ σ′ , t′ ⟩
 
+refl≃ : T ≃ T
 refl≃c : Γ ≃c Γ
 refl≃ty : A ≃ty A
 refl≃tm : s ≃tm s
 refl≃s : σ ≃s σ
+
+refl≃ {T = Sing} = Sing≃
+refl≃ {T = Join S T} = Join≃ refl≃ refl≃
 
 refl≃c {Γ = ∅} = Emp≃
 refl≃c {Γ = Γ , A} = Add≃ refl≃c refl≃ty
@@ -51,15 +57,19 @@ refl≃ty {A = ⋆} = Star≃ refl
 refl≃ty {A = s ─⟨ A ⟩⟶ t} = Arr≃ refl≃tm refl≃ty refl≃tm
 
 refl≃tm {s = Var i} = Var≃ refl refl
-refl≃tm {s = Coh Δ A σ} = Coh≃ refl≃c refl≃ty refl≃s
+refl≃tm {s = Coh Δ A σ} = Coh≃ refl≃ refl≃ty refl≃s
 
 refl≃s {σ = ⟨⟩} = Null≃ refl
 refl≃s {σ = ⟨ σ , t ⟩} = Ext≃ refl≃s refl≃tm
 
+sym≃ : S ≃ T → T ≃ S
 sym≃c : Γ ≃c Δ → Δ ≃c Γ
 sym≃ty : A ≃ty B → B ≃ty A
 sym≃tm : s ≃tm t → t ≃tm s
 sym≃s : σ ≃s τ → τ ≃s σ
+
+sym≃ Sing≃ = Sing≃
+sym≃ (Join≃ p q) = Join≃ (sym≃ p) (sym≃ q)
 
 sym≃c Emp≃ = Emp≃
 sym≃c (Add≃ p q) = Add≃ (sym≃c p) (sym≃ty q)
@@ -68,15 +78,19 @@ sym≃ty (Star≃ x) = Star≃ (sym x)
 sym≃ty (Arr≃ p q r) = Arr≃ (sym≃tm p) (sym≃ty q) (sym≃tm r)
 
 sym≃tm (Var≃ x y) = Var≃ (sym x) (sym y)
-sym≃tm (Coh≃ p q r) = Coh≃ (sym≃c p) (sym≃ty q) (sym≃s r)
+sym≃tm (Coh≃ p q r) = Coh≃ (sym≃ p) (sym≃ty q) (sym≃s r)
 
 sym≃s (Null≃ x) = Null≃ (sym x)
 sym≃s (Ext≃ p q) = Ext≃ (sym≃s p) (sym≃tm q)
 
+trans≃ : S ≃ T → T ≃ U → S ≃ U
 trans≃c : Γ ≃c Δ → Δ ≃c Υ → Γ ≃c Υ
 trans≃ty : A ≃ty B → B ≃ty C → A ≃ty C
 trans≃tm : s ≃tm t → t ≃tm u → s ≃tm u
 trans≃s : σ ≃s τ → τ ≃s μ → σ ≃s μ
+
+trans≃ Sing≃ Sing≃ = Sing≃
+trans≃ (Join≃ p q) (Join≃ p′ q′) = Join≃ (trans≃ p p′) (trans≃ q q′)
 
 trans≃c Emp≃ Emp≃ = Emp≃
 trans≃c (Add≃ p q) (Add≃ r s) = Add≃ (trans≃c p r) (trans≃ty q s)
@@ -85,7 +99,7 @@ trans≃ty (Star≃ x) (Star≃ y) = Star≃ (trans x y)
 trans≃ty (Arr≃ p q r) (Arr≃ s t u) = Arr≃ (trans≃tm p s) (trans≃ty q t) (trans≃tm r u)
 
 trans≃tm (Var≃ w x) (Var≃ y z) = Var≃ (trans w y) (trans x z)
-trans≃tm (Coh≃ p q r) (Coh≃ s t u) = Coh≃ (trans≃c p s) (trans≃ty q t) (trans≃s r u)
+trans≃tm (Coh≃ p q r) (Coh≃ s t u) = Coh≃ (trans≃ p s) (trans≃ty q t) (trans≃s r u)
 
 trans≃s (Null≃ x) (Null≃ y) = Null≃ (trans x y)
 trans≃s (Ext≃ p q) (Ext≃ r s) = Ext≃ (trans≃s p r) (trans≃tm q s)
@@ -142,6 +156,10 @@ sub-setoid = record { Carrier = SUB
 ≃ty-preserve-height (Star≃ x) = refl
 ≃ty-preserve-height (Arr≃ x p x₁) = cong suc (≃ty-preserve-height p)
 
+≃-to-same-n : {S : Tree n} → {T : Tree m} → S ≃ T → n ≡ m
+≃-to-same-n Sing≃ = refl
+≃-to-same-n (Join≃ p q) = cong₂ (λ a b → (a + suc (suc b))) (≃-to-same-n q) (≃-to-same-n p)
+
 ≃c-preserve-length : Γ ≃c Δ → ctxLength Γ ≡ ctxLength Δ
 ≃c-preserve-length Emp≃ = refl
 ≃c-preserve-length (Add≃ p x) = cong suc (≃c-preserve-length p)
@@ -149,6 +167,15 @@ sub-setoid = record { Carrier = SUB
 ≃s-to-codomain-≡ : {σ : Sub n m} → {τ : Sub n′ m′} → σ ≃s τ → m ≡ m′
 ≃s-to-codomain-≡ (Null≃ x) = x
 ≃s-to-codomain-≡ (Ext≃ p x) = ≃s-to-codomain-≡ p
+
+≃-to-≡ : {S T : Tree n} → S ≃ T → S ≡ T
+≃-to-≡ {S = S} {T = T} q = subst (λ - → subst Tree - S ≡ T) (≡-irrelevant (≃-to-same-n q) refl) (γ q)
+  where
+    subst-Tree : (p : n ≡ n′) → (q : m ≡ m′) → (S : Tree n) → (T : Tree m) → subst Tree (cong₂ (λ a b → (a + suc (suc b))) q p) (Join S T) ≡ Join (subst Tree p S) (subst Tree q T)
+    subst-Tree refl refl S T = refl
+    γ : {S : Tree n} → {T : Tree m} → (p : S ≃ T) → subst Tree (≃-to-same-n p) S ≡ T
+    γ Sing≃ = refl
+    γ (Join≃ q r) = trans (subst-Tree (≃-to-same-n q) (≃-to-same-n r) _ _) (cong₂ Join (γ q) (γ r))
 
 ≃c-to-≡ : Γ ≃c Δ → Γ ≡ Δ
 ≃ty-to-≡ : A ≃ty B → A ≡ B
@@ -174,9 +201,9 @@ sub-setoid = record { Carrier = SUB
 
 ≃tm-to-≡ (Var≃ x y) with toℕ-injective y
 ... | refl = refl
-≃tm-to-≡ (Coh≃ p q r) with ≃c-preserve-length p | ≃ty-preserve-height q
+≃tm-to-≡ (Coh≃ p q r) with ≃-to-same-n p | ≃ty-preserve-height q
 ... | refl | refl
-  rewrite ≃c-to-≡ p
+  rewrite ≃-to-≡ p
   rewrite ≃ty-to-≡ q
   rewrite ≃s-to-≡ r = refl
 
@@ -249,7 +276,7 @@ lift-subbed-tm-≃ (Var i) σ = lem i σ
     lem : (i : Fin n) → (σ : Sub n m) → Var i [ liftSub σ ]tm ≃tm liftTerm (Var i [ σ ]tm)
     lem zero ⟨ σ , t ⟩ = refl≃tm
     lem (suc i) ⟨ σ , t ⟩ = lem i σ
-lift-subbed-tm-≃ (Coh Δ A τ) σ = Coh≃ refl≃c refl≃ty (lift-subbed-sub-≃ τ σ)
+lift-subbed-tm-≃ (Coh Δ A τ) σ = Coh≃ refl≃ refl≃ty (lift-subbed-sub-≃ τ σ)
 
 lift-subbed-sub-≃ ⟨⟩ σ = Null≃ refl
 lift-subbed-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (lift-subbed-sub-≃ τ σ) (lift-subbed-tm-≃ t σ)
@@ -266,7 +293,7 @@ apply-lifted-sub-tm-≃ (Var i) σ = lem i σ
     lem : (i : Fin n) → (σ : Sub n m) → Var i [ liftSub σ ]tm ≃tm liftTerm (Var i [ σ ]tm)
     lem zero ⟨ σ , t ⟩ = refl≃tm
     lem (suc i) ⟨ σ , t ⟩ = lem i σ
-apply-lifted-sub-tm-≃ (Coh Δ A τ) σ = Coh≃ refl≃c refl≃ty (apply-lifted-sub-sub-≃ τ σ)
+apply-lifted-sub-tm-≃ (Coh Δ A τ) σ = Coh≃ refl≃ refl≃ty (apply-lifted-sub-sub-≃ τ σ)
 
 apply-lifted-sub-sub-≃ ⟨⟩ σ = Null≃ refl
 apply-lifted-sub-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (apply-lifted-sub-sub-≃ τ σ) (apply-lifted-sub-tm-≃ t σ)
@@ -275,10 +302,19 @@ apply-lifted-sub-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (apply-lifted-sub-sub-≃ τ
 ‼-≃ zero zero p (Add≃ q x) = lift-ty-≃ x
 ‼-≃ (suc i) (suc j) p (Add≃ q x) = lift-ty-≃ (‼-≃ i j (cong pred p) q)
 
+≃-dec : (S : Tree n) → (T : Tree m) → Dec (S ≃ T)
 ≃c-dec : (Γ : Ctx n) → (Γ′ : Ctx m) → Dec (Γ ≃c Γ′)
 ≃ty-dec : (A : Ty n d) → (B : Ty m d′) → Dec (A ≃ty B)
 ≃tm-dec : (s : Tm n) → (t : Tm m) → Dec (s ≃tm t)
 ≃s-dec : (σ : Sub n m) → (τ : Sub n′ m′) → Dec (σ ≃s τ)
+
+≃-dec Sing Sing = yes Sing≃
+≃-dec Sing (Join S T) = no λ ()
+≃-dec (Join S T) Sing = no λ ()
+≃-dec (Join S T) (Join S′ T′) with ≃-dec S S′ | ≃-dec T T′
+... | yes p | yes q = yes (Join≃ p q)
+... | yes p | no q = no λ where (Join≃ x y) → q y
+... | no p | q = no λ where (Join≃ x y) → p x
 
 ≃c-dec ∅ ∅ = yes Emp≃
 ≃c-dec ∅ (Γ′ , B) = no λ ()
@@ -306,7 +342,7 @@ apply-lifted-sub-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (apply-lifted-sub-sub-≃ τ
 
 ≃tm-dec (Var i) (Coh Δ A σ) = no (λ ())
 ≃tm-dec (Coh Δ A σ) (Var i) = no (λ ())
-≃tm-dec (Coh Δ A σ) (Coh Δ′ A′ σ′) with ≃c-dec Δ Δ′ | ≃ty-dec A A′ | ≃s-dec σ σ′
+≃tm-dec (Coh Δ A σ) (Coh Δ′ A′ σ′) with ≃-dec Δ Δ′ | ≃ty-dec A A′ | ≃s-dec σ σ′
 ... | yes p | yes q | yes r = yes (Coh≃ p q r)
 ... | yes p | yes q | no r = no λ where (Coh≃ _ _ x) → r x
 ... | yes p | no q | r = no λ where (Coh≃ _ x _) → q x
@@ -335,10 +371,14 @@ tm-dec s t = map (equivalence ≃tm-to-≡ reflexive≃tm) (≃tm-dec s t)
 sub-dec : DecidableEquality (Sub n m)
 sub-dec σ τ = map (equivalence ≃s-to-≡ reflexive≃s) (≃s-dec σ τ)
 
+≃-irrel : Irrelevant (S ≃ T)
 ≃c-irrel : Irrelevant (Γ ≃c Δ)
 ≃ty-irrel : Irrelevant (A ≃ty B)
 ≃tm-irrel : Irrelevant (s ≃tm t)
 ≃s-irrel : Irrelevant (σ ≃s τ)
+
+≃-irrel Sing≃ Sing≃ = refl
+≃-irrel (Join≃ p q) (Join≃ p′ q′) = cong₂ Join≃ (≃-irrel p p′) (≃-irrel q q′)
 
 ≃c-irrel Emp≃ Emp≃ = refl
 ≃c-irrel (Add≃ p x) (Add≃ q y) = cong₂ Add≃ (≃c-irrel p q) (≃ty-irrel x y)
@@ -350,9 +390,9 @@ sub-dec σ τ = map (equivalence ≃s-to-≡ reflexive≃s) (≃s-dec σ τ)
     lem refl refl refl = refl
 
 ≃tm-irrel (Var≃ p q) (Var≃ p′ q′) = cong₂ Var≃ (≡-irrelevant p p′) (≡-irrelevant q q′)
-≃tm-irrel (Coh≃ p q r) (Coh≃ p′ q′ r′) = lem (≃c-irrel p p′) (≃ty-irrel q q′) (≃s-irrel r r′)
+≃tm-irrel (Coh≃ p q r) (Coh≃ p′ q′ r′) = lem (≃-irrel p p′) (≃ty-irrel q q′) (≃s-irrel r r′)
   where
-    lem : {a b : Γ ≃c Δ} {c d : A ≃ty A′} {e f : σ ≃s τ} → a ≡ b → c ≡ d → e ≡ f → Coh≃ a c e ≡ Coh≃ b d f
+    lem : {a b : S ≃ T} {c d : A ≃ty A′} {e f : σ ≃s τ} → a ≡ b → c ≡ d → e ≡ f → Coh≃ a c e ≡ Coh≃ b d f
     lem refl refl refl = refl
 
 ≃s-irrel (Null≃ x) (Null≃ y) = cong Null≃ (≡-irrelevant x y)
@@ -372,7 +412,7 @@ lift-sub-comp-lem-sub σ ⟨⟩ = Null≃ refl
 lift-sub-comp-lem-sub σ ⟨ τ , t ⟩ = Ext≃ (lift-sub-comp-lem-sub σ τ) (lift-sub-comp-lem-tm σ t)
 
 lift-sub-comp-lem-tm σ (Var i) = refl≃tm
-lift-sub-comp-lem-tm σ (Coh Δ A τ) = Coh≃ refl≃c refl≃ty (lift-sub-comp-lem-sub σ τ)
+lift-sub-comp-lem-tm σ (Coh Δ A τ) = Coh≃ refl≃ refl≃ty (lift-sub-comp-lem-sub σ τ)
 
 lift-sub-comp-lem-ty σ ⋆ = refl≃ty
 lift-sub-comp-lem-ty σ (s ─⟨ B ⟩⟶ t) = Arr≃ (lift-sub-comp-lem-tm σ s) (lift-sub-comp-lem-ty σ B) (lift-sub-comp-lem-tm σ t)
@@ -392,12 +432,11 @@ id-on-tm (Var i) = lem i
     lem : (i : Fin m) → Var i [ idSub m ]tm ≃tm Var i
     lem {m = suc m} zero = refl≃tm
     lem {m = suc m} (suc i) = trans≃tm (apply-lifted-sub-tm-≃ (Var i) (idSub m)) (lift-tm-≃ (lem i))
-id-on-tm (Coh Δ A σ) = Coh≃ refl≃c refl≃ty (id-left-unit σ)
+id-on-tm (Coh Δ A σ) = Coh≃ refl≃ refl≃ty (id-left-unit σ)
 
 ∘-assoc : (σ : Sub n l) → (τ : Sub m n) → (μ : Sub m′ m) → (σ ∘ τ) ∘ μ ≃s σ ∘ (τ ∘ μ)
 assoc-tm : (σ : Sub n l) → (τ : Sub m n) → (t : Tm m) → t [ σ ∘ τ ]tm ≃tm (t [ τ ]tm) [ σ ]tm
 assoc-ty : (σ : Sub n l) → (τ : Sub m n) → (A : Ty m d) → A [ σ ∘ τ ]ty ≃ty (A [ τ ]ty) [ σ ]ty
--- assoc-var : (σ : Sub n l) → (τ : Sub m n) → (i : Fin ) → Var i [ σ ∘ τ ]tm ≃tm (Var i [ τ ]tm) [ σ ]tm
 
 ∘-assoc σ τ ⟨⟩ = Null≃ refl
 ∘-assoc σ τ ⟨ μ , t ⟩ = Ext≃ (∘-assoc σ τ μ) (assoc-tm σ τ t)
@@ -407,7 +446,7 @@ assoc-tm σ τ (Var i) = lem σ τ i
     lem : (σ : Sub n l) → (τ : Sub m n) → (i : Fin m) → Var i [ σ ∘ τ ]tm ≃tm (Var i [ τ ]tm) [ σ ]tm
     lem σ ⟨ τ , t ⟩ zero = refl≃tm
     lem σ ⟨ τ , t ⟩ (suc i) = lem σ τ i
-assoc-tm σ τ (Coh Δ A μ) = Coh≃ refl≃c refl≃ty (∘-assoc σ τ μ)
+assoc-tm σ τ (Coh Δ A μ) = Coh≃ refl≃ refl≃ty (∘-assoc σ τ μ)
 
 assoc-ty σ τ ⋆ = refl≃ty
 assoc-ty σ τ (s ─⟨ A ⟩⟶ t) = Arr≃ (assoc-tm σ τ s) (assoc-ty σ τ A) (assoc-tm σ τ t)
@@ -430,7 +469,7 @@ idSub≃-on-tm p (Var i) = lem p i
     lem : (p : Γ ≃c Δ) → (i : Fin (ctxLength Γ)) → Var i [ idSub≃ p ]tm ≃tm Var {n = ctxLength Γ} i
     lem (Add≃ p x) zero = Var≃ (cong suc (sym (≃c-preserve-length p))) refl
     lem (Add≃ p x) (suc i) = trans≃tm (apply-lifted-sub-tm-≃ (Var i) (idSub≃ p)) (lift-tm-≃ (lem p i))
-idSub≃-on-tm p (Coh Δ A σ) = Coh≃ refl≃c refl≃ty (idSub≃-on-sub p σ)
+idSub≃-on-tm p (Coh Δ A σ) = Coh≃ refl≃ refl≃ty (idSub≃-on-sub p σ)
 
 idSub≃-on-sub p ⟨⟩ = Null≃ (sym (≃c-preserve-length p))
 idSub≃-on-sub p ⟨ σ , t ⟩ = Ext≃ (idSub≃-on-sub p σ) (idSub≃-on-tm p t)
@@ -438,6 +477,10 @@ idSub≃-on-sub p ⟨ σ , t ⟩ = Ext≃ (idSub≃-on-sub p σ) (idSub≃-on-tm
 idSub≃-fst-var : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (p : Γ ≃c Δ) → Var (fromℕ n) [ idSub≃ p ]tm ≃tm Var (fromℕ m)
 idSub≃-fst-var (Add≃ Emp≃ x) = refl≃tm
 idSub≃-fst-var (Add≃ (Add≃ p y) x) = trans≃tm (apply-lifted-sub-tm-≃ (Var (fromℕ _)) (idSub≃ (Add≃ p y))) (lift-tm-≃ (idSub≃-fst-var (Add≃ p y)))
+
+idSub≃-snd-var : {Γ : Ctx (suc (suc n))} → {Δ : Ctx (suc (suc m))} → (p : Γ ≃c Δ) → Var (inject₁ (fromℕ n)) [ idSub≃ p ]tm ≃tm Var (inject₁ (fromℕ m))
+idSub≃-snd-var (Add≃ (Add≃ Emp≃ y) x) = refl≃tm
+idSub≃-snd-var (Add≃ (Add≃ (Add≃ p z) y) x) = trans≃tm (apply-lifted-sub-tm-≃ (Var (inject₁ (fromℕ _))) (idSub≃ (Add≃ (Add≃ p z) y))) (lift-tm-≃ (idSub≃-snd-var (Add≃ (Add≃ p z) y)))
 
 -- idSub≃-on-ty p (Star≃ x) = Star≃ (trans≃c (sym≃c p) x)
 -- idSub≃-on-ty p (Arr≃ q r s) = Arr≃ (idSub≃-on-tm p q) (idSub≃-on-ty p r) (idSub≃-on-tm p s)

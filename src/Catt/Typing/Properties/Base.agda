@@ -13,8 +13,6 @@ open import Catt.Typing index rule
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary
 open import Catt.Suspension
-open import Catt.Pasting
-open import Catt.Pasting.Properties
 
 private
   Index : Set
@@ -49,8 +47,8 @@ reflexive≈ty (Star≃ x) = Star≈
 reflexive≈ty (Arr≃ p q r) = Arr≈ (reflexive≈tm p) (reflexive≈ty q) (reflexive≈tm r)
 
 reflexive≈tm (Var≃ x y) = Var≈ y
-reflexive≈tm (Coh≃ p q r) with ≃c-preserve-length p
-... | refl with ≃c-to-≡ p
+reflexive≈tm (Coh≃ p q r) with ≃-to-same-n p
+... | refl with ≃-to-≡ p
 ... | refl = Coh≈ (reflexive≈ty q) (reflexive≈s r)
 
 reflexive≈s (Null≃ x) = Null≈

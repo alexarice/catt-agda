@@ -3,12 +3,8 @@
 module Catt.Globular where
 
 open import Catt.Syntax
--- open import Catt.Dimension
 open import Data.Nat
-open import Catt.Variables
-open import Data.Unit
 open import Data.Empty
-open import Data.Product renaming (_,_ to _,,_)
 
 get-tm-height : Ctx n → Tm n → ℕ
 get-tm-height Γ (Var i) = lookupHeight Γ i

@@ -8,11 +8,13 @@ module Catt.Typing (index : ℕ) (rule : Fin index → Rule) where
 
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Pasting
 open import Data.Nat
 open import Data.Nat.Properties
 open import Relation.Binary.PropositionalEquality
 open import Catt.Support
+open import Catt.Tree
+open import Catt.Tree.Support
+open import Data.Bool using (true; false)
 
 private
   Index : Set
@@ -35,7 +37,7 @@ data _≈[_]tm_ where
   Var≈ : {i j : Fin n} → (toℕ i ≡ toℕ j) → (Var i) ≈[ Γ ]tm (Var j)
   Sym≈ : s ≈[ Γ ]tm t → t ≈[ Γ ]tm s
   Trans≈ : s ≈[ Γ ]tm t → t ≈[ Γ ]tm u → s ≈[ Γ ]tm u
-  Coh≈ : A ≈[ Δ ]ty B → σ ≈[ Γ ]s τ → (Coh Δ A σ) ≈[ Γ ]tm (Coh Δ B τ)
+  Coh≈ : A ≈[ tree-to-ctx T ]ty B → σ ≈[ Γ ]s τ → (Coh T A σ) ≈[ Γ ]tm (Coh T B τ)
   Rule≈ : (i : Index)
         → (a : rule i .Args)
         → (eqt : (j : eqtIndex (rule i)) → (rule i .eqtlhs j a) ≈[ rule i .eqtCtx j a ]tm (rule i .eqtrhs j a))
@@ -59,8 +61,8 @@ data Typing-Tm where
   -- TyVar : {Γ : Ctx n} → (i : Fin n) → {B : Ty n d} → (Γ ‼ i) ≈[ Γ ]ty B → Typing-Tm Γ (Var i) B
   TyVarZ : Γ ‼ zero ≈[ Γ ]ty B → Typing-Tm Γ 0V B
   TyVarS : (i : Fin (ctxLength Γ)) → Typing-Tm Γ (Var i) A → liftType A ≈[ Γ , C ]ty B → Typing-Tm (Γ , C) (Var (suc i)) B
-  TyCoh : Δ ⊢pd₀ d → Typing-Ty Δ A → Typing-Sub Δ Γ σ → FVTy A ≡ full → (A [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh Δ A σ) B
-  TyComp : (pd : Δ ⊢pd₀ d) → .⦃ _ : NonZero′ d ⦄ → Typing-Ty Δ (s ─⟨ A ⟩⟶ t) → Typing-Sub Δ Γ σ → FVTy A ∪ FVTm s ≡ supp-src pd → FVTy A ∪ FVTm t ≡ supp-tgt pd → ((s ─⟨ A ⟩⟶ t) [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ t) σ) B
+  TyCoh : Typing-Ty (tree-to-ctx T) A → Typing-Sub (tree-to-ctx T) Γ σ → FVTy A ≡ full → (A [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh T A σ) B
+  TyComp : .⦃ _ : NonZero′ (tree-dim T) ⦄ → Typing-Ty (tree-to-ctx T) (s ─⟨ A ⟩⟶ t) → Typing-Sub (tree-to-ctx T) Γ σ → FVTy A ∪ FVTm s ≡ supp-bd (pred (tree-dim T)) T false → FVTy A ∪ FVTm t ≡ supp-bd (pred (tree-dim T)) T true → ((s ─⟨ A ⟩⟶ t) [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh T (s ─⟨ A ⟩⟶ t) σ) B
   -- TyConv : Typing-Tm Γ t A → A ≈[ Γ ]ty B → Typing-Tm Γ t B
 
 data Typing-Ty where

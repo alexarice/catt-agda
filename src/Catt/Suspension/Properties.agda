@@ -5,17 +5,14 @@ module Catt.Suspension.Properties where
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
--- open import Catt.Pasting
--- open import Catt.Pasting.Properties
 open import Catt.Suspension
--- open import Catt.Globular
--- open import Catt.Globular.Properties
 open import Data.Nat
 open import Data.Fin using (Fin;zero;suc;inject₁;toℕ;fromℕ;lower₁)
 open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁;inject₁-injective)
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
 open import Catt.Variables
+open import Catt.Variables.Properties
 open import Relation.Nullary
 open import Data.Sum
 open import Data.Product renaming (_,_ to _,,_)
@@ -124,7 +121,7 @@ susp-var-split-compat {σ = σ} {τ = τ} {vs = vs} vsc i with suspension-vars i
 ... | inj₁ k | p = trans≃tm (inject-susp-sub σ k) (susp-tm-≃ p)
 ... | inj₂ k | p = trans≃tm (inject-susp-sub τ k) (susp-tm-≃ p)
 
-{-
+
 module _  where
   private
     minus1 : ∀ {n} → Fin (suc (suc n)) → Fin (suc n)
@@ -134,6 +131,18 @@ module _  where
     lem : (n : ℕ) → (k : Fin n) → fromℕ n ≢ (inject₁ k)
     lem zero ()
     lem (suc n) (suc k) p = lem n k (cong minus1 p)
+
+    varToVarSuspSub-preserve-fst : (σ : Sub n m) → .⦃ _ : varToVar σ ⦄ → varToVarFunction (suspSub σ) ⦃ suspSub-var-to-var σ ⦄ (fromℕ _) ≡ fromℕ _
+    varToVarSuspSub-preserve-fst ⟨⟩ = refl
+    varToVarSuspSub-preserve-fst ⟨ σ , Var i ⟩ ⦃ v ⦄ = varToVarSuspSub-preserve-fst σ ⦃ proj₁ v ⦄
+
+    varToVarSuspSub-preserve-snd : (σ : Sub n m) → .⦃ _ : varToVar σ ⦄ → varToVarFunction (suspSub σ) ⦃ suspSub-var-to-var σ ⦄ (inject₁ (fromℕ _)) ≡ inject₁ (fromℕ _)
+    varToVarSuspSub-preserve-snd ⟨⟩ = refl
+    varToVarSuspSub-preserve-snd ⟨ σ , Var i ⟩ ⦃ v ⦄ = varToVarSuspSub-preserve-snd σ ⦃ proj₁ v ⦄
+
+    varToVarSuspSub-preserve-inject : (σ : Sub n m) → .⦃ _ : varToVar σ ⦄ → (k : Fin n) → varToVarFunction (suspSub σ) ⦃ suspSub-var-to-var σ ⦄ (inject₁ (inject₁ k)) ≡ inject₁ (inject₁ (varToVarFunction σ k))
+    varToVarSuspSub-preserve-inject ⟨ σ , Var i ⟩ zero = refl
+    varToVarSuspSub-preserve-inject ⟨ σ , Var i ⟩ ⦃ v ⦄ (suc k) = varToVarSuspSub-preserve-inject σ ⦃ proj₁ v ⦄ k
 
   susp-var-split-fst : (vs : VarSplit n m l) → susp-var-split vs (fromℕ _) ≡ inj₂ (fromℕ _)
   susp-var-split-fst {n = n} vs with suspension-vars (fromℕ (suc n))
@@ -156,4 +165,39 @@ module _  where
   ... | inj₁ x = refl
   ... | inj₂ y = refl
 
--}
+  susp-var-split-full : (τ : Sub l n) → .⦃ _ : varToVar τ ⦄ → (vs : VarSplit n m l) → VarSplitFull₂ τ vs → VarSplitFull₂ (suspSub τ) ⦃ suspSub-var-to-var τ ⦄ (susp-var-split vs)
+  susp-var-split-full τ vs vsf i with suspension-vars i
+  ... | inj₁ (inj₁ refl) = let
+    instance _ = suspSub-var-to-var τ
+    in begin
+    susp-var-split vs (varToVarFunction (suspSub τ) (suc (fromℕ _)))
+      ≡⟨ cong (susp-var-split vs) (varToVarSuspSub-preserve-fst τ) ⟩
+    susp-var-split vs (fromℕ (suc _))
+      ≡⟨ susp-var-split-fst vs ⟩
+    inj₂ (fromℕ (suc _)) ∎
+    where
+      open ≡-Reasoning
+  ... | inj₁ (inj₂ refl) = let
+    instance _ = suspSub-var-to-var τ
+    in begin
+    susp-var-split vs (varToVarFunction (suspSub τ) (inject₁ (fromℕ _)))
+      ≡⟨ cong (susp-var-split vs) (varToVarSuspSub-preserve-snd τ) ⟩
+    susp-var-split vs (inject₁ (fromℕ _))
+      ≡⟨ susp-var-split-snd vs ⟩
+    inj₂ (inject₁ (fromℕ _)) ∎
+    where
+      open ≡-Reasoning
+  ... | inj₂ (k ,, refl) = let
+    instance - = suspSub-var-to-var τ
+    in begin
+      susp-var-split vs (varToVarFunction (suspSub τ) (inject₁ (inject₁ k)))
+        ≡⟨ cong (susp-var-split vs) (varToVarSuspSub-preserve-inject τ k) ⟩
+      susp-var-split vs (inject₁ (inject₁ (varToVarFunction τ k)))
+        ≡⟨ susp-var-split-inject vs (varToVarFunction τ k) ⟩
+      Data.Sum.map (λ - → inject₁ (inject₁ -))
+        (λ - → inject₁ (inject₁ -)) (vs (varToVarFunction τ k))
+        ≡⟨ cong (Data.Sum.map (λ - → inject₁ (inject₁ -))
+        (λ - → inject₁ (inject₁ -))) (vsf k) ⟩
+      inj₂ (inject₁ (inject₁ k)) ∎
+    where
+      open ≡-Reasoning

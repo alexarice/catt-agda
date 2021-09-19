@@ -194,3 +194,8 @@ unbiased-type-disc-lem-2 d T p = begin
   < tree-last-var T >tm ∎
   where
     open Reasoning tm-setoid
+
+unbiased-type-≃ : d ≡ d′ → (S ≃ T) → unbiased-type d S ≃ty unbiased-type d′ T
+unbiased-type-≃ refl q with ≃-to-same-n q
+... | refl with ≃-to-≡ q
+... | refl = refl≃ty

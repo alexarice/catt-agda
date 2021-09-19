@@ -31,8 +31,7 @@ getVarFin (Var j) = j
 
 varToVar : Sub n m → Set
 varToVar ⟨⟩ = ⊤
-varToVar ⟨ σ , Var i ⟩ = varToVar σ
-varToVar ⟨ σ , Coh Δ A σ₁ ⟩ = ⊥
+varToVar ⟨ σ , t ⟩ = varToVar σ × isVar t
 
 ty-is-globular : Ty n d → Set
 ty-is-globular ⋆ = ⊤
@@ -43,5 +42,11 @@ ctx-is-globular ∅ = ⊤
 ctx-is-globular (Γ , A) = (ctx-is-globular Γ) × (ty-is-globular A)
 
 varToVarFunction : (σ : Sub n m) → .⦃ varToVar σ ⦄ → (i : Fin n) → Fin m
-varToVarFunction ⟨ σ , Var j ⟩ zero = j
-varToVarFunction ⟨ σ , Var j ⟩ (suc i) = varToVarFunction σ i
+varToVarFunction ⟨ σ , t ⟩ ⦃ v ⦄ zero = getVarFin t ⦃ proj₂ v ⦄
+varToVarFunction ⟨ σ , t ⟩ ⦃ v ⦄ (suc i) = varToVarFunction σ ⦃ proj₁ v ⦄ i
+
+VarSplitFull₁ : (σ : Sub m n) → .⦃ varToVar σ ⦄ → VarSplit n m l → Set
+VarSplitFull₁ {m} σ vs = ∀ (i : Fin m) → vs (varToVarFunction σ i) ≡ inj₁ i
+
+VarSplitFull₂ : (τ : Sub l n) → .⦃ varToVar τ ⦄ → VarSplit n m l → Set
+VarSplitFull₂ {l} τ vs = ∀ (i : Fin l) → vs (varToVarFunction τ i) ≡ inj₂ i

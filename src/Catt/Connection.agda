@@ -8,7 +8,7 @@ open import Catt.Variables
 open import Data.Nat
 open import Data.Fin using (Fin; suc; zero; toℕ)
 open import Data.Sum
-open import Data.Bool using (Bool; true; false)
+open import Relation.Nullary
 
 connect : (Γ : Ctx (suc n)) → (x : Tm (suc n)) → (Δ : Ctx (suc m)) → Ctx (suc (m + n))
 connect-inc-right : (x : Tm (suc n)) → (m : ℕ) → Sub (suc m) (suc (m + n))
@@ -50,9 +50,9 @@ connect-var-split n (suc m) (suc i) with connect-var-split n m i
 ... | inj₂ j = inj₂ (suc j)
 
 connect-var-split-right : (t : Tm (suc n)) → .⦃ isVar t ⦄ → (m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
-connect-var-split-right t zero i with toℕ (getVarFin t) ≡ᵇ toℕ i
-... | true = inj₂ zero
-... | false = inj₁ i
+connect-var-split-right t zero i with toℕ (getVarFin t) ≟ toℕ i
+... | yes _ = inj₂ zero
+... | no _ = inj₁ i
 connect-var-split-right t (suc m) zero = inj₂ zero
 connect-var-split-right t (suc m) (suc i) with connect-var-split-right t m i
 ... | inj₁ j = inj₁ j

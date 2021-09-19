@@ -474,6 +474,18 @@ idSub≃-on-tm p (Coh Δ A σ) = Coh≃ refl≃ refl≃ty (idSub≃-on-sub p σ)
 idSub≃-on-sub p ⟨⟩ = Null≃ (sym (≃c-preserve-length p))
 idSub≃-on-sub p ⟨ σ , t ⟩ = Ext≃ (idSub≃-on-sub p σ) (idSub≃-on-tm p t)
 
+idSub≃-right-unit : (p : Γ ≃c Δ) → (σ : Sub (ctxLength Δ) n) → σ ∘ idSub≃ p ≃s σ
+idSub≃-right-unit Emp≃ ⟨⟩ = refl≃s
+idSub≃-right-unit (Add≃ p x) ⟨ σ , t ⟩ = Ext≃ (trans≃s (lift-sub-comp-lem-sub σ (idSub≃ p)) (idSub≃-right-unit p σ)) refl≃tm
+
+idSub≃-functorial : (p : Γ ≃c Δ) → (q : Δ ≃c Υ) → idSub≃ q ∘ idSub≃ p ≃s idSub≃ (trans≃c p q)
+idSub≃-functorial Emp≃ Emp≃ = refl≃s
+idSub≃-functorial (Add≃ p x) (Add≃ q y) = Ext≃ lem refl≃tm
+  where
+    lem : (idSub≃ (Add≃ q y) ∘ liftSub (idSub≃ p)) ≃s
+            liftSub (idSub≃ (trans≃c p q))
+    lem = trans≃s (lift-sub-comp-lem-sub (liftSub (idSub≃ q)) (idSub≃ p)) (trans≃s (apply-lifted-sub-sub-≃ (idSub≃ p) (idSub≃ q)) (lift-sub-≃ (idSub≃-functorial p q)))
+
 idSub≃-fst-var : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (p : Γ ≃c Δ) → Var (fromℕ n) [ idSub≃ p ]tm ≃tm Var (fromℕ m)
 idSub≃-fst-var (Add≃ Emp≃ x) = refl≃tm
 idSub≃-fst-var (Add≃ (Add≃ p y) x) = trans≃tm (apply-lifted-sub-tm-≃ (Var (fromℕ _)) (idSub≃ (Add≃ p y))) (lift-tm-≃ (idSub≃-fst-var (Add≃ p y)))

@@ -26,6 +26,8 @@ open import Relation.Nullary
 open import Data.Sum
 open import Data.Unit using (⊤; tt)
 open import Data.Product renaming (_,_ to _,,_)
+open import Catt.PartialSubstitution
+open import Catt.PartialSubstitution.Properties
 
 exterior-sub-fst-var : (S : Tree n)
                      → (P : Path S)
@@ -737,3 +739,81 @@ interior-sub-comm S P T σ τ = sub-≃-term-wise (sub-from-insertion S P T σ �
     lem i with insertion-var-split S P T
          (varToVarFunction (interior-sub S P T) i) | insertion-var-split-full S P T i
     ... | inj₂ .i | refl = refl≃tm
+
+-- interior-sub-comm′ : (S : Tree n)
+--                    → (P : Path S)
+--                    → .⦃ bp : is-branching-path P ⦄
+--                    → (T : Tree m)
+--                    → .⦃ lh : has-linear-height (path-length P) T ⦄
+--                    → (σ : Sub (suc n) l)
+--                    → (τ : Sub (suc m) l)
+--                    → (A : Ty l d)
+--                    → sub-from-insertion′ S P T σ τ A ∘⟨ A ⟩ interior-sub S P T ≃s τ
+-- interior-sub-comm′ (Join S₁ S₂) PHere T σ τ A = begin
+--   < sub-from-connect τ (tree-last-var T) (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+--     ∘⟨ A ⟩ idSub≃ (connect-tree-to-ctx T S₂)
+--     ∘⟨ A ⟩ (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘ connect-inc-left (tree-last-var T) (tree-size S₂)) >s
+--     ≈˘⟨ ∘⟨⟩-assoc A (sub-from-connect τ (tree-last-var T) (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂))) (idSub≃ (connect-tree-to-ctx T S₂)) (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘ connect-inc-left (tree-last-var T) _) ⟩
+--   < sub-from-connect τ (tree-last-var T) (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+--     ∘⟨ A ⟩ (idSub≃ (connect-tree-to-ctx T S₂)
+--            ∘ (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
+--            ∘ connect-inc-left (tree-last-var T) _)) >s
+--     ≈⟨ sub-⟨⟩-action-≃-sub refl≃s refl≃ty (trans≃s (idSub≃-on-sub (connect-tree-to-ctx T S₂) ((idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
+--            ∘ connect-inc-left (tree-last-var T) _))) (idSub≃-on-sub (sym≃c (connect-tree-to-ctx T S₂)) (connect-inc-left (tree-last-var T) _))) ⟩
+--   < sub-from-connect τ (tree-last-var T) (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+--     ∘⟨ A ⟩ connect-inc-left (tree-last-var T) _ >s
+--     ≈⟨ ⟨⟩-var-to-var (sub-from-connect τ (tree-last-var T) (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂))) A (connect-inc-left (tree-last-var T) _) ⦃ connect-inc-left-var-to-var (tree-last-var T) (tree-size S₂) ⦄ ⟩
+--   < sub-from-connect τ (tree-last-var T) (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+--     ∘ connect-inc-left (tree-last-var T) _
+--     >s
+--     ≈⟨ sub-from-connect-inc-left τ (tree-last-var T) (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ⟩
+--   < τ >s ∎
+--   where
+--     open Reasoning sub-setoid
+-- interior-sub-comm′ (Join S₁ S₂) (PExt P) (Join T Sing) σ τ A = begin
+--   < sub-from-insertion′ (Join S₁ S₂) (PExt P) (Join T Sing) σ τ A
+--     ∘⟨ A ⟩ interior-sub (Join S₁ S₂) (PExt P) (Join T Sing) >s
+--     ≈⟨ ∘⟨⟩-assoc A _ _ _ ⟩
+--   < sub-from-insertion′ (Join S₁ S₂) (PExt P) (Join T Sing) σ τ A
+--     ∘⟨ A ⟩ connect-susp-inc-left (insertion-tree-size S₁ P T) (tree-size S₂)
+--     ∘⟨ A ⟩ suspSub (interior-sub S₁ P T) >s
+--     ≈⟨ sub-⟨⟩-action-≃-sub (⟨⟩-var-to-var _ _ _ ⦃ connect-susp-inc-left-var-to-var (insertion-tree-size S₁ P T) (tree-size S₂) ⦄) refl≃ty refl≃s ⟩
+--   < sub-from-insertion′ (Join S₁ S₂) (PExt P) (Join T Sing) σ τ A
+--     ∘ connect-inc-left getSnd (tree-size S₂)
+--     ∘⟨ A ⟩ suspSub (interior-sub S₁ P T) >s
+--     ≈⟨ sub-⟨⟩-action-≃-sub (sub-from-connect-inc-left _ getSnd (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂))) refl≃ty refl≃s ⟩
+--   < unrestrict (sub-from-insertion′ S₁ P T (restrict (σ ∘⟨ A ⟩ connect-susp-inc-left (tree-size S₁) (tree-size S₂))) (restrict τ) ((getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm))) ((getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm))
+--     ∘⟨ A ⟩ suspSub (interior-sub S₁ P T) >s
+--     ≈˘⟨ unrestrict-comp _ _ _ ⟩
+--   < unrestrict
+--     (sub-from-insertion′ S₁ P T (restrict (σ ∘⟨ A ⟩ connect-susp-inc-left (tree-size S₁) (tree-size S₂)))
+--      (restrict τ) ((getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm))
+--      ∘⟨ (getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm) ⟩
+--      interior-sub S₁ P T)
+--     ((getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm))
+--     >s
+--     ≈⟨ unrestrict-≃ (interior-sub-comm′ S₁ P T (restrict
+--                                                  (σ ∘⟨ A ⟩ connect-susp-inc-left (tree-size S₁) (tree-size S₂))) (restrict τ) ((getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm))) refl≃ty ⟩
+--   < unrestrict (restrict τ) ((getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm)) >s
+--     ≈⟨ unrestrict-restrict τ A ⟩
+--   < τ >s ∎
+--   where
+--     open Reasoning sub-setoid
+-- interior-sub-comm′ (Join S₁ S₂) (PShift P) T σ τ A = begin
+--   < sub-from-insertion′ (Join S₁ S₂) (PShift P) T σ τ A
+--     ∘⟨ A ⟩ interior-sub (Join S₁ S₂) (PShift P) T >s
+--     ≈⟨ ∘⟨⟩-assoc A _ _ _ ⟩
+--   < sub-from-insertion′ (Join S₁ S₂) (PShift P) T σ τ A
+--     ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (insertion-tree-size S₂ P T)
+--     ∘⟨ A ⟩ interior-sub S₂ P T >s
+--     ≈⟨ sub-⟨⟩-action-≃-sub (⟨⟩-var-to-var _ _ _ ⦃ connect-susp-inc-right-var-to-var (tree-size S₁) (insertion-tree-size S₂ P T) ⦄) refl≃ty refl≃s ⟩
+--   < sub-from-insertion′ (Join S₁ S₂) (PShift P) T σ τ A
+--     ∘ connect-inc-right getSnd (insertion-tree-size S₂ P T)
+--     ∘⟨ A ⟩ interior-sub S₂ P T >s
+--     ≈⟨ sub-⟨⟩-action-≃-sub (sub-from-connect-inc-right (σ ∘⟨ A ⟩ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) getSnd (sub-from-insertion′ S₂ P T (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ A) {!!}) refl≃ty refl≃s ⟩
+--   < sub-from-insertion′ S₂ P T (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ A
+--     ∘⟨ A ⟩ interior-sub S₂ P T >s
+--     ≈⟨ interior-sub-comm′ S₂ P T (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ A ⟩
+--   < τ >s ∎
+--   where
+--     open Reasoning sub-setoid

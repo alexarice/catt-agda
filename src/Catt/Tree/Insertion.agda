@@ -20,6 +20,7 @@ open import Catt.Tree.Unbiased
 open import Catt.Variables
 open import Catt.Variables.Properties
 open import Data.Sum
+open import Catt.PartialSubstitution
 
 data Path : Tree n → Set where
   PHere : {S : Tree m} → {T : Tree n} → Path (Join S T)
@@ -131,3 +132,25 @@ sub-from-insertion : (S : Tree n)
                    → (τ : Sub (suc m) l)
                    → Sub (suc (insertion-tree-size S P T)) l
 sub-from-insertion S P T σ τ = sub-from-function (sub-from-insertion-func S P T σ τ)
+
+sub-from-insertion′ : (S : Tree n)
+                   → (P : Path S)
+                   → .⦃ bp : is-branching-path P ⦄
+                   → (T : Tree m)
+                   → .⦃ lh : has-linear-height (path-length P) T ⦄
+                   → (σ : Sub (suc n) l)
+                   → (τ : Sub (suc m) l)
+                   → (A : Ty l d)
+                   → Sub (suc (insertion-tree-size S P T)) l
+sub-from-insertion′ (Join S₁ S₂) PHere T σ τ A
+  = sub-from-connect τ
+                     (tree-last-var T)
+                     (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ∘⟨ A ⟩ (idSub≃ (connect-tree-to-ctx T S₂))
+sub-from-insertion′ (Join S₁ S₂) (PExt P) (Join T Sing) σ τ A
+  = sub-from-connect (unrestrict (sub-from-insertion′ S₁ P T (restrict (σ ∘⟨ A ⟩ connect-susp-inc-left (tree-size S₁) (tree-size S₂))) (restrict τ) ((getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm))) ((getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm)))
+                     getSnd
+                     (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+sub-from-insertion′ (Join S₁ S₂) (PShift P) T σ τ A
+  = sub-from-connect (σ ∘⟨ A ⟩ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                     getSnd
+                     (sub-from-insertion′ S₂ P T (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ A)

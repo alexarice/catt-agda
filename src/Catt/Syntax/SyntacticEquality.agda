@@ -35,7 +35,7 @@ data _≃ty_ where
 
 data _≃tm_ where
   Var≃ : {i : Fin n} → {j : Fin m} → n ≡ m → toℕ i ≡ toℕ j → Var i ≃tm Var j
-  Coh≃ : S ≃ S′ → A ≃ty A′ → σ ≃s σ′ → Coh S A σ ≃tm Coh S′ A′ σ′
+  Coh≃ : {σ : Sub (suc n) m} → {σ′ : Sub (suc n′) m′} → S ≃ S′ → A ≃ty A′ → σ ≃s σ′ → Coh S A σ ≃tm Coh S′ A′ σ′
 
 data _≃s_ where
   Null≃ : n ≡ m → ⟨⟩ {n = n} ≃s ⟨⟩ {n = m}

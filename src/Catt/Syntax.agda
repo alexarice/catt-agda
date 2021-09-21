@@ -20,7 +20,7 @@ instance
   nonZero = _
 
 variable
-  n n′ m m′ l l′ d d′ d″ : ℕ
+  n n′ m m′ l l′ o d d′ d″ : ℕ
 
 data Tree : ℕ → Set where
   Sing : Tree 0
@@ -37,7 +37,7 @@ variable
   Γ Γ′ Δ Δ′ Υ Θ : Ctx n
   A A′ B C D : Ty n d
   s s′ t t′ u : Tm n
-  σ σ′ τ μ : Sub n m
+  σ σ′ τ τ′ μ : Sub n m
 
 infixl 25 _,_
 data Ctx where
@@ -89,6 +89,9 @@ liftSub ⟨ σ , t ⟩ = ⟨ liftSub σ , liftTerm t ⟩
 
 ty-dim : Ty n d → ℕ
 ty-dim {d = d} A = d
+
+sub-colength : Sub n m → ℕ
+sub-colength {m = m} σ = m
 
 ty-base : (A : Ty n (suc d)) → Ty n d
 ty-base (s ─⟨ A ⟩⟶ t) = A

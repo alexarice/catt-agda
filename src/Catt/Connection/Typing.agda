@@ -9,7 +9,6 @@ module Catt.Connection.Typing (index : ℕ) (rule : Fin index → Rule) (props :
 
 open import Catt.Typing index rule
 open import Catt.Typing.Properties index rule props
-open import Catt.Suspension.Typing index rule props
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Syntax
@@ -19,6 +18,7 @@ open import Catt.Connection
 open import Catt.Connection.Properties
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
+open import Data.Empty
 
 connect-Ty : {Γ : Ctx (suc n)} → Typing-Ctx Γ → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → {Δ : Ctx (suc m)} → Typing-Ctx Δ → Typing-Ctx (connect Γ t Δ)
 connect-inc-right-Ty : {Γ : Ctx (suc n)} → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → (Δ : Ctx (suc m)) → Typing-Sub Δ (connect Γ t Δ) (connect-inc-right t m)
@@ -26,14 +26,14 @@ connect-inc-right-Ty : {Γ : Ctx (suc n)} → {t : Tm (suc n)} → Typing-Tm Γ 
 connect-Ty Γty tty (TyAdd TyEmp x) = Γty
 connect-Ty Γty tty (TyAdd (TyAdd Δty y) x) = TyAdd (connect-Ty Γty tty (TyAdd Δty y)) (apply-sub-ty-typing x (connect-inc-right-Ty tty (_ , _)))
 
-connect-inc-right-Ty tty (∅ , A) with ≃ty-preserve-height (⋆-is-only-ty-in-empty-context A)
-... | refl with A
-... | ⋆ = TyExt TyNull tty
+connect-inc-right-Ty tty (∅ , ⋆) = TyExt (TyNull TyStar) tty
+connect-inc-right-Ty tty (∅ , s ─⟨ A ⟩⟶ t) = ⊥-elim (no-term-in-empty-context s)
 connect-inc-right-Ty tty (Δ , A , B) = TyExt (lift-sub-typing (connect-inc-right-Ty tty (Δ , A))) (TyVarZ (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ _ (connect-inc-right _ _)))))
 
 connect-inc-left-Ty : {Γ : Ctx (suc n)} → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → (Δ : Ctx (suc m)) → Typing-Sub Γ (connect Γ t Δ) (connect-inc-left t m)
 connect-inc-left-Ty tty (∅ , A) = id-Ty
 connect-inc-left-Ty tty (Δ , A , B) = lift-sub-typing (connect-inc-left-Ty tty (Δ , A))
+
 
 connect-susp-Ty : Typing-Ctx Γ → Typing-Ctx Δ → Typing-Ctx (connect-susp Γ Δ)
 connect-susp-Ty Γty Δty = connect-Ty (suspCtxTy Γty) getSndTy Δty
@@ -44,12 +44,12 @@ connect-susp-inc-left-Ty Γ Δ = connect-inc-left-Ty getSndTy Δ
 connect-susp-inc-right-Ty : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → Typing-Sub Δ (connect-susp Γ Δ) (connect-susp-inc-right n m)
 connect-susp-inc-right-Ty Γ Δ = connect-inc-right-Ty getSndTy Δ
 
-sub-from-connect-inc-right-≈ : (σ : Sub (suc n) l) → (t : Tm (suc n)) → (τ : Sub (suc m) l) → {Γ : Ctx l} → (t [ σ ]tm ≈[ Γ ]tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ t τ ∘ connect-inc-right t m ≈[ Γ ]s τ
-sub-from-connect-inc-right-≈ σ t ⟨ ⟨⟩ , s ⟩ p = Ext≈ Null≈ p
+sub-from-connect-inc-right-≈ : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → {Γ : Ctx l} → (t [ σ ]tm ≈[ Γ ]tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ t τ ∘ connect-inc-right t m ≈[ Γ ]s τ
+sub-from-connect-inc-right-≈ σ t ⟨ ⟨⟩ , s ⟩ p = Ext≈ (Null≈ refl≈ty) p
 sub-from-connect-inc-right-≈ σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≈ (trans≈s (reflexive≈s (lift-sub-comp-lem-sub (sub-from-connect σ t ⟨ τ , s ⟩) (connect-inc-right t _))) (sub-from-connect-inc-right-≈ σ t ⟨ τ , s ⟩ p)) refl≈tm
 
 sub-from-connect-Ty : Typing-Sub Γ Υ σ → Typing-Sub Δ Υ τ → (t [ σ ]tm ≈[ Υ ]tm Var (fromℕ _) [ τ ]tm)→ Typing-Sub (connect Γ t Δ) Υ (sub-from-connect σ t τ)
-sub-from-connect-Ty σty (TyExt TyNull x) p = σty
+sub-from-connect-Ty σty (TyExt (TyNull y) x) p = σty
 sub-from-connect-Ty {Υ = Υ} {σ = σ} {t = t} σty (TyExt {A = A} (TyExt {σ = τ} {t = s} τty y) x) p = TyExt (sub-from-connect-Ty σty (TyExt τty y) p) (term-conversion x lem)
   where
     open Reasoning (ty-setoid-≈ Υ)
@@ -57,11 +57,10 @@ sub-from-connect-Ty {Υ = Υ} {σ = σ} {t = t} σty (TyExt {A = A} (TyExt {σ =
             ((A [ connect-inc-right t _ ]ty) [
              sub-from-connect σ t ⟨ τ , s ⟩ ]ty)
     lem = begin
-      < A [ ⟨ τ , s ⟩ ]ty >ty′ ≈˘⟨ apply-sub-eq-ty A (sub-from-connect-inc-right-≈ σ t ⟨ τ , s ⟩ p) ⟩
-      < A [ sub-from-connect σ t ⟨ τ , s ⟩ ∘ connect-inc-right t _ ]ty >ty′
-        ≈⟨ reflexive≈ty (assoc-ty _ _ _) ⟩
-      < ((A [ connect-inc-right t _ ]ty) [ sub-from-connect σ t ⟨ τ , s ⟩
-          ]ty) >ty′ ∎
+      A [ ⟨ τ , s ⟩ ]ty ≈˘⟨ apply-sub-eq-ty A (sub-from-connect-inc-right-≈ σ t ⟨ τ , s ⟩ p) ⟩
+      A [ sub-from-connect σ t ⟨ τ , s ⟩ ∘ connect-inc-right t _ ]ty
+        ≈⟨ reflexive≈ty (assoc-ty _ _ A) ⟩
+      ((A [ connect-inc-right t _ ]ty) [ sub-from-connect σ t ⟨ τ , s ⟩ ]ty) ∎
 
 sub-between-connects-Ty : Typing-Sub Γ Δ σ
                         → Typing-Tm Γ t ⋆

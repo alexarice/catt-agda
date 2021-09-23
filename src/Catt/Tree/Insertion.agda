@@ -20,7 +20,7 @@ open import Catt.Tree.Unbiased
 open import Catt.Variables
 open import Catt.Variables.Properties
 open import Data.Sum
-open import Catt.PartialSubstitution
+-- open import Catt.PartialSubstitution
 
 data Path : Tree n → Set where
   PHere : {S : Tree m} → {T : Tree n} → Path (Join S T)
@@ -50,7 +50,7 @@ insertion-tree (Join S₁ S₂) (PExt P) (Join T Sing) = Join (insertion-tree S�
 insertion-tree (Join S₁ S₂) (PShift P) T = Join S₁ (insertion-tree S₂ P T)
 
 
-interior-sub : (S : Tree n) → (P : Path S) → (T : Tree m) → .⦃ _ : has-linear-height (path-length P) T ⦄ → Sub (suc m) (suc (insertion-tree-size S P T))
+interior-sub : (S : Tree n) → (P : Path S) → (T : Tree m) → .⦃ _ : has-linear-height (path-length P) T ⦄ → Sub (suc m) (suc (insertion-tree-size S P T)) ⋆
 interior-sub (Join S₁ S₂) PHere T = idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘ connect-inc-left (tree-last-var T) _
 interior-sub (Join S₁ S₂) (PExt P) (Join T Sing) = connect-susp-inc-left (insertion-tree-size S₁ P T) (tree-size S₂) ∘ suspSub (interior-sub S₁ P T)
 interior-sub (Join S₁ S₂) (PShift P) T = connect-susp-inc-right (tree-size S₁) (insertion-tree-size S₂ P T) ∘ interior-sub S₂ P T
@@ -76,10 +76,10 @@ exterior-sub : (S : Tree n)
              → (T : Tree m)
              → .⦃ _ : has-linear-height (path-length P) T ⦄
              → .⦃ p : height-of-branching P ≡ tree-dim T ⦄
-             → Sub (suc n) (suc (insertion-tree-size S P T))
+             → Sub (suc n) (suc (insertion-tree-size S P T)) ⋆
 exterior-sub (Join S₁ S₂) PHere T ⦃ p = p ⦄
   = idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
-    ∘ sub-between-connects (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub _)) ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
+    ∘ sub-between-connects (sub-from-disc (unbiased-type (suc (tree-dim S₁)) T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub _)) ∘ idSub≃ (trans≃c (linear-tree-compat (suspTree S₁)) (disc-≡ (sym (unbiased-type-dim (suc (tree-dim S₁)) T)))))
                            getSnd
                            (idSub _)
                            (tree-last-var T)
@@ -89,7 +89,7 @@ exterior-sub (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p = p ⦄ =
 exterior-sub (Join S₁ S₂) (PShift P) T =
   sub-between-connect-susps (idSub _)
                             (exterior-sub S₂ P T)
-
+{-
 insertion-var-split : (S : Tree n)
                     → (P : Path S)
                     → .⦃ bp : is-branching-path P ⦄
@@ -132,25 +132,26 @@ sub-from-insertion : (S : Tree n)
                    → (τ : Sub (suc m) l)
                    → Sub (suc (insertion-tree-size S P T)) l
 sub-from-insertion S P T σ τ = sub-from-function (sub-from-insertion-func S P T σ τ)
+-}
 
-sub-from-insertion′ : (S : Tree n)
+sub-from-insertion : (S : Tree n)
                    → (P : Path S)
                    → .⦃ bp : is-branching-path P ⦄
                    → (T : Tree m)
                    → .⦃ lh : has-linear-height (path-length P) T ⦄
-                   → (σ : Sub (suc n) l)
-                   → (τ : Sub (suc m) l)
-                   → (A : Ty l d)
-                   → Sub (suc (insertion-tree-size S P T)) l
-sub-from-insertion′ (Join S₁ S₂) PHere T σ τ A
+                   → (σ : Sub (suc n) l A)
+                   → (τ : Sub (suc m) l A)
+                   → Sub (suc (insertion-tree-size S P T)) l A
+sub-from-insertion (Join S₁ S₂) PHere T σ τ
   = sub-from-connect τ
                      (tree-last-var T)
-                     (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ∘⟨ A ⟩ (idSub≃ (connect-tree-to-ctx T S₂))
-sub-from-insertion′ (Join S₁ S₂) (PExt P) (Join T Sing) σ τ A
-  = sub-from-connect (unrestrict (sub-from-insertion′ S₁ P T (restrict (σ ∘⟨ A ⟩ connect-susp-inc-left (tree-size S₁) (tree-size S₂))) (restrict τ) ((getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm))) ((getFst [ τ ]⟨ A ⟩tm) ─⟨ A ⟩⟶ (getSnd [ τ ]⟨ A ⟩tm)))
+                     (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ∘ (idSub≃ (connect-tree-to-ctx T S₂))
+sub-from-insertion (Join S₁ S₂) (PExt P) (Join T Sing) σ τ
+  = sub-from-connect (unrestrict (sub-from-insertion S₁ P T (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) (getFst [ τ ]tm) (getSnd [ τ ]tm))
+                                                             (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
                      getSnd
-                     (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
-sub-from-insertion′ (Join S₁ S₂) (PShift P) T σ τ A
-  = sub-from-connect (σ ∘⟨ A ⟩ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                     (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+sub-from-insertion (Join S₁ S₂) (PShift P) T σ τ
+  = sub-from-connect (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
                      getSnd
-                     (sub-from-insertion′ S₂ P T (σ ∘⟨ A ⟩ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ A)
+                     (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ)

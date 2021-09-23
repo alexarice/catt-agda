@@ -31,10 +31,10 @@ suspSuppSnd (x ∷ xs) = cong₂ _∷_ (∨-identityʳ x) (suspSuppSnd xs)
 suspSuppEmpRight : (xs : VarSet n) → suspSupp xs ≡ suspSupp xs ∪ suspSupp empty
 suspSuppEmpRight xs = sym (trans (suspSupp∪ xs empty) (cong suspSupp (∪-right-unit xs)))
 
-suspSuppTy : (A : Ty n d) → FVTy (suspTy A) ≡ suspSupp (FVTy A)
+suspSuppTy : (A : Ty n) → FVTy (suspTy A) ≡ suspSupp (FVTy A)
 suspSuppTm : (t : Tm n) → (suspSupp empty) ∪ FVTm (suspTm t) ≡ suspSupp (FVTm t)
-suspSuppSub : (σ : Sub n m) → FVSub (suspSub σ) ≡ suspSupp (FVSub σ)
-suspSuppTyTm : (A : Ty n d) → (t : Tm n) → FVTy (suspTy A) ∪ FVTm (suspTm t) ≡ suspSupp (FVTy A ∪ FVTm t)
+suspSuppSub : (σ : Sub n m ⋆) → FVSub (suspSub σ) ≡ suspSupp (FVSub σ)
+suspSuppTyTm : (A : Ty n) → (t : Tm n) → FVTy (suspTy A) ∪ FVTm (suspTm t) ≡ suspSupp (FVTy A ∪ FVTm t)
 
 suspSuppTy ⋆ = suspSuppLem _
 suspSuppTy (s ─⟨ A ⟩⟶ t) = begin

@@ -62,7 +62,7 @@ tree-bd zero T = Sing
 tree-bd (suc d) Sing = Sing
 tree-bd (suc d) (Join S T) = Join (tree-bd d S) (tree-bd (suc d) T)
 
-tree-inc : (d : ℕ) → (T : Tree n) → (b : Bool) → Sub (suc (tree-bd-len d T)) (suc n)
+tree-inc : (d : ℕ) → (T : Tree n) → (b : Bool) → Sub (suc (tree-bd-len d T)) (suc n) ⋆
 tree-inc zero T false = ⟨ ⟨⟩ , (Var (fromℕ _)) ⟩
 tree-inc zero T true = ⟨ ⟨⟩ , (tree-last-var T) ⟩
 tree-inc (suc d) Sing b = ⟨ ⟨⟩ , 0V ⟩

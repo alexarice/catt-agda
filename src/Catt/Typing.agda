@@ -14,7 +14,9 @@ open import Relation.Binary.PropositionalEquality
 open import Catt.Support
 open import Catt.Tree
 open import Catt.Tree.Support
-open import Data.Bool using (true; false)
+open import Data.Bool using (Bool; true; false)
+open import Data.Empty
+open import Data.Product renaming (_,_ to _,,_)
 
 private
   Index : Set
@@ -22,12 +24,12 @@ private
 
 -- data _≈c_ : (Γ : Ctx m) → (Δ : Ctx m) → Set
 data _≈[_]tm_ : Tm n → Ctx n → Tm n → Set
-data _≈[_]ty_ : Ty n d → Ctx n → Ty n d′ → Set
-data _≈[_]s_ : (σ : Sub n m) → Ctx m → (τ : Sub n m) → Set
+data _≈[_]ty_ : Ty n → Ctx n → Ty n → Set
+data _≈[_]s_ : (σ : Sub n m A) → Ctx m → (τ : Sub n m B) → Set
 data Typing-Ctx : (Γ : Ctx m) → Set
-data Typing-Tm : (Γ : Ctx m) → Tm m → Ty m d → Set
-data Typing-Ty : (Γ : Ctx m) → Ty m d → Set
-data Typing-Sub : (Γ : Ctx m) → (Δ : Ctx n) → Sub m n → Set
+data Typing-Tm : (Γ : Ctx m) → Tm m → Ty m → Set
+data Typing-Ty : (Γ : Ctx m) → Ty m → Set
+data Typing-Sub : (Γ : Ctx m) → (Δ : Ctx n) → Sub m n A → Set
 
 -- data _≈c_ where
 --   Emp≈ : ∅ ≈c ∅
@@ -40,8 +42,7 @@ data _≈[_]tm_ where
   Coh≈ : A ≈[ tree-to-ctx T ]ty B → σ ≈[ Γ ]s τ → (Coh T A σ) ≈[ Γ ]tm (Coh T B τ)
   Rule≈ : (i : Index)
         → (a : rule i .Args)
-        → (eqt : (j : eqtIndex (rule i)) → (rule i .eqtlhs j a) ≈[ rule i .eqtCtx j a ]tm (rule i .eqtrhs j a))
-        → {C : Ty (rule i .len a) d}
+        → {C : Ty (rule i .len a)}
         → Typing-Tm (rule i .tgtCtx a) (rule i .lhs a) C
         → (rule i .lhs a) ≈[ rule i .tgtCtx a ]tm (rule i .rhs a)
 
@@ -50,25 +51,28 @@ data _≈[_]ty_ where
   Arr≈ : s ≈[ Γ ]tm s′ → A ≈[ Γ ]ty A′ → t ≈[ Γ ]tm t′ → (s ─⟨ A ⟩⟶ t) ≈[ Γ ]ty (s′ ─⟨ A′ ⟩⟶ t′)
 
 data _≈[_]s_ where
-  Null≈ : ⟨⟩ {n = n} ≈[ Δ ]s ⟨⟩
+  Null≈ : A ≈[ Δ ]ty B → ⟨⟩ {A = A} ≈[ Δ ]s ⟨⟩ {A = B}
   Ext≈ : σ ≈[ Δ ]s τ → s ≈[ Δ ]tm t → ⟨ σ , s ⟩ ≈[ Δ ]s ⟨ τ , t ⟩
 
 data Typing-Ctx where
   TyEmp : Typing-Ctx ∅
   TyAdd : Typing-Ctx Γ → Typing-Ty Γ A → Typing-Ctx (Γ , A)
 
+supp-condition : (b : Bool) → (A : Ty (suc n)) → (T : Tree n) → Set
+supp-condition false A T = FVTy A ≡ full
+supp-condition true ⋆ T = ⊥
+supp-condition true (s ─⟨ A ⟩⟶ t) Sing = ⊥
+supp-condition true (s ─⟨ A ⟩⟶ t) T@(Join _ _) = FVTy A ∪ FVTm s ≡ supp-bd (pred (tree-dim T)) T false × FVTy A ∪ FVTm t ≡ supp-bd (pred (tree-dim T)) T true
+
 data Typing-Tm where
-  -- TyVar : {Γ : Ctx n} → (i : Fin n) → {B : Ty n d} → (Γ ‼ i) ≈[ Γ ]ty B → Typing-Tm Γ (Var i) B
   TyVarZ : Γ ‼ zero ≈[ Γ ]ty B → Typing-Tm Γ 0V B
   TyVarS : (i : Fin (ctxLength Γ)) → Typing-Tm Γ (Var i) A → liftType A ≈[ Γ , C ]ty B → Typing-Tm (Γ , C) (Var (suc i)) B
-  TyCoh : Typing-Ty (tree-to-ctx T) A → Typing-Sub (tree-to-ctx T) Γ σ → FVTy A ≡ full → (A [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh T A σ) B
-  TyComp : .⦃ _ : NonZero′ (tree-dim T) ⦄ → Typing-Ty (tree-to-ctx T) (s ─⟨ A ⟩⟶ t) → Typing-Sub (tree-to-ctx T) Γ σ → FVTy A ∪ FVTm s ≡ supp-bd (pred (tree-dim T)) T false → FVTy A ∪ FVTm t ≡ supp-bd (pred (tree-dim T)) T true → ((s ─⟨ A ⟩⟶ t) [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh T (s ─⟨ A ⟩⟶ t) σ) B
-  -- TyConv : Typing-Tm Γ t A → A ≈[ Γ ]ty B → Typing-Tm Γ t B
+  TyCoh : Typing-Ty (tree-to-ctx T) A → Typing-Sub (tree-to-ctx T) Γ σ → (b : Bool) → supp-condition b A T → (A [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh T A σ) B
 
 data Typing-Ty where
   TyStar : Typing-Ty Γ ⋆
   TyArr : Typing-Tm Γ s A → Typing-Ty Γ A → Typing-Tm Γ t A → Typing-Ty Γ (s ─⟨ A ⟩⟶ t)
 
 data Typing-Sub where
-  TyNull : Typing-Sub ∅ Δ ⟨⟩
+  TyNull : Typing-Ty Δ A → Typing-Sub ∅ Δ (⟨⟩ {A = A})
   TyExt : Typing-Sub Γ Δ σ → Typing-Tm Δ t (A [ σ ]ty) → Typing-Sub (Γ , A) Δ ⟨ σ , t ⟩

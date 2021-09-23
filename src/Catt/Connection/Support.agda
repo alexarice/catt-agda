@@ -36,15 +36,15 @@ connect-susp-supp-incs : (xs : VarSet (suc n)) → (ys : VarSet (suc m))
                       → TransportVarSet (suspSupp xs) (connect-susp-inc-left n m) ∪ TransportVarSet ys (connect-susp-inc-right n m) ≡ connect-supp (suspSupp xs) ys
 connect-susp-supp-incs xs ys = connect-supp-incs (suspSupp xs) getSnd ys (suspSuppSnd xs)
 
-sub-from-connect-supp : (σ : Sub (suc n) l) → (t : Tm (suc n)) → (τ : Sub (suc m) l)
+sub-from-connect-supp : (σ : Sub (suc n) l ⋆) → (t : Tm (suc n)) → (τ : Sub (suc m) l ⋆)
                       → FVSub σ ≡ FVSub σ ∪ FVTm (Var (fromℕ _) [ τ ]tm)
                       → FVSub (sub-from-connect σ t τ) ≡ FVSub σ ∪ FVSub τ
 sub-from-connect-supp {l = l} σ t ⟨ ⟨⟩ , x ⟩ p = trans p (solve (∪-monoid {l}))
 sub-from-connect-supp {l = l} σ t ⟨ ⟨ τ , y ⟩ , x ⟩ p = trans (cong (_∪ FVTm x) (sub-from-connect-supp σ t ⟨ τ , y ⟩ p)) (solve (∪-monoid {l}))
 
-sub-between-connect-supp : (σ : Sub (suc n) (suc l))
+sub-between-connect-supp : (σ : Sub (suc n) (suc l) ⋆)
                          → (t : Tm (suc n))
-                         → (τ : Sub (suc m) (suc l′))
+                         → (τ : Sub (suc m) (suc l′) ⋆)
                          → (s : Tm (suc l))
                          → FVSub (connect-inc-left s l′ ∘ σ) ≡ FVSub (connect-inc-left s l′ ∘ σ) ∪ FVTm (Var (fromℕ m) [ connect-inc-right s l′ ∘ τ ]tm)
                          → FVSub σ ∪ FVTm s ≡ FVSub σ
@@ -62,8 +62,8 @@ sub-between-connect-supp σ t τ s p q = begin
   where
     open ≡-Reasoning
 
-sub-between-connect-susps-supp : (σ : Sub (suc n) (suc l))
-                               → (τ : Sub (suc m) (suc l′))
+sub-between-connect-susps-supp : (σ : Sub (suc n) (suc l) ⋆)
+                               → (τ : Sub (suc m) (suc l′) ⋆)
                                → Var (fromℕ _) [ τ ]tm ≃tm Var (fromℕ l′)
                                → FVSub (sub-between-connect-susps σ τ) ≡ connect-supp (suspSupp (FVSub σ)) (FVSub τ)
 sub-between-connect-susps-supp {n = n} {l = l} {m = m} {l′ = l′} σ τ p = trans (sub-between-connect-supp (suspSub σ) getSnd τ getSnd lem2 (trans (trans (cong (_∪ trueAt (inject₁ (fromℕ _))) (suspSuppSub σ)) (suspSuppSnd (FVSub σ))) (sym (suspSuppSub σ)))) (cong (λ - → connect-supp - (FVSub τ)) (suspSuppSub σ))

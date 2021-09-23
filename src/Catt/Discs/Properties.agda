@@ -39,22 +39,22 @@ linear-tree-compat : (T : Tree n) → .⦃ _ : is-linear T ⦄ → tree-to-ctx T
 linear-tree-compat Sing = Add≃ Emp≃ (Star≃ refl)
 linear-tree-compat (Join S Sing) = trans≃c (susp-ctx-≃ (linear-tree-compat S)) (disc-susp (tree-dim S))
 
-sub-from-sphere-prop : (A : Ty n d) → sphere-type d [ sub-from-sphere A ]ty ≃ty A
+sub-from-sphere-prop : (A : Ty n) → sphere-type (ty-dim A) [ sub-from-sphere A ]ty ≃ty A
 sub-from-sphere-prop ⋆ = refl≃ty
 sub-from-sphere-prop (s ─⟨ A ⟩⟶ t) = Arr≃ refl≃tm (trans≃ty (lift-sub-comp-lem-ty ⟨ sub-from-sphere A , s ⟩ (liftType (sphere-type _))) (trans≃ty (lift-sub-comp-lem-ty (sub-from-sphere A) (sphere-type _)) (sub-from-sphere-prop A))) refl≃tm
 
-sub-from-disc-tm-≃ : Γ ≃c Δ → s ≃tm t → sub-from-disc Γ s ≃s sub-from-disc Δ t
+sub-from-disc-tm-≃ : A ≃ty B → s ≃tm t → sub-from-disc A s ≃s sub-from-disc B t
 sub-from-sphere-ty-≃ : A ≃ty B → sub-from-sphere A ≃s sub-from-sphere B
 
-sub-from-disc-tm-≃ p q = Ext≃ (sub-from-sphere-ty-≃ (tm-to-ty-≃ p q)) q
+sub-from-disc-tm-≃ p q = Ext≃ (sub-from-sphere-ty-≃ p) q
 
-sub-from-sphere-ty-≃ (Star≃ x) = Null≃ x
+sub-from-sphere-ty-≃ (Star≃ x) = Null≃ (Star≃ x)
 sub-from-sphere-ty-≃ (Arr≃ p q r) = Ext≃ (Ext≃ (sub-from-sphere-ty-≃ q) p) r
 
 -- disc-to-subbed-tm : sub-from-disc (t [ σ ]tm) ≃s σ ∘ sub-from-disc t
 -- disc-to-subbed-tm = Ext≃ {!!} refl≃tm
 
-sphere-to-subbed-ty : (A : Ty n d) → (σ : Sub n m) → sub-from-sphere (A [ σ ]ty) ≃s σ ∘ sub-from-sphere A
+sphere-to-subbed-ty : (A : Ty n) → (σ : Sub n m ⋆) → sub-from-sphere (A [ σ ]ty) ≃s σ ∘ sub-from-sphere A
 sphere-to-subbed-ty ⋆ σ = refl≃s
 sphere-to-subbed-ty (s ─⟨ A ⟩⟶ t) σ = Ext≃ (Ext≃ (sphere-to-subbed-ty A σ) refl≃tm) refl≃tm
 

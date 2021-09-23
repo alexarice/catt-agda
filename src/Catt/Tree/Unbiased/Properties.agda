@@ -3,6 +3,7 @@
 module Catt.Tree.Unbiased.Properties where
 
 open import Catt.Syntax
+open import Catt.Syntax.Properties
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree.Unbiased
@@ -19,7 +20,6 @@ open import Data.Fin using (Fin; zero; suc; fromℕ)
 open import Catt.Discs
 open import Catt.Discs.Properties
 open import Data.Nat.Properties
-
 
 unbiased-type-inc-lem : (d : ℕ) → (T : Tree n) → unbiased-type d (tree-bd d T) [ tree-inc d T true ]ty ≃ty unbiased-type d (tree-bd d T) [ tree-inc d T false ]ty
 unbiased-type-inc-lem zero T = refl≃ty
@@ -40,7 +40,7 @@ unbiased-type-inc-lem (suc d) T = Arr≃ (l1 (unbiased-term d (tree-bd d (tree-b
       where
         open Reasoning tm-setoid
 
-    l2 : (A : Ty (suc (tree-bd-len d (tree-bd (suc d) T))) d)
+    l2 : (A : Ty (suc (tree-bd-len d (tree-bd (suc d) T))))
        → A [ tree-inc d (tree-bd (suc d) T) false ]ty [ tree-inc (suc d) T true ]ty
        ≃ty A [ tree-inc d (tree-bd (suc d) T) false ]ty [ tree-inc (suc d) T false ]ty
     l2 A = begin
@@ -117,15 +117,15 @@ unbiased-type-sphere-lem : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ suc d
                            ≃tm Var (fromℕ (tree-size T))
 unbiased-type-sphere-lem zero T p = refl≃tm
 unbiased-type-sphere-lem (suc d) T p = begin
-  < Var (fromℕ (suc (sphere-size (suc d))))
+  < Var (fromℕ _)
       [ sub-from-sphere (unbiased-type (suc (suc d)) T) ]tm >tm ≡⟨⟩
-  < Var (fromℕ (suc (sphere-size d)))
+  < Var (fromℕ _)
       [ sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = Var (fromℕ _)}) (sphere-to-subbed-ty (unbiased-type (suc d) (tree-bd (suc d) T)) (tree-inc (suc d) T false)) ⟩
-  < Var (fromℕ (suc (sphere-size d)))
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = Var (fromℕ _)}) {!!} ⟩ --(sphere-to-subbed-ty (unbiased-type (suc d) (tree-bd (suc d) T)) (tree-inc (suc d) T false))
+  < Var (fromℕ _)
     [ tree-inc (suc d) T false ∘ sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T)) ]tm >tm
-    ≈⟨ assoc-tm (tree-inc (suc d) T false) (sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T))) (Var (fromℕ (suc (sphere-size d)))) ⟩
-  < Var (fromℕ (suc (sphere-size d)))
+    ≈⟨ assoc-tm (tree-inc (suc d) T false) (sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T))) (Var (fromℕ _)) ⟩
+  < Var (fromℕ _)
     [ sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T)) ]tm
     [ tree-inc (suc d) T false ]tm >tm
     ≈⟨ sub-action-≃-tm (unbiased-type-sphere-lem d (tree-bd (suc d) T) (tree-dim-bd′ (suc d) T (≤-trans (n≤1+n (suc d)) (≤-reflexive (sym p))))) refl≃s ⟩
@@ -139,23 +139,20 @@ unbiased-type-sphere-lem (suc d) T p = begin
 unbiased-type-disc-lem : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ d)
                        → .⦃ NonZero′ d ⦄
                        → Var (fromℕ _)
-                         [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type d T) (idSub _)) ]tm
+                         [ sub-from-disc (unbiased-type d T) (Coh T (unbiased-type d T) (idSub _)) ]tm
                          ≃tm Var (fromℕ (tree-size T))
-unbiased-type-disc-lem (suc zero) T p = id-on-tm (Var (fromℕ (tree-size T)))
+unbiased-type-disc-lem (suc zero) T p = refl≃tm -- id-on-tm (Var (fromℕ (tree-size T)))
 unbiased-type-disc-lem (suc (suc d)) T p = begin
-  < Var (fromℕ (suc (suc (sphere-size (suc d)))))
-    [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (suc d)) T) (idSub (suc _))) ]tm >tm
+  < Var (fromℕ _)
+    [ sub-from-disc (unbiased-type (suc (suc d)) T) (Coh T (unbiased-type (suc (suc d)) T) (idSub (suc _))) ]tm >tm
     ≡⟨⟩
-  < Var (fromℕ (suc (sphere-size (suc d))))
-     [ sub-from-sphere (unbiased-type (suc (suc d)) T [ idSub _ ]ty) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = Var (fromℕ (suc (sphere-size (suc d))))}) (sub-from-sphere-ty-≃ (id-on-ty (unbiased-type (suc (suc d)) T))) ⟩
-  < Var (fromℕ (suc (sphere-size (suc d))))
+  < Var (fromℕ _)
       [ sub-from-sphere (unbiased-type (suc (suc d)) T) ]tm >tm
     ≈⟨ unbiased-type-sphere-lem (suc d) T p ⟩
   < Var (fromℕ (tree-size T)) >tm ∎
   where
     open Reasoning tm-setoid
-
+{-
 unbiased-type-sphere-lem-2 : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ suc d)
                            → getSnd
                              [ sub-from-sphere (unbiased-type (suc d) T) ]tm
@@ -199,3 +196,4 @@ unbiased-type-≃ : d ≡ d′ → (S ≃ T) → unbiased-type d S ≃ty unbiase
 unbiased-type-≃ refl q with ≃-to-same-n q
 ... | refl with ≃-to-≡ q
 ... | refl = refl≃ty
+-}

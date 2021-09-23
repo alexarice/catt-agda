@@ -76,15 +76,15 @@ module _ {n : ℕ} where
   ∪-monoid = record
     { isMonoid = ∪-isMonoid }
 
-TransportVarSet-empty : (σ : Sub n m) → TransportVarSet empty σ ≡ empty
+TransportVarSet-empty : (σ : Sub n m ⋆) → TransportVarSet empty σ ≡ empty
 TransportVarSet-empty ⟨⟩ = refl
 TransportVarSet-empty ⟨ σ , t ⟩ = TransportVarSet-empty σ
 
-TransportVarSet-full : (σ : Sub n m) → TransportVarSet full σ ≡ FVSub σ
+TransportVarSet-full : (σ : Sub n m ⋆) → TransportVarSet full σ ≡ FVSub σ
 TransportVarSet-full ⟨⟩ = refl
 TransportVarSet-full ⟨ σ , t ⟩ = cong (_∪ FVTm t) (TransportVarSet-full σ)
 
-TransportVarSet-∪ : (xs ys : VarSet n) → (σ : Sub n m) → TransportVarSet (xs ∪ ys) σ ≡ TransportVarSet xs σ ∪ TransportVarSet ys σ
+TransportVarSet-∪ : (xs ys : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet (xs ∪ ys) σ ≡ TransportVarSet xs σ ∪ TransportVarSet ys σ
 TransportVarSet-∪ xs ys ⟨⟩ = sym (∪-left-unit empty)
 TransportVarSet-∪ (ewf xs) (ewf ys) ⟨ σ , t ⟩ = TransportVarSet-∪ xs ys σ
 TransportVarSet-∪ (ewf xs) (ewt ys) ⟨ σ , t ⟩ = trans (cong (_∪ FVTm t) (TransportVarSet-∪ xs ys σ)) (∪-assoc (TransportVarSet xs σ) (TransportVarSet ys σ) (FVTm t))
@@ -117,9 +117,9 @@ TransportVarSet-∪ {n} {m} (ewt xs) (ewt ys) ⟨ σ , t ⟩ = begin
   where
     open ≡-Reasoning
 
-TransportVarSet-ty : (A : Ty n d) → (σ : Sub n m) → TransportVarSet (FVTy A) σ ≡ FVTy (A [ σ ]ty)
-TransportVarSet-tm : (t : Tm n) → (σ : Sub n m) → TransportVarSet (FVTm t) σ ≡ FVTm (t [ σ ]tm)
-TransportVarSet-sub : (τ : Sub l n) → (σ : Sub n m) → TransportVarSet (FVSub τ) σ ≡ FVSub (σ ∘ τ)
+TransportVarSet-ty : (A : Ty n) → (σ : Sub n m ⋆) → TransportVarSet (FVTy A) σ ≡ FVTy (A [ σ ]ty)
+TransportVarSet-tm : (t : Tm n) → (σ : Sub n m ⋆) → TransportVarSet (FVTm t) σ ≡ FVTm (t [ σ ]tm)
+TransportVarSet-sub : (τ : Sub l n ⋆) → (σ : Sub n m ⋆) → TransportVarSet (FVSub τ) σ ≡ FVSub (σ ∘ τ)
 
 TransportVarSet-ty ⋆ σ = TransportVarSet-empty σ
 TransportVarSet-ty (s ─⟨ A ⟩⟶ t) σ = begin
@@ -140,9 +140,9 @@ TransportVarSet-tm (Coh S A τ) σ = TransportVarSet-sub τ σ
 TransportVarSet-sub ⟨⟩ σ = TransportVarSet-empty σ
 TransportVarSet-sub ⟨ τ , t ⟩ σ = trans (TransportVarSet-∪ (FVSub τ) (FVTm t) σ) (cong₂ _∪_ (TransportVarSet-sub τ σ) (TransportVarSet-tm t σ))
 
-supp-lift-ty : (A : Ty n d) → FVTy (liftType A) ≡ ewf (FVTy A)
+supp-lift-ty : (A : Ty n) → FVTy (liftType A) ≡ ewf (FVTy A)
 supp-lift-tm : (t : Tm n) → FVTm (liftTerm t) ≡ ewf (FVTm t)
-supp-lift-sub : (σ : Sub n m) → FVSub (liftSub σ) ≡ ewf (FVSub σ)
+supp-lift-sub : (σ : Sub n m ⋆) → FVSub (liftSub σ) ≡ ewf (FVSub σ)
 
 supp-lift-ty ⋆ = refl
 supp-lift-ty (s ─⟨ A ⟩⟶ t) = cong₂ _∪_ (cong₂ _∪_ (supp-lift-ty A) (supp-lift-tm s)) (supp-lift-tm t)
@@ -157,7 +157,7 @@ idSub-supp : (n : ℕ) → FVSub (idSub n) ≡ full
 idSub-supp zero = refl
 idSub-supp (suc n) = trans (cong (_∪ ewt empty) (supp-lift-sub (idSub n))) (cong ewt (trans (∪-right-unit (FVSub (idSub n))) (idSub-supp n)))
 
-TransportVarSet-lift : (xs : VarSet n) → (σ : Sub n m) → TransportVarSet xs (liftSub σ) ≡ ewf (TransportVarSet xs σ)
+TransportVarSet-lift : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet xs (liftSub σ) ≡ ewf (TransportVarSet xs σ)
 TransportVarSet-lift emp ⟨⟩ = refl
 TransportVarSet-lift (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-lift xs σ
 TransportVarSet-lift (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (TransportVarSet-lift xs σ) (supp-lift-tm t)

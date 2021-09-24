@@ -113,20 +113,20 @@ linear-tree-unbiased-lem (suc d) (Join S Sing) p = begin
 
 unbiased-type-sphere-lem : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ suc d)
                          → Var (fromℕ _)
-                           [ sub-from-sphere (unbiased-type (suc d) T) ]tm
+                           [ sub-from-sphere-unbiased (suc d) T ]tm
                            ≃tm Var (fromℕ (tree-size T))
 unbiased-type-sphere-lem zero T p = refl≃tm
 unbiased-type-sphere-lem (suc d) T p = begin
   < Var (fromℕ _)
-      [ sub-from-sphere (unbiased-type (suc (suc d)) T) ]tm >tm ≡⟨⟩
+      [ sub-from-sphere-unbiased (suc (suc d)) T ]tm >tm ≡⟨⟩
   < Var (fromℕ _)
-      [ sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = Var (fromℕ _)}) {!!} ⟩ --(sphere-to-subbed-ty (unbiased-type (suc d) (tree-bd (suc d) T)) (tree-inc (suc d) T false))
+      [ sub-from-sphere (suc d) (unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty) (trans (sym (sub-dim (tree-inc (suc d) T false) (unbiased-type (suc d) (tree-bd (suc d) T)))) (unbiased-type-dim (suc d) (tree-bd (suc d) T))) ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = Var (fromℕ _)}) (sphere-to-subbed-ty (suc d) (unbiased-type (suc d) (tree-bd (suc d) T)) (unbiased-type-dim (suc d) (tree-bd (suc d) T)) (tree-inc (suc d) T false)) ⟩ --(sphere-to-subbed-ty (unbiased-type (suc d) (tree-bd (suc d) T)) (tree-inc (suc d) T false))
   < Var (fromℕ _)
-    [ tree-inc (suc d) T false ∘ sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T)) ]tm >tm
-    ≈⟨ assoc-tm (tree-inc (suc d) T false) (sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T))) (Var (fromℕ _)) ⟩
+    [ tree-inc (suc d) T false ∘ sub-from-sphere-unbiased (suc d) (tree-bd (suc d) T) ]tm >tm
+    ≈⟨ assoc-tm (tree-inc (suc d) T false) (sub-from-sphere-unbiased (suc d) (tree-bd (suc d) T)) (Var (fromℕ _)) ⟩
   < Var (fromℕ _)
-    [ sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T)) ]tm
+    [ sub-from-sphere-unbiased (suc d) (tree-bd (suc d) T) ]tm
     [ tree-inc (suc d) T false ]tm >tm
     ≈⟨ sub-action-≃-tm (unbiased-type-sphere-lem d (tree-bd (suc d) T) (tree-dim-bd′ (suc d) T (≤-trans (n≤1+n (suc d)) (≤-reflexive (sym p))))) refl≃s ⟩
   < Var (fromℕ (tree-size (tree-bd (suc d) T)))
@@ -139,33 +139,33 @@ unbiased-type-sphere-lem (suc d) T p = begin
 unbiased-type-disc-lem : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ d)
                        → .⦃ NonZero′ d ⦄
                        → Var (fromℕ _)
-                         [ sub-from-disc (unbiased-type d T) (Coh T (unbiased-type d T) (idSub _)) ]tm
+                         [ sub-from-disc-unbiased d T ]tm
                          ≃tm Var (fromℕ (tree-size T))
 unbiased-type-disc-lem (suc zero) T p = refl≃tm -- id-on-tm (Var (fromℕ (tree-size T)))
 unbiased-type-disc-lem (suc (suc d)) T p = begin
   < Var (fromℕ _)
-    [ sub-from-disc (unbiased-type (suc (suc d)) T) (Coh T (unbiased-type (suc (suc d)) T) (idSub (suc _))) ]tm >tm
+    [ sub-from-disc-unbiased (suc (suc d)) T ]tm >tm
     ≡⟨⟩
   < Var (fromℕ _)
-      [ sub-from-sphere (unbiased-type (suc (suc d)) T) ]tm >tm
+      [ sub-from-sphere-unbiased (suc (suc d)) T ]tm >tm
     ≈⟨ unbiased-type-sphere-lem (suc d) T p ⟩
   < Var (fromℕ (tree-size T)) >tm ∎
   where
     open Reasoning tm-setoid
-{-
+
 unbiased-type-sphere-lem-2 : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ suc d)
                            → getSnd
-                             [ sub-from-sphere (unbiased-type (suc d) T) ]tm
+                             [ sub-from-sphere-unbiased (suc d) T ]tm
                              ≃tm tree-last-var T
 unbiased-type-sphere-lem-2 zero T p = refl≃tm
 unbiased-type-sphere-lem-2 (suc d) T p = begin
-  < getSnd [ sub-from-sphere (unbiased-type (suc (suc d)) T) ]tm >tm
+  < getSnd [ sub-from-sphere-unbiased (suc (suc d)) T ]tm >tm
     ≡⟨⟩
-  < getSnd [ sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = getSnd}) (sphere-to-subbed-ty (unbiased-type (suc d) (tree-bd (suc d) T)) (tree-inc (suc d) T false)) ⟩
-  < getSnd [ tree-inc (suc d) T false ∘ sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T)) ]tm >tm
-    ≈⟨ assoc-tm (tree-inc (suc d) T false) (sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T))) getSnd ⟩
-  < getSnd [ sub-from-sphere (unbiased-type (suc d) (tree-bd (suc d) T)) ]tm
+  < getSnd [ sub-from-sphere (suc d) (unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty) (trans (sym (sub-dim (tree-inc (suc d) T false) (unbiased-type (suc d) (tree-bd (suc d) T)))) (unbiased-type-dim (suc d) (tree-bd (suc d) T))) ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = getSnd}) (sphere-to-subbed-ty (suc d) (unbiased-type (suc d) (tree-bd (suc d) T)) (unbiased-type-dim (suc d) (tree-bd (suc d) T)) (tree-inc (suc d) T false)) ⟩
+  < getSnd [ tree-inc (suc d) T false ∘ sub-from-sphere-unbiased (suc d) (tree-bd (suc d) T) ]tm >tm
+    ≈⟨ assoc-tm (tree-inc (suc d) T false) (sub-from-sphere-unbiased (suc d) (tree-bd (suc d) T)) getSnd ⟩
+  < getSnd [ sub-from-sphere-unbiased (suc d) (tree-bd (suc d) T) ]tm
            [ tree-inc (suc d) T false ]tm >tm
     ≈⟨ sub-action-≃-tm (unbiased-type-sphere-lem-2 d (tree-bd (suc d) T) (tree-dim-bd′ (suc d) T (≤-trans (n≤1+n (suc d)) (≤-reflexive (sym p))))) refl≃s ⟩
   < tree-last-var (tree-bd (suc d) T) [ tree-inc (suc d) T false ]tm >tm
@@ -176,17 +176,14 @@ unbiased-type-sphere-lem-2 (suc d) T p = begin
 
 unbiased-type-disc-lem-2 : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ suc d)
                          → getSnd
-                           [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc d) T) (idSub _)) ]tm
+                           [ sub-from-disc-unbiased (suc d) T ]tm
                            ≃tm tree-last-var T
 unbiased-type-disc-lem-2 d T p = begin
   < getSnd
-    [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc d) T) (idSub _)) ]tm >tm
+    [ sub-from-disc-unbiased (suc d) T ]tm >tm
     ≡⟨⟩
   < getSnd
-     [ sub-from-sphere (unbiased-type (suc d) T [ idSub _ ]ty) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = getSnd}) (sub-from-sphere-ty-≃ (id-on-ty (unbiased-type (suc d) T))) ⟩
-  < getSnd
-      [ sub-from-sphere (unbiased-type (suc d) T) ]tm >tm
+      [ sub-from-sphere-unbiased (suc d) T ]tm >tm
     ≈⟨ unbiased-type-sphere-lem-2 d T p ⟩
   < tree-last-var T >tm ∎
   where
@@ -196,4 +193,3 @@ unbiased-type-≃ : d ≡ d′ → (S ≃ T) → unbiased-type d S ≃ty unbiase
 unbiased-type-≃ refl q with ≃-to-same-n q
 ... | refl with ≃-to-≡ q
 ... | refl = refl≃ty
--}

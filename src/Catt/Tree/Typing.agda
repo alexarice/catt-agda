@@ -26,7 +26,7 @@ tree-last-var-Ty Sing = TyVarZ refl≈ty
 tree-last-var-Ty (Join S T) = apply-sub-tm-typing (tree-last-var-Ty T) (connect-susp-inc-right-Ty (tree-to-ctx S) (tree-to-ctx T))
 
 tree-inc-Ty : (d : ℕ) → (T : Tree n) → (b : Bool) → Typing-Sub (tree-to-ctx (tree-bd d T)) (tree-to-ctx T) (tree-inc d T b)
-tree-inc-Ty zero T false = TyExt TyNull (fst-var-Ty (tree-to-ctx T))
-tree-inc-Ty zero T true = TyExt TyNull (tree-last-var-Ty T)
+tree-inc-Ty zero T false = TyExt (TyNull TyStar) (fst-var-Ty (tree-to-ctx T))
+tree-inc-Ty zero T true = TyExt (TyNull TyStar) (tree-last-var-Ty T)
 tree-inc-Ty (suc d) Sing b = id-Ty
 tree-inc-Ty (suc d) (Join S T) b = sub-between-connect-susps-Ty (tree-inc-Ty d S b) (tree-inc-Ty (suc d) T b) (reflexive≈tm (tree-inc-preserve-fst-var d T b))

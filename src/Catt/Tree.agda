@@ -11,6 +11,7 @@ open import Data.Empty
 open import Data.Bool using (Bool; true; false)
 open import Relation.Nullary
 open import Data.Unit using (⊤; tt)
+open import Relation.Binary.PropositionalEquality
 
 singleton-ctx : Ctx 1
 singleton-ctx = ∅ , ⋆

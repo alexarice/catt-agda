@@ -32,15 +32,15 @@ connect-susp-inc-right n m = connect-inc-right getSnd m
 connect-susp-inc-left : (n m : ℕ) → Sub (3 + n) (suc (m + (2 + n))) ⋆
 connect-susp-inc-left n m = connect-inc-left getSnd m
 
-sub-from-connect : Sub (suc n) l A → (t : Tm (suc n)) → Sub (suc m) l A → Sub (suc (m + n)) l A
-sub-from-connect σ s ⟨ ⟨⟩ , t ⟩ = σ
-sub-from-connect σ s ⟨ ⟨ τ , u ⟩ , t ⟩ = ⟨ sub-from-connect σ s ⟨ τ , u ⟩ , t ⟩
+sub-from-connect : Sub (suc n) l A → Sub (suc m) l A → Sub (suc (m + n)) l A
+sub-from-connect σ ⟨ ⟨⟩ , t ⟩ = σ
+sub-from-connect σ ⟨ ⟨ τ , u ⟩ , t ⟩ = ⟨ sub-from-connect σ ⟨ τ , u ⟩ , t ⟩
 
-sub-between-connects : Sub (suc n) (suc l) ⋆ → (t : Tm (suc n)) → Sub (suc m) (suc l′) ⋆ → (s : Tm (suc l)) → Sub (suc (m + n)) (suc (l′ + l)) ⋆
-sub-between-connects {l′ = l′} σ t τ s = sub-from-connect (connect-inc-left s l′ ∘ σ) t (connect-inc-right s l′ ∘ τ)
+sub-between-connects : Sub (suc n) (suc l) ⋆ → Sub (suc m) (suc l′) ⋆ → (s : Tm (suc l)) → Sub (suc (m + n)) (suc (l′ + l)) ⋆
+sub-between-connects {l′ = l′} σ τ s = sub-from-connect (connect-inc-left s l′ ∘ σ) (connect-inc-right s l′ ∘ τ)
 
 sub-between-connect-susps : Sub (suc n) (suc l) ⋆ → Sub (suc m) (suc l′) ⋆ → Sub (suc (m + (2 + n))) (suc (l′ + (2 + l))) ⋆
-sub-between-connect-susps σ τ = sub-between-connects (suspSub σ) getSnd τ getSnd
+sub-between-connect-susps σ τ = sub-between-connects (suspSub σ) τ getSnd
 
 connect-var-split : (n m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
 connect-var-split n zero i = inj₁ i

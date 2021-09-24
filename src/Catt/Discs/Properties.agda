@@ -3,6 +3,7 @@
 module Catt.Discs.Properties where
 
 open import Catt.Syntax
+open import Catt.Syntax.Properties
 open import Catt.Syntax.Bundles
 open import Catt.Suspension
 open import Catt.Suspension.Properties
@@ -39,24 +40,24 @@ linear-tree-compat : (T : Tree n) → .⦃ _ : is-linear T ⦄ → tree-to-ctx T
 linear-tree-compat Sing = Add≃ Emp≃ (Star≃ refl)
 linear-tree-compat (Join S Sing) = trans≃c (susp-ctx-≃ (linear-tree-compat S)) (disc-susp (tree-dim S))
 
-sub-from-sphere-prop : (A : Ty n) → sphere-type (ty-dim A) [ sub-from-sphere A ]ty ≃ty A
-sub-from-sphere-prop ⋆ = refl≃ty
-sub-from-sphere-prop (s ─⟨ A ⟩⟶ t) = Arr≃ refl≃tm (trans≃ty (lift-sub-comp-lem-ty ⟨ sub-from-sphere A , s ⟩ (liftType (sphere-type _))) (trans≃ty (lift-sub-comp-lem-ty (sub-from-sphere A) (sphere-type _)) (sub-from-sphere-prop A))) refl≃tm
+sub-from-sphere-prop : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → sphere-type d [ sub-from-sphere d A p ]ty ≃ty A
+sub-from-sphere-prop zero ⋆ p = refl≃ty
+sub-from-sphere-prop (suc d) (s ─⟨ A ⟩⟶ t) p = Arr≃ refl≃tm (trans≃ty (lift-sub-comp-lem-ty ⟨ sub-from-sphere d A (cong pred p) , s ⟩ (liftType (sphere-type _))) (trans≃ty (lift-sub-comp-lem-ty (sub-from-sphere d A (cong pred p)) (sphere-type _)) (sub-from-sphere-prop d A (cong pred p)))) refl≃tm
 
-sub-from-disc-tm-≃ : A ≃ty B → s ≃tm t → sub-from-disc A s ≃s sub-from-disc B t
-sub-from-sphere-ty-≃ : A ≃ty B → sub-from-sphere A ≃s sub-from-sphere B
+sub-from-disc-tm-≃ : (d₁ d₂ : ℕ) → A ≃ty B → .(p : ty-dim A ≡ d₁) → .(q : ty-dim B ≡ d₂) → s ≃tm t → sub-from-disc d₁ A p s ≃s sub-from-disc d₂ B q t
+sub-from-sphere-ty-≃ : (d₁ d₂ : ℕ) → A ≃ty B → .(p : ty-dim A ≡ d₁) → .(q : ty-dim B ≡ d₂) → sub-from-sphere d₁ A p ≃s sub-from-sphere d₂ B q
 
-sub-from-disc-tm-≃ p q = Ext≃ (sub-from-sphere-ty-≃ p) q
+sub-from-disc-tm-≃ d₁ d₂ a b c d = Ext≃ (sub-from-sphere-ty-≃ d₁ d₂ a b c) d
 
-sub-from-sphere-ty-≃ (Star≃ x) = Null≃ (Star≃ x)
-sub-from-sphere-ty-≃ (Arr≃ p q r) = Ext≃ (Ext≃ (sub-from-sphere-ty-≃ q) p) r
+sub-from-sphere-ty-≃ zero zero (Star≃ x) p q = Null≃ (Star≃ x)
+sub-from-sphere-ty-≃ (suc d₁) (suc d₂) (Arr≃ a b c) p q = Ext≃ (Ext≃ (sub-from-sphere-ty-≃ d₁ d₂ b (cong pred p) (cong pred q)) a) c
 
 -- disc-to-subbed-tm : sub-from-disc (t [ σ ]tm) ≃s σ ∘ sub-from-disc t
 -- disc-to-subbed-tm = Ext≃ {!!} refl≃tm
 
-sphere-to-subbed-ty : (A : Ty n) → (σ : Sub n m ⋆) → sub-from-sphere (A [ σ ]ty) ≃s σ ∘ sub-from-sphere A
-sphere-to-subbed-ty ⋆ σ = refl≃s
-sphere-to-subbed-ty (s ─⟨ A ⟩⟶ t) σ = Ext≃ (Ext≃ (sphere-to-subbed-ty A σ) refl≃tm) refl≃tm
+sphere-to-subbed-ty : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (σ : Sub n m ⋆) → sub-from-sphere d (A [ σ ]ty) (trans (sym (sub-dim σ A)) p) ≃s σ ∘ sub-from-sphere d A p
+sphere-to-subbed-ty zero ⋆ p σ = refl≃s
+sphere-to-subbed-ty (suc d) (s ─⟨ A ⟩⟶ t) p σ = Ext≃ (Ext≃ (sphere-to-subbed-ty d A (cong pred p) σ) refl≃tm) refl≃tm
 
 -- right-base-sphere : (n : ℕ) → get-right-base-tm (sphere-type (suc n)) ≃tm Var {n = sphere-size (suc n)} (inject₁ (fromℕ _))
 -- right-base-sphere zero = refl≃tm

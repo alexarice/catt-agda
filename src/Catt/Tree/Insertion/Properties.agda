@@ -26,8 +26,6 @@ open import Relation.Nullary
 open import Data.Sum
 open import Data.Unit using (⊤; tt)
 open import Data.Product renaming (_,_ to _,,_)
-open import Catt.PartialSubstitution
-open import Catt.PartialSubstitution.Properties
 
 exterior-sub-fst-var : (S : Tree n)
                      → (P : Path S)
@@ -40,21 +38,18 @@ exterior-sub-fst-var (Join S₁ S₂) PHere T = begin
   < Var (fromℕ (insertion-tree-size (Join S₁ S₂) PHere T)) >tm
     ≈˘⟨ idSub≃-fst-var (sym≃c (connect-tree-to-ctx T S₂)) ⟩
   < Var (fromℕ _) [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ]tm >tm
-    ≈˘⟨ sub-action-≃-tm (sub-between-connects-fst-var (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _))) ∘ idSub≃ (linear-tree-compat (suspTree S₁))) getSnd (idSub (suc _)) (tree-last-var T) lem) (refl≃s {σ = idSub≃ (sym≃c (connect-tree-to-ctx T S₂))}) ⟩
+    ≈˘⟨ sub-action-≃-tm (sub-between-connects-fst-var (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘ idSub≃ (linear-tree-compat (suspTree S₁))) (idSub (suc _)) (tree-last-var T) lem) (refl≃s {σ = idSub≃ (sym≃c (connect-tree-to-ctx T S₂))}) ⟩
   < Var (fromℕ _)
-    [ sub-between-connects (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _))) ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
-                           getSnd
+    [ sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
                            (idSub (suc _))
                            (tree-last-var T) ]tm
     [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ]tm
     >tm
-    ≈˘⟨ assoc-tm (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))) (sub-between-connects (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub _)) ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
-                           getSnd
+    ≈˘⟨ assoc-tm (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))) (sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
                            (idSub _)
                            (tree-last-var T)) (Var (fromℕ _)) ⟩
   < Var (fromℕ _) [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
-    ∘ sub-between-connects (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub _)) ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
-                           getSnd
+    ∘ sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
                            (idSub _)
                            (tree-last-var T) ]tm >tm ≡⟨⟩
   < Var (fromℕ _) [ exterior-sub (Join S₁ S₂) PHere T ]tm >tm ∎
@@ -62,24 +57,24 @@ exterior-sub-fst-var (Join S₁ S₂) PHere T = begin
     open Reasoning tm-setoid
 
     lem : Var (fromℕ _)
-            [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _)))
+            [ sub-from-disc-unbiased (suc (tree-dim S₁)) T
              ∘ idSub≃ (linear-tree-compat (suspTree S₁)) ]tm
             ≃tm Var (fromℕ _)
     lem = begin
       < Var (fromℕ _)
-          [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _)))
+          [ sub-from-disc-unbiased (suc (tree-dim S₁)) T
             ∘ idSub≃ (linear-tree-compat (suspTree S₁)) ]tm >tm
         ≈⟨ assoc-tm _ (idSub≃ (linear-tree-compat (suspTree S₁))) (Var (fromℕ _)) ⟩
       < Var (fromℕ _)
           [ idSub≃ (linear-tree-compat (suspTree S₁)) ]tm
-          [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _))) ]tm >tm
+          [ sub-from-disc-unbiased (suc (tree-dim S₁)) T ]tm >tm
         ≈⟨ sub-action-≃-tm (idSub≃-fst-var (linear-tree-compat (suspTree S₁))) refl≃s ⟩
       < Var (fromℕ _)
-          [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _))) ]tm >tm
+          [ sub-from-disc-unbiased (suc (tree-dim S₁)) T ]tm >tm
         ≈⟨ unbiased-type-disc-lem (suc (tree-dim S₁)) T (sym it) ⟩
       < Var (fromℕ (tree-size T)) >tm ∎
 
-exterior-sub-fst-var (Join S₁ S₂) (PExt P) (Join T Sing) = sym≃tm (sub-between-connect-susps-fst-var (exterior-sub S₁ P T ⦃ p = cong pred it ⦄) (idSub _))
+exterior-sub-fst-var (Join S₁ S₂) (PExt P) (Join T Sing) = sym≃tm (sub-between-connect-susps-fst-var (exterior-sub S₁ P T) (idSub _))
 
 exterior-sub-fst-var (Join S₁ S₂) (PShift P) T = sym≃tm (sub-between-connect-susps-fst-var (idSub _) (exterior-sub S₂ P T))
 
@@ -100,28 +95,27 @@ insertion-eq (Join S₁ S₂) PHere T = begin
        ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm >tm
     ≈⟨ sub-action-≃-tm (refl≃tm {s = 0V}) (∘-assoc _ _ (connect-susp-inc-left (tree-size S₁) (tree-size S₂))) ⟩
   < 0V [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
-       ∘ (sub-between-connects (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _)))
+       ∘ (sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T
                                ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
-                           getSnd
                            (idSub _)
                            (tree-last-var T)
          ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = 0V}) (sub-action-≃-sub (sub-between-connects-inc-left (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _)))
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = 0V}) (sub-action-≃-sub (sub-between-connects-inc-left (sub-from-disc-unbiased (suc (tree-dim S₁)) T
                                ∘ idSub≃ (linear-tree-compat (suspTree S₁))) getSnd (idSub _) (tree-last-var T)) (refl≃s {σ = idSub≃ (sym≃c (connect-tree-to-ctx T S₂))})) ⟩
   < 0V [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
        ∘ (connect-inc-left (tree-last-var T) _
-       ∘ (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _)))
+       ∘ (sub-from-disc-unbiased (suc (tree-dim S₁)) T
        ∘ idSub≃ (linear-tree-compat (suspTree S₁)))) ]tm >tm
     ≈⟨ sub-action-≃-tm (refl≃tm {s = 0V}) (idSub≃-on-sub (sym≃c (connect-tree-to-ctx T S₂)) (connect-inc-left (tree-last-var T) _
-       ∘ (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _)))
+       ∘ (sub-from-disc-unbiased (suc (tree-dim S₁)) T
        ∘ idSub≃ (linear-tree-compat (suspTree S₁))))) ⟩
   < 0V [ connect-inc-left (tree-last-var T) _
-       ∘ (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _)))
+       ∘ (sub-from-disc-unbiased (suc (tree-dim S₁)) T
        ∘ idSub≃ (linear-tree-compat (suspTree S₁))) ]tm >tm
-    ≈⟨ sub-action-≃-tm {s = 0V} {t = 0V} (Var≃ (≃c-preserve-length (linear-tree-compat (suspTree S₁))) refl) (sub-action-≃-sub (idSub≃-right-unit (linear-tree-compat (suspTree S₁)) (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _))))) (refl≃s)) ⟩
+    ≈⟨ sub-action-≃-tm {s = 0V} {t = 0V} (Var≃ (≃c-preserve-length (linear-tree-compat (suspTree S₁))) refl) (sub-action-≃-sub (idSub≃-right-unit (linear-tree-compat (suspTree S₁)) (sub-from-disc-unbiased (suc (tree-dim S₁)) T)) refl≃s) ⟩
   < 0V [ connect-inc-left (tree-last-var T) _
-       ∘ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub _)) ]tm >tm
-    ≈⟨ assoc-tm (connect-inc-left (tree-last-var T) _) (sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub _))) 0V ⟩
+       ∘ sub-from-disc-unbiased (suc (tree-dim S₁)) T ]tm >tm
+    ≈⟨ assoc-tm (connect-inc-left (tree-last-var T) _) (sub-from-disc-unbiased (suc (tree-dim S₁)) T) 0V ⟩
   < Coh T (unbiased-type (suc (tree-dim S₁)) T) (connect-inc-left (tree-last-var T) _ ∘ idSub _) >tm
     ≈⟨ Coh≃ refl≃ (unbiased-type-≃ (recompute ((suc (tree-dim S₁)) ≟ (tree-dim T)) it) refl≃) lem ⟩
   < Coh T (unbiased-type (tree-dim T) T)
@@ -196,22 +190,24 @@ insertion-eq (Join S₁ S₂) (PShift P) T = begin
   where
     open Reasoning tm-setoid
 
-lift-sub-from-insertion : (S : Tree n)
-                        → (P : Path S)
-                        → .⦃ bp : is-branching-path P ⦄
-                        → (T : Tree m)
-                        → .⦃ lh : has-linear-height (path-length P) T ⦄
-                        → (σ : Sub (suc n) l)
-                        → (τ : Sub (suc m) l)
-                        → liftSub (sub-from-insertion S P T σ τ) ≃s sub-from-insertion S P T (liftSub σ) (liftSub τ)
-lift-sub-from-insertion S P T σ τ = trans≃s (lift-sub-from-function (sub-from-insertion-func S P T σ τ)) (sub-from-function-≃ _ _ γ)
-  where
-    γ : (i : Fin (suc (insertion-tree-size S P T)))
-      → liftTerm (sub-from-insertion-func S P T σ τ i)
-        ≃tm sub-from-insertion-func S P T (liftSub σ) (liftSub τ) i
-    γ i with insertion-var-split S P T i
-    ... | inj₁ j = sym≃tm (apply-lifted-sub-tm-≃ (Var j) σ)
-    ... | inj₂ j = sym≃tm (apply-lifted-sub-tm-≃ (Var j) τ)
+
+
+-- lift-sub-from-insertion : (S : Tree n)
+--                         → (P : Path S)
+--                         → .⦃ bp : is-branching-path P ⦄
+--                         → (T : Tree m)
+--                         → .⦃ lh : has-linear-height (path-length P) T ⦄
+--                         → (σ : Sub (suc n) l)
+--                         → (τ : Sub (suc m) l)
+--                         → liftSub (sub-from-insertion S P T σ τ) ≃s sub-from-insertion S P T (liftSub σ) (liftSub τ)
+-- lift-sub-from-insertion S P T σ τ = trans≃s (lift-sub-from-function (sub-from-insertion-func S P T σ τ)) (sub-from-function-≃ _ _ γ)
+--   where
+--     γ : (i : Fin (suc (insertion-tree-size S P T)))
+--       → liftTerm (sub-from-insertion-func S P T σ τ i)
+--         ≃tm sub-from-insertion-func S P T (liftSub σ) (liftSub τ) i
+--     γ i with insertion-var-split S P T i
+--     ... | inj₁ j = sym≃tm (apply-lifted-sub-tm-≃ (Var j) σ)
+--     ... | inj₂ j = sym≃tm (apply-lifted-sub-tm-≃ (Var j) τ)
 
 
 exterior-sub-susp : (S : Tree n)
@@ -219,17 +215,16 @@ exterior-sub-susp : (S : Tree n)
              → .⦃ _ : is-branching-path P ⦄
              → (T : Tree m)
              → .⦃ _ : has-linear-height (path-length P) T ⦄
-             → .⦃ p : height-of-branching P ≡ tree-dim T ⦄
-             → exterior-sub (suspTree S) (PExt P) (suspTree T) ⦃ p = cong suc p ⦄ ≃s suspSub (exterior-sub S P T)
+             → exterior-sub (suspTree S) (PExt P) (suspTree T) ≃s suspSub (exterior-sub S P T)
 exterior-sub-susp S P T = begin
-  < exterior-sub (suspTree S) (PExt P) (suspTree T) ⦃ p = cong suc it ⦄ >s ≡⟨⟩
+  < exterior-sub (suspTree S) (PExt P) (suspTree T) >s ≡⟨⟩
   < idSub (2 + suc (insertion-tree-size S P T))
-       ∘ suspSub (exterior-sub S P T ⦃ p = it ⦄) >s
+       ∘ suspSub (exterior-sub S P T) >s
     ≈⟨ id-left-unit (suspSub (exterior-sub S P T)) ⟩
   < suspSub (exterior-sub S P T) >s ∎
     where
       open Reasoning sub-setoid
-
+{-
 insertion-var-split-compat : (S : Tree n)
                            → (P : Path S)
                            → .⦃ bp : is-branching-path P ⦄
@@ -739,7 +734,7 @@ interior-sub-comm S P T σ τ = sub-≃-term-wise (sub-from-insertion S P T σ �
     lem i with insertion-var-split S P T
          (varToVarFunction (interior-sub S P T) i) | insertion-var-split-full S P T i
     ... | inj₂ .i | refl = refl≃tm
-
+-}
 -- interior-sub-comm′ : (S : Tree n)
 --                    → (P : Path S)
 --                    → .⦃ bp : is-branching-path P ⦄
@@ -817,3 +812,384 @@ interior-sub-comm S P T σ τ = sub-≃-term-wise (sub-from-insertion S P T σ �
 --   < τ >s ∎
 --   where
 --     open Reasoning sub-setoid
+
+sub-from-insertion-≃ : (S : Tree n)
+                     → (P : Path S)
+                     → .⦃ bp : is-branching-path P ⦄
+                     → (T : Tree m)
+                     → .⦃ lh : has-linear-height (path-length P) T ⦄
+                     → σ ≃s σ′ → τ ≃s τ′
+                     → sub-from-insertion S P T σ τ ≃s sub-from-insertion S P T σ′ τ′
+sub-from-insertion-≃ (Join S₁ S₂) PHere T p q = sub-action-≃-sub refl≃s (sub-from-connect-≃ q (sub-action-≃-sub refl≃s p))
+sub-from-insertion-≃ (Join S₁ S₂) (PExt P) (Join T Sing) p q = sub-from-connect-≃ (unrestrict-≃ (sub-from-insertion-≃ S₁ P T (restrict-≃ (sub-action-≃-sub refl≃s p) (sub-action-≃-tm (refl≃tm {s = getFst}) q) (sub-action-≃-tm (refl≃tm {s = getSnd}) q)) (restrict-≃ q (sub-action-≃-tm (refl≃tm {s = getFst}) q) (sub-action-≃-tm (refl≃tm {s = getSnd}) q)))) (sub-action-≃-sub refl≃s p)
+sub-from-insertion-≃ (Join S₁ S₂) (PShift P) T p q = sub-from-connect-≃ (sub-action-≃-sub refl≃s p) (sub-from-insertion-≃ S₂ P T (sub-action-≃-sub refl≃s p) q)
+
+lift-sub-from-insertion : (S : Tree n)
+                        → (P : Path S)
+                        → .⦃ bp : is-branching-path P ⦄
+                        → (T : Tree m)
+                        → .⦃ lh : has-linear-height (path-length P) T ⦄
+                        → (σ : Sub (suc n) l A)
+                        → (τ : Sub (suc m) l A)
+                        → liftSub (sub-from-insertion S P T σ τ) ≃s sub-from-insertion S P T (liftSub σ) (liftSub τ)
+lift-sub-from-insertion (Join S₁ S₂) PHere T σ τ = begin
+  < liftSub (sub-from-connect τ
+                              (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+            ∘ idSub≃ (connect-tree-to-ctx T S₂)) >s
+    ≈˘⟨ apply-lifted-sub-sub-≃ _ _ ⟩
+  < liftSub (sub-from-connect τ
+                              (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+    ∘ idSub≃ (connect-tree-to-ctx T S₂) >s
+    ≈⟨ sub-action-≃-sub refl≃s (sub-from-connect-lift τ (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))) ⟩
+  < sub-from-connect (liftSub τ)
+                     (liftSub (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+    ∘ idSub≃ (connect-tree-to-ctx T S₂) >s
+    ≈˘⟨ sub-action-≃-sub refl≃s (sub-from-connect-≃ refl≃s (apply-lifted-sub-sub-≃ (connect-susp-inc-right (tree-size S₁) (tree-size S₂)) σ)) ⟩
+  < sub-from-connect (liftSub τ)
+                     (liftSub σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+    ∘ idSub≃ (connect-tree-to-ctx T S₂) >s ∎
+  where
+    open Reasoning sub-setoid
+
+lift-sub-from-insertion (Join S₁ S₂) (PExt P) (Join T Sing) σ τ = begin
+  < liftSub (sub-from-connect
+      (unrestrict (sub-from-insertion S₁ P T
+        (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                  (getFst [ τ ]tm)
+                  (getSnd [ τ ]tm))
+        (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
+      (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))) >s
+    ≈⟨ sub-from-connect-lift _ (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ⟩
+  < sub-from-connect
+      (liftSub (unrestrict
+        (sub-from-insertion S₁ P T
+          (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                    (getFst [ τ ]tm)
+                    (getSnd [ τ ]tm))
+          (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))))
+      (liftSub (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))) >s
+    ≈˘⟨ sub-from-connect-≃ lem (apply-lifted-sub-sub-≃ (connect-susp-inc-right (tree-size S₁) (tree-size S₂)) σ) ⟩
+  < sub-from-connect
+      (unrestrict
+        (sub-from-insertion S₁ P T
+          (restrict (liftSub σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                    (getFst [ liftSub τ ]tm)
+                    (getSnd [ liftSub τ ]tm))
+          (restrict (liftSub τ) (getFst [ liftSub τ ]tm) (getSnd [ liftSub τ ]tm))))
+      (liftSub σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) >s ∎
+  where
+    open Reasoning sub-setoid
+
+    l1 : restrict (liftSub σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                  (getFst [ liftSub τ ]tm)
+                  (getSnd [ liftSub τ ]tm)
+         ≃s
+         liftSub (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                           (getFst [ τ ]tm)
+                           (getSnd [ τ ]tm))
+    l1 = begin
+      < restrict (liftSub σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                 (getFst [ liftSub τ ]tm)
+                 (getSnd [ liftSub τ ]tm) >s
+        ≈⟨ restrict-≃ (apply-lifted-sub-sub-≃ (connect-susp-inc-left (tree-size S₁) (tree-size S₂)) σ) (apply-lifted-sub-tm-≃ getFst τ) (apply-lifted-sub-tm-≃ getSnd τ) ⟩
+      < restrict (liftSub (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)))
+                 (liftTerm (getFst [ τ ]tm))
+                 (liftTerm (getSnd [ τ ]tm)) >s
+        ≈⟨ restrict-lift _ _ _ ⟩
+      < liftSub (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                          (getFst [ τ ]tm)
+                          (getSnd [ τ ]tm)) >s ∎
+
+    l2 : restrict (liftSub τ) (getFst [ liftSub τ ]tm) (getSnd [ liftSub τ ]tm)
+         ≃s liftSub (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))
+    l2 = begin
+      < restrict (liftSub τ) (getFst [ liftSub τ ]tm) (getSnd [ liftSub τ ]tm) >s
+        ≈⟨ restrict-≃ refl≃s (apply-lifted-sub-tm-≃ getFst τ) (apply-lifted-sub-tm-≃ getSnd τ) ⟩
+      < restrict (liftSub τ) (liftTerm (getFst [ τ ]tm)) (liftTerm (getSnd [ τ ]tm)) >s
+        ≈⟨ restrict-lift τ (getFst [ τ ]tm) (getSnd [ τ ]tm) ⟩
+      < liftSub (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)) >s ∎
+
+    lem : unrestrict (sub-from-insertion S₁ P T
+            (restrict
+              (liftSub σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+              (getFst [ liftSub τ ]tm) (getSnd [ liftSub τ ]tm))
+            (restrict (liftSub τ) (getFst [ liftSub τ ]tm)
+              (getSnd [ liftSub τ ]tm)))
+          ≃s
+          liftSub (unrestrict (sub-from-insertion S₁ P T
+            (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                      (getFst [ τ ]tm)
+                      (getSnd [ τ ]tm))
+            (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
+    lem = begin
+      < unrestrict (sub-from-insertion S₁ P T
+        (restrict
+          (liftSub σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+          (getFst [ liftSub τ ]tm) (getSnd [ liftSub τ ]tm))
+        (restrict (liftSub τ) (getFst [ liftSub τ ]tm)
+          (getSnd [ liftSub τ ]tm))) >s
+        ≈⟨ unrestrict-≃ (sub-from-insertion-≃ S₁ P T l1 l2) ⟩
+      < unrestrict (sub-from-insertion S₁ P T
+         (liftSub (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                            (getFst [ τ ]tm)
+                            (getSnd [ τ ]tm)))
+         (liftSub (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))) >s
+        ≈˘⟨ unrestrict-≃ (lift-sub-from-insertion S₁ P T _ _) ⟩
+      < unrestrict (liftSub (sub-from-insertion S₁ P T
+          (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                    (getFst [ τ ]tm)
+                    (getSnd [ τ ]tm))
+          (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))) >s
+        ≈⟨ unrestrict-lift _ ⟩
+      < liftSub (unrestrict (sub-from-insertion S₁ P T
+        (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                  (getFst [ τ ]tm)
+                  (getSnd [ τ ]tm))
+        (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))) >s ∎
+
+lift-sub-from-insertion (Join S₁ S₂) (PShift P) T σ τ = begin
+  < liftSub (sub-from-connect
+       (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+       (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ)) >s
+    ≈⟨ sub-from-connect-lift (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ) ⟩
+  < sub-from-connect
+      (liftSub (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)))
+      (liftSub (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ)) >s
+    ≈˘⟨ sub-from-connect-≃ (apply-lifted-sub-sub-≃ (connect-susp-inc-left (tree-size S₁) (tree-size S₂)) σ) lem ⟩
+  < sub-from-connect
+      (liftSub σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+      (sub-from-insertion S₂ P T
+                          (liftSub σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+                          (liftSub τ)) >s ∎
+  where
+    open Reasoning sub-setoid
+
+    lem : sub-from-insertion S₂ P T
+            (liftSub σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+            (liftSub τ)
+          ≃s
+          liftSub (sub-from-insertion S₂ P T
+                  (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ)
+    lem = begin
+      < sub-from-insertion S₂ P T
+          (liftSub σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+          (liftSub τ) >s
+        ≈⟨ sub-from-insertion-≃ S₂ P T (apply-lifted-sub-sub-≃ (connect-susp-inc-right _ _) σ) refl≃s ⟩
+      < sub-from-insertion S₂ P T
+          (liftSub (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+          (liftSub τ) >s
+        ≈˘⟨ lift-sub-from-insertion S₂ P T _ _ ⟩
+      < liftSub (sub-from-insertion S₂ P T
+                (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ) >s ∎
+
+sub-from-insertion-susp-res : (S : Tree n)
+                            → (P : Path S)
+                            → .⦃ bp : is-branching-path P ⦄
+                            → (T : Tree m)
+                            → .⦃ lh : has-linear-height (path-length P) T ⦄
+                            → (σ : Sub (suc n) l A)
+                            → (τ : Sub (suc m) l A)
+                            → sub-from-insertion S P T (suspSubRes σ) (suspSubRes τ) ≃s suspSubRes (sub-from-insertion S P T σ τ)
+sub-from-insertion-susp-res (Join S₁ S₂) PHere T σ τ = begin
+  < sub-from-connect (suspSubRes τ) (suspSubRes σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+    ∘ idSub≃ (connect-tree-to-ctx T S₂) >s
+    ≈˘⟨ sub-action-≃-sub refl≃s (sub-from-connect-≃ refl≃s (susp-res-comp-sub σ (connect-susp-inc-right (tree-size S₁) (tree-size S₂)))) ⟩
+  < sub-from-connect (suspSubRes τ) (suspSubRes (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+    ∘ idSub≃ (connect-tree-to-ctx T S₂) >s
+    ≈˘⟨ sub-action-≃-sub refl≃s (sub-from-connect-susp-res τ (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))) ⟩
+  < suspSubRes (sub-from-connect τ (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+    ∘ idSub≃ (connect-tree-to-ctx T S₂) >s
+    ≈˘⟨ susp-res-comp-sub _ _ ⟩
+  < suspSubRes (sub-from-connect τ (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+    ∘ idSub≃ (connect-tree-to-ctx T S₂)) >s ∎
+  where
+    open Reasoning sub-setoid
+
+sub-from-insertion-susp-res (Join S₁ S₂) (PExt P) (Join T Sing) σ τ = begin
+  < sub-from-connect
+      (unrestrict (sub-from-insertion S₁ P T
+        (restrict (suspSubRes σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                  (getFst [ suspSubRes τ ]tm)
+                  (getSnd [ suspSubRes τ ]tm))
+        (restrict (suspSubRes τ) (getFst [ suspSubRes τ ]tm) (getSnd [ suspSubRes τ ]tm))))
+      (suspSubRes σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) >s
+    ≈⟨ sub-from-connect-≃ l1 l2 ⟩
+  < sub-from-connect
+      (suspSubRes (unrestrict (sub-from-insertion S₁ P T
+        (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                  (getFst [ τ ]tm)
+                  (getSnd [ τ ]tm))
+        (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))))
+      (suspSubRes (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))) >s
+    ≈˘⟨ sub-from-connect-susp-res _ (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ⟩
+  < suspSubRes (sub-from-connect
+      (unrestrict
+        (sub-from-insertion S₁ P T
+         (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+          (getFst [ τ ]tm) (getSnd [ τ ]tm))
+         (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
+      (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))) >s ∎
+  where
+    open Reasoning sub-setoid
+
+    l3 : restrict
+           (suspSubRes σ ∘
+            connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+           (getFst [ suspSubRes τ ]tm) (getSnd [ suspSubRes τ ]tm)
+           ≃s
+           suspSubRes
+           (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+            (getFst [ τ ]tm) (getSnd [ τ ]tm))
+    l3 = begin
+      < restrict (suspSubRes σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                 (getFst [ suspSubRes τ ]tm)
+                 (getSnd [ suspSubRes τ ]tm) >s
+        ≈˘⟨ restrict-≃ (susp-res-comp-sub σ (connect-susp-inc-left (tree-size S₁) (tree-size S₂)))
+                       (susp-res-comp-tm getFst τ)
+                       (susp-res-comp-tm getSnd τ) ⟩
+      < restrict (suspSubRes (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)))
+                 (suspTm (getFst [ τ ]tm))
+                 (suspTm (getSnd [ τ ]tm)) >s
+        ≈˘⟨ susp-res-restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                              (getFst [ τ ]tm)
+                              (getSnd [ τ ]tm) ⟩
+      < suspSubRes (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                             (getFst [ τ ]tm)
+                             (getSnd [ τ ]tm)) >s ∎
+
+    l4 : restrict (suspSubRes τ) (getFst [ suspSubRes τ ]tm)
+                                 (getSnd [ suspSubRes τ ]tm)
+         ≃s suspSubRes (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))
+    l4 = begin
+      < restrict (suspSubRes τ) (getFst [ suspSubRes τ ]tm) (getSnd [ suspSubRes τ ]tm) >s
+        ≈˘⟨ restrict-≃ refl≃s (susp-res-comp-tm getFst τ) (susp-res-comp-tm getSnd τ) ⟩
+      < restrict (suspSubRes τ) (suspTm (getFst [ τ ]tm)) (suspTm (getSnd [ τ ]tm)) >s
+        ≈˘⟨ susp-res-restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm) ⟩
+      < suspSubRes (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)) >s ∎
+
+    l1 : unrestrict (sub-from-insertion S₁ P T
+           (restrict (suspSubRes σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                     (getFst [ suspSubRes τ ]tm)
+                     (getSnd [ suspSubRes τ ]tm))
+           (restrict (suspSubRes τ) (getFst [ suspSubRes τ ]tm) (getSnd [ suspSubRes τ ]tm)))
+      ≃s suspSubRes (unrestrict (sub-from-insertion S₁ P T
+           (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                     (getFst [ τ ]tm)
+                     (getSnd [ τ ]tm))
+           (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
+    l1 = begin
+      < unrestrict (sub-from-insertion S₁ P T
+          (restrict (suspSubRes σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                    (getFst [ suspSubRes τ ]tm)
+                    (getSnd [ suspSubRes τ ]tm))
+          (restrict (suspSubRes τ) (getFst [ suspSubRes τ ]tm) (getSnd [ suspSubRes τ ]tm))) >s
+        ≈⟨ unrestrict-≃ (sub-from-insertion-≃ S₁ P T l3 l4) ⟩
+      < unrestrict (sub-from-insertion S₁ P T
+          (suspSubRes (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                                (getFst [ τ ]tm)
+                                (getSnd [ τ ]tm)))
+          (suspSubRes (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))) >s
+        ≈⟨ unrestrict-≃ (sub-from-insertion-susp-res S₁ P T _ _) ⟩
+      < unrestrict (suspSubRes (sub-from-insertion S₁ P T
+          (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                    (getFst [ τ ]tm)
+                    (getSnd [ τ ]tm))
+          (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))) >s
+        ≈˘⟨ sub-res-unrestrict-comm _ ⟩
+      < suspSubRes (unrestrict (sub-from-insertion S₁ P T
+          (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+                    (getFst [ τ ]tm)
+                    (getSnd [ τ ]tm))
+          (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))) >s ∎
+
+    l2 : suspSubRes σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)
+      ≃s suspSubRes (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+    l2 = sym≃s (susp-res-comp-sub σ (connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+
+sub-from-insertion-susp-res (Join S₁ S₂) (PShift P) T σ τ = begin
+  < sub-from-connect
+      (suspSubRes σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+      (sub-from-insertion S₂ P T (suspSubRes σ
+                                 ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+                                 (suspSubRes τ)) >s
+    ≈˘⟨ sub-from-connect-≃ (susp-res-comp-sub σ (connect-susp-inc-left (tree-size S₁) (tree-size S₂)))
+                           lem ⟩
+  < sub-from-connect
+      (suspSubRes (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)))
+      (suspSubRes (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ)) >s
+    ≈˘⟨ sub-from-connect-susp-res (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) _ ⟩
+  < suspSubRes (sub-from-connect
+      (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+      (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ)) >s ∎
+  where
+    open Reasoning sub-setoid
+
+    lem : suspSubRes (sub-from-insertion S₂ P T
+                     (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ)
+       ≃s sub-from-insertion S₂ P T (suspSubRes σ
+                                    ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+                                    (suspSubRes τ)
+    lem = begin
+      < suspSubRes (sub-from-insertion S₂ P T
+                   (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ) >s
+        ≈˘⟨ sub-from-insertion-susp-res S₂ P T _ _ ⟩
+      < sub-from-insertion S₂ P T (suspSubRes (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+                                  (suspSubRes τ) >s
+        ≈⟨ sub-from-insertion-≃ S₂ P T (susp-res-comp-sub σ (connect-susp-inc-right (tree-size S₁) (tree-size S₂))) refl≃s ⟩
+      < sub-from-insertion S₂ P T (suspSubRes σ
+                                  ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+                                  (suspSubRes τ) >s ∎
+
+sub-from-insertion-susp : (S : Tree n)
+                        → (P : Path S)
+                        → .⦃ bp : is-branching-path P ⦄
+                        → (T : Tree m)
+                        → .⦃ lh : has-linear-height (path-length P) T ⦄
+                        → (σ : Sub (suc n) l ⋆)
+                        → (τ : Sub (suc m) l ⋆)
+                        → sub-from-insertion (suspTree S) (PExt P) (suspTree T) (suspSub σ) (suspSub τ) ≃s suspSub (sub-from-insertion S P T σ τ)
+sub-from-insertion-susp S P T σ τ = begin
+  < sub-from-insertion (suspTree S) (PExt P) (suspTree T) (suspSub σ) (suspSub τ) >s ≡⟨⟩
+  < (unrestrict (sub-from-insertion S P T
+                (restrict (suspSub σ ∘ idSub _)
+                          (getFst [ suspSub τ ]tm) (getSnd [ suspSub τ ]tm))
+                (restrict (suspSub τ) (getFst [ suspSub τ ]tm) (getSnd [ suspSub τ ]tm)))) >s
+    ≈⟨ unrestrict-≃ (sub-from-insertion-≃ S P T l1 l2) ⟩
+  < unrestrict (sub-from-insertion S P T (suspSubRes σ) (suspSubRes τ)) >s
+    ≈⟨ unrestrict-≃ (sub-from-insertion-susp-res S P T σ τ) ⟩
+  < unrestrict (suspSubRes (sub-from-insertion S P T σ τ)) >s ≡⟨⟩
+  < suspSub (sub-from-insertion S P T σ τ) >s ∎
+  where
+    open Reasoning sub-setoid
+
+    l1 : restrict (suspSub σ ∘ idSub _) (getFst [ suspSub τ ]tm) (getSnd [ suspSub τ ]tm)
+         ≃s suspSubRes σ
+    l1 = begin
+      < restrict (suspSub σ ∘ idSub (2 + suc _)) (getFst [ suspSub τ ]tm) (getSnd [ suspSub τ ]tm) >s
+        ≈⟨ restrict-≃ (id-right-unit (suspSub σ)) (sym≃tm (susp-sub-preserve-getFst τ)) (sym≃tm (susp-sub-preserve-getSnd τ)) ⟩
+      < restrict (suspSub σ) getFst getSnd >s
+        ≈⟨ restrict-unrestrict (suspSubRes σ) ⟩
+      < suspSubRes σ >s ∎
+
+    l2 : restrict (suspSub τ) (getFst [ suspSub τ ]tm)
+           (getSnd [ suspSub τ ]tm)
+           ≃s suspSubRes τ
+    l2 = begin
+      < restrict (suspSub τ) (getFst [ suspSub τ ]tm) (getSnd [ suspSub τ ]tm) >s
+        ≈˘⟨ restrict-≃ refl≃s (susp-sub-preserve-getFst τ) (susp-sub-preserve-getSnd τ) ⟩
+      < restrict (suspSub τ) getFst getSnd >s
+        ≈⟨ restrict-unrestrict (suspSubRes τ) ⟩
+      < suspSubRes τ >s ∎
+
+sub-from-insertion-sub : (S : Tree n)
+                       → (P : Path S)
+                       → .⦃ bp : is-branching-path P ⦄
+                       → (T : Tree m)
+                       → .⦃ lh : has-linear-height (path-length P) T ⦄
+                       → (σ : Sub (suc n) l A)
+                       → (τ : Sub (suc m) l A)
+                       → (μ : Sub l l′ B)
+                       → sub-from-insertion S P T (μ ∘ σ) (μ ∘ τ) ≃s μ ∘ sub-from-insertion S P T σ τ
+sub-from-insertion-sub (Join S₁ S₂) PHere T σ τ μ = {!!}
+sub-from-insertion-sub (Join S₁ S₂) (PExt P) T σ τ μ = {!!}
+sub-from-insertion-sub (Join S₁ S₂) (PShift P) T σ τ μ = {!!}

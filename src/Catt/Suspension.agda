@@ -17,6 +17,9 @@ suspTy : Ty n → Ty (2 + n)
 getFst : Tm (2 + n)
 getSnd : Tm (2 + n)
 suspTm : Tm n → Tm (2 + n)
+restrict : Sub (2 + n) m A → (s t : Tm m) → Sub n m (s ─⟨ A ⟩⟶ t)
+unrestrict : Sub n m (s ─⟨ A ⟩⟶ t) → Sub (2 + n) m A
+suspSubRes : (σ : Sub n m A) → Sub n (2 + m) (suspTy A)
 suspSub : Sub n m ⋆ → Sub (2 + n) (2 + m) ⋆
 
 suspTree T = Join T Sing
@@ -34,36 +37,36 @@ getSnd = Var (inject₁ (fromℕ _))
 suspTm (Var i) = Var (inject₁ (inject₁ i))
 suspTm (Coh T A σ) = Coh (suspTree T) (suspTy A) (suspSub σ)
 
-suspSub ⟨⟩ = ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩
-suspSub ⟨ σ , t ⟩ = ⟨ suspSub σ , suspTm t ⟩
-
-newLength : (d : ℕ) → (n : ℕ) → ℕ
-newLength zero n = n
-newLength (suc d) n = newLength d (2 + n)
-
-n-fold-suspTree : (d : ℕ) → (T : Tree n) → (Tree (newLength d n))
-n-fold-suspTree zero T = T
-n-fold-suspTree (suc d) T = n-fold-suspTree d (suspTree T)
-
-n-fold-suspTy : (d : ℕ) → (A : Ty (suc n)) → Ty (suc (newLength d n))
-n-fold-suspTy zero A = A
-n-fold-suspTy (suc d) A = n-fold-suspTy d (suspTy A)
-
-n-fold-suspSub : (d : ℕ) → (σ : Sub (suc n) (suc m) ⋆) → Sub (suc (newLength d n)) (suc (newLength d m)) ⋆
-n-fold-suspSub zero σ = σ
-n-fold-suspSub (suc d) σ = n-fold-suspSub d (suspSub σ)
-
-restrict : Sub (2 + n) m A → (s t : Tm m) → Sub n m (s ─⟨ A ⟩⟶ t)
 restrict ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ s t = ⟨⟩
 restrict ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = ⟨ restrict σ s t , u ⟩
 
-unrestrict : Sub n m (s ─⟨ A ⟩⟶ t) → Sub (2 + n) m A
 unrestrict {s = s} {A = A} {t = t} ⟨⟩  = ⟨ ⟨ ⟨⟩ {A = A} , s ⟩ , t ⟩
 unrestrict ⟨ σ , u ⟩ = ⟨ unrestrict σ , u ⟩
 
-full-unrestrict : Sub (suc n) m A → Sub (suc (newLength (ty-dim A) n)) m ⋆
-full-unrestrict {A = ⋆} σ = σ
-full-unrestrict {A = s ─⟨ A ⟩⟶ t} σ = full-unrestrict {A = A} (unrestrict σ)
+suspSubRes ⟨⟩ = ⟨⟩
+suspSubRes ⟨ σ , t ⟩ = ⟨ suspSubRes σ , suspTm t ⟩
+
+suspSub σ = unrestrict (suspSubRes σ)
+
+-- newLength : (d : ℕ) → (n : ℕ) → ℕ
+-- newLength zero n = n
+-- newLength (suc d) n = newLength d (2 + n)
+
+-- n-fold-suspTree : (d : ℕ) → (T : Tree n) → (Tree (newLength d n))
+-- n-fold-suspTree zero T = T
+-- n-fold-suspTree (suc d) T = n-fold-suspTree d (suspTree T)
+
+-- n-fold-suspTy : (d : ℕ) → (A : Ty (suc n)) → Ty (suc (newLength d n))
+-- n-fold-suspTy zero A = A
+-- n-fold-suspTy (suc d) A = n-fold-suspTy d (suspTy A)
+
+-- n-fold-suspSub : (d : ℕ) → (σ : Sub (suc n) (suc m) ⋆) → Sub (suc (newLength d n)) (suc (newLength d m)) ⋆
+-- n-fold-suspSub zero σ = σ
+-- n-fold-suspSub (suc d) σ = n-fold-suspSub d (suspSub σ)
+
+-- full-unrestrict : Sub (suc n) m A → Sub (suc (newLength (ty-dim A) n)) m ⋆
+-- full-unrestrict {A = ⋆} σ = σ
+-- full-unrestrict {A = s ─⟨ A ⟩⟶ t} σ = full-unrestrict {A = A} (unrestrict σ)
 
 -- suspension-vars : (i : Fin (2 + n)) → ((i ≡ fromℕ _) ⊎ (i ≡ inject₁ (fromℕ _))) ⊎ Σ[ j ∈ Fin n ] i ≡ inject₁ (inject₁ j)
 -- suspension-vars {n = zero} zero = inj₁ (inj₂ refl)

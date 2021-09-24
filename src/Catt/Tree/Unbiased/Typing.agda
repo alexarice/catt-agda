@@ -27,6 +27,9 @@ open import Data.Empty
 open import Data.Unit using (⊤; tt)
 open import Data.Nat.Properties
 open import Data.Bool using (Bool; true; false)
+open import Data.Product renaming (_,_ to _,,_)
+open import Catt.Discs
+open import Catt.Discs.Typing index rule props
 
 NonZero′-subst : n ≡ m → NonZero′ n → NonZero′ m
 NonZero′-subst refl x = x
@@ -36,7 +39,7 @@ unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → .(tr
                  → Typing-Tm Γ (Coh T (unbiased-type d T) σ) (unbiased-type d T [ σ ]ty)
 unbiased-type-Ty : (d : ℕ) → (T : Tree n) → .(d ≤ tree-dim T) → Typing-Ty (tree-to-ctx T) (unbiased-type d T)
 
-unbiased-comp-Ty (suc d) T q σty = TyComp ⦃ NonZero′-subst (sym q) it ⦄ (unbiased-type-Ty (suc d) T (≤-reflexive (sym q))) σty (supp-lem false) lem refl≈ty
+unbiased-comp-Ty (suc d) T@(Join _ _) q σty = TyCoh (unbiased-type-Ty (suc d) T (≤-reflexive (sym q))) σty true ((supp-lem false) ,, lem) refl≈ty
   where
     open ≡-Reasoning
     supp-lem : (b : Bool) → FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T b ]ty) ∪
@@ -81,3 +84,9 @@ unbiased-type-Ty (suc d) T q
   = TyArr (apply-sub-tm-typing (unbiased-term-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-trans (n≤1+n d) q))) (tree-inc-Ty d T false))
           (apply-sub-ty-typing (unbiased-type-Ty d (tree-bd d T) (≤-reflexive (sym (tree-dim-bd′ d T (≤-trans (n≤1+n d) q))))) (tree-inc-Ty d T false))
           (term-conversion (apply-sub-tm-typing (unbiased-term-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-trans (n≤1+n d) q))) (tree-inc-Ty d T true)) (reflexive≈ty (unbiased-type-inc-lem d T)))
+
+sub-from-sphere-unbiased-Ty : (d : ℕ) → (T : Tree n) → .(d ≡ tree-dim T) → Typing-Sub (Sphere d) (tree-to-ctx T) (sub-from-sphere-unbiased d T)
+sub-from-sphere-unbiased-Ty d T p = sub-from-sphere-Ty d (unbiased-type-Ty d T (≤-reflexive p)) (unbiased-type-dim d T)
+
+sub-from-disc-unbiased-Ty : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → .(d ≡ tree-dim T) → Typing-Sub (Disc d) (tree-to-ctx T) (sub-from-disc-unbiased d T)
+sub-from-disc-unbiased-Ty d T p = sub-from-disc-Ty d (unbiased-type-Ty d T (≤-reflexive p)) (unbiased-type-dim d T) (term-conversion (unbiased-comp-Ty d T (sym p) id-Ty) (reflexive≈ty (id-on-ty (unbiased-type d T))))

@@ -207,7 +207,7 @@ apply-sub-tm-typing (TyVarS {A = A} i tvi x) (TyExt {t = t} σty tty) = term-con
 apply-sub-tm-typing {B = ⋆} (TyCoh {A = A} Aty τty b sc p) σty = TyCoh Aty (apply-sub-sub-typing τty σty) b sc (trans≈ty (reflexive≈ty (assoc-ty _ _ A)) (apply-sub-ty-eq σty p))
 apply-sub-tm-typing {B = s ─⟨ B ⟩⟶ t} (TyCoh Aty τty b sc p) σty = term-conversion (apply-sub-tm-typing (suspTmTy (TyCoh Aty τty b sc p)) (unrestrictTy σty)) (reflexive≈ty (sym≃ty (unrestrict-comp-ty _ _)))
 
-apply-sub-sub-typing (TyNull x) σty = TyNull (sub-typing-implies-ty-typing σty)
+apply-sub-sub-typing (TyNull x) σty = TyNull (apply-sub-ty-typing x σty)
 apply-sub-sub-typing (TyExt {A = A} τty tty) σty = TyExt (apply-sub-sub-typing τty σty) (term-conversion (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ A))))
 
 apply-sub-ty-eq σty Star≈ = refl≈ty
@@ -221,7 +221,7 @@ apply-sub-tm-eq {A = ⋆} σty (Coh≈ q r) = Coh≈ q (apply-sub-sub-eq σty r)
 apply-sub-tm-eq {A = s ─⟨ A ⟩⟶ t} σty (Coh≈ q r) = apply-sub-tm-eq (unrestrictTy σty) (Coh≈ (suspTyEq q) (suspSubEq r))
 apply-sub-tm-eq σty (Rule≈ i args tc) = props i .sub-rule args σty (apply-sub-tm-typing tc σty)
 
-apply-sub-sub-eq σty (Null≈ x) = Null≈ refl≈ty
+apply-sub-sub-eq σty (Null≈ x) = Null≈ (apply-sub-ty-eq σty x)
 apply-sub-sub-eq σty (Ext≈ p x) = Ext≈ (apply-sub-sub-eq σty p) (apply-sub-tm-eq σty x)
 
 apply-sub-eq-ty : (A : Ty n) → σ ≈[ Γ ]s τ → A [ σ ]ty ≈[ Γ ]ty A [ τ ]ty

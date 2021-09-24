@@ -13,7 +13,6 @@ open import Catt.Discs.Properties
 open import Catt.Discs.Typing index rule props
 open import Catt.Suspension
 open import Catt.Suspension.Properties
-open import Catt.Suspension.Typing index rule props
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
@@ -48,20 +47,29 @@ exterior-sub-Ty : (S : Tree n)
                 → .⦃ p : height-of-branching P ≡ tree-dim T ⦄
                 → Typing-Sub (tree-to-ctx S) (tree-to-ctx (insertion-tree S P T)) (exterior-sub S P T)
 exterior-sub-Ty (Join S₁ S₂) PHere T
-  = apply-sub-sub-typing (sub-between-connects-Ty (apply-sub-sub-typing (idSub≃-Ty (trans≃c (susp-ctx-≃ (linear-tree-compat S₁)) (disc-susp (tree-dim S₁)))) (sub-from-disc-Ty (apply-sub-ty-typing (unbiased-type-Ty (suc (tree-dim S₁)) T (≤-reflexive it)) id-Ty) (unbiased-comp-Ty (suc (tree-dim S₁)) T (sym it) id-Ty))) getSndTy id-Ty (tree-last-var-Ty T) (reflexive≈tm lem) (reflexive≈tm (id-on-tm (Var (fromℕ _)))))
-                         (idSub≃-Ty (sym≃c (connect-tree-to-ctx T S₂)))
+  = apply-sub-sub-typing
+      (sub-between-connects-Ty
+        (apply-sub-sub-typing
+          (idSub≃-Ty (linear-tree-compat (suspTree S₁)))
+          (sub-from-disc-unbiased-Ty (suc (tree-dim S₁)) T it))
+        getSndTy
+        id-Ty
+        (tree-last-var-Ty T)
+        (reflexive≈tm lem)
+        (reflexive≈tm (id-on-tm (Var (fromℕ _)))))
+      (idSub≃-Ty (sym≃c (connect-tree-to-ctx T S₂)))
   where
-    lem : getSnd [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _)))
+    lem : getSnd [ sub-from-disc-unbiased (suc (tree-dim S₁)) T
              ∘ idSub≃ (trans≃c (susp-ctx-≃ (linear-tree-compat S₁)) (disc-susp (tree-dim S₁))) ]tm
           ≃tm tree-last-var T
     lem = begin
-      < getSnd [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _)))
+      < getSnd [ sub-from-disc-unbiased (suc (tree-dim S₁)) T
                ∘ idSub≃ (trans≃c (susp-ctx-≃ (linear-tree-compat S₁)) (disc-susp (tree-dim S₁))) ]tm >tm
         ≈⟨ assoc-tm _ (idSub≃ (trans≃c (susp-ctx-≃ (linear-tree-compat S₁)) (disc-susp (tree-dim S₁)))) getSnd ⟩
       < getSnd [ idSub≃ (trans≃c (susp-ctx-≃ (linear-tree-compat S₁)) (disc-susp (tree-dim S₁))) ]tm
-               [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _))) ]tm >tm
+               [ sub-from-disc-unbiased (suc (tree-dim S₁)) T ]tm >tm
         ≈⟨ sub-action-≃-tm {t = getSnd} (idSub≃-snd-var (trans≃c (susp-ctx-≃ (linear-tree-compat S₁)) (disc-susp (tree-dim S₁)))) refl≃s ⟩
-      < getSnd [ sub-from-disc (tree-to-ctx T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub (suc _)))]tm >tm
+      < getSnd [ sub-from-disc-unbiased (suc (tree-dim S₁)) T ]tm >tm
         ≈⟨ unbiased-type-disc-lem-2 (tree-dim S₁) T (sym it) ⟩
       < tree-last-var T >tm ∎
       where

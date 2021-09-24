@@ -49,7 +49,6 @@ insertion-tree (Join S₁ S₂) PHere T = connect-tree T S₂
 insertion-tree (Join S₁ S₂) (PExt P) (Join T Sing) = Join (insertion-tree S₁ P T) S₂
 insertion-tree (Join S₁ S₂) (PShift P) T = Join S₁ (insertion-tree S₂ P T)
 
-
 interior-sub : (S : Tree n) → (P : Path S) → (T : Tree m) → .⦃ _ : has-linear-height (path-length P) T ⦄ → Sub (suc m) (suc (insertion-tree-size S P T)) ⋆
 interior-sub (Join S₁ S₂) PHere T = idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘ connect-inc-left (tree-last-var T) _
 interior-sub (Join S₁ S₂) (PExt P) (Join T Sing) = connect-susp-inc-left (insertion-tree-size S₁ P T) (tree-size S₂) ∘ suspSub (interior-sub S₁ P T)
@@ -75,16 +74,14 @@ exterior-sub : (S : Tree n)
              → .⦃ _ : is-branching-path P ⦄
              → (T : Tree m)
              → .⦃ _ : has-linear-height (path-length P) T ⦄
-             → .⦃ p : height-of-branching P ≡ tree-dim T ⦄
              → Sub (suc n) (suc (insertion-tree-size S P T)) ⋆
-exterior-sub (Join S₁ S₂) PHere T ⦃ p = p ⦄
+exterior-sub (Join S₁ S₂) PHere T
   = idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
-    ∘ sub-between-connects (sub-from-disc (unbiased-type (suc (tree-dim S₁)) T) (Coh T (unbiased-type (suc (tree-dim S₁)) T) (idSub _)) ∘ idSub≃ (trans≃c (linear-tree-compat (suspTree S₁)) (disc-≡ (sym (unbiased-type-dim (suc (tree-dim S₁)) T)))))
-                           getSnd
+    ∘ sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘ (idSub≃ (linear-tree-compat (suspTree S₁))))
                            (idSub _)
                            (tree-last-var T)
-exterior-sub (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p = p ⦄ =
-  sub-between-connect-susps (exterior-sub S₁ P T ⦃ p = cong pred p ⦄)
+exterior-sub (Join S₁ S₂) (PExt P) (Join T Sing) =
+  sub-between-connect-susps (exterior-sub S₁ P T)
                             (idSub _)
 exterior-sub (Join S₁ S₂) (PShift P) T =
   sub-between-connect-susps (idSub _)
@@ -144,14 +141,11 @@ sub-from-insertion : (S : Tree n)
                    → Sub (suc (insertion-tree-size S P T)) l A
 sub-from-insertion (Join S₁ S₂) PHere T σ τ
   = sub-from-connect τ
-                     (tree-last-var T)
                      (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ∘ (idSub≃ (connect-tree-to-ctx T S₂))
 sub-from-insertion (Join S₁ S₂) (PExt P) (Join T Sing) σ τ
   = sub-from-connect (unrestrict (sub-from-insertion S₁ P T (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) (getFst [ τ ]tm) (getSnd [ τ ]tm))
                                                              (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
-                     getSnd
                      (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
 sub-from-insertion (Join S₁ S₂) (PShift P) T σ τ
   = sub-from-connect (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
-                     getSnd
                      (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ)

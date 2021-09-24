@@ -84,7 +84,7 @@ _[_]ty : Ty n → Sub n m A → Ty m
 _[_]tm : Tm n → Sub n m A → Tm m
 
 infixl 31 _∘_
-_∘_ : Sub n l A → Sub m n ⋆ → Sub m l A
+_∘_ : (σ : Sub n l A) → Sub m n B → Sub m l (B [ σ ]ty)
 
 ⋆ [ σ ]ty = sub-type σ
 (s ─⟨ A ⟩⟶ t) [ σ ]ty = (s [ σ ]tm) ─⟨ (A [ σ ]ty) ⟩⟶ (t [ σ ]tm)

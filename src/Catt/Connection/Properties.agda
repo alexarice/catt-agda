@@ -32,18 +32,20 @@ connect-≃ p q (Add≃ (Add≃ r s) t) = Add≃ (connect-≃ p q (Add≃ r s)) 
 connect-inc-right-≃ {m = zero} refl q refl = Ext≃ refl≃s q
 connect-inc-right-≃ {m = suc m} refl q refl = Ext≃ (lift-sub-≃ (connect-inc-right-≃ refl q refl)) (Var≃ refl refl)
 
+sub-from-connect-≃ : σ ≃s σ′ → τ ≃s τ′ → sub-from-connect σ τ ≃s sub-from-connect σ′ τ′
+sub-from-connect-≃ p (Ext≃ (Null≃ y) x) = p
+sub-from-connect-≃ p (Ext≃ (Ext≃ q y) x) = Ext≃ (sub-from-connect-≃ p (Ext≃ q y)) x
+
 sub-between-connects-≃ : (σ : Sub (suc n) (suc l) ⋆)
-                       → (t : Tm (suc n))
                        → (σ′ : Sub (suc n′) (suc l) ⋆)
-                       → (t′ : Tm (suc n′))
                        → (τ : Sub (suc m) (suc l′) ⋆)
                        → (s : Tm (suc l))
                        → (τ′ : Sub (suc m′) (suc l′) ⋆)
                        → (s′ : Tm (suc l))
-                       → n ≡ n′ → m ≡ m′ → σ ≃s σ′ → t ≃tm t′ → τ ≃s τ′ → s ≃tm s′
-                       → sub-between-connects σ t τ s ≃s sub-between-connects σ′ t′ τ′ s′
-sub-between-connects-≃ σ t σ′ t′ τ s τ′ s′ refl refl a b c d with ≃s-to-≡ a | ≃tm-to-≡ b | ≃s-to-≡ c | ≃tm-to-≡ d
-... | refl | refl | refl | refl = refl≃s
+                       → n ≡ n′ → m ≡ m′ → σ ≃s σ′ → τ ≃s τ′ → s ≃tm s′
+                       → sub-between-connects σ τ s ≃s sub-between-connects σ′ τ′ s′
+sub-between-connects-≃ σ σ′ τ s τ′ s′ refl refl a b c with ≃s-to-≡ a | ≃s-to-≡ b | ≃tm-to-≡ c
+... | refl | refl | refl = refl≃s
 
 sub-between-connect-susps-≃ : (σ : Sub (suc n) (suc l) ⋆)
                             → (σ′ : Sub (suc n′) (suc l) ⋆)
@@ -51,7 +53,7 @@ sub-between-connect-susps-≃ : (σ : Sub (suc n) (suc l) ⋆)
                             → (τ′ : Sub (suc m′) (suc l′) ⋆)
                             → n ≡ n′ → m ≡ m′ → σ ≃s σ′ → τ ≃s τ′
                             → sub-between-connect-susps σ τ ≃s sub-between-connect-susps σ′ τ′
-sub-between-connect-susps-≃ σ σ′ τ τ′ refl refl p q = sub-between-connects-≃ (suspSub σ) getSnd (suspSub σ′) getSnd τ getSnd τ′ getSnd refl refl (susp-sub-≃ p) refl≃tm q refl≃tm
+sub-between-connect-susps-≃ σ σ′ τ τ′ refl refl p q = sub-between-connects-≃ (suspSub σ) (suspSub σ′) τ getSnd τ′ getSnd refl refl (susp-sub-≃ p) q refl≃tm
 
 -- connect left unit
 
@@ -102,19 +104,19 @@ connect-susp-assoc : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → (s : Tm (suc 
               → connect (connect-susp Γ Δ) (s [ connect-susp-inc-right n m ]tm) Υ ≃c connect-susp Γ (connect Δ s Υ)
 connect-susp-assoc Γ Δ s Υ = connect-assoc (suspCtx Γ) getSnd Δ s Υ
 
-sub-from-connect-inc-left : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → sub-from-connect σ t τ ∘ connect-inc-left t m ≃s σ
-sub-from-connect-inc-left σ t τ@(⟨ ⟨⟩ , s ⟩) = id-right-unit (sub-from-connect σ t τ)
-sub-from-connect-inc-left σ t ⟨ ⟨ τ , s ⟩ , u ⟩ = trans≃s (lift-sub-comp-lem-sub (sub-from-connect σ t ⟨ τ , s ⟩) (connect-inc-left t _)) (sub-from-connect-inc-left σ t ⟨ τ , s ⟩)
+sub-from-connect-inc-left : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → sub-from-connect σ τ ∘ connect-inc-left t m ≃s σ
+sub-from-connect-inc-left σ t τ@(⟨ ⟨⟩ , s ⟩) = id-right-unit (sub-from-connect σ τ)
+sub-from-connect-inc-left σ t ⟨ ⟨ τ , s ⟩ , u ⟩ = trans≃s (lift-sub-comp-lem-sub (sub-from-connect σ ⟨ τ , s ⟩) (connect-inc-left t _)) (sub-from-connect-inc-left σ t ⟨ τ , s ⟩)
 
-sub-from-connect-inc-right : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → (t [ σ ]tm ≃tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ t τ ∘ connect-inc-right t m ≃s τ
+sub-from-connect-inc-right : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → (t [ σ ]tm ≃tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ τ ∘ connect-inc-right t m ≃s τ
 sub-from-connect-inc-right σ t ⟨ ⟨⟩ , s ⟩ p = Ext≃ refl≃s p
-sub-from-connect-inc-right σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≃ (trans≃s (lift-sub-comp-lem-sub (sub-from-connect σ t ⟨ τ , s ⟩) (connect-inc-right t _)) (sub-from-connect-inc-right σ t ⟨ τ , s ⟩ p)) refl≃tm
+sub-from-connect-inc-right σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≃ (trans≃s (lift-sub-comp-lem-sub (sub-from-connect σ ⟨ τ , s ⟩) (connect-inc-right t _)) (sub-from-connect-inc-right σ t ⟨ τ , s ⟩ p)) refl≃tm
 
 sub-between-connects-inc-left : (σ : Sub (suc n) (suc l) ⋆)
                               → (t : Tm (suc n))
                               → (τ : Sub (suc m) (suc l′) ⋆)
                               → (s : Tm (suc l))
-                              → sub-between-connects σ t τ s ∘ connect-inc-left t m
+                              → sub-between-connects σ τ s ∘ connect-inc-left t m
                               ≃s connect-inc-left s l′ ∘ σ
 sub-between-connects-inc-left {l′ = l′} σ t τ s = sub-from-connect-inc-left (connect-inc-left s l′ ∘ σ) t (connect-inc-right s l′ ∘ τ)
 
@@ -140,7 +142,7 @@ sub-between-connects-inc-right : (σ : Sub (suc n) (suc l) ⋆)
                                → (s : Tm (suc l))
                                → t [ σ ]tm ≃tm s
                                → Var (fromℕ _) [ τ ]tm ≃tm Var (fromℕ l′)
-                               → sub-between-connects σ t τ s ∘ connect-inc-right t m
+                               → sub-between-connects σ τ s ∘ connect-inc-right t m
                                ≃s connect-inc-right s l′ ∘ τ
 sub-between-connects-inc-right {l′ = l′} σ t τ s p q = sub-from-connect-inc-right (connect-inc-left s l′ ∘ σ ) t (connect-inc-right s l′ ∘ τ) (begin
   < t [ connect-inc-left s l′ ∘ σ ]tm >tm
@@ -168,20 +170,19 @@ connect-inc-left-fst-var : (t : Tm (suc n)) → (m : ℕ) → Var (fromℕ _) [ 
 connect-inc-left-fst-var t zero = id-on-tm (Var (fromℕ _))
 connect-inc-left-fst-var t (suc m) = trans≃tm (apply-lifted-sub-tm-≃ (Var (fromℕ _)) (connect-inc-left t m)) (lift-tm-≃ (connect-inc-left-fst-var t m))
 
-sub-from-connect-fst-var : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → Var (fromℕ _) [ sub-from-connect σ t τ ]tm ≃tm Var (fromℕ _) [ σ ]tm
-sub-from-connect-fst-var σ t ⟨ ⟨⟩ , s ⟩ = refl≃tm
-sub-from-connect-fst-var σ t ⟨ ⟨ τ , s ⟩ , u ⟩ = sub-from-connect-fst-var σ t ⟨ τ , s ⟩
+sub-from-connect-fst-var : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → Var (fromℕ _) [ sub-from-connect σ τ ]tm ≃tm Var (fromℕ _) [ σ ]tm
+sub-from-connect-fst-var σ ⟨ ⟨⟩ , s ⟩ = refl≃tm
+sub-from-connect-fst-var σ ⟨ ⟨ τ , s ⟩ , u ⟩ = sub-from-connect-fst-var σ ⟨ τ , s ⟩
 
 sub-between-connects-fst-var : (σ : Sub (suc n) (suc l) ⋆)
-                             → (t : Tm (suc n))
                              → (τ : Sub (suc m) (suc l′) ⋆)
                              → (s : Tm (suc l))
                              → Var (fromℕ _) [ σ ]tm ≃tm Var (fromℕ l)
-                             → Var (fromℕ _) [ sub-between-connects σ t τ s ]tm ≃tm Var (fromℕ (l′ + l))
-sub-between-connects-fst-var {l′ = l′} σ t τ s p = begin
+                             → Var (fromℕ _) [ sub-between-connects σ τ s ]tm ≃tm Var (fromℕ (l′ + l))
+sub-between-connects-fst-var {l′ = l′} σ τ s p = begin
   < Var (fromℕ _)
-    [ sub-from-connect (connect-inc-left s l′ ∘ σ) t (connect-inc-right s l′ ∘ τ) ]tm >tm
-    ≈⟨ sub-from-connect-fst-var (connect-inc-left s l′ ∘ σ) t (connect-inc-right s l′ ∘ τ) ⟩
+    [ sub-from-connect (connect-inc-left s l′ ∘ σ) (connect-inc-right s l′ ∘ τ) ]tm >tm
+    ≈⟨ sub-from-connect-fst-var (connect-inc-left s l′ ∘ σ) (connect-inc-right s l′ ∘ τ) ⟩
   < Var (fromℕ _) [ connect-inc-left s l′ ∘ σ ]tm >tm
     ≈⟨ assoc-tm (connect-inc-left s l′) σ (Var (fromℕ _)) ⟩
   < Var (fromℕ _) [ σ ]tm [ connect-inc-left s l′ ]tm >tm
@@ -195,10 +196,9 @@ sub-between-connects-fst-var {l′ = l′} σ t τ s p = begin
 sub-between-connect-susps-fst-var : (σ : Sub (suc n) (suc l) ⋆)
                                   → (τ : Sub (suc m) (suc l′) ⋆)
                                   → Var (fromℕ _) [ sub-between-connect-susps σ τ ]tm ≃tm Var (fromℕ (l′ + (2 + l)))
-sub-between-connect-susps-fst-var σ τ = sub-between-connects-fst-var (suspSub σ) getSnd τ getSnd (sym≃tm (susp-sub-preserve-getFst σ))
+sub-between-connect-susps-fst-var σ τ = sub-between-connects-fst-var (suspSub σ) τ getSnd (sym≃tm (susp-sub-preserve-getFst σ))
 
 sub-between-connects-comp : (σ : Sub (suc n) (suc l) ⋆)
-                          → (t : Tm (suc n))
                           → (τ : Sub (suc m) (suc l′) ⋆)
                           → (s : Tm (suc l))
                           → (σ′ : Sub (suc l) (suc n′) ⋆)
@@ -206,14 +206,14 @@ sub-between-connects-comp : (σ : Sub (suc n) (suc l) ⋆)
                           → (τ′ : Sub (suc l′) (suc m′) ⋆)
                           → s [ σ′ ]tm ≃tm u
                           → Var (fromℕ l′) [ τ′ ]tm ≃tm Var (fromℕ m′)
-                          → sub-between-connects σ′ s τ′ u ∘ sub-between-connects σ t τ s
-                          ≃s sub-between-connects (σ′ ∘ σ) t (τ′ ∘ τ) u
-sub-between-connects-comp {l′ = l′} {m′ = m′} σ t ⟨ ⟨⟩ , x ⟩ s σ′ u τ′ p q = begin
-  < sub-from-connect (connect-inc-left u m′ ∘ σ′) s (connect-inc-right u m′ ∘ τ′)
+                          → sub-between-connects σ′ τ′ u ∘ sub-between-connects σ τ s
+                          ≃s sub-between-connects (σ′ ∘ σ) (τ′ ∘ τ) u
+sub-between-connects-comp {l′ = l′} {m′ = m′} σ ⟨ ⟨⟩ , x ⟩ s σ′ u τ′ p q = begin
+  < sub-from-connect (connect-inc-left u m′ ∘ σ′) (connect-inc-right u m′ ∘ τ′)
     ∘ (connect-inc-left s l′ ∘ σ) >s
-    ≈˘⟨ ∘-assoc (sub-from-connect (connect-inc-left u m′ ∘ σ′) s
+    ≈˘⟨ ∘-assoc (sub-from-connect (connect-inc-left u m′ ∘ σ′)
                   (connect-inc-right u m′ ∘ τ′)) (connect-inc-left s l′) σ ⟩
-  < sub-from-connect (connect-inc-left u m′ ∘ σ′) s (connect-inc-right u m′ ∘ τ′)
+  < sub-from-connect (connect-inc-left u m′ ∘ σ′) (connect-inc-right u m′ ∘ τ′)
     ∘ connect-inc-left s l′
     ∘ σ >s
     ≈⟨ sub-action-≃-sub refl≃s (sub-from-connect-inc-left (connect-inc-left u m′ ∘ σ′) s (connect-inc-right u m′ ∘ τ′)) ⟩
@@ -222,11 +222,11 @@ sub-between-connects-comp {l′ = l′} {m′ = m′} σ t ⟨ ⟨⟩ , x ⟩ s 
   < connect-inc-left u m′ ∘ (σ′ ∘ σ) >s ∎
   where
     open Reasoning sub-setoid
-sub-between-connects-comp {l′ = l′} {m′ = m′} σ t ⟨ ⟨ τ , y ⟩ , x ⟩ s σ′ u τ′ p q = Ext≃ (sub-between-connects-comp σ t ⟨ τ , y ⟩ s σ′ u τ′ p q) (begin
+sub-between-connects-comp {l′ = l′} {m′ = m′} σ ⟨ ⟨ τ , y ⟩ , x ⟩ s σ′ u τ′ p q = Ext≃ (sub-between-connects-comp σ ⟨ τ , y ⟩ s σ′ u τ′ p q) (begin
   < x [ connect-inc-right s l′ ]tm
-      [ sub-between-connects σ′ s τ′ u ]tm >tm
-    ≈˘⟨ assoc-tm (sub-between-connects σ′ s τ′ u) (connect-inc-right s l′) x ⟩
-  < x [ sub-between-connects σ′ s τ′ u ∘ connect-inc-right s l′ ]tm >tm
+      [ sub-between-connects σ′ τ′ u ]tm >tm
+    ≈˘⟨ assoc-tm (sub-between-connects σ′ τ′ u) (connect-inc-right s l′) x ⟩
+  < x [ sub-between-connects σ′ τ′ u ∘ connect-inc-right s l′ ]tm >tm
     ≈⟨ sub-action-≃-tm (refl≃tm {s = x}) (sub-between-connects-inc-right σ′ s τ′ u p q) ⟩
   < x [ connect-inc-right u m′ ∘ τ′ ]tm >tm
     ≈⟨ assoc-tm (connect-inc-right u m′) τ′ x ⟩
@@ -241,7 +241,7 @@ sub-between-connect-susps-comp : (σ : Sub (suc n) (suc l) ⋆)
                                → Var (fromℕ l′) [ τ′ ]tm ≃tm Var (fromℕ m′)
                                → sub-between-connect-susps σ′ τ′ ∘ sub-between-connect-susps σ τ
                                ≃s sub-between-connect-susps (σ′ ∘ σ) (τ′ ∘ τ)
-sub-between-connect-susps-comp σ τ σ′ τ′ p = trans≃s (sub-between-connects-comp (suspSub σ) getSnd τ getSnd (suspSub σ′) getSnd τ′ (sym≃tm (susp-sub-preserve-getSnd σ′)) p) (sub-between-connects-≃ (suspSub σ′ ∘ suspSub σ) getSnd (suspSub (σ′ ∘ σ)) getSnd (τ′ ∘ τ) getSnd (τ′ ∘ τ) getSnd refl refl (sym≃s (susp-functorial σ′ σ)) refl≃tm refl≃s refl≃tm)
+sub-between-connect-susps-comp σ τ σ′ τ′ p = trans≃s (sub-between-connects-comp (suspSub σ) τ getSnd (suspSub σ′) getSnd τ′ (sym≃tm (susp-sub-preserve-getSnd σ′)) p) (sub-between-connects-≃ (suspSub σ′ ∘ suspSub σ) (suspSub (σ′ ∘ σ)) (τ′ ∘ τ) getSnd (τ′ ∘ τ) getSnd refl refl (sym≃s (susp-functorial σ′ σ)) refl≃s refl≃tm)
 
 connect-var-split-compat : (t : Tm (suc n)) → (m : ℕ) → VarSplitCompat (connect-inc-left t m) (connect-inc-right t m) (connect-var-split n m)
 connect-var-split-compat t zero i = id-on-tm (Var i)
@@ -299,3 +299,17 @@ connect-var-split-right-full (Var j) (suc m) (suc i) = trans (cong (connect-var-
     lem with connect-var-split-right (Var j) m (varToVarFunction (connect-inc-right (Var j) m) i) | connect-var-split-right-full (Var j) m i
     ... | inj₁ x | ()
     ... | inj₂ y | refl = refl
+
+sub-from-connect-lift : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → liftSub (sub-from-connect σ τ) ≃s sub-from-connect (liftSub σ) (liftSub τ)
+sub-from-connect-lift σ ⟨ ⟨⟩ , t ⟩ = refl≃s
+sub-from-connect-lift σ ⟨ ⟨ τ , s ⟩ , t ⟩ = Ext≃ (sub-from-connect-lift σ ⟨ τ , s ⟩) refl≃tm
+
+sub-from-connect-susp-res : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → suspSubRes (sub-from-connect σ τ) ≃s sub-from-connect (suspSubRes σ) (suspSubRes τ)
+sub-from-connect-susp-res σ ⟨ ⟨⟩ , t ⟩ = refl≃s
+sub-from-connect-susp-res σ ⟨ ⟨ τ , s ⟩ , t ⟩ = Ext≃ (sub-from-connect-susp-res σ ⟨ τ , s ⟩) refl≃tm
+
+sub-from-connect-sub : (σ : Sub (suc n) l A)
+                     → (τ : Sub (suc m) l A)
+                     → (μ : Sub l l′ B)
+                     → μ ∘ sub-from-connect σ τ ≃s sub-from-connect (μ ∘ σ) (μ ∘ τ)
+sub-from-connect-sub σ τ μ = {!!}

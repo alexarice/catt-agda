@@ -53,6 +53,29 @@ inject-susp-sub : (σ : Sub n m ⋆) → (i : Fin n) → Var (inject₁ (inject�
 inject-susp-sub ⟨ σ , t ⟩ zero = refl≃tm
 inject-susp-sub ⟨ σ , t ⟩ (suc i) = inject-susp-sub σ i
 
+sub-res-unrestrict-comm : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → suspSubRes (unrestrict σ) ≃s unrestrict (suspSubRes σ)
+sub-res-unrestrict-comm ⟨⟩ = refl≃s
+sub-res-unrestrict-comm ⟨ σ , t ⟩ = Ext≃ (sub-res-unrestrict-comm σ) refl≃tm
+
+susp-res-comp-ty : (B : Ty n) → (σ : Sub n m A) → suspTy (B [ σ ]ty) ≃ty B [ suspSubRes σ ]ty
+susp-res-comp-tm : (t : Tm n) → (σ : Sub n m A) → suspTm (t [ σ ]tm) ≃tm t [ suspSubRes σ ]tm
+susp-res-comp-sub : (σ : Sub n m A) → (τ : Sub l n B) → suspSubRes (σ ∘ τ) ≃s suspSubRes σ ∘ τ
+
+susp-res-comp-ty ⋆ σ = refl≃ty
+susp-res-comp-ty (s ─⟨ B ⟩⟶ t) σ = Arr≃ (susp-res-comp-tm s σ) (susp-res-comp-ty B σ) (susp-res-comp-tm t σ)
+
+susp-res-comp-tm (Var zero) ⟨ σ , t ⟩ = refl≃tm
+susp-res-comp-tm (Var (suc i)) ⟨ σ , t ⟩ = susp-res-comp-tm (Var i) σ
+susp-res-comp-tm {A = ⋆} (Coh S B τ) σ = Coh≃ refl≃ refl≃ty (susp-functorial σ τ)
+susp-res-comp-tm {A = s ─⟨ A ⟩⟶ t} (Coh S B τ) σ = trans≃tm (susp-res-comp-tm (Coh (suspTree S) (suspTy B) (suspSub τ)) (unrestrict σ)) (sub-action-≃-tm (refl≃tm {s = Coh (suspTree S) (suspTy B) (suspSub τ)}) (sub-res-unrestrict-comm σ))
+
+susp-res-comp-sub σ ⟨⟩ = Null≃ (susp-res-comp-ty _ σ)
+susp-res-comp-sub σ ⟨ τ , t ⟩ = Ext≃ (susp-res-comp-sub σ τ) (susp-res-comp-tm t σ)
+
+susp-res-restrict : (σ : Sub (2 + n) m A) → (s t : Tm m) → suspSubRes (restrict σ s t) ≃s restrict (suspSubRes σ) (suspTm s) (suspTm t)
+susp-res-restrict ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ s t = refl≃s
+susp-res-restrict ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = Ext≃ (susp-res-restrict σ s t) refl≃tm
+
 {-
 susp-var-split-compat : {vs : VarSplit n m l} → VarSplitCompat σ τ vs → VarSplitCompat (suspSub σ) (suspSub τ) (susp-var-split vs)
 susp-var-split-compat {σ = σ} {τ = τ} {vs = vs} vsc i with suspension-vars i

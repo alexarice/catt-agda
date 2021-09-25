@@ -22,10 +22,8 @@ open import Catt.Connection.Properties
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
 open import Data.Empty
-open P index rule
-open import Catt.Typing.Properties.Lifting index rule lift-rule
+open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Suspension.Typing index rule lift-rule susp-rule
-open import Catt.Typing.Properties.Substitution index rule lift-rule susp-rule sub-rule
 
 connect-Ty : {Γ : Ctx (suc n)} → Typing-Ctx Γ → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → {Δ : Ctx (suc m)} → Typing-Ctx Δ → Typing-Ctx (connect Γ t Δ)
 connect-inc-right-Ty : {Γ : Ctx (suc n)} → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → (Δ : Ctx (suc m)) → Typing-Sub Δ (connect Γ t Δ) (connect-inc-right t m)

@@ -1,18 +1,20 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
 open import Catt.Typing.Base
-import Catt.Typing.Properties.Base
+import Catt.Typing.Properties.Base as P
 open import Data.Nat
 open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
-module Catt.Discs.Typing (index : ℕ) (rule : Fin index → Rule) (props : (i : Fin index) → Catt.Typing.Properties.Base.Props index rule i) where
+module Catt.Discs.Typing (index : ℕ)
+                         (rule : Fin index → Rule)
+                         (lift-rule : ∀ i a → P.LiftRule index rule {i} a) where
 
 open import Catt.Typing index rule
-open import Catt.Typing.Properties index rule props
 open import Catt.Syntax
 open import Catt.Discs
 open import Catt.Globular
-open import Catt.Globular.Typing index rule props
+open import Catt.Globular.Typing index rule lift-rule
+open P index rule
 open import Catt.Discs.Properties
 open import Catt.Syntax.SyntacticEquality
 open import Relation.Binary.PropositionalEquality

@@ -1,18 +1,23 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
 open import Catt.Typing.Base
-import Catt.Typing.Properties.Base
+import Catt.Typing.Properties.Base as P
 open import Data.Nat
 open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
-module Catt.Tree.Insertion.Typing (index : ℕ) (rule : Fin index → Rule) (props : (i : Fin index) → Catt.Typing.Properties.Base.Props index rule i) where
+module Catt.Tree.Insertion.Typing (index : ℕ)
+                              (rule : Fin index → Rule)
+                              (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
+                              (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
+                              (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
 
-open import Catt.Connection.Typing index rule props
+open import Catt.Connection.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Discs
 open import Catt.Discs.Properties
-open import Catt.Discs.Typing index rule props
+open import Catt.Discs.Typing index rule lift-rule
 open import Catt.Suspension
 open import Catt.Suspension.Properties
+open import Catt.Suspension.Typing index rule lift-rule susp-rule
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
@@ -20,12 +25,12 @@ open import Catt.Tree
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 open import Catt.Tree.Properties
-open import Catt.Tree.Typing index rule props
+open import Catt.Tree.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
-open import Catt.Tree.Unbiased.Typing index rule props
+open import Catt.Tree.Unbiased.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Typing index rule
-open import Catt.Typing.Properties index rule props
+open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Data.Nat.Properties
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
@@ -52,7 +57,6 @@ exterior-sub-Ty (Join S₁ S₂) PHere T
         (apply-sub-sub-typing
           (idSub≃-Ty (linear-tree-compat (suspTree S₁)))
           (sub-from-disc-unbiased-Ty (suc (tree-dim S₁)) T it))
-        getSndTy
         id-Ty
         (tree-last-var-Ty T)
         (reflexive≈tm lem)

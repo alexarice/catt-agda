@@ -1,14 +1,17 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
 open import Catt.Typing.Base
-import Catt.Typing.Properties.Base
+import Catt.Typing.Properties.Base as P
 open import Data.Nat
 open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
-module Catt.Globular.Typing (index : ℕ) (rule : Fin index → Rule) (props : (i : Fin index) → Catt.Typing.Properties.Base.Props index rule i) where
+module Catt.Globular.Typing (index : ℕ)
+                              (rule : Fin index → Rule)
+                              (lift-rule : ∀ i a → P.LiftRule index rule {i} a) where
 
 open import Catt.Typing index rule
-open import Catt.Typing.Properties index rule props
+open import Catt.Typing.Properties.Lifting index rule lift-rule
+open P index rule
 open import Catt.Syntax
 open import Catt.Globular
 

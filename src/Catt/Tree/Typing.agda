@@ -1,15 +1,19 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
 open import Catt.Typing.Base
-import Catt.Typing.Properties.Base
+import Catt.Typing.Properties.Base as P
 open import Data.Nat
 open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
-module Catt.Tree.Typing (index : ℕ) (rule : Fin index → Rule) (props : (i : Fin index) → Catt.Typing.Properties.Base.Props index rule i) where
+module Catt.Tree.Typing (index : ℕ)
+                              (rule : Fin index → Rule)
+                              (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
+                              (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
+                              (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
 
 open import Catt.Typing index rule
-open import Catt.Typing.Properties index rule props
-open import Catt.Connection.Typing index rule props
+open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
+open import Catt.Connection.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality

@@ -7,14 +7,10 @@ open import Data.Nat
 
 module Catt.Typing.Properties (index : ℕ)
                               (rule : Fin index → Rule)
-                              (lift-rule : (i : Fin index) → Catt. index rule i) where
+                              (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
+                              (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
+                              (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
 
 open import Catt.Typing.Properties.Base index rule public
-
-open import Catt.Typing index rule
-open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
-open import Relation.Binary.PropositionalEquality
-open import Data.Fin.Properties using (toℕ-injective; toℕ-inject₁)
-import Relation.Binary.Reasoning.Setoid as Reasoning
-open import Catt.Syntax.Bundles
+open import Catt.Typing.Properties.Lifting index rule lift-rule public
+open import Catt.Typing.Properties.Substitution index rule lift-rule susp-rule sub-rule public

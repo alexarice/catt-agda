@@ -139,27 +139,53 @@ sub-setoid-≈ {m} n Δ = record { Carrier = SUB′ n m
 -- typing-implies-pd (TyCoh x x₁ x₂ x₃ x₄) = pd-dim-lem x
 -- typing-implies-pd (TyComp x x₁ x₂ x₃ x₄ x₅) = pd-dim-lem x
 
-record Props (i : Index) : Set where
-  field
-    -- ctx-eq : (a : rule i .Args)
-    --        → (tct : (j : rule i .tctIndex) → Typing-Tm ((rule i .tctCtx j a)) (rule i .tct j a) (rule i .tctTy j a))
-    --        → (eqt : (j : rule i .eqtIndex) → ((rule i .eqtlhs j a)) ≈tm (rule i .eqtrhs j a))
-    --        → rule i .lhsCtx a ≈c rule i .rhsCtx a
-    lift-rule : (a : rule i .Args)
-              → {A : Ty (rule i .len a)}
-              → {C : Ty (rule i .len a)}
-              → Typing-Tm (rule i .tgtCtx a , A) (liftTerm (rule i .lhs a)) (liftType C)
-              → (liftTerm (rule i .lhs a)) ≈[ rule i .tgtCtx a , A ]tm (liftTerm (rule i .rhs a))
-    susp-rule : (a : rule i .Args)
-              → {C : Ty (rule i .len a)}
-              → Typing-Tm (suspCtx (rule i .tgtCtx a)) (suspTm (rule i .lhs a)) (suspTy C)
-              → suspTm (rule i .lhs a) ≈[ suspCtx (rule i .tgtCtx a) ]tm suspTm (rule i .rhs a)
-    sub-rule : (a : rule i .Args)
-             → {σ : Sub (rule i .len a) n A}
-             → {Δ : Ctx n}
-             → Typing-Sub (rule i .tgtCtx a) Δ σ
-             → {C : Ty (rule i .len a)}
-             → Typing-Tm Δ (rule i .lhs a [ σ ]tm) (C [ σ ]ty)
-             → rule i .lhs a [ σ ]tm ≈[ Δ ]tm rule i .rhs a [ σ ]tm
+-- record Props (i : Index) : Set where
+--   field
+--     -- ctx-eq : (a : rule i .Args)
+--     --        → (tct : (j : rule i .tctIndex) → Typing-Tm ((rule i .tctCtx j a)) (rule i .tct j a) (rule i .tctTy j a))
+--     --        → (eqt : (j : rule i .eqtIndex) → ((rule i .eqtlhs j a)) ≈tm (rule i .eqtrhs j a))
+--     --        → rule i .lhsCtx a ≈c rule i .rhsCtx a
+--     lift-rule : (a : rule i .Args)
+--               → {A : Ty (rule i .len a)}
+--               → {C : Ty (rule i .len a)}
+--               → Typing-Tm (rule i .tgtCtx a , A) (liftTerm (rule i .lhs a)) (liftType C)
+--               → (liftTerm (rule i .lhs a)) ≈[ rule i .tgtCtx a , A ]tm (liftTerm (rule i .rhs a))
+--     susp-rule : (a : rule i .Args)
+--               → {C : Ty (rule i .len a)}
+--               → Typing-Tm (suspCtx (rule i .tgtCtx a)) (suspTm (rule i .lhs a)) (suspTy C)
+--               → suspTm (rule i .lhs a) ≈[ suspCtx (rule i .tgtCtx a) ]tm suspTm (rule i .rhs a)
+--     sub-rule : (a : rule i .Args)
+--              → {σ : Sub (rule i .len a) n A}
+--              → {Δ : Ctx n}
+--              → Typing-Sub (rule i .tgtCtx a) Δ σ
+--              → {C : Ty (rule i .len a)}
+--              → Typing-Tm Δ (rule i .lhs a [ σ ]tm) (C [ σ ]ty)
+--              → rule i .lhs a [ σ ]tm ≈[ Δ ]tm rule i .rhs a [ σ ]tm
 
-open Props public
+term-conversion : Typing-Tm Γ t A → A ≈[ Γ ]ty B → Typing-Tm Γ t B
+term-conversion (TyVarZ x) eq = TyVarZ (trans≈ty x eq)
+term-conversion (TyVarS i tvi x) eq = TyVarS i tvi (trans≈ty x eq)
+term-conversion (TyCoh Aty σty b sc p) eq = TyCoh Aty σty b sc (trans≈ty p eq)
+
+module _ {i : Index} (a : rule i .Rule.Args) where
+  open Rule (rule i)
+
+  LiftRule : Set
+  LiftRule = {A : Ty (len a)}
+           → {C : Ty (len a)}
+           → Typing-Tm (tgtCtx a , A) (liftTerm (lhs a)) (liftType C)
+           → (liftTerm (lhs a)) ≈[ tgtCtx a , A ]tm (liftTerm (rhs a))
+
+  SuspRule : Set
+  SuspRule = {C : Ty (len a)}
+           → Typing-Tm (suspCtx (tgtCtx a)) (suspTm (lhs a)) (suspTy C)
+           → suspTm (lhs a) ≈[ suspCtx (tgtCtx a) ]tm suspTm (rhs a)
+
+  SubRule : Set
+  SubRule = ∀ {n}
+          → {σ : Sub (len a) n ⋆}
+          → {Δ : Ctx n}
+          → {C : Ty (len a)}
+          → Typing-Sub (tgtCtx a) Δ σ
+          → Typing-Tm Δ (lhs a [ σ ]tm) (C [ σ ]ty)
+          → lhs a [ σ ]tm ≈[ Δ ]tm rhs a [ σ ]tm

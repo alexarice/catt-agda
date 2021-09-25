@@ -76,6 +76,13 @@ susp-res-restrict : (σ : Sub (2 + n) m A) → (s t : Tm m) → suspSubRes (rest
 susp-res-restrict ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ s t = refl≃s
 susp-res-restrict ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = Ext≃ (susp-res-restrict σ s t) refl≃tm
 
+restrict-comp-sub : (τ : Sub n m A)
+                  → (σ : Sub (2 + l) n B)
+                  → (s t : Tm n)
+                  → τ ∘ restrict σ s t ≃s restrict (τ ∘ σ) (s [ τ ]tm) (t [ τ ]tm)
+restrict-comp-sub τ ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ s t = refl≃s
+restrict-comp-sub τ ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = Ext≃ (restrict-comp-sub τ σ s t) refl≃tm
+
 {-
 susp-var-split-compat : {vs : VarSplit n m l} → VarSplitCompat σ τ vs → VarSplitCompat (suspSub σ) (suspSub τ) (susp-var-split vs)
 susp-var-split-compat {σ = σ} {τ = τ} {vs = vs} vsc i with suspension-vars i

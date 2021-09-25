@@ -28,5 +28,3 @@ record Rule : Set₁ where
     tgtCtx : (a : Args) → Ctx (len a)
     lhs : (a : Args) → Tm (len a)
     rhs : (a : Args) → Tm (len a)
-
-open Rule public

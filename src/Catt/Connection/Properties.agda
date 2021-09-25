@@ -312,4 +312,5 @@ sub-from-connect-sub : (σ : Sub (suc n) l A)
                      → (τ : Sub (suc m) l A)
                      → (μ : Sub l l′ B)
                      → μ ∘ sub-from-connect σ τ ≃s sub-from-connect (μ ∘ σ) (μ ∘ τ)
-sub-from-connect-sub σ τ μ = {!!}
+sub-from-connect-sub σ ⟨ ⟨⟩ , t ⟩ μ = refl≃s
+sub-from-connect-sub σ ⟨ ⟨ τ , s ⟩ , t ⟩ μ = Ext≃ (sub-from-connect-sub σ ⟨ τ , s ⟩ μ) refl≃tm

@@ -18,6 +18,8 @@ open import Data.Bool using (Bool; true; false)
 open import Data.Empty
 open import Data.Product renaming (_,_ to _,,_)
 
+open Rule
+
 private
   Index : Set
   Index = Fin index

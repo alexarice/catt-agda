@@ -3,11 +3,14 @@
 module Catt.Globular.Properties where
 
 open import Catt.Syntax
+open import Catt.Syntax.Bundles
 open import Catt.Globular
+open import Catt.Suspension
 open import Catt.Syntax.SyntacticEquality
 open import Data.Nat
-open import Data.Fin using (Fin;suc;zero)
+open import Data.Fin using (Fin;suc;zero;inject₁)
 open import Relation.Binary.PropositionalEquality
+import Relation.Binary.Reasoning.Setoid as Reasoning
 
 -- src-subbed_:_(A_:_Ty_Γ_(suc_(suc_d)))_→_(σ_:_Sub_Γ_Δ)_→_(ty-src_A)_[_σ_]tm_≡_ty-src_(A_[_σ_]ty)
 -- src-subbed_(s_─⟨_A_⟩⟶_t)_σ_=_refl
@@ -21,6 +24,69 @@ open import Relation.Binary.PropositionalEquality
 tm-to-ty-≃ : Γ ≃c Δ → s ≃tm t → tm-to-ty Γ s ≃ty tm-to-ty Δ t
 tm-to-ty-≃ p (Var≃ x y) = ‼-≃ _ _ y p
 tm-to-ty-≃ p (Coh≃ q r s) = sub-action-≃-ty r s
+
+sub-dim : (σ : Sub n m ⋆) → (A : Ty n) → ty-dim A ≡ ty-dim (A [ σ ]ty)
+sub-dim σ ⋆ = refl
+sub-dim σ (s ─⟨ A ⟩⟶ t) = cong suc (sub-dim σ A)
+
+sub-dim′ : (σ : Sub n m B) → (A : Ty n) → ty-dim A + ty-dim B ≡ ty-dim (A [ σ ]ty)
+sub-dim′ σ ⋆ = refl
+sub-dim′ σ (s ─⟨ A ⟩⟶ t) = cong suc (sub-dim′ σ A)
+
+susp-dim : (A : Ty n) → ty-dim (suspTy A) ≡ suc (ty-dim A)
+susp-dim ⋆ = refl
+susp-dim (s ─⟨ A ⟩⟶ t) = cong suc (susp-dim A)
+
+lift-ty-dim : (A : Ty n) → ty-dim (liftType A) ≡ ty-dim A
+lift-ty-dim ⋆ = refl
+lift-ty-dim (s ─⟨ A ⟩⟶ t) = cong suc (lift-ty-dim A)
+
+tm-to-ty-coh-sub : (S : Tree n) → (B : Ty (suc n)) → (τ : Sub (suc n) m ⋆) → (Δ : Ctx l) → (σ : Sub m l A) → tm-to-ty Δ (Coh S B τ [ σ ]tm) ≃ty B [ σ ∘ τ ]ty
+tm-to-ty-coh-sub {A = ⋆} S B τ Δ σ = refl≃ty
+tm-to-ty-coh-sub {A = s ─⟨ A ⟩⟶ t} S B τ Δ σ = begin
+  < tm-to-ty Δ (Coh (suspTree S) (suspTy B) (suspSub τ) [ unrestrict σ ]tm) >ty
+    ≈⟨ tm-to-ty-coh-sub (suspTree S) (suspTy B) (suspSub τ) Δ (unrestrict σ) ⟩
+  < suspTy B [ unrestrict σ ∘ suspSub τ ]ty >ty
+    ≈˘⟨ sub-action-≃-ty (refl≃ty {A = suspTy B}) (unrestrict-comp σ τ) ⟩
+  < suspTy B [ unrestrict (σ ∘ τ) ]ty >ty
+    ≈˘⟨ unrestrict-comp-ty B (σ ∘ τ) ⟩
+  < B [ σ ∘ τ ]ty >ty ∎
+  where
+    open Reasoning ty-setoid
+
+susp-tm-height : (t : Tm n) → (Δ : Ctx n) → tm-height (suspCtx Δ) (suspTm t) ≡ suc (tm-height Δ t)
+susp-tm-height (Var zero) (Δ , A) = begin
+  ty-dim (liftType (suspTy A))
+    ≡⟨ lift-ty-dim (suspTy A) ⟩
+  ty-dim (suspTy A)
+    ≡⟨ susp-dim A ⟩
+  suc (ty-dim A)
+    ≡˘⟨ cong suc (lift-ty-dim A) ⟩
+  suc (ty-dim (liftType A)) ∎
+  where
+    open ≡-Reasoning
+susp-tm-height (Var (suc i)) (Δ , A) = begin
+  ty-dim (liftType (suspCtx Δ ‼ inject₁ (inject₁ i)))
+    ≡⟨ lift-ty-dim (suspCtx Δ ‼ inject₁ (inject₁ i)) ⟩
+  ty-dim (suspCtx Δ ‼ inject₁ (inject₁ i))
+    ≡⟨ susp-tm-height (Var i) Δ ⟩
+  suc (ty-dim (Δ ‼ i))
+    ≡˘⟨ cong suc (lift-ty-dim (Δ ‼ i)) ⟩
+  suc (ty-dim (liftType (Δ ‼ i))) ∎
+  where
+    open ≡-Reasoning
+susp-tm-height (Coh S A σ) Δ = begin
+  ty-dim (suspTy A [ suspSub σ ]ty)
+    ≡˘⟨ cong ty-dim (≃ty-to-≡ (susp-functorial-ty σ A)) ⟩
+  ty-dim (suspTy (A [ σ ]ty))
+    ≡⟨ susp-dim (A [ σ ]ty) ⟩
+  suc (ty-dim (A [ σ ]ty)) ∎
+  where
+    open ≡-Reasoning
+
+tm-height-≃ : (Γ : Ctx n) → s ≃tm t → tm-height Γ s ≡ tm-height Γ t
+tm-height-≃ Γ p with ≃tm-to-≡ p
+... | refl = refl
 
 -- ty-src-≃ : A ≃ty B → ty-src A ≃tm ty-src B
 -- ty-src-≃ (Arr≃ p q r) = p
@@ -63,4 +129,4 @@ tm-to-ty-≃ p (Coh≃ q r s) = sub-action-≃-ty r s
 --     lem : (i : Fin (ctxLength Γ)) → (σ : Sub Γ Δ) → tm-to-ty (Var i [ σ ]tm) ≃ty (Γ ‼ i [ σ ]ty)
 --     lem {Γ = Γ , A} zero ⟨ σ , t ⟩ = trans≃ty {!!} (sym≃ty (lift-sub-comp-lem-ty σ A))
 --     lem {Γ = Γ , A} (suc i) ⟨ σ , t ⟩ = {!!}
--- tm-to-ty-sub (Coh Δ A x τ) σ = assoc-ty σ τ A
+-- tm-to-ty-sub (Coh Δ A x τ) σ = assoc-ty σ τ

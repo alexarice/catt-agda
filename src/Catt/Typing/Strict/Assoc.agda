@@ -194,8 +194,8 @@ susp-rule i a tc = begin
 
     open Reasoning (tm-setoid-≈ (suspCtx id-Γ))
 
-open import Catt.Typing.Properties.Lifting 1 (λ x → insertionRule) lift-rule
-open import Catt.Suspension.Typing 1 (λ x → insertionRule) lift-rule susp-rule
+-- open import Catt.Typing.Properties.Lifting 1 (λ x → insertionRule) lift-rule
+-- open import Catt.Suspension.Typing 1 (λ x → insertionRule) lift-rule susp-rule
 
 sub-rule : ∀ i a → SubRule {i} a
 sub-rule i a {σ = σ} {Δ = Δ} σty tc = begin
@@ -224,3 +224,41 @@ sub-rule i a {σ = σ} {Δ = Δ} σty tc = begin
         open Reasoning tm-setoid
 
     open Reasoning (tm-setoid-≈ Δ)
+
+open import Catt.Typing.Properties 1 (λ x → insertionRule) lift-rule susp-rule sub-rule hiding (refl≈ty)
+
+example-ctx : Ctx 7
+example-ctx = ∅ , ⋆ , ⋆ , 1V ─⟨ ⋆ ⟩⟶ 0V , ⋆ , 2V ─⟨ ⋆ ⟩⟶ 0V , ⋆ , 2V ─⟨ ⋆ ⟩⟶ 0V
+
+example-tree : Tree 6
+example-tree = Join Sing (Join Sing (Join Sing Sing))
+
+test1 : tree-to-ctx (example-tree) ≡ example-ctx
+test1 = refl
+
+test2 : unbiased-type 1 example-tree ≡ 6V ─⟨ ⋆ ⟩⟶ 1V
+test2 = refl
+
+example-tm-1 : Tm 7
+example-tm-1 = Coh example-tree (6V ─⟨ ⋆ ⟩⟶ 1V) (idSub _)
+
+example-tm-2 : Tm 7
+example-tm-2 = Coh (Join Sing (Join Sing Sing)) (4V ─⟨ ⋆ ⟩⟶ 1V)
+  ⟨ ⟨ ⟨ ⟨ ⟨ ⟨⟩ , 6V ⟩ , 5V ⟩ , 4V ⟩ , 1V ⟩ ,
+    Coh (Join Sing (Join Sing Sing)) (4V ─⟨ ⋆ ⟩⟶ 1V)
+    ⟨ ⟨ ⟨ ⟨ ⟨ ⟨⟩ , 5V ⟩ , 3V ⟩ , 2V ⟩ , 1V ⟩ , 0V ⟩ ⟩
+
+open import Data.Bool
+open import Data.Product renaming (_,_ to _,,_)
+open import Catt.Tree.Unbiased.Typing 1 (λ x → insertionRule) lift-rule susp-rule sub-rule
+
+example-tm-1-Ty : Typing-Tm example-ctx example-tm-1 (6V ─⟨ ⋆ ⟩⟶ 1V)
+example-tm-1-Ty = TyCoh (TyArr (var-Ty (example-ctx) (suc (suc (suc (suc (suc (suc zero))))))) TyStar (var-Ty example-ctx (suc zero))) id-Ty true (refl ,, refl) refl≈ty
+
+example-tm-2-Ty : Typing-Tm example-ctx example-tm-2 (6V ─⟨ ⋆ ⟩⟶ 1V)
+example-tm-2-Ty = TyCoh (unbiased-type-Ty 1 (Join Sing (Join Sing Sing)) (s≤s z≤n))
+  (TyExt (TyExt (TyExt (TyExt (TyExt (TyNull TyStar) (var-Ty example-ctx (suc (suc (suc (suc (suc (suc zero)))))))) (var-Ty example-ctx (suc (suc (suc (suc (suc zero))))))) (var-Ty example-ctx (suc (suc (suc (suc zero)))))) (var-Ty example-ctx (suc zero))) (TyCoh (unbiased-type-Ty 1 (Join Sing (Join Sing Sing)) (s≤s z≤n)) (TyExt (TyExt (TyExt (TyExt (TyExt (TyNull TyStar) (var-Ty example-ctx (suc (suc (suc (suc (suc zero))))))) (var-Ty example-ctx (suc (suc (suc zero))))) (var-Ty example-ctx (suc (suc zero)))) (var-Ty example-ctx (suc zero))) (var-Ty example-ctx zero)) true (refl ,, refl) refl≈ty))
+  true (refl ,, refl) refl≈ty
+
+example-ins : example-tm-2 ≈[ example-ctx ]tm example-tm-1
+example-ins = Ins≈ (Join Sing (Join Sing Sing)) example-tm-2-Ty (PShift PHere) (Join Sing (Join Sing Sing)) refl≃tm

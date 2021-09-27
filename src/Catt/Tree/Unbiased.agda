@@ -3,7 +3,8 @@
 module Catt.Tree.Unbiased where
 
 open import Catt.Syntax
-open import Catt.Syntax.Properties
+open import Catt.Globular
+open import Catt.Globular.Properties
 open import Catt.Tree
 open import Data.Nat
 open import Data.Bool using (Bool; true; false)
@@ -27,6 +28,9 @@ unbiased-comp d T σ = Coh T (unbiased-type d T) σ
 unbiased-type-dim : (d : ℕ) → (T : Tree n) → ty-dim (unbiased-type d T) ≡ d
 unbiased-type-dim zero T = refl
 unbiased-type-dim (suc d) T = cong suc (trans (sym (sub-dim (tree-inc d T false) (unbiased-type d (tree-bd d T)))) (unbiased-type-dim d (tree-bd d T)))
+
+unbiased-comp-dim : (d : ℕ) → (T : Tree n) → (σ : Sub (suc n) m ⋆) → (Δ : Ctx m) → tm-height Δ (unbiased-comp d T σ) ≡ d
+unbiased-comp-dim d T σ Δ = trans (sym (sub-dim σ (unbiased-type d T))) (unbiased-type-dim d T)
 
 sub-from-disc-unbiased : (d : ℕ) → Tree m → Sub (disc-size d) (suc m) ⋆
 sub-from-disc-unbiased d T = sub-from-disc d (unbiased-type d T) (unbiased-type-dim d T) (unbiased-comp d T (idSub _))

@@ -17,6 +17,7 @@ open import Relation.Nullary
 open import Data.Sum
 open import Data.Product renaming (_,_ to _,,_)
 open import Data.Empty
+open import Data.Unit
 
 -- susp-src-compat : (A : Ty n (suc d)) → suspTm (ty-src A) ≃tm ty-src (suspTy A)
 -- susp-src-compat (s ─⟨ A ⟩⟶ t) = refl≃tm
@@ -82,6 +83,33 @@ restrict-comp-sub : (τ : Sub n m A)
                   → τ ∘ restrict σ s t ≃s restrict (τ ∘ σ) (s [ τ ]tm) (t [ τ ]tm)
 restrict-comp-sub τ ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ s t = refl≃s
 restrict-comp-sub τ ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = Ext≃ (restrict-comp-sub τ σ s t) refl≃tm
+
+restrict-susp : (u : Tm n) → .⦃ isVar u ⦄ → (σ : Sub (2 + n) m A) → suspTm u [ σ ]tm ≃tm u [ restrict σ s t ]tm
+restrict-susp (Var zero) ⟨ ⟨ ⟨ σ , u ⟩ , s ⟩ , t ⟩ = refl≃tm
+restrict-susp (Var (suc i)) ⟨ ⟨ ⟨ σ , u ⟩ , s ⟩ , t ⟩ = restrict-susp (Var i) ⟨ ⟨ σ , u ⟩ , s ⟩
+
+unrestrict-restrict-≃ : (σ : Sub (2 + n) m A)
+                      → s ≃tm getFst [ σ ]tm
+                      → t ≃tm getSnd [ σ ]tm
+                      → unrestrict (restrict σ s t) ≃s σ
+unrestrict-restrict-≃ ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ p q = Ext≃ (Ext≃ refl≃s p) q
+unrestrict-restrict-≃ ⟨ ⟨ ⟨ σ , u ⟩ , s ⟩ , t ⟩ p q = Ext≃ (unrestrict-restrict-≃ ⟨ ⟨ σ , u ⟩ , s ⟩ p q) refl≃tm
+
+restrict-susp-full : (u : Tm n)
+                   → (σ : Sub (2 + n) m A)
+                   → s ≃tm getFst [ σ ]tm
+                   → t ≃tm getSnd [ σ ]tm
+                   → suspTm u [ σ ]tm ≃tm u [ restrict σ s t ]tm
+restrict-susp-full (Var i) σ p q = restrict-susp (Var i) σ
+restrict-susp-full (Coh S A τ) σ p q = sub-action-≃-tm (refl≃tm {s = suspTm (Coh S A τ)}) (sym≃s (unrestrict-restrict-≃ σ p q))
+
+getFst-unrestrict : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → getFst [ unrestrict σ ]tm ≃tm s
+getFst-unrestrict ⟨⟩ = refl≃tm
+getFst-unrestrict ⟨ σ , t ⟩ = getFst-unrestrict σ
+
+getSnd-unrestrict : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → getSnd [ unrestrict σ ]tm ≃tm t
+getSnd-unrestrict ⟨⟩ = refl≃tm
+getSnd-unrestrict ⟨ σ , t ⟩ = getSnd-unrestrict σ
 
 {-
 susp-var-split-compat : {vs : VarSplit n m l} → VarSplitCompat σ τ vs → VarSplitCompat (suspSub σ) (suspSub τ) (susp-var-split vs)

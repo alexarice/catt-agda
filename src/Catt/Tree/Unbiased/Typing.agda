@@ -35,9 +35,6 @@ open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Discs
 open import Catt.Discs.Typing index rule lift-rule
 
-NonZero′-subst : n ≡ m → NonZero′ n → NonZero′ m
-NonZero′-subst refl x = x
-
 unbiased-term-Ty : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ d) → Typing-Tm (tree-to-ctx T) (unbiased-term d T) (unbiased-type d T)
 unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → .(tree-dim T ≡ d) → Typing-Sub (tree-to-ctx T) Γ σ
                  → Typing-Tm Γ (Coh T (unbiased-type d T) σ) (unbiased-type d T [ σ ]ty)

@@ -20,6 +20,11 @@ open import Data.Fin using (Fin; zero; suc; fromℕ)
 open import Catt.Discs
 open import Catt.Discs.Properties
 open import Data.Nat.Properties
+open import Catt.Variables
+open import Catt.Variables.Properties
+open import Data.Empty
+open import Catt.Globular
+open import Catt.Globular.Properties
 
 unbiased-type-inc-lem : (d : ℕ) → (T : Tree n) → unbiased-type d (tree-bd d T) [ tree-inc d T true ]ty ≃ty unbiased-type d (tree-bd d T) [ tree-inc d T false ]ty
 unbiased-type-inc-lem zero T = refl≃ty
@@ -193,3 +198,24 @@ unbiased-type-≃ : d ≡ d′ → (S ≃ T) → unbiased-type d S ≃ty unbiase
 unbiased-type-≃ refl q with ≃-to-same-n q
 ... | refl with ≃-to-≡ q
 ... | refl = refl≃ty
+
+unbiased-type-truncate-1 : (d : ℕ) → (T : Tree n) → truncate 1 (unbiased-type (suc d) T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
+unbiased-type-truncate-1 zero T = refl≃ty
+unbiased-type-truncate-1 (suc d) T = begin
+  < truncate 1
+      ((unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]tm)
+       ─⟨ unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty
+       ⟩⟶ (unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T true ]tm)) >ty
+    ≈⟨ truncate-≤ {s = unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]tm} {t = unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T true ]tm} 1 (unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty) (s≤s z≤n) ⟩
+  < truncate 1 (unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty) >ty
+    ≈⟨ truncate-sub 1 (unbiased-type (suc d) (tree-bd (suc d) T)) (tree-inc (suc d) T false) ⟩
+  < truncate 1 (unbiased-type (suc d) (tree-bd (suc d) T)) [ tree-inc (suc d) T false ]ty >ty
+    ≈⟨ sub-action-≃-ty (unbiased-type-truncate-1 d (tree-bd (suc d) T)) refl≃s ⟩
+  < (Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var (tree-bd (suc d) T)) [ tree-inc (suc d) T false ]ty >ty
+    ≈⟨ Arr≃ (tree-inc-preserve-fst-var d T false) refl≃ty (tree-inc-preserve-last-var d T false) ⟩
+  < Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T >ty ∎
+  where
+    open Reasoning ty-setoid
+
+unbiased-type-truncate-1′ : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → truncate 1 (unbiased-type d T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
+unbiased-type-truncate-1′ (suc d) = unbiased-type-truncate-1 d

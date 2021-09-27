@@ -20,6 +20,8 @@ open import Data.Bool using (Bool; true; false; not)
 open import Data.Fin using (Fin; zero; suc; fromℕ)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary
+open import Catt.Globular
+open import Catt.Globular.Properties
 
 connect-tree-to-ctx : (S : Tree n) → (T : Tree m)
                     → tree-to-ctx (connect-tree S T) ≃c connect (tree-to-ctx S) (tree-last-var S) (tree-to-ctx T)
@@ -130,3 +132,7 @@ tree-inc-susp-lem zero T false = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , getF
 tree-inc-susp-lem zero T true = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩ , suspTm (tree-last-var T) ⟩)
 tree-inc-susp-lem (suc d) Sing b = refl≃s
 tree-inc-susp-lem (suc d) (Join S T) b = sym≃s (id-left-unit _)
+
+linear-tree-dim : (S : Tree n) → .⦃ is-linear S ⦄ → tm-height (tree-to-ctx S) 0V ≡ tree-dim S
+linear-tree-dim Sing = refl
+linear-tree-dim (Join S Sing) = trans (susp-tm-height 0V (tree-to-ctx S)) (cong suc (linear-tree-dim S))

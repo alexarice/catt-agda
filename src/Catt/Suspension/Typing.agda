@@ -23,7 +23,7 @@ open import Catt.Suspension.Support
 open import Data.Fin.Properties using (toℕ-inject₁)
 open import Catt.Syntax.SyntacticEquality
 open import Relation.Binary.PropositionalEquality
-open import Data.Vec hiding (drop)
+open import Data.Vec hiding (drop; restrict)
 open import Data.Bool
 open import Data.Product renaming (_,_ to _,,_)
 open import Data.Empty

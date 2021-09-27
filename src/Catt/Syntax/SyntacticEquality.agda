@@ -159,9 +159,9 @@ sub-setoid = record { Carrier = SUB
                                              }
                     }
 
--- ≃ty-preserve-height : {A : Ty n d} → {B : Ty m d′} → A ≃ty B → d ≡ d′
--- ≃ty-preserve-height (Star≃ x) = refl
--- ≃ty-preserve-height (Arr≃ x p x₁) = cong suc (≃ty-preserve-height p)
+≃ty-preserve-height : {A : Ty n} → {B : Ty m} → A ≃ty B → ty-dim A ≡ ty-dim B
+≃ty-preserve-height (Star≃ x) = refl
+≃ty-preserve-height (Arr≃ x p x₁) = cong suc (≃ty-preserve-height p)
 
 ≃-to-same-n : {S : Tree n} → {T : Tree m} → S ≃ T → n ≡ m
 ≃-to-same-n Sing≃ = refl

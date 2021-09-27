@@ -10,8 +10,8 @@ tm-to-ty : (Γ : Ctx n) → (t : Tm n) → Ty n
 tm-to-ty Γ (Var i) = Γ ‼ i
 tm-to-ty Γ (Coh Δ A σ) = A [ σ ]ty
 
-get-tm-height : Ctx n → Tm n → ℕ
-get-tm-height Γ t = ty-dim (tm-to-ty Γ t)
+tm-height : Ctx n → Tm n → ℕ
+tm-height Γ t = ty-dim (tm-to-ty Γ t)
 
 -- get-right-base-tm : (A : Ty n d) → .⦃ _ : NonZero′ d ⦄ → Tm n
 -- get-right-base-tm {d = suc zero} A = ty-tgt A

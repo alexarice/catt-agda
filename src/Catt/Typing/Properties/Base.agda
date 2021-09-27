@@ -123,6 +123,13 @@ sub-setoid-≈ {m} n Δ = record { Carrier = SUB′ n m
                                              }
                     }
 
+≈ty-preserve-height : A ≈[ Γ ]ty B → ty-dim A ≡ ty-dim B
+≈ty-preserve-height Star≈ = refl
+≈ty-preserve-height (Arr≈ x p x₁) = cong suc (≈ty-preserve-height p)
+
+NonZero′-subst : n ≡ m → NonZero′ n → NonZero′ m
+NonZero′-subst refl x = x
+
 -- ≈c-preserve-len : Γ ≈c Δ → ctxLength Γ ≡ ctxLength Δ
 -- ≈c-preserve-len Emp≈ = refl
 -- ≈c-preserve-len (Add≈ p x) = cong suc (≈c-preserve-len p)

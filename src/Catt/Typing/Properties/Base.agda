@@ -13,6 +13,7 @@ open import Catt.Typing index rule
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary
 open import Catt.Suspension
+open import Catt.Tree
 
 private
   Index : Set
@@ -127,9 +128,6 @@ sub-setoid-≈ {m} n Δ = record { Carrier = SUB′ n m
 ≈ty-preserve-height Star≈ = refl
 ≈ty-preserve-height (Arr≈ x p x₁) = cong suc (≈ty-preserve-height p)
 
-NonZero′-subst : n ≡ m → NonZero′ n → NonZero′ m
-NonZero′-subst refl x = x
-
 -- ≈c-preserve-len : Γ ≈c Δ → ctxLength Γ ≡ ctxLength Δ
 -- ≈c-preserve-len Emp≈ = refl
 -- ≈c-preserve-len (Add≈ p x) = cong suc (≈c-preserve-len p)
@@ -174,6 +172,22 @@ term-conversion (TyVarZ x) eq = TyVarZ (trans≈ty x eq)
 term-conversion (TyVarS i tvi x) eq = TyVarS i tvi (trans≈ty x eq)
 term-conversion (TyCoh Aty σty b sc p) eq = TyCoh Aty σty b sc (trans≈ty p eq)
 
+src-eq : (s ─⟨ A ⟩⟶ t) ≈[ Γ ]ty (s′ ─⟨ A′ ⟩⟶ t′) → s ≈[ Γ ]tm s′
+src-eq (Arr≈ p q r) = p
+
+tgt-eq : (s ─⟨ A ⟩⟶ t) ≈[ Γ ]ty (s′ ─⟨ A′ ⟩⟶ t′) → t ≈[ Γ ]tm t′
+tgt-eq (Arr≈ p q r) = r
+
+base-eq : (s ─⟨ A ⟩⟶ t) ≈[ Γ ]ty (s′ ─⟨ A′ ⟩⟶ t′) → A ≈[ Γ ]ty A′
+base-eq (Arr≈ p q r) = q
+
+transport-typing : Typing-Tm Γ t A → t ≃tm s → Typing-Tm Γ s A
+transport-typing tty p with ≃tm-to-≡ p
+... | refl = tty
+
+coh-sub-ty : Typing-Tm Γ (Coh T A τ) B → Typing-Sub (tree-to-ctx T) Γ τ
+coh-sub-ty (TyCoh x τty b x₂ x₃) = τty
+
 module _ {i : Index} (a : rule i .Rule.Args) where
   open Rule (rule i)
 
@@ -196,3 +210,8 @@ module _ {i : Index} (a : rule i .Rule.Args) where
           → Typing-Sub (tgtCtx a) Δ σ
           → Typing-Tm Δ (lhs a [ σ ]tm) (C [ σ ]ty)
           → lhs a [ σ ]tm ≈[ Δ ]tm rhs a [ σ ]tm
+
+  ConvRule : Set
+  ConvRule = {A : Ty (len a)}
+           → Typing-Tm (tgtCtx a) (lhs a) A
+           → Typing-Tm (tgtCtx a) (rhs a) A

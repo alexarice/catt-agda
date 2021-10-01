@@ -41,37 +41,6 @@ suspTyEq : A ≈[ Γ ]ty B → suspTy A ≈[ suspCtx Γ ]ty suspTy B
 suspTmEq : s ≈[ Γ ]tm t → suspTm s ≈[ suspCtx Γ ]tm suspTm t
 suspSubEq : σ ≈[ Γ ]s τ → suspSub σ ≈[ suspCtx Γ ]s suspSub τ
 
-suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {T : Tree n} → supp-condition b A T → supp-condition b (suspTy A) (suspTree T)
-suspSuppCondition {b = false} {A} {T} sc = begin
-  FVTy (suspTy A) ≡⟨ suspSuppTy A ⟩
-  suspSupp (FVTy A) ≡⟨ cong suspSupp sc ⟩
-  suspSupp full ≡⟨ suspSuppFull ⟩
-  full ∎
-  where
-    open ≡-Reasoning
-suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {T@(Join S₁ S₂)} (sc1 ,, sc2) = l1 ,, l2
-  where
-    open ≡-Reasoning
-    suc-pred : (n : ℕ) → zero ≢ n → suc (pred n) ≡ n
-    suc-pred zero p = ⊥-elim (p refl)
-    suc-pred (suc n) p = refl
-
-    l1 : FVTy (suspTy A) ∪ FVTm (suspTm s) ≡ supp-bd (tree-dim T) (suspTree T) false
-    l1 = begin
-      FVTy (suspTy A) ∪ FVTm (suspTm s) ≡⟨ suspSuppTyTm A s ⟩
-      suspSupp (FVTy A ∪ FVTm s) ≡⟨ cong suspSupp sc1 ⟩
-      suspSupp (supp-bd (pred (tree-dim T)) T false) ≡⟨ suspSuppBd (pred (tree-dim T)) T false ⟩
-      supp-bd (suc (pred (tree-dim T))) (suspTree T) false ≡⟨ cong (λ - → supp-bd - (suspTree T) false) (suc-pred (tree-dim T) (join-tree-has-non-zero-dim S₁ S₂)) ⟩
-      supp-bd (tree-dim T) (suspTree T) false ∎
-
-    l2 : FVTy (suspTy A) ∪ FVTm (suspTm t) ≡ supp-bd (tree-dim T) (suspTree T) true
-    l2 = begin
-      FVTy (suspTy A) ∪ FVTm (suspTm t) ≡⟨ suspSuppTyTm A t ⟩
-      suspSupp (FVTy A ∪ FVTm t) ≡⟨ cong suspSupp sc2 ⟩
-      suspSupp (supp-bd (pred (tree-dim T)) T true) ≡⟨ suspSuppBd (pred (tree-dim T)) T true ⟩
-      supp-bd (suc (pred (tree-dim T))) (suspTree T) true ≡⟨ cong (λ - → supp-bd - (suspTree T) true) (suc-pred (tree-dim T) (join-tree-has-non-zero-dim S₁ S₂)) ⟩
-      supp-bd (pred (tree-dim (suspTree T))) (suspTree T) true ∎
-
 suspCtxTy TyEmp = TyAdd (TyAdd TyEmp TyStar) TyStar
 suspCtxTy (TyAdd ty x) = TyAdd (suspCtxTy ty) (suspTyTy x)
 

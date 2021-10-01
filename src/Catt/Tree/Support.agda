@@ -18,18 +18,6 @@ open import Catt.Suspension
 open import Data.Vec
 open import Data.Bool
 
-supp-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → VarSet (suc n)
-supp-bd zero T false = trueAt (fromℕ _)
-supp-bd zero T true = trueAt (getVarFin (tree-last-var T) ⦃ tree-last-var-is-var T ⦄)
-supp-bd (suc d) Sing b = full
-supp-bd (suc d) (Join S T) b = connect-supp (suspSupp (supp-bd d S b)) (supp-bd (suc d) T b)
-
-suspSuppBd : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSupp (supp-bd d T b) ≡ supp-bd (suc d) (suspTree T) b
-suspSuppBd zero T false = refl
-suspSuppBd zero T true = refl
-suspSuppBd (suc d) Sing b = refl
-suspSuppBd (suc d) (Join S T) b = refl
-
 supp-bd-compat : (d : ℕ) → (T : Tree n) → (b : Bool) → FVSub (tree-inc d T b) ≡ supp-bd d T b
 supp-bd-compat zero T false = ∪-left-unit (trueAt (fromℕ _))
 supp-bd-compat zero T true = trans (∪-left-unit (FVTm (tree-last-var T))) (FVTm-on-var (tree-last-var T) ⦃ tree-last-var-is-var T ⦄)

@@ -198,6 +198,34 @@ sub-between-connect-susps-fst-var : (σ : Sub (suc n) (suc l) ⋆)
                                   → Var (fromℕ _) [ sub-between-connect-susps σ τ ]tm ≃tm Var (fromℕ (l′ + (2 + l)))
 sub-between-connect-susps-fst-var σ τ = sub-between-connects-fst-var (suspSub σ) τ getSnd (sym≃tm (susp-sub-preserve-getFst σ))
 
+between-connect-from-connect : (σ : Sub (suc n) (suc l) ⋆)
+                             → (τ : Sub (suc m) (suc l′) ⋆)
+                             → (s : Tm (suc l))
+                             → (σ′ : Sub (suc l) o A)
+                             → (τ′ : Sub (suc l′) o A)
+                             → s [ σ′ ]tm ≃tm Var (fromℕ _) [ τ′ ]tm
+                             → sub-from-connect σ′ τ′ ∘ sub-between-connects σ τ s ≃s sub-from-connect (σ′ ∘ σ) (τ′ ∘ τ)
+between-connect-from-connect σ ⟨ ⟨⟩ , t ⟩ s σ′ τ′ p = begin
+  < sub-from-connect σ′ τ′ ∘ (connect-inc-left s _ ∘ σ) >s
+    ≈˘⟨ ∘-assoc (sub-from-connect σ′ τ′) (connect-inc-left s _) σ ⟩
+  < sub-from-connect σ′ τ′ ∘ connect-inc-left s _ ∘ σ >s
+    ≈⟨ sub-action-≃-sub refl≃s (sub-from-connect-inc-left σ′ s τ′) ⟩
+  < σ′ ∘ σ >s ∎
+  where
+    open Reasoning sub-setoid
+between-connect-from-connect σ ⟨ ⟨ τ , u ⟩ , t ⟩ s σ′ τ′ p = Ext≃ (between-connect-from-connect σ ⟨ τ , u ⟩ s σ′ τ′ p) tm-lem
+  where
+    tm-lem : t [ connect-inc-right s _ ]tm [ sub-from-connect σ′ τ′ ]tm
+         ≃tm t [ τ′ ]tm
+    tm-lem = begin
+      < t [ connect-inc-right s _ ]tm [ sub-from-connect σ′ τ′ ]tm >tm
+        ≈˘⟨ assoc-tm (sub-from-connect σ′ τ′) (connect-inc-right s _) t ⟩
+      < t [ sub-from-connect σ′ τ′ ∘ connect-inc-right s _ ]tm >tm
+        ≈⟨ sub-action-≃-tm (refl≃tm {s = t}) (sub-from-connect-inc-right σ′ s τ′ p) ⟩
+      < t [ τ′ ]tm >tm ∎
+      where
+        open Reasoning tm-setoid
+
 sub-between-connects-comp : (σ : Sub (suc n) (suc l) ⋆)
                           → (τ : Sub (suc m) (suc l′) ⋆)
                           → (s : Tm (suc l))
@@ -314,3 +342,27 @@ sub-from-connect-sub : (σ : Sub (suc n) l A)
                      → μ ∘ sub-from-connect σ τ ≃s sub-from-connect (μ ∘ σ) (μ ∘ τ)
 sub-from-connect-sub σ ⟨ ⟨⟩ , t ⟩ μ = refl≃s
 sub-from-connect-sub σ ⟨ ⟨ τ , s ⟩ , t ⟩ μ = Ext≃ (sub-from-connect-sub σ ⟨ τ , s ⟩ μ) refl≃tm
+
+sub-from-connect-prop : (t : Tm (suc n)) → (m : ℕ)
+                      → sub-from-connect (connect-inc-left t m)
+                                         (connect-inc-right t m)
+                      ≃s idSub (suc (m + n))
+sub-from-connect-prop t zero = refl≃s
+sub-from-connect-prop t (suc zero) = refl≃s
+sub-from-connect-prop t (suc (suc m)) = Ext≃ (trans≃s (sym≃s (sub-from-connect-lift (connect-inc-left t (suc m)) (connect-inc-right t (suc m)))) (lift-sub-≃ (sub-from-connect-prop t (suc m)))) refl≃tm
+
+sub-from-connect-prop′ : (t : Tm (suc n)) → (m : ℕ)
+                       → (σ : Sub (suc (m + n)) l A)
+                       → sub-from-connect (σ ∘ connect-inc-left t m)
+                                          (σ ∘ connect-inc-right t m)
+                       ≃s σ
+sub-from-connect-prop′ t m σ = begin
+  < sub-from-connect (σ ∘ connect-inc-left t m) (σ ∘ connect-inc-right t m) >s
+    ≈˘⟨ sub-from-connect-sub (connect-inc-left t m) (connect-inc-right t m) σ ⟩
+  < σ ∘ sub-from-connect (connect-inc-left t m) (connect-inc-right t m) >s
+    ≈⟨ sub-action-≃-sub (sub-from-connect-prop t m) refl≃s ⟩
+  < σ ∘ idSub (suc (m + _)) >s
+    ≈⟨ id-right-unit σ ⟩
+  < σ >s ∎
+  where
+    open Reasoning sub-setoid

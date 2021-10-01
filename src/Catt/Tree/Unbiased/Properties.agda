@@ -199,6 +199,9 @@ unbiased-type-≃ refl q with ≃-to-same-n q
 ... | refl with ≃-to-≡ q
 ... | refl = refl≃ty
 
+unbiased-comp-≃ : d ≡ d′ → (S ≃ T) → (σ ≃s τ) → unbiased-comp d S σ ≃tm unbiased-comp d′ T τ
+unbiased-comp-≃ p q r = Coh≃ q (unbiased-type-≃ p q) r
+
 unbiased-type-truncate-1 : (d : ℕ) → (T : Tree n) → truncate 1 (unbiased-type (suc d) T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
 unbiased-type-truncate-1 zero T = refl≃ty
 unbiased-type-truncate-1 (suc d) T = begin
@@ -219,3 +222,68 @@ unbiased-type-truncate-1 (suc d) T = begin
 
 unbiased-type-truncate-1′ : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → truncate 1 (unbiased-type d T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
 unbiased-type-truncate-1′ (suc d) = unbiased-type-truncate-1 d
+
+unbiased-type′-prop : (d : ℕ) → (T : Tree n) → (d′ : ℕ) → (d ≤ d′) → (b : Bool) → unbiased-type′ d T ≃ty unbiased-type′ d (tree-bd d′ T) [ tree-inc d′ T b ]ty
+unbiased-term′-≃ : (d ≡ d′) → S ≃ T → unbiased-term′ d S ≃tm unbiased-term′ d′ T
+unbiased-term′-≃ refl p with ≃-to-same-n p
+... | refl with ≃-to-≡ p
+... | refl = refl≃tm
+
+unbiased-type′-prop zero T d′ p b = refl≃ty
+unbiased-type′-prop (suc d) T d′ p b = Arr≃ (lem false) (unbiased-type′-prop d T d′ (≤-trans (n≤1+n d) p) b) (lem true)
+  where
+    lem : (b′ : Bool) → (unbiased-term′ d (tree-bd d T) [ tree-inc d T b′ ]tm) ≃tm
+      ((unbiased-term′ d (tree-bd d (tree-bd d′ T)) [
+        tree-inc d (tree-bd d′ T) b′ ]tm)
+       [ tree-inc d′ T b ]tm)
+    lem b′ = begin
+      < unbiased-term′ d (tree-bd d T) [ tree-inc d T b′ ]tm >tm
+        ≈˘⟨ sub-action-≃-tm (unbiased-term′-≃ refl (tree-bd-glob d d′ T p)) (tree-inc-glob d d′ T b′ b p) ⟩
+      < unbiased-term′ d (tree-bd d (tree-bd d′ T))
+        [ tree-inc d′ T b ∘ tree-inc d (tree-bd d′ T) b′ ]tm >tm
+        ≈⟨ assoc-tm _ _ (unbiased-term′ d (tree-bd d (tree-bd d′ T))) ⟩
+      < unbiased-term′ d (tree-bd d (tree-bd d′ T))
+        [ tree-inc d (tree-bd d′ T) b′ ]tm
+        [ tree-inc d′ T b ]tm >tm ∎
+      where
+        open Reasoning tm-setoid
+
+unbiased-term′-susp-lem : (d : ℕ) → (T : Tree n) → suspTm (unbiased-term′ d T) ≃tm unbiased-term′ (suc d) (suspTree T)
+unbiased-type′-susp-lem : (d : ℕ) → (T : Tree n) → suspTy (unbiased-type′ d T) ≃ty unbiased-type′ (suc d) (suspTree T)
+
+unbiased-term′-susp-lem d T with is-linear-dec T
+... | yes p = refl≃tm
+... | no p = Coh≃ refl≃ (unbiased-type′-susp-lem d T) (susp-functorial-id (suc _))
+
+unbiased-type′-susp-lem zero T = refl≃ty
+unbiased-type′-susp-lem (suc d) T = Arr≃ (l1 false) (unbiased-type′-susp-lem d T) (l1 true)
+  where
+    l1 : (b : Bool)
+       → suspTm (unbiased-term′ d (tree-bd d T) [ tree-inc d T b ]tm)
+           ≃tm
+         unbiased-term′ (suc d) (tree-bd (suc d) (suspTree T))
+           [ tree-inc (suc d) (suspTree T) b ]tm
+    l1 b = begin
+      < suspTm (unbiased-term′ d (tree-bd d T) [ tree-inc d T b ]tm) >tm
+        ≈⟨ susp-functorial-tm (tree-inc d T b) (unbiased-term′ d (tree-bd d T)) ⟩
+      < suspTm (unbiased-term′ d (tree-bd d T))
+          [ suspSub (tree-inc d T b) ]tm >tm
+        ≈⟨ sub-action-≃-tm (unbiased-term′-susp-lem d (tree-bd d T)) (tree-inc-susp-lem d T b) ⟩
+      < unbiased-term′ (suc d) (tree-bd (suc d) (suspTree T))
+          [ tree-inc (suc d) (suspTree T) b ]tm >tm ∎
+      where
+        open Reasoning tm-setoid
+
+linear-tree-unbiased′-lem : (d : ℕ) → (T : Tree n) → .⦃ is-linear T ⦄ → .(tree-dim T ≡ d) → tree-to-ctx T ‼ zero ≃ty unbiased-type′ d T
+linear-tree-unbiased′-lem zero Sing p = Star≃ refl
+linear-tree-unbiased′-lem zero (Join S T) p = ⊥-elim (join-tree-has-non-zero-dim S T (sym (recompute ((tree-dim (Join S T)) ≟ zero) p)))
+linear-tree-unbiased′-lem (suc d) (Join S Sing) p = begin
+  < suspCtx (tree-to-ctx S) ‼ zero >ty
+    ≈⟨ susp-‼ (tree-to-ctx S) zero ⟩
+  < suspTy (tree-to-ctx S ‼ zero) >ty
+    ≈⟨ susp-ty-≃ (linear-tree-unbiased′-lem d S (cong pred p)) ⟩
+  < suspTy (unbiased-type′ d S) >ty
+    ≈⟨ unbiased-type′-susp-lem d S ⟩
+  < unbiased-type′ (suc d) (Join S Sing) >ty ∎
+  where
+    open Reasoning ty-setoid

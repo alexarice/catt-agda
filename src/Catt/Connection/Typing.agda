@@ -94,3 +94,35 @@ sub-between-connect-susps-Ty : Typing-Sub Γ Δ σ
                              → Var (fromℕ _) [ τ ]tm ≈[ Θ ]tm Var (fromℕ _)
                              → Typing-Sub (connect-susp Γ Υ) (connect-susp Δ Θ) (sub-between-connect-susps σ τ)
 sub-between-connect-susps-Ty {σ = σ} σty τty p = sub-between-connects-Ty (suspSubTy σty) τty getSndTy (reflexive≈tm (sym≃tm (susp-sub-preserve-getSnd σ))) p
+
+between-connect-from-connect-≈ : (σ : Sub (suc n) (suc l) ⋆)
+                               → (τ : Sub (suc m) (suc l′) ⋆)
+                               → (s : Tm (suc l))
+                               → (σ′ : Sub (suc l) o A)
+                               → (τ′ : Sub (suc l′) o A)
+                               → s [ σ′ ]tm ≈[ Γ ]tm Var (fromℕ _) [ τ′ ]tm
+                               → sub-from-connect σ′ τ′ ∘ sub-between-connects σ τ s ≈[ Γ ]s sub-from-connect (σ′ ∘ σ) (τ′ ∘ τ)
+between-connect-from-connect-≈ {Γ = Γ} σ ⟨ ⟨⟩ , t ⟩ s σ′ τ′ p = reflexive≈s (begin
+  < sub-from-connect σ′ τ′ ∘ (connect-inc-left s _ ∘ σ) >s
+    ≈˘⟨ ∘-assoc (sub-from-connect σ′ τ′) (connect-inc-left s _) σ ⟩
+  < sub-from-connect σ′ τ′ ∘ connect-inc-left s _ ∘ σ >s
+    ≈⟨ sub-action-≃-sub refl≃s (sub-from-connect-inc-left σ′ s τ′) ⟩
+  < σ′ ∘ σ >s ∎)
+  where
+    open Reasoning sub-setoid
+between-connect-from-connect-≈ {Γ = Γ} σ ⟨ ⟨ τ , u ⟩ , t ⟩ s σ′ τ′ p = Ext≈ (between-connect-from-connect-≈ σ ⟨ τ , u ⟩ s σ′ τ′ p) tm-lem
+  where
+    tm-lem : t [ connect-inc-right s _ ]tm [ sub-from-connect σ′ τ′ ]tm
+         ≈[ Γ ]tm t [ τ′ ]tm
+    tm-lem = begin
+      t [ connect-inc-right s _ ]tm [ sub-from-connect σ′ τ′ ]tm
+        ≈˘⟨ reflexive≈tm (assoc-tm (sub-from-connect σ′ τ′) (connect-inc-right s _) t) ⟩
+      t [ sub-from-connect σ′ τ′ ∘ connect-inc-right s _ ]tm
+        ≈⟨ apply-sub-eq-tm t (sub-from-connect-inc-right-≈ σ′ s τ′ p) ⟩
+      t [ τ′ ]tm ∎
+      where
+        open Reasoning (tm-setoid-≈ Γ)
+
+sub-from-connect-≈ : σ ≈[ Γ ]s σ′ → τ ≈[ Γ ]s τ′ → sub-from-connect σ τ ≈[ Γ ]s sub-from-connect σ′ τ′
+sub-from-connect-≈ p (Ext≈ (Null≈ y) x) = p
+sub-from-connect-≈ p (Ext≈ (Ext≈ q y) x) = Ext≈ (sub-from-connect-≈ p (Ext≈ q y)) x

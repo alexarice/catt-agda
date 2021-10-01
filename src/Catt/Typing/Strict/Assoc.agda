@@ -111,154 +111,177 @@ Ins≈ : (S : Tree n)
 Ins≈ {Γ = Γ} {A = A} {σ = σ} {τ = τ} S ty P T p
   = Rule≈ zero (insertionBuilder Γ S A σ P T τ p) ty
 
-open import Catt.Typing.Properties.Base 1 (λ x → insertionRule)
+module _ where
+  open import Catt.Typing.Properties.Base 1 (λ x → insertionRule)
 
-lift-rule : ∀ i a → LiftRule {i} a
-lift-rule i a tc = begin
-  liftTerm (insertionRule .lhs a) ≡⟨⟩
-  Coh id-S id-A (liftSub id-σ)
-    ≈⟨ Ins≈ id-S tc id-P id-T lem ⟩
-  Coh (insertion-tree id-S id-P id-T)
-      (id-A [ exterior-sub id-S id-P id-T ]ty)
-      (sub-from-insertion id-S id-P id-T (liftSub id-σ) (liftSub id-τ))
-    ≈⟨ reflexive≈tm (Coh≃ refl≃ refl≃ty (sym≃s (lift-sub-from-insertion id-S id-P id-T id-σ id-τ))) ⟩
-  liftTerm (insertionRule .rhs a) ∎
+  lift-rule : ∀ i a → LiftRule {i} a
+  lift-rule i a tc = begin
+    liftTerm (insertionRule .lhs a) ≡⟨⟩
+    Coh id-S id-A (liftSub id-σ)
+      ≈⟨ Ins≈ id-S tc id-P id-T lem ⟩
+    Coh (insertion-tree id-S id-P id-T)
+        (id-A [ exterior-sub id-S id-P id-T ]ty)
+        (sub-from-insertion id-S id-P id-T (liftSub id-σ) (liftSub id-τ))
+        ≈⟨ reflexive≈tm (Coh≃ refl≃ refl≃ty (sym≃s (lift-sub-from-insertion id-S id-P id-T id-σ id-τ))) ⟩
+    liftTerm (insertionRule .rhs a) ∎
 
-  where
-    open InsertionData a
-    lem : branching-path-to-var id-S id-P
-            [ liftSub id-σ ]tm
-          ≃tm
-          unbiased-comp (tree-dim id-T) id-T (liftSub id-τ)
-    lem = begin
-      < branching-path-to-var id-S id-P [ liftSub id-σ ]tm >tm
-        ≈⟨ apply-lifted-sub-tm-≃ (branching-path-to-var id-S id-P) id-σ ⟩
-      < liftTerm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
-        ≈⟨ lift-tm-≃ id-eq ⟩
-      < liftTerm (unbiased-comp (tree-dim id-T) id-T id-τ) >tm
-        ≡⟨⟩
-      < unbiased-comp (tree-dim id-T) id-T (liftSub id-τ) >tm ∎
-      where
-        open Reasoning tm-setoid
+    where
+      open InsertionData a
+      lem : branching-path-to-var id-S id-P
+                                  [ liftSub id-σ ]tm
+            ≃tm
+            unbiased-comp (tree-dim id-T) id-T (liftSub id-τ)
+      lem = begin
+        < branching-path-to-var id-S id-P [ liftSub id-σ ]tm >tm
+          ≈⟨ apply-lifted-sub-tm-≃ (branching-path-to-var id-S id-P) id-σ ⟩
+        < liftTerm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
+          ≈⟨ lift-tm-≃ id-eq ⟩
+        < liftTerm (unbiased-comp (tree-dim id-T) id-T id-τ) >tm
+          ≡⟨⟩
+        < unbiased-comp (tree-dim id-T) id-T (liftSub id-τ) >tm ∎
+        where
+          open Reasoning tm-setoid
 
-    open Reasoning (tm-setoid-≈ (id-Γ , _))
+      open Reasoning (tm-setoid-≈ (id-Γ , _))
 
-susp-rule : ∀ i a → SuspRule {i} a
-susp-rule i a tc = begin
-  Coh (suspTree id-S) (suspTy id-A) (suspSub id-σ)
-    ≈⟨ Ins≈ (suspTree id-S) tc (PExt id-P) (suspTree id-T) lem ⟩
-  Coh (insertion-tree (suspTree id-S) (PExt id-P) (suspTree id-T))
-      (suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty)
-      (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (suspSub id-σ) (suspSub id-τ))
-    ≈⟨ reflexive≈tm (Coh≃ refl≃ lem-ty (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
-  Coh (suspTree (insertion-tree id-S id-P id-T))
+  susp-rule : ∀ i a → SuspRule {i} a
+  susp-rule i a tc = begin
+    Coh (suspTree id-S) (suspTy id-A) (suspSub id-σ)
+      ≈⟨ Ins≈ (suspTree id-S) tc (PExt id-P) (suspTree id-T) lem ⟩
+    Coh (insertion-tree (suspTree id-S) (PExt id-P) (suspTree id-T))
+        (suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty)
+        (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (suspSub id-σ) (suspSub id-τ))
+        ≈⟨ reflexive≈tm (Coh≃ refl≃ lem-ty (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
+    Coh (suspTree (insertion-tree id-S id-P id-T))
         (suspTy (id-A [ exterior-sub id-S id-P id-T ]ty))
         (suspSub (sub-from-insertion id-S id-P id-T id-σ id-τ)) ∎
-  where
-    open InsertionData a
+    where
+      open InsertionData a
 
-    lem-ty : suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty
+      lem-ty : suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty
                ≃ty
-             suspTy (id-A [ exterior-sub id-S id-P id-T ]ty)
-    lem-ty = begin
-      < suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty >ty
-        ≈⟨ sub-action-≃-ty refl≃ty (exterior-sub-susp id-S id-P id-T) ⟩
-      < suspTy id-A [ suspSub (exterior-sub id-S id-P id-T) ]ty >ty
-        ≈˘⟨ susp-functorial-ty (exterior-sub id-S id-P id-T) id-A ⟩
-      < suspTy (id-A [ exterior-sub id-S id-P id-T ]ty) >ty ∎
-      where
-        open Reasoning ty-setoid
+               suspTy (id-A [ exterior-sub id-S id-P id-T ]ty)
+      lem-ty = begin
+        < suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty >ty
+          ≈⟨ sub-action-≃-ty refl≃ty (exterior-sub-susp id-S id-P id-T) ⟩
+        < suspTy id-A [ suspSub (exterior-sub id-S id-P id-T) ]ty >ty
+          ≈˘⟨ susp-functorial-ty (exterior-sub id-S id-P id-T) id-A ⟩
+        < suspTy (id-A [ exterior-sub id-S id-P id-T ]ty) >ty ∎
+        where
+          open Reasoning ty-setoid
 
-    lem : (branching-path-to-var (suspTree id-S) (PExt id-P)
-             [ suspSub id-σ ]tm)
-          ≃tm
-          unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) (unrestrict (suspSubRes id-τ))
-    lem = begin
-      < branching-path-to-var (suspTree id-S) (PExt id-P) [ suspSub id-σ ]tm >tm ≡⟨⟩
-      < suspTm (branching-path-to-var id-S id-P)
-          [ idSub _ ]tm
-          [ suspSub id-σ ]tm >tm
-        ≈⟨ sub-action-≃-tm (id-on-tm (suspTm (branching-path-to-var id-S id-P))) refl≃s ⟩
-      < suspTm (branching-path-to-var id-S id-P)
-          [ suspSub id-σ ]tm >tm
-        ≈˘⟨ susp-functorial-tm id-σ (branching-path-to-var id-S id-P) ⟩
-      < suspTm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
-        ≈⟨ susp-tm-≃ id-eq ⟩
-      < suspTm (unbiased-comp (tree-dim id-T) id-T id-τ) >tm ≡⟨⟩
-      < Coh (suspTree id-T) (suspTy (unbiased-type (tree-dim id-T) id-T)) (suspSub id-τ) >tm
-        ≈⟨ Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim id-T) id-T) refl≃s ⟩
-      < Coh (suspTree id-T) (unbiased-type (tree-dim (suspTree id-T)) (suspTree id-T)) (suspSub id-τ) >tm ≡⟨⟩
-      < unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) (suspSub id-τ) >tm ∎
-      where
-        open Reasoning tm-setoid
+      lem : (branching-path-to-var (suspTree id-S) (PExt id-P)
+               [ suspSub id-σ ]tm)
+            ≃tm
+            unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) (unrestrict (suspSubRes id-τ))
+      lem = begin
+        < branching-path-to-var (suspTree id-S) (PExt id-P) [ suspSub id-σ ]tm >tm ≡⟨⟩
+        < suspTm (branching-path-to-var id-S id-P)
+            [ idSub _ ]tm
+            [ suspSub id-σ ]tm >tm
+          ≈⟨ sub-action-≃-tm (id-on-tm (suspTm (branching-path-to-var id-S id-P))) refl≃s ⟩
+        < suspTm (branching-path-to-var id-S id-P)
+            [ suspSub id-σ ]tm >tm
+          ≈˘⟨ susp-functorial-tm id-σ (branching-path-to-var id-S id-P) ⟩
+        < suspTm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
+          ≈⟨ susp-tm-≃ id-eq ⟩
+        < suspTm (unbiased-comp (tree-dim id-T) id-T id-τ) >tm ≡⟨⟩
+        < Coh (suspTree id-T) (suspTy (unbiased-type (tree-dim id-T) id-T)) (suspSub id-τ) >tm
+          ≈⟨ Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim id-T) id-T) refl≃s ⟩
+        < Coh (suspTree id-T) (unbiased-type (tree-dim (suspTree id-T)) (suspTree id-T)) (suspSub id-τ) >tm ≡⟨⟩
+        < unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) (suspSub id-τ) >tm ∎
+        where
+          open Reasoning tm-setoid
 
-    open Reasoning (tm-setoid-≈ (suspCtx id-Γ))
+      open Reasoning (tm-setoid-≈ (suspCtx id-Γ))
 
--- open import Catt.Typing.Properties.Lifting 1 (λ x → insertionRule) lift-rule
--- open import Catt.Suspension.Typing 1 (λ x → insertionRule) lift-rule susp-rule
+  sub-rule : ∀ i a → SubRule {i} a
+  sub-rule i a {σ = σ} {Δ = Δ} σty tc = begin
+    insertionRule .lhs a [ σ ]tm ≡⟨⟩
+    Coh id-S id-A (σ ∘ id-σ)
+      ≈⟨ Ins≈ {τ = σ ∘ id-τ} id-S tc id-P id-T lem ⟩
+    Coh (insertion-tree id-S id-P id-T)
+        (id-A [ exterior-sub id-S id-P id-T ]ty)
+        (sub-from-insertion id-S id-P id-T (σ ∘ id-σ) (σ ∘ id-τ)) ≈⟨ Coh≈ refl≈ty (reflexive≈s (sub-from-insertion-sub id-S id-P id-T id-σ id-τ σ)) ⟩
+    Coh (insertion-tree id-S id-P id-T)
+        (id-A [ exterior-sub id-S id-P id-T ]ty)
+        (σ ∘ sub-from-insertion id-S id-P id-T id-σ id-τ) ≡⟨⟩
+    insertionRule .rhs a [ σ ]tm ∎
+    where
+      open InsertionData a
 
-sub-rule : ∀ i a → SubRule {i} a
-sub-rule i a {σ = σ} {Δ = Δ} σty tc = begin
-  insertionRule .lhs a [ σ ]tm ≡⟨⟩
-  Coh id-S id-A (σ ∘ id-σ)
-    ≈⟨ Ins≈ {τ = σ ∘ id-τ} id-S tc id-P id-T lem ⟩
-  Coh (insertion-tree id-S id-P id-T)
-      (id-A [ exterior-sub id-S id-P id-T ]ty)
-      (sub-from-insertion id-S id-P id-T (σ ∘ id-σ) (σ ∘ id-τ)) ≈⟨ Coh≈ refl≈ty (reflexive≈s (sub-from-insertion-sub id-S id-P id-T id-σ id-τ σ)) ⟩
-  Coh (insertion-tree id-S id-P id-T)
-      (id-A [ exterior-sub id-S id-P id-T ]ty)
-      (σ ∘ sub-from-insertion id-S id-P id-T id-σ id-τ) ≡⟨⟩
-  insertionRule .rhs a [ σ ]tm ∎
+      lem : branching-path-to-var id-S id-P [ σ ∘ id-σ ]tm
+        ≃tm unbiased-comp (tree-dim id-T) id-T (σ ∘ id-τ)
+      lem = begin
+        < branching-path-to-var id-S id-P [ σ ∘ id-σ ]tm >tm
+          ≈⟨ assoc-tm σ id-σ (branching-path-to-var id-S id-P) ⟩
+        < branching-path-to-var id-S id-P [ id-σ ]tm [ σ ]tm >tm
+          ≈⟨ sub-action-≃-tm id-eq refl≃s ⟩
+        < unbiased-comp (tree-dim id-T) id-T (σ ∘ id-τ) >tm ∎
+        where
+          open Reasoning tm-setoid
+
+      open Reasoning (tm-setoid-≈ Δ)
+
+open import Catt.Typing.Properties 1 (λ x → insertionRule) lift-rule susp-rule sub-rule
+
+-- example-ctx : Ctx 7
+-- example-ctx = ∅ , ⋆ , ⋆ , 1V ─⟨ ⋆ ⟩⟶ 0V , ⋆ , 2V ─⟨ ⋆ ⟩⟶ 0V , ⋆ , 2V ─⟨ ⋆ ⟩⟶ 0V
+
+-- example-tree : Tree 6
+-- example-tree = Join Sing (Join Sing (Join Sing Sing))
+
+-- test1 : tree-to-ctx (example-tree) ≡ example-ctx
+-- test1 = refl
+
+-- test2 : unbiased-type 1 example-tree ≡ 6V ─⟨ ⋆ ⟩⟶ 1V
+-- test2 = refl
+
+-- example-tm-1 : Tm 7
+-- example-tm-1 = Coh example-tree (6V ─⟨ ⋆ ⟩⟶ 1V) (idSub _)
+
+-- example-tm-2 : Tm 7
+-- example-tm-2 = Coh (Join Sing (Join Sing Sing)) (4V ─⟨ ⋆ ⟩⟶ 1V)
+--   ⟨ ⟨ ⟨ ⟨ ⟨ ⟨⟩ , 6V ⟩ , 5V ⟩ , 4V ⟩ , 1V ⟩ ,
+--     Coh (Join Sing (Join Sing Sing)) (4V ─⟨ ⋆ ⟩⟶ 1V)
+--     ⟨ ⟨ ⟨ ⟨ ⟨ ⟨⟩ , 5V ⟩ , 3V ⟩ , 2V ⟩ , 1V ⟩ , 0V ⟩ ⟩
+
+-- open import Data.Bool
+-- open import Data.Product renaming (_,_ to _,,_)
+-- open import Catt.Tree.Unbiased.Typing 1 (λ x → insertionRule) lift-rule susp-rule sub-rule
+
+-- example-tm-1-Ty : Typing-Tm example-ctx example-tm-1 (6V ─⟨ ⋆ ⟩⟶ 1V)
+-- example-tm-1-Ty = TyCoh (TyArr (var-Ty (example-ctx) (suc (suc (suc (suc (suc (suc zero))))))) TyStar (var-Ty example-ctx (suc zero))) id-Ty true (refl ,, refl) refl≈ty
+
+-- example-tm-2-Ty : Typing-Tm example-ctx example-tm-2 (6V ─⟨ ⋆ ⟩⟶ 1V)
+-- example-tm-2-Ty = TyCoh (unbiased-type-Ty 1 (Join Sing (Join Sing Sing)) (s≤s z≤n))
+--   (TyExt (TyExt (TyExt (TyExt (TyExt (TyNull TyStar) (var-Ty example-ctx (suc (suc (suc (suc (suc (suc zero)))))))) (var-Ty example-ctx (suc (suc (suc (suc (suc zero))))))) (var-Ty example-ctx (suc (suc (suc (suc zero)))))) (var-Ty example-ctx (suc zero))) (TyCoh (unbiased-type-Ty 1 (Join Sing (Join Sing Sing)) (s≤s z≤n)) (TyExt (TyExt (TyExt (TyExt (TyExt (TyNull TyStar) (var-Ty example-ctx (suc (suc (suc (suc (suc zero))))))) (var-Ty example-ctx (suc (suc (suc zero))))) (var-Ty example-ctx (suc (suc zero)))) (var-Ty example-ctx (suc zero))) (var-Ty example-ctx zero)) true (refl ,, refl) refl≈ty))
+--   true (refl ,, refl) refl≈ty
+
+-- example-ins : example-tm-2 ≈[ example-ctx ]tm example-tm-1
+-- example-ins = Ins≈ (Join Sing (Join Sing Sing)) example-tm-2-Ty (PShift PHere) (Join Sing (Join Sing Sing)) refl≃tm
+
+open import Catt.Tree.Insertion.Typing 1 (λ i → insertionRule) lift-rule susp-rule sub-rule
+
+convRule : ∀ i a → ConvRule {i} a
+convRule i a (TyCoh {B = B} Aty σty b sc p) = TyCoh (apply-sub-ty-typing Aty (exterior-sub-Ty id-S id-P id-T ⦃ p = insertion-dim-lem id-S id-P id-T σty τty p′ ⦄)) (sub-from-insertion-Ty id-S id-P id-T σty τty p′) b {!!} lem
   where
     open InsertionData a
 
-    lem : branching-path-to-var id-S id-P [ σ ∘ id-σ ]tm
-      ≃tm unbiased-comp (tree-dim id-T) id-T (σ ∘ id-τ)
+    p′ = trans≃tm id-eq (Coh≃ refl≃ refl≃ty (sym≃s (id-right-unit _)))
+
+    τty : Typing-Sub (tree-to-ctx id-T) id-Γ id-τ
+    τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) id-eq)
+
+    lem : id-A [ exterior-sub id-S id-P id-T ]ty [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
+            ≈[ id-Γ ]ty B
     lem = begin
-      < branching-path-to-var id-S id-P [ σ ∘ id-σ ]tm >tm
-        ≈⟨ assoc-tm σ id-σ (branching-path-to-var id-S id-P) ⟩
-      < branching-path-to-var id-S id-P [ id-σ ]tm [ σ ]tm >tm
-        ≈⟨ sub-action-≃-tm id-eq refl≃s ⟩
-      < unbiased-comp (tree-dim id-T) id-T (σ ∘ id-τ) >tm ∎
+      id-A [ exterior-sub id-S id-P id-T ]ty [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
+        ≈˘⟨ reflexive≈ty (assoc-ty _ _ id-A) ⟩
+      id-A [ sub-from-insertion id-S id-P id-T id-σ id-τ ∘ exterior-sub id-S id-P id-T ]ty
+        ≈⟨ apply-sub-eq-ty id-A (exterior-sub-comm id-S id-P id-T σty τty p′) ⟩
+      id-A [ id-σ ]ty
+        ≈⟨ p ⟩
+      B ∎
       where
-        open Reasoning tm-setoid
-
-    open Reasoning (tm-setoid-≈ Δ)
-
-open import Catt.Typing.Properties 1 (λ x → insertionRule) lift-rule susp-rule sub-rule hiding (refl≈ty)
-
-example-ctx : Ctx 7
-example-ctx = ∅ , ⋆ , ⋆ , 1V ─⟨ ⋆ ⟩⟶ 0V , ⋆ , 2V ─⟨ ⋆ ⟩⟶ 0V , ⋆ , 2V ─⟨ ⋆ ⟩⟶ 0V
-
-example-tree : Tree 6
-example-tree = Join Sing (Join Sing (Join Sing Sing))
-
-test1 : tree-to-ctx (example-tree) ≡ example-ctx
-test1 = refl
-
-test2 : unbiased-type 1 example-tree ≡ 6V ─⟨ ⋆ ⟩⟶ 1V
-test2 = refl
-
-example-tm-1 : Tm 7
-example-tm-1 = Coh example-tree (6V ─⟨ ⋆ ⟩⟶ 1V) (idSub _)
-
-example-tm-2 : Tm 7
-example-tm-2 = Coh (Join Sing (Join Sing Sing)) (4V ─⟨ ⋆ ⟩⟶ 1V)
-  ⟨ ⟨ ⟨ ⟨ ⟨ ⟨⟩ , 6V ⟩ , 5V ⟩ , 4V ⟩ , 1V ⟩ ,
-    Coh (Join Sing (Join Sing Sing)) (4V ─⟨ ⋆ ⟩⟶ 1V)
-    ⟨ ⟨ ⟨ ⟨ ⟨ ⟨⟩ , 5V ⟩ , 3V ⟩ , 2V ⟩ , 1V ⟩ , 0V ⟩ ⟩
-
-open import Data.Bool
-open import Data.Product renaming (_,_ to _,,_)
-open import Catt.Tree.Unbiased.Typing 1 (λ x → insertionRule) lift-rule susp-rule sub-rule
-
-example-tm-1-Ty : Typing-Tm example-ctx example-tm-1 (6V ─⟨ ⋆ ⟩⟶ 1V)
-example-tm-1-Ty = TyCoh (TyArr (var-Ty (example-ctx) (suc (suc (suc (suc (suc (suc zero))))))) TyStar (var-Ty example-ctx (suc zero))) id-Ty true (refl ,, refl) refl≈ty
-
-example-tm-2-Ty : Typing-Tm example-ctx example-tm-2 (6V ─⟨ ⋆ ⟩⟶ 1V)
-example-tm-2-Ty = TyCoh (unbiased-type-Ty 1 (Join Sing (Join Sing Sing)) (s≤s z≤n))
-  (TyExt (TyExt (TyExt (TyExt (TyExt (TyNull TyStar) (var-Ty example-ctx (suc (suc (suc (suc (suc (suc zero)))))))) (var-Ty example-ctx (suc (suc (suc (suc (suc zero))))))) (var-Ty example-ctx (suc (suc (suc (suc zero)))))) (var-Ty example-ctx (suc zero))) (TyCoh (unbiased-type-Ty 1 (Join Sing (Join Sing Sing)) (s≤s z≤n)) (TyExt (TyExt (TyExt (TyExt (TyExt (TyNull TyStar) (var-Ty example-ctx (suc (suc (suc (suc (suc zero))))))) (var-Ty example-ctx (suc (suc (suc zero))))) (var-Ty example-ctx (suc (suc zero)))) (var-Ty example-ctx (suc zero))) (var-Ty example-ctx zero)) true (refl ,, refl) refl≈ty))
-  true (refl ,, refl) refl≈ty
-
-example-ins : example-tm-2 ≈[ example-ctx ]tm example-tm-1
-example-ins = Ins≈ (Join Sing (Join Sing Sing)) example-tm-2-Ty (PShift PHere) (Join Sing (Join Sing Sing)) refl≃tm
+        open Reasoning (ty-setoid-≈ id-Γ)

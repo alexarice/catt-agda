@@ -34,40 +34,15 @@ open import Data.Bool using (Bool; true; false)
 open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Discs
 open import Catt.Discs.Typing index rule lift-rule
+open import Catt.Suspension
+open import Catt.Suspension.Typing index rule lift-rule susp-rule
 
 unbiased-term-Ty : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ d) → Typing-Tm (tree-to-ctx T) (unbiased-term d T) (unbiased-type d T)
 unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → .(tree-dim T ≡ d) → Typing-Sub (tree-to-ctx T) Γ σ
                  → Typing-Tm Γ (Coh T (unbiased-type d T) σ) (unbiased-type d T [ σ ]ty)
 unbiased-type-Ty : (d : ℕ) → (T : Tree n) → .(d ≤ tree-dim T) → Typing-Ty (tree-to-ctx T) (unbiased-type d T)
 
-unbiased-comp-Ty (suc d) T@(Join _ _) q σty = TyCoh (unbiased-type-Ty (suc d) T (≤-reflexive (sym q))) σty true ((supp-lem false) ,, lem) refl≈ty
-  where
-    open ≡-Reasoning
-    supp-lem : (b : Bool) → FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T b ]ty) ∪
-           FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T b ]tm)
-           ≡ supp-bd (pred (tree-dim T)) T b
-    supp-lem b = begin
-      FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T b ]ty) ∪
-        FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T b ]tm)
-        ≡˘⟨ cong₂ _∪_ (TransportVarSet-ty (unbiased-type d (tree-bd d T)) (tree-inc d T b)) (TransportVarSet-tm (unbiased-term d (tree-bd d T)) (tree-inc d T b)) ⟩
-      TransportVarSet (FVTy (unbiased-type d (tree-bd d T))) (tree-inc d T b)
-        ∪ TransportVarSet (FVTm (unbiased-term d (tree-bd d T))) (tree-inc d T b)
-        ≡˘⟨ TransportVarSet-∪ (FVTy (unbiased-type d (tree-bd d T))) (FVTm (unbiased-term d (tree-bd d T))) (tree-inc d T b) ⟩
-      TransportVarSet (FVTy (unbiased-type d (tree-bd d T)) ∪ FVTm (unbiased-term d (tree-bd d T))) (tree-inc d T b)
-        ≡⟨ cong (λ - → TransportVarSet - (tree-inc d T b)) (supp-unbiased d (tree-bd d T) (tree-dim-bd′ d T (≤-trans (n≤1+n d) (≤-reflexive (sym q))))) ⟩
-      TransportVarSet full (tree-inc d T b)
-        ≡⟨ TransportVarSet-full (tree-inc d T b) ⟩
-      FVSub (tree-inc d T b)
-        ≡⟨ supp-bd-compat d T b ⟩
-      supp-bd d T b ≡˘⟨ cong (λ - → supp-bd - T b) (recompute ((tree-dim T ∸ 1) ≟ (suc d ∸ 1)) (cong pred q)) ⟩
-      supp-bd (pred (tree-dim T)) T b ∎
-
-    lem : FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T false ]ty) ∪
-            FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm)
-            ≡ supp-bd (pred (tree-dim T)) T true
-    lem = trans (cong (λ - → FVTy - ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm))
-                   (sym (≃ty-to-≡ (unbiased-type-inc-lem d T)))) (supp-lem true)
-
+unbiased-comp-Ty (suc d) T q σty = TyCoh (unbiased-type-Ty (suc d) T (≤-reflexive (sym q))) σty true (unbiased-supp-condition d T (recompute ((tree-dim T) ≟ (suc d)) q)) refl≈ty
 
 unbiased-term-Ty d T q with is-linear-dec T
 ... | yes p = TyVarZ (reflexive≈ty (linear-tree-unbiased-lem d T ⦃ p ⦄ q))
@@ -86,8 +61,34 @@ unbiased-type-Ty (suc d) T q
           (apply-sub-ty-typing (unbiased-type-Ty d (tree-bd d T) (≤-reflexive (sym (tree-dim-bd′ d T (≤-trans (n≤1+n d) q))))) (tree-inc-Ty d T false))
           (term-conversion (apply-sub-tm-typing (unbiased-term-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-trans (n≤1+n d) q))) (tree-inc-Ty d T true)) (reflexive≈ty (unbiased-type-inc-lem d T)))
 
+unbiased-type′-Ty : (d : ℕ) → (T : Tree n) → .(d ≤ tree-dim T) → Typing-Ty (tree-to-ctx T) (unbiased-type′ d T)
+unbiased-term′-Ty : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ d) → Typing-Tm (tree-to-ctx T) (unbiased-term′ d T) (unbiased-type′ d T)
+unbiased-comp′-Ty : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → .(tree-dim T ≡ d)
+                  → Typing-Tm (tree-to-ctx T) (unbiased-comp′ d T) (unbiased-type′ d T)
+
+unbiased-type′-Ty zero T q = TyStar
+unbiased-type′-Ty (suc d) T q = TyArr (term-conversion (apply-sub-tm-typing utty (tree-inc-Ty d T false)) (reflexive≈ty (sym≃ty (unbiased-type′-prop d T d ≤-refl false)))) (unbiased-type′-Ty d T (≤-trans (n≤1+n d) q)) (term-conversion (apply-sub-tm-typing utty (tree-inc-Ty d T true)) (reflexive≈ty (sym≃ty (unbiased-type′-prop d T d ≤-refl true))))
+  where
+    utty = unbiased-term′-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-trans (n≤1+n d) q))
+
+unbiased-term′-Ty d T q with is-linear-dec T
+... | yes p = TyVarZ (reflexive≈ty (linear-tree-unbiased′-lem d T ⦃ p ⦄ q))
+... | no p = unbiased-comp′-Ty d ⦃ NonZero′-subst q (non-linear-has-no-zero-dim T p) ⦄ T q
+  where
+    non-linear-has-no-zero-dim : (T : Tree n) → ¬ is-linear T → NonZero′ (tree-dim T)
+    non-linear-has-no-zero-dim Sing p = ⊥-elim (p tt)
+    non-linear-has-no-zero-dim (Join S T) p with tree-dim (Join S T) | join-tree-has-non-zero-dim S T
+    ... | zero | q = ⊥-elim (q refl)
+    ... | suc d | q = it
+
+unbiased-comp′-Ty (suc d) T q = TyCoh (unbiased-type′-Ty (suc d) T (≤-reflexive (sym q))) id-Ty true {!!} (reflexive≈ty (id-on-ty _))
+
 sub-from-sphere-unbiased-Ty : (d : ℕ) → (T : Tree n) → .(d ≡ tree-dim T) → Typing-Sub (Sphere d) (tree-to-ctx T) (sub-from-sphere-unbiased d T)
 sub-from-sphere-unbiased-Ty d T p = sub-from-sphere-Ty d (unbiased-type-Ty d T (≤-reflexive p)) (unbiased-type-dim d T)
 
 sub-from-disc-unbiased-Ty : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → .(d ≡ tree-dim T) → Typing-Sub (Disc d) (tree-to-ctx T) (sub-from-disc-unbiased d T)
 sub-from-disc-unbiased-Ty d T p = sub-from-disc-Ty d (unbiased-type-Ty d T (≤-reflexive p)) (unbiased-type-dim d T) (term-conversion (unbiased-comp-Ty d T (sym p) id-Ty) (reflexive≈ty (id-on-ty (unbiased-type d T))))
+
+sub-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero′ (tree-dim T) ⦄ → (d : ℕ) → (tree-dim T ≡ tree-dim S + d) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T d)
+sub-from-linear-tree-unbiased-Ty Sing T d p = TyExt (TyNull {!!}) {!!}
+sub-from-linear-tree-unbiased-Ty (Join S Sing) T d p = {!!}

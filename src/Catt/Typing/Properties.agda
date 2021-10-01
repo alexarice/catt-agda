@@ -44,15 +44,6 @@ var-Ty (Γ , A) (suc i) = TyVarS i (var-Ty Γ i) refl≈ty
 isVar-Ty : (Γ : Ctx n) → (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
 isVar-Ty Γ (Var i) = var-Ty Γ i
 
-Ty-unique : Typing-Tm Γ t A → Typing-Tm Γ t B → A ≈[ Γ ]ty B
-Ty-unique (TyVarZ x) (TyVarZ y) = trans≈ty (sym≈ty x) y
-Ty-unique (TyVarS _ tty x) (TyVarS _ tty2 y) = trans≈ty (trans≈ty (sym≈ty x) (lift-ty-equality (Ty-unique tty tty2))) y
-Ty-unique (TyCoh _ _ _ _ x) (TyCoh _ _ _ _ y) = trans≈ty (sym≈ty x) y
-
-Ty-unique-≃ : s ≃tm t → Typing-Tm Γ s A → Typing-Tm Γ t B → A ≈[ Γ ]ty B
-Ty-unique-≃ p tty tty2 with ≃tm-to-≡ p
-... | refl = Ty-unique tty tty2
-
 truncate′-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate′ d A ≈[ Γ ]ty truncate′ d′ A′
 truncate′-≈ {d = zero} refl p = p
 truncate′-≈ {d = suc d} refl Star≈ = Star≈
@@ -60,12 +51,3 @@ truncate′-≈ {d = suc d} refl (Arr≈ x p x₁) = truncate′-≈ {d = d} ref
 
 truncate-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate d A ≈[ Γ ]ty truncate d′ A′
 truncate-≈ {d} {d′} {A = A} {A′ = A′} refl p = truncate′-≈ {d = ty-dim A ∸ d} {d′ = ty-dim A′ ∸ d} (cong (_∸ d) (≈ty-preserve-height p)) p
-
-src-eq : (s ─⟨ A ⟩⟶ t) ≈[ Γ ]ty (s′ ─⟨ A′ ⟩⟶ t′) → s ≈[ Γ ]tm s′
-src-eq (Arr≈ p q r) = p
-
-tgt-eq : (s ─⟨ A ⟩⟶ t) ≈[ Γ ]ty (s′ ─⟨ A′ ⟩⟶ t′) → t ≈[ Γ ]tm t′
-tgt-eq (Arr≈ p q r) = r
-
-base-eq : (s ─⟨ A ⟩⟶ t) ≈[ Γ ]ty (s′ ─⟨ A′ ⟩⟶ t′) → A ≈[ Γ ]ty A′
-base-eq (Arr≈ p q r) = q

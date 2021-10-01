@@ -622,7 +622,7 @@ idSub≃ (Add≃ p x) = ⟨ (liftSub (idSub≃ p)) , 0V ⟩
 
 idSub≃-on-ty : (p : Γ ≃c Δ) → (A : Ty (ctxLength Γ)) → A [ idSub≃ p ]ty ≃ty A
 idSub≃-on-tm : (p : Γ ≃c Δ) → (s : Tm (ctxLength Γ)) → s [ idSub≃ p ]tm ≃tm s
-idSub≃-on-sub : (p : Γ ≃c Δ) → (σ : Sub n (ctxLength Γ) ⋆) → idSub≃ p ∘ σ ≃s σ
+idSub≃-on-sub : (p : Γ ≃c Δ) → (σ : Sub n (ctxLength Γ) A) → idSub≃ p ∘ σ ≃s σ
 
 idSub≃-on-ty p ⋆ = Star≃ (sym (≃c-preserve-length p))
 idSub≃-on-ty p (s ─⟨ A ⟩⟶ t) = Arr≃ (idSub≃-on-tm p s) (idSub≃-on-ty p A) (idSub≃-on-tm p t)
@@ -634,7 +634,7 @@ idSub≃-on-tm p (Var i) = lem p i
     lem (Add≃ p x) (suc i) = trans≃tm (apply-lifted-sub-tm-≃ (Var i) (idSub≃ p)) (lift-tm-≃ (lem p i))
 idSub≃-on-tm p (Coh Δ A σ) = Coh≃ refl≃ refl≃ty (idSub≃-on-sub p σ)
 
-idSub≃-on-sub p ⟨⟩ = Null≃ (Star≃ (sym (≃c-preserve-length p)))
+idSub≃-on-sub p ⟨⟩ = Null≃ (idSub≃-on-ty p _)
 idSub≃-on-sub p ⟨ σ , t ⟩ = Ext≃ (idSub≃-on-sub p σ) (idSub≃-on-tm p t)
 
 idSub≃-right-unit : (p : Γ ≃c Δ) → (σ : Sub (ctxLength Δ) n A) → σ ∘ idSub≃ p ≃s σ

@@ -60,12 +60,6 @@ data Typing-Ctx where
   TyEmp : Typing-Ctx ∅
   TyAdd : Typing-Ctx Γ → Typing-Ty Γ A → Typing-Ctx (Γ , A)
 
-supp-condition : (b : Bool) → (A : Ty (suc n)) → (T : Tree n) → Set
-supp-condition false A T = FVTy A ≡ full
-supp-condition true ⋆ T = ⊥
-supp-condition true (s ─⟨ A ⟩⟶ t) Sing = ⊥
-supp-condition true (s ─⟨ A ⟩⟶ t) T@(Join _ _) = FVTy A ∪ FVTm s ≡ supp-bd (pred (tree-dim T)) T false × FVTy A ∪ FVTm t ≡ supp-bd (pred (tree-dim T)) T true
-
 data Typing-Tm where
   TyVarZ : Γ ‼ zero ≈[ Γ ]ty B → Typing-Tm Γ 0V B
   TyVarS : (i : Fin (ctxLength Γ)) → Typing-Tm Γ (Var i) A → liftType A ≈[ Γ , C ]ty B → Typing-Tm (Γ , C) (Var (suc i)) B

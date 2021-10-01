@@ -23,6 +23,9 @@ instance
   nonZero : ∀ {n} → NonZero′ (suc n)
   nonZero = _
 
+NonZero′-subst : n ≡ m → NonZero′ n → NonZero′ m
+NonZero′-subst refl x = x
+
 it : ∀ {a} {A : Set a} → {{A}} → A
 it {{x}} = x
 

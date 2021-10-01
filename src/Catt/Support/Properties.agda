@@ -7,7 +7,7 @@ open import Catt.Support
 open import Catt.Variables
 open import Relation.Binary
 open import Data.Nat
-open import Data.Bool
+open import Data.Bool renaming (T to Truth)
 open import Data.Bool.Properties
 open import Data.Vec
 open import Relation.Binary.PropositionalEquality
@@ -15,6 +15,7 @@ open import Data.Fin using (Fin; zero; suc)
 open import Tactic.MonoidSolver
 open import Data.Product renaming (_,_ to _,,_)
 open import Algebra.Bundles
+open import Catt.Syntax.SyntacticEquality
 
 open import Algebra.Definitions
 
@@ -157,6 +158,10 @@ idSub-supp : (n : ℕ) → FVSub (idSub n) ≡ full
 idSub-supp zero = refl
 idSub-supp (suc n) = trans (cong (_∪ ewt empty) (supp-lift-sub (idSub n))) (cong ewt (trans (∪-right-unit (FVSub (idSub n))) (idSub-supp n)))
 
+idSub≃-supp : (p : Γ ≃c Δ) → FVSub (idSub≃ p) ≡ full
+idSub≃-supp Emp≃ = refl
+idSub≃-supp (Add≃ p x) = trans (cong (_∪ ewt empty) (supp-lift-sub (idSub≃ p))) (cong ewt (trans (∪-right-unit (FVSub (idSub≃ p))) (idSub≃-supp p)))
+
 TransportVarSet-lift : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet xs (liftSub σ) ≡ ewf (TransportVarSet xs σ)
 TransportVarSet-lift emp ⟨⟩ = refl
 TransportVarSet-lift (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-lift xs σ
@@ -166,3 +171,80 @@ TransportVarSet-id : (xs : VarSet n) → TransportVarSet xs (idSub n) ≡ xs
 TransportVarSet-id emp = refl
 TransportVarSet-id (ewf xs) = trans (TransportVarSet-lift xs (idSub _)) (cong ewf (TransportVarSet-id xs))
 TransportVarSet-id (ewt xs) = trans (cong (_∪ ewt empty) (TransportVarSet-lift xs (idSub _))) (cong ewt (trans (∪-right-unit (TransportVarSet xs (idSub _))) (TransportVarSet-id xs)))
+
+⊆-refl : {xs : VarSet n} → xs ⊆ xs
+⊆-refl = sym (∪-idem _)
+
+⊆-reflexive : {xs ys : VarSet n} → xs ≡ ys → xs ⊆ ys
+⊆-reflexive refl = ⊆-refl
+
+⊆-trans : {xs ys zs : VarSet n} → xs ⊆ ys → ys ⊆ zs → xs ⊆ zs
+⊆-trans {xs = xs} {ys} {zs} p q = begin
+  zs
+    ≡⟨ q ⟩
+  zs ∪ ys
+    ≡⟨ cong (zs ∪_) p ⟩
+  zs ∪ (ys ∪ xs)
+    ≡˘⟨ ∪-assoc zs ys xs ⟩
+  zs ∪ ys ∪ xs
+    ≡˘⟨ cong (_∪ xs) q ⟩
+  zs ∪ xs ∎
+  where
+    open ≡-Reasoning
+
+⊆-antisym : {xs ys : VarSet n} → xs ⊆ ys → ys ⊆ xs → xs ≡ ys
+⊆-antisym {xs = xs} {ys} p q = begin
+  xs
+    ≡⟨ q ⟩
+  xs ∪ ys
+    ≡⟨ ∪-comm xs ys ⟩
+  ys ∪ xs
+    ≡˘⟨ p ⟩
+  ys ∎
+  where
+    open ≡-Reasoning
+
+⊆-preorder : (n : ℕ) → IsPreorder _≡_ (_⊆_ {n})
+IsPreorder.isEquivalence (⊆-preorder n) = isEquivalence
+IsPreorder.reflexive (⊆-preorder n) = ⊆-reflexive
+IsPreorder.trans (⊆-preorder n) = ⊆-trans
+
+⊆-partial-order : (n : ℕ) → IsPartialOrder _≡_ (_⊆_ {n})
+IsPartialOrder.isPreorder (⊆-partial-order n) = ⊆-preorder n
+IsPartialOrder.antisym (⊆-partial-order n) = ⊆-antisym
+
+⊆-poset : (n : ℕ) → Poset _ _ _
+Poset.Carrier (⊆-poset n) = VarSet n
+Poset._≈_ (⊆-poset n) = _≡_
+Poset._≤_ (⊆-poset n) = _⊆_
+Poset.isPartialOrder (⊆-poset n) = ⊆-partial-order n
+
+⊆-TransportVarSet : (σ : Sub n m ⋆) → {xs ys : VarSet n} → xs ⊆ ys → TransportVarSet xs σ ⊆ TransportVarSet ys σ
+⊆-TransportVarSet σ {xs} {ys} p = begin
+  TransportVarSet ys σ
+    ≡⟨ cong (λ - → TransportVarSet - σ) p ⟩
+  TransportVarSet (ys ∪ xs) σ
+    ≡⟨ TransportVarSet-∪ ys xs σ ⟩
+  TransportVarSet ys σ ∪ TransportVarSet xs σ ∎
+  where
+    open ≡-Reasoning
+
+lookup-isVar-⊆ : (xs : VarSet n) → (s : Tm n) → .⦃ _ : isVar s ⦄ → Truth (lookup-isVar xs s) → FVTm s ⊆ xs
+lookup-isVar-⊆ (ewt xs) (Var zero) p = cong ewt (sym (∪-right-unit xs))
+lookup-isVar-⊆ (ewf xs) (Var (suc i)) p = cong ewf (lookup-isVar-⊆ xs (Var i) p)
+lookup-isVar-⊆ (ewt xs) (Var (suc i)) p = cong ewt (lookup-isVar-⊆ xs (Var i) p)
+
+TransportVarSet-comp : (xs : VarSet l) → (σ : Sub n m ⋆) → (τ : Sub l n ⋆) → TransportVarSet xs (σ ∘ τ) ≡ TransportVarSet (TransportVarSet xs τ) σ
+TransportVarSet-comp emp σ ⟨⟩ = sym (TransportVarSet-empty σ)
+TransportVarSet-comp (ewf xs) σ ⟨ τ , t ⟩ = TransportVarSet-comp xs σ τ
+TransportVarSet-comp (ewt xs) σ ⟨ τ , t ⟩ = begin
+  TransportVarSet xs (σ ∘ τ) ∪ FVTm (t [ σ ]tm)
+    ≡⟨ cong₂ _∪_ (TransportVarSet-comp xs σ τ) (sym (TransportVarSet-tm t σ)) ⟩
+  TransportVarSet (TransportVarSet xs τ) σ ∪ TransportVarSet (FVTm t) σ
+    ≡˘⟨ TransportVarSet-∪ (TransportVarSet xs τ) (FVTm t) σ ⟩
+  TransportVarSet (TransportVarSet xs τ ∪ FVTm t) σ ∎
+  where
+    open ≡-Reasoning
+
+isVar-supp : (t : Tm n) → .⦃ _ : isVar t ⦄ → FVTm t ≡ trueAt (getVarFin t)
+isVar-supp (Var i) = refl

@@ -2,17 +2,23 @@
 
 module Catt.Support where
 
-open import Data.Nat hiding (_+_)
+open import Data.Nat
 open import Data.Nat.Properties using (≤-refl)
 open import Data.Vec hiding (drop ; [_])
 open import Catt.Syntax
 open import Catt.Syntax.Properties
 -- open import Catt.Dimension
 open import Data.Bool
-open import Data.Fin
+open import Data.Fin using (Fin;zero;suc;fromℕ)
 open import Data.Empty
 open import Data.Unit
 open import Catt.Globular
+open import Catt.Variables
+open import Catt.Tree
+open import Catt.Tree.Properties
+open import Relation.Binary.PropositionalEquality
+open import Data.Product renaming (_,_ to _,,_)
+open import Catt.Suspension
 
 -- record VarSet (Γ : Ctx n) : Set where
 --   constructor [_]v
@@ -61,3 +67,35 @@ TransportVarSet : VarSet n → Sub n m ⋆ → VarSet m
 TransportVarSet xs ⟨⟩ = empty
 TransportVarSet (ewf xs) ⟨ σ , t ⟩ = TransportVarSet xs σ
 TransportVarSet (ewt xs) ⟨ σ , t ⟩ = TransportVarSet xs σ ∪ FVTm t
+
+connect-supp : VarSet (suc n) → VarSet (suc m) → VarSet (suc (m + n))
+connect-supp xs (x ∷ emp) = xs
+connect-supp xs (x ∷ y ∷ ys) = x ∷ connect-supp xs (y ∷ ys)
+
+suspSupp : VarSet n → VarSet (2 + n)
+suspSupp [] = full
+suspSupp (x ∷ vs) = x ∷ suspSupp vs
+
+supp-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → VarSet (suc n)
+supp-bd zero T false = trueAt (fromℕ _)
+supp-bd zero T true = trueAt (getVarFin (tree-last-var T) ⦃ tree-last-var-is-var T ⦄)
+supp-bd (suc d) Sing b = full
+supp-bd (suc d) (Join S T) b = connect-supp (suspSupp (supp-bd d S b)) (supp-bd (suc d) T b)
+
+supp-condition : (b : Bool) → (A : Ty (suc n)) → (T : Tree n) → Set
+supp-condition false A T = FVTy A ≡ full
+supp-condition true ⋆ T = ⊥
+supp-condition true (s ─⟨ A ⟩⟶ t) T = NonZero′ (tree-dim T) × FVTy A ∪ FVTm s ≡ supp-bd (pred (tree-dim T)) T false × FVTy A ∪ FVTm t ≡ supp-bd (pred (tree-dim T)) T true
+
+suspSuppBd : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSupp (supp-bd d T b) ≡ supp-bd (suc d) (suspTree T) b
+suspSuppBd zero T false = refl
+suspSuppBd zero T true = refl
+suspSuppBd (suc d) Sing b = refl
+suspSuppBd (suc d) (Join S T) b = refl
+
+lookup-isVar : (xs : VarSet n) → (t : Tm n) → .⦃ isVar t ⦄ → Bool
+lookup-isVar (x ∷ xs) (Var zero) = x
+lookup-isVar (x ∷ xs) (Var (suc i)) = lookup-isVar xs (Var i)
+
+_⊆_ : VarSet n → VarSet n → Set
+xs ⊆ ys = ys ≡ ys ∪ xs

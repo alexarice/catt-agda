@@ -10,11 +10,12 @@ open import Data.Vec
 open import Catt.Suspension
 open import Relation.Binary.PropositionalEquality
 open import Data.Fin using (fromℕ; inject₁; Fin; zero; suc)
+open import Data.Bool
 open import Data.Bool.Properties
-
-suspSupp : VarSet n → VarSet (2 + n)
-suspSupp [] = full
-suspSupp (x ∷ vs) = x ∷ suspSupp vs
+open import Data.Empty
+open import Data.Product renaming (_,_ to _,,_)
+open import Catt.Tree
+open import Catt.Tree.Properties
 
 suspSupp∪ : (vs vs′ : VarSet n) → suspSupp vs ∪ suspSupp vs′ ≡ suspSupp (vs ∪ vs′)
 suspSupp∪ emp emp = refl
@@ -24,9 +25,9 @@ suspSuppLem : (n : ℕ) → empty ∪ ewf (trueAt (fromℕ n)) ∪ trueAt (injec
 suspSuppLem zero = refl
 suspSuppLem (suc n) = cong (ewf) (suspSuppLem n)
 
-suspSuppSnd : (xs : VarSet n) → suspSupp xs ∪ FVTm getSnd ≡ suspSupp xs
+suspSuppSnd : (xs : VarSet n) → FVTm getSnd ⊆ suspSupp xs
 suspSuppSnd emp = refl
-suspSuppSnd (x ∷ xs) = cong₂ _∷_ (∨-identityʳ x) (suspSuppSnd xs)
+suspSuppSnd (x ∷ xs) = cong₂ _∷_ (sym (∨-identityʳ x)) (suspSuppSnd xs)
 
 suspSuppEmpRight : (xs : VarSet n) → suspSupp xs ≡ suspSupp xs ∪ suspSupp empty
 suspSuppEmpRight xs = sym (trans (suspSupp∪ xs empty) (cong suspSupp (∪-right-unit xs)))
@@ -82,3 +83,34 @@ suspSuppSub ⟨ σ , t ⟩ = begin
 suspSuppFull : suspSupp (full {n}) ≡ full
 suspSuppFull {zero} = refl
 suspSuppFull {suc n} = cong ewt suspSuppFull
+
+suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {T : Tree n} → supp-condition b A T → supp-condition b (suspTy A) (suspTree T)
+suspSuppCondition {b = false} {A} {T} sc = begin
+  FVTy (suspTy A) ≡⟨ suspSuppTy A ⟩
+  suspSupp (FVTy A) ≡⟨ cong suspSupp sc ⟩
+  suspSupp full ≡⟨ suspSuppFull ⟩
+  full ∎
+  where
+    open ≡-Reasoning
+suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {T} (nz ,, sc1 ,, sc2) = it ,, l1 ,, l2
+  where
+    instance _ = nz
+    open ≡-Reasoning
+    suc-pred : (n : ℕ) → .⦃ NonZero′ n ⦄ → suc (pred n) ≡ n
+    suc-pred (suc n) = refl
+
+    l1 : FVTy (suspTy A) ∪ FVTm (suspTm s) ≡ supp-bd (tree-dim T) (suspTree T) false
+    l1 = begin
+      FVTy (suspTy A) ∪ FVTm (suspTm s) ≡⟨ suspSuppTyTm A s ⟩
+      suspSupp (FVTy A ∪ FVTm s) ≡⟨ cong suspSupp sc1 ⟩
+      suspSupp (supp-bd (pred (tree-dim T)) T false) ≡⟨ suspSuppBd (pred (tree-dim T)) T false ⟩
+      supp-bd (suc (pred (tree-dim T))) (suspTree T) false ≡⟨ cong (λ - → supp-bd - (suspTree T) false) (suc-pred (tree-dim T)) ⟩
+      supp-bd (tree-dim T) (suspTree T) false ∎
+
+    l2 : FVTy (suspTy A) ∪ FVTm (suspTm t) ≡ supp-bd (tree-dim T) (suspTree T) true
+    l2 = begin
+      FVTy (suspTy A) ∪ FVTm (suspTm t) ≡⟨ suspSuppTyTm A t ⟩
+      suspSupp (FVTy A ∪ FVTm t) ≡⟨ cong suspSupp sc2 ⟩
+      suspSupp (supp-bd (pred (tree-dim T)) T true) ≡⟨ suspSuppBd (pred (tree-dim T)) T true ⟩
+      supp-bd (suc (pred (tree-dim T))) (suspTree T) true ≡⟨ cong (λ - → supp-bd - (suspTree T) true) (suc-pred (tree-dim T)) ⟩
+      supp-bd (pred (tree-dim (suspTree T))) (suspTree T) true ∎

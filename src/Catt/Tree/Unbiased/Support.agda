@@ -17,8 +17,28 @@ open import Relation.Nullary
 open import Data.Bool using (Bool; true; false)
 open import Tactic.MonoidSolver
 open import Data.Nat.Properties
+open import Data.Product renaming (_,_ to _,,_)
 
+supp-unbiased-lem : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ suc d) → (b : Bool)
+                  → FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T b ]ty)
+                  ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T b ]tm) ≡ supp-bd d T b
 supp-unbiased : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ d) → FVTy (unbiased-type d T) ∪ FVTm (unbiased-term d T) ≡ full
+
+supp-unbiased-lem d T p b = begin
+  FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T b ]ty)
+  ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T b ]tm)
+    ≡˘⟨ cong₂ _∪_ (TransportVarSet-ty (unbiased-type d (tree-bd d T)) (tree-inc d T b)) (TransportVarSet-tm (unbiased-term d (tree-bd d T)) (tree-inc d T b)) ⟩
+  TransportVarSet (FVTy (unbiased-type d (tree-bd d T))) (tree-inc d T b)
+  ∪ TransportVarSet (FVTm (unbiased-term d (tree-bd d T))) (tree-inc d T b)
+    ≡˘⟨ TransportVarSet-∪ (FVTy (unbiased-type d (tree-bd d T))) (FVTm (unbiased-term d (tree-bd d T))) (tree-inc d T b) ⟩
+  TransportVarSet (FVTy (unbiased-type d (tree-bd d T)) ∪ FVTm (unbiased-term d (tree-bd d T))) (tree-inc d T b)
+    ≡⟨ cong (λ - → TransportVarSet - (tree-inc d T b)) (supp-unbiased d (tree-bd d T) (tree-dim-bd′ d T (≤-trans (n≤1+n d) (≤-reflexive (sym p))))) ⟩
+  TransportVarSet full (tree-inc d T b) ≡⟨ TransportVarSet-full (tree-inc d T b) ⟩
+  FVSub (tree-inc d T b) ≡⟨ supp-bd-compat d T b ⟩
+  supp-bd d T b ∎
+    where
+      open ≡-Reasoning
+
 supp-unbiased zero Sing p = refl
 supp-unbiased zero (Join S T) p with .(join-tree-has-non-zero-dim S T (sym p))
 ... | ()
@@ -26,20 +46,6 @@ supp-unbiased {n} (suc d) T p with is-linear-dec T
 ... | yes q = trans (cong (_∪ ewt empty) l1) (linear-tree-supp-lem d T ⦃ q ⦄ p)
   where
     open ≡-Reasoning
-    l2 : (b : Bool) → FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T b ]ty)
-      ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T b ]tm) ≡ supp-bd d T b
-    l2 b = begin
-      FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T b ]ty)
-      ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T b ]tm)
-        ≡˘⟨ cong₂ _∪_ (TransportVarSet-ty (unbiased-type d (tree-bd d T)) (tree-inc d T b)) (TransportVarSet-tm (unbiased-term d (tree-bd d T)) (tree-inc d T b)) ⟩
-      TransportVarSet (FVTy (unbiased-type d (tree-bd d T))) (tree-inc d T b)
-      ∪ TransportVarSet (FVTm (unbiased-term d (tree-bd d T))) (tree-inc d T b)
-        ≡˘⟨ TransportVarSet-∪ (FVTy (unbiased-type d (tree-bd d T))) (FVTm (unbiased-term d (tree-bd d T))) (tree-inc d T b) ⟩
-      TransportVarSet (FVTy (unbiased-type d (tree-bd d T)) ∪ FVTm (unbiased-term d (tree-bd d T))) (tree-inc d T b)
-        ≡⟨ cong (λ - → TransportVarSet - (tree-inc d T b)) (supp-unbiased d (tree-bd d T) (tree-dim-bd′ d T (≤-trans (n≤1+n d) (≤-reflexive (sym p))))) ⟩
-      TransportVarSet full (tree-inc d T b) ≡⟨ TransportVarSet-full (tree-inc d T b) ⟩
-      FVSub (tree-inc d T b) ≡⟨ supp-bd-compat d T b ⟩
-      supp-bd d T b ∎
 
     l3 : FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T false ]ty)
       ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm) ≡ supp-bd d T true
@@ -49,7 +55,7 @@ supp-unbiased {n} (suc d) T p with is-linear-dec T
         ≡˘⟨ cong (λ - → FVTy - ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm)) (≃ty-to-≡ (unbiased-type-inc-lem d T)) ⟩
       FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T true ]ty) ∪
         FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm)
-        ≡⟨ l2 true ⟩
+        ≡⟨ supp-unbiased-lem d T p true ⟩
       supp-bd d T true ∎
 
     l1 : FVTy (unbiased-type (suc d) T) ≡ supp-bd d T false ∪ supp-bd d T true
@@ -76,7 +82,7 @@ supp-unbiased {n} (suc d) T p with is-linear-dec T
       ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T false ]tm))
       ∪ (FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T false ]ty)
       ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm))
-        ≡⟨ cong₂ _∪_ (l2 false) l3 ⟩
+        ≡⟨ cong₂ _∪_ (supp-unbiased-lem d T p false) l3 ⟩
       supp-bd d T false ∪ supp-bd d T true ∎
 
 
@@ -86,3 +92,36 @@ supp-unbiased {n} (suc d) T p with is-linear-dec T
   full ∎
   where
     open ≡-Reasoning
+
+unbiased-supp-condition : (d : ℕ) → (T : Tree n) → (tree-dim T ≡ suc d) → supp-condition true (unbiased-type (suc d) T) T
+unbiased-supp-condition d T p = nz ,, l1 ,, l2
+  where
+    open ≡-Reasoning
+
+    nz : NonZero′ (tree-dim T)
+    nz = NonZero′-subst (sym p) it
+
+    l1 : FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T false ]ty) ∪
+           FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T false ]tm)
+           ≡ supp-bd (pred (tree-dim T)) T false
+    l1 = begin
+      FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T false ]ty) ∪
+        FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T false ]tm)
+        ≡⟨ supp-unbiased-lem d T p false ⟩
+      supp-bd d T false
+        ≡⟨ cong (λ - → supp-bd - T false) (cong pred (sym p)) ⟩
+      supp-bd (pred (tree-dim T)) T false ∎
+
+    l2 : FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T false ]ty) ∪
+           FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm)
+           ≡ supp-bd (pred (tree-dim T)) T true
+    l2 = begin
+      FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T false ]ty) ∪
+        FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm)
+        ≡⟨ cong (λ - → FVTy - ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm)) (sym (≃ty-to-≡ (unbiased-type-inc-lem d T))) ⟩
+      FVTy (unbiased-type d (tree-bd d T) [ tree-inc d T true ]ty) ∪
+        FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm)
+        ≡⟨ supp-unbiased-lem d T p true ⟩
+      supp-bd d T true
+        ≡⟨ cong (λ - → supp-bd - T true) (cong pred (sym p)) ⟩
+        supp-bd (pred (tree-dim T)) T true ∎

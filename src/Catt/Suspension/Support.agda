@@ -10,12 +10,13 @@ open import Data.Vec
 open import Catt.Suspension
 open import Relation.Binary.PropositionalEquality
 open import Data.Fin using (fromℕ; inject₁; Fin; zero; suc)
-open import Data.Bool
+open import Data.Bool renaming (T to Truth)
 open import Data.Bool.Properties
 open import Data.Empty
 open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Tree
 open import Catt.Tree.Properties
+open import Data.Unit
 
 suspSupp∪ : (vs vs′ : VarSet n) → suspSupp vs ∪ suspSupp vs′ ≡ suspSupp (vs ∪ vs′)
 suspSupp∪ emp emp = refl
@@ -24,6 +25,14 @@ suspSupp∪ (x ∷ xs) (y ∷ ys) = cong₂ _∷_ refl (suspSupp∪ xs ys)
 suspSuppLem : (n : ℕ) → empty ∪ ewf (trueAt (fromℕ n)) ∪ trueAt (inject₁ (fromℕ n)) ≡ suspSupp empty
 suspSuppLem zero = refl
 suspSuppLem (suc n) = cong (ewf) (suspSuppLem n)
+
+suspSuppFstTruth : (xs : VarSet n) → Truth (lookup-isVar (suspSupp xs) getFst)
+suspSuppFstTruth emp = tt
+suspSuppFstTruth (x ∷ xs) = suspSuppFstTruth xs
+
+suspSuppSndTruth : (xs : VarSet n) → Truth (lookup-isVar (suspSupp xs) getSnd)
+suspSuppSndTruth emp = tt
+suspSuppSndTruth (x ∷ xs) = suspSuppSndTruth xs
 
 suspSuppSnd : (xs : VarSet n) → FVTm getSnd ⊆ suspSupp xs
 suspSuppSnd emp = refl

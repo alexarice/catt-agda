@@ -77,7 +77,7 @@ exterior-sub : (S : Tree n)
              → Sub (suc n) (suc (insertion-tree-size S P T)) ⋆
 exterior-sub (Join S₁ S₂) PHere T
   = idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
-    ∘ sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘ (idSub≃ (linear-tree-compat (suspTree S₁))))
+    ∘ sub-between-connects (sub-from-linear-tree-unbiased (suspTree S₁) T 0)
                            (idSub _)
                            (tree-last-var T)
 exterior-sub (Join S₁ S₂) (PExt P) (Join T Sing) =

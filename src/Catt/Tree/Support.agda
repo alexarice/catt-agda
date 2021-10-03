@@ -3,6 +3,7 @@
 module Catt.Tree.Support where
 
 open import Catt.Syntax
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Connection.Support
@@ -16,7 +17,30 @@ open import Data.Fin using (Fin; suc; zero; fromℕ; inject₁)
 open import Relation.Binary.PropositionalEquality
 open import Catt.Suspension
 open import Data.Vec
-open import Data.Bool
+open import Data.Bool using (Bool; true; false; _∨_) renaming (T to Truth)
+open import Data.Nat.Properties
+import Relation.Binary.Reasoning.PartialOrder as PReasoning
+open import Catt.Connection
+open import Catt.Connection.Properties
+open import Data.Unit using (tt)
+
+supp-bd-full : (d : ℕ) → (T : Tree n) → (b : Bool) → tree-dim T ≤ d → supp-bd d T b ≡ full
+supp-bd-full zero Sing false p = refl
+supp-bd-full zero Sing true p = refl
+supp-bd-full zero (Join S T) b p with tree-dim T
+supp-bd-full zero (Join S T) b () | zero
+supp-bd-full zero (Join S T) b () | suc x
+supp-bd-full (suc d) Sing b p = refl
+supp-bd-full (suc d) (Join S T) b p = begin
+  connect-supp (suspSupp (supp-bd d S b)) (supp-bd (suc d) T b)
+    ≡⟨ cong₂ (λ a b → connect-supp (suspSupp a) b) (supp-bd-full d S b (≤-pred (m⊔n≤o⇒m≤o (suc (tree-dim S)) (tree-dim T) p))) (supp-bd-full (suc d) T b (m⊔n≤o⇒n≤o (suc (tree-dim S)) (tree-dim T) p)) ⟩
+  connect-supp (suspSupp full) full
+    ≡⟨ cong (λ - → connect-supp - full) suspSuppFull ⟩
+  connect-supp full full
+    ≡⟨ connect-supp-full (suc (suc _)) _ ⟩
+  full ∎
+  where
+    open ≡-Reasoning
 
 supp-bd-compat : (d : ℕ) → (T : Tree n) → (b : Bool) → FVSub (tree-inc d T b) ≡ supp-bd d T b
 supp-bd-compat zero T false = ∪-left-unit (trueAt (fromℕ _))
@@ -43,3 +67,43 @@ linear-tree-supp-lem (suc d) (Join T Sing) p = begin
     open ≡-Reasoning
     lem : (xs : VarSet (suc n)) → suspSupp xs ∪ ewt empty ≡ suspSupp (xs ∪ ewt empty)
     lem (x ∷ xs) = cong ((x ∨ true) ∷_) (trans (∪-right-unit (suspSupp xs)) (cong suspSupp (sym (∪-right-unit xs))))
+
+supp-bd-include-fst : (d : ℕ) → (T : Tree n) → (b : Bool) → Truth (lookup-isVar (supp-bd (suc d) T b) (Var (fromℕ _)))
+supp-bd-include-fst d Sing b = tt
+supp-bd-include-fst d (Join S T) b = connect-supp-fst (suspSupp (supp-bd d S b)) (supp-bd (suc d) T b) (suspSuppFstTruth (supp-bd d S b))
+
+supp-bd-include-last : (d : ℕ) → (T : Tree n) → (b : Bool) → FVTm (tree-last-var T) ⊆ supp-bd (suc d) T b
+supp-bd-include-last d Sing b = ⊆-refl
+supp-bd-include-last d (Join S T) b = begin
+  FVTm (tree-last-var T [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm)
+    ≡˘⟨ TransportVarSet-tm (tree-last-var T) (connect-susp-inc-right (tree-size S) (tree-size T)) ⟩
+  TransportVarSet (FVTm (tree-last-var T))
+    (connect-susp-inc-right (tree-size S) (tree-size T))
+    ≤⟨ ⊆-TransportVarSet (connect-susp-inc-right (tree-size S) (tree-size T)) (supp-bd-include-last d T b) ⟩
+  TransportVarSet (supp-bd (suc d) T b) (connect-inc-right getSnd _)
+    ≤⟨ ∪-⊆-2 (TransportVarSet (suspSupp (supp-bd d S b))
+               (connect-inc-left getSnd _)) (TransportVarSet (supp-bd (suc d) T b) (connect-inc-right getSnd _)) ⟩
+  TransportVarSet (suspSupp (supp-bd d S b))
+    (connect-inc-left getSnd _)
+    ∪
+    TransportVarSet (supp-bd (suc d) T b) (connect-inc-right getSnd _)
+    ≡⟨ connect-supp-incs (suspSupp (supp-bd d S b)) getSnd (supp-bd (suc d) T b) (suspSuppSnd (supp-bd d S b)) ⟩
+  connect-supp (suspSupp (supp-bd d S b)) (supp-bd (suc d) T b) ∎
+  where
+    open PReasoning (⊆-poset _)
+
+connect-tree-to-ctx-supp : (d : ℕ) → (S : Tree n) → (T : Tree m) → (b : Bool)
+                         → TransportVarSet (connect-supp (supp-bd (suc d) S b) (supp-bd (suc d) T b))
+                                           (idSub≃ (sym≃c (connect-tree-to-ctx S T)))
+                         ≡ supp-bd (suc d) (connect-tree S T) b
+connect-tree-to-ctx-supp d Sing T b = begin
+  TransportVarSet (connect-supp full (supp-bd (suc d) T b))
+      (idSub≃ (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T)))))
+    ≡⟨ cong (λ - → TransportVarSet (connect-supp full (supp-bd (suc d) T b)) (idSub≃ -)) (≃c-irrel (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T)))) (connect-left-unit (tree-to-ctx T))) ⟩
+  TransportVarSet (connect-supp full (supp-bd (suc d) T b))
+    (idSub≃ (connect-left-unit (tree-to-ctx T)))
+    ≡⟨ connect-supp-unit-left (supp-bd (suc d) T b) (tree-to-ctx T) (supp-bd-include-fst d T b) ⟩
+  supp-bd (suc d) T b ∎
+  where
+    open ≡-Reasoning
+connect-tree-to-ctx-supp d (Join S₁ S₂) T b = {!!}

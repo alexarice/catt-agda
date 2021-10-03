@@ -53,14 +53,14 @@ _∪_ : VarSet n → VarSet n → VarSet n
 FVCtx : (Γ : Ctx n) → VarSet n
 FVTm : (t : Tm n) → VarSet n
 FVTy : (A : Ty n) → VarSet n
-FVSub : (σ : Sub n m ⋆) → VarSet m
+FVSub : (σ : Sub n m A) → VarSet m
 
 FVCtx Γ = full
 FVTm (Var i) = trueAt i
 FVTm (Coh Δ A σ) = FVSub σ
 FVTy ⋆ = empty
 FVTy (s ─⟨ A ⟩⟶ t) = FVTy A ∪ FVTm s ∪ FVTm t
-FVSub ⟨⟩ = empty
+FVSub {A = A} ⟨⟩ = FVTy A
 FVSub ⟨ σ , t ⟩ = FVSub σ ∪ FVTm t
 
 TransportVarSet : VarSet n → Sub n m ⋆ → VarSet m

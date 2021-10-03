@@ -21,6 +21,8 @@ open import Tactic.MonoidSolver
 import Relation.Binary.Reasoning.Setoid as Reasoning
 import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Catt.Variables
+open import Catt.Tree
+open import Data.Unit using (tt)
 
 connect-supp-full : ∀ n m → connect-supp {n} {m} full full ≡ full
 connect-supp-full n zero = refl
@@ -157,3 +159,21 @@ sub-between-connect-susps-supp {n = n} {l = l} {m = m} {l′ = l′} σ τ p = t
         ≡˘⟨ cong (FVSub (connect-susp-inc-left l l′ ∘ suspSub σ) ∪_) (cong FVTm (≃tm-to-≡ lem)) ⟩
       FVSub (connect-susp-inc-left l l′ ∘ suspSub σ) ∪
         FVTm (Var (fromℕ m) [ connect-inc-right getSnd l′ ∘ τ ]tm) ∎
+
+connect-supp-unit-left : (xs : VarSet (suc n)) → (Γ : Ctx (suc n))
+                       → Truth (lookup-isVar xs (Var (fromℕ _)))
+                       → TransportVarSet (connect-supp full xs)
+                         (idSub≃ (connect-left-unit Γ))
+                         ≡ xs
+connect-supp-unit-left (ewt emp) (∅ , A) p = refl
+connect-supp-unit-left (ewf (y ∷ xs)) (Γ , B , A) p = trans (TransportVarSet-lift (connect-supp full (y ∷ xs)) (idSub≃ (connect-left-unit (Γ , B)))) (cong ewf (connect-supp-unit-left (y ∷ xs) (Γ , B) p))
+connect-supp-unit-left (ewt (y ∷ xs)) (Γ , B , A) p = trans (cong (_∪ ewt empty) (TransportVarSet-lift (connect-supp full (y ∷ xs)) (idSub≃ (connect-left-unit (Γ , B))))) (cong ewt (trans (∪-right-unit _) (connect-supp-unit-left (y ∷ xs) (Γ , B) p)))
+
+connect-supp-fst : (xs : VarSet (suc n)) → (ys : VarSet (suc m)) → Truth (lookup-isVar xs (Var (fromℕ _))) → Truth (lookup-isVar (connect-supp xs ys) (Var (fromℕ _)))
+connect-supp-fst xs (x ∷ emp) p = p
+connect-supp-fst xs (x ∷ y ∷ ys) p = connect-supp-fst xs (y ∷ ys) p
+
+connect-supp-assoc : (Γ : Ctx (suc n)) → (xs : VarSet (suc n)) → (Δ : Ctx (suc m)) → (ys : VarSet (suc m)) → (Υ : Ctx (suc l)) → (zs : VarSet (suc l))
+                   → TransportVarSet (connect-supp (connect-supp xs ys) zs) (idSub≃ (connect-assoc Γ {!!} {!!} {!!} {!!}))
+                   ≡ connect-supp xs (connect-supp ys zs)
+connect-supp-assoc = {!!}

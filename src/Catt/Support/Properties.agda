@@ -16,6 +16,8 @@ open import Tactic.MonoidSolver
 open import Data.Product renaming (_,_ to _,,_)
 open import Algebra.Bundles
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Suspension
+import Relation.Binary.Reasoning.PartialOrder as PReasoning
 
 open import Algebra.Definitions
 
@@ -248,3 +250,27 @@ TransportVarSet-comp (ewt xs) σ ⟨ τ , t ⟩ = begin
 
 isVar-supp : (t : Tm n) → .⦃ _ : isVar t ⦄ → FVTm t ≡ trueAt (getVarFin t)
 isVar-supp (Var i) = refl
+
+unrestrict-supp : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → FVSub (unrestrict σ) ≡ FVSub σ
+unrestrict-supp ⟨⟩ = refl
+unrestrict-supp ⟨ σ , t ⟩ = cong (_∪ FVTm t) (unrestrict-supp σ)
+
+∪-⊆-2 : (xs ys : VarSet n) → ys ⊆ xs ∪ ys
+∪-⊆-2 xs ys = begin
+  xs ∪ ys
+    ≡˘⟨ cong (xs ∪_) (∪-idem ys) ⟩
+  xs ∪ (ys ∪ ys)
+    ≡˘⟨ ∪-assoc xs ys ys ⟩
+  xs ∪ ys ∪ ys ∎
+  where
+    open ≡-Reasoning
+
+∪-⊆-1 : (xs ys : VarSet n) → xs ⊆ xs ∪ ys
+∪-⊆-1 xs ys = begin
+  xs
+    ≤⟨ ∪-⊆-2 ys xs ⟩
+  ys ∪ xs
+    ≡⟨ ∪-comm ys xs ⟩
+  xs ∪ ys ∎
+  where
+    open PReasoning (⊆-poset _)

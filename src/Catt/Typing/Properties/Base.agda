@@ -11,9 +11,11 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing index rule
 open import Relation.Binary.PropositionalEquality
-open import Relation.Binary
+open import Relation.Binary using (Setoid)
 open import Catt.Suspension
 open import Catt.Tree
+open import Catt.Globular
+open import Function.Bundles
 
 private
   Index : Set
@@ -190,6 +192,10 @@ coh-sub-ty (TyCoh x τty b x₂ x₃) = τty
 
 module _ {i : Index} (a : rule i .Rule.Args) where
   open Rule (rule i)
+
+  BoundRule : Set
+  BoundRule = ∀ {d}
+            → (BoundedTm d (tgtCtx a) (lhs a)) ⇔ (BoundedTm d (tgtCtx a) (rhs a))
 
   LiftRule : Set
   LiftRule = {A : Ty (len a)}

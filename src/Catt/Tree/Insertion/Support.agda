@@ -30,6 +30,7 @@ open import Catt.Tree.Unbiased.Properties
 open import Catt.Variables
 open import Catt.Tree.Unbiased.Support
 open import Catt.Tree.Support
+open import Data.Nat.Properties
 
 insertion-tree-dim : (S : Tree n)
                    → (P : Path S)
@@ -194,7 +195,7 @@ exterior-sub-preserve-bd (suc d) (Join S₁ S₂) PHere T b = begin
   TransportVarSet
     (connect-supp (supp-bd (suc d) T b) (supp-bd (suc d) S₂ b))
     (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)))
-    ≡⟨ {!!} ⟩
+    ≡⟨ connect-tree-to-ctx-supp d T S₂ b ⟩
   supp-bd (suc d) (connect-tree T S₂) b ∎
   where
     l1 : Var (fromℕ _) [ connect-inc-right (tree-last-var T) (tree-size S₂) ∘ idSub _ ]tm
@@ -250,293 +251,55 @@ exterior-sub-preserve-bd (suc d) (Join S₁ S₂) PHere T b = begin
         ≡⟨ cong₂ connect-supp (sub-from-linear-tree-supp (suc d) (suspTree S₁) b T (sym it)) (TransportVarSet-id (supp-bd (suc d) S₂ b)) ⟩
       connect-supp (supp-bd (suc d) T b) (supp-bd (suc d) S₂ b) ∎
 
-exterior-sub-preserve-bd (suc d) (Join S₁ S₂) (PExt P) T b = {!!}
-exterior-sub-preserve-bd (suc d) (Join S₁ S₂) (PShift P) T b = {!!}
+exterior-sub-preserve-bd (suc d) (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p = p ⦄ b = begin
+  TransportVarSet
+      (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
+      (sub-between-connect-susps (exterior-sub S₁ P T)
+       (idSub _))
+    ≡⟨ sub-between-connect-susps-Transport (exterior-sub S₁ P T) (idSub _) (supp-bd d S₁ b) (supp-bd (suc d) S₂ b) (id-on-tm (Var (fromℕ _))) ⟩
+  connect-supp
+    (suspSupp (TransportVarSet (supp-bd d S₁ b) (exterior-sub S₁ P T)))
+    (TransportVarSet (supp-bd (suc d) S₂ b) (idSub (suc _)))
+    ≡⟨ cong₂ (λ a → connect-supp (suspSupp a)) (exterior-sub-preserve-bd d S₁ P T ⦃ p = cong pred p ⦄ b) (TransportVarSet-id (supp-bd (suc d) S₂ b)) ⟩
+  connect-supp (suspSupp (supp-bd d (insertion-tree S₁ P T) b))
+      (supp-bd (suc d) S₂ b) ∎
+  where
+    open ≡-Reasoning
+exterior-sub-preserve-bd (suc d) (Join S₁ S₂) (PShift P) T b = begin
+  TransportVarSet
+      (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
+      (sub-between-connect-susps
+       (idSub _) (exterior-sub S₂ P T))
+    ≡⟨ sub-between-connect-susps-Transport (idSub _) (exterior-sub S₂ P T) (supp-bd d S₁ b) (supp-bd (suc d) S₂ b) (sym≃tm (exterior-sub-fst-var S₂ P T)) ⟩
+  connect-supp
+    (suspSupp (TransportVarSet (supp-bd d S₁ b) (idSub (suc _))))
+    (TransportVarSet (supp-bd (suc d) S₂ b) (exterior-sub S₂ P T))
+    ≡⟨ cong₂ (λ a → connect-supp (suspSupp a)) (TransportVarSet-id (supp-bd d S₁ b)) (exterior-sub-preserve-bd (suc d) S₂ P T b) ⟩
+  connect-supp (suspSupp (supp-bd d S₁ b))
+      (supp-bd (suc d) (insertion-tree S₂ P T) b) ∎
+  where
+    open ≡-Reasoning
 
--- exterior-sub-preserve-bd : (S : Tree n)
---                          → (P : Path S)
---                          → .⦃ _ : is-branching-path P ⦄
---                          → (T : Tree m)
---                          → .⦃ _ : has-linear-height (path-length P) T ⦄
---                          → ⦃ p : height-of-branching P ≡ tree-dim T ⦄
---                          → (b : Bool)
---                          → TransportVarSet (supp-bd (pred (tree-dim S)) S b) (exterior-sub S P T)
---                          ≡ supp-bd (pred (tree-dim (insertion-tree S P T))) (insertion-tree S P T) b
--- exterior-sub-preserve-bd (Join S₁ S₂) PHere T b = begin
---   TransportVarSet
---     (supp-bd (pred (tree-dim (Join S₁ S₂))) (Join S₁ S₂) b)
---     (exterior-sub (Join S₁ S₂) PHere T)
---     ≡⟨ lem (pred (tree-dim (Join S₁ S₂))) b ⟩
---   supp-bd (pred (tree-dim (Join S₁ S₂))) (connect-tree T S₂) b
---     ≡⟨ cong (λ - → supp-bd (pred -) (connect-tree T S₂) b) (insertion-tree-dim (Join S₁ S₂) PHere T) ⟩
---   supp-bd (pred (tree-dim (insertion-tree (Join S₁ S₂) PHere T)))
---     (connect-tree T S₂) b ∎
---   where
+exterior-sub-supp-full : (S : Tree n)
+                       → (P : Path S)
+                       → .⦃ _ : is-branching-path P ⦄
+                       → (T : Tree m)
+                       → .⦃ _ : has-linear-height (path-length P) T ⦄
+                       → ⦃ p : height-of-branching P ≡ tree-dim T ⦄
+                       → FVSub (exterior-sub S P T) ≡ full
+exterior-sub-supp-full S P T = begin
+  FVSub (exterior-sub S P T)
+    ≡˘⟨ TransportVarSet-full (exterior-sub S P T) ⟩
+  TransportVarSet full (exterior-sub S P T)
+    ≡˘⟨ cong (λ - → TransportVarSet - (exterior-sub S P T)) (supp-bd-full (tree-dim S) S false ≤-refl) ⟩
+  TransportVarSet (supp-bd (tree-dim S) S false) (exterior-sub S P T)
+    ≡⟨ exterior-sub-preserve-bd (tree-dim S) S P T false ⟩
+  supp-bd (tree-dim S) (insertion-tree S P T) false
+    ≡⟨ supp-bd-full (tree-dim S) (insertion-tree S P T) false (≤-reflexive (sym (insertion-tree-dim S P T))) ⟩
+  full ∎
+  where
+    open ≡-Reasoning
 
---     l2 : Var (fromℕ _)
---             [ sub-from-disc-unbiased (suc (tree-dim S₁)) T
---              ∘ idSub≃ (linear-tree-compat (suspTree S₁)) ]tm
---             ≃tm Var (fromℕ _)
---     l2 = begin
---       < Var (fromℕ _)
---           [ sub-from-disc-unbiased (suc (tree-dim S₁)) T
---             ∘ idSub≃ (linear-tree-compat (suspTree S₁)) ]tm >tm
---         ≈⟨ assoc-tm _ (idSub≃ (linear-tree-compat (suspTree S₁))) (Var (fromℕ _)) ⟩
---       < Var (fromℕ _)
---           [ idSub≃ (linear-tree-compat (suspTree S₁)) ]tm
---           [ sub-from-disc-unbiased (suc (tree-dim S₁)) T ]tm >tm
---         ≈⟨ sub-action-≃-tm (idSub≃-fst-var (linear-tree-compat (suspTree S₁))) refl≃s ⟩
---       < Var (fromℕ _)
---           [ sub-from-disc-unbiased (suc (tree-dim S₁)) T ]tm >tm
---         ≈⟨ unbiased-type-disc-lem (suc (tree-dim S₁)) T (sym it) ⟩
---       < Var (fromℕ (tree-size T)) >tm ∎
---       where
---         open Reasoning tm-setoid
-
---     l1 : (Var (fromℕ _) [
---          idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---          sub-between-connects
---          (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---           idSub≃
---           (trans≃c (susp-ctx-≃ (linear-tree-compat S₁))
---            (disc-susp (tree-dim S₁))))
---          (idSub (suc _)) (tree-last-var T)
---          ]tm) ≃tm Var (fromℕ (connect-tree-length T S₂))
---     l1 = begin
---       < Var (fromℕ _) [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
---         ∘ sub-between-connects
---         (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---          idSub≃ (linear-tree-compat (suspTree S₁)))
---         (idSub (suc _)) (tree-last-var T) ]tm >tm
---         ≈⟨ assoc-tm (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))) (sub-between-connects
---         (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---          idSub≃ (linear-tree-compat (suspTree S₁)))
---         (idSub (suc _)) (tree-last-var T)) (Var (fromℕ _)) ⟩
---       < Var (fromℕ _)
---         [ sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---                                idSub≃ (linear-tree-compat (suspTree S₁)))
---                                (idSub (suc _)) (tree-last-var T) ]tm
---         [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ]tm >tm
---         ≈⟨ sub-action-≃-tm (sub-between-connects-fst-var (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---                                idSub≃ (linear-tree-compat (suspTree S₁))) (idSub _) (tree-last-var T) l2) (refl≃s {σ = idSub≃ (sym≃c (connect-tree-to-ctx T S₂))}) ⟩
---       < Var (fromℕ _) [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ]tm >tm
---         ≈⟨ idSub≃-fst-var (sym≃c (connect-tree-to-ctx T S₂)) ⟩
---       < Var (fromℕ (connect-tree-length T S₂)) >tm ∎
---       where
---         open Reasoning tm-setoid
-
---     l4 : (getSnd [
---             sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---             idSub≃ (linear-tree-compat (suspTree S₁))
---             ]tm)
---            ≃tm tree-last-var T
---     l4 = begin
---       < getSnd [ sub-from-disc-unbiased (suc (tree-dim S₁)) T
---                ∘ idSub≃ (linear-tree-compat (suspTree S₁)) ]tm >tm
---         ≈⟨ assoc-tm (sub-from-disc-unbiased (suc (tree-dim S₁)) T) (idSub≃ (linear-tree-compat (suspTree S₁))) getSnd ⟩
---       < getSnd [ idSub≃ (linear-tree-compat (suspTree S₁)) ]tm
---                [ sub-from-disc-unbiased (suc (tree-dim S₁)) T ]tm >tm
---         ≈⟨ sub-action-≃-tm (idSub≃-snd-var (linear-tree-compat (suspTree S₁))) refl≃s ⟩
---       < getSnd [ sub-from-disc-unbiased (suc (tree-dim S₁)) T ]tm >tm
---         ≈⟨ unbiased-type-disc-lem-2 (tree-dim S₁) T (sym it) ⟩
---       < tree-last-var T >tm ∎
---       where
---         open Reasoning tm-setoid
-
---     l3 : tree-last-var (Join S₁ S₂) [
---          idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---          sub-between-connects
---          (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---           idSub≃
---           (linear-tree-compat (suspTree S₁)))
---          (idSub (suc _)) (tree-last-var T)
---          ]tm
---          ≃tm tree-last-var (connect-tree T S₂)
---     l3 = begin
---       < tree-last-var S₂ [ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm
---         [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---          sub-between-connects
---          (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---           idSub≃
---           (linear-tree-compat (suspTree S₁)))
---          (idSub (suc _)) (tree-last-var T)
---          ]tm >tm
---         ≈˘⟨ assoc-tm _ _ (tree-last-var S₂) ⟩
---       < tree-last-var S₂ [
---         idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---         sub-between-connects
---         (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---          idSub≃ (linear-tree-compat (suspTree S₁)))
---         (idSub (suc _)) (tree-last-var T)
---         ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)
---         ]tm >tm
---         ≈⟨ sub-action-≃-tm (refl≃tm {s = tree-last-var S₂}) (∘-assoc _ _ _) ⟩
---       < tree-last-var S₂ [
---         idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
---         ∘ (sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T
---                                ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
---                                (idSub (suc _)) (tree-last-var T)
---         ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ]tm >tm
---         ≈⟨ sub-action-≃-tm (refl≃tm {s = tree-last-var S₂}) (sub-action-≃-sub (sub-between-connects-inc-right (sub-from-disc-unbiased (suc (tree-dim S₁)) T
---                                ∘ idSub≃ (linear-tree-compat (suspTree S₁))) getSnd (idSub _) (tree-last-var T) l4 (id-on-tm (Var (fromℕ _)))) refl≃s) ⟩
---       < tree-last-var S₂ [
---         idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---         (connect-inc-right (tree-last-var T) _ ∘ idSub (suc _))
---         ]tm >tm
---         ≈⟨ sub-action-≃-tm (refl≃tm {s = tree-last-var S₂}) (sub-action-≃-sub (id-right-unit (connect-inc-right (tree-last-var T) _)) refl≃s) ⟩
---       <
---         tree-last-var S₂ [
---         idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---         connect-inc-right (tree-last-var T) (tree-size S₂) ]tm >tm
---         ≈˘⟨ connect-tree-last-var T S₂ ⟩
---       < tree-last-var (connect-tree T S₂) >tm ∎
---       where
---         open Reasoning tm-setoid
-
---     open ≡-Reasoning
-
---     lem : (d : ℕ) → (b : Bool) → TransportVarSet
---       (supp-bd d (Join S₁ S₂) b)
---       (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---        sub-between-connects
---        (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---         idSub≃
---         (trans≃c (susp-ctx-≃ (linear-tree-compat S₁))
---          (disc-susp (tree-dim S₁)))) (idSub _) (tree-last-var T))
---       ≡
---       supp-bd d (connect-tree T S₂) b
---     lem zero false = begin
---       TransportVarSet (trueAt (fromℕ _))
---       (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---        sub-between-connects
---        (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---         idSub≃
---         (trans≃c (susp-ctx-≃ (linear-tree-compat S₁))
---          (disc-susp (tree-dim S₁))))
---        (idSub _) (tree-last-var T))
---         ≡⟨ TransportVarSet-tm (Var (fromℕ _)) (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---        sub-between-connects
---        (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---         idSub≃
---         (trans≃c (susp-ctx-≃ (linear-tree-compat S₁))
---          (disc-susp (tree-dim S₁))))
---        (idSub _) (tree-last-var T)) ⟩
---       FVTm
---         (Var (fromℕ _) [
---          idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---          sub-between-connects
---          (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---           idSub≃
---           (trans≃c (susp-ctx-≃ (linear-tree-compat S₁))
---            (disc-susp (tree-dim S₁))))
---          (idSub (suc _)) (tree-last-var T)
---          ]tm)
---         ≡⟨ cong FVTm (≃tm-to-≡ l1) ⟩
---       FVTm (Var (fromℕ (connect-tree-length T S₂))) ∎
-
---     lem zero true = let
---       instance _ = tree-last-var-is-var (Join S₁ S₂)
---       instance _ = tree-last-var-is-var (connect-tree T S₂)
---       in begin
---       TransportVarSet (trueAt (getVarFin (tree-last-var (Join S₁ S₂))))
---         (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---          sub-between-connects
---          (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---           idSub≃
---           (trans≃c (susp-ctx-≃ (linear-tree-compat S₁))
---            (disc-susp (tree-dim S₁))))
---          (idSub (suc _)) (tree-last-var T))
---         ≡˘⟨ cong (λ - → TransportVarSet - (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---          sub-between-connects
---          (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---           idSub≃
---           (trans≃c (susp-ctx-≃ (linear-tree-compat S₁))
---            (disc-susp (tree-dim S₁))))
---          (idSub (suc _)) (tree-last-var T))) (isVar-supp (tree-last-var (Join S₁ S₂))) ⟩
---       TransportVarSet (FVTm (tree-last-var (Join S₁ S₂)))
---         (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---          sub-between-connects
---          (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---           idSub≃
---           (trans≃c (susp-ctx-≃ (linear-tree-compat S₁))
---            (disc-susp (tree-dim S₁))))
---          (idSub (suc _)) (tree-last-var T))
---         ≡⟨ TransportVarSet-tm (tree-last-var (Join S₁ S₂)) (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---          sub-between-connects
---          (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---           idSub≃
---           (trans≃c (susp-ctx-≃ (linear-tree-compat S₁))
---            (disc-susp (tree-dim S₁))))
---          (idSub (suc _)) (tree-last-var T)) ⟩
---       FVTm
---         (tree-last-var (Join S₁ S₂) [
---          idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---          sub-between-connects
---          (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---           idSub≃
---           (trans≃c (susp-ctx-≃ (linear-tree-compat S₁))
---            (disc-susp (tree-dim S₁))))
---          (idSub (suc _)) (tree-last-var T)
---          ]tm)
---         ≡⟨ cong FVTm (≃tm-to-≡ l3) ⟩
---       FVTm (tree-last-var (connect-tree T S₂))
---         ≡⟨ isVar-supp (tree-last-var (connect-tree T S₂)) ⟩
---       trueAt (getVarFin (tree-last-var (connect-tree T S₂))) ∎
-
---     lem (suc d) b = begin
---       TransportVarSet
---       (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
---       (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
---        sub-between-connects
---        (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---         idSub≃ (linear-tree-compat (suspTree S₁)))
---        (idSub _) (tree-last-var T))
---         ≡⟨ TransportVarSet-comp (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b)) (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))) (sub-between-connects
---        (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---         idSub≃ (linear-tree-compat (suspTree S₁)))
---        (idSub _) (tree-last-var T)) ⟩
---       TransportVarSet
---         (TransportVarSet
---          (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
---          (sub-between-connects
---           (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---            idSub≃ (linear-tree-compat (suspTree S₁)))
---           (idSub (suc _)) (tree-last-var T)))
---         (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)))
---         ≡⟨ cong (λ - → TransportVarSet - (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)))) l5 ⟩
---       TransportVarSet
---         (connect-supp (supp-bd d T b) (supp-bd (suc d) S₂ b))
---         (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)))
---         ≡⟨ {!!} ⟩
---       supp-bd (suc d) (connect-tree T S₂) b ∎
---         where
---           l5 : TransportVarSet
---                  (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
---                  (sub-between-connects
---                   (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---                    idSub≃ (linear-tree-compat (suspTree S₁)))
---                   (idSub (suc _)) (tree-last-var T))
---                  ≡ connect-supp (supp-bd d T b) (supp-bd (suc d) S₂ b)
---           l5 = begin
---             TransportVarSet
---               (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
---               (sub-between-connects
---                (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---                 idSub≃ (linear-tree-compat (suspTree S₁)))
---                (idSub (suc _)) (tree-last-var T))
---               ≡⟨ sub-between-connect-Transport (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---                 idSub≃ (linear-tree-compat (suspTree S₁))) (idSub _) (tree-last-var T) (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b) getSnd {!!} {!!} {!!} ⟩
---             connect-supp
---               (TransportVarSet (suspSupp (supp-bd d S₁ b))
---                (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘
---                 idSub≃ (linear-tree-compat (suspTree S₁))))
---               (TransportVarSet (supp-bd (suc d) S₂ b) (idSub (suc _)))
---               ≡⟨ {!!} ⟩
---             connect-supp (supp-bd d T b) (supp-bd (suc d) S₂ b) ∎
-
-
--- exterior-sub-preserve-bd (Join S₁ S₂) (PExt P) T b = {!!}
--- exterior-sub-preserve-bd (Join S₁ S₂) (PShift P) T b = {!!}
 
 insertion-supp-condition : (b : Bool)
                          → (A : Ty (suc n))
@@ -556,7 +319,7 @@ insertion-supp-condition false A S P T sc = begin
   TransportVarSet full (exterior-sub S P T)
     ≡⟨ TransportVarSet-full (exterior-sub S P T) ⟩
   FVSub (exterior-sub S P T)
-    ≡⟨ {!!} ⟩ -- exterior-sub-supp-full S P T ⟩
+    ≡⟨ exterior-sub-supp-full S P T ⟩
   full ∎
   where
     open ≡-Reasoning
@@ -580,7 +343,9 @@ insertion-supp-condition true (s ─⟨ A ⟩⟶ t) S P T ⦃ p = p ⦄ (nz ,, s
       TransportVarSet (FVTy A ∪ FVTm s) (exterior-sub S P T)
         ≡⟨ cong (λ - → TransportVarSet - (exterior-sub S P T)) sc1 ⟩
       TransportVarSet (supp-bd (pred (tree-dim S)) S false) (exterior-sub S P T)
-        ≡⟨ {!!} ⟩ -- exterior-sub-preserve-bd S P T false ⟩
+        ≡⟨ exterior-sub-preserve-bd (pred (tree-dim S)) S P T false ⟩
+      supp-bd (pred (tree-dim S)) (insertion-tree S P T) false
+        ≡⟨ cong (λ - → supp-bd (pred -) (insertion-tree S P T) false) (insertion-tree-dim S P T) ⟩
       supp-bd (pred (tree-dim (insertion-tree S P T))) (insertion-tree S P T) false ∎
 
     l2 : FVTy (A [ exterior-sub S P T ]ty) ∪
@@ -598,5 +363,7 @@ insertion-supp-condition true (s ─⟨ A ⟩⟶ t) S P T ⦃ p = p ⦄ (nz ,, s
       TransportVarSet (FVTy A ∪ FVTm t) (exterior-sub S P T)
         ≡⟨ cong (λ - → TransportVarSet - (exterior-sub S P T)) sc2 ⟩
       TransportVarSet (supp-bd (pred (tree-dim S)) S true) (exterior-sub S P T)
-        ≡⟨ {!!} ⟩ -- exterior-sub-preserve-bd S P T true ⟩
+        ≡⟨ exterior-sub-preserve-bd (pred (tree-dim S)) S P T true ⟩
+      supp-bd (pred (tree-dim S)) (insertion-tree S P T) true
+        ≡⟨ cong (λ - → supp-bd (pred -) (insertion-tree S P T) true) (insertion-tree-dim S P T) ⟩
       supp-bd (pred (tree-dim (insertion-tree S P T))) (insertion-tree S P T) true ∎

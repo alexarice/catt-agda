@@ -23,6 +23,7 @@ import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Catt.Variables
 open import Catt.Tree
 open import Data.Unit using (tt)
+open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise; Pointwise-≡⇒≡)
 
 connect-supp-full : ∀ n m → connect-supp {n} {m} full full ≡ full
 connect-supp-full n zero = refl
@@ -160,20 +161,72 @@ sub-between-connect-susps-supp {n = n} {l = l} {m = m} {l′ = l′} σ τ p = t
       FVSub (connect-susp-inc-left l l′ ∘ suspSub σ) ∪
         FVTm (Var (fromℕ m) [ connect-inc-right getSnd l′ ∘ τ ]tm) ∎
 
-connect-supp-unit-left : (xs : VarSet (suc n)) → (Γ : Ctx (suc n))
+sub-between-connect-susps-Transport : (σ : Sub (suc n) (suc l) ⋆)
+                                    → (τ : Sub (suc m) (suc l′) ⋆)
+                                    → (xs : VarSet (suc n))
+                                    → (ys : VarSet (suc m))
+                                    → Var (fromℕ _) [ τ ]tm ≃tm Var (fromℕ l′)
+                                    -- → Var (fromℕ _) [ connect-inc-right s l′ ∘ τ ]tm ≃tm getSnd [ connect-susp-inc-left s l′ ∘ σ ]tm
+                                    -- → Truth (lookup-isVar xs t)
+                                    -- → FVTm s ⊆ TransportVarSet xs σ
+                                    → TransportVarSet (connect-supp (suspSupp xs) ys) (sub-between-connect-susps σ τ)
+                                    ≡ connect-supp (suspSupp (TransportVarSet xs σ)) (TransportVarSet ys τ)
+sub-between-connect-susps-Transport σ τ xs ys p = begin
+  TransportVarSet (connect-supp (suspSupp xs) ys)
+    (sub-between-connect-susps σ τ)
+    ≡⟨ sub-between-connect-Transport (suspSub σ) τ getSnd (suspSupp xs) ys getSnd l1 (suspSuppSndTruth xs) l2 ⟩
+  connect-supp (TransportVarSet (suspSupp xs) (suspSub σ))
+    (TransportVarSet ys τ)
+    ≡⟨ cong (λ - → connect-supp - (TransportVarSet ys τ)) (TransportVarSet-susp xs σ) ⟩
+  connect-supp (suspSupp (TransportVarSet xs σ))
+    (TransportVarSet ys τ) ∎
+  where
+    l1 : Var (fromℕ _) [ connect-inc-right getSnd _ ∘ τ ]tm
+     ≃tm getSnd [ connect-inc-left getSnd _ ∘ suspSub σ ]tm
+    l1 = begin
+      < Var (fromℕ _) [ connect-inc-right getSnd _ ∘ τ ]tm >tm
+        ≈⟨ assoc-tm (connect-inc-right getSnd _) τ (Var (fromℕ _)) ⟩
+      < (Var (fromℕ _) [ τ ]tm) [ connect-inc-right getSnd _ ]tm >tm
+        ≈⟨ sub-action-≃-tm p refl≃s ⟩
+      < Var (fromℕ _) [ connect-inc-right getSnd _ ]tm >tm
+        ≈˘⟨ connect-inc-fst-var getSnd _ ⟩
+      < getSnd [ connect-inc-left getSnd _ ]tm >tm
+        ≈⟨ sub-action-≃-tm (susp-sub-preserve-getSnd σ) refl≃s ⟩
+      < getSnd [ suspSub σ ]tm [ connect-inc-left getSnd _ ]tm >tm
+        ≈˘⟨ assoc-tm (connect-inc-left getSnd _) (suspSub σ) getSnd ⟩
+      < getSnd [ connect-inc-left getSnd _ ∘ suspSub σ ]tm >tm ∎
+      where
+        open Reasoning tm-setoid
+
+    l2 : FVTm getSnd ⊆ TransportVarSet (suspSupp xs) (suspSub σ)
+    l2 = begin
+      FVTm getSnd
+        ≤⟨ suspSuppSnd (TransportVarSet xs σ) ⟩
+      suspSupp (TransportVarSet xs σ)
+        ≡˘⟨ TransportVarSet-susp xs σ ⟩
+      TransportVarSet (suspSupp xs) (suspSub σ) ∎
+      where
+        open PReasoning (⊆-poset _)
+
+    open ≡-Reasoning
+
+connect-supp-unit-left : (xs : VarSet (suc n))
                        → Truth (lookup-isVar xs (Var (fromℕ _)))
-                       → TransportVarSet (connect-supp full xs)
-                         (idSub≃ (connect-left-unit Γ))
-                         ≡ xs
-connect-supp-unit-left (ewt emp) (∅ , A) p = refl
-connect-supp-unit-left (ewf (y ∷ xs)) (Γ , B , A) p = trans (TransportVarSet-lift (connect-supp full (y ∷ xs)) (idSub≃ (connect-left-unit (Γ , B)))) (cong ewf (connect-supp-unit-left (y ∷ xs) (Γ , B) p))
-connect-supp-unit-left (ewt (y ∷ xs)) (Γ , B , A) p = trans (cong (_∪ ewt empty) (TransportVarSet-lift (connect-supp full (y ∷ xs)) (idSub≃ (connect-left-unit (Γ , B))))) (cong ewt (trans (∪-right-unit _) (connect-supp-unit-left (y ∷ xs) (Γ , B) p)))
+                       → connect-supp (full {1}) xs ≡ᵖ xs
+connect-supp-unit-left (ewt emp) p = P.refl refl
+connect-supp-unit-left (ewf (y ∷ xs)) p = refl P.∷ connect-supp-unit-left (y ∷ xs) p
+connect-supp-unit-left (ewt (y ∷ xs)) p = refl P.∷ connect-supp-unit-left (y ∷ xs) p
 
 connect-supp-fst : (xs : VarSet (suc n)) → (ys : VarSet (suc m)) → Truth (lookup-isVar xs (Var (fromℕ _))) → Truth (lookup-isVar (connect-supp xs ys) (Var (fromℕ _)))
 connect-supp-fst xs (x ∷ emp) p = p
 connect-supp-fst xs (x ∷ y ∷ ys) p = connect-supp-fst xs (y ∷ ys) p
 
-connect-supp-assoc : (Γ : Ctx (suc n)) → (xs : VarSet (suc n)) → (Δ : Ctx (suc m)) → (ys : VarSet (suc m)) → (Υ : Ctx (suc l)) → (zs : VarSet (suc l))
-                   → TransportVarSet (connect-supp (connect-supp xs ys) zs) (idSub≃ (connect-assoc Γ {!!} {!!} {!!} {!!}))
-                   ≡ connect-supp xs (connect-supp ys zs)
-connect-supp-assoc = {!!}
+connect-supp-assoc : (xs : VarSet (suc n)) → (ys : VarSet (suc m)) → (zs : VarSet (suc l))
+                   → connect-supp (connect-supp xs ys) zs ≡ᵖ connect-supp xs (connect-supp ys zs)
+connect-supp-assoc xs ys (x ∷ emp) = P.refl refl
+connect-supp-assoc xs (x′ ∷ ys) (x ∷ y ∷ emp) = P.refl refl
+connect-supp-assoc xs (x′ ∷ ys) (x ∷ y ∷ z ∷ zs) = refl P.∷ connect-supp-assoc xs (x′ ∷ ys) (y ∷ z ∷ zs)
+
+connect-supp-≡ᵖ : {xs : VarSet (suc n)} → {xs′ : VarSet (suc n′)} → {ys : VarSet (suc m)} → {ys′ : VarSet (suc m′)} → xs ≡ᵖ xs′ → ys ≡ᵖ ys′ → connect-supp xs ys ≡ᵖ connect-supp xs′ ys′
+connect-supp-≡ᵖ p (x∼y P.∷ P.[]) = p
+connect-supp-≡ᵖ p (x∼y P.∷ z P.∷ q) = x∼y Pointwise.∷ (connect-supp-≡ᵖ p (z P.∷ q))

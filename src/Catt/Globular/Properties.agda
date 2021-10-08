@@ -130,3 +130,16 @@ tm-height-≃ Γ p with ≃tm-to-≡ p
 --     lem {Γ = Γ , A} zero ⟨ σ , t ⟩ = trans≃ty {!!} (sym≃ty (lift-sub-comp-lem-ty σ A))
 --     lem {Γ = Γ , A} (suc i) ⟨ σ , t ⟩ = {!!}
 -- tm-to-ty-sub (Coh Δ A x τ) σ = assoc-ty σ τ
+
+BoundedSucTm : BoundedTm d Γ t → BoundedTm (suc d) Γ t
+BoundedSucTy : BoundedTy d Γ A → BoundedTy (suc d) Γ A
+BoundedSucSub : BoundedSub d Γ σ → BoundedSub (suc d) Γ σ
+
+BoundedSucTm (VarBound i p) = VarBound i (BoundedSucTy p)
+BoundedSucTm (CohBound S p q) = CohBound S (BoundedSucTy p) (BoundedSucSub q)
+
+BoundedSucTy StarBound = StarBound
+BoundedSucTy (ArrBound a b c) = ArrBound (BoundedSucTm a) (BoundedSucTy b) (BoundedSucTm c)
+
+BoundedSucSub NullBound = NullBound
+BoundedSucSub (ExtBound b x) = ExtBound (BoundedSucSub b) (BoundedSucTm x)

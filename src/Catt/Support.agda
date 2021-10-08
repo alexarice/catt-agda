@@ -5,6 +5,7 @@ module Catt.Support where
 open import Data.Nat
 open import Data.Nat.Properties using (≤-refl)
 open import Data.Vec hiding (drop ; [_])
+open import Data.Vec.Relation.Binary.Pointwise.Inductive using (Pointwise)
 open import Catt.Syntax
 open import Catt.Syntax.Properties
 -- open import Catt.Dimension
@@ -99,3 +100,7 @@ lookup-isVar (x ∷ xs) (Var (suc i)) = lookup-isVar xs (Var i)
 
 _⊆_ : VarSet n → VarSet n → Set
 xs ⊆ ys = ys ≡ ys ∪ xs
+
+infix 4 _≡ᵖ_
+_≡ᵖ_ : VarSet n → VarSet m → Set
+_≡ᵖ_ = Pointwise _≡_

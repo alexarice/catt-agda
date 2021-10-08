@@ -18,6 +18,7 @@ open import Algebra.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Suspension
 import Relation.Binary.Reasoning.PartialOrder as PReasoning
+open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise)
 
 open import Algebra.Definitions
 
@@ -274,3 +275,8 @@ unrestrict-supp ⟨ σ , t ⟩ = cong (_∪ FVTm t) (unrestrict-supp σ)
   xs ∪ ys ∎
   where
     open PReasoning (⊆-poset _)
+
+TransportVarSet-idSub≃ : (xs : VarSet n) → (p : Γ ≃c Δ) → TransportVarSet xs (idSub≃ p) ≡ᵖ xs
+TransportVarSet-idSub≃ emp Emp≃ = P.refl refl
+TransportVarSet-idSub≃ (ewf xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (TransportVarSet-lift xs (idSub≃ p))) (refl P.∷ TransportVarSet-idSub≃ xs p)
+TransportVarSet-idSub≃ (ewt xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (trans (cong (_∪ ewt empty) (TransportVarSet-lift xs (idSub≃ p))) (cong ewt (∪-right-unit (TransportVarSet xs (idSub≃ p)))))) (refl P.∷ TransportVarSet-idSub≃ xs p)

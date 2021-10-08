@@ -18,6 +18,7 @@ open import Catt.Globular.Properties
 open import Relation.Binary.PropositionalEquality
 open import Catt.Syntax.SyntacticEquality
 open import Data.Nat.Properties
+open import Data.Fin.Properties
 
 tm-to-ty-prop : Typing-Tm Γ t A → tm-to-ty Γ t ≈[ Γ ]ty A
 tm-to-ty-prop (TyVarZ x) = x

@@ -123,3 +123,19 @@ suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {T} (nz ,, sc1 ,, sc2) = it ,
       suspSupp (supp-bd (pred (tree-dim T)) T true) ≡⟨ suspSuppBd (pred (tree-dim T)) T true ⟩
       supp-bd (suc (pred (tree-dim T))) (suspTree T) true ≡⟨ cong (λ - → supp-bd - (suspTree T) true) (suc-pred (tree-dim T)) ⟩
       supp-bd (pred (tree-dim (suspTree T))) (suspTree T) true ∎
+
+TransportVarSet-susp : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet (suspSupp xs) (suspSub σ) ≡ suspSupp (TransportVarSet xs σ)
+TransportVarSet-susp emp ⟨⟩ = suspSuppLem _
+TransportVarSet-susp (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-susp xs σ
+TransportVarSet-susp (ewt xs) ⟨ σ , t ⟩ = begin
+  TransportVarSet (suspSupp xs) (suspSub σ) ∪ FVTm (suspTm t)
+    ≡⟨ cong (_∪ FVTm (suspTm t)) (trans (TransportVarSet-susp xs σ) (suspSuppEmpRight (TransportVarSet xs σ))) ⟩
+  suspSupp (TransportVarSet xs σ) ∪ suspSupp empty ∪ FVTm (suspTm t)
+    ≡⟨ ∪-assoc (suspSupp (TransportVarSet xs σ)) (suspSupp empty) (FVTm (suspTm t)) ⟩
+  suspSupp (TransportVarSet xs σ) ∪ (suspSupp empty ∪ FVTm (suspTm t))
+    ≡⟨ cong (suspSupp (TransportVarSet xs σ) ∪_) (suspSuppTm t) ⟩
+  suspSupp (TransportVarSet xs σ) ∪ suspSupp (FVTm t)
+    ≡⟨ suspSupp∪ (TransportVarSet xs σ) (FVTm t) ⟩
+  suspSupp (TransportVarSet xs σ ∪ FVTm t) ∎
+  where
+    open ≡-Reasoning

@@ -23,6 +23,7 @@ import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Catt.Connection
 open import Catt.Connection.Properties
 open import Data.Unit using (tt)
+open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using ()
 
 supp-bd-full : (d : ℕ) → (T : Tree n) → (b : Bool) → tree-dim T ≤ d → supp-bd d T b ≡ full
 supp-bd-full zero Sing false p = refl
@@ -96,14 +97,9 @@ connect-tree-to-ctx-supp : (d : ℕ) → (S : Tree n) → (T : Tree m) → (b : 
                          → TransportVarSet (connect-supp (supp-bd (suc d) S b) (supp-bd (suc d) T b))
                                            (idSub≃ (sym≃c (connect-tree-to-ctx S T)))
                          ≡ supp-bd (suc d) (connect-tree S T) b
-connect-tree-to-ctx-supp d Sing T b = begin
-  TransportVarSet (connect-supp full (supp-bd (suc d) T b))
-      (idSub≃ (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T)))))
-    ≡⟨ cong (λ - → TransportVarSet (connect-supp full (supp-bd (suc d) T b)) (idSub≃ -)) (≃c-irrel (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T)))) (connect-left-unit (tree-to-ctx T))) ⟩
-  TransportVarSet (connect-supp full (supp-bd (suc d) T b))
-    (idSub≃ (connect-left-unit (tree-to-ctx T)))
-    ≡⟨ connect-supp-unit-left (supp-bd (suc d) T b) (tree-to-ctx T) (supp-bd-include-fst d T b) ⟩
-  supp-bd (suc d) T b ∎
+connect-tree-to-ctx-supp d S T b = P.Pointwise-≡⇒≡ (P.trans trans (TransportVarSet-idSub≃ (connect-supp (supp-bd (suc d) S b) (supp-bd (suc d) T b)) (sym≃c (connect-tree-to-ctx S T))) (lem d S T b))
   where
-    open ≡-Reasoning
-connect-tree-to-ctx-supp d (Join S₁ S₂) T b = {!!}
+    lem : (d : ℕ) → (S : Tree n) → (T : Tree m) → (b : Bool)
+        → connect-supp (supp-bd (suc d) S b) (supp-bd (suc d) T b) ≡ᵖ supp-bd (suc d) (connect-tree S T) b
+    lem d Sing T b = connect-supp-unit-left (supp-bd (suc d) T b) (supp-bd-include-fst d T b)
+    lem d (Join S₁ S₂) T b = P.trans trans (connect-supp-assoc (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b) (supp-bd (suc d) T b)) (connect-supp-≡ᵖ (P.refl refl) (lem d S₂ T b))

@@ -7,7 +7,7 @@ open import Data.Nat
 
 module Catt.Typing.BoundedEq.Properties.Lifting (index : ℕ)
                                       (rule : Fin index → Rule)
-                                      (dim-rule : ∀ i a → P.DimRule index rule {i} a)
+                                      (bound-rule : ∀ i a → P.BoundRule index rule {i} a)
                                       (lift-rule : ∀ i a → P.LiftRule index rule {i} a) where
 
 open import Catt.Syntax
@@ -15,7 +15,7 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing index rule
 open import Catt.Typing.BoundedEq index rule
-open import Catt.Typing.BoundedEq.Properties index rule dim-rule
+open import Catt.Typing.BoundedEq.Properties index rule bound-rule
 open import Catt.Typing.Properties.Lifting index rule lift-rule
 open P index rule
 open import Relation.Binary.PropositionalEquality
@@ -36,7 +36,7 @@ lift-tm-bdeq (SymB≈ eq) = SymB≈ (lift-tm-bdeq eq)
 lift-tm-bdeq (TransB≈ eq eq′) = TransB≈ (lift-tm-bdeq eq) (lift-tm-bdeq eq′)
 
 lift-tm-bdeq (CohB≈ r s) = CohB≈ r (lift-sub-bdeq s)
-lift-tm-bdeq {A = A} (RuleB≈ i a tc p) = eq-to-bd-eq-tm (lift-rule i a (lift-tm-typing tc)) {!!} -- lift-rule i a (lift-tm-typing tc)
+lift-tm-bdeq {A = A} (RuleB≈ i a tc p) = eq-to-bd-eq-tm (lift-rule i a (lift-tm-typing tc)) (BoundedLiftTm p) -- lift-rule i a (lift-tm-typing tc)
 
 lift-sub-bdeq (NullB≈ x) = NullB≈ (lift-ty-bdeq x)
 lift-sub-bdeq (ExtB≈ eq x) = ExtB≈ (lift-sub-bdeq eq) (lift-tm-bdeq x)

@@ -203,26 +203,22 @@ unbiased-comp-≃ : d ≡ d′ → (S ≃ T) → unbiased-comp d S ≃tm unbiase
 unbiased-comp-≃ p q with ≃-to-same-n q
 ... | refl = Coh≃ q (unbiased-type-≃ p q) refl≃s
 
--- unbiased-type-truncate-1 : (d : ℕ) → (T : Tree n) → truncate 1 (unbiased-type (suc d) T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
--- unbiased-type-truncate-1 zero T = refl≃ty
--- unbiased-type-truncate-1 (suc d) T = begin
---   < truncate 1
---       ((unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]tm)
---        ─⟨ unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty
---        ⟩⟶ (unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T true ]tm)) >ty
---     ≈⟨ truncate-≤ {s = unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]tm} {t = unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T true ]tm} 1 (unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty) (s≤s z≤n) ⟩
---   < truncate 1 (unbiased-type (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]ty) >ty
---     ≈⟨ truncate-sub 1 (unbiased-type (suc d) (tree-bd (suc d) T)) (tree-inc (suc d) T false) ⟩
---   < truncate 1 (unbiased-type (suc d) (tree-bd (suc d) T)) [ tree-inc (suc d) T false ]ty >ty
---     ≈⟨ sub-action-≃-ty (unbiased-type-truncate-1 d (tree-bd (suc d) T)) refl≃s ⟩
---   < (Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var (tree-bd (suc d) T)) [ tree-inc (suc d) T false ]ty >ty
---     ≈⟨ Arr≃ (tree-inc-preserve-fst-var d T false) refl≃ty (tree-inc-preserve-last-var d T false) ⟩
---   < Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T >ty ∎
---   where
---     open Reasoning ty-setoid
+unbiased-type-truncate-1 : (d : ℕ) → (T : Tree n) → truncate 1 (unbiased-type (suc d) T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
+unbiased-type-truncate-1 zero T = refl≃ty
+unbiased-type-truncate-1 (suc d) T = begin
+  < truncate 1
+      ((unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]tm)
+        ─⟨ unbiased-type (suc d) T ⟩⟶
+       (unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T true ]tm))>ty
+    ≈⟨ truncate-≤ {s = unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T false ]tm} {t = unbiased-term (suc d) (tree-bd (suc d) T) [ tree-inc (suc d) T true ]tm} 1 (unbiased-type (suc d) T) (s≤s z≤n) ⟩
+  < truncate 1 (unbiased-type (suc d) T) >ty
+    ≈⟨ unbiased-type-truncate-1 d T ⟩
+  < Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T >ty ∎
+  where
+    open Reasoning ty-setoid
 
--- unbiased-type-truncate-1′ : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → truncate 1 (unbiased-type d T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
--- unbiased-type-truncate-1′ (suc d) = unbiased-type-truncate-1 d
+unbiased-type-truncate-1′ : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → truncate 1 (unbiased-type d T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
+unbiased-type-truncate-1′ (suc d) = unbiased-type-truncate-1 d
 
 unbiased-type-prop : (d : ℕ) → (T : Tree n) → (d′ : ℕ) → (d ≤ d′) → (b : Bool) → unbiased-type d T ≃ty unbiased-type d (tree-bd d′ T) [ tree-inc d′ T b ]ty
 unbiased-term-≃ : (d ≡ d′) → S ≃ T → unbiased-term d S ≃tm unbiased-term d′ T
@@ -251,10 +247,11 @@ unbiased-type-prop (suc d) T d′ p b = Arr≃ (lem false) (unbiased-type-prop d
 
 unbiased-term-susp-lem : (d : ℕ) → (T : Tree n) → suspTm (unbiased-term d T) ≃tm unbiased-term (suc d) (suspTree T)
 unbiased-type-susp-lem : (d : ℕ) → (T : Tree n) → suspTy (unbiased-type d T) ≃ty unbiased-type (suc d) (suspTree T)
+unbiased-comp-susp-lem : (d : ℕ) → (T : Tree n) → suspTm (unbiased-comp d T) ≃tm unbiased-comp (suc d) (suspTree T)
 
 unbiased-term-susp-lem d T with is-linear-dec T
 ... | yes p = refl≃tm
-... | no p = Coh≃ refl≃ (unbiased-type-susp-lem d T) (susp-functorial-id (suc _))
+... | no p = unbiased-comp-susp-lem d T
 
 unbiased-type-susp-lem zero T = refl≃ty
 unbiased-type-susp-lem (suc d) T = Arr≃ (l1 false) (unbiased-type-susp-lem d T) (l1 true)
@@ -274,6 +271,8 @@ unbiased-type-susp-lem (suc d) T = Arr≃ (l1 false) (unbiased-type-susp-lem d T
           [ tree-inc (suc d) (suspTree T) b ]tm >tm ∎
       where
         open Reasoning tm-setoid
+
+unbiased-comp-susp-lem d T = Coh≃ refl≃ (unbiased-type-susp-lem d T) (susp-functorial-id _)
 
 linear-tree-unbiased-lem : (d : ℕ) → (T : Tree n) → .⦃ is-linear T ⦄ → .(tree-dim T ≡ d) → tree-to-ctx T ‼ zero ≃ty unbiased-type d T
 linear-tree-unbiased-lem zero Sing p = Star≃ refl

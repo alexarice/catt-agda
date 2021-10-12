@@ -19,6 +19,8 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Suspension
 import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise)
+open import Data.Sum
+open import Data.Unit using (tt)
 
 open import Algebra.Definitions
 
@@ -280,3 +282,12 @@ TransportVarSet-idSub≃ : (xs : VarSet n) → (p : Γ ≃c Δ) → TransportVar
 TransportVarSet-idSub≃ emp Emp≃ = P.refl refl
 TransportVarSet-idSub≃ (ewf xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (TransportVarSet-lift xs (idSub≃ p))) (refl P.∷ TransportVarSet-idSub≃ xs p)
 TransportVarSet-idSub≃ (ewt xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (trans (cong (_∪ ewt empty) (TransportVarSet-lift xs (idSub≃ p))) (cong ewt (∪-right-unit (TransportVarSet xs (idSub≃ p)))))) (refl P.∷ TransportVarSet-idSub≃ xs p)
+
+∪-Truth : (xs ys : VarSet n) → (i : Fin n) → Truth (lookup (xs ∪ ys) i) → Truth (lookup xs i) ⊎ Truth (lookup ys i)
+∪-Truth (x ∷ xs) (y ∷ ys) (suc i) truth = ∪-Truth xs ys i truth
+∪-Truth (ewf xs) (y ∷ ys) zero truth = inj₂ truth
+∪-Truth (ewt xs) (y ∷ ys) zero truth = inj₁ tt
+
+sub-type-⊆ : (σ : Sub n m A) → FVTy A ⊆ FVSub σ
+sub-type-⊆ ⟨⟩ = ⊆-refl
+sub-type-⊆ ⟨ σ , t ⟩ = ⊆-trans (sub-type-⊆ σ) (∪-⊆-1 (FVSub σ) (FVTm t))

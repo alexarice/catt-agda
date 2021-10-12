@@ -32,8 +32,8 @@ open import Data.Unit using (⊤; tt)
 open import Data.Nat.Properties
 open import Data.Bool using (Bool; true; false)
 open import Data.Product renaming (_,_ to _,,_)
-open import Catt.Discs
-open import Catt.Discs.Typing index rule lift-rule
+-- open import Catt.Discs
+-- open import Catt.Discs.Typing index rule lift-rule
 open import Catt.Suspension
 open import Catt.Suspension.Typing index rule lift-rule susp-rule
 
@@ -72,7 +72,6 @@ unbiased-type-Ty (suc d) T q = TyArr (term-conversion (apply-sub-tm-typing utty 
     utty = unbiased-term-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-trans (n≤1+n d) q))
 
 unbiased-term-Ty d T q with is-linear-dec T
-... | yes p = TyVarZ (reflexive≈ty (linear-tree-unbiased-lem d T ⦃ p ⦄ q))
 ... | no p = unbiased-comp-Ty d ⦃ NonZero′-subst q (non-linear-has-no-zero-dim T p) ⦄ T q
   where
     non-linear-has-no-zero-dim : (T : Tree n) → ¬ is-linear T → NonZero′ (tree-dim T)
@@ -80,8 +79,10 @@ unbiased-term-Ty d T q with is-linear-dec T
     non-linear-has-no-zero-dim (Join S T) p with tree-dim (Join S T) | join-tree-has-non-zero-dim S T
     ... | zero | q = ⊥-elim (q refl)
     ... | suc d | q = it
+... | yes p with tree-to-ctx T | tree-to-ctx-Ty T | linear-tree-unbiased-lem d T ⦃ p ⦄ q
+... | Γ , A | TyAdd Γty x | l = TyVarZ x (reflexive≈ty l)
 
-unbiased-comp-Ty (suc d) T q = TyCoh (unbiased-type-Ty (suc d) T (≤-reflexive (sym q))) id-Ty true (unbiased-supp-condition d T q) (reflexive≈ty (id-on-ty _))
+unbiased-comp-Ty (suc d) T q = TyCoh (unbiased-type-Ty (suc d) T (≤-reflexive (sym q))) (id-Ty (tree-to-ctx-Ty T)) true (unbiased-supp-condition d T q) (reflexive≈ty (id-on-ty _))
 
 -- sub-from-sphere-unbiased-Ty : (d : ℕ) → (T : Tree n) → .(d ≡ tree-dim T) → Typing-Sub (Sphere d) (tree-to-ctx T) (sub-from-sphere-unbiased d T)
 -- sub-from-sphere-unbiased-Ty d T p = sub-from-sphere-Ty d (unbiased-type-Ty d T (≤-reflexive p)) (unbiased-type-dim d T)
@@ -90,5 +91,8 @@ unbiased-comp-Ty (suc d) T q = TyCoh (unbiased-type-Ty (suc d) T (≤-reflexive 
 -- sub-from-disc-unbiased-Ty d T p = sub-from-disc-Ty d (unbiased-type-Ty d T (≤-reflexive p)) (unbiased-type-dim d T) (term-conversion (unbiased-comp-Ty d T (sym p) id-Ty) (reflexive≈ty (id-on-ty (unbiased-type d T))))
 
 sub-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero′ (tree-dim T) ⦄ → (d : ℕ) → (tree-dim T ≡ tree-dim S + d) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T d)
-sub-from-linear-tree-unbiased-Ty Sing T d p = TyExt (TyNull (unbiased-type-Ty d T (≤-reflexive (sym p)))) (unbiased-comp-Ty d ⦃ NonZero′-subst p it ⦄ T p)
+sub-from-linear-tree-unbiased-Ty Sing T d p = TyExt (TyNull (unbiased-type-Ty d T (≤-reflexive (sym p)))) TyStar (unbiased-comp-Ty d ⦃ NonZero′-subst p it ⦄ T p)
 sub-from-linear-tree-unbiased-Ty (Join S Sing) T d p = unrestrictTy (sub-from-linear-tree-unbiased-Ty S T (suc d) (trans p (sym (+-suc (tree-dim S) d))))
+
+sub-from-linear-tree-unbiased-Ty-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero′ (tree-dim T) ⦄ → .(tree-dim T ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T 0)
+sub-from-linear-tree-unbiased-Ty-0 S T p = sub-from-linear-tree-unbiased-Ty S T 0 (trans (recompute ((tree-dim T) ≟ (tree-dim S)) p) (sym (+-identityʳ (tree-dim S))))

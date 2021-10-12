@@ -1,7 +1,5 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
-{-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
-
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 open import Data.Fin using (Fin; zero; suc; inject₁; toℕ)
@@ -170,4 +168,7 @@ eq-to-bd-eq-ty Star≈ p = StarB≈
 eq-to-bd-eq-ty (Arr≈ p q r) (ArrBound a b c) = ArrB≈ (eq-to-bd-eq-tm p (BoundedSucTm a)) (eq-to-bd-eq-ty q (BoundedSucTy b)) (eq-to-bd-eq-tm r (BoundedSucTm c))
 
 eq-to-bd-eq-sub (Null≈ Star≈) b = NullB≈ StarB≈
-eq-to-bd-eq-sub (Ext≈ eq x) b = ExtB≈ ? ?
+eq-to-bd-eq-sub (Ext≈ eq x) (ExtBound a b) = ExtB≈ (eq-to-bd-eq-sub eq a) (eq-to-bd-eq-tm x b)
+
+bd-eq-tm : d ≡ d′ → s ≈⟨ d ⟩[ Γ ]tm t → s ≈⟨ d′ ⟩[ Γ ]tm t
+bd-eq-tm refl p = p

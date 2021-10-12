@@ -26,9 +26,6 @@ open import Catt.Suspension
 
 -- unbiased-comp d T σ = Coh T (unbiased-type d T) σ
 
--- unbiased-comp-dim : (d : ℕ) → (T : Tree n) → (σ : Sub (suc n) m ⋆) → (Δ : Ctx m) → tm-height Δ (unbiased-comp d T σ) ≡ d
--- unbiased-comp-dim d T σ Δ = trans (sym (sub-dim σ (unbiased-type d T))) (unbiased-type-dim d T)
-
 -- sub-from-disc-unbiased : (d : ℕ) → Tree m → Sub (disc-size d) (suc m) ⋆
 -- sub-from-disc-unbiased d T = sub-from-disc d (unbiased-type d T) (unbiased-type-dim d T) (unbiased-comp d T (idSub _))
 
@@ -55,3 +52,6 @@ sub-from-linear-tree-unbiased (Join S Sing) T d = unrestrict (sub-from-linear-tr
 unbiased-type-dim : (d : ℕ) → (T : Tree n) → ty-dim (unbiased-type d T) ≡ d
 unbiased-type-dim zero T = refl
 unbiased-type-dim (suc d) T = cong suc (unbiased-type-dim d T)
+
+unbiased-comp-dim : (d : ℕ) → (T : Tree n) → tm-height (tree-to-ctx T) (unbiased-comp d T) ≡ d
+unbiased-comp-dim d T = trans (sym (sub-dim (idSub (suc _)) (unbiased-type d T))) (unbiased-type-dim d T)

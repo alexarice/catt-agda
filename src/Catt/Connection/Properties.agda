@@ -287,46 +287,32 @@ connect-var-split-right-compat t (suc m) (suc i) with connect-var-split-right t 
 ... | inj₁ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left t m)) (lift-tm-≃ p)
 ... | inj₂ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right t m)) (lift-tm-≃ p)
 
-connect-inc-left-var-to-var : (t : Tm (suc n)) → (m : ℕ) → varToVar (connect-inc-left t m)
-connect-inc-left-var-to-var {n = n} t zero = id-is-var-to-var (suc n)
-connect-inc-left-var-to-var t (suc m) = liftSub-preserve-var-to-var (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄
+-- connect-var-split-full : (t : Tm (suc n)) → (m : ℕ) → VarSplitFull₁ (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄ (connect-var-split n m)
+-- connect-var-split-full t zero i = cong inj₁ (varToVarFunction-idSub (suc _) i)
+-- connect-var-split-full {n} t (suc m) i = trans (cong (connect-var-split n (suc m)) (varToVarFunction-lift (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄ i)) lem
+--   where
+--     instance _ = connect-inc-left-var-to-var t m
+--     lem : connect-var-split n (suc m)
+--             (suc (varToVarFunction (connect-inc-left t m) i))
+--             ≡ inj₁ i
+--     lem with connect-var-split n m (varToVarFunction (connect-inc-left t m) i) | connect-var-split-full t m i
+--     ... | inj₁ x | refl = refl
+--     ... | inj₂ y | ()
 
-connect-inc-right-var-to-var : (t : Tm (suc n)) → (m : ℕ) → .⦃ isVar t ⦄ → varToVar (connect-inc-right t m)
-connect-inc-right-var-to-var t zero = extend-var-to-var ⟨⟩ t
-connect-inc-right-var-to-var t (suc m) = liftSub-preserve-var-to-var (connect-inc-right t m) ⦃ connect-inc-right-var-to-var t m ⦄ ,, tt
-
-connect-susp-inc-left-var-to-var : (n m : ℕ) → varToVar (connect-susp-inc-left n m)
-connect-susp-inc-left-var-to-var n m = connect-inc-left-var-to-var getSnd m
-
-connect-susp-inc-right-var-to-var : (n m : ℕ) → varToVar (connect-susp-inc-right n m)
-connect-susp-inc-right-var-to-var n m = connect-inc-right-var-to-var getSnd m
-
-connect-var-split-full : (t : Tm (suc n)) → (m : ℕ) → VarSplitFull₁ (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄ (connect-var-split n m)
-connect-var-split-full t zero i = cong inj₁ (varToVarFunction-idSub (suc _) i)
-connect-var-split-full {n} t (suc m) i = trans (cong (connect-var-split n (suc m)) (varToVarFunction-lift (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄ i)) lem
-  where
-    instance _ = connect-inc-left-var-to-var t m
-    lem : connect-var-split n (suc m)
-            (suc (varToVarFunction (connect-inc-left t m) i))
-            ≡ inj₁ i
-    lem with connect-var-split n m (varToVarFunction (connect-inc-left t m) i) | connect-var-split-full t m i
-    ... | inj₁ x | refl = refl
-    ... | inj₂ y | ()
-
-connect-var-split-right-full : (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → (m : ℕ) → VarSplitFull₂ (connect-inc-right t m) ⦃ connect-inc-right-var-to-var t m ⦄ (connect-var-split-right t m)
-connect-var-split-right-full (Var j) zero zero with toℕ j ≟ toℕ j
-... | yes p = refl
-... | no p = ⊥-elim (p refl)
-connect-var-split-right-full (Var j) (suc m) zero = refl
-connect-var-split-right-full (Var j) (suc m) (suc i) = trans (cong (connect-var-split-right (Var j) (suc m)) (varToVarFunction-lift (connect-inc-right (Var j) m) ⦃ connect-inc-right-var-to-var (Var j) m ⦄ i)) lem
-  where
-    instance _ = connect-inc-right-var-to-var (Var j) m
-    lem : connect-var-split-right (Var j) (suc m)
-            (suc (varToVarFunction (connect-inc-right (Var j) m) i))
-            ≡ inj₂ (suc i)
-    lem with connect-var-split-right (Var j) m (varToVarFunction (connect-inc-right (Var j) m) i) | connect-var-split-right-full (Var j) m i
-    ... | inj₁ x | ()
-    ... | inj₂ y | refl = refl
+-- connect-var-split-right-full : (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → (m : ℕ) → VarSplitFull₂ (connect-inc-right t m) ⦃ connect-inc-right-var-to-var t m ⦄ (connect-var-split-right t m)
+-- connect-var-split-right-full (Var j) zero zero with toℕ j ≟ toℕ j
+-- ... | yes p = refl
+-- ... | no p = ⊥-elim (p refl)
+-- connect-var-split-right-full (Var j) (suc m) zero = refl
+-- connect-var-split-right-full (Var j) (suc m) (suc i) = trans (cong (connect-var-split-right (Var j) (suc m)) (varToVarFunction-lift (connect-inc-right (Var j) m) ⦃ connect-inc-right-var-to-var (Var j) m ⦄ i)) lem
+--   where
+--     instance _ = connect-inc-right-var-to-var (Var j) m
+--     lem : connect-var-split-right (Var j) (suc m)
+--             (suc (varToVarFunction (connect-inc-right (Var j) m) i))
+--             ≡ inj₂ (suc i)
+--     lem with connect-var-split-right (Var j) m (varToVarFunction (connect-inc-right (Var j) m) i) | connect-var-split-right-full (Var j) m i
+--     ... | inj₁ x | ()
+--     ... | inj₂ y | refl = refl
 
 sub-from-connect-lift : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → liftSub (sub-from-connect σ τ) ≃s sub-from-connect (liftSub σ) (liftSub τ)
 sub-from-connect-lift σ ⟨ ⟨⟩ , t ⟩ = refl≃s
@@ -366,3 +352,24 @@ sub-from-connect-prop′ t m σ = begin
   < σ >s ∎
   where
     open Reasoning sub-setoid
+
+connect-inc-left-var-to-var : (t : Tm (suc n)) → (m : ℕ) → varToVar (connect-inc-left t m)
+connect-inc-left-var-to-var {n = n} t zero = id-is-var-to-var (suc n)
+connect-inc-left-var-to-var t (suc m) = liftSub-preserve-var-to-var (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄
+
+connect-inc-right-var-to-var : (t : Tm (suc n)) → (m : ℕ) → .⦃ isVar t ⦄ → varToVar (connect-inc-right t m)
+connect-inc-right-var-to-var t zero = extend-var-to-var ⟨⟩ t
+connect-inc-right-var-to-var t (suc m) = liftSub-preserve-var-to-var (connect-inc-right t m) ⦃ connect-inc-right-var-to-var t m ⦄ ,, tt
+
+connect-glob : (Γ : Ctx (suc n)) → ⦃ ctx-is-globular Γ ⦄ → (t : Tm (suc n)) → .⦃ isVar t ⦄ → (Δ : Ctx (suc m)) → ⦃ ctx-is-globular Δ ⦄ → ctx-is-globular (connect Γ t Δ)
+connect-glob Γ t (∅ , A) = it
+connect-glob Γ t (Δ , B , A) ⦃ p ⦄ = (connect-glob Γ t (Δ , B) ⦃ proj₁ p ⦄) ,, var-to-var-comp-ty A ⦃ proj₂ p ⦄ (connect-inc-right t (ctxLength Δ)) ⦃ connect-inc-right-var-to-var t _ ⦄
+
+connect-susp-glob : (Γ : Ctx (suc n)) → ⦃ ctx-is-globular Γ ⦄ → (Δ : Ctx (suc m)) → ⦃ ctx-is-globular Δ ⦄ → ctx-is-globular (connect-susp Γ Δ)
+connect-susp-glob Γ Δ = connect-glob (suspCtx Γ) ⦃ susp-ctx-glob Γ ⦄ getSnd Δ
+
+connect-susp-inc-left-var-to-var : (n m : ℕ) → varToVar (connect-susp-inc-left n m)
+connect-susp-inc-left-var-to-var n m = connect-inc-left-var-to-var getSnd m
+
+connect-susp-inc-right-var-to-var : (n m : ℕ) → varToVar (connect-susp-inc-right n m)
+connect-susp-inc-right-var-to-var n m = connect-inc-right-var-to-var getSnd m

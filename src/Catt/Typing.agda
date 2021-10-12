@@ -61,7 +61,7 @@ data Typing-Ctx where
   TyAdd : Typing-Ctx Γ → Typing-Ty Γ A → Typing-Ctx (Γ , A)
 
 data Typing-Tm where
-  TyVarZ : Γ ‼ zero ≈[ Γ ]ty B → Typing-Tm Γ 0V B
+  TyVarZ : Typing-Ty Γ A → liftType A ≈[ Γ , A ]ty B → Typing-Tm (Γ , A) 0V B
   TyVarS : (i : Fin (ctxLength Γ)) → Typing-Tm Γ (Var i) A → liftType A ≈[ Γ , C ]ty B → Typing-Tm (Γ , C) (Var (suc i)) B
   TyCoh : Typing-Ty (tree-to-ctx T) A → Typing-Sub (tree-to-ctx T) Γ σ → (b : Bool) → supp-condition b A T → (A [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh T A σ) B
 
@@ -71,4 +71,4 @@ data Typing-Ty where
 
 data Typing-Sub where
   TyNull : Typing-Ty Δ A → Typing-Sub ∅ Δ (⟨⟩ {A = A})
-  TyExt : Typing-Sub Γ Δ σ → Typing-Tm Δ t (A [ σ ]ty) → Typing-Sub (Γ , A) Δ ⟨ σ , t ⟩
+  TyExt : Typing-Sub Γ Δ σ → Typing-Ty Γ A → Typing-Tm Δ t (A [ σ ]ty) → Typing-Sub (Γ , A) Δ ⟨ σ , t ⟩

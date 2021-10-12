@@ -146,7 +146,6 @@ exterior-sub-last-var (Join S₁ S₂) (PShift P) T = begin
     open Reasoning tm-setoid
 
 
-{-
 insertion-eq : (S : Tree n)
              → (P : Path S)
              → .⦃ _ : is-branching-path P ⦄
@@ -1380,4 +1379,3 @@ sub-from-insertion-sub (Join S₁ S₂) (PShift P) T σ τ μ = begin
         ≈⟨ sub-from-insertion-sub S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ μ ⟩
       < μ ∘ sub-from-insertion S₂ P T
           (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ >s ∎
--}

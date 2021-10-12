@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
-module Catt.Typing.Strict.Assoc where
+module Catt.Strict.Assoc where
 
 open import Catt.Typing.Base
 open import Catt.Syntax
@@ -24,6 +24,11 @@ open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Insertion.Properties
 open Rule
+open import Catt.Support
+open import Catt.Support.Properties
+open import Catt.Connection.Support
+open import Catt.Connection.Properties
+open import Catt.Tree.Properties
 
 record InsertionData : Set where
   field
@@ -40,7 +45,7 @@ record InsertionData : Set where
     id-τ : Sub (suc id-m) id-l ⋆
     .⦃ id-lh ⦄ : has-linear-height (path-length id-P) id-T
     -- .⦃ id-p ⦄ : height-of-branching id-P ≡ tree-dim id-T
-    id-eq : branching-path-to-var id-S id-P [ id-σ ]tm ≃tm unbiased-comp (tree-dim id-T) id-T id-τ
+    id-eq : branching-path-to-var id-S id-P [ id-σ ]tm ≃tm unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm
 
 module _ where
 
@@ -79,7 +84,7 @@ module _ where
                    → (T : Tree m)
                    → (τ : Sub (suc m) l ⋆)
                    → .⦃ lh : has-linear-height (path-length P) T ⦄
-                   → branching-path-to-var S P [ σ ]tm ≃tm unbiased-comp (tree-dim T) T τ
+                   → branching-path-to-var S P [ σ ]tm ≃tm unbiased-comp (tree-dim T) T [ τ ]tm
                    → InsertionData
   insertionBuilder Γ S A σ P T τ eq .id-l = _
   insertionBuilder Γ S A σ P T τ eq .id-Γ = Γ
@@ -102,7 +107,7 @@ Ins≈ : (S : Tree n)
      → (P : Path S)
      → .⦃ bp : is-branching-path P ⦄
      → (T : Tree m)
-     → (branching-path-to-var S P [ σ ]tm) ≃tm unbiased-comp (tree-dim T) T τ
+     → (branching-path-to-var S P [ σ ]tm) ≃tm unbiased-comp (tree-dim T) T [ τ ]tm
      → .⦃ lh : has-linear-height (path-length P) T ⦄
      → Coh S A σ ≈[ Γ ]tm
        Coh (insertion-tree S P T)
@@ -130,15 +135,15 @@ module _ where
       lem : branching-path-to-var id-S id-P
                                   [ liftSub id-σ ]tm
             ≃tm
-            unbiased-comp (tree-dim id-T) id-T (liftSub id-τ)
+            unbiased-comp (tree-dim id-T) id-T [ liftSub id-τ ]tm
       lem = begin
         < branching-path-to-var id-S id-P [ liftSub id-σ ]tm >tm
           ≈⟨ apply-lifted-sub-tm-≃ (branching-path-to-var id-S id-P) id-σ ⟩
         < liftTerm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
           ≈⟨ lift-tm-≃ id-eq ⟩
-        < liftTerm (unbiased-comp (tree-dim id-T) id-T id-τ) >tm
-          ≡⟨⟩
-        < unbiased-comp (tree-dim id-T) id-T (liftSub id-τ) >tm ∎
+        < liftTerm (unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm) >tm
+          ≈˘⟨ apply-lifted-sub-tm-≃ (unbiased-comp (tree-dim id-T) id-T) id-τ ⟩
+        < unbiased-comp (tree-dim id-T) id-T [ liftSub id-τ ]tm >tm ∎
         where
           open Reasoning tm-setoid
 
@@ -173,7 +178,7 @@ module _ where
       lem : (branching-path-to-var (suspTree id-S) (PExt id-P)
                [ suspSub id-σ ]tm)
             ≃tm
-            unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) (unrestrict (suspSubRes id-τ))
+            unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) [ unrestrict (suspSubRes id-τ) ]tm
       lem = begin
         < branching-path-to-var (suspTree id-S) (PExt id-P) [ suspSub id-σ ]tm >tm ≡⟨⟩
         < suspTm (branching-path-to-var id-S id-P)
@@ -185,11 +190,11 @@ module _ where
           ≈˘⟨ susp-functorial-tm id-σ (branching-path-to-var id-S id-P) ⟩
         < suspTm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
           ≈⟨ susp-tm-≃ id-eq ⟩
-        < suspTm (unbiased-comp (tree-dim id-T) id-T id-τ) >tm ≡⟨⟩
-        < Coh (suspTree id-T) (suspTy (unbiased-type (tree-dim id-T) id-T)) (suspSub id-τ) >tm
-          ≈⟨ Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim id-T) id-T) refl≃s ⟩
-        < Coh (suspTree id-T) (unbiased-type (tree-dim (suspTree id-T)) (suspTree id-T)) (suspSub id-τ) >tm ≡⟨⟩
-        < unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) (suspSub id-τ) >tm ∎
+        < suspTm (unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm) >tm
+          ≈⟨ susp-functorial-tm id-τ (unbiased-comp (tree-dim id-T) id-T) ⟩
+        < suspTm (unbiased-comp (tree-dim id-T) id-T) [ suspSub id-τ ]tm >tm
+          ≈⟨ sub-action-≃-tm (unbiased-comp-susp-lem (tree-dim id-T) id-T) (refl≃s {σ = suspSub id-τ}) ⟩
+        < unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) [ suspSub id-τ ]tm >tm ∎
         where
           open Reasoning tm-setoid
 
@@ -211,13 +216,15 @@ module _ where
       open InsertionData a
 
       lem : branching-path-to-var id-S id-P [ σ ∘ id-σ ]tm
-        ≃tm unbiased-comp (tree-dim id-T) id-T (σ ∘ id-τ)
+        ≃tm unbiased-comp (tree-dim id-T) id-T [ σ ∘ id-τ ]tm
       lem = begin
         < branching-path-to-var id-S id-P [ σ ∘ id-σ ]tm >tm
           ≈⟨ assoc-tm σ id-σ (branching-path-to-var id-S id-P) ⟩
         < branching-path-to-var id-S id-P [ id-σ ]tm [ σ ]tm >tm
           ≈⟨ sub-action-≃-tm id-eq refl≃s ⟩
-        < unbiased-comp (tree-dim id-T) id-T (σ ∘ id-τ) >tm ∎
+        < unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm [ σ ]tm >tm
+          ≈˘⟨ assoc-tm σ id-τ (unbiased-comp (tree-dim id-T) id-T) ⟩
+        < unbiased-comp (tree-dim id-T) id-T [ σ ∘ id-τ ]tm >tm ∎
         where
           open Reasoning tm-setoid
 
@@ -263,25 +270,143 @@ open import Catt.Typing.Properties 1 (λ x → insertionRule) lift-rule susp-rul
 
 open import Catt.Tree.Insertion.Typing 1 (λ i → insertionRule) lift-rule susp-rule sub-rule
 
-convRule : ∀ i a → ConvRule {i} a
-convRule i a (TyCoh {B = B} Aty σty b sc p) = TyCoh (apply-sub-ty-typing Aty (exterior-sub-Ty id-S id-P id-T ⦃ p = insertion-dim-lem id-S id-P id-T σty τty p′ ⦄)) (sub-from-insertion-Ty id-S id-P id-T σty τty p′) b {!!} lem
+-- convRule : ∀ i a → ConvRule {i} a
+-- convRule i a (TyCoh {B = B} Aty σty b sc p) = TyCoh (apply-sub-ty-typing Aty (exterior-sub-Ty id-S id-P id-T ⦃ p = insertion-dim-lem id-S id-P id-T σty τty p′ ⦄)) (sub-from-insertion-Ty id-S id-P id-T σty τty p′) b {!!} lem
+--   where
+--     open InsertionData a
+
+--     p′ = trans≃tm id-eq (Coh≃ refl≃ refl≃ty (sym≃s (id-right-unit _)))
+
+--     τty : Typing-Sub (tree-to-ctx id-T) id-Γ id-τ
+--     τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) id-eq)
+
+--     lem : id-A [ exterior-sub id-S id-P id-T ]ty [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
+--             ≈[ id-Γ ]ty B
+--     lem = begin
+--       id-A [ exterior-sub id-S id-P id-T ]ty [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
+--         ≈˘⟨ reflexive≈ty (assoc-ty _ _ id-A) ⟩
+--       id-A [ sub-from-insertion id-S id-P id-T id-σ id-τ ∘ exterior-sub id-S id-P id-T ]ty
+--         ≈⟨ apply-sub-eq-ty id-A (exterior-sub-comm id-S id-P id-T σty τty p′) ⟩
+--       id-A [ id-σ ]ty
+--         ≈⟨ p ⟩
+--       B ∎
+--       where
+--         open Reasoning (ty-setoid-≈ id-Γ)
+
+suppStuff : (S : Tree n)
+          → (P : Path S)
+          → .⦃ bp : is-branching-path P ⦄
+          → (T : Tree m)
+          → {σ : Sub (suc n) l A}
+          → {τ : Sub (suc m) l A}
+          → Typing-Sub (tree-to-ctx S) Γ σ
+          → Typing-Sub (tree-to-ctx T) Γ τ
+          → (branching-path-to-var S P [ σ ]tm) ≃tm unbiased-comp (tree-dim T) T [ τ ]tm
+          → .⦃ lh : has-linear-height (path-length P) T ⦄
+          → FVSub (sub-from-insertion S P T σ τ) ≡ FVSub σ
+suppStuff (Join S₁ S₂) PHere T {σ} {τ} σty τty p = begin
+  FVSub
+      (sub-from-connect τ
+       (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+       ∘ idSub≃ (connect-tree-to-ctx T S₂))
+    ≡˘⟨ {!!} ⟩
+  FVSub
+      (sub-from-connect τ
+       (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+    ≡⟨ sub-from-connect-supp τ (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) {!!} ⟩
+  FVSub τ ∪ FVSub (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+    ≡⟨ {!!} ⟩
+  {!!} ∎
   where
-    open InsertionData a
-
-    p′ = trans≃tm id-eq (Coh≃ refl≃ refl≃ty (sym≃s (id-right-unit _)))
-
-    τty : Typing-Sub (tree-to-ctx id-T) id-Γ id-τ
-    τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) id-eq)
-
-    lem : id-A [ exterior-sub id-S id-P id-T ]ty [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
-            ≈[ id-Γ ]ty B
+    open ≡-Reasoning
+suppStuff (Join S₁ S₂) (PExt P) (Join T Sing) {σ} {τ} σty τty p = begin
+  FVSub
+      (sub-from-connect
+       (unrestrict
+        (sub-from-insertion S₁ P T
+         (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+          (getFst [ τ ]tm) (getSnd [ τ ]tm))
+         (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
+       (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+    ≡⟨ sub-from-connect-supp (unrestrict
+        (sub-from-insertion S₁ P T
+         (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+          (getFst [ τ ]tm) (getSnd [ τ ]tm))
+         (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))) (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) {!!} ⟩
+  FVSub
+    (unrestrict
+     (sub-from-insertion S₁ P T
+      (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+       (getFst [ τ ]tm) (getSnd [ τ ]tm))
+      (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
+    ∪ FVSub (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+    ≡⟨ cong
+         (_∪
+          FVSub (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+         lem ⟩
+  FVSub (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) ∪
+    FVSub (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+    ≡˘⟨ sub-from-connect-supp (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) {!!} ⟩
+  FVSub
+    (sub-from-connect
+     (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+     (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+    ≡⟨ cong FVSub (≃s-to-≡ (sub-from-connect-prop′ getSnd (tree-size S₂) σ)) ⟩
+  FVSub σ ∎
+  where
+    open ≡-Reasoning
+    lem : FVSub
+            (unrestrict
+             (sub-from-insertion S₁ P T
+              (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+               (getFst [ τ ]tm) (getSnd [ τ ]tm))
+              (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
+            ≡ FVSub (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
     lem = begin
-      id-A [ exterior-sub id-S id-P id-T ]ty [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
-        ≈˘⟨ reflexive≈ty (assoc-ty _ _ id-A) ⟩
-      id-A [ sub-from-insertion id-S id-P id-T id-σ id-τ ∘ exterior-sub id-S id-P id-T ]ty
-        ≈⟨ apply-sub-eq-ty id-A (exterior-sub-comm id-S id-P id-T σty τty p′) ⟩
-      id-A [ id-σ ]ty
-        ≈⟨ p ⟩
-      B ∎
-      where
-        open Reasoning (ty-setoid-≈ id-Γ)
+      FVSub
+        (unrestrict
+         (sub-from-insertion S₁ P T
+          (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+           (getFst [ τ ]tm) (getSnd [ τ ]tm))
+          (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
+        ≡⟨ unrestrict-supp (sub-from-insertion S₁ P T
+          (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+           (getFst [ τ ]tm) (getSnd [ τ ]tm))
+          (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))) ⟩
+      FVSub
+        (sub-from-insertion S₁ P T
+         (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+          (getFst [ τ ]tm) (getSnd [ τ ]tm))
+         (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))
+        ≡⟨ suppStuff S₁ P T {!!} {!!} {!!} ⟩
+      FVSub
+        (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+         (getFst [ τ ]tm) (getSnd [ τ ]tm))
+        ≡⟨ {!!} ⟩
+      {!!} ∎
+suppStuff (Join S₁ S₂) (PShift P) T {σ} {τ} σty τty p = begin
+  FVSub
+      (sub-from-connect
+       (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+       (sub-from-insertion S₂ P T
+        (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ))
+    ≡⟨ sub-from-connect-supp (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ) {!!} ⟩
+  FVSub (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) ∪
+    FVSub
+    (sub-from-insertion S₂ P T
+     (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ)
+    ≡⟨ cong
+         (FVSub (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+          ∪_)
+         (suppStuff S₂ P T {!!} {!!} {!!}) ⟩
+  FVSub (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) ∪
+    FVSub (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
+    ≡˘⟨ sub-from-connect-supp (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) {!!} ⟩
+  FVSub
+    (sub-from-connect
+     (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
+     (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))
+    ≡⟨ cong FVSub (≃s-to-≡ (sub-from-connect-prop′ getSnd (tree-size S₂) σ)) ⟩
+  FVSub σ ∎
+  where
+    open ≡-Reasoning

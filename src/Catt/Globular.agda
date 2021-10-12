@@ -33,7 +33,8 @@ data BoundedTy : ℕ → Ctx n → Ty n → Set
 data BoundedSub : ℕ → Ctx n → Sub m n ⋆ → Set
 
 data BoundedTm where
-  VarBound : (i : Fin n) → BoundedTy d Γ (Γ ‼ i) → BoundedTm d Γ (Var i)
+  VarBoundZ : BoundedTy d Γ A → BoundedTm d (Γ , A) 0V
+  VarBoundS : ∀ i → BoundedTm d Γ (Var i) → BoundedTm d (Γ , A) (Var (suc i))
   CohBound : (S : Tree n) → BoundedTy d (tree-to-ctx S) A → BoundedSub d Γ σ → BoundedTm d Γ (Coh S A σ)
 
 data BoundedTy where

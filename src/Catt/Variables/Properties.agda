@@ -46,7 +46,6 @@ liftType-preserve-is-globular : (A : Ty n) → (ty-is-globular A) → ty-is-glob
 liftType-preserve-is-globular ⋆ g = tt
 liftType-preserve-is-globular (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = liftTerm-preserve-isVar s vs ,, liftType-preserve-is-globular A gA ,, liftTerm-preserve-isVar t vt
 
-
 ≃c-preserve-globular : Γ ≃c Δ → ctx-is-globular Γ → ctx-is-globular Δ
 ≃ty-preserve-globular : A ≃ty B → ty-is-globular A → ty-is-globular B
 ≃tm-preserve-isVar : s ≃tm t → isVar s → isVar t

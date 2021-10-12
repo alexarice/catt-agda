@@ -22,6 +22,7 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Data.Product renaming (_,_ to _,,_)
 
 connect-tree-to-ctx : (S : Tree n) → (T : Tree m)
                     → tree-to-ctx (connect-tree S T) ≃c connect (tree-to-ctx S) (tree-last-var S) (tree-to-ctx T)
@@ -229,3 +230,7 @@ connect-tree-last-var (Join S₁ S₂) T = begin
         open Reasoning sub-setoid
 
     open Reasoning tm-setoid
+
+tree-to-ctx-glob : (S : Tree n) → ctx-is-globular (tree-to-ctx S)
+tree-to-ctx-glob Sing = tt ,, tt
+tree-to-ctx-glob (Join S T) = connect-susp-glob (tree-to-ctx S) ⦃ tree-to-ctx-glob S ⦄ (tree-to-ctx T) ⦃ tree-to-ctx-glob T ⦄

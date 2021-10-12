@@ -41,10 +41,19 @@ connect-susp-supp-incs : (xs : VarSet (suc n)) → (ys : VarSet (suc m))
                       → TransportVarSet (suspSupp xs) (connect-susp-inc-left n m) ∪ TransportVarSet ys (connect-susp-inc-right n m) ≡ connect-supp (suspSupp xs) ys
 connect-susp-supp-incs xs ys = connect-supp-incs (suspSupp xs) getSnd ys (suspSuppSnd xs)
 
-sub-from-connect-supp : (σ : Sub (suc n) l ⋆) → (τ : Sub (suc m) l ⋆)
-                      → FVSub σ ≡ FVSub σ ∪ FVTm (Var (fromℕ _) [ τ ]tm)
+sub-from-connect-supp : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A)
+                      → FVTm (Var (fromℕ _) [ τ ]tm) ⊆ FVSub σ
                       → FVSub (sub-from-connect σ τ) ≡ FVSub σ ∪ FVSub τ
-sub-from-connect-supp {l = l} σ ⟨ ⟨⟩ , x ⟩ p = trans p (solve (∪-monoid {l}))
+sub-from-connect-supp {l = l} {A = A} σ ⟨ ⟨⟩ , x ⟩ p = begin
+  FVSub σ
+    ≡⟨ p ⟩
+  FVSub σ ∪ FVTm x
+    ≡⟨ cong (_∪ FVTm x) (sub-type-⊆ σ) ⟩
+  FVSub σ ∪ FVTy A ∪ FVTm x
+    ≡⟨ ∪-assoc (FVSub σ) (FVTy A) (FVTm x) ⟩
+  FVSub σ ∪ (FVTy A ∪ FVTm x) ∎
+  where
+    open ≡-Reasoning
 sub-from-connect-supp {l = l} σ ⟨ ⟨ τ , y ⟩ , x ⟩ p = trans (cong (_∪ FVTm x) (sub-from-connect-supp σ ⟨ τ , y ⟩ p)) (solve (∪-monoid {l}))
 
 sub-from-connect-Transport : (σ : Sub (suc n) l ⋆)

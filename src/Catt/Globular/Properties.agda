@@ -135,7 +135,8 @@ BoundedSucTm : BoundedTm d Γ t → BoundedTm (suc d) Γ t
 BoundedSucTy : BoundedTy d Γ A → BoundedTy (suc d) Γ A
 BoundedSucSub : BoundedSub d Γ σ → BoundedSub (suc d) Γ σ
 
-BoundedSucTm (VarBound i p) = VarBound i (BoundedSucTy p)
+BoundedSucTm (VarBoundZ p) = VarBoundZ (BoundedSucTy p)
+BoundedSucTm (VarBoundS i p) = VarBoundS i (BoundedSucTm p)
 BoundedSucTm (CohBound S p q) = CohBound S (BoundedSucTy p) (BoundedSucSub q)
 
 BoundedSucTy StarBound = StarBound
@@ -143,3 +144,39 @@ BoundedSucTy (ArrBound a b c) = ArrBound (BoundedSucTm a) (BoundedSucTy b) (Boun
 
 BoundedSucSub NullBound = NullBound
 BoundedSucSub (ExtBound b x) = ExtBound (BoundedSucSub b) (BoundedSucTm x)
+
+BoundedLiftTm : BoundedTm d Γ t → BoundedTm d (Γ , A) (liftTerm t)
+BoundedLiftTy : BoundedTy d Γ B → BoundedTy d (Γ , A) (liftType B)
+BoundedLiftSub : BoundedSub d Γ σ → BoundedSub d (Γ , A) (liftSub σ)
+
+BoundedLiftTm (VarBoundZ p) = VarBoundS zero (VarBoundZ p)
+BoundedLiftTm (VarBoundS i p) = VarBoundS (suc i) (VarBoundS i p)
+BoundedLiftTm (CohBound S p q) = CohBound S p (BoundedLiftSub q)
+
+BoundedLiftTy StarBound = StarBound
+BoundedLiftTy (ArrBound p q r) = ArrBound (BoundedLiftTm p) (BoundedLiftTy q) (BoundedLiftTm r)
+
+BoundedLiftSub NullBound = NullBound
+BoundedLiftSub (ExtBound b x) = ExtBound (BoundedLiftSub b) (BoundedLiftTm x)
+
+BoundedGetFst : BoundedTm d (suspCtx Γ) getFst
+BoundedGetSnd : BoundedTm d (suspCtx Γ) getSnd
+
+BoundedGetFst {Γ = ∅} = VarBoundS zero (VarBoundZ StarBound)
+BoundedGetFst {Γ = Γ , A} = VarBoundS (Data.Fin.fromℕ (suc _)) BoundedGetFst
+BoundedGetSnd {Γ = ∅} = VarBoundZ StarBound
+BoundedGetSnd {Γ = Γ , A} = VarBoundS (inject₁ (Data.Fin.fromℕ _)) BoundedGetSnd
+
+BoundedSuspTm : BoundedTm d Γ t → BoundedTm (suc d) (suspCtx Γ) (suspTm t)
+BoundedSuspTy : BoundedTy d Γ A → BoundedTy (suc d) (suspCtx Γ) (suspTy A)
+BoundedSuspSub : BoundedSub d Γ σ → BoundedSub (suc d) (suspCtx Γ) (suspSub σ)
+
+BoundedSuspTm (VarBoundZ x) = VarBoundZ (BoundedSuspTy x)
+BoundedSuspTm (VarBoundS i b) = VarBoundS (inject₁ (inject₁ i)) (BoundedSuspTm b)
+BoundedSuspTm (CohBound S p q) = CohBound (suspTree S) (BoundedSuspTy p) (BoundedSuspSub q)
+
+BoundedSuspTy StarBound = ArrBound BoundedGetFst StarBound BoundedGetSnd
+BoundedSuspTy (ArrBound p q r) = ArrBound (BoundedSuspTm p) (BoundedSuspTy q) (BoundedSuspTm r)
+
+BoundedSuspSub NullBound = ExtBound (ExtBound NullBound BoundedGetFst) BoundedGetSnd
+BoundedSuspSub (ExtBound b x) = ExtBound (BoundedSuspSub b) (BoundedSuspTm x)

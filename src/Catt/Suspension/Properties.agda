@@ -201,3 +201,14 @@ module _  where
     where
       open ≡-Reasoning
 -}
+
+susp-tm-glob : (t : Tm n) → ⦃ isVar t ⦄ → isVar (suspTm t)
+susp-tm-glob (Var i) = tt
+
+susp-ty-glob : (A : Ty n) → ⦃ ty-is-globular A ⦄ → ty-is-globular (suspTy A)
+susp-ty-glob ⋆ = tt ,, (tt ,, tt)
+susp-ty-glob (s ─⟨ A ⟩⟶ t) ⦃ a ,, b ,, c ⦄ = susp-tm-glob s ⦃ a ⦄ ,, (susp-ty-glob A ⦃ b ⦄) ,, (susp-tm-glob t ⦃ c ⦄)
+
+susp-ctx-glob : (Γ : Ctx n) → ⦃ ctx-is-globular Γ ⦄ → ctx-is-globular (suspCtx Γ)
+susp-ctx-glob ∅ = (tt ,, tt) ,, tt
+susp-ctx-glob (Γ , A) ⦃ a ,, b ⦄ = susp-ctx-glob Γ ⦃ a ⦄ ,, susp-ty-glob A ⦃ b ⦄

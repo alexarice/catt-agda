@@ -170,7 +170,7 @@ sub-setoid-≈ {m} n Δ = record { Carrier = SUB′ n m
 --              → rule i .lhs a [ σ ]tm ≈[ Δ ]tm rule i .rhs a [ σ ]tm
 
 term-conversion : Typing-Tm Γ t A → A ≈[ Γ ]ty B → Typing-Tm Γ t B
-term-conversion (TyVarZ x) eq = TyVarZ (trans≈ty x eq)
+term-conversion (TyVarZ x y) eq = TyVarZ x (trans≈ty y eq)
 term-conversion (TyVarS i tvi x) eq = TyVarS i tvi (trans≈ty x eq)
 term-conversion (TyCoh Aty σty b sc p) eq = TyCoh Aty σty b sc (trans≈ty p eq)
 
@@ -187,8 +187,22 @@ transport-typing : Typing-Tm Γ t A → t ≃tm s → Typing-Tm Γ s A
 transport-typing tty p with ≃tm-to-≡ p
 ... | refl = tty
 
+transport-typing-ctx : Typing-Ctx Γ → Γ ≃c Δ → Typing-Ctx Δ
+transport-typing-ctx Γty p with ≃c-preserve-length p
+... | refl with ≃c-to-≡ p
+... | refl = Γty
+
+transport-typing-ty : Typing-Ty Γ A → Γ ≃c Δ → A ≃ty B → Typing-Ty Δ B
+transport-typing-ty Γty p q with ≃c-preserve-length p
+... | refl with ≃c-to-≡ p | ≃ty-to-≡ q
+... | refl | refl = Γty
+
 coh-sub-ty : Typing-Tm Γ (Coh T A τ) B → Typing-Sub (tree-to-ctx T) Γ τ
 coh-sub-ty (TyCoh x τty b x₂ x₃) = τty
+
+sub-to-ctx-Ty : Typing-Sub Γ Δ σ → Typing-Ctx Γ
+sub-to-ctx-Ty (TyNull x) = TyEmp
+sub-to-ctx-Ty (TyExt σty Aty tty) = TyAdd (sub-to-ctx-Ty σty) Aty
 
 module _ {i : Index} (a : rule i .Rule.Args) where
   open Rule (rule i)

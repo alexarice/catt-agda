@@ -27,22 +27,23 @@ unrestrict-restrict-≈ ⟨ ⟨ ⟨ σ , u ⟩ , s ⟩ , t ⟩ p q = Ext≈ (unr
 
 restrictTy : {σ : Sub (2 + n) m A}
            → Typing-Sub (suspCtx Γ) Δ σ
+           → Typing-Ctx Γ
            → Typing-Tm Δ s A
            → Typing-Tm Δ t A
            → s ≈[ Δ ]tm getFst [ σ ]tm
            → t ≈[ Δ ]tm getSnd [ σ ]tm
            → Typing-Sub Γ Δ (restrict σ s t)
-restrictTy {Γ = ∅} (TyExt (TyExt (TyNull z) y) x) sty tty p q = TyNull (TyArr sty z tty)
-restrictTy {Γ = ∅ , A} (TyExt (TyExt (TyExt σty z) y) x) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty z) y) sty tty p q) (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
-restrictTy {Γ = ∅ , B , A} (TyExt (TyExt (TyExt σty z) y) x) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty z) y) sty tty p q) (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
-restrictTy {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty z) y) x) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty z) y) sty tty p q) (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
+restrictTy {Γ = ∅} (TyExt (TyExt (TyNull z) v y) w x) Γty sty tty p q = TyNull (TyArr sty z tty)
+restrictTy {Γ = ∅ , A} (TyExt (TyExt (TyExt σty v z) w y) u x) (TyAdd TyEmp Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty v z) w y) TyEmp sty tty p q) Aty (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
+restrictTy {Γ = ∅ , B , A} (TyExt (TyExt (TyExt σty v z) w y) u x) (TyAdd Γty Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty v z) w y) Γty sty tty p q) Aty (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
+restrictTy {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty v z) w y) u x) (TyAdd Γty Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty v z) w y) Γty sty tty p q) Aty (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
 
-var-Ty : (Γ : Ctx n) → (i : Fin n) → Typing-Tm Γ (Var i) (Γ ‼ i)
-var-Ty (Γ , A) zero = TyVarZ refl≈ty
-var-Ty (Γ , A) (suc i) = TyVarS i (var-Ty Γ i) refl≈ty
+var-Ty : Typing-Ctx Γ → (i : Fin n) → Typing-Tm Γ (Var i) (Γ ‼ i)
+var-Ty (TyAdd Γty Aty) zero = TyVarZ Aty refl≈ty
+var-Ty (TyAdd Γty Aty) (suc i) = TyVarS i (var-Ty Γty i) refl≈ty
 
-isVar-Ty : (Γ : Ctx n) → (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
-isVar-Ty Γ (Var i) = var-Ty Γ i
+isVar-Ty : Typing-Ctx Γ → (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
+isVar-Ty Γty (Var i) = var-Ty Γty i
 
 truncate′-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate′ d A ≈[ Γ ]ty truncate′ d′ A′
 truncate′-≈ {d = zero} refl p = p

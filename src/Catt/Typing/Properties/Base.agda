@@ -16,6 +16,9 @@ open import Catt.Suspension
 open import Catt.Tree
 open import Catt.Globular
 open import Function.Bundles
+open import Catt.Support
+open import Data.Product renaming (_,_ to _,,_)
+open import Data.Unit
 
 private
   Index : Set
@@ -204,6 +207,20 @@ sub-to-ctx-Ty : Typing-Sub Γ Δ σ → Typing-Ctx Γ
 sub-to-ctx-Ty (TyNull x) = TyEmp
 sub-to-ctx-Ty (TyExt σty Aty tty) = TyAdd (sub-to-ctx-Ty σty) Aty
 
+Supporting-Tm : Typing-Tm Γ t A → Set
+Supporting-Ty : Typing-Ty Γ A → Set
+Supporting-Sub : Typing-Sub Γ Δ σ → Set
+
+Supporting-Tm (TyVarZ {A = A} {B = B} Aty p) = Supporting-Ty Aty × FVTy (liftType A) ≡ FVTy B
+Supporting-Tm (TyVarS {A = A} {B = B} i tty p) = Supporting-Tm tty × FVTy (liftType A) ≡ FVTy B
+Supporting-Tm (TyCoh {A = A} {σ = σ} {B = B} Aty σty b sc p) = Supporting-Ty Aty × Supporting-Sub σty × FVTy (A [ σ ]ty) ≡ FVTy B
+
+Supporting-Ty TyStar = ⊤
+Supporting-Ty (TyArr sty Aty tty) = Supporting-Tm sty × Supporting-Ty Aty × Supporting-Tm tty
+
+Supporting-Sub (TyNull Aty) = Supporting-Ty Aty
+Supporting-Sub (TyExt σty Aty tty) = Supporting-Sub σty × Supporting-Ty Aty × Supporting-Tm tty
+
 module _ {i : Index} (a : rule i .Rule.Args) where
   open Rule (rule i)
 
@@ -230,6 +247,12 @@ module _ {i : Index} (a : rule i .Rule.Args) where
           → Typing-Sub (tgtCtx a) Δ σ
           → Typing-Tm Δ (lhs a [ σ ]tm) (C [ σ ]ty)
           → lhs a [ σ ]tm ≈[ Δ ]tm rhs a [ σ ]tm
+
+  SupportRule : Set
+  SupportRule = {A : Ty (len a)}
+              → (tty : Typing-Tm (tgtCtx a) (lhs a) A)
+              → Supporting-Tm tty
+              → FVTmTy (tgtCtx a) (lhs a) ≡ FVTmTy (tgtCtx a) (rhs a)
 
   ConvRule : Set
   ConvRule = {A : Ty (len a)}

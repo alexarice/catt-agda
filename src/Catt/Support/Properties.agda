@@ -224,6 +224,9 @@ Poset._≈_ (⊆-poset n) = _≡_
 Poset._≤_ (⊆-poset n) = _⊆_
 Poset.isPartialOrder (⊆-poset n) = ⊆-partial-order n
 
+⊆-top : (xs : VarSet n) → xs ⊆ full
+⊆-top xs = sym (∪-left-zero xs)
+
 ⊆-TransportVarSet : (σ : Sub n m ⋆) → {xs ys : VarSet n} → xs ⊆ ys → TransportVarSet xs σ ⊆ TransportVarSet ys σ
 ⊆-TransportVarSet σ {xs} {ys} p = begin
   TransportVarSet ys σ
@@ -291,3 +294,25 @@ TransportVarSet-idSub≃ (ewt xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwis
 sub-type-⊆ : (σ : Sub n m A) → FVTy A ⊆ FVSub σ
 sub-type-⊆ ⟨⟩ = ⊆-refl
 sub-type-⊆ ⟨ σ , t ⟩ = ⊆-trans (sub-type-⊆ σ) (∪-⊆-1 (FVSub σ) (FVTm t))
+
+∪-⊆ : {xs ys zs : VarSet n} → xs ⊆ zs → ys ⊆ zs → xs ∪ ys ⊆ zs
+∪-⊆ {xs = xs} {ys} {zs} p q = begin
+  zs
+    ≡⟨ q ⟩
+  zs ∪ ys
+    ≡⟨ cong (_∪ ys) p ⟩
+  zs ∪ xs ∪ ys
+    ≡⟨ ∪-assoc zs xs ys ⟩
+  zs ∪ (xs ∪ ys) ∎
+  where
+    open ≡-Reasoning
+
+-- subbed-ty-⊆ : (B : Ty n) → (σ : Sub n m A) → FVTy (B [ σ ]ty) ⊆ FVSub σ
+-- subbed-tm-⊆ : (t : Tm n) → (σ : Sub n m A) → FVTm (t [ σ ]tm) ⊆ FVSub σ
+
+-- subbed-ty-⊆ ⋆ σ = sub-type-⊆ σ
+-- subbed-ty-⊆ (s ─⟨ B ⟩⟶ t) σ = ∪-⊆ (∪-⊆ (subbed-ty-⊆ B σ) (subbed-tm-⊆ s σ)) (subbed-tm-⊆ t σ)
+
+-- subbed-tm-⊆ (Var zero) ⟨ σ , t ⟩ = ∪-⊆-2 (FVSub σ) (FVTm t)
+-- subbed-tm-⊆ (Var (suc i)) ⟨ σ , t ⟩ = ⊆-trans (subbed-tm-⊆ (Var i) σ) (∪-⊆-1 (FVSub σ) (FVTm t))
+-- subbed-tm-⊆ (Coh S A τ) σ = {!!}

@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K --safe --exact-split #-}
 
 module Catt.Support where
 
@@ -20,6 +20,7 @@ open import Catt.Tree.Properties
 open import Relation.Binary.PropositionalEquality
 open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Suspension
+open import Catt.Dimension
 
 -- record VarSet (Γ : Ctx n) : Set where
 --   constructor [_]v
@@ -50,6 +51,18 @@ trueAt {n = suc n} (suc i) = ewf (trueAt i)
 infixl 60 _∪_
 _∪_ : VarSet n → VarSet n → VarSet n
 (f ∪ g) = zipWith _∨_ f g
+
+Supp : (x : CtxSyntax n) → VarSet n
+Supp = ≺-rec (λ {n} _ → VarSet n) r
+  where
+    r : (x : CtxSyntax n) → (∀ {m} → (y : CtxSyntax m) → y ≺ x → VarSet m) → VarSet n
+    r (CtxTm (Var zero) (Γ , A)) rec = ewt (rec (CtxTy A Γ) Tm1)
+    r (CtxTm (Var (suc i)) (Γ , A)) rec = ewf (rec (CtxTm (Var i) Γ) Tm2)
+    r (CtxTm (Coh S A σ) Γ) rec = rec (CtxSub σ Γ) Tm4
+    r (CtxTy ⋆ Γ) rec = empty
+    r (CtxTy (s ─⟨ A ⟩⟶ t) Γ) rec = rec (CtxTy A Γ) Ty2 ∪ rec (CtxTm s Γ) Ty1 ∪ rec (CtxTm t Γ) Ty3
+    r (CtxSub ⟨⟩ Γ) rec = rec (CtxTy _ Γ) Sub1
+    r (CtxSub ⟨ σ , t ⟩ Γ) rec = (rec (CtxSub σ Γ) Sub2) ∪ (rec (CtxTm t Γ) Sub3)
 
 FVCtx : (Γ : Ctx n) → VarSet n
 FVTm : (t : Tm n) → VarSet n
@@ -104,3 +117,6 @@ xs ⊆ ys = ys ≡ ys ∪ xs
 infix 4 _≡ᵖ_
 _≡ᵖ_ : VarSet n → VarSet m → Set
 _≡ᵖ_ = Pointwise _≡_
+
+FVTmTy : Ctx n → Tm n → VarSet n
+FVTmTy Γ t = FVTy (tm-to-ty Γ t) ∪ FVTm t

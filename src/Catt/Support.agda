@@ -97,9 +97,14 @@ supp-bd (suc d) Sing b = full
 supp-bd (suc d) (Join S T) b = connect-supp (suspSupp (supp-bd d S b)) (supp-bd (suc d) T b)
 
 supp-condition : (b : Bool) → (A : Ty (suc n)) → (T : Tree n) → Set
-supp-condition false A T = FVTy A ≡ full
+supp-condition false A T = Supp (CtxTy A (tree-to-ctx T)) ≡ full
 supp-condition true ⋆ T = ⊥
-supp-condition true (s ─⟨ A ⟩⟶ t) T = NonZero′ (tree-dim T) × FVTy A ∪ FVTm s ≡ supp-bd (pred (tree-dim T)) T false × FVTy A ∪ FVTm t ≡ supp-bd (pred (tree-dim T)) T true
+supp-condition true (s ─⟨ A ⟩⟶ t) T
+  = NonZero′ (tree-dim T)
+  × Supp (CtxTm s (tree-to-ctx T)) ≡ supp-bd (pred (tree-dim T)) T false
+  × Supp (CtxTm t (tree-to-ctx T)) ≡ supp-bd (pred (tree-dim T)) T true
+
+  -- NonZero′ (tree-dim T) × FVTy A ∪ FVTm s ≡ supp-bd (pred (tree-dim T)) T false × FVTy A ∪ FVTm t ≡ supp-bd (pred (tree-dim T)) T true
 
 suspSuppBd : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSupp (supp-bd d T b) ≡ supp-bd (suc d) (suspTree T) b
 suspSuppBd zero T false = refl

@@ -24,9 +24,13 @@ suspSupp∪ : (vs vs′ : VarSet n) → suspSupp vs ∪ suspSupp vs′ ≡ suspS
 suspSupp∪ emp emp = refl
 suspSupp∪ (x ∷ xs) (y ∷ ys) = cong₂ _∷_ refl (suspSupp∪ xs ys)
 
-suspSuppLem : (n : ℕ) → empty ∪ ewf (trueAt (fromℕ n)) ∪ trueAt (inject₁ (fromℕ n)) ≡ suspSupp empty
-suspSuppLem zero = refl
-suspSuppLem (suc n) = cong (ewf) (suspSuppLem n)
+-- suspSuppLem : (n : ℕ) → empty ∪ ewf (trueAt (fromℕ n)) ∪ trueAt (inject₁ (fromℕ n)) ≡ suspSupp empty
+-- suspSuppLem zero = refl
+-- suspSuppLem (suc n) = cong (ewf) (suspSuppLem n)
+
+suspSuppLem : (Γ : Ctx n) → Supp (CtxTm getFst (suspCtx Γ)) ∪ Supp (CtxTm getSnd (suspCtx Γ)) ≡ suspSupp empty
+suspSuppLem ∅ = refl
+suspSuppLem (Γ , A) = cong ewf (suspSuppLem Γ)
 
 suspSuppFstTruth : (xs : VarSet n) → Truth (lookup-isVar (suspSupp xs) getFst)
 suspSuppFstTruth emp = tt
@@ -65,7 +69,12 @@ suspSuppComp = ≺-rec (λ x → Supp (suspCtxSyntax x) ≡ suspSupp (Supp x)) r
       Supp (CtxSub (suspSub σ) (suspCtx Γ)) ≡⟨ Supp-unrestrict (suspSubRes σ) (suspCtx Γ) ⟩
       Supp (CtxSub (suspSubRes σ) (suspCtx Γ)) ≡⟨ rec (CtxSub σ Γ) Tm4 ⟩
       suspSupp (Supp (CtxTm (Coh S A σ) Γ)) ∎
-    r (CtxTy ⋆ Γ) rec = {!!}
+    r (CtxTy ⋆ Γ) rec = begin
+      empty ∪ Supp (CtxTm getFst (suspCtx Γ)) ∪ Supp (CtxTm getSnd (suspCtx Γ))
+        ≡⟨ cong (_∪ Supp (CtxTm getSnd (suspCtx Γ))) (∪-left-unit (Supp (CtxTm getFst (suspCtx Γ)))) ⟩
+      Supp (CtxTm getFst (suspCtx Γ)) ∪ Supp (CtxTm getSnd (suspCtx Γ))
+        ≡⟨ suspSuppLem Γ ⟩
+      suspSupp empty ∎
     r (CtxTy (s ─⟨ A ⟩⟶ t) Γ) rec = begin
       Supp (CtxTy (suspTy A) (suspCtx Γ)) ∪ Supp (CtxTm (suspTm s) (suspCtx Γ)) ∪ Supp (CtxTm (suspTm t) (suspCtx Γ)) ≡⟨ cong₂ _∪_ (cong₂ _∪_ (rec (CtxTy A Γ) Ty2) (rec (CtxTm s Γ) Ty1)) (rec (CtxTm t Γ) Ty3) ⟩
       suspSupp (Supp (CtxTy A Γ)) ∪ suspSupp (Supp (CtxTm s Γ)) ∪
@@ -134,7 +143,7 @@ suspSuppFull {suc n} = cong ewt suspSuppFull
 
 suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {T : Tree n} → supp-condition b A T → supp-condition b (suspTy A) (suspTree T)
 suspSuppCondition {b = false} {A} {T} sc = begin
-  Supp (CtxTy (suspTy A) (tree-to-ctx (suspTree T))) ≡⟨ {!!} ⟩
+  Supp (CtxTy (suspTy A) (suspCtx (tree-to-ctx T))) ≡⟨ suspSuppComp (CtxTy A (tree-to-ctx T)) ⟩
   suspSupp (Supp (CtxTy A (tree-to-ctx T))) ≡⟨ cong suspSupp sc ⟩
   suspSupp full ≡⟨ suspSuppFull ⟩
   full ∎
@@ -153,7 +162,11 @@ suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {T} (nz ,, sc1 ,, sc2) = it ,
 
     l1 : Supp (CtxTm (suspTm s) (tree-to-ctx (suspTree T))) ≡ supp-bd (tree-dim T) (suspTree T) false
     l1 = begin
-      Supp (CtxTm (suspTm s) (tree-to-ctx (suspTree T))) ≡⟨ {!!} ⟩
+      Supp (CtxTm (suspTm s) (suspCtx (tree-to-ctx T))) ≡⟨ suspSuppComp (CtxTm s (tree-to-ctx T)) ⟩
+      suspSupp (Supp (CtxTm s (tree-to-ctx T))) ≡⟨ cong suspSupp sc1 ⟩
+      suspSupp (supp-bd (pred (tree-dim T)) T false) ≡⟨⟩
+      supp-bd (suc (pred (tree-dim T))) (suspTree T) false
+        ≡⟨ cong (λ - → supp-bd - (suspTree T) false) (suc-pred (tree-dim T)) ⟩
       supp-bd (tree-dim T) (suspTree T) false ∎
       -- FVTy (suspTy A) ∪ FVTm (suspTm s) ≡⟨ suspSuppTyTm A s ⟩
       -- suspSupp (FVTy A ∪ FVTm s) ≡⟨ cong suspSupp sc1 ⟩
@@ -163,7 +176,11 @@ suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {T} (nz ,, sc1 ,, sc2) = it ,
 
     l2 : Supp (CtxTm (suspTm t) (tree-to-ctx (suspTree T))) ≡ supp-bd (tree-dim T) (suspTree T) true
     l2 = begin
-      Supp (CtxTm (suspTm t) (tree-to-ctx (suspTree T))) ≡⟨ {!!} ⟩
+      Supp (CtxTm (suspTm t) (suspCtx (tree-to-ctx T))) ≡⟨ suspSuppComp (CtxTm t (tree-to-ctx T)) ⟩
+      suspSupp (Supp (CtxTm t (tree-to-ctx T))) ≡⟨ cong suspSupp sc2 ⟩
+      suspSupp (supp-bd (pred (tree-dim T)) T true) ≡⟨⟩
+      supp-bd (suc (pred (tree-dim T))) (suspTree T) true
+        ≡⟨ cong (λ - → supp-bd - (suspTree T) true) (suc-pred (tree-dim T)) ⟩
       supp-bd (tree-dim T) (suspTree T) true ∎
       -- FVTy (suspTy A) ∪ FVTm (suspTm t) ≡⟨ suspSuppTyTm A t ⟩
       -- suspSupp (FVTy A ∪ FVTm t) ≡⟨ cong suspSupp sc2 ⟩

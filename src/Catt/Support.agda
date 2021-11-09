@@ -50,7 +50,8 @@ trueAt {n = suc n} (suc i) = ewf (trueAt i)
 
 infixl 60 _∪_
 _∪_ : VarSet n → VarSet n → VarSet n
-(f ∪ g) = zipWith _∨_ f g
+emp ∪ emp = emp
+(x ∷ xs) ∪ (y ∷ ys) = (x ∨ y) ∷ xs ∪ ys
 
 Supp : (x : CtxSyntax n) → VarSet n
 Supp = ≺-rec (λ {n} _ → VarSet n) r
@@ -77,7 +78,7 @@ FVTy (s ─⟨ A ⟩⟶ t) = FVTy A ∪ FVTm s ∪ FVTm t
 FVSub {A = A} ⟨⟩ = FVTy A
 FVSub ⟨ σ , t ⟩ = FVSub σ ∪ FVTm t
 
-TransportVarSet : VarSet n → Sub n m ⋆ → VarSet m
+TransportVarSet : VarSet n → Sub n m A → VarSet m
 TransportVarSet xs ⟨⟩ = empty
 TransportVarSet (ewf xs) ⟨ σ , t ⟩ = TransportVarSet xs σ
 TransportVarSet (ewt xs) ⟨ σ , t ⟩ = TransportVarSet xs σ ∪ FVTm t
@@ -120,3 +121,17 @@ _≡ᵖ_ = Pointwise _≡_
 
 FVTmTy : Ctx n → Tm n → VarSet n
 FVTmTy Γ t = FVTy (tm-to-ty Γ t) ∪ FVTm t
+
+DC : (Γ : Ctx n) → VarSet n → VarSet n
+DC ∅ xs = emp
+DC (Γ , A) (ewf xs) = ewf (DC Γ xs)
+DC (Γ , A) (ewt xs) = ewt (DC Γ (xs ∪ FVTy A))
+
+SuppTm : (Γ : Ctx n) → (t : Tm n) → VarSet n
+SuppTm Γ t = DC Γ (FVTm t)
+
+SuppTy : (Γ : Ctx n) → (A : Ty n) → VarSet n
+SuppTy Γ A = DC Γ (FVTy A)
+
+SuppSub : (Γ : Ctx n) → (σ : Sub m n A) → VarSet n
+SuppSub Γ σ = DC Γ (FVSub σ)

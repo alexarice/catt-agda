@@ -56,6 +56,37 @@ sub-from-connect-supp {l = l} {A = A} σ ⟨ ⟨⟩ , x ⟩ p = begin
     open ≡-Reasoning
 sub-from-connect-supp {l = l} σ ⟨ ⟨ τ , y ⟩ , x ⟩ p = trans (cong (_∪ FVTm x) (sub-from-connect-supp σ ⟨ τ , y ⟩ p)) (solve (∪-monoid {l}))
 
+sub-from-connect-supp′ : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A)
+                       → SuppTm Γ (Var (fromℕ _) [ τ ]tm) ⊆ SuppSub Γ σ
+                       → SuppSub Γ (sub-from-connect σ τ) ≡ SuppSub Γ σ ∪ SuppSub Γ τ
+sub-from-connect-supp′ {A = A} {Γ = Γ} σ ⟨ ⟨⟩ , x ⟩ p = begin
+  SuppSub Γ σ
+    ≡⟨ p ⟩
+  SuppSub Γ σ ∪ SuppTm Γ x
+    ≡⟨ cong (_∪ SuppTm Γ x) (cong (DC Γ) (sub-type-⊆ σ)) ⟩
+  DC Γ (FVSub σ ∪ FVTy A) ∪ SuppTm Γ x
+    ≡⟨ cong (_∪ SuppTm Γ x) (DC-cup Γ (FVSub σ) (FVTy A)) ⟩
+  SuppSub Γ σ ∪ SuppTy Γ A ∪ SuppTm Γ x
+    ≡⟨ ∪-assoc (DC Γ (FVSub σ)) (SuppTy Γ A) (SuppTm Γ x) ⟩
+  SuppSub Γ σ ∪ (SuppTy Γ A ∪ SuppTm Γ x)
+    ≡˘⟨ cong (SuppSub Γ σ ∪_) (DC-cup Γ (FVTy A) (FVTm x)) ⟩
+  SuppSub Γ σ ∪ (DC Γ (FVTy A ∪ FVTm x)) ∎
+  where
+    open ≡-Reasoning
+sub-from-connect-supp′ {Γ = Γ} σ ⟨ ⟨ τ , y ⟩ , x ⟩ p = begin
+  DC Γ (FVSub (sub-from-connect σ ⟨ τ , y ⟩) ∪ FVTm x)
+    ≡⟨ DC-cup Γ (FVSub (sub-from-connect σ ⟨ τ , y ⟩)) (FVTm x) ⟩
+  SuppSub Γ (sub-from-connect σ ⟨ τ , y ⟩) ∪ SuppTm Γ x
+    ≡⟨ cong (_∪ SuppTm Γ x) (sub-from-connect-supp′ σ ⟨ τ , y ⟩ p) ⟩
+  SuppSub Γ σ ∪ SuppSub Γ ⟨ τ , y ⟩ ∪ SuppTm Γ x
+    ≡⟨ ∪-assoc (SuppSub Γ σ) (SuppSub Γ ⟨ τ , y ⟩) (SuppTm Γ x) ⟩
+  SuppSub Γ σ ∪ (SuppSub Γ ⟨ τ , y ⟩ ∪ SuppTm Γ x)
+    ≡˘⟨ cong (SuppSub Γ σ ∪_) (DC-cup Γ (FVSub ⟨ τ , y ⟩) (FVTm x)) ⟩
+  SuppSub Γ σ ∪ SuppSub Γ ⟨ ⟨ τ , y ⟩ , x ⟩ ∎
+  where
+    open ≡-Reasoning
+
+
 sub-from-connect-Transport : (σ : Sub (suc n) l ⋆)
                            → (τ : Sub (suc m) l ⋆)
                            → (xs : VarSet (suc n))

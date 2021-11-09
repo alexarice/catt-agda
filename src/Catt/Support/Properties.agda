@@ -21,6 +21,7 @@ import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise)
 open import Data.Sum
 open import Data.Unit using (tt)
+open import Catt.Globular
 
 open import Algebra.Definitions
 
@@ -72,7 +73,7 @@ module _ {n : ℕ} where
     ; assoc = ∪-assoc
     }
 
-  ∪-isMonoid : IsMonoid (zipWith _∨_) empty
+  ∪-isMonoid : IsMonoid _∪_ empty
   ∪-isMonoid = record
     { isSemigroup = ∪-isSemigroup
     ; identity = ∪-left-unit ,, ∪-right-unit
@@ -125,7 +126,7 @@ TransportVarSet-∪ {n} {m} (ewt xs) (ewt ys) ⟨ σ , t ⟩ = begin
 
 TransportVarSet-ty : (A : Ty n) → (σ : Sub n m ⋆) → TransportVarSet (FVTy A) σ ≡ FVTy (A [ σ ]ty)
 TransportVarSet-tm : (t : Tm n) → (σ : Sub n m ⋆) → TransportVarSet (FVTm t) σ ≡ FVTm (t [ σ ]tm)
-TransportVarSet-sub : (τ : Sub l n ⋆) → (σ : Sub n m ⋆) → TransportVarSet (FVSub τ) σ ≡ FVSub (σ ∘ τ)
+TransportVarSet-sub : (τ : Sub l n A) → (σ : Sub n m ⋆) → TransportVarSet (FVSub τ) σ ≡ FVSub (σ ∘ τ)
 
 TransportVarSet-ty ⋆ σ = TransportVarSet-empty σ
 TransportVarSet-ty (s ─⟨ A ⟩⟶ t) σ = begin
@@ -143,7 +144,7 @@ TransportVarSet-tm (Var zero) ⟨ σ , t ⟩ = trans (cong (_∪ FVTm t) (Transp
 TransportVarSet-tm (Var (suc i)) ⟨ σ , t ⟩ = TransportVarSet-tm (Var i) σ
 TransportVarSet-tm (Coh S A τ) σ = TransportVarSet-sub τ σ
 
-TransportVarSet-sub ⟨⟩ σ = TransportVarSet-empty σ
+TransportVarSet-sub {A = A} ⟨⟩ σ = TransportVarSet-ty A σ -- TransportVarSet-empty σ
 TransportVarSet-sub ⟨ τ , t ⟩ σ = trans (TransportVarSet-∪ (FVSub τ) (FVTm t) σ) (cong₂ _∪_ (TransportVarSet-sub τ σ) (TransportVarSet-tm t σ))
 
 supp-lift-ty : (A : Ty n) → FVTy (liftType A) ≡ ewf (FVTy A)
@@ -316,3 +317,137 @@ sub-type-⊆ ⟨ σ , t ⟩ = ⊆-trans (sub-type-⊆ σ) (∪-⊆-1 (FVSub σ) 
 -- subbed-tm-⊆ (Var zero) ⟨ σ , t ⟩ = ∪-⊆-2 (FVSub σ) (FVTm t)
 -- subbed-tm-⊆ (Var (suc i)) ⟨ σ , t ⟩ = ⊆-trans (subbed-tm-⊆ (Var i) σ) (∪-⊆-1 (FVSub σ) (FVTm t))
 -- subbed-tm-⊆ (Coh S A τ) σ = {!!}
+
+DC-⊆ : (Γ : Ctx n) → (xs : VarSet n) → xs ⊆ DC Γ xs
+DC-⊆ ∅ emp = ⊆-refl
+DC-⊆ (Γ , A) (ewf xs) = cong ewf (DC-⊆ Γ xs)
+DC-⊆ (Γ , A) (ewt xs) = cong ewt (begin
+  xs
+    ≤⟨ ∪-⊆-1 xs (FVTy A) ⟩
+  xs ∪ FVTy A
+    ≤⟨ DC-⊆ Γ (xs ∪ FVTy A) ⟩
+  DC Γ (xs ∪ FVTy A) ∎)
+  where
+    open PReasoning (⊆-poset _)
+
+module _ where
+  open ≡-Reasoning
+
+  DC-cup : (Γ : Ctx n) → (xs ys : VarSet n) → DC Γ (xs ∪ ys) ≡ DC Γ xs ∪ DC Γ ys
+  DC-cup ∅ xs ys = refl
+  DC-cup (Γ , A) (ewf xs) (ewf ys) = cong ewf (DC-cup Γ xs ys)
+  DC-cup (Γ , A) (ewf xs) (ewt ys) = cong ewt (begin
+    DC Γ (xs ∪ ys ∪ FVTy A)
+      ≡⟨ cong (DC Γ) (∪-assoc xs ys (FVTy A)) ⟩
+    DC Γ (xs ∪ (ys ∪ FVTy A))
+      ≡⟨ DC-cup Γ xs (ys ∪ FVTy A) ⟩
+    (DC Γ xs) ∪ (DC Γ (ys ∪ FVTy A)) ∎)
+  DC-cup (Γ , A) (ewt xs) (ewf ys) = cong ewt (begin
+    DC Γ (xs ∪ ys ∪ FVTy A)
+      ≡⟨ cong (DC Γ) (∪-assoc xs ys (FVTy A)) ⟩
+    DC Γ (xs ∪ (ys ∪ FVTy A))
+      ≡⟨ cong (λ - → DC Γ (xs ∪ -)) (∪-comm ys (FVTy A)) ⟩
+    DC Γ (xs ∪ (FVTy A ∪ ys))
+      ≡˘⟨ cong (DC Γ) (∪-assoc xs (FVTy A) ys) ⟩
+    DC Γ (xs ∪ FVTy A ∪ ys)
+      ≡⟨ DC-cup Γ (xs ∪ FVTy A) ys ⟩
+    (DC Γ (xs ∪ FVTy A)) ∪ (DC Γ ys) ∎)
+  DC-cup {suc n} (Γ , A) (ewt xs) (ewt ys) = cong ewt (begin
+    DC Γ (xs ∪ ys ∪ FVTy A)
+      ≡˘⟨ cong (λ - → DC Γ (xs ∪ ys ∪ -)) (∪-idem (FVTy A)) ⟩
+    DC Γ (xs ∪ ys ∪ (FVTy A ∪ FVTy A))
+      ≡⟨ cong (DC Γ) (solve (∪-monoid {n})) ⟩
+    DC Γ (xs ∪ (ys ∪ FVTy A) ∪ FVTy A)
+      ≡⟨ cong (λ - → DC Γ (xs ∪ - ∪ FVTy A)) (∪-comm ys (FVTy A)) ⟩
+    DC Γ (xs ∪ (FVTy A ∪ ys) ∪ FVTy A)
+      ≡⟨ cong (DC Γ) (solve (∪-monoid {n})) ⟩
+    DC Γ ((xs ∪ FVTy A) ∪ (ys ∪ FVTy A))
+      ≡⟨ DC-cup Γ (xs ∪ FVTy A) (ys ∪ FVTy A) ⟩
+    DC Γ (xs ∪ FVTy A) ∪ DC Γ (ys ∪ FVTy A) ∎)
+
+  DC-idem : (Γ : Ctx n) → (xs : VarSet n) → DC Γ (DC Γ xs) ≡ DC Γ xs
+  DC-idem ∅ xs = refl
+  DC-idem (Γ , A) (ewf xs) = cong ewf (DC-idem Γ xs)
+  DC-idem (Γ , A) (ewt xs) = cong ewt (begin
+    DC Γ (DC Γ (xs ∪ FVTy A) ∪ FVTy A)
+      ≡⟨ cong (λ - → DC Γ (- ∪ FVTy A)) (DC-cup Γ xs (FVTy A)) ⟩
+    DC Γ (DC Γ xs ∪ DC Γ (FVTy A) ∪ FVTy A)
+      ≡⟨ cong (DC Γ) (∪-assoc (DC Γ xs) (DC Γ (FVTy A)) (FVTy A)) ⟩
+    DC Γ (DC Γ xs ∪ (DC Γ (FVTy A) ∪ FVTy A))
+      ≡˘⟨ cong (λ - → DC Γ (DC Γ xs ∪ -)) (DC-⊆ Γ (FVTy A)) ⟩
+    DC Γ (DC Γ xs ∪ DC Γ (FVTy A))
+      ≡˘⟨ cong (DC Γ) (DC-cup Γ xs (FVTy A)) ⟩
+    DC Γ (DC Γ (xs ∪ FVTy A))
+      ≡⟨ DC-idem Γ (xs ∪ FVTy A) ⟩
+    DC Γ (xs ∪ FVTy A) ∎)
+
+  DC-empty : (Γ : Ctx n) → DC Γ empty ≡ empty
+  DC-empty ∅ = refl
+  DC-empty (Γ , A) = cong ewf (DC-empty Γ)
+
+⊆-cong-∪-1 : {xs ys zs : VarSet n} → ys ⊆ zs → xs ∪ ys ⊆ xs ∪ zs
+⊆-cong-∪-1 p = ∪-⊆ (∪-⊆-1 _ _) (⊆-trans p (∪-⊆-2 _ _))
+
+
+FVSub-≃ : σ ≃s τ → FVSub σ ≡ FVSub τ
+FVSub-≃ (Null≃ x) with ≃ty-to-≡ x
+... | refl = refl
+FVSub-≃ (Ext≃ p x) with ≃tm-to-≡ x
+... | refl = cong₂ _∪_ (FVSub-≃ p) refl
+
+FVTy-comp-⊆ : (A : Ty n) → (σ : Sub n m B) → FVTy (A [ σ ]ty) ⊆ FVSub σ
+FVTm-comp-⊆ : (t : Tm n) → (σ : Sub n m A) → FVTm (t [ σ ]tm) ⊆ FVSub σ
+FVSub-comp-⊆ : (σ : Sub n m A) → (τ : Sub l n ⋆) → FVSub (σ ∘ τ) ⊆ FVSub σ
+
+FVTy-comp-⊆ ⋆ σ = sub-type-⊆ σ
+FVTy-comp-⊆ (s ─⟨ A ⟩⟶ t) σ = ∪-⊆ (∪-⊆ (FVTy-comp-⊆ A σ) (FVTm-comp-⊆ s σ)) (FVTm-comp-⊆ t σ)
+
+FVTm-comp-⊆ (Var zero) ⟨ σ , t ⟩ = ∪-⊆-2 (FVSub σ) (FVTm t)
+FVTm-comp-⊆ (Var (suc i)) ⟨ σ , t ⟩ = ⊆-trans (FVTm-comp-⊆ (Var i) σ) (∪-⊆-1 (FVSub σ) (FVTm t))
+FVTm-comp-⊆ {A = ⋆} (Coh S B τ) σ = FVSub-comp-⊆ σ τ
+FVTm-comp-⊆ {A = s ─⟨ A ⟩⟶ t} (Coh S B τ) σ = begin
+  FVTm
+      (Coh (suspTree S) (suspTy B) (suspSub τ) [ unrestrict σ ]tm)
+    ≤⟨ FVTm-comp-⊆ (Coh (suspTree S) (suspTy B) (suspSub τ)) (unrestrict σ) ⟩
+  FVSub (unrestrict σ)
+    ≡⟨ unrestrict-supp σ ⟩
+  FVSub σ ∎
+  where
+    open PReasoning (⊆-poset _)
+
+FVSub-comp-⊆ σ ⟨⟩ = sub-type-⊆ σ
+FVSub-comp-⊆ σ ⟨ τ , t ⟩ = begin
+  FVSub (σ ∘ τ) ∪ FVTm (t [ σ ]tm)
+    ≤⟨ ⊆-cong-∪-1 (FVTm-comp-⊆ t σ) ⟩
+  FVSub (σ ∘ τ) ∪ FVSub σ
+    ≤⟨ ∪-⊆ (FVSub-comp-⊆ σ τ) ⊆-refl ⟩
+  FVSub σ ∎
+  where
+    open PReasoning (⊆-poset _)
+
+SuppContainsType : (t : Tm n) → (Γ : Ctx n) → SuppTy Γ (tm-to-ty Γ t) ⊆ SuppTm Γ t
+SuppContainsType (Var zero) (Γ , A) = begin
+  SuppTy (Γ , A) (liftType A)
+    ≡⟨ cong (DC (Γ , A)) (supp-lift-ty A) ⟩
+  ewf (SuppTy Γ A)
+    ≤⟨ cong ewt (sym (∪-idem (SuppTy Γ A))) ⟩
+  ewt (SuppTy Γ A)
+    ≡˘⟨ cong (λ - → ewt (DC Γ -)) (∪-left-unit (FVTy A)) ⟩
+  ewt (DC Γ (empty ∪ FVTy A))
+    ≡⟨⟩
+  SuppTm (Γ , A) 0V ∎
+  where
+    open PReasoning (⊆-poset _)
+
+SuppContainsType (Var (suc i)) (Γ , A) = begin
+  SuppTy (Γ , A) (liftType (Γ ‼ i))
+    ≡⟨ cong (DC (Γ , A)) (supp-lift-ty (Γ ‼ i)) ⟩
+  ewf (SuppTy Γ (Γ ‼ i))
+    ≤⟨ cong ewf (SuppContainsType (Var i) Γ) ⟩
+  ewf (SuppTm Γ (Var i))
+    ≡⟨⟩
+  SuppTm (Γ , A) (Var (suc i)) ∎
+  where
+    open PReasoning (⊆-poset _)
+
+SuppContainsType (Coh S A σ) Γ = trans (cong (DC Γ) (FVTy-comp-⊆ A σ)) (DC-cup Γ (FVTm (Coh S A σ)) (FVTy (A [ σ ]ty)))

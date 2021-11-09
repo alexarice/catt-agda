@@ -18,6 +18,7 @@ open import Data.Sum
 open import Data.Product renaming (_,_ to _,,_)
 open import Data.Empty
 open import Data.Unit
+open import Catt.Globular
 
 -- susp-src-compat : (A : Ty n (suc d)) → suspTm (ty-src A) ≃tm ty-src (suspTy A)
 -- susp-src-compat (s ─⟨ A ⟩⟶ t) = refl≃tm
@@ -212,3 +213,8 @@ susp-ty-glob (s ─⟨ A ⟩⟶ t) ⦃ a ,, b ,, c ⦄ = susp-tm-glob s ⦃ a �
 susp-ctx-glob : (Γ : Ctx n) → ⦃ ctx-is-globular Γ ⦄ → ctx-is-globular (suspCtx Γ)
 susp-ctx-glob ∅ = (tt ,, tt) ,, tt
 susp-ctx-glob (Γ , A) ⦃ a ,, b ⦄ = susp-ctx-glob Γ ⦃ a ⦄ ,, susp-ty-glob A ⦃ b ⦄
+
+tm-to-ty-susp : (t : Tm n) → (Γ : Ctx n) → suspTy (tm-to-ty Γ t) ≃ty tm-to-ty (suspCtx Γ) (suspTm t)
+tm-to-ty-susp (Var zero) (Γ , A) = susp-ty-lift A
+tm-to-ty-susp (Var (suc i)) (Γ , A) = trans≃ty (susp-ty-lift (Γ ‼ i)) (lift-ty-≃ (tm-to-ty-susp (Var i) Γ))
+tm-to-ty-susp (Coh S A σ) Γ = susp-functorial-ty σ A

@@ -8,6 +8,7 @@ open import Catt.Syntax
 open import Data.Nat
 open import Data.Vec
 open import Catt.Suspension
+open import Catt.Suspension.Properties
 open import Relation.Binary.PropositionalEquality
 open import Data.Fin using (fromℕ; inject₁; Fin; zero; suc)
 open import Data.Bool renaming (T to Truth)
@@ -17,6 +18,9 @@ open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Data.Unit
+import Relation.Binary.Reasoning.PartialOrder as PReasoning
+open import Catt.Globular
+open import Catt.Syntax.SyntacticEquality
 
 suspSupp∪ : (vs vs′ : VarSet n) → suspSupp vs ∪ suspSupp vs′ ≡ suspSupp (vs ∪ vs′)
 suspSupp∪ emp emp = refl
@@ -137,5 +141,81 @@ TransportVarSet-susp (ewt xs) ⟨ σ , t ⟩ = begin
   suspSupp (TransportVarSet xs σ) ∪ suspSupp (FVTm t)
     ≡⟨ suspSupp∪ (TransportVarSet xs σ) (FVTm t) ⟩
   suspSupp (TransportVarSet xs σ ∪ FVTm t) ∎
+  where
+    open ≡-Reasoning
+
+suspSuppTyContainsEmpty : (A : Ty n) → suspSupp empty ⊆ FVTy (suspTy A)
+suspSuppTyContainsEmpty ⋆ = ⊆-reflexive (sym (suspSuppLem _))
+suspSuppTyContainsEmpty (s ─⟨ A ⟩⟶ t) = begin
+  suspSupp empty
+    ≤⟨ suspSuppTyContainsEmpty A ⟩
+  FVTy (suspTy A)
+    ≤⟨ ∪-⊆-1 (FVTy (suspTy A)) (FVTm (suspTm s)) ⟩
+  FVTy (suspTy A) ∪ FVTm (suspTm s)
+    ≤⟨ ∪-⊆-1 (FVTy (suspTy A) ∪ FVTm (suspTm s)) (FVTm (suspTm t)) ⟩
+  FVTy (suspTy A) ∪ FVTm (suspTm s) ∪ FVTm (suspTm t) ∎
+  where
+    open PReasoning (⊆-poset _)
+
+suspSuppTmContainsEmpty : (Γ : Ctx n) → (t : Tm n) → suspSupp empty ⊆ SuppTm (suspCtx Γ) (suspTm t)
+suspSuppTmContainsEmpty Γ t = begin
+  suspSupp empty
+    ≤⟨ suspSuppTyContainsEmpty (tm-to-ty Γ t) ⟩
+  FVTy (suspTy (tm-to-ty Γ t))
+    ≤⟨ DC-⊆ (suspCtx Γ) (FVTy (suspTy (tm-to-ty Γ t))) ⟩
+  SuppTy (suspCtx Γ) (suspTy (tm-to-ty Γ t))
+    ≡⟨ cong (SuppTy (suspCtx Γ)) (≃ty-to-≡ (tm-to-ty-susp t Γ)) ⟩
+  SuppTy (suspCtx Γ) (tm-to-ty (suspCtx Γ) (suspTm t))
+    ≤⟨ SuppContainsType (suspTm t) (suspCtx Γ) ⟩
+  SuppTm (suspCtx Γ) (suspTm t) ∎
+  where
+    open PReasoning (⊆-poset _)
+
+DC-suspSupp : (Γ : Ctx n) → (xs : VarSet n) → DC (suspCtx Γ) (suspSupp xs) ≡ suspSupp (DC Γ xs)
+DC-suspSupp ∅ emp = refl
+DC-suspSupp (Γ , A) (ewf xs) = cong ewf (DC-suspSupp Γ xs)
+DC-suspSupp (Γ , A) (ewt xs) = cong ewt (begin
+  DC (suspCtx Γ) (suspSupp xs ∪ FVTy (suspTy A))
+    ≡⟨ cong (DC (suspCtx Γ)) lem ⟩
+  DC (suspCtx Γ) (suspSupp (xs ∪ FVTy A))
+    ≡⟨ DC-suspSupp Γ (xs ∪ FVTy A) ⟩
+  suspSupp (DC Γ (xs ∪ FVTy A)) ∎)
+  where
+    open ≡-Reasoning
+    lem : suspSupp xs ∪ FVTy (suspTy A) ≡ suspSupp (xs ∪ FVTy A)
+    lem = begin
+      suspSupp xs ∪ FVTy (suspTy A)
+        ≡⟨ cong (suspSupp xs ∪_) (suspSuppTy A) ⟩
+      suspSupp xs ∪ suspSupp (FVTy A)
+        ≡⟨ suspSupp∪ xs (FVTy A) ⟩
+      suspSupp (xs ∪ FVTy A) ∎
+
+suspSuppTm′ : (Γ : Ctx n) → (t : Tm n) → SuppTm (suspCtx Γ) (suspTm t) ≡ suspSupp (SuppTm Γ t)
+suspSuppTm′ Γ t = begin
+  SuppTm (suspCtx Γ) (suspTm t)
+    ≡⟨ suspSuppTmContainsEmpty Γ t ⟩
+  SuppTm (suspCtx Γ) (suspTm t) ∪ suspSupp empty
+    ≡⟨ ∪-comm (DC (suspCtx Γ) (FVTm (suspTm t))) (suspSupp empty) ⟩
+  suspSupp empty ∪ SuppTm (suspCtx Γ) (suspTm t)
+    ≡˘⟨ cong (_∪ SuppTm (suspCtx Γ) (suspTm t)) (trans (DC-suspSupp Γ empty) (cong suspSupp (DC-empty Γ))) ⟩
+  DC (suspCtx Γ) (suspSupp empty) ∪ DC (suspCtx Γ) (FVTm (suspTm t))
+    ≡˘⟨ DC-cup (suspCtx Γ) (suspSupp empty) (FVTm (suspTm t)) ⟩
+  DC (suspCtx Γ) (suspSupp empty ∪ FVTm (suspTm t))
+    ≡⟨ cong (DC (suspCtx Γ)) (suspSuppTm t) ⟩
+  DC (suspCtx Γ) (suspSupp (FVTm t))
+    ≡⟨ DC-suspSupp Γ (FVTm t) ⟩
+  suspSupp (SuppTm Γ t) ∎
+  where
+    open ≡-Reasoning
+
+SuspSuppTmProp : (s t : Tm n) → SuppTm Γ s ≡ SuppTm Γ t → SuppTm (suspCtx Γ) (suspTm s) ≡ SuppTm (suspCtx Γ) (suspTm t)
+SuspSuppTmProp {Γ = Γ} s t p = begin
+  SuppTm (suspCtx Γ) (suspTm s)
+    ≡⟨ suspSuppTm′ Γ s ⟩
+  suspSupp (SuppTm Γ s)
+    ≡⟨ cong suspSupp p ⟩
+  suspSupp (SuppTm Γ t)
+    ≡˘⟨ suspSuppTm′ Γ t ⟩
+  SuppTm (suspCtx Γ) (suspTm t) ∎
   where
     open ≡-Reasoning

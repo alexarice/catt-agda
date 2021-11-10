@@ -203,43 +203,12 @@ transport-typing-ty Γty p q with ≃c-preserve-length p
 coh-sub-ty : Typing-Tm Γ (Coh T A τ) B → Typing-Sub (tree-to-ctx T) Γ τ
 coh-sub-ty (TyCoh x τty b x₂ x₃) = τty
 
+coh-ty-ty : Typing-Tm Γ (Coh T A τ) B → Typing-Ty (tree-to-ctx T) A
+coh-ty-ty (TyCoh Aty τty b a c) = Aty
+
 sub-to-ctx-Ty : Typing-Sub Γ Δ σ → Typing-Ctx Γ
 sub-to-ctx-Ty (TyNull x) = TyEmp
 sub-to-ctx-Ty (TyExt σty Aty tty) = TyAdd (sub-to-ctx-Ty σty) Aty
-
-Preserve-Supp-Tm : s ≈[ Γ ]tm t → Set
-Preserve-Supp-Ty : A ≈[ Γ ]ty B → Set
-Preserve-Supp-Sub : σ ≈[ Γ ]s τ → Set
-
--- Preserve-Supp-Tm (Var≈ x) = ⊤
--- Preserve-Supp-Tm (Sym≈ p) = Preserve-Supp-Tm p
--- Preserve-Supp-Tm (Trans≈ p q) = Preserve-Supp-Tm p × Preserve-Supp-Tm q
--- Preserve-Supp-Tm (Coh≈ p q) = Preserve-Supp-Ty p × Preserve-Supp-Sub q
--- Preserve-Supp-Tm (Rule≈ i a tty) = SuppTm (rule i .Rule.tgtCtx a) (rule i .Rule.lhs a) ≡ SuppTm (rule i .Rule.tgtCtx a) (rule i .Rule.rhs a)
-
--- Preserve-Supp-Ty Star≈ = ⊤
--- Preserve-Supp-Ty (Arr≈ p q r) = Preserve-Supp-Tm p × Preserve-Supp-Ty p × Preserve-Supp-Tm r
-
--- Preserve-Supp-Sub (Null≈ x) = {!!}
--- Preserve-Supp-Sub (Ext≈ p x) = {!!}
-
-Preserve-Supp-Tm {s = s} {Γ = Γ} {t = t} p = SuppTm Γ s ≡ SuppTm Γ t
-Preserve-Supp-Ty {A = A} {Γ = Γ} {B = B} p = SuppTy Γ A ≡ SuppTy Γ B
-Preserve-Supp-Sub {σ = σ} {Γ = Γ} {τ = τ} p = SuppSub Γ σ ≡ SuppSub Γ τ
-
-Supporting-Tm : Typing-Tm Γ t A → Set
-Supporting-Ty : Typing-Ty Γ A → Set
-Supporting-Sub : Typing-Sub Γ Δ σ → Set
-
-Supporting-Tm (TyVarZ {Γ = Γ} {A = A} {B = B} Aty p) = Supporting-Ty Aty × Preserve-Supp-Ty p
-Supporting-Tm (TyVarS {A = A} {B = B} i tty p) = Supporting-Tm tty × Preserve-Supp-Ty p
-Supporting-Tm (TyCoh {A = A} {σ = σ} {B = B} Aty σty b sc p) = Supporting-Ty Aty × Supporting-Sub σty × Preserve-Supp-Ty p
-
-Supporting-Ty TyStar = ⊤
-Supporting-Ty (TyArr sty Aty tty) = Supporting-Tm sty × Supporting-Ty Aty × Supporting-Tm tty
-
-Supporting-Sub (TyNull Aty) = Supporting-Ty Aty
-Supporting-Sub (TyExt σty Aty tty) = Supporting-Sub σty × Supporting-Ty Aty × Supporting-Tm tty
 
 module _ {i : Index} (a : rule i .Rule.Args) where
   open Rule (rule i)

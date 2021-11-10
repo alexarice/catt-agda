@@ -2,37 +2,39 @@
 
 module Catt.Strict.Assoc where
 
-open import Catt.Typing.Base
+open import Catt.Connection
+open import Catt.Connection.Properties
+open import Catt.Connection.Support
+open import Catt.Support
+open import Catt.Support.Properties
+open import Catt.Suspension
+open import Catt.Suspension.Properties
+open import Catt.Suspension.Support
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
--- open import Data.Unit
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Fin using (Fin;zero;suc;fromℕ)
-open import Data.Fin.Properties using (toℕ-injective)
 open import Catt.Syntax.SyntacticEquality
-open import Relation.Binary.PropositionalEquality
-open import Data.Unit using (⊤;tt)
-import Relation.Binary.Reasoning.Setoid as Reasoning
-import Relation.Binary.Reasoning.PartialOrder as PReasoning
-open import Relation.Nullary
-open import Catt.Suspension
-open import Catt.Suspension.Properties
-open import Catt.Connection
-open import Catt.Tree.Insertion
 open import Catt.Tree
+open import Catt.Tree.Insertion
+open import Catt.Tree.Insertion.Properties
+open import Catt.Tree.Insertion.Support
+open import Catt.Tree.Properties
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
-open import Catt.Tree.Insertion.Properties
-open Rule
-open import Catt.Support
-open import Catt.Support.Properties
-open import Catt.Connection.Support
-open import Catt.Connection.Properties
-open import Catt.Tree.Properties
-open import Catt.Suspension.Support
+open import Catt.Typing.Base
+open import Data.Bool using (true)
+open import Data.Fin using (Fin;zero;suc;fromℕ)
+open import Data.Fin.Properties using (toℕ-injective)
+open import Data.Nat
+open import Data.Nat.Properties
 open import Data.Product renaming (_,_ to _,,_)
+open import Data.Unit using (⊤;tt)
+open import Relation.Binary.PropositionalEquality
+open import Relation.Nullary
+
+import Relation.Binary.Reasoning.PartialOrder as PReasoning
+import Relation.Binary.Reasoning.Setoid as Reasoning
+open Rule
 
 record InsertionData : Set where
   field
@@ -445,112 +447,10 @@ module Support where
 
         open Reasoning (tm-setoid-≈ (suspCtx id-Γ))
 
-    module _ where
-      open ≡-Reasoning
-      EqSuppTy : A ≈[ Γ ]ty B → SuppTy Γ A ≡ SuppTy Γ B
-      EqSuppTm : s ≈[ Γ ]tm t → SuppTm Γ s ≡ SuppTm Γ t
-      EqSuppSub : σ ≈[ Γ ]s τ → SuppSub Γ σ ≡ SuppSub Γ τ
+    supp-rule-supp : ∀ i a → SupportRule {i} a
+    supp-rule-supp i (a ,, sc) tty = sc
 
-      EqSuppTy Star≈ = refl
-      EqSuppTy (Arr≈ {s = s} {Γ = Γ} {s′} {A} {A′} {t} {t′} p q r) = begin
-        DC Γ (FVTy A ∪ FVTm s ∪ FVTm t)
-          ≡⟨ DC-cup Γ (FVTy A ∪ FVTm s) (FVTm t) ⟩
-        DC Γ (FVTy A ∪ FVTm s) ∪ DC Γ (FVTm t)
-          ≡⟨ cong (_∪ DC Γ (FVTm t)) (DC-cup Γ (FVTy A) (FVTm s)) ⟩
-        DC Γ (FVTy A) ∪ DC Γ (FVTm s) ∪ DC Γ (FVTm t)
-          ≡⟨ cong₂ _∪_ (cong₂ _∪_ (EqSuppTy q) (EqSuppTm p)) (EqSuppTm r) ⟩
-        DC Γ (FVTy A′) ∪ SuppTm Γ s′ ∪ SuppTm Γ t′
-          ≡˘⟨ cong (_∪ DC Γ (FVTm t′)) (DC-cup Γ (FVTy A′) (FVTm s′)) ⟩
-        DC Γ (FVTy A′ ∪ FVTm s′) ∪ DC Γ (FVTm t′)
-          ≡˘⟨ DC-cup Γ (FVTy A′ ∪ FVTm s′) (FVTm t′) ⟩
-        DC Γ (FVTy A′ ∪ FVTm s′ ∪ FVTm t′) ∎
-
-      EqSuppTm (Var≈ x) with toℕ-injective x
-      ... | refl = refl
-      EqSuppTm (Sym≈ p) = sym (EqSuppTm p)
-      EqSuppTm (Trans≈ p q) = trans (EqSuppTm p) (EqSuppTm q)
-      EqSuppTm (Coh≈ p q) = EqSuppSub q
-      EqSuppTm (Rule≈ i (a ,, snd) x) = snd
-
-      EqSuppSub (Null≈ x) = EqSuppTy x
-      EqSuppSub (Ext≈ {σ = σ} {Δ = Δ} {τ = τ} {s} {t} p x) = begin
-        DC Δ (FVSub σ ∪ FVTm s)
-          ≡⟨ DC-cup Δ (FVSub σ) (FVTm s) ⟩
-        DC Δ (FVSub σ) ∪ DC Δ (FVTm s)
-          ≡⟨ cong₂ _∪_ (EqSuppSub p) (EqSuppTm x) ⟩
-        DC Δ (FVSub τ) ∪ DC Δ (FVTm t)
-          ≡˘⟨ DC-cup Δ (FVSub τ) (FVTm t) ⟩
-        DC Δ (FVSub τ ∪ FVTm t) ∎
-
-      SuppSubFV : {σ : Sub n m ⋆} → Typing-Sub Γ Δ σ → SuppSub Δ σ ≡ FVSub σ
-      SuppTmChar : Typing-Tm Γ t A → SuppTm Γ t ≡ SuppTy Γ A ∪ FVTm t
-
-      SuppSubFV (TyNull x) = DC-empty _
-      SuppSubFV {Δ = Δ} (TyExt {σ = σ} {A = A} {t = t} σty Aty tty) = begin
-        DC Δ (FVSub σ ∪ FVTm t)
-          ≡⟨ DC-cup Δ (FVSub σ) (FVTm t) ⟩
-        SuppSub Δ σ ∪ SuppTm Δ t
-          ≡⟨ cong (SuppSub Δ σ ∪_) (SuppTmChar tty) ⟩
-        SuppSub Δ σ ∪ (SuppTy Δ (A [ σ ]ty) ∪ FVTm t)
-          ≡˘⟨ ∪-assoc (SuppSub Δ σ) (SuppTy Δ (A [ σ ]ty)) (FVTm t) ⟩
-        SuppSub Δ σ ∪ SuppTy Δ (A [ σ ]ty) ∪ FVTm t
-          ≡˘⟨ cong (_∪ FVTm t) (DC-cup Δ (FVSub σ) (FVTy (A [ σ ]ty))) ⟩
-        DC Δ (FVSub σ ∪ FVTy (A [ σ ]ty)) ∪ FVTm t
-          ≡˘⟨ cong (λ - → DC Δ - ∪ FVTm t) (FVTy-comp-⊆ A σ) ⟩
-        SuppSub Δ σ ∪ FVTm t
-          ≡⟨ cong (_∪ FVTm t) (SuppSubFV σty) ⟩
-        FVSub σ ∪ FVTm t ∎
-
-      SuppTmChar (TyVarZ {Γ = Γ} {A = A} {B = B} Aty p) = begin
-        ewt (DC Γ (empty ∪ FVTy A))
-          ≡⟨ cong (λ - → ewt (DC Γ -)) (∪-left-unit (FVTy A)) ⟩
-        ewt (DC Γ (FVTy A))
-          ≡˘⟨ cong ewt (∪-right-unit (SuppTy Γ A)) ⟩
-        ewt (SuppTy Γ A ∪ empty)
-          ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewt empty) (supp-lift-ty A) ⟩
-        SuppTy (Γ , A) (liftType A) ∪ ewt empty
-          ≡⟨ cong (_∪ ewt empty) (EqSuppTy p) ⟩
-        SuppTy (Γ , A) B ∪ ewt empty ∎
-
-      SuppTmChar (TyVarS {Γ = Γ} {A = A} {C = C} {B = B} i tty x) = begin
-        ewf (SuppTm Γ (Var i))
-          ≡⟨ cong ewf (SuppTmChar tty) ⟩
-        ewf (SuppTy Γ A ∪ FVTm (Var i))
-          ≡˘⟨ cong (λ - → DC (Γ , C) - ∪ ewf (FVTm (Var i))) (supp-lift-ty A) ⟩
-        SuppTy (Γ , C) (liftType A) ∪ ewf (FVTm (Var i))
-          ≡⟨ cong (_∪ ewf (FVTm (Var i))) (EqSuppTy x) ⟩
-        SuppTy (Γ , C) B ∪ ewf (FVTm (Var i)) ∎
-
-      SuppTmChar {Γ = Γ} (TyCoh {A = A} {σ = σ} {B = B} Aty σty b s p) = begin
-        SuppSub Γ σ
-          ≡⟨ cong (DC Γ) (trans (FVTy-comp-⊆ A σ) (∪-comm (FVSub σ) (FVTy (A [ σ ]ty)))) ⟩
-        DC Γ (FVTy (A [ σ ]ty) ∪ FVSub σ)
-          ≡⟨ DC-cup Γ (FVTy (A [ σ ]ty)) (FVSub σ) ⟩
-        SuppTy Γ (A [ σ ]ty) ∪ SuppSub Γ σ
-          ≡⟨ cong (SuppTy Γ (A [ σ ]ty) ∪_) (SuppSubFV σty) ⟩
-        SuppTy Γ (A [ σ ]ty) ∪ FVSub σ
-          ≡⟨ cong (_∪ FVSub σ) (EqSuppTy p) ⟩
-        SuppTy Γ B ∪ FVSub σ ∎
-
-      TransportVarSet-DC : {σ : Sub n m ⋆} → (xs : VarSet n) → Typing-Sub Γ Δ σ → DC Δ (TransportVarSet xs σ) ≡ TransportVarSet (DC Γ xs) σ
-      TransportVarSet-DC emp (TyNull x) = DC-empty _
-      TransportVarSet-DC (ewf xs) (TyExt σty Aty tty) = TransportVarSet-DC xs σty
-      TransportVarSet-DC {Γ = Γ , A} {Δ = Δ} (ewt xs) (TyExt {σ = σ} {t = t} σty Aty tty) = begin
-        DC Δ (TransportVarSet xs σ ∪ FVTm t)
-          ≡⟨ DC-cup Δ (TransportVarSet xs σ) (FVTm t) ⟩
-        DC Δ (TransportVarSet xs σ) ∪ DC Δ (FVTm t)
-          ≡⟨ cong₂ _∪_ (TransportVarSet-DC xs σty) (SuppTmChar tty) ⟩
-        TransportVarSet (DC Γ xs) σ ∪ (SuppTy Δ (A [ σ ]ty) ∪ FVTm t)
-          ≡˘⟨ ∪-assoc (TransportVarSet (DC Γ xs) σ) (SuppTy Δ (A [ σ ]ty)) (FVTm t) ⟩
-        TransportVarSet (DC Γ xs) σ ∪ SuppTy Δ (A [ σ ]ty) ∪ FVTm t
-          ≡˘⟨ cong (λ - → TransportVarSet (DC Γ xs) σ ∪ DC Δ - ∪ FVTm t) (TransportVarSet-ty A σ) ⟩
-        TransportVarSet (DC Γ xs) σ ∪ DC Δ (TransportVarSet (FVTy A) σ) ∪ FVTm t
-          ≡⟨ cong (λ - → TransportVarSet (DC Γ xs) σ ∪ - ∪ FVTm t) (TransportVarSet-DC (FVTy A) σty) ⟩
-        TransportVarSet (DC Γ xs) σ ∪ TransportVarSet (DC Γ (FVTy A)) σ ∪ FVTm t
-          ≡˘⟨ cong (_∪ FVTm t) (TransportVarSet-∪ (DC Γ xs) (DC Γ (FVTy A)) σ) ⟩
-        TransportVarSet (DC Γ xs ∪ DC Γ (FVTy A)) σ ∪ FVTm t
-          ≡˘⟨ cong (λ - → TransportVarSet - σ ∪ FVTm t) (DC-cup Γ xs (FVTy A)) ⟩
-        TransportVarSet (DC Γ (xs ∪ FVTy A)) σ ∪ FVTm t ∎
+    open import Catt.Typing.Properties.Support 1 (λ x → modifyRule insertionRule) supp-rule-supp
 
     sub-rule-supp : ∀ i a → SubRule {i} a
     sub-rule-supp i (a ,, sc) {σ = σ} {Δ = Δ} σty tc = begin
@@ -604,6 +504,7 @@ module Support where
   open import Catt.Typing.Properties 1 (λ x → modifyRule insertionRule) lift-rule-supp susp-rule-supp sub-rule-supp
   open import Catt.Tree.Insertion.Typing 1 (λ x → modifyRule insertionRule) lift-rule-supp susp-rule-supp sub-rule-supp
   open import Catt.Tree.Typing 1 (λ x → modifyRule insertionRule) lift-rule-supp susp-rule-supp sub-rule-supp
+  open import Catt.Typing.Properties.Support 1 (λ x → modifyRule insertionRule) supp-rule-supp public
 
   SuppProp : (a : InsertionData)
            → {A : Ty (insertionRule .len a)}
@@ -645,7 +546,7 @@ module Support where
 
 module _ where
   open import Catt.Typing 1 (λ x → insertionRule)
-  open import Catt.Typing.Properties.Base 1 (λ x → insertionRule)
+  open import Catt.Typing.Properties 1 (λ x → insertionRule) lift-rule susp-rule sub-rule
 
   toSuppTyping-Ty : Typing-Ty Γ A → Support.Typing-Ty Γ A
   toSuppTyping-Tm : Typing-Tm Γ t A → Support.Typing-Tm Γ t A
@@ -685,3 +586,39 @@ module _ where
 
   supp-rule : ∀ i a → SupportRule {i} a
   supp-rule i a tty = Support.EqSuppTm (toSuppEq-Tm (Rule≈ i a tty))
+
+  open import Catt.Tree.Typing 1 (λ x → insertionRule) lift-rule susp-rule sub-rule
+  open import Catt.Tree.Insertion.Typing 1 (λ x → insertionRule) lift-rule susp-rule sub-rule
+
+
+  conv-rule : ∀ i a → ConvRule {i} a
+  conv-rule i a (TyCoh {B = B} Aty σty b sc p)
+    = TyCoh (apply-sub-ty-typing Aty
+                                 (exterior-sub-Ty id-S id-P id-T ⦃ p = dim-lem ⦄))
+            (sub-from-insertion-Ty id-S id-P id-T σty τty id-eq)
+            b
+            (insertion-supp-condition b _ id-S id-P id-T ⦃ p = dim-lem ⦄ sc)
+            lem
+    where
+      open InsertionData a
+
+      τty : Typing-Sub (tree-to-ctx id-T) id-Γ id-τ
+      τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx-Ty id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) (trans≃tm id-eq (Coh≃ refl≃ refl≃ty (id-right-unit id-τ))))
+
+      dim-lem : height-of-branching id-P ≡ tree-dim id-T
+      dim-lem = insertion-dim-lem id-S id-P id-T σty τty id-eq
+
+      lem : id-A [ exterior-sub id-S id-P id-T ]ty
+                 [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
+          ≈[ id-Γ ]ty B
+      lem = begin
+        id-A [ exterior-sub id-S id-P id-T ]ty
+             [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
+          ≈˘⟨ reflexive≈ty (assoc-ty _ _ id-A) ⟩
+        id-A [ sub-from-insertion id-S id-P id-T id-σ id-τ ∘ exterior-sub id-S id-P id-T ]ty
+          ≈⟨ apply-sub-eq-ty id-A (exterior-sub-comm id-S id-P id-T σty τty id-eq) ⟩
+        id-A [ id-σ ]ty
+          ≈⟨ p ⟩
+        B ∎
+        where
+          open Reasoning (ty-setoid-≈ _)

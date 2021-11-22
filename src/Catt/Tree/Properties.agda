@@ -24,6 +24,10 @@ open import Catt.Globular
 open import Catt.Globular.Properties
 open import Data.Product renaming (_,_ to _,,_)
 
+connect-tree-≃ : S ≃ S′ → T ≃ T′ → connect-tree S T ≃ connect-tree S′ T′
+connect-tree-≃ Sing≃ q = q
+connect-tree-≃ (Join≃ p p′) q = Join≃ p (connect-tree-≃ p′ q)
+
 connect-tree-to-ctx : (S : Tree n) → (T : Tree m)
                     → tree-to-ctx (connect-tree S T) ≃c connect (tree-to-ctx S) (tree-last-var S) (tree-to-ctx T)
 connect-tree-to-ctx Sing T = sym≃c (connect-left-unit (tree-to-ctx T)) -- sym≃c (connect-pdb-left-unit (tree-to-ctx T))

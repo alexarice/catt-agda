@@ -5,6 +5,14 @@ module Catt.Syntax.Bundles where
 open import Catt.Syntax
 open import Data.Nat
 
+record TREE : Set where
+  constructor <_>t
+  field
+    {tree-n} : ℕ
+    tr : Tree tree-n
+
+open TREE public
+
 record CTX : Set where
   constructor <_>c
   field

@@ -123,6 +123,16 @@ reflexive≃tm refl = refl≃tm
 reflexive≃s : σ ≡ τ → σ ≃s τ
 reflexive≃s refl = refl≃s
 
+tree-setoid : Setoid _ _
+tree-setoid = record { Carrier = TREE
+                     ; _≈_ = λ x y → tr x ≃ tr y
+                     ; isEquivalence = record { refl = refl≃
+                                              ; sym = sym≃
+                                              ; trans = trans≃
+                                              }
+                     }
+
+
 ctx-setoid : Setoid _ _
 ctx-setoid = record { Carrier = CTX
                     ; _≈_ = λ x y → ctx x ≃c ctx y

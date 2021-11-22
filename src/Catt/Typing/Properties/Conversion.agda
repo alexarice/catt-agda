@@ -113,3 +113,13 @@ sub-conversion′ (Ext≈ p x) = mk⇔ f g
                                     (E.g (full-term-conv′ x (apply-sub-eq-ty A p)) tty)
 
 full-term-conv′ p eq = (term-conversion′ p) ∘-⇔ (mk⇔ (λ tty → term-conversion tty eq) (λ tty → term-conversion tty (sym≈ty eq)))
+
+type-conversion : A ≈[ Γ ]ty B → Typing-Ty Γ A → Typing-Ty Γ B
+sub-conversion : σ ≈[ Δ ]s τ → Typing-Sub Γ Δ σ → Typing-Sub Γ Δ τ
+full-term-conv : s ≈[ Γ ]tm t → A ≈[ Γ ]ty B → Typing-Tm Γ s A → Typing-Tm Γ t B
+
+type-conversion p = E.f (type-conversion′ p)
+
+sub-conversion p = E.f (sub-conversion′ p)
+
+full-term-conv p q = E.f (full-term-conv′ p q)

@@ -35,6 +35,11 @@ data Peak : ∀ {n} {d} → Dyck (2 + n) d → Set where
   ⇑pk : (p : Peak dy) → Peak (⇑ dy)
   ⇓pk : (p : Peak dy) → Peak (⇓ dy)
 
+peak-term : {dy : Dyck (2 + n) d} → Peak dy → Tm (3 + n)
+peak-term (⇕pk dy) = 0V
+peak-term (⇑pk p) = liftTerm (liftTerm (peak-term p))
+peak-term (⇓pk p) = peak-term p
+
 susp-dyck : Dyck n d → Dyck (2 + n) (suc d)
 susp-dyck End = ⇑ End
 susp-dyck (⇑ d) = ⇑ (susp-dyck d)

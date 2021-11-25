@@ -18,7 +18,7 @@ prune-project (⇕pk dy) = ⟨ ⟨ (idSub (suc _)) , dyck-term dy ⟩ , identity
 prune-project (⇑pk p) = ⟨ ⟨ (liftSub (liftSub (prune-project p))) , 1V ⟩ , 0V ⟩
 prune-project (⇓pk p) = prune-project p
 
-_//_ : {dy : Dyck (2 + n) d} → Sub (3 + n) m ⋆ → Peak dy → Sub (1 + n) m ⋆
-⟨ ⟨ σ , s ⟩ , t ⟩ // ⇕pk dy = σ
-⟨ ⟨ σ , s ⟩ , t ⟩ // ⇑pk p = ⟨ ⟨ (σ // p) , s ⟩ , t ⟩
-⟨ ⟨ σ , s ⟩ , t ⟩ // ⇓pk p = ⟨ ⟨ σ , s ⟩ , t ⟩ // p
+prune-sub : {dy : Dyck (2 + n) d} → Peak dy → Sub (3 + n) m ⋆ → Sub (1 + n) m ⋆
+prune-sub (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ = σ
+prune-sub (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ = ⟨ ⟨ (prune-sub p σ) , s ⟩ , t ⟩
+prune-sub (⇓pk p) σ = prune-sub p σ

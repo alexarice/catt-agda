@@ -7,6 +7,10 @@ open import Data.Nat
 open import Catt.Dyck
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary
+open import Catt.Globular
+open import Catt.Globular.Properties
+open import Catt.Syntax.SyntacticEquality
+open import Data.Fin using (zero)
 
 data _≃d_ : Dyck n d → Dyck n′ d′ → Set where
   End≃ : End ≃d End
@@ -59,3 +63,13 @@ connect-dyck-≃ : {gy : Dyck n d} → dy ≃d ey → fy ≃d gy → connect-dyc
 connect-dyck-≃ p End≃ = p
 connect-dyck-≃ p (⇑≃ q) = ⇑≃ (connect-dyck-≃ p q)
 connect-dyck-≃ p (⇓≃ q) = ⇓≃ (connect-dyck-≃ p q)
+
+susp-dyck-≃ : dy ≃d ey → susp-dyck dy ≃d susp-dyck ey
+susp-dyck-≃ End≃ = refl≃d
+susp-dyck-≃ (⇑≃ p) = ⇑≃ (susp-dyck-≃ p)
+susp-dyck-≃ (⇓≃ p) = ⇓≃ (susp-dyck-≃ p)
+
+dyck-type-dim : (dy : Dyck n d) → ty-dim (dyck-type dy) ≡ d
+dyck-type-dim End = refl
+dyck-type-dim (⇑ dy) = cong suc (trans (lift-ty-dim (liftType (dyck-type dy))) (trans (lift-ty-dim (dyck-type dy)) (dyck-type-dim dy)))
+dyck-type-dim (⇓ dy) = trans (ty-dim-ty-base (dyck-type dy)) (cong pred (dyck-type-dim dy))

@@ -136,19 +136,45 @@ tree-to-dyck-to-tree (Join S T) = begin
 
 -- Dyck to tree to dyck
 
-tree-to-ctx-extend-tree : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄ → tree-to-dyck (suc d) (extend-tree d T) ⦃ extended-tree-is-more-extendable d T ⦄ ≃d ⇑ (tree-to-dyck d T)
-tree-to-ctx-extend-tree zero Sing = refl≃d
-tree-to-ctx-extend-tree zero (Join S Sing) = refl≃d
-tree-to-ctx-extend-tree zero (Join S (Join T₁ Sing)) = refl≃d
-tree-to-ctx-extend-tree zero (Join S (Join T₁ (Join T₂ T₃))) = let
-  instance _ = extended-tree-is-more-extendable zero (Join T₁ (Join T₂ T₃))
+tree-to-dyck-extend-tree : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄ → tree-to-dyck (suc d) (extend-tree d T) ⦃ extended-tree-is-more-extendable d T ⦄ ≃d ⇑ (tree-to-dyck d T)
+tree-to-dyck-extend-tree zero Sing = refl≃d
+tree-to-dyck-extend-tree zero (Join S Sing) = refl≃d
+tree-to-dyck-extend-tree zero (Join S (Join T₁ Sing)) = refl≃d
+tree-to-dyck-extend-tree zero (Join S (Join T₁ T₂@(Join _ _))) =
+  connect-dyck-≃ refl≃d (tree-to-dyck-extend-tree 0 (Join T₁ T₂))
+tree-to-dyck-extend-tree (suc d) (Join S Sing) = susp-dyck-≃ (tree-to-dyck-extend-tree d S)
+tree-to-dyck-extend-tree (suc d) (Join S (Join T₁ Sing)) = connect-dyck-≃ refl≃d (susp-dyck-≃ (tree-to-dyck-extend-tree d T₁))
+tree-to-dyck-extend-tree (suc d) (Join S (Join T₁ T₂@(Join _ _))) = connect-dyck-≃ refl≃d (tree-to-dyck-extend-tree (suc d) (Join T₁ T₂))
+
+tree-to-dyck-restrict : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable (suc d) T ⦄ → tree-to-dyck d T ⦃ pred-n-extendable d T ⦄ ≃d ⇓ (tree-to-dyck (suc d) T)
+tree-to-dyck-restrict zero (Join S Sing) = refl≃d
+tree-to-dyck-restrict zero (Join S T@(Join _ _)) = connect-dyck-≃ refl≃d (tree-to-dyck-restrict zero T)
+tree-to-dyck-restrict (suc d) (Join S Sing) = susp-dyck-≃ (tree-to-dyck-restrict d S)
+tree-to-dyck-restrict (suc d) (Join S T@(Join _ _)) = let
+  instance _ = pred-n-extendable (suc d) T
+  in connect-dyck-≃ refl≃d (tree-to-dyck-restrict (suc d) T)
+
+dyck-to-tree-to-dyck : (dy : Dyck n d) → tree-to-dyck d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄ ≃d dy
+dyck-to-tree-to-dyck End = refl≃d
+dyck-to-tree-to-dyck {d = suc d} (⇑ dy) = let
+  instance _ = dyck-to-tree-is-n-extendable dy
+  instance _ = extended-tree-is-more-extendable d (dyck-to-tree dy)
   in begin
-  < connect-dyck (⇓ (susp-dyck (tree-to-dyck zero S)))
-      (tree-to-dyck 1 (Join T₁ (extend-tree zero (Join T₂ T₃)))) >d
-    ≈⟨ connect-dyck-≃ {!!} {!!} ⟩
-  {!!}
-    ≈⟨ {!!} ⟩
-  {!!} ∎
+  < tree-to-dyck (suc d) (extend-tree d (dyck-to-tree dy)) >d
+    ≈⟨ tree-to-dyck-extend-tree d (dyck-to-tree dy) ⟩
+  < ⇑ (tree-to-dyck d (dyck-to-tree dy)) >d
+    ≈⟨ ⇑≃ (dyck-to-tree-to-dyck dy) ⟩
+  < ⇑ dy >d ∎
   where
     open Reasoning dyck-setoid
-tree-to-ctx-extend-tree (suc d) T = {!!}
+dyck-to-tree-to-dyck {d = d} (⇓ dy) = let
+  instance _ = dyck-to-tree-is-n-extendable dy
+  instance _ = dyck-to-tree-is-n-extendable (⇓ dy)
+  in begin
+  < tree-to-dyck d (dyck-to-tree (⇓ dy)) >d
+    ≈⟨ tree-to-dyck-restrict d (dyck-to-tree dy) ⟩
+  < ⇓ (tree-to-dyck (suc d) (dyck-to-tree dy)) >d
+    ≈⟨ ⇓≃ (dyck-to-tree-to-dyck dy) ⟩
+  < ⇓ dy >d ∎
+  where
+    open Reasoning dyck-setoid

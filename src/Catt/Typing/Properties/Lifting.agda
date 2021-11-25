@@ -64,3 +64,7 @@ idSub≃-Ty (Add≃ {A = A} {A′ = A′} p x) (TyAdd Γty y) = TyExt (lift-sub-
       < liftType A >ty ≈˘⟨ lift-ty-≃ (idSub≃-on-ty p A) ⟩
       < liftType (A [ idSub≃ p ]ty) >ty ≈˘⟨ apply-lifted-sub-ty-≃ A (idSub≃ p) ⟩
       < A [ liftSub (idSub≃ p) ]ty >ty ∎
+
+‼-Ty : Typing-Ctx Γ → (i : Fin n) → Typing-Ty Γ (Γ ‼ i)
+‼-Ty (TyAdd Γty Aty) zero = lift-ty-typing Aty
+‼-Ty (TyAdd Γty Aty) (suc i) = lift-ty-typing (‼-Ty Γty i)

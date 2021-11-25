@@ -55,3 +55,10 @@ unbiased-type-dim (suc d) T = cong suc (unbiased-type-dim d T)
 
 unbiased-comp-dim : (d : ℕ) → (T : Tree n) → tm-height (tree-to-ctx T) (unbiased-comp d T) ≡ d
 unbiased-comp-dim d T = trans (sym (sub-dim (idSub (suc _)) (unbiased-type d T))) (unbiased-type-dim d T)
+
+sub-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) → (A : Ty m) → .(ty-dim A ≡ tree-dim S) → Sub (suc n) m ⋆
+sub-from-linear-tree Sing t A p = ⟨ ⟨⟩ , t ⟩
+sub-from-linear-tree (Join S Sing) t (s ─⟨ A ⟩⟶ s′) p = ⟨ ⟨ (sub-from-linear-tree S s A (cong pred p)) , s′ ⟩ , t ⟩
+
+identity : (t : Tm n) → (A : Ty n) → Tm n
+identity t A = Coh (n-disk (ty-dim A)) (unbiased-type (suc (ty-dim A)) (n-disk (ty-dim A))) (sub-from-linear-tree (n-disk (ty-dim A)) ⦃ n-disk-is-linear (ty-dim A) ⦄ t A (sym (tree-dim-n-disk (ty-dim A))))

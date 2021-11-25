@@ -8,6 +8,7 @@ open import Catt.Syntax.Bundles
 open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Suspension
+open import Catt.Suspension.Properties
 open import Catt.Tree
 import Relation.Binary.Reasoning.Setoid as Reasoning
 open import Catt.Variables
@@ -23,6 +24,10 @@ open import Relation.Nullary
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Data.Product renaming (_,_ to _,,_)
+
+join-tree-has-non-zero-dim : (S : Tree n) → (T : Tree m) → ¬ (zero ≡ tree-dim (Join S T))
+join-tree-has-non-zero-dim S T p with ≤-trans (m≤m⊔n (suc (tree-dim S)) (tree-dim T)) (≤-reflexive (sym p))
+... | ()
 
 connect-tree-≃ : S ≃ S′ → T ≃ T′ → connect-tree S T ≃ connect-tree S′ T′
 connect-tree-≃ Sing≃ q = q
@@ -84,6 +89,12 @@ tree-bd-glob zero d₂ T p = Sing≃
 tree-bd-glob (suc d₁) (suc d₂) Sing p = Sing≃
 tree-bd-glob (suc d₁) (suc d₂) (Join S T) p = Join≃ (tree-bd-glob d₁ d₂ S (≤-pred p)) (tree-bd-glob (suc d₁) (suc d₂) T p)
 
+tree-bd-full : (d : ℕ) → (T : Tree n) → (tree-dim T ≤ d) → tree-bd d T ≃ T
+tree-bd-full zero Sing p = Sing≃
+tree-bd-full zero (Join S T) p = ⊥-elim (join-tree-has-non-zero-dim S T (sym (n≤0⇒n≡0 p)))
+tree-bd-full (suc d) Sing p = Sing≃
+tree-bd-full (suc d) (Join S T) p = Join≃ (tree-bd-full d S (≤-pred (m⊔n≤o⇒m≤o (suc (tree-dim S)) (tree-dim T) p))) (tree-bd-full (suc d) T (m⊔n≤o⇒n≤o (suc (tree-dim S)) (tree-dim T) p))
+
 tree-inc-glob : (d₁ d₂ : ℕ) → (T : Tree n) → (b₁ b₂ : Bool) → d₁ < d₂ → tree-inc d₂ T b₂ ∘ tree-inc d₁ (tree-bd d₂ T) b₁ ≃s tree-inc d₁ T b₁
 tree-inc-glob zero (suc d₂) T false b₂ p = Ext≃ refl≃s (tree-inc-preserve-fst-var d₂ T b₂)
 tree-inc-glob zero (suc d₂) T true b₂ p = Ext≃ refl≃s (tree-inc-preserve-last-var d₂ T b₂)
@@ -109,6 +120,20 @@ tree-inc-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p = begin
   where
     open Reasoning sub-setoid
 
+tree-inc-full : (d : ℕ) → (T : Tree n) → (b : Bool) → (p : tree-dim T ≤ d) → tree-inc d T b ≃s idSub (suc (tree-size T))
+tree-inc-full zero Sing false p = refl≃s
+tree-inc-full zero Sing true p = refl≃s
+tree-inc-full zero (Join S T) b p = ⊥-elim (join-tree-has-non-zero-dim S T (sym (n≤0⇒n≡0 p)))
+tree-inc-full (suc d) Sing b p = refl≃s
+tree-inc-full (suc d) (Join S T) b p = begin
+  < sub-between-connect-susps (tree-inc d S b) (tree-inc (suc d) T b) >s
+    ≈⟨ sub-between-connect-susps-≃ (tree-inc d S b) (idSub (suc (tree-size S))) (tree-inc (suc d) T b) (idSub (suc (tree-size T))) (≃-to-same-n (tree-bd-full d S (≤-pred (m⊔n≤o⇒m≤o (suc (tree-dim S)) (tree-dim T) p)))) (≃-to-same-n (tree-bd-full (suc d) T (m⊔n≤o⇒n≤o (suc (tree-dim S)) (tree-dim T) p))) (tree-inc-full d S b (≤-pred (m⊔n≤o⇒m≤o (suc (tree-dim S)) (tree-dim T) p))) (tree-inc-full (suc d) T b (m⊔n≤o⇒n≤o (suc (tree-dim S)) (tree-dim T) p)) ⟩
+  < sub-between-connect-susps (idSub (suc (tree-size S))) (idSub (suc (tree-size T))) >s
+    ≈⟨ sub-between-connect-susps-id _ _ ⟩
+  < idSub (suc (tree-size (Join S T))) >s ∎
+  where
+    open Reasoning sub-setoid
+
 tree-inc-glob-step : (d : ℕ) → (T : Tree n) (b₁ b₂ : Bool) → tree-inc (suc d) T b₁ ∘ tree-inc d (tree-bd (suc d) T) b₂ ≃s tree-inc (suc d) T (not b₁) ∘ tree-inc d (tree-bd (suc d) T) b₂
 tree-inc-glob-step d T b₁ b₂ = begin
   < tree-inc (suc d) T b₁ ∘ tree-inc d (tree-bd (suc d) T) b₂ >s
@@ -127,10 +152,6 @@ tree-dim-bd (suc d) (Join S T) = trans (cong₂ _⊔_ (cong suc (tree-dim-bd d S
 
 tree-dim-bd′ : (d : ℕ) → (T : Tree n) → d ≤ tree-dim T → tree-dim (tree-bd d T) ≡ d
 tree-dim-bd′ d T p = trans (tree-dim-bd d T) (m≤n⇒m⊓n≡m p)
-
-join-tree-has-non-zero-dim : (S : Tree n) → (T : Tree m) → ¬ (zero ≡ tree-dim (Join S T))
-join-tree-has-non-zero-dim S T p with ≤-trans (m≤m⊔n (suc (tree-dim S)) (tree-dim T)) (≤-reflexive (sym p))
-... | ()
 
 tree-inc-susp-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSub (tree-inc d T b) ≃s tree-inc (suc d) (suspTree T) b
 tree-inc-susp-lem zero T false = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩ , suspTm (Var (fromℕ _)) ⟩)
@@ -238,3 +259,17 @@ connect-tree-last-var (Join S₁ S₂) T = begin
 tree-to-ctx-glob : (S : Tree n) → ctx-is-globular (tree-to-ctx S)
 tree-to-ctx-glob Sing = tt ,, tt
 tree-to-ctx-glob (Join S T) = connect-susp-glob (tree-to-ctx S) ⦃ tree-to-ctx-glob S ⦄ (tree-to-ctx T) ⦃ tree-to-ctx-glob T ⦄
+
+
+susp-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → suspCtx (tree-to-ctx S) ≃c tree-to-ctx S , tree-to-ctx S ‼ zero , 1V ─⟨ (liftType (tree-to-ctx S ‼ zero)) ⟩⟶ 0V
+susp-lin-tree Sing = refl≃c
+susp-lin-tree (Join S Sing) = begin
+  < suspCtx (suspCtx (tree-to-ctx S)) >c
+    ≈⟨ susp-ctx-≃ (susp-lin-tree S) ⟩
+  < suspCtx (tree-to-ctx S) , suspTy (tree-to-ctx S ‼ zero) ,
+       1V ─⟨ suspTy (liftType (tree-to-ctx S ‼ zero)) ⟩⟶ 0V >c
+    ≈˘⟨ Add≃ (Add≃ refl≃c (susp-‼ (tree-to-ctx S) zero)) (Arr≃ refl≃tm (trans≃ty (lift-ty-≃ (susp-‼ (tree-to-ctx S) zero)) (sym≃ty (susp-ty-lift (tree-to-ctx S ‼ zero)))) refl≃tm) ⟩
+  < suspCtx (tree-to-ctx S) , suspCtx (tree-to-ctx S) ‼ zero ,
+       1V ─⟨ liftType (suspCtx (tree-to-ctx S) ‼ zero) ⟩⟶ 0V >c ∎
+  where
+    open Reasoning ctx-setoid

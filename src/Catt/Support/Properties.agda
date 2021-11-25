@@ -451,3 +451,6 @@ SuppContainsType (Var (suc i)) (Γ , A) = begin
     open PReasoning (⊆-poset _)
 
 SuppContainsType (Coh S A σ) Γ = trans (cong (DC Γ) (FVTy-comp-⊆ A σ)) (DC-cup Γ (FVTm (Coh S A σ)) (FVTy (A [ σ ]ty)))
+
+full-⊆ : {xs : VarSet n} → full ⊆ xs → xs ≡ full
+full-⊆ p = trans p (∪-right-zero _)

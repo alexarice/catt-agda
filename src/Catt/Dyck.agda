@@ -4,6 +4,7 @@ module Catt.Dyck where
 
 open import Catt.Syntax
 open import Data.Nat
+open import Catt.Globular
 
 data Dyck : ℕ → ℕ → Set where
   End : Dyck 0 0
@@ -21,18 +22,6 @@ dyck-to-ctx End = ∅ , ⋆
 dyck-to-ctx (⇑ d) = dyck-to-ctx d , dyck-type d , (liftTerm (dyck-term d)) ─⟨ (liftType (dyck-type d)) ⟩⟶ 0V
 dyck-to-ctx (⇓ d) = dyck-to-ctx d
 
-ty-src : Ty (suc n) → Tm (suc n)
-ty-src ⋆ = 0V
-ty-src (s ─⟨ A ⟩⟶ t) = s
-
-ty-tgt : Ty (suc n) → Tm (suc n)
-ty-tgt ⋆ = 0V
-ty-tgt (s ─⟨ A ⟩⟶ t) = t
-
-ty-base : Ty n → Ty n
-ty-base ⋆ = ⋆
-ty-base (s ─⟨ A ⟩⟶ t) = A
-
 dyck-type End = ⋆
 dyck-type (⇑ d) = liftType ((liftTerm (dyck-term d)) ─⟨ (liftType (dyck-type d)) ⟩⟶ 0V)
 dyck-type (⇓ d) = ty-base (dyck-type d)
@@ -41,10 +30,10 @@ dyck-term End = 0V
 dyck-term (⇑ d) = 0V
 dyck-term (⇓ d) = ty-tgt (dyck-type d)
 
-data Peak : ∀ {n} {d} → Dyck n d → Set where
-  ⇕pk : (d : Dyck n d) → Peak (⇓ (⇑ d))
-  ⇑pk : {d : Dyck n d} → (p : Peak d) → Peak (⇑ d)
-  ⇓pk : {d : Dyck n (suc d)} → (p : Peak d) → Peak (⇓ d)
+data Peak : ∀ {n} {d} → Dyck (2 + n) d → Set where
+  ⇕pk : (dy : Dyck n d) → Peak (⇓ (⇑ dy))
+  ⇑pk : (p : Peak dy) → Peak (⇑ dy)
+  ⇓pk : (p : Peak dy) → Peak (⇓ dy)
 
 susp-dyck : Dyck n d → Dyck (2 + n) (suc d)
 susp-dyck End = ⇑ End

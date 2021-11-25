@@ -123,3 +123,12 @@ sub-tm-height-0 t Γ σty = trans (sym (+-identityʳ _)) (sub-tm-height t Γ σt
 -- BoundedSubTm (VarBoundZ x) (TyExt σty Aty y) = {!!}
 -- BoundedSubTm (VarBoundS i b) σty = {!!}
 -- BoundedSubTm (CohBound S p q) σty = {!!}
+
+ty-src-Ty : Typing-Ty Γ A → (ty-dim A > 0) → Typing-Tm Γ (ty-src A) (ty-base A)
+ty-src-Ty (TyArr sty Aty tty) p = sty
+
+ty-tgt-Ty : Typing-Ty Γ A → (ty-dim A > 0) → Typing-Tm Γ (ty-tgt A) (ty-base A)
+ty-tgt-Ty (TyArr sty Aty tty) p = tty
+
+ty-base-Ty : Typing-Ty Γ A → (ty-dim A > 0) → Typing-Ty Γ (ty-base A)
+ty-base-Ty (TyArr sty Aty tty) p = Aty

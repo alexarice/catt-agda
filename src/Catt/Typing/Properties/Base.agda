@@ -1,7 +1,7 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
 open import Catt.Typing.Base
-open import Data.Fin using (Fin)
+open import Data.Fin using (Fin; zero; suc)
 open import Data.Nat
 
 module Catt.Typing.Properties.Base (index : ℕ) (rule : Fin index → Rule) where
@@ -19,6 +19,7 @@ open import Function.Bundles
 open import Catt.Support
 open import Data.Product renaming (_,_ to _,,_)
 open import Data.Unit
+open import Catt.Variables
 
 private
   Index : Set
@@ -209,6 +210,13 @@ coh-ty-ty (TyCoh Aty τty b a c) = Aty
 sub-to-ctx-Ty : Typing-Sub Γ Δ σ → Typing-Ctx Γ
 sub-to-ctx-Ty (TyNull x) = TyEmp
 sub-to-ctx-Ty (TyExt σty Aty tty) = TyAdd (sub-to-ctx-Ty σty) Aty
+
+var-Ty : Typing-Ctx Γ → (i : Fin n) → Typing-Tm Γ (Var i) (Γ ‼ i)
+var-Ty (TyAdd Γty Aty) zero = TyVarZ Aty refl≈ty
+var-Ty (TyAdd Γty Aty) (suc i) = TyVarS i (var-Ty Γty i) refl≈ty
+
+isVar-Ty : Typing-Ctx Γ → (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
+isVar-Ty Γty (Var i) = var-Ty Γty i
 
 module _ {i : Index} (a : rule i .Rule.Args) where
   open Rule (rule i)

@@ -38,13 +38,6 @@ restrictTy {Γ = ∅ , A} (TyExt (TyExt (TyExt σty v z) w y) u x) (TyAdd TyEmp 
 restrictTy {Γ = ∅ , B , A} (TyExt (TyExt (TyExt σty v z) w y) u x) (TyAdd Γty Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty v z) w y) Γty sty tty p q) Aty (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
 restrictTy {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty v z) w y) u x) (TyAdd Γty Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty v z) w y) Γty sty tty p q) Aty (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
 
-var-Ty : Typing-Ctx Γ → (i : Fin n) → Typing-Tm Γ (Var i) (Γ ‼ i)
-var-Ty (TyAdd Γty Aty) zero = TyVarZ Aty refl≈ty
-var-Ty (TyAdd Γty Aty) (suc i) = TyVarS i (var-Ty Γty i) refl≈ty
-
-isVar-Ty : Typing-Ctx Γ → (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
-isVar-Ty Γty (Var i) = var-Ty Γty i
-
 truncate′-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate′ d A ≈[ Γ ]ty truncate′ d′ A′
 truncate′-≈ {d = zero} refl p = p
 truncate′-≈ {d = suc d} refl Star≈ = Star≈

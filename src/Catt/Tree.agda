@@ -68,3 +68,15 @@ tree-inc zero T false = ⟨ ⟨⟩ , (Var (fromℕ _)) ⟩
 tree-inc zero T true = ⟨ ⟨⟩ , (tree-last-var T) ⟩
 tree-inc (suc d) Sing b = ⟨ ⟨⟩ , 0V ⟩
 tree-inc (suc d) (Join S T) b = sub-between-connect-susps (tree-inc d S b) (tree-inc (suc d) T b)
+
+n-disk : (n : ℕ) → Tree (n * 2)
+n-disk zero = Sing
+n-disk (suc n) = Join (n-disk n) Sing
+
+n-disk-is-linear : (n : ℕ) → is-linear (n-disk n)
+n-disk-is-linear zero = tt
+n-disk-is-linear (suc n) = n-disk-is-linear n
+
+tree-dim-n-disk : (n : ℕ) → tree-dim (n-disk n) ≡ n
+tree-dim-n-disk zero = refl
+tree-dim-n-disk (suc n) = cong suc (tree-dim-n-disk n)

@@ -373,3 +373,23 @@ connect-susp-inc-left-var-to-var n m = connect-inc-left-var-to-var getSnd m
 
 connect-susp-inc-right-var-to-var : (n m : ℕ) → varToVar (connect-susp-inc-right n m)
 connect-susp-inc-right-var-to-var n m = connect-inc-right-var-to-var getSnd m
+
+sub-between-connects-id : (t : Tm (suc n)) → (m : ℕ) → sub-between-connects (idSub (suc n)) (idSub (suc m)) t ≃s idSub (suc (m + n))
+sub-between-connects-id t m = begin
+  < sub-from-connect (connect-inc-left t m ∘ idSub _) (connect-inc-right t m ∘ idSub (suc m)) >s
+    ≈⟨ sub-from-connect-≃ (id-right-unit (connect-inc-left t m)) (id-right-unit (connect-inc-right t m)) ⟩
+  < sub-from-connect (connect-inc-left t m) (connect-inc-right t m) >s
+    ≈⟨ sub-from-connect-prop t m ⟩
+  < idSub _ >s ∎
+  where
+    open Reasoning sub-setoid
+
+sub-between-connect-susps-id : (n m : ℕ) → sub-between-connect-susps (idSub (suc n)) (idSub (suc m)) ≃s idSub (suc (m + (2 + n)))
+sub-between-connect-susps-id n m = begin
+  < sub-between-connects (suspSub (idSub (suc n))) (idSub (suc m)) getSnd >s
+    ≈⟨ sub-between-connects-≃ (suspSub (idSub (suc n))) (idSub (3 + n)) (idSub (suc m)) getSnd (idSub (suc m)) getSnd refl refl (susp-functorial-id (suc n)) refl≃s refl≃tm ⟩
+  < sub-between-connects (idSub (3 + n)) (idSub (suc m)) getSnd >s
+    ≈⟨ sub-between-connects-id getSnd m ⟩
+  < idSub _ >s ∎
+  where
+    open Reasoning sub-setoid

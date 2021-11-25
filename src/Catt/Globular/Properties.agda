@@ -41,6 +41,10 @@ lift-ty-dim : (A : Ty n) → ty-dim (liftType A) ≡ ty-dim A
 lift-ty-dim ⋆ = refl
 lift-ty-dim (s ─⟨ A ⟩⟶ t) = cong suc (lift-ty-dim A)
 
+ty-dim-ty-base : (A : Ty n) → ty-dim (ty-base A) ≡ pred (ty-dim A)
+ty-dim-ty-base ⋆ = refl
+ty-dim-ty-base (s ─⟨ A ⟩⟶ t) = refl
+
 tm-to-ty-coh-sub : (S : Tree n) → (B : Ty (suc n)) → (τ : Sub (suc n) m ⋆) → (Δ : Ctx l) → (σ : Sub m l A) → tm-to-ty Δ (Coh S B τ [ σ ]tm) ≃ty B [ σ ∘ τ ]ty
 tm-to-ty-coh-sub {A = ⋆} S B τ Δ σ = refl≃ty
 tm-to-ty-coh-sub {A = s ─⟨ A ⟩⟶ t} S B τ Δ σ = begin
@@ -88,14 +92,27 @@ tm-height-≃ : (Γ : Ctx n) → s ≃tm t → tm-height Γ s ≡ tm-height Γ t
 tm-height-≃ Γ p with ≃tm-to-≡ p
 ... | refl = refl
 
--- ty-src-≃ : A ≃ty B → ty-src A ≃tm ty-src B
--- ty-src-≃ (Arr≃ p q r) = p
+ty-src-≃ : A ≃ty B → ty-src A ≃tm ty-src B
+ty-src-≃ (Star≃ p) = Var≃ p refl
+ty-src-≃ (Arr≃ p q r) = p
 
--- ty-tgt-≃ : A ≃ty B → ty-tgt A ≃tm ty-tgt B
--- ty-tgt-≃ (Arr≃ p q r) = r
+ty-tgt-≃ : A ≃ty B → ty-tgt A ≃tm ty-tgt B
+ty-tgt-≃ (Star≃ p) = Var≃ p refl
+ty-tgt-≃ (Arr≃ p q r) = r
 
--- ty-base-≃ : A ≃ty B → ty-base A ≃ty ty-base B
--- ty-base-≃ (Arr≃ p q r) = q
+ty-base-≃ : A ≃ty B → ty-base A ≃ty ty-base B
+ty-base-≃ (Star≃ p) = Star≃ p
+ty-base-≃ (Arr≃ p q r) = q
+
+ty-base-sub : (A : Ty n) → (σ : Sub n m ⋆) → ty-base A [ σ ]ty ≃ty ty-base (A [ σ ]ty)
+ty-base-sub ⋆ σ = refl≃ty
+ty-base-sub (s ─⟨ A ⟩⟶ t) σ = refl≃ty
+
+ty-src-sub : (A : Ty (suc n)) → (σ : Sub (suc n) (suc m) ⋆) → (ty-dim A > 0) → ty-src A [ σ ]tm ≃tm ty-src (A [ σ ]ty)
+ty-src-sub (s ─⟨ A ⟩⟶ t) σ p = refl≃tm
+
+ty-tgt-sub : (A : Ty (suc n)) → (σ : Sub (suc n) (suc m) ⋆) → (ty-dim A > 0) → ty-tgt A [ σ ]tm ≃tm ty-tgt (A [ σ ]ty)
+ty-tgt-sub (s ─⟨ A ⟩⟶ t) σ p = refl≃tm
 
 -- ty-src-lift : (A : Ty n (suc d)) → ty-src (liftType A) ≃tm liftTerm (ty-src A)
 -- ty-src-lift (s ─⟨ A ⟩⟶ t) = refl≃tm

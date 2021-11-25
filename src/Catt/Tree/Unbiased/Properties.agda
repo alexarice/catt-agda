@@ -220,12 +220,12 @@ unbiased-type-truncate-1 (suc d) T = begin
 unbiased-type-truncate-1′ : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → truncate 1 (unbiased-type d T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
 unbiased-type-truncate-1′ (suc d) = unbiased-type-truncate-1 d
 
-unbiased-type-prop : (d : ℕ) → (T : Tree n) → (d′ : ℕ) → (d ≤ d′) → (b : Bool) → unbiased-type d T ≃ty unbiased-type d (tree-bd d′ T) [ tree-inc d′ T b ]ty
 unbiased-term-≃ : (d ≡ d′) → S ≃ T → unbiased-term d S ≃tm unbiased-term d′ T
 unbiased-term-≃ refl p with ≃-to-same-n p
 ... | refl with ≃-to-≡ p
 ... | refl = refl≃tm
 
+unbiased-type-prop : (d : ℕ) → (T : Tree n) → (d′ : ℕ) → (d ≤ d′) → (b : Bool) → unbiased-type d T ≃ty unbiased-type d (tree-bd d′ T) [ tree-inc d′ T b ]ty
 unbiased-type-prop zero T d′ p b = refl≃ty
 unbiased-type-prop (suc d) T d′ p b = Arr≃ (lem false) (unbiased-type-prop d T d′ (≤-trans (n≤1+n d) p) b) (lem true)
   where
@@ -291,3 +291,51 @@ linear-tree-unbiased-lem (suc d) (Join S Sing) p = begin
 sub-from-linear-tree-unbiased-0V : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → 0V [ sub-from-linear-tree-unbiased S T d ]tm ≃tm unbiased-comp (d + tree-dim S) T
 sub-from-linear-tree-unbiased-0V Sing T d = unbiased-comp-≃ (sym (+-identityʳ d)) refl≃
 sub-from-linear-tree-unbiased-0V (Join S Sing) T d = trans≃tm (sym≃tm (unrestrict-comp-tm 0V (sub-from-linear-tree-unbiased S T (suc d)))) (trans≃tm (sub-from-linear-tree-unbiased-0V S T (suc d)) (unbiased-comp-≃ (sym (+-suc d (tree-dim S))) refl≃))
+
+sub-from-linear-tree-0V : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) → (A : Ty m) → (p : ty-dim A ≡ tree-dim S) → 0V [ sub-from-linear-tree S t A p ]tm ≃tm t
+sub-from-linear-tree-0V Sing t A p = refl≃tm
+sub-from-linear-tree-0V (Join S Sing) t (s ─⟨ A ⟩⟶ s′) p = refl≃tm
+
+sub-from-linear-tree-‼-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) → (A : Ty m) → (p : ty-dim A ≡ tree-dim S) → tree-to-ctx S ‼ zero [ sub-from-linear-tree S t A p ]ty ≃ty A
+sub-from-linear-tree-‼-0 Sing t ⋆ p = refl≃ty
+sub-from-linear-tree-‼-0 (Join S Sing) t (s ─⟨ A ⟩⟶ s′) p = begin
+  < suspCtx (tree-to-ctx S) ‼ zero [ ⟨ ⟨ sub-from-linear-tree S s A (cong pred p) , s′ ⟩ , t ⟩ ]ty >ty
+    ≈⟨ sub-action-≃-ty (‼-≃ zero zero refl (susp-lin-tree S)) refl≃s ⟩
+  < ((0V [ sub-from-linear-tree S s A (cong pred p) ]tm)
+    ─⟨ liftType (liftType (tree-to-ctx S ‼ zero))
+       [ ⟨ ⟨ sub-from-linear-tree S s A (cong pred p) , s′ ⟩ , t ⟩ ]ty
+       ⟩⟶ s′) >ty
+    ≈⟨ Arr≃ (sub-from-linear-tree-0V S s A (cong pred p)) lem refl≃tm ⟩
+  < s ─⟨ A ⟩⟶ s′ >ty ∎
+  where
+    open Reasoning ty-setoid
+
+    lem : liftType (liftType (tree-to-ctx S ‼ zero))
+            [ ⟨ ⟨ sub-from-linear-tree S s A (cong pred p) , s′ ⟩ , t ⟩ ]ty
+            ≃ty A
+    lem = begin
+      < liftType (liftType (tree-to-ctx S ‼ zero))
+        [ ⟨ ⟨ sub-from-linear-tree S s A _ , s′ ⟩ , t ⟩ ]ty >ty
+        ≈⟨ lift-sub-comp-lem-ty ⟨ sub-from-linear-tree S s A _ , s′ ⟩ (liftType (tree-to-ctx S ‼ zero)) ⟩
+      < liftType (tree-to-ctx S ‼ zero) [ ⟨ sub-from-linear-tree S s A _ , s′ ⟩ ]ty >ty
+        ≈⟨ lift-sub-comp-lem-ty (sub-from-linear-tree S s A _) (tree-to-ctx S ‼ zero) ⟩
+      < tree-to-ctx S ‼ zero [ sub-from-linear-tree S s A _ ]ty >ty
+        ≈⟨ sub-from-linear-tree-‼-0 S s A (cong pred p) ⟩
+      < A >ty ∎
+
+unbiased-term-disk : (n : ℕ) → unbiased-term n (n-disk n) ≃tm 0V {suc (n * 2)}
+unbiased-term-disk zero = refl≃tm
+unbiased-term-disk (suc n) = trans≃tm (sym≃tm (unbiased-term-susp-lem n (n-disk n))) (susp-tm-≃ (unbiased-term-disk n))
+
+unbiased-type-disk : (n : ℕ) → unbiased-type n (n-disk n) ≃ty (tree-to-ctx (n-disk n)) ‼ zero
+unbiased-type-disk zero = refl≃ty
+unbiased-type-disk (suc n) = begin
+  < unbiased-type (suc n) (n-disk (suc n)) >ty
+    ≈˘⟨ unbiased-type-susp-lem n (n-disk n) ⟩
+  < suspTy (unbiased-type n (n-disk n)) >ty
+    ≈⟨ susp-ty-≃ (unbiased-type-disk n) ⟩
+  < suspTy (tree-to-ctx (n-disk n) ‼ zero) >ty
+    ≈˘⟨ susp-‼ (tree-to-ctx (n-disk n)) zero ⟩
+  < suspCtx (tree-to-ctx (n-disk n)) ‼ zero >ty ∎
+  where
+    open Reasoning ty-setoid

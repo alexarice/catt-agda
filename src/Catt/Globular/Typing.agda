@@ -132,3 +132,15 @@ ty-tgt-Ty (TyArr sty Aty tty) p = tty
 
 ty-base-Ty : Typing-Ty Γ A → (ty-dim A > 0) → Typing-Ty Γ (ty-base A)
 ty-base-Ty (TyArr sty Aty tty) p = Aty
+
+ty-src-≈ : A ≈[ Γ ]ty B → ty-src A ≈[ Γ ]tm ty-src B
+ty-src-≈ Star≈ = refl≈tm
+ty-src-≈ (Arr≈ p q r) = p
+
+ty-tgt-≈ : A ≈[ Γ ]ty B → ty-tgt A ≈[ Γ ]tm ty-tgt B
+ty-tgt-≈ Star≈ = refl≈tm
+ty-tgt-≈ (Arr≈ p q r) = r
+
+ty-base-≈ : A ≈[ Γ ]ty B → ty-base A ≈[ Γ ]ty ty-base B
+ty-base-≈ Star≈ = refl≈ty
+ty-base-≈ (Arr≈ p q r) = q

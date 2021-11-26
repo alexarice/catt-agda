@@ -17,11 +17,13 @@ open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Dyck.Typing index rule lift-rule
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree.Unbiased.Typing index rule lift-rule susp-rule sub-rule
+open import Catt.Globular.Typing index rule lift-rule
 
 open import Catt.Dyck
 open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Properties
-
+open import Catt.Tree.Unbiased
+open import Catt.Tree.Unbiased.Properties
 open import Catt.Syntax.Bundles
 import Relation.Binary.Reasoning.Setoid as Reasoning
 
@@ -54,17 +56,29 @@ prune-project-Ty (⇑pk {dy = dy} p)
         open Reasoning ty-setoid
 prune-project-Ty (⇓pk p) = prune-project-Ty p
 
-prune-sub-Ty : (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) Γ σ → Typing-Sub (dyck-to-ctx (prune-peak p)) Γ (prune-sub p σ)
-prune-Eq : (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) Γ σ → σ ≈[ Γ ]s prune-sub p σ ∘ prune-project p
+prune-sub-Ty : {Γ : Ctx n} → (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) Γ σ → Typing-Tm Γ t A → Typing-Ty Γ A → peak-term p [ σ ]tm ≃tm identity t A → Typing-Sub (dyck-to-ctx (prune-peak p)) Γ (prune-sub p σ)
+prune-Eq : {Γ : Ctx n} → (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) Γ σ → Typing-Tm Γ t A → Typing-Ty Γ A → peak-term p [ σ ]tm ≃tm identity t A → σ ≈[ Γ ]s prune-sub p σ ∘ prune-project p
 
-prune-sub-Ty (⇕pk dy) (TyExt (TyExt σty Aty sty) Bty tty) = σty
-prune-sub-Ty (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty Aty sty) Bty tty) = TyExt (TyExt (prune-sub-Ty p σty) (dyck-type-Ty (prune-peak p)) (term-conversion sty l1)) (dyck-lem-Ty (prune-peak p)) (term-conversion tty (Arr≈ l2 l3 refl≈tm))
+prune-sub-Ty (⇕pk dy) (TyExt (TyExt σty Aty sty) Bty tty) tty2 Aty2 q = σty
+prune-sub-Ty {t = t} {A = A} (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty Aty sty) Bty tty) tty2 Aty2 q = TyExt (TyExt (prune-sub-Ty p σty tty2 Aty2 l4) (dyck-type-Ty (prune-peak p)) (term-conversion sty l1)) (dyck-lem-Ty (prune-peak p)) (term-conversion tty (Arr≈ l2 l3 refl≈tm))
   where
+    l4 : peak-term p [ σ ]tm ≃tm identity t A
+    l4 = begin
+      < peak-term p [ σ ]tm >tm
+        ≈˘⟨ lift-sub-comp-lem-tm σ (peak-term p) ⟩
+      < liftTerm (peak-term p) [ ⟨ σ , _ ⟩ ]tm >tm
+        ≈˘⟨ lift-sub-comp-lem-tm ⟨ σ , _ ⟩ (liftTerm (peak-term p)) ⟩
+      < liftTerm (liftTerm (peak-term p)) [ ⟨ ⟨ σ , _ ⟩ , _ ⟩ ]tm >tm
+        ≈⟨ q ⟩
+      < identity t A >tm ∎
+      where
+        open Reasoning tm-setoid
+
     l1 : (dyck-type dy [ σ ]ty) ≈[ Δ ]ty
            (dyck-type (prune-peak p) [ prune-sub p σ ]ty)
     l1 = begin
       dyck-type dy [ σ ]ty
-        ≈⟨ apply-sub-eq-ty (dyck-type dy) {!!} ⟩
+        ≈⟨ apply-sub-eq-ty (dyck-type dy) (prune-Eq p σty tty2 Aty2 l4) ⟩
       dyck-type dy [ prune-sub p σ ∘ prune-project p ]ty
         ≈⟨ reflexive≈ty (assoc-ty (prune-sub p σ) (prune-project p) (dyck-type dy)) ⟩
       dyck-type dy [ prune-project p ]ty [ prune-sub p σ ]ty
@@ -79,7 +93,7 @@ prune-sub-Ty (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty Aty sty)
       liftTerm (dyck-term dy) [ ⟨ σ , _ ⟩ ]tm
         ≈⟨ reflexive≈tm (lift-sub-comp-lem-tm σ (dyck-term dy)) ⟩
       dyck-term dy [ σ ]tm
-        ≈⟨ apply-sub-eq-tm (dyck-term dy) {!!} ⟩
+        ≈⟨ apply-sub-eq-tm (dyck-term dy) (prune-Eq p σty tty2 Aty2 l4) ⟩
       dyck-term dy [ prune-sub p σ ∘ prune-project p ]tm
         ≈⟨ reflexive≈tm (assoc-tm (prune-sub p σ) (prune-project p) (dyck-term dy)) ⟩
       dyck-term dy [ prune-project p ]tm [ prune-sub p σ ]tm
@@ -103,15 +117,61 @@ prune-sub-Ty (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty Aty sty)
       where
         open Reasoning (ty-setoid-≈ Δ)
 
-prune-sub-Ty (⇓pk p) σty = prune-sub-Ty p σty
+prune-sub-Ty (⇓pk p) σty t A q = prune-sub-Ty p σty t A q
 
-prune-Eq (⇕pk dy) (TyExt (TyExt {σ = σ} σty Aty sty) Bty tty) = Ext≈ (Ext≈ (reflexive≈s (sym≃s (id-right-unit σ))) {!!}) {!!}
-prune-Eq (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty Aty sty) Bty tty) = Ext≈ (Ext≈ lem refl≈tm) refl≈tm
+prune-Eq {t = t} {A = A} {Γ = Γ} (⇕pk dy) (TyExt {t = u} (TyExt {σ = σ} {t = s} σty Aty sty) Bty tty) tty2 Aty2 q = Ext≈ (Ext≈ (reflexive≈s (sym≃s (id-right-unit σ))) l1) l2
   where
+    lem : ((liftTerm (dyck-term dy) ─⟨ liftType (dyck-type dy) ⟩⟶ Var zero) [
+             ⟨ σ , s ⟩ ]ty)
+            ≈[ Γ ]ty (t ─⟨ A ⟩⟶ t)
+    lem = Ty-unique-≃ q tty (identity-Ty tty2 Aty2)
+
+    l1 : s ≈[ Γ ]tm
+           (dyck-term dy [ σ ]tm)
+    l1 = begin
+      s
+        ≈⟨ tgt-eq lem  ⟩
+      t
+        ≈˘⟨ src-eq lem ⟩
+      liftTerm (dyck-term dy) [ ⟨ σ , s ⟩ ]tm
+        ≈⟨ reflexive≈tm (lift-sub-comp-lem-tm σ (dyck-term dy)) ⟩
+      dyck-term dy [ σ ]tm ∎
+      where
+        open Reasoning (tm-setoid-≈ Γ)
+
+    l2 : u ≈[ Γ ]tm (identity (dyck-term dy) (dyck-type dy) [ σ ]tm)
+    l2 = begin
+      u
+        ≈⟨ reflexive≈tm q ⟩
+      identity t A
+        ≈⟨ identity-≈ (trans≈tm (sym≈tm (src-eq lem)) (reflexive≈tm (lift-sub-comp-lem-tm σ (dyck-term dy)))) (trans≈ty (sym≈ty (base-eq lem)) (reflexive≈ty (lift-sub-comp-lem-ty σ (dyck-type dy)))) ⟩
+      identity (dyck-term dy [ σ ]tm) (dyck-type dy [ σ ]ty)
+        ≈˘⟨ reflexive≈tm (identity-sub (dyck-term dy) (dyck-type dy) σ) ⟩
+      identity (dyck-term dy) (dyck-type dy) [ σ ]tm ∎
+
+      where
+        open Reasoning (tm-setoid-≈ Γ)
+
+
+
+prune-Eq {t = t} {A = A} (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty Aty sty) Bty tty) tty2 Aty2 q = Ext≈ (Ext≈ lem refl≈tm) refl≈tm
+  where
+    l4 : peak-term p [ σ ]tm ≃tm identity t A
+    l4 = begin
+      < peak-term p [ σ ]tm >tm
+        ≈˘⟨ lift-sub-comp-lem-tm σ (peak-term p) ⟩
+      < liftTerm (peak-term p) [ ⟨ σ , _ ⟩ ]tm >tm
+        ≈˘⟨ lift-sub-comp-lem-tm ⟨ σ , _ ⟩ (liftTerm (peak-term p)) ⟩
+      < liftTerm (liftTerm (peak-term p)) [ ⟨ ⟨ σ , _ ⟩ , _ ⟩ ]tm >tm
+        ≈⟨ q ⟩
+      < identity t A >tm ∎
+      where
+        open Reasoning tm-setoid
+
     lem : σ ≈[ Δ ]s  ⟨ ⟨ prune-sub p σ , _ ⟩ , _ ⟩ ∘ liftSub (liftSub (prune-project p))
     lem = begin
       < σ >s′
-        ≈⟨ prune-Eq p σty ⟩
+        ≈⟨ prune-Eq p σty tty2 Aty2 l4 ⟩
       < prune-sub p σ ∘ prune-project p >s′
         ≈˘⟨ reflexive≈s (lift-sub-comp-lem-sub (prune-sub p σ) (prune-project p)) ⟩
       < ⟨ prune-sub p σ , _ ⟩ ∘ liftSub (prune-project p) >s′
@@ -119,4 +179,5 @@ prune-Eq (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty Aty sty) Bty
       < ⟨ ⟨ prune-sub p σ , _ ⟩ , _ ⟩ ∘ liftSub (liftSub (prune-project p)) >s′ ∎
       where
         open Reasoning (sub-setoid-≈ _ Δ)
-prune-Eq (⇓pk p) σty = prune-Eq p σty
+
+prune-Eq (⇓pk p) σty t A q = prune-Eq p σty t A q

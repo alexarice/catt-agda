@@ -184,3 +184,10 @@ identity-Ty {t = t} {A = A} tty Aty
         < A >ty ∎
         where
           open Reasoning ty-setoid
+
+sub-from-linear-tree-≈ : (S : Tree n) → .⦃ _ : is-linear S ⦄ → s ≈[ Γ ]tm t → (r : A ≈[ Γ ]ty B) → (p : ty-dim A ≡ tree-dim S) → sub-from-linear-tree S s A p ≈[ Γ ]s sub-from-linear-tree S t B (trans (sym (ty-dim-≈ r)) p)
+sub-from-linear-tree-≈ Sing a Star≈ p = Ext≈ (Null≈ Star≈) a
+sub-from-linear-tree-≈ (Join S Sing) a (Arr≈ b c d) p = Ext≈ (Ext≈ (sub-from-linear-tree-≈ S b c (cong pred p)) d) a
+
+identity-≈ : s ≈[ Γ ]tm t → A ≈[ Γ ]ty B → identity s A ≈[ Γ ]tm identity t B
+identity-≈ {A = A} {B = B} p q = trans≈tm (reflexive≈tm (Coh≃ (n-disk-≃ (ty-dim-≈ q)) (unbiased-type-≃ (cong suc (ty-dim-≈ q)) (n-disk-≃ (ty-dim-≈ q))) (sub-from-linear-tree-≃ (n-disk-≃ (ty-dim-≈ q)) ⦃ n-disk-is-linear (ty-dim A) ⦄ ⦃ n-disk-is-linear (ty-dim B) ⦄ refl≃tm refl≃ty (sym (tree-dim-n-disk (ty-dim A))) (trans (ty-dim-≈ q) (sym (tree-dim-n-disk (ty-dim B))))))) (Coh≈ refl≈ty (sub-from-linear-tree-≈ (n-disk (ty-dim B)) ⦃ n-disk-is-linear (ty-dim B) ⦄ p q (trans (ty-dim-≈ q) (sym (tree-dim-n-disk (ty-dim B))))))

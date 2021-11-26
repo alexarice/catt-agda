@@ -33,6 +33,10 @@ sub-dim′ : (σ : Sub n m B) → (A : Ty n) → ty-dim A + ty-dim B ≡ ty-dim 
 sub-dim′ σ ⋆ = refl
 sub-dim′ σ (s ─⟨ A ⟩⟶ t) = cong suc (sub-dim′ σ A)
 
+ty-dim-≃ : A ≃ty B → ty-dim A ≡ ty-dim B
+ty-dim-≃ (Star≃ x) = refl
+ty-dim-≃ (Arr≃ _ p _) = cong suc (ty-dim-≃ p)
+
 susp-dim : (A : Ty n) → ty-dim (suspTy A) ≡ suc (ty-dim A)
 susp-dim ⋆ = refl
 susp-dim (s ─⟨ A ⟩⟶ t) = cong suc (susp-dim A)

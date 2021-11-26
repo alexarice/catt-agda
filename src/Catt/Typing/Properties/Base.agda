@@ -218,6 +218,10 @@ var-Ty (TyAdd Γty Aty) (suc i) = TyVarS i (var-Ty Γty i) refl≈ty
 isVar-Ty : Typing-Ctx Γ → (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
 isVar-Ty Γty (Var i) = var-Ty Γty i
 
+ty-dim-≈ : A ≈[ Γ ]ty B → ty-dim A ≡ ty-dim B
+ty-dim-≈ Star≈ = refl
+ty-dim-≈ (Arr≈ _ p _) = cong suc (ty-dim-≈ p)
+
 module _ {i : Index} (a : rule i .Rule.Args) where
   open Rule (rule i)
 

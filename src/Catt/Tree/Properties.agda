@@ -273,3 +273,11 @@ susp-lin-tree (Join S Sing) = begin
        1V ─⟨ liftType (suspCtx (tree-to-ctx S) ‼ zero) ⟩⟶ 0V >c ∎
   where
     open Reasoning ctx-setoid
+
+n-disk-≃ : n ≡ m → n-disk n ≃ n-disk m
+n-disk-≃ refl = refl≃
+
+tree-dim-≃ : S ≃ T → tree-dim S ≡ tree-dim T
+tree-dim-≃ p with ≃-to-same-n p
+... | refl with ≃-to-≡ p
+... | refl = refl

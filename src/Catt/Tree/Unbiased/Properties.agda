@@ -339,3 +339,17 @@ unbiased-type-disk (suc n) = begin
   < suspCtx (tree-to-ctx (n-disk n)) ‼ zero >ty ∎
   where
     open Reasoning ty-setoid
+
+sub-from-linear-tree-≃ : S ≃ T → .⦃ _ : is-linear S ⦄ → .⦃ _ : is-linear T ⦄ → s ≃tm t → A ≃ty B → (p : ty-dim A ≡ tree-dim S) → (q : ty-dim B ≡ tree-dim T) → sub-from-linear-tree S s A p ≃s sub-from-linear-tree T t B q
+sub-from-linear-tree-≃ Sing≃ b (Star≃ x) p q = Ext≃ (Null≃ (Star≃ x)) b
+sub-from-linear-tree-≃ (Join≃ a Sing≃) b (Arr≃ c d e) p q = Ext≃ (Ext≃ (sub-from-linear-tree-≃ a c d (cong pred p) (cong pred q)) e) b
+
+sub-from-linear-tree-sub : (a : S ≃ T) → .⦃ _ : is-linear S ⦄ → .⦃ _ : is-linear T ⦄ → (t : Tm m) → (A : Ty m) → (p : ty-dim A ≡ tree-dim S) → (σ : Sub m l ⋆) → σ ∘ sub-from-linear-tree S t A p ≃s sub-from-linear-tree T (t [ σ ]tm) (A [ σ ]ty) (trans (sym (sub-dim σ A)) (trans p (tree-dim-≃ a)))
+sub-from-linear-tree-sub Sing≃ t A p σ = refl≃s
+sub-from-linear-tree-sub (Join≃ a Sing≃) t (s ─⟨ A ⟩⟶ s′) p σ = Ext≃ (Ext≃ (sub-from-linear-tree-sub a s A (cong pred p) σ) refl≃tm) refl≃tm
+
+identity-sub : (t : Tm n) → (A : Ty n) → (σ : Sub n m ⋆) → identity t A [ σ ]tm ≃tm identity (t [ σ ]tm) (A [ σ ]ty)
+identity-sub t A σ = Coh≃ (n-disk-≃ (sub-dim σ A)) (unbiased-type-≃ (cong suc (sub-dim σ A)) (n-disk-≃ (sub-dim σ A))) (sub-from-linear-tree-sub (n-disk-≃ (sub-dim σ A)) ⦃ n-disk-is-linear (ty-dim A) ⦄ ⦃ n-disk-is-linear (ty-dim (A [ σ ]ty)) ⦄ t A (sym (tree-dim-n-disk (ty-dim A))) σ)
+
+identity-≃ : s ≃tm t → A ≃ty B → identity s A ≃tm identity t B
+identity-≃ {A = A} {B = B} p q = Coh≃ (n-disk-≃ (ty-dim-≃ q)) (unbiased-type-≃ (cong suc (ty-dim-≃ q)) (n-disk-≃ (ty-dim-≃ q))) (sub-from-linear-tree-≃ (n-disk-≃ (ty-dim-≃ q)) ⦃ n-disk-is-linear (ty-dim A) ⦄ ⦃ n-disk-is-linear (ty-dim B) ⦄ p q (sym (tree-dim-n-disk (ty-dim A))) (sym (tree-dim-n-disk (ty-dim B))))

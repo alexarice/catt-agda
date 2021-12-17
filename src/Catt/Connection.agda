@@ -20,7 +20,7 @@ connect-inc-right x zero = ⟨ ⟨⟩ , x ⟩
 connect-inc-right x (suc m) = ⟨ liftSub (connect-inc-right x m) , 0V ⟩
 
 connect-inc-left : (x : Tm (suc n)) → (m : ℕ) → Sub (suc n) (suc (m + n)) ⋆
-connect-inc-left x zero = idSub (suc _)
+connect-inc-left x zero = idSub
 connect-inc-left x (suc m) = liftSub (connect-inc-left x m)
 
 connect-susp : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → Ctx (suc (m + (2 + n)))

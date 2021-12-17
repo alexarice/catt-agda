@@ -83,7 +83,7 @@ supp-unbiased {n} (suc d) T p with is-linear-dec T
       supp-bd d T false ∪ supp-bd d T true ∎
 
 ... | no q = begin
-  FVTy (unbiased-type (suc d) T) ∪ FVSub (idSub _) ≡⟨ cong (FVTy (unbiased-type (suc d) T) ∪_) (idSub-supp (suc _)) ⟩
+  FVTy (unbiased-type (suc d) T) ∪ FVSub idSub ≡⟨ cong (FVTy (unbiased-type (suc d) T) ∪_) idSub-supp ⟩
   FVTy (unbiased-type (suc d) T) ∪ full ≡⟨ ∪-right-zero (FVTy (unbiased-type (suc d) T)) ⟩
   full ∎
   where
@@ -115,8 +115,8 @@ sub-from-linear-tree-supp-lem : (d d′ : ℕ)
                               → (tree-dim T ≡ tree-dim S + d′)
                               → FVSub (sub-from-linear-tree-unbiased S T d′ ∘ tree-inc d S b) ≡ supp-bd (d + d′) T b
 sub-from-linear-tree-supp-lem zero d′ Sing T false p = begin
-  FVTy (unbiased-type d′ T) ∪ FVSub (idSub _)
-    ≡⟨ cong (FVTy (unbiased-type d′ T) ∪_) (idSub-supp _) ⟩
+  FVTy (unbiased-type d′ T) ∪ FVSub idSub
+    ≡⟨ cong (FVTy (unbiased-type d′ T) ∪_) idSub-supp ⟩
   FVTy (unbiased-type d′ T) ∪ full
     ≡⟨ ∪-right-zero (FVTy (unbiased-type d′ T)) ⟩
   full
@@ -125,8 +125,8 @@ sub-from-linear-tree-supp-lem zero d′ Sing T false p = begin
   where
     open ≡-Reasoning
 sub-from-linear-tree-supp-lem zero d′ Sing T true p = begin
-  FVTy (unbiased-type d′ T) ∪ FVSub (idSub _)
-    ≡⟨ cong (FVTy (unbiased-type d′ T) ∪_) (idSub-supp _) ⟩
+  FVTy (unbiased-type d′ T) ∪ FVSub idSub
+    ≡⟨ cong (FVTy (unbiased-type d′ T) ∪_) idSub-supp ⟩
   FVTy (unbiased-type d′ T) ∪ full
     ≡⟨ ∪-right-zero (FVTy (unbiased-type d′ T)) ⟩
   full
@@ -151,8 +151,8 @@ sub-from-linear-tree-supp-lem zero d′ (Join S Sing) T true p = begin
   where
     open ≡-Reasoning
 sub-from-linear-tree-supp-lem (suc d) d′ Sing T b p = begin
-  FVTy (unbiased-type d′ T) ∪ FVSub (idSub _)
-    ≡⟨ cong (FVTy (unbiased-type d′ T) ∪_) (idSub-supp _) ⟩
+  FVTy (unbiased-type d′ T) ∪ FVSub idSub
+    ≡⟨ cong (FVTy (unbiased-type d′ T) ∪_) idSub-supp ⟩
   FVTy (unbiased-type d′ T) ∪ full
     ≡⟨ ∪-right-zero (FVTy (unbiased-type d′ T)) ⟩
   full
@@ -161,7 +161,7 @@ sub-from-linear-tree-supp-lem (suc d) d′ Sing T b p = begin
   where
     open ≡-Reasoning
 sub-from-linear-tree-supp-lem (suc d) d′ (Join S Sing) T b p = begin
-  FVSub (unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ∘ (idSub _ ∘ suspSub (tree-inc d S b)))
+  FVSub (unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ∘ (idSub ∘ suspSub (tree-inc d S b)))
     ≡⟨ cong FVSub (≃s-to-≡ lem) ⟩
   FVSub (unrestrict (sub-from-linear-tree-unbiased S T (suc d′) ∘ tree-inc d S b))
     ≡⟨ unrestrict-supp (sub-from-linear-tree-unbiased S T (suc d′) ∘ tree-inc d S b) ⟩
@@ -171,10 +171,10 @@ sub-from-linear-tree-supp-lem (suc d) d′ (Join S Sing) T b p = begin
     ≡⟨ cong (λ - → supp-bd - T b) (+-suc d d′) ⟩
   supp-bd (suc d + d′) T b ∎
   where
-    lem : unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ∘ (idSub _ ∘ suspSub (tree-inc d S b))
+    lem : unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ∘ (idSub ∘ suspSub (tree-inc d S b))
        ≃s unrestrict (sub-from-linear-tree-unbiased S T (suc d′) ∘ tree-inc d S b)
     lem = begin
-      < unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ∘ (idSub _ ∘ suspSub (tree-inc d S b)) >s
+      < unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ∘ (idSub ∘ suspSub (tree-inc d S b)) >s
         ≈⟨ sub-action-≃-sub (id-left-unit (unrestrict (suspSubRes (tree-inc d S b)))) refl≃s ⟩
       < unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ∘ suspSub (tree-inc d S b) >s
         ≈˘⟨ unrestrict-comp (sub-from-linear-tree-unbiased S T (suc d′)) (tree-inc d S b) ⟩

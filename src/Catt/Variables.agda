@@ -50,11 +50,3 @@ VarSplitFull₁ {m} σ vs = ∀ (i : Fin m) → vs (varToVarFunction σ i) ≡ i
 
 VarSplitFull₂ : (τ : Sub l n ⋆) → .⦃ varToVar τ ⦄ → VarSplit n m l → Set
 VarSplitFull₂ {l} τ vs = ∀ (i : Fin l) → vs (varToVarFunction τ i) ≡ inj₂ i
-
-truncate′ : ℕ → Ty n → Ty n
-truncate′ zero A = A
-truncate′ (suc d) ⋆ = ⋆
-truncate′ (suc d) (s ─⟨ A ⟩⟶ t) = truncate′ d A
-
-truncate : ℕ → Ty n → Ty n
-truncate d A = truncate′ (ty-dim A ∸ d) A

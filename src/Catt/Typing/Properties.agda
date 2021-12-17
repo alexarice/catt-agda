@@ -14,6 +14,7 @@ module Catt.Typing.Properties (index : ℕ)
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Suspension
+open import Catt.Globular
 open import Catt.Typing index rule
 open import Catt.Typing.Properties.Base index rule public
 open import Catt.Typing.Properties.Lifting index rule lift-rule public
@@ -40,7 +41,7 @@ restrictTy {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty v z) w y) u x) (TyAdd
 
 truncate′-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate′ d A ≈[ Γ ]ty truncate′ d′ A′
 truncate′-≈ {d = zero} refl p = p
-truncate′-≈ {d = suc d} refl Star≈ = Star≈
+truncate′-≈ {d = suc d} refl Star≈ = refl≈ty
 truncate′-≈ {d = suc d} refl (Arr≈ x p x₁) = truncate′-≈ {d = d} refl p
 
 truncate-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate d A ≈[ Γ ]ty truncate d′ A′

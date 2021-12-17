@@ -517,13 +517,13 @@ lift-sub-comp-lem-tm {A = s ─⟨ A ⟩⟶ t} {t = u} σ (Coh T B τ) = begin
 lift-sub-comp-lem-ty σ ⋆ = refl≃ty
 lift-sub-comp-lem-ty σ (s ─⟨ B ⟩⟶ t) = Arr≃ (lift-sub-comp-lem-tm σ s) (lift-sub-comp-lem-ty σ B) (lift-sub-comp-lem-tm σ t)
 
-id-right-unit : (σ : Sub n m A) → σ ∘ idSub n ≃s σ
+id-right-unit : (σ : Sub n m A) → σ ∘ idSub ≃s σ
 id-right-unit ⟨⟩ = refl≃s
-id-right-unit ⟨ σ , t ⟩ = Ext≃ (trans≃s (lift-sub-comp-lem-sub σ (idSub _)) (id-right-unit σ)) refl≃tm
+id-right-unit ⟨ σ , t ⟩ = Ext≃ (trans≃s (lift-sub-comp-lem-sub σ idSub) (id-right-unit σ)) refl≃tm
 
-id-left-unit : (σ : Sub m n A) → idSub n ∘ σ ≃s σ
-id-on-ty : (B : Ty m) → B [ idSub m ]ty ≃ty B
-id-on-tm : (t : Tm m) → t [ idSub m ]tm ≃tm t
+id-left-unit : (σ : Sub m n A) → idSub ∘ σ ≃s σ
+id-on-ty : (B : Ty m) → B [ idSub ]ty ≃ty B
+id-on-tm : (t : Tm m) → t [ idSub ]tm ≃tm t
 
 id-left-unit ⟨⟩ = Null≃ (id-on-ty _)
 id-left-unit ⟨ σ , t ⟩ = Ext≃ (id-left-unit σ) (id-on-tm t)
@@ -533,9 +533,9 @@ id-on-ty (s ─⟨ B ⟩⟶ t) = Arr≃ (id-on-tm s) (id-on-ty B) (id-on-tm t)
 
 id-on-tm (Var i) = lem i
   where
-    lem : (i : Fin m) → Var i [ idSub m ]tm ≃tm Var i
+    lem : (i : Fin m) → Var i [ idSub ]tm ≃tm Var i
     lem {m = suc m} zero = refl≃tm
-    lem {m = suc m} (suc i) = trans≃tm (apply-lifted-sub-tm-≃ (Var i) (idSub m)) (lift-tm-≃ (lem i))
+    lem {m = suc m} (suc i) = trans≃tm (apply-lifted-sub-tm-≃ (Var i) idSub) (lift-tm-≃ (lem i))
 id-on-tm (Coh Δ A σ) = Coh≃ refl≃ refl≃ty (id-left-unit σ)
 
 susp-sub-preserve-getFst : (σ : Sub n m ⋆) → getFst {n = m} ≃tm getFst [ suspSub σ ]tm
@@ -667,7 +667,7 @@ idSub≃-snd-var : {Γ : Ctx (suc (suc n))} → {Δ : Ctx (suc (suc m))} → (p 
 idSub≃-snd-var (Add≃ (Add≃ Emp≃ y) x) = refl≃tm
 idSub≃-snd-var (Add≃ (Add≃ (Add≃ p z) y) x) = trans≃tm (apply-lifted-sub-tm-≃ (Var (inject₁ (fromℕ _))) (idSub≃ (Add≃ (Add≃ p z) y))) (lift-tm-≃ (idSub≃-snd-var (Add≃ (Add≃ p z) y)))
 
-idSub-id : {Γ Δ : Ctx n} → (p : Γ ≃c Δ) → idSub≃ p ≃s idSub n
+idSub-id : {Γ Δ : Ctx n} → (p : Γ ≃c Δ) → idSub≃ p ≃s idSub {n}
 idSub-id Emp≃ = refl≃s
 idSub-id (Add≃ p x) = Ext≃ (lift-sub-≃ (idSub-id p)) refl≃tm
 
@@ -725,3 +725,16 @@ liftTerm-inj {s = Coh Δ A σ} {t = Coh Δ′ A′ σ′} (Coh≃ p q r) = Coh�
 
 liftSub-inj {σ = ⟨⟩} {τ = ⟨⟩} (Null≃ x) = Null≃ (liftType-inj x)
 liftSub-inj {σ = ⟨ σ , t ⟩} {τ = ⟨ τ , s ⟩} (Ext≃ p q) = Ext≃ (liftSub-inj p) (liftTerm-inj q)
+
+replaceSub-lift : (σ : Sub (1 + n) m A) → (t : Tm m) → liftSub (replaceSub σ t) ≃s replaceSub (liftSub σ) (liftTerm t)
+replaceSub-lift ⟨ σ , _ ⟩ t = refl≃s
+
+apply-replaceSub-lift-ty : (A : Ty n) → (σ : Sub (1 + n) m B) → (t : Tm m) → liftType A [ replaceSub σ t ]ty ≃ty liftType A [ σ ]ty
+apply-replaceSub-lift-ty A ⟨ σ , s ⟩ t = begin
+  < liftType A [ ⟨ σ , t ⟩ ]ty >ty
+    ≈⟨ lift-sub-comp-lem-ty σ A ⟩
+  < A [ σ ]ty >ty
+    ≈˘⟨ lift-sub-comp-lem-ty σ A ⟩
+  < liftType A [ ⟨ σ , s ⟩ ]ty >ty ∎
+  where
+    open Reasoning ty-setoid

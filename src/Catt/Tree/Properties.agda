@@ -120,17 +120,17 @@ tree-inc-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p = begin
   where
     open Reasoning sub-setoid
 
-tree-inc-full : (d : ℕ) → (T : Tree n) → (b : Bool) → (p : tree-dim T ≤ d) → tree-inc d T b ≃s idSub (suc (tree-size T))
+tree-inc-full : (d : ℕ) → (T : Tree n) → (b : Bool) → (p : tree-dim T ≤ d) → tree-inc d T b ≃s idSub {suc (tree-size T)}
 tree-inc-full zero Sing false p = refl≃s
 tree-inc-full zero Sing true p = refl≃s
 tree-inc-full zero (Join S T) b p = ⊥-elim (join-tree-has-non-zero-dim S T (sym (n≤0⇒n≡0 p)))
 tree-inc-full (suc d) Sing b p = refl≃s
 tree-inc-full (suc d) (Join S T) b p = begin
   < sub-between-connect-susps (tree-inc d S b) (tree-inc (suc d) T b) >s
-    ≈⟨ sub-between-connect-susps-≃ (tree-inc d S b) (idSub (suc (tree-size S))) (tree-inc (suc d) T b) (idSub (suc (tree-size T))) (≃-to-same-n (tree-bd-full d S (≤-pred (m⊔n≤o⇒m≤o (suc (tree-dim S)) (tree-dim T) p)))) (≃-to-same-n (tree-bd-full (suc d) T (m⊔n≤o⇒n≤o (suc (tree-dim S)) (tree-dim T) p))) (tree-inc-full d S b (≤-pred (m⊔n≤o⇒m≤o (suc (tree-dim S)) (tree-dim T) p))) (tree-inc-full (suc d) T b (m⊔n≤o⇒n≤o (suc (tree-dim S)) (tree-dim T) p)) ⟩
-  < sub-between-connect-susps (idSub (suc (tree-size S))) (idSub (suc (tree-size T))) >s
+    ≈⟨ sub-between-connect-susps-≃ (tree-inc d S b) idSub (tree-inc (suc d) T b) idSub (≃-to-same-n (tree-bd-full d S (≤-pred (m⊔n≤o⇒m≤o (suc (tree-dim S)) (tree-dim T) p)))) (≃-to-same-n (tree-bd-full (suc d) T (m⊔n≤o⇒n≤o (suc (tree-dim S)) (tree-dim T) p))) (tree-inc-full d S b (≤-pred (m⊔n≤o⇒m≤o (suc (tree-dim S)) (tree-dim T) p))) (tree-inc-full (suc d) T b (m⊔n≤o⇒n≤o (suc (tree-dim S)) (tree-dim T) p)) ⟩
+  < sub-between-connect-susps idSub idSub >s
     ≈⟨ sub-between-connect-susps-id _ _ ⟩
-  < idSub (suc (tree-size (Join S T))) >s ∎
+  < idSub >s ∎
   where
     open Reasoning sub-setoid
 
@@ -174,14 +174,14 @@ connect-tree-length-lem (Join S₁ S₂) T = trans (cong (_+ (2 + tree-size S₁
 connect-tree-last-var : (S : Tree n) → (T : Tree m) → tree-last-var (connect-tree S T) ≃tm tree-last-var T [ idSub≃ (sym≃c (connect-tree-to-ctx S T)) ∘ (connect-inc-right (tree-last-var S) (tree-size T)) ]tm
 connect-tree-last-var Sing T = sym≃tm (trans≃tm (sub-action-≃-tm (refl≃tm {s = tree-last-var T}) lem) (id-on-tm (tree-last-var (connect-tree Sing T))))
   where
-    lem : idSub≃ (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T)))) ∘ connect-inc-right (Var zero) (tree-size T) ≃s idSub (suc (tree-size T))
+    lem : idSub≃ (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T)))) ∘ connect-inc-right (Var zero) (tree-size T) ≃s idSub {suc (tree-size T)}
     lem = begin
       < idSub≃ (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T))))
         ∘ connect-inc-right (Var zero) (tree-size T) >s
         ≈⟨ idSub≃-on-sub (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T)))) (connect-inc-right (Var zero) _) ⟩
       < connect-inc-right (Var zero) _ >s
-        ≈⟨ connect-inc-right-left-unit _ ⟩
-      < idSub (suc _) >s ∎
+        ≈⟨ connect-inc-right-left-unit ⟩
+      < idSub >s ∎
       where
         open Reasoning sub-setoid
 connect-tree-last-var (Join S₁ S₂) T = begin

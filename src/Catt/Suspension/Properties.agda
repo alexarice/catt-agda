@@ -39,9 +39,9 @@ susp-‼ : (Γ : Ctx n) → (i : Fin (ctxLength Γ)) → suspCtx Γ ‼ inject�
 susp-‼ (Γ , A) zero = sym≃ty (susp-ty-lift A)
 susp-‼ (Γ , A) (suc i) = trans≃ty (lift-ty-≃ (susp-‼ Γ i)) (sym≃ty (susp-ty-lift (Γ ‼ i)))
 
-susp-functorial-id : (n : ℕ) → suspSub (idSub n) ≃s idSub (2 + n)
-susp-functorial-id zero = refl≃s
-susp-functorial-id (suc n) = Ext≃ (trans≃s (susp-sub-lift (idSub n)) (lift-sub-≃ (susp-functorial-id n))) refl≃tm
+susp-functorial-id : {n : ℕ} → suspSub (idSub {n}) ≃s idSub {2 + n}
+susp-functorial-id {zero} = refl≃s
+susp-functorial-id {suc n} = Ext≃ (trans≃s (susp-sub-lift idSub) (lift-sub-≃ (susp-functorial-id))) refl≃tm
 
 suspSub-preserve-star : (σ : Sub n m ⋆) → suspTy ⋆ [ suspSub σ ]ty ≃ty suspTy (⋆ {n = m})
 suspSub-preserve-star ⟨⟩ = refl≃ty

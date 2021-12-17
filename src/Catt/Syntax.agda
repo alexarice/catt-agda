@@ -104,9 +104,9 @@ _[_]tm {A = s ─⟨ A ⟩⟶ t} (Coh T B τ) σ = _[_]tm {A = A} (Coh (suspTree
 σ ∘ ⟨⟩ = ⟨⟩
 σ ∘ ⟨ τ , t ⟩ = ⟨ (σ ∘ τ) , t [ σ ]tm ⟩
 
-idSub : (n : ℕ) → Sub n n ⋆
-idSub zero = ⟨⟩
-idSub (suc n) = ⟨ liftSub (idSub n) , Var zero ⟩
+idSub : {n : ℕ} → Sub n n ⋆
+idSub {zero} = ⟨⟩
+idSub {suc n} = ⟨ liftSub idSub , Var zero ⟩
 
 lookupHeight : (Γ : Ctx n) → (i : Fin n) → ℕ
 lookupHeight (Γ , A) zero = ty-dim A
@@ -116,6 +116,15 @@ infix 45 _‼_
 _‼_ : (Γ : Ctx n) → (i : Fin n) → Ty n
 (Γ , A) ‼ zero = liftType A
 (Γ , A) ‼ suc i = liftType (Γ ‼ i)
+
+ctx-proj₁ : Ctx (suc n) → Ctx n
+ctx-proj₁ (Γ , A) = Γ
+
+ctx-proj₂ : Ctx (suc n) → Ty n
+ctx-proj₂ (Γ , A) = A
+
+replaceSub : Sub (1 + n) m A → Tm m → Sub (1 + n) m A
+replaceSub ⟨ σ , _ ⟩ t = ⟨ σ , t ⟩
 
 -- sub-from-function : ((i : Fin n) → Tm m) → Sub n m
 -- sub-from-function {n = zero} f = ⟨⟩

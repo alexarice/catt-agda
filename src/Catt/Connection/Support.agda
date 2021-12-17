@@ -32,8 +32,8 @@ connect-supp-full n (suc m) = cong ewt (connect-supp-full n m)
 connect-supp-incs : (xs : VarSet (suc n)) → (t : Tm (suc n)) → (ys : VarSet (suc m))
                   → FVTm t ⊆ xs
                   → TransportVarSet xs (connect-inc-left t m) ∪ TransportVarSet ys (connect-inc-right t m) ≡ connect-supp xs ys
-connect-supp-incs xs t (ewf emp) p = trans (∪-right-unit (TransportVarSet xs (idSub _))) (TransportVarSet-id xs)
-connect-supp-incs xs t (ewt emp) p = trans (cong (TransportVarSet xs (idSub _) ∪_) (∪-left-unit (FVTm t))) (trans (cong (_∪ FVTm t) (TransportVarSet-id xs)) (sym p))
+connect-supp-incs xs t (ewf emp) p = trans (∪-right-unit (TransportVarSet xs idSub)) (TransportVarSet-id xs)
+connect-supp-incs xs t (ewt emp) p = trans (cong (TransportVarSet xs idSub ∪_) (∪-left-unit (FVTm t))) (trans (cong (_∪ FVTm t) (TransportVarSet-id xs)) (sym p))
 connect-supp-incs xs t (ewf (y ∷ ys)) p = trans (cong₂ _∪_ (TransportVarSet-lift xs (connect-inc-left t _)) (TransportVarSet-lift (y ∷ ys) (connect-inc-right t _))) (cong ewf (connect-supp-incs xs t (y ∷ ys) p))
 connect-supp-incs xs t (ewt (y ∷ ys)) p = trans (cong₂ (λ a b → a ∪ (b ∪ ewt empty)) (TransportVarSet-lift xs (connect-inc-left t _)) (TransportVarSet-lift (y ∷ ys) (connect-inc-right t _))) (cong ewt (trans (cong (TransportVarSet xs (connect-inc-left t _) ∪_) (∪-right-unit (TransportVarSet (y ∷ ys) (connect-inc-right t _)))) (connect-supp-incs xs t (y ∷ ys) p)))
 

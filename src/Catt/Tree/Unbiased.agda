@@ -40,7 +40,7 @@ unbiased-term d T with is-linear-dec T
 ... | yes p = 0V
 ... | no p = unbiased-comp d T
 
-unbiased-comp d T = Coh T (unbiased-type d T) (idSub _)
+unbiased-comp d T = Coh T (unbiased-type d T) idSub
 
 unbiased-type zero T = ⋆
 unbiased-type (suc d) T = (unbiased-term d (tree-bd d T) [ tree-inc d T false ]tm) ─⟨ unbiased-type d T ⟩⟶ (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm)
@@ -54,7 +54,7 @@ unbiased-type-dim zero T = refl
 unbiased-type-dim (suc d) T = cong suc (unbiased-type-dim d T)
 
 unbiased-comp-dim : (d : ℕ) → (T : Tree n) → tm-height (tree-to-ctx T) (unbiased-comp d T) ≡ d
-unbiased-comp-dim d T = trans (sym (sub-dim (idSub (suc _)) (unbiased-type d T))) (unbiased-type-dim d T)
+unbiased-comp-dim d T = trans (sym (sub-dim idSub (unbiased-type d T))) (unbiased-type-dim d T)
 
 sub-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) → (A : Ty m) → .(ty-dim A ≡ tree-dim S) → Sub (suc n) m ⋆
 sub-from-linear-tree Sing t A p = ⟨ ⟨⟩ , t ⟩

@@ -8,6 +8,7 @@ open import Catt.Globular
 open import Catt.Suspension
 open import Catt.Syntax.SyntacticEquality
 open import Data.Nat
+open import Data.Nat.Properties
 open import Data.Fin using (Fin;suc;zero;inject₁)
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
@@ -108,6 +109,10 @@ ty-base-≃ : A ≃ty B → ty-base A ≃ty ty-base B
 ty-base-≃ (Star≃ p) = Star≃ p
 ty-base-≃ (Arr≃ p q r) = q
 
+ty-base-lift : (A : Ty n) → ty-base (liftType A) ≃ty liftType (ty-base A)
+ty-base-lift ⋆ = refl≃ty
+ty-base-lift (s ─⟨ A ⟩⟶ t) = refl≃ty
+
 ty-base-sub : (A : Ty n) → (σ : Sub n m ⋆) → ty-base A [ σ ]ty ≃ty ty-base (A [ σ ]ty)
 ty-base-sub ⋆ σ = refl≃ty
 ty-base-sub (s ─⟨ A ⟩⟶ t) σ = refl≃ty
@@ -117,6 +122,61 @@ ty-src-sub (s ─⟨ A ⟩⟶ t) σ p = refl≃tm
 
 ty-tgt-sub : (A : Ty (suc n)) → (σ : Sub (suc n) (suc m) ⋆) → (ty-dim A > 0) → ty-tgt A [ σ ]tm ≃tm ty-tgt (A [ σ ]ty)
 ty-tgt-sub (s ─⟨ A ⟩⟶ t) σ p = refl≃tm
+
+truncate-≤ : (d : ℕ) → (A : Ty n) → d ≤ ty-dim A → truncate d (s ─⟨ A ⟩⟶ t) ≃ty truncate d A
+truncate-≤ d A p
+  rewrite +-∸-assoc 1 p = refl≃ty
+
+suspTy-truncate : (A : Ty n) → truncate 1 (suspTy A) ≃ty getFst {n = n} ─⟨ ⋆ ⟩⟶ getSnd
+suspTy-truncate ⋆ = refl≃ty
+suspTy-truncate (s ─⟨ A ⟩⟶ t) = trans≃ty (truncate-≤ 1 (suspTy A) (≤-trans (s≤s z≤n) (≤-reflexive (sym (susp-dim A))))) (suspTy-truncate A)
+-- suspTy-sub-truncate : (A : Ty n) → (σ : Sub (2 + n) m B) → truncate (suc (ty-dim B)) (suspTy A [ σ ]ty) ≃ty (getFst [ σ ]tm) ─⟨ B ⟩⟶ (getSnd [ σ ]tm)
+-- suspTy-sub-truncate {B = B} ⋆ σ
+--   rewrite n∸n≡0 (ty-dim B) = refl≃ty
+-- suspTy-sub-truncate {B = B} (s ─⟨ A ⟩⟶ t) σ = trans≃ty (truncate-≤ {s = suspTm s [ σ ]tm} {t = suspTm t [ σ ]tm} (suc (ty-dim B)) (suspTy A [ σ ]ty) (≤-trans (s≤s (m≤n+m (ty-dim B) (ty-dim A))) (≤-reflexive (trans (cong (_+ ty-dim B) (sym (susp-dim A))) (sub-dim′ σ (suspTy A)))))) (suspTy-sub-truncate A σ)
+
+truncate′-≃ : d ≡ d′ → A ≃ty A′ → truncate′ d A ≃ty truncate′ d′ A′
+truncate′-≃ {d = zero} refl p = p
+truncate′-≃ {d = suc d} refl p = truncate′-≃ {d = d} refl (ty-base-≃ p)
+
+truncate-≃ : d ≡ d′ → A ≃ty A′ → truncate d A ≃ty truncate d′ A′
+truncate-≃ {d} {d′} {A = A} {A′ = A′} refl p = truncate′-≃ {d = ty-dim A ∸ d} {d′ = ty-dim A′ ∸ d} (cong (_∸ d) (≃ty-preserve-height p)) p
+
+truncate′-sub : (d : ℕ) → (A : Ty n) → (σ : Sub n m B) → d ≤ ty-dim A → truncate′ d (A [ σ ]ty) ≃ty truncate′ d A [ σ ]ty
+truncate′-sub zero A σ p = refl≃ty
+truncate′-sub (suc d) (s ─⟨ A ⟩⟶ t) σ p = truncate′-sub d A σ (≤-pred p)
+
+truncate-sub : (d : ℕ) → (A : Ty n) → (σ : Sub n m B) → truncate (d + ty-dim B) (A [ σ ]ty) ≃ty truncate d A [ σ ]ty
+truncate-sub {B = B} d A σ = begin
+  < truncate (d + ty-dim B) (A [ σ ]ty) >ty ≡⟨⟩
+  < truncate′ (ty-dim (A [ σ ]ty) ∸ (d + ty-dim B)) (A [ σ ]ty) >ty
+    ≈⟨ truncate′-≃ lem refl≃ty ⟩
+  < truncate′ (ty-dim A ∸ d) (A [ σ ]ty) >ty
+    ≈⟨ truncate′-sub (ty-dim A ∸ d) A σ (m∸n≤m (ty-dim A) d) ⟩
+  < truncate′ (ty-dim A ∸ d) A [ σ ]ty >ty ≡⟨⟩
+  < truncate d A [ σ ]ty >ty ∎
+  where
+    lem : ty-dim (A [ σ ]ty) ∸ (d + ty-dim B) ≡ ty-dim A ∸ d
+    lem = begin
+      ty-dim (A [ σ ]ty) ∸ (d + ty-dim B)
+        ≡˘⟨ cong₂ _∸_ (sub-dim′ σ A) (+-comm (ty-dim B) d) ⟩
+      ty-dim A + ty-dim B ∸ (ty-dim B + d)
+        ≡˘⟨ ∸-+-assoc (ty-dim A + ty-dim B) (ty-dim B) d ⟩
+      ty-dim A + ty-dim B ∸ ty-dim B ∸ d
+        ≡⟨ cong (_∸ d) (+-∸-assoc (ty-dim A) {n = ty-dim B} ≤-refl) ⟩
+      ty-dim A + (ty-dim B ∸ ty-dim B) ∸ d
+        ≡⟨ cong (λ - → ty-dim A + - ∸ d) (n∸n≡0 (ty-dim B)) ⟩
+      ty-dim A + 0 ∸ d
+        ≡⟨ cong (_∸ d) (+-identityʳ (ty-dim A)) ⟩
+      ty-dim A ∸ d ∎
+      where
+        open ≡-Reasoning
+
+    open Reasoning ty-setoid
+
+truncate′-lift : (n : ℕ) → (A : Ty m) → truncate′ n (liftType A) ≃ty liftType (truncate′ n A)
+truncate′-lift zero A = refl≃ty
+truncate′-lift (suc n) A = trans≃ty (truncate′-≃ {d = n} refl (ty-base-lift A)) (truncate′-lift n (ty-base A))
 
 -- ty-src-lift : (A : Ty n (suc d)) → ty-src (liftType A) ≃tm liftTerm (ty-src A)
 -- ty-src-lift (s ─⟨ A ⟩⟶ t) = refl≃tm

@@ -160,9 +160,9 @@ supp-lift-tm (Coh S A σ) = supp-lift-sub σ
 supp-lift-sub ⟨⟩ = refl
 supp-lift-sub ⟨ σ , t ⟩ = cong₂ _∪_ (supp-lift-sub σ) (supp-lift-tm t)
 
-idSub-supp : (n : ℕ) → FVSub (idSub n) ≡ full
-idSub-supp zero = refl
-idSub-supp (suc n) = trans (cong (_∪ ewt empty) (supp-lift-sub (idSub n))) (cong ewt (trans (∪-right-unit (FVSub (idSub n))) (idSub-supp n)))
+idSub-supp : FVSub (idSub {n}) ≡ full
+idSub-supp {zero} = refl
+idSub-supp {suc n} = trans (cong (_∪ ewt empty) (supp-lift-sub idSub)) (cong ewt (trans (∪-right-unit (FVSub idSub)) idSub-supp))
 
 idSub≃-supp : (p : Γ ≃c Δ) → FVSub (idSub≃ p) ≡ full
 idSub≃-supp Emp≃ = refl
@@ -173,10 +173,10 @@ TransportVarSet-lift emp ⟨⟩ = refl
 TransportVarSet-lift (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-lift xs σ
 TransportVarSet-lift (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (TransportVarSet-lift xs σ) (supp-lift-tm t)
 
-TransportVarSet-id : (xs : VarSet n) → TransportVarSet xs (idSub n) ≡ xs
+TransportVarSet-id : (xs : VarSet n) → TransportVarSet xs idSub ≡ xs
 TransportVarSet-id emp = refl
-TransportVarSet-id (ewf xs) = trans (TransportVarSet-lift xs (idSub _)) (cong ewf (TransportVarSet-id xs))
-TransportVarSet-id (ewt xs) = trans (cong (_∪ ewt empty) (TransportVarSet-lift xs (idSub _))) (cong ewt (trans (∪-right-unit (TransportVarSet xs (idSub _))) (TransportVarSet-id xs)))
+TransportVarSet-id (ewf xs) = trans (TransportVarSet-lift xs idSub) (cong ewf (TransportVarSet-id xs))
+TransportVarSet-id (ewt xs) = trans (cong (_∪ ewt empty) (TransportVarSet-lift xs idSub)) (cong ewt (trans (∪-right-unit (TransportVarSet xs idSub)) (TransportVarSet-id xs)))
 
 ⊆-refl : {xs : VarSet n} → xs ⊆ xs
 ⊆-refl = sym (∪-idem _)

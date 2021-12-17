@@ -356,7 +356,7 @@ sub-from-insertion-Ty {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ} {τ
       < suspTm (branching-path-to-var S₁ P) [ connect-inc-left getSnd _ ]tm [ σ ]tm >tm
         ≈⟨ p ⟩
       < unbiased-comp (tree-dim (suspTree T)) (suspTree T) [ τ ]tm >tm
-        ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim T) T) (susp-functorial-id (suc _))) (refl≃s {σ = τ}) ⟩
+        ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim T) T) susp-functorial-id) (refl≃s {σ = τ}) ⟩
       < suspTm (unbiased-comp (tree-dim T) T) [ τ ]tm >tm
         ≈⟨ restrict-susp-full (unbiased-comp (tree-dim T) T) τ refl≃tm refl≃tm ⟩
       < unbiased-comp (tree-dim T) T
@@ -512,7 +512,7 @@ interior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ} {τ} σ
       < suspTm (branching-path-to-var S₁ P) [ connect-inc-left getSnd _ ]tm [ σ ]tm >tm
         ≈⟨ p ⟩
       < unbiased-comp (tree-dim (suspTree T)) (suspTree T) [ τ ]tm >tm
-        ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim T) T) (susp-functorial-id (suc _))) (refl≃s {σ = τ}) ⟩
+        ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim T) T) susp-functorial-id) (refl≃s {σ = τ}) ⟩
       < suspTm (unbiased-comp (tree-dim T) T) [ τ ]tm >tm
         ≈⟨ restrict-susp-full (unbiased-comp (tree-dim T) T) τ refl≃tm refl≃tm ⟩
       < unbiased-comp (tree-dim T) T
@@ -583,22 +583,22 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) PHere T {σ} {τ} σty τty p = beg
        ∘ (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
          sub-between-connects
          (sub-from-linear-tree-unbiased (suspTree S₁) T 0)
-         (idSub _) (tree-last-var T)) >s′
+         idSub (tree-last-var T)) >s′
     ≈⟨ reflexive≈s (sub-action-≃-sub (idSub≃-on-sub _ _) (idSub≃-right-unit _ _)) ⟩
   < sub-from-connect τ
       (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
       ∘ sub-between-connects
          (sub-from-linear-tree-unbiased (suspTree S₁) T 0)
-         (idSub _) (tree-last-var T) >s′
+         idSub (tree-last-var T) >s′
     ≈⟨ between-connect-from-connect-≈ (sub-from-linear-tree-unbiased (suspTree S₁) T 0)
-                                      (idSub _)
+                                      idSub
                                       (tree-last-var T)
                                       τ
                                       (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
                                       lem2 ⟩
   < sub-from-connect
       (τ ∘ sub-from-linear-tree-unbiased (suspTree S₁) T 0)
-      (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ∘ idSub (suc _)) >s′
+      (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ∘ idSub) >s′
     ≈⟨ sub-from-connect-≈ l1 (reflexive≈s (id-right-unit (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))) ⟩
   < sub-from-connect
       (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
@@ -671,8 +671,8 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ = σ} {�
                   (getSnd [ τ ]tm))
         (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm))))
     (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
-    ∘ sub-between-connect-susps (exterior-sub S₁ P T) (idSub _) >s′
-    ≈⟨ between-connect-from-connect-≈ (suspSub (exterior-sub S₁ P T)) (idSub _) getSnd (unrestrict
+    ∘ sub-between-connect-susps (exterior-sub S₁ P T) idSub >s′
+    ≈⟨ between-connect-from-connect-≈ (suspSub (exterior-sub S₁ P T)) idSub getSnd (unrestrict
       (sub-from-insertion S₁ P T
         (restrict (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
                   (getFst [ τ ]tm)
@@ -686,7 +686,7 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ = σ} {�
                   (getSnd [ τ ]tm))
         (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)))
       ∘ suspSub (exterior-sub S₁ P T))
-    (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ∘ idSub (suc _)) >s′
+    (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ∘ idSub) >s′
     ≈⟨ sub-from-connect-≈ l3 (reflexive≈s (id-right-unit (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))) ⟩
   < sub-from-connect
     (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
@@ -708,7 +708,7 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ = σ} {�
       < suspTm (branching-path-to-var S₁ P) [ connect-inc-left getSnd _ ]tm [ σ ]tm >tm
         ≈⟨ p ⟩
       < unbiased-comp (tree-dim (suspTree T)) (suspTree T) [ τ ]tm >tm
-        ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim T) T) (susp-functorial-id (suc _))) (refl≃s {σ = τ}) ⟩
+        ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim T) T) susp-functorial-id) (refl≃s {σ = τ}) ⟩
       < suspTm (unbiased-comp (tree-dim T) T) [ τ ]tm >tm
         ≈⟨ restrict-susp-full (unbiased-comp (tree-dim T) T) τ refl≃tm refl≃tm ⟩
       < unbiased-comp (tree-dim T) T
@@ -800,10 +800,10 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) (PShift P) T {σ} {τ} σty τty p 
                      (sub-from-insertion S₂ P T
                        (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
                        τ)
-    ∘ sub-between-connect-susps (idSub _) (exterior-sub S₂ P T) >s′
-    ≈⟨ between-connect-from-connect-≈ (suspSub (idSub _)) (exterior-sub S₂ P T) getSnd (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ) lem ⟩
+    ∘ sub-between-connect-susps idSub (exterior-sub S₂ P T) >s′
+    ≈⟨ between-connect-from-connect-≈ (suspSub idSub) (exterior-sub S₂ P T) getSnd (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ) lem ⟩
   < sub-from-connect
-    (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ∘ suspSub (idSub (suc _)))
+    (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ∘ suspSub idSub)
     (sub-from-insertion S₂ P T
       (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ
     ∘ exterior-sub S₂ P T) >s′
@@ -835,12 +835,12 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) (PShift P) T {σ} {τ} σty τty p 
           open Reasoning (tm-setoid-≈ Γ)
 
     l1 : (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ∘
-            suspSub (idSub (suc _)))
+            suspSub idSub)
       ≃s (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
     l1 = begin
-      < σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ∘ suspSub (idSub (suc _)) >s
-        ≈⟨ sub-action-≃-sub (susp-functorial-id _) refl≃s ⟩
-      < σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ∘ idSub _ >s
+      < σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ∘ suspSub idSub >s
+        ≈⟨ sub-action-≃-sub susp-functorial-id refl≃s ⟩
+      < σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ∘ idSub >s
         ≈⟨ id-right-unit (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) ⟩
       < σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) >s ∎
       where

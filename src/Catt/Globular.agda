@@ -28,6 +28,13 @@ ty-base : Ty n → Ty n
 ty-base ⋆ = ⋆
 ty-base (s ─⟨ A ⟩⟶ t) = A
 
+truncate′ : ℕ → Ty n → Ty n
+truncate′ zero A = A
+truncate′ (suc d) A = truncate′ d (ty-base A)
+
+truncate : ℕ → Ty n → Ty n
+truncate d A = truncate′ (ty-dim A ∸ d) A
+
 -- get-right-base-tm : (A : Ty n d) → .⦃ _ : NonZero′ d ⦄ → Tm n
 -- get-right-base-tm {d = suc zero} A = ty-tgt A
 -- get-right-base-tm {d = suc (suc d)} A = get-right-base-tm (ty-base A)

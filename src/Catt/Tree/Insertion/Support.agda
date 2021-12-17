@@ -178,16 +178,16 @@ exterior-sub-preserve-bd (suc d) (Join S₁ S₂) PHere T b = begin
   TransportVarSet (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
     (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
     ∘ sub-between-connects (unrestrict (sub-from-linear-tree-unbiased S₁ T 1))
-                           (idSub _)
+                           idSub
                            (tree-last-var T))
     ≡⟨ TransportVarSet-comp (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b)) (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))) (sub-between-connects (unrestrict (sub-from-linear-tree-unbiased S₁ T 1))
-                           (idSub _)
+                           idSub
                            (tree-last-var T)) ⟩
   TransportVarSet
     (TransportVarSet
      (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
      (sub-between-connects
-      (unrestrict (sub-from-linear-tree-unbiased S₁ T 1)) (idSub (suc _))
+      (unrestrict (sub-from-linear-tree-unbiased S₁ T 1)) idSub
       (tree-last-var T)))
     (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)))
     ≡⟨ cong (λ - → TransportVarSet - (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))))
@@ -198,12 +198,12 @@ exterior-sub-preserve-bd (suc d) (Join S₁ S₂) PHere T b = begin
     ≡⟨ connect-tree-to-ctx-supp d T S₂ b ⟩
   supp-bd (suc d) (connect-tree T S₂) b ∎
   where
-    l1 : Var (fromℕ _) [ connect-inc-right (tree-last-var T) (tree-size S₂) ∘ idSub _ ]tm
+    l1 : Var (fromℕ _) [ connect-inc-right (tree-last-var T) (tree-size S₂) ∘ idSub ]tm
            ≃tm
          getSnd [ connect-inc-left (tree-last-var T) (tree-size S₂)
                 ∘ sub-from-linear-tree-unbiased (suspTree S₁) T 0 ]tm
     l1 = begin
-      < Var (fromℕ _) [ connect-inc-right (tree-last-var T) (tree-size S₂) ∘ idSub (suc _) ]tm >tm
+      < Var (fromℕ _) [ connect-inc-right (tree-last-var T) (tree-size S₂) ∘ idSub ]tm >tm
         ≈⟨ sub-action-≃-tm (refl≃tm {s = Var (fromℕ _)}) (id-right-unit (connect-inc-right (tree-last-var T) (tree-size S₂))) ⟩
       < Var (fromℕ _) [ connect-inc-right (tree-last-var T) _ ]tm >tm
         ≈˘⟨ connect-inc-fst-var (tree-last-var T) (tree-size S₂) ⟩
@@ -235,19 +235,19 @@ exterior-sub-preserve-bd (suc d) (Join S₁ S₂) PHere T b = begin
     lem : TransportVarSet
      (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
      (sub-between-connects
-      (unrestrict (sub-from-linear-tree-unbiased S₁ T 1)) (idSub (suc _))
+      (unrestrict (sub-from-linear-tree-unbiased S₁ T 1)) idSub
       (tree-last-var T)) ≡ connect-supp (supp-bd (suc d) T b) (supp-bd (suc d) S₂ b)
     lem = begin
       TransportVarSet
         (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
         (sub-between-connects
-         (unrestrict (sub-from-linear-tree-unbiased S₁ T 1)) (idSub (suc _))
+         (unrestrict (sub-from-linear-tree-unbiased S₁ T 1)) idSub
          (tree-last-var T))
-        ≡⟨ sub-between-connect-Transport (unrestrict (sub-from-linear-tree-unbiased S₁ T 1)) (idSub _) (tree-last-var T) (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b) getSnd l1 (suspSuppSndTruth (supp-bd d S₁ b)) l2 ⟩
+        ≡⟨ sub-between-connect-Transport (unrestrict (sub-from-linear-tree-unbiased S₁ T 1)) idSub (tree-last-var T) (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b) getSnd l1 (suspSuppSndTruth (supp-bd d S₁ b)) l2 ⟩
       connect-supp
         (TransportVarSet (suspSupp (supp-bd d S₁ b))
          (unrestrict (sub-from-linear-tree-unbiased S₁ T 1)))
-        (TransportVarSet (supp-bd (suc d) S₂ b) (idSub (suc _)))
+        (TransportVarSet (supp-bd (suc d) S₂ b) idSub)
         ≡⟨ cong₂ connect-supp (sub-from-linear-tree-supp (suc d) (suspTree S₁) b T (sym it)) (TransportVarSet-id (supp-bd (suc d) S₂ b)) ⟩
       connect-supp (supp-bd (suc d) T b) (supp-bd (suc d) S₂ b) ∎
 
@@ -255,11 +255,11 @@ exterior-sub-preserve-bd (suc d) (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p =
   TransportVarSet
       (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
       (sub-between-connect-susps (exterior-sub S₁ P T)
-       (idSub _))
-    ≡⟨ sub-between-connect-susps-Transport (exterior-sub S₁ P T) (idSub _) (supp-bd d S₁ b) (supp-bd (suc d) S₂ b) (id-on-tm (Var (fromℕ _))) ⟩
+       idSub)
+    ≡⟨ sub-between-connect-susps-Transport (exterior-sub S₁ P T) idSub (supp-bd d S₁ b) (supp-bd (suc d) S₂ b) (id-on-tm (Var (fromℕ _))) ⟩
   connect-supp
     (suspSupp (TransportVarSet (supp-bd d S₁ b) (exterior-sub S₁ P T)))
-    (TransportVarSet (supp-bd (suc d) S₂ b) (idSub (suc _)))
+    (TransportVarSet (supp-bd (suc d) S₂ b) idSub)
     ≡⟨ cong₂ (λ a → connect-supp (suspSupp a)) (exterior-sub-preserve-bd d S₁ P T ⦃ p = cong pred p ⦄ b) (TransportVarSet-id (supp-bd (suc d) S₂ b)) ⟩
   connect-supp (suspSupp (supp-bd d (insertion-tree S₁ P T) b))
       (supp-bd (suc d) S₂ b) ∎
@@ -269,10 +269,10 @@ exterior-sub-preserve-bd (suc d) (Join S₁ S₂) (PShift P) T b = begin
   TransportVarSet
       (connect-supp (suspSupp (supp-bd d S₁ b)) (supp-bd (suc d) S₂ b))
       (sub-between-connect-susps
-       (idSub _) (exterior-sub S₂ P T))
-    ≡⟨ sub-between-connect-susps-Transport (idSub _) (exterior-sub S₂ P T) (supp-bd d S₁ b) (supp-bd (suc d) S₂ b) (sym≃tm (exterior-sub-fst-var S₂ P T)) ⟩
+       idSub (exterior-sub S₂ P T))
+    ≡⟨ sub-between-connect-susps-Transport idSub (exterior-sub S₂ P T) (supp-bd d S₁ b) (supp-bd (suc d) S₂ b) (sym≃tm (exterior-sub-fst-var S₂ P T)) ⟩
   connect-supp
-    (suspSupp (TransportVarSet (supp-bd d S₁ b) (idSub (suc _))))
+    (suspSupp (TransportVarSet (supp-bd d S₁ b) idSub))
     (TransportVarSet (supp-bd (suc d) S₂ b) (exterior-sub S₂ P T))
     ≡⟨ cong₂ (λ a → connect-supp (suspSupp a)) (TransportVarSet-id (supp-bd d S₁ b)) (exterior-sub-preserve-bd (suc d) S₂ P T b) ⟩
   connect-supp (suspSupp (supp-bd d S₁ b))

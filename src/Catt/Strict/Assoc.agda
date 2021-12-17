@@ -189,7 +189,7 @@ module _ where
       lem = begin
         < branching-path-to-var (suspTree id-S) (PExt id-P) [ suspSub id-σ ]tm >tm ≡⟨⟩
         < suspTm (branching-path-to-var id-S id-P)
-            [ idSub _ ]tm
+            [ idSub ]tm
             [ suspSub id-σ ]tm >tm
           ≈⟨ sub-action-≃-tm (id-on-tm (suspTm (branching-path-to-var id-S id-P))) refl≃s ⟩
         < suspTm (branching-path-to-var id-S id-P)
@@ -411,7 +411,7 @@ module Support where
         lem = begin
           < branching-path-to-var (suspTree id-S) (PExt id-P) [ suspSub id-σ ]tm >tm ≡⟨⟩
           < suspTm (branching-path-to-var id-S id-P)
-              [ idSub _ ]tm
+              [ idSub ]tm
               [ suspSub id-σ ]tm >tm
             ≈⟨ sub-action-≃-tm (id-on-tm (suspTm (branching-path-to-var id-S id-P))) refl≃s ⟩
           < suspTm (branching-path-to-var id-S id-P)

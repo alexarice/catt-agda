@@ -3,61 +3,86 @@
 module Catt.Pasting where
 
 open import Data.Nat
+open import Data.Nat.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Properties
--- open import Catt.Dimension
-open import Data.Empty
-open import Data.Unit
-open import Catt.Support
--- open import Catt.Dimension
--- open import Catt.Globular
+open import Catt.Globular
 open import Relation.Binary.PropositionalEquality
 open import Catt.Syntax.SyntacticEquality
+open import Relation.Nullary
 
-variable
-  submax submax′ submax″ : ℕ
+data _⊢pd₀ : Ctx (suc n) → Set
 
-data _⊢pd₀_ : Ctx (suc n) → ℕ → Set
+data _⊢pdb_ : (Γ : Ctx (suc n)) → ℕ → Set
 
-data _⊢pd[_][_] : (Γ : Ctx (suc n)) → ℕ → ℕ → Set
-
-getFocusType : Γ ⊢pd[ submax ][ d ] → Ty (ctxLength Γ) d
-getFocusTerm : Γ ⊢pd[ submax ][ d ] → Tm (ctxLength Γ)
+getFocusType : Γ ⊢pdb d → Ty (ctxLength Γ)
+getFocusTerm : Γ ⊢pdb d → Tm (ctxLength Γ)
 
 -- Uniquely extend a pasting context
-extend : {Γ : Ctx (suc n)} → Γ ⊢pd[ submax ][ d ] → Ctx (3 + n)
+extend : {Γ : Ctx (suc n)} → Γ ⊢pdb d → Ctx (3 + n)
 extend {Γ = Γ} pdb = Γ , getFocusType pdb , liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V
 
-data _⊢pd[_][_] where
-  Base : ∅ , ⋆ ⊢pd[ 0 ][ 0 ]
-  Extend : (pdb : Γ ⊢pd[ submax ][ d ])
-         → {A : Ty (suc n) d} → A ≃ty getFocusType pdb
-         → {B : Ty (suc (suc n)) (suc d)} → B ≃ty liftTerm (getFocusTerm pdb) ─⟨ liftType (getFocusType pdb) ⟩⟶ 0V
-         → Γ , A , B ⊢pd[ pred submax ][ suc d ]
-  Restr : Γ ⊢pd[ submax ][ suc d ] →
-          Γ ⊢pd[ suc submax ][ d ]
+data _⊢pdb_ where
+  Base : ∅ , ⋆ ⊢pdb 0
+  Extend : (pdb : Γ ⊢pdb d)
+         → extend pdb ⊢pdb (suc d)
+  Restr : Γ ⊢pdb (suc d) → Γ ⊢pdb d
 
 getFocusType Base = ⋆
-getFocusType {Γ = Γ , A} (Extend pdb p q) = liftType A
+getFocusType {Γ = Γ , A} (Extend pdb) = liftType A
 getFocusType (Restr pdb) = ty-base (getFocusType pdb)
 
 getFocusTerm Base = 0V
-getFocusTerm (Extend pdb p q) = 0V
+getFocusTerm (Extend pdb) = 0V
 getFocusTerm (Restr pdb) = ty-tgt (getFocusType pdb)
 
-data _⊢pd₀_ where
-  Finish : (pdb : Γ ⊢pd[ submax ][ 0 ]) → Γ ⊢pd₀ submax
+data _⊢pd₀ where
+  Finish : (pdb : Γ ⊢pdb 0) → Γ ⊢pd₀
 
-instance
-  nonZeroTT : NonZero′ (submax + suc d)
-  nonZeroTT {zero} = it
-  nonZeroTT {suc submax} = it
+-- instance
+--   nonZeroTT : NonZero′ (submax + suc d)
+--   nonZeroTT {zero} = it
+--   nonZeroTT {suc submax} = it
 
+pdb-bd-dim : (n : ℕ) → (d : ℕ) → ℕ
+pdb-bd-dim n zero = zero
+pdb-bd-dim zero (suc d) = zero
+pdb-bd-dim (suc n) (suc d) = suc (pdb-bd-dim n d)
+
+pdb-bd-len-1 : (n : ℤ) → (pdb : Γ ⊢pdb d) → ℕ
+pdb-bd-ctx : (n : ℤ) → (pdb : Γ ⊢pdb d) → Ctx (suc (pdb-bd-len-1 n pdb))
+pdb-bd-pdb : (n : ℤ) → (pdb : Γ ⊢pdb d) → pdb-bd-ctx n pdb ⊢pdb pdb-bd-dim n d
+
+pdb-bd-len-1 n pdb = ?
+
+pdb-bd-ctx n pdb = ?
+
+pdb-bd-pdb n pdb = {!!}
+
+-- pdb-bd-len-1 n Base = 0
+-- pdb-bd-len-1 n (Extend {m} {d = d} pdb p q) with n ≤? d
+-- ... | yes _ = m
+-- ... | no _ = 2 + m
+-- pdb-bd-len-1 n (Restr pdb) = pdb-bd-len-1 n pdb
+
+-- pdb-bd-ctx n Base = ∅ , ⋆
+-- pdb-bd-ctx n (Extend {Γ = Γ} {d = d} pdb p q) with n ≤? d
+-- ... | yes _ = Γ
+-- ... | no _ = extend pdb
+-- pdb-bd-ctx n (Restr {d = d} pdb) with n ≤? d
+-- ... | yes _ = pdb-bd-ctx n pdb
+-- ... | no _ = {!!}
+
+-- pdb-bd-pdb n Base = Base
+-- pdb-bd-pdb n (Extend {d = d} pdb p q) = {!!}
+-- pdb-bd-pdb n (Restr pdb) = {!!}
+
+{-
 newDim : ℕ → ℕ → ℕ
 newDim zero d = pred d
 newDim (suc submax) d = d
 
-pdb-bd-len-1 : Γ ⊢pd[ submax ][ d ] → .⦃ nz : NonZero′ (submax + d) ⦄ → ℕ
+pdb-bd-len-1 : Γ ⊢pdb d → .⦃ nz : NonZero′ (submax + d) ⦄ → ℕ
 pdb-bd-ctx : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → Ctx (suc (pdb-bd-len-1 pdb))
 pdb-bd-pd : (pdb : Γ ⊢pd[ submax ][ d ]) → .⦃ nz : NonZero′ (submax + d) ⦄ → (pdb-bd-ctx pdb ⊢pd[ pred submax ][ newDim submax d ])
 
@@ -137,3 +162,4 @@ pd-focus-tm (Finish pdb) = getFocusTerm pdb
 
 pd-focus-ty : (pd : Γ ⊢pd₀ d) → Ty (ctxLength Γ) 0
 pd-focus-ty (Finish pdb) = getFocusType pdb
+-}

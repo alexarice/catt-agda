@@ -78,13 +78,13 @@ exterior-sub : (S : Tree n)
 exterior-sub (Join S₁ S₂) PHere T
   = idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
     ∘ sub-between-connects (sub-from-linear-tree-unbiased (suspTree S₁) T 0)
-                           (idSub _)
+                           idSub
                            (tree-last-var T)
 exterior-sub (Join S₁ S₂) (PExt P) (Join T Sing) =
   sub-between-connect-susps (exterior-sub S₁ P T)
-                            (idSub _)
+                            idSub
 exterior-sub (Join S₁ S₂) (PShift P) T =
-  sub-between-connect-susps (idSub _)
+  sub-between-connect-susps idSub
                             (exterior-sub S₂ P T)
 {-
 insertion-var-split : (S : Tree n)

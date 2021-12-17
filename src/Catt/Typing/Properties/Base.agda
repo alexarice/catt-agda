@@ -201,6 +201,12 @@ transport-typing-ty Γty p q with ≃c-preserve-length p
 ... | refl with ≃c-to-≡ p | ≃ty-to-≡ q
 ... | refl | refl = Γty
 
+transport-typing-sub : Typing-Sub Γ Δ σ → Γ ≃c Γ′ → Δ ≃c Δ′ → σ ≃s τ → Typing-Sub Γ′ Δ′ τ
+transport-typing-sub σty p q r with ≃c-preserve-length p | ≃c-preserve-length q
+... | refl | refl with ≃c-to-≡ p | ≃c-to-≡ q | ≃ty-to-≡ (≃s-to-same-ty r)
+... | refl | refl | refl with ≃s-to-≡ r
+... | refl = σty
+
 coh-sub-ty : Typing-Tm Γ (Coh T A τ) B → Typing-Sub (tree-to-ctx T) Γ τ
 coh-sub-ty (TyCoh x τty b x₂ x₃) = τty
 
@@ -217,6 +223,9 @@ var-Ty (TyAdd Γty Aty) (suc i) = TyVarS i (var-Ty Γty i) refl≈ty
 
 isVar-Ty : Typing-Ctx Γ → (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
 isVar-Ty Γty (Var i) = var-Ty Γty i
+
+replaceSub-Ty : {Γ : Ctx (suc n)} → Typing-Sub Γ Δ σ → Typing-Tm Δ t (Γ ‼ zero [ σ ]ty) → Typing-Sub Γ Δ (replaceSub σ t)
+replaceSub-Ty (TyExt {σ = σ} {A = A} σty Aty sty) tty = TyExt σty Aty (term-conversion tty (reflexive≈ty (lift-sub-comp-lem-ty σ A)))
 
 ty-dim-≈ : A ≈[ Γ ]ty B → ty-dim A ≡ ty-dim B
 ty-dim-≈ Star≈ = refl

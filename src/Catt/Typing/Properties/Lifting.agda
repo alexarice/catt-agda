@@ -48,9 +48,9 @@ lift-tm-equality {A = A} (Rule≈ i a tc) = lift-rule i a (lift-tm-typing tc)
 lift-sub-equality (Null≈ x) = Null≈ (lift-ty-equality x)
 lift-sub-equality (Ext≈ eq x) = Ext≈ (lift-sub-equality eq) (lift-tm-equality x)
 
-id-Ty : Typing-Ctx Γ → Typing-Sub Γ Γ (idSub n)
+id-Ty : Typing-Ctx Γ → Typing-Sub Γ Γ idSub
 id-Ty TyEmp = TyNull TyStar
-id-Ty (TyAdd Γty x) = TyExt (lift-sub-typing (id-Ty Γty)) x (TyVarZ x (reflexive≈ty (trans≃ty (sym≃ty (id-on-ty (liftType _))) (lift-sub-comp-lem-ty (liftSub (idSub _)) _))))
+id-Ty (TyAdd Γty x) = TyExt (lift-sub-typing (id-Ty Γty)) x (TyVarZ x (reflexive≈ty (trans≃ty (sym≃ty (id-on-ty (liftType _))) (lift-sub-comp-lem-ty (liftSub idSub) _))))
 
 idSub≃-Ty : (p : Γ ≃c Δ) → Typing-Ctx Γ → Typing-Sub Γ Δ (idSub≃ p)
 idSub≃-Ty Emp≃ Γty = TyNull TyStar

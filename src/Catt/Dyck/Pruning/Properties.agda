@@ -21,10 +21,10 @@ dyck-term-prune : (p : Peak dy) → dyck-term (prune-peak p) ≃tm dyck-term dy 
 dyck-type-prune (⇕pk dy) = begin
   < dyck-type dy >ty
     ≈˘⟨ id-on-ty (dyck-type dy) ⟩
-  < dyck-type dy [ idSub (1 + _) ]ty >ty
-    ≈˘⟨ lift-sub-comp-lem-ty (idSub _) (dyck-type dy) ⟩
-  < liftType (dyck-type dy) [ ⟨ idSub (1 + _) , dyck-term dy ⟩ ]ty >ty
-    ≈˘⟨ lift-sub-comp-lem-ty ⟨ idSub _ , dyck-term dy ⟩ (liftType (dyck-type dy)) ⟩
+  < dyck-type dy [ idSub ]ty >ty
+    ≈˘⟨ lift-sub-comp-lem-ty idSub (dyck-type dy) ⟩
+  < liftType (dyck-type dy) [ ⟨ idSub , dyck-term dy ⟩ ]ty >ty
+    ≈˘⟨ lift-sub-comp-lem-ty ⟨ idSub , dyck-term dy ⟩ (liftType (dyck-type dy)) ⟩
   < dyck-type (⇓ (⇑ dy)) [ prune-project (⇕pk dy) ]ty >ty ∎
   where
     open Reasoning ty-setoid
@@ -64,10 +64,14 @@ dyck-type-prune (⇑pk {dy = dy} p) = Arr≃ l1 l2 refl≃tm
       where
         open Reasoning ty-setoid
 dyck-type-prune (⇓pk {dy = dy} p) = begin
+  < dyck-type (prune-peak (⇓pk p)) >ty
+    ≈˘⟨ ty-base-lift (dyck-pre-type (prune-peak p)) ⟩
   < ty-base (dyck-type (prune-peak p)) >ty
     ≈⟨ ty-base-≃ (dyck-type-prune p) ⟩
   < ty-base (dyck-type dy [ prune-project p ]ty) >ty
     ≈˘⟨ ty-base-sub (dyck-type dy) (prune-project p) ⟩
+  < ty-base (dyck-type dy) [ prune-project p ]ty >ty
+    ≈⟨ sub-action-≃-ty (ty-base-lift (dyck-pre-type dy)) refl≃s ⟩
   < dyck-type (⇓ dy) [ prune-project (⇓pk p) ]ty >ty ∎
   where
     open Reasoning ty-setoid

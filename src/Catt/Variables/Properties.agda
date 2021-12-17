@@ -66,17 +66,17 @@ varToVarFunction-≃ : {σ τ : Sub n m ⋆} → (p : σ ≃s τ) → .⦃ _ : v
 varToVarFunction-≃ p i with ≃s-to-≡ p
 ... | refl = refl
 
-id-is-var-to-var : (n : ℕ) → varToVar (idSub n)
-id-is-var-to-var zero = tt
-id-is-var-to-var (suc n) = liftSub-preserve-var-to-var (idSub n) ⦃ id-is-var-to-var n ⦄ ,, tt
+id-is-var-to-var : varToVar (idSub {n})
+id-is-var-to-var {zero} = tt
+id-is-var-to-var {suc n} = liftSub-preserve-var-to-var idSub ⦃ id-is-var-to-var {n} ⦄ ,, tt
 
 varToVarFunction-lift : (σ : Sub n m ⋆) → .⦃ _ : varToVar σ ⦄ → (i : Fin n) → varToVarFunction (liftSub σ) ⦃ liftSub-preserve-var-to-var σ ⦄ i ≡ suc (varToVarFunction σ i)
 varToVarFunction-lift ⟨ σ , Var j ⟩ zero = refl
 varToVarFunction-lift ⟨ σ , Var j ⟩ ⦃ v ⦄ (suc i) = varToVarFunction-lift σ ⦃ proj₁ v ⦄ i
 
-varToVarFunction-idSub : (n : ℕ) → (i : Fin n) → varToVarFunction (idSub n) ⦃ id-is-var-to-var n ⦄ i ≡ i
-varToVarFunction-idSub (suc n) zero = refl
-varToVarFunction-idSub (suc n) (suc i) = trans (varToVarFunction-lift (idSub n) ⦃ id-is-var-to-var n ⦄ i) (cong suc (varToVarFunction-idSub n i))
+varToVarFunction-idSub : (i : Fin n) → varToVarFunction idSub ⦃ id-is-var-to-var {n} ⦄ i ≡ i
+varToVarFunction-idSub {suc n} zero = refl
+varToVarFunction-idSub {suc n} (suc i) = trans (varToVarFunction-lift idSub ⦃ id-is-var-to-var {n} ⦄ i) (cong suc (varToVarFunction-idSub i))
 
 extend-var-to-var : (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → (t : Tm m) → .⦃ isVar t ⦄ → varToVar ⟨ σ , t ⟩
 extend-var-to-var σ ⦃ v ⦄ (Var i) = v ,, tt
@@ -121,55 +121,3 @@ suspSub-var-to-var ⟨ σ , Var i ⟩ ⦃ v ⦄ = suspSub-var-to-var σ ⦃ proj
 
 suspTm-var : (t : Tm n) → ⦃ isVar t ⦄ → isVar (suspTm t)
 suspTm-var (Var i) = tt
-
-truncate-≤ : (d : ℕ) → (A : Ty n) → d ≤ ty-dim A → truncate d (s ─⟨ A ⟩⟶ t) ≃ty truncate d A
-truncate-≤ d A p
-  rewrite +-∸-assoc 1 p = refl≃ty
-
-suspTy-truncate : (A : Ty n) → truncate 1 (suspTy A) ≃ty getFst {n = n} ─⟨ ⋆ ⟩⟶ getSnd
-suspTy-truncate ⋆ = refl≃ty
-suspTy-truncate (s ─⟨ A ⟩⟶ t) = trans≃ty (truncate-≤ 1 (suspTy A) (≤-trans (s≤s z≤n) (≤-reflexive (sym (susp-dim A))))) (suspTy-truncate A)
--- suspTy-sub-truncate : (A : Ty n) → (σ : Sub (2 + n) m B) → truncate (suc (ty-dim B)) (suspTy A [ σ ]ty) ≃ty (getFst [ σ ]tm) ─⟨ B ⟩⟶ (getSnd [ σ ]tm)
--- suspTy-sub-truncate {B = B} ⋆ σ
---   rewrite n∸n≡0 (ty-dim B) = refl≃ty
--- suspTy-sub-truncate {B = B} (s ─⟨ A ⟩⟶ t) σ = trans≃ty (truncate-≤ {s = suspTm s [ σ ]tm} {t = suspTm t [ σ ]tm} (suc (ty-dim B)) (suspTy A [ σ ]ty) (≤-trans (s≤s (m≤n+m (ty-dim B) (ty-dim A))) (≤-reflexive (trans (cong (_+ ty-dim B) (sym (susp-dim A))) (sub-dim′ σ (suspTy A)))))) (suspTy-sub-truncate A σ)
-
-truncate′-≃ : d ≡ d′ → A ≃ty A′ → truncate′ d A ≃ty truncate′ d′ A′
-truncate′-≃ {d = zero} refl p = p
-truncate′-≃ {d = suc d} refl (Star≃ x) = Star≃ x
-truncate′-≃ {d = suc d} refl (Arr≃ x p x₁) = truncate′-≃ {d = d} refl p
-
-truncate-≃ : d ≡ d′ → A ≃ty A′ → truncate d A ≃ty truncate d′ A′
-truncate-≃ {d} {d′} {A = A} {A′ = A′} refl p = truncate′-≃ {d = ty-dim A ∸ d} {d′ = ty-dim A′ ∸ d} (cong (_∸ d) (≃ty-preserve-height p)) p
-
-truncate′-sub : (d : ℕ) → (A : Ty n) → (σ : Sub n m B) → d ≤ ty-dim A → truncate′ d (A [ σ ]ty) ≃ty truncate′ d A [ σ ]ty
-truncate′-sub zero A σ p = refl≃ty
-truncate′-sub (suc d) (s ─⟨ A ⟩⟶ t) σ p = truncate′-sub d A σ (≤-pred p)
-
-truncate-sub : (d : ℕ) → (A : Ty n) → (σ : Sub n m B) → truncate (d + ty-dim B) (A [ σ ]ty) ≃ty truncate d A [ σ ]ty
-truncate-sub {B = B} d A σ = begin
-  < truncate (d + ty-dim B) (A [ σ ]ty) >ty ≡⟨⟩
-  < truncate′ (ty-dim (A [ σ ]ty) ∸ (d + ty-dim B)) (A [ σ ]ty) >ty
-    ≈⟨ truncate′-≃ lem refl≃ty ⟩
-  < truncate′ (ty-dim A ∸ d) (A [ σ ]ty) >ty
-    ≈⟨ truncate′-sub (ty-dim A ∸ d) A σ (m∸n≤m (ty-dim A) d) ⟩
-  < truncate′ (ty-dim A ∸ d) A [ σ ]ty >ty ≡⟨⟩
-  < truncate d A [ σ ]ty >ty ∎
-  where
-    lem : ty-dim (A [ σ ]ty) ∸ (d + ty-dim B) ≡ ty-dim A ∸ d
-    lem = begin
-      ty-dim (A [ σ ]ty) ∸ (d + ty-dim B)
-        ≡˘⟨ cong₂ _∸_ (sub-dim′ σ A) (+-comm (ty-dim B) d) ⟩
-      ty-dim A + ty-dim B ∸ (ty-dim B + d)
-        ≡˘⟨ ∸-+-assoc (ty-dim A + ty-dim B) (ty-dim B) d ⟩
-      ty-dim A + ty-dim B ∸ ty-dim B ∸ d
-        ≡⟨ cong (_∸ d) (+-∸-assoc (ty-dim A) {n = ty-dim B} ≤-refl) ⟩
-      ty-dim A + (ty-dim B ∸ ty-dim B) ∸ d
-        ≡⟨ cong (λ - → ty-dim A + - ∸ d) (n∸n≡0 (ty-dim B)) ⟩
-      ty-dim A + 0 ∸ d
-        ≡⟨ cong (_∸ d) (+-identityʳ (ty-dim A)) ⟩
-      ty-dim A ∸ d ∎
-      where
-        open ≡-Reasoning
-
-    open Reasoning ty-setoid

@@ -159,7 +159,7 @@ identity-Ty {t = t} {A = A} tty Aty
            [ sub-from-linear-tree (n-disk (ty-dim A)) t A _ ]tm >tm
           ≈⟨ sub-action-≃-tm (sub-action-≃-tm (unbiased-term-≃ refl (tree-bd-full (ty-dim A) (n-disk (ty-dim A)) (≤-reflexive (tree-dim-n-disk (ty-dim A))))) (tree-inc-full (ty-dim A) (n-disk (ty-dim A)) b (≤-reflexive (tree-dim-n-disk (ty-dim A))))) refl≃s ⟩
         < unbiased-term (ty-dim A) (n-disk (ty-dim A))
-          [ idSub (suc (tree-size (n-disk (ty-dim A)))) ]tm
+          [ idSub ]tm
           [ sub-from-linear-tree (n-disk (ty-dim A)) t A (sym (tree-dim-n-disk (ty-dim A))) ]tm >tm
           ≈⟨ sub-action-≃-tm (id-on-tm (unbiased-term (ty-dim A) (n-disk (ty-dim A)))) refl≃s ⟩
         < unbiased-term (ty-dim A) (n-disk (ty-dim A))

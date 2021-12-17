@@ -272,7 +272,7 @@ unbiased-type-susp-lem (suc d) T = Arr≃ (l1 false) (unbiased-type-susp-lem d T
       where
         open Reasoning tm-setoid
 
-unbiased-comp-susp-lem d T = Coh≃ refl≃ (unbiased-type-susp-lem d T) (susp-functorial-id _)
+unbiased-comp-susp-lem d T = Coh≃ refl≃ (unbiased-type-susp-lem d T) susp-functorial-id
 
 linear-tree-unbiased-lem : (d : ℕ) → (T : Tree n) → .⦃ is-linear T ⦄ → .(tree-dim T ≡ d) → tree-to-ctx T ‼ zero ≃ty unbiased-type d T
 linear-tree-unbiased-lem zero Sing p = Star≃ refl

@@ -4,6 +4,7 @@ module Catt.Dyck where
 
 open import Catt.Syntax
 open import Data.Nat
+open import Data.Integer using (ℤ;+_;-[1+_])
 open import Catt.Globular
 open import Data.Bool
 open import Data.Fin using (Fin; zero; suc)
@@ -59,27 +60,33 @@ trim : Dyck (suc n) (suc d) → Dyck n d
 trim (⇑ dy) = dy
 trim (⇓ dy) = ⇓ (trim dy)
 
-dyck-bd-len : (n : ℕ) → (dy : Dyck m d) → ℕ
-dyck-bd : (n : ℕ) → (dy : Dyck m d) → Dyck (dyck-bd-len n dy) d
+-- dyck-bd-len : (n : ℕ) → (dy : Dyck m d) → ℕ
+-- dyck-bd : (n : ℕ) → (dy : Dyck m d) → Dyck (dyck-bd-len n dy) d
 
-dyck-bd-len {m = zero} n dy = 0
-dyck-bd-len {m = suc m} n (⇑ dy) = suc (dyck-bd-len (suc n) dy)
-dyck-bd-len {m = suc m} zero (⇓ dy) = dyck-bd-len zero (trim dy)
-dyck-bd-len {m = suc m} (suc n) (⇓ dy) = dyck-bd-len n dy
+-- dyck-bd-len n dy = {!!}
 
-dyck-bd {m = zero} n dy = dy
-dyck-bd {m = suc m} n (⇑ dy) = ⇑ (dyck-bd (suc n) dy)
-dyck-bd {m = suc m} zero (⇓ dy) = dyck-bd zero (trim dy)
-dyck-bd {m = suc m} (suc n) (⇓ dy) = ⇓ (dyck-bd n dy)
+-- dyck-bd n End = End
+-- dyck-bd n (⇑ dy) = {!!}
+-- dyck-bd n (⇓ dy) = {!!}
 
-dyck-inc : (n : ℕ) → (dy : Dyck m d) → (b : Bool) → Sub (suc (dyck-bd-len n dy * 2)) (suc (m * 2)) ⋆
-dyck-inc {m = zero} n dy b = idSub
-dyck-inc {m = suc m} n (⇑ dy) b = ⟨ ⟨ (liftSub (liftSub (dyck-inc (suc n) dy b))) , 1V ⟩ , 0V ⟩
-dyck-inc {m = suc m} zero (⇓ dy) false = liftSub (liftSub (dyck-inc zero (trim dy) false))
-dyck-inc {m = suc m} zero (⇓ dy) true = replaceSub (liftSub (liftSub (dyck-inc zero (trim dy) true))) 1V
-dyck-inc {m = suc m} (suc n) (⇓ dy) b = dyck-inc n dy b
+-- dyck-bd-len {m = zero} n dy = 0
+-- dyck-bd-len {m = suc m} n (⇑ dy) = suc (dyck-bd-len (suc n) dy)
+-- dyck-bd-len {m = suc m} zero (⇓ dy) = dyck-bd-len zero (trim dy)
+-- dyck-bd-len {m = suc m} (suc n) (⇓ dy) = dyck-bd-len n dy
 
---
+-- dyck-bd {m = zero} n dy = dy
+-- dyck-bd {m = suc m} n (⇑ dy) = ⇑ (dyck-bd (suc n) dy)
+-- dyck-bd {m = suc m} zero (⇓ dy) = dyck-bd zero (trim dy)
+-- dyck-bd {m = suc m} (suc n) (⇓ dy) = ⇓ (dyck-bd n dy)
+
+-- dyck-inc : (n : ℕ) → (dy : Dyck m d) → (b : Bool) → Sub (suc (dyck-bd-len n dy * 2)) (suc (m * 2)) ⋆
+-- dyck-inc {m = zero} n dy b = idSub
+-- dyck-inc {m = suc m} n (⇑ dy) b = ⟨ ⟨ (liftSub (liftSub (dyck-inc (suc n) dy b))) , 1V ⟩ , 0V ⟩
+-- dyck-inc {m = suc m} zero (⇓ dy) false = liftSub (liftSub (dyck-inc zero (trim dy) false))
+-- dyck-inc {m = suc m} zero (⇓ dy) true = replaceSub (liftSub (liftSub (dyck-inc zero (trim dy) true))) 1V
+-- dyck-inc {m = suc m} (suc n) (⇓ dy) b = dyck-inc n dy b
+
+-- --
 
 dyck-bd-len-1 : (n : ℕ) → (dy : Dyck m d) → ℕ
 dyck-bd-len-2 : (n : ℕ) → (dy : Dyck m (n + d)) → ℕ

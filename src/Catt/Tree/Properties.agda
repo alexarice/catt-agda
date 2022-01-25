@@ -11,8 +11,6 @@ open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Tree
 import Relation.Binary.Reasoning.Setoid as Reasoning
-open import Catt.Variables
-open import Catt.Variables.Properties
 open import Data.Unit using (⊤; tt)
 open import Data.Empty
 open import Data.Nat
@@ -24,10 +22,13 @@ open import Relation.Nullary
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Data.Product renaming (_,_ to _,,_)
+open import Catt.Variables
+open import Catt.Variables.Properties
 
 join-tree-has-non-zero-dim : (S : Tree n) → (T : Tree m) → ¬ (zero ≡ tree-dim (Join S T))
-join-tree-has-non-zero-dim S T p with ≤-trans (m≤m⊔n (suc (tree-dim S)) (tree-dim T)) (≤-reflexive (sym p))
-... | ()
+join-tree-has-non-zero-dim S T ()
+-- join-tree-has-non-zero-dim S T p with ≤-trans (m≤m⊔n (suc (tree-dim S)) (tree-dim T)) (≤-reflexive (sym p))
+-- ... | ()
 
 connect-tree-≃ : S ≃ S′ → T ≃ T′ → connect-tree S T ≃ connect-tree S′ T′
 connect-tree-≃ Sing≃ q = q
@@ -83,7 +84,7 @@ tree-inc-preserve-last-var d (Join S T) b = begin
   < tree-last-var T [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm >tm ∎
   where
     open Reasoning tm-setoid
-
+{-
 tree-bd-glob : (d₁ d₂ : ℕ) → (T : Tree n) → d₁ < d₂ → tree-bd d₁ (tree-bd d₂ T) ≃ tree-bd d₁ T
 tree-bd-glob zero d₂ T p = Sing≃
 tree-bd-glob (suc d₁) (suc d₂) Sing p = Sing≃
@@ -281,3 +282,4 @@ tree-dim-≃ : S ≃ T → tree-dim S ≡ tree-dim T
 tree-dim-≃ p with ≃-to-same-n p
 ... | refl with ≃-to-≡ p
 ... | refl = refl
+-}

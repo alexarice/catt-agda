@@ -7,8 +7,6 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Connection
 open import Catt.Suspension
 open import Catt.Suspension.Properties
-open import Catt.Variables
-open import Catt.Variables.Properties
 open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Fin using (Fin; zero; suc; fromℕ; toℕ)
@@ -22,6 +20,8 @@ open import Data.Unit using (⊤; tt)
 open import Data.Bool using (Bool; true; false) renaming (T to Truth)
 -- open import Data.Bool.Properties using (T?)
 open import Relation.Nullary
+open import Catt.Variables
+open import Catt.Variables.Properties
 
 connect-≃ : Γ ≃c Γ′ → t ≃tm t′ → Δ ≃c Δ′ → connect Γ t Δ ≃c connect Γ′ t′ Δ′
 connect-inc-right-≃ : {t : Tm (suc n)} → {t′ : Tm (suc n′)} → n ≡ n′ → t ≃tm t′ → m ≡ m′ → connect-inc-right t m ≃s connect-inc-right t′ m′
@@ -271,21 +271,21 @@ sub-between-connect-susps-comp : (σ : Sub (suc n) (suc l) ⋆)
                                ≃s sub-between-connect-susps (σ′ ∘ σ) (τ′ ∘ τ)
 sub-between-connect-susps-comp σ τ σ′ τ′ p = trans≃s (sub-between-connects-comp (suspSub σ) τ getSnd (suspSub σ′) getSnd τ′ (sym≃tm (susp-sub-preserve-getSnd σ′)) p) (sub-between-connects-≃ (suspSub σ′ ∘ suspSub σ) (suspSub (σ′ ∘ σ)) (τ′ ∘ τ) getSnd (τ′ ∘ τ) getSnd refl refl (sym≃s (susp-functorial σ′ σ)) refl≃s refl≃tm)
 
-connect-var-split-compat : (t : Tm (suc n)) → (m : ℕ) → VarSplitCompat (connect-inc-left t m) (connect-inc-right t m) (connect-var-split n m)
-connect-var-split-compat t zero i = id-on-tm (Var i)
-connect-var-split-compat t (suc m) zero = refl≃tm
-connect-var-split-compat {n = n} t (suc m) (suc i) with connect-var-split n m i | connect-var-split-compat t m i
-... | inj₁ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left t m)) (lift-tm-≃ p)
-... | inj₂ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right t m)) (lift-tm-≃ p)
+-- connect-var-split-compat : (t : Tm (suc n)) → (m : ℕ) → VarSplitCompat (connect-inc-left t m) (connect-inc-right t m) (connect-var-split n m)
+-- connect-var-split-compat t zero i = id-on-tm (Var i)
+-- connect-var-split-compat t (suc m) zero = refl≃tm
+-- connect-var-split-compat {n = n} t (suc m) (suc i) with connect-var-split n m i | connect-var-split-compat t m i
+-- ... | inj₁ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left t m)) (lift-tm-≃ p)
+-- ... | inj₂ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right t m)) (lift-tm-≃ p)
 
-connect-var-split-right-compat : (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → (m : ℕ) → VarSplitCompat (connect-inc-left t m) (connect-inc-right t m) (connect-var-split-right t m)
-connect-var-split-right-compat t zero i with toℕ (getVarFin t) ≟ toℕ i
-... | no p = id-on-tm (Var i)
-... | yes eq = trans≃tm (getVarFinProp t) (Var≃ refl eq)
-connect-var-split-right-compat t (suc m) zero = refl≃tm
-connect-var-split-right-compat t (suc m) (suc i) with connect-var-split-right t m i | connect-var-split-right-compat t m i
-... | inj₁ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left t m)) (lift-tm-≃ p)
-... | inj₂ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right t m)) (lift-tm-≃ p)
+-- connect-var-split-right-compat : (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → (m : ℕ) → VarSplitCompat (connect-inc-left t m) (connect-inc-right t m) (connect-var-split-right t m)
+-- connect-var-split-right-compat t zero i with toℕ (getVarFin t) ≟ toℕ i
+-- ... | no p = id-on-tm (Var i)
+-- ... | yes eq = trans≃tm (getVarFinProp t) (Var≃ refl eq)
+-- connect-var-split-right-compat t (suc m) zero = refl≃tm
+-- connect-var-split-right-compat t (suc m) (suc i) with connect-var-split-right t m i | connect-var-split-right-compat t m i
+-- ... | inj₁ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left t m)) (lift-tm-≃ p)
+-- ... | inj₂ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right t m)) (lift-tm-≃ p)
 
 -- connect-var-split-full : (t : Tm (suc n)) → (m : ℕ) → VarSplitFull₁ (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄ (connect-var-split n m)
 -- connect-var-split-full t zero i = cong inj₁ (varToVarFunction-idSub (suc _) i)

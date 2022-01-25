@@ -11,46 +11,101 @@ open import Relation.Binary.PropositionalEquality
 open import Catt.Syntax.SyntacticEquality
 open import Relation.Nullary
 open import Relation.Binary.Definitions
+open import Data.Empty
+open import Data.Unit
+open import Data.Bool
 
-data _⊢pd₀ : Ctx (suc n) → Set
+data _⊢pdb : (Γ : Ctx n) → Set
 
-data _⊢pdb_∶_ : (Γ : Ctx (suc n)) → (x : Tm (suc n)) → (A : Ty (suc n)) → Set
+focus-ty : {Γ : Ctx n} → Γ ⊢pdb → Ty n
+focus-tm : {Γ : Ctx n} → Γ ⊢pdb → Tm n
 
--- Uniquely extend a pasting context
-extend : {Γ : Ctx (suc n)} → Γ ⊢pdb t ∶ A → Ctx (3 + n)
-extend {t = t} {A = A} {Γ = Γ} pdb = Γ , A , liftTerm t ─⟨ liftType A ⟩⟶ 0V
+data _⊢pdb where
+  Base : ∅ , ⋆ ⊢pdb
+  Extend : (pdb : Γ ⊢pdb)
+         → (p : A ≃ty focus-ty pdb)
+         → (q : B ≃ty liftTerm (focus-tm pdb) ─⟨ liftType (focus-ty pdb) ⟩⟶ 0V)
+         → Γ , A , B ⊢pdb
+  Restr : (pdb : Γ ⊢pdb) → .⦃ NonZero′ (ty-dim (focus-ty pdb)) ⦄ → Γ ⊢pdb
 
-data _⊢pdb_∶_ where
-  Base : ∅ , ⋆ ⊢pdb 0V ∶ ⋆
-  Extend : (pdb : Γ ⊢pdb t ∶ A)
-         → extend pdb ⊢pdb 0V ∶ liftType (liftTerm t ─⟨ liftType A ⟩⟶ 0V)
-  Restr : Γ ⊢pdb t ∶ A → Γ ⊢pdb (ty-tgt A) ∶ ty-base A
+focus-ty Base = ⋆
+focus-ty (Extend {B = B} pdb p q) = liftType B
+focus-ty (Restr pdb) = ty-base (focus-ty pdb)
 
-data _⊢pd₀ where
-  Finish : (pdb : Γ ⊢pdb t ∶ ⋆) → Γ ⊢pd₀
+focus-tm Base = 0V
+focus-tm (Extend pdb p q) = 0V
+focus-tm (Restr pdb) = ty-tgt′ (focus-ty pdb)
+
+data _⊢pd : (Ctx n) → Set where
+  Finish : (pdb : Γ ⊢pdb) → .⦃ IsZero (ty-dim (focus-ty pdb)) ⦄ → Γ ⊢pd
+
+pd-to-pdb : {Γ : Ctx n} → Γ ⊢pd → Γ ⊢pdb
+pd-to-pdb (Finish pdb) = pdb
+
+pd-focus-ty : {Γ : Ctx n} → Γ ⊢pd → Ty n
+pd-focus-ty pd = focus-ty (pd-to-pdb pd)
+
+pd-focus-tm : {Γ : Ctx n} → Γ ⊢pd → Tm n
+pd-focus-tm pd = focus-tm (pd-to-pdb pd)
+
+pd-to-pdb-0-d : (pd : Γ ⊢pd) → IsZero (ty-dim (focus-ty (pd-to-pdb pd)))
+pd-to-pdb-0-d (Finish pdb) with ty-dim (focus-ty pdb)
+... | zero = it
+
+pd-to-pdb-focus-tm : (pd : Γ ⊢pd) → focus-tm (pd-to-pdb pd) ≃tm pd-focus-tm pd
+pd-to-pdb-focus-tm (Finish pdb) = refl≃tm
+
+Odd Even : ℕ → Set
+Odd zero = ⊥
+Odd (suc n) = Even n
+Even zero = ⊤
+Even (suc n) = Odd n
+
+pdb-odd-length : {Γ : Ctx m} → Γ ⊢pdb → Odd m
+pdb-odd-length Base = tt
+pdb-odd-length (Extend pdb p q) = pdb-odd-length pdb
+pdb-odd-length (Restr pdb) = pdb-odd-length pdb
 
 -- instance
 --   nonZeroTT : NonZero′ (submax + suc d)
 --   nonZeroTT {zero} = it
 --   nonZeroTT {suc submax} = it
 
-open Tri
+pdb-prefix : Γ , A , B ⊢pdb → Γ ⊢pdb
+pdb-prefix (Extend pdb p q) = pdb
+pdb-prefix (Restr pdb) = pdb-prefix pdb
 
-pdb-bd-len-1 : (n : ℕ) → (pdb : Γ ⊢pdb t ∶ A) → ℕ
-pdb-bd-ctx : (n : ℕ) → (pdb : Γ ⊢pdb t ∶ A) → Ctx (suc (pdb-bd-len-1 n pdb))
--- pdb-bd-pdb : (n : ℕ) → (pdb : Γ ⊢pdb t ∶ A)
+right-base : Ty n → Tm n → Tm n
+right-base ⋆ u = u
+right-base (s ─⟨ A ⟩⟶ t) u = right-base A t
 
-pdb-bd-len-1 n pdb = {!!}
+pdb-right-base : {Γ : Ctx n} → Γ ⊢pdb → Tm n
+pdb-right-base pdb = right-base (focus-ty pdb) (focus-tm pdb)
 
-pdb-bd-ctx n Base = ∅ , ⋆
-pdb-bd-ctx n (Extend {Γ = Γ} {A = A} pdb) with <-cmp (suc n) (ty-dim A)
-... | tri< a ¬b ¬c = ?
-... | tri≈ ¬a b ¬c = ?
-... | tri> ¬a ¬b c = ?
-pdb-bd-ctx n (Restr pdb) = {!!}
+
+
+-- pdb-bd-len : (n : ℕ) → (Γ : Ctx m) → (pdb : Γ ⊢pdb) → ℕ
+-- pdb-bd-ctx : (n : ℕ) → (Γ : Ctx m) → (pdb : Γ ⊢pdb) → Ctx (pdb-bd-len n Γ pdb)
+
+-- pdb-non-zero : {Γ : Ctx n} → Γ ⊢pdb → NonZero′ n
+-- pdb-non-zero Base = it
+-- pdb-non-zero (Extend pdb p q) = it
+-- pdb-non-zero (Restr pdb) = pdb-non-zero pdb
+-- -- pdb-prefix : Γ , A , B ⊢pdb t ∶ A
+
+-- pdb-bd-len n Γ pdb = {!!}
+
+-- pdb-bd-ctx n ∅ pdb = ⊥-elim (NonZero′.nonZero (pdb-non-zero pdb))
+-- pdb-bd-ctx n (∅ , A) pdb = ∅ , A
+-- pdb-bd-ctx n (Γ , B , A) pdb = tri-cases (<-cmp n (ty-dim A)) new-bd new-bd (new-bd , {!!} , {!!})
+--   where
+--     new-bd : Ctx (pdb-bd-len n Γ {!!})
+--     new-bd = pdb-bd-ctx n Γ {!!}
+
 -- pdb-bd-pdb n Base = Base
 -- pdb-bd-pdb n (Extend {d = d} pdb p q) = {!!}
--- pdb-bd-pdb n (Restr pdb) = {!!}
+-- pdb-bd-pdb n (Restr pdb) =
+
 
 {-
 newDim : ℕ → ℕ → ℕ

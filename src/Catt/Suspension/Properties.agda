@@ -11,14 +11,14 @@ open import Data.Fin using (Fin;zero;suc;inject₁;toℕ;fromℕ;lower₁)
 open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁;inject₁-injective)
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as Reasoning
-open import Catt.Variables
-open import Catt.Variables.Properties
 open import Relation.Nullary
 open import Data.Sum
 open import Data.Product renaming (_,_ to _,,_)
 open import Data.Empty
 open import Data.Unit
 open import Catt.Globular
+open import Catt.Globular.Properties
+open import Catt.Variables
 
 -- susp-src-compat : (A : Ty n (suc d)) → suspTm (ty-src A) ≃tm ty-src (suspTy A)
 -- susp-src-compat (s ─⟨ A ⟩⟶ t) = refl≃tm
@@ -218,3 +218,9 @@ tm-to-ty-susp : (t : Tm n) → (Γ : Ctx n) → suspTy (tm-to-ty Γ t) ≃ty tm-
 tm-to-ty-susp (Var zero) (Γ , A) = susp-ty-lift A
 tm-to-ty-susp (Var (suc i)) (Γ , A) = trans≃ty (susp-ty-lift (Γ ‼ i)) (lift-ty-≃ (tm-to-ty-susp (Var i) Γ))
 tm-to-ty-susp (Coh S A σ) Γ = susp-functorial-ty σ A
+
+ty-base-susp : (A : Ty n) → .⦃ NonZero′ (ty-dim A) ⦄ → ty-base (suspTy A) ≃ty suspTy (ty-base A)
+ty-base-susp (s ─⟨ A ⟩⟶ t) = refl≃ty
+
+ty-tgt′-susp : (A : Ty n) → .⦃ _ : NonZero′ (ty-dim A) ⦄ → ty-tgt′ (suspTy A) ⦃ NonZero′-subst (sym (susp-dim A)) it ⦄ ≃tm suspTm (ty-tgt′ A)
+ty-tgt′-susp (s ─⟨ A ⟩⟶ t) = refl≃tm

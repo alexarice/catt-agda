@@ -109,8 +109,6 @@ suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {T} (nz ,, sc1 ,, sc2) = it ,
   where
     instance _ = nz
     open ≡-Reasoning
-    suc-pred : (n : ℕ) → .⦃ NonZero′ n ⦄ → suc (pred n) ≡ n
-    suc-pred (suc n) = refl
 
     l1 : FVTy (suspTy A) ∪ FVTm (suspTm s) ≡ supp-bd (tree-dim T) (suspTree T) false
     l1 = begin

@@ -7,11 +7,13 @@ open import Catt.Support
 open import Catt.Variables
 open import Relation.Binary
 open import Data.Nat
-open import Data.Bool renaming (T to Truth)
-open import Data.Bool.Properties
-open import Data.Vec
+open import Data.Nat.Properties
+open import Data.Bool using (true;false;Bool) renaming (T to Truth)
+import Data.Bool.Properties as B
+open import Data.Vec hiding (drop)
 open import Relation.Binary.PropositionalEquality
-open import Data.Fin using (Fin; zero; suc)
+open import Data.Fin using (Fin; zero; suc; fromℕ) renaming (_≟_ to _f≟_)
+open import Data.Fin.Properties using (toℕ-injective)
 open import Tactic.MonoidSolver
 open import Data.Product renaming (_,_ to _,,_)
 open import Algebra.Bundles
@@ -20,14 +22,42 @@ open import Catt.Suspension
 import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise)
 open import Data.Sum
-open import Data.Unit using (tt)
+open import Data.Unit using (⊤;tt)
 open import Catt.Globular
+open import Catt.Pasting
+open import Catt.Pasting.Properties
+open import Catt.Connection
+open import Catt.Connection.Pasting
+open import Catt.Suspension
+open import Catt.Suspension.Pasting
+open import Data.Empty
+open import Catt.Globular
+open import Catt.Globular.Properties
+open import Catt.Tree
+open import Catt.Tree.Pasting
+open import Catt.Variables
+open import Catt.Variables.Properties
+open import Relation.Nullary
 
 open import Algebra.Definitions
 
+FVTm-≃ : s ≃tm t → FVTm s ≡ FVTm t
+FVTy-≃ : A ≃ty B → FVTy A ≡ FVTy B
+FVSub-≃ : σ ≃s τ → FVSub σ ≡ FVSub τ
+
+FVTm-≃ (Var≃ x y) with toℕ-injective y
+... | refl = refl
+FVTm-≃ (Coh≃ x y z) = FVSub-≃ z
+
+FVTy-≃ (Star≃ x) = refl
+FVTy-≃ (Arr≃ p q r) = cong₂ _∪_ (cong₂ _∪_ (FVTy-≃ q) (FVTm-≃ p)) (FVTm-≃ r)
+
+FVSub-≃ (Null≃ x) = FVTy-≃ x
+FVSub-≃ (Ext≃ p x) = cong₂ _∪_ (FVSub-≃ p) (FVTm-≃ x)
+
 ∪-assoc : Associative _≡_ (_∪_ {n})
 ∪-assoc emp emp emp = refl
-∪-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) = cong₂ _∷_ (∨-assoc x y z) (∪-assoc xs ys zs)
+∪-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) = cong₂ _∷_ (B.∨-assoc x y z) (∪-assoc xs ys zs)
 
 ∪-left-unit : LeftIdentity _≡_ empty (_∪_ {n})
 ∪-left-unit emp = refl
@@ -35,15 +65,15 @@ open import Algebra.Definitions
 
 ∪-right-unit : RightIdentity _≡_ empty (_∪_ {n})
 ∪-right-unit emp = refl
-∪-right-unit (x ∷ xs) = cong₂ _∷_ (∨-identityʳ x) (∪-right-unit xs)
+∪-right-unit (x ∷ xs) = cong₂ _∷_ (B.∨-identityʳ x) (∪-right-unit xs)
 
 ∪-comm : Commutative _≡_ (_∪_ {n})
 ∪-comm emp emp = refl
-∪-comm (x ∷ xs) (y ∷ ys) = cong₂ _∷_ (∨-comm x y) (∪-comm xs ys)
+∪-comm (x ∷ xs) (y ∷ ys) = cong₂ _∷_ (B.∨-comm x y) (∪-comm xs ys)
 
 ∪-idem : Idempotent _≡_ (_∪_ {n})
 ∪-idem emp = refl
-∪-idem (x ∷ xs) = cong₂ _∷_ (∨-idem x) (∪-idem xs)
+∪-idem (x ∷ xs) = cong₂ _∷_ (B.∨-idem x) (∪-idem xs)
 
 ∪-left-zero : (xs : VarSet n) → full ∪ xs ≡ full
 ∪-left-zero emp = refl
@@ -51,7 +81,7 @@ open import Algebra.Definitions
 
 ∪-right-zero : (xs : VarSet n) → xs ∪ full ≡ full
 ∪-right-zero emp = refl
-∪-right-zero (x ∷ xs) = cong₂ _∷_ (∨-zeroʳ x) (∪-right-zero xs)
+∪-right-zero (x ∷ xs) = cong₂ _∷_ (B.∨-zeroʳ x) (∪-right-zero xs)
 
 FVTm-on-var : (t : Tm n) → .⦃ _ : isVar t ⦄ → FVTm t ≡ trueAt (getVarFin t)
 FVTm-on-var (Var i) = refl
@@ -228,6 +258,9 @@ Poset.isPartialOrder (⊆-poset n) = ⊆-partial-order n
 ⊆-top : (xs : VarSet n) → xs ⊆ full
 ⊆-top xs = sym (∪-left-zero xs)
 
+⊆-bot : (xs : VarSet n) → empty ⊆ xs
+⊆-bot xs = sym (∪-right-unit xs)
+
 ⊆-TransportVarSet : (σ : Sub n m ⋆) → {xs ys : VarSet n} → xs ⊆ ys → TransportVarSet xs σ ⊆ TransportVarSet ys σ
 ⊆-TransportVarSet σ {xs} {ys} p = begin
   TransportVarSet ys σ
@@ -388,12 +421,15 @@ module _ where
 ⊆-cong-∪-1 : {xs ys zs : VarSet n} → ys ⊆ zs → xs ∪ ys ⊆ xs ∪ zs
 ⊆-cong-∪-1 p = ∪-⊆ (∪-⊆-1 _ _) (⊆-trans p (∪-⊆-2 _ _))
 
+build-⊆-1 : (x : Bool) → {xs ys : VarSet n} → xs ⊆ ys → ewf xs ⊆ (x ∷ ys)
+build-⊆-1 x p = cong₂ _∷_ (sym (B.∨-identityʳ x)) p
 
-FVSub-≃ : σ ≃s τ → FVSub σ ≡ FVSub τ
-FVSub-≃ (Null≃ x) with ≃ty-to-≡ x
-... | refl = refl
-FVSub-≃ (Ext≃ p x) with ≃tm-to-≡ x
-... | refl = cong₂ _∪_ (FVSub-≃ p) refl
+build-⊆-2 : (x : Bool) → {xs ys : VarSet n} → xs ⊆ ys → (x ∷ xs) ⊆ ewt ys
+build-⊆-2 x p = cong ewt p
+
+debuild-⊆-2 : {x y : Bool} → {xs ys : VarSet n} → (x ∷ xs) ⊆ (y ∷ ys) → xs ⊆ ys
+debuild-⊆-2 p = cong tail p
+
 
 FVTy-comp-⊆ : (A : Ty n) → (σ : Sub n m B) → FVTy (A [ σ ]ty) ⊆ FVSub σ
 FVTm-comp-⊆ : (t : Tm n) → (σ : Sub n m A) → FVTm (t [ σ ]tm) ⊆ FVSub σ
@@ -454,3 +490,220 @@ SuppContainsType (Coh S A σ) Γ = trans (cong (DC Γ) (FVTy-comp-⊆ A σ)) (DC
 
 full-⊆ : {xs : VarSet n} → full ⊆ xs → xs ≡ full
 full-⊆ p = trans p (∪-right-zero _)
+
+subctx-inc-ty : (A : Ty n) → (σ : Sub m n ⋆) → .⦃ varToVar σ ⦄ → .(FVTy A ⊆ FVSub σ) → Ty m
+subctx-inc-tm : (t : Tm n) → (σ : Sub m n ⋆) → .⦃ varToVar σ ⦄ → .(FVTm t ⊆ FVSub σ) → Tm m
+subctx-inc-sub : (τ : Sub l n ⋆) → (σ : Sub m n ⋆) → .⦃ varToVar σ ⦄ → .(FVSub τ ⊆ FVSub σ) → Sub l m ⋆
+
+subctx-inc-ty ⋆ σ p = ⋆
+subctx-inc-ty (s ─⟨ A ⟩⟶ t) σ p = (subctx-inc-tm s σ (⊆-trans (⊆-trans (∪-⊆-2 (FVTy A) (FVTm s)) (∪-⊆-1 (FVTy A ∪ FVTm s) (FVTm t))) p)) ─⟨ (subctx-inc-ty A σ (⊆-trans (⊆-trans (∪-⊆-1 (FVTy A) (FVTm s)) (∪-⊆-1 (FVTy A ∪ FVTm s) (FVTm t))) p)) ⟩⟶ (subctx-inc-tm t σ (⊆-trans (∪-⊆-2 (FVTy A ∪ FVTm s) (FVTm t)) p))
+
+subctx-inc-tm (Var i) ⟨⟩ p = ⊥-elim (lem i p)
+  where
+    lem : (i : Fin n) → .(trueAt i ⊆ empty) → ⊥
+    lem zero ()
+    lem (suc i) p = lem i (debuild-⊆-2 p)
+subctx-inc-tm (Var i) ⟨ σ , Var j ⟩ ⦃ q ⦄ p with i f≟ j
+... | yes x = 0V
+... | no x = liftTerm (subctx-inc-tm (Var i) σ ⦃ proj₁ q ⦄ (lem i j x (FVSub σ) p))
+  where
+    lem : (i j : Fin n) → ¬ i ≡ j → (xs : VarSet n) → trueAt i ⊆ xs ∪ trueAt j → trueAt i ⊆ xs
+    lem zero zero p xs q = ⊥-elim (p refl)
+    lem zero (suc j) p (ewt xs) q = cong ewt (⊆-bot xs)
+    lem (suc i) zero p (x ∷ xs) q = build-⊆-1 x (⊆-trans (debuild-⊆-2 q) (⊆-reflexive (∪-right-unit xs)))
+    lem (suc i) (suc j) p (x ∷ xs) q = build-⊆-1 x (lem i j (λ where refl → p refl) xs (debuild-⊆-2 q))
+
+subctx-inc-tm (Coh S A τ) σ p = Coh S A (subctx-inc-sub τ σ p)
+
+subctx-inc-sub ⟨⟩ σ p = ⟨⟩
+subctx-inc-sub ⟨ τ , t ⟩ σ p = ⟨ (subctx-inc-sub τ σ (⊆-trans (∪-⊆-1 (FVSub τ) (FVTm t)) p)) , (subctx-inc-tm t σ (⊆-trans (∪-⊆-2 (FVSub τ) (FVTm t)) p)) ⟩
+
+is-DC : (Γ : Ctx n) → (xs : VarSet n) → Set
+is-DC ∅ emp = ⊤
+is-DC (Γ , A) (ewf xs) = is-DC Γ xs
+is-DC (Γ , A) (ewt xs) = is-DC Γ xs × (FVTy A ⊆ xs)
+
+DC-is-DC : (Γ : Ctx n) → (xs : VarSet n) → is-DC Γ (DC Γ xs)
+DC-is-DC ∅ emp = tt
+DC-is-DC (Γ , A) (ewf xs) = DC-is-DC Γ xs
+DC-is-DC (Γ , A) (ewt xs) = (DC-is-DC Γ (xs ∪ FVTy A)) ,, ⊆-trans (∪-⊆-2 xs (FVTy A)) (DC-⊆ Γ (xs ∪ FVTy A))
+
+VarSet-size : VarSet n → ℕ
+VarSet-size emp = 0
+VarSet-size (ewf xs) = VarSet-size xs
+VarSet-size (ewt xs) = suc (VarSet-size xs)
+
+supp-ctx-inc : (xs : VarSet n) → Sub (VarSet-size xs) n ⋆
+supp-ctx-inc emp = ⟨⟩
+supp-ctx-inc (ewf xs) = liftSub (supp-ctx-inc xs)
+supp-ctx-inc (ewt xs) = ⟨ (liftSub (supp-ctx-inc xs)) , 0V ⟩
+
+supp-ctx-inc-v2v : (xs : VarSet n) → varToVar (supp-ctx-inc xs)
+supp-ctx-inc-v2v emp = tt
+supp-ctx-inc-v2v (ewf xs) = liftSub-preserve-var-to-var (supp-ctx-inc xs) ⦃ supp-ctx-inc-v2v xs ⦄
+supp-ctx-inc-v2v (ewt xs) = (liftSub-preserve-var-to-var (supp-ctx-inc xs) ⦃ supp-ctx-inc-v2v xs ⦄) ,, tt
+
+supp-ctx-inc-FV : (xs : VarSet n) → FVSub (supp-ctx-inc xs) ≡ xs
+supp-ctx-inc-FV emp = refl
+supp-ctx-inc-FV (ewf xs) = trans (supp-lift-sub (supp-ctx-inc xs)) (cong ewf (supp-ctx-inc-FV xs))
+supp-ctx-inc-FV (ewt xs) = trans (cong (_∪ ewt empty) (supp-lift-sub (supp-ctx-inc xs))) (cong ewt (trans (∪-right-unit (FVSub (supp-ctx-inc xs))) (supp-ctx-inc-FV xs)))
+
+
+supp-ctx : (Γ : Ctx n) → (xs : VarSet n) → .(is-DC Γ xs) → Ctx (VarSet-size xs)
+supp-ctx ∅ emp dc = ∅
+supp-ctx (Γ , A) (ewf xs) dc = supp-ctx Γ xs dc
+supp-ctx (Γ , A) (ewt xs) dc = (supp-ctx Γ xs (proj₁ dc)) , subctx-inc-ty A (supp-ctx-inc xs) ⦃ supp-ctx-inc-v2v xs ⦄ (⊆-trans (proj₂ dc) (⊆-reflexive (sym (supp-ctx-inc-FV xs))))
+
+VarSet-NonEmpty : (xs : VarSet n) → Set
+VarSet-NonEmpty emp = ⊥
+VarSet-NonEmpty (ewf xs) = VarSet-NonEmpty xs
+VarSet-NonEmpty (ewt xs) = ⊤
+
+susp-supp-drop : (xs : VarSet n) → .⦃ VarSet-NonEmpty xs ⦄ → suspSupp (drop xs) ≡ drop (suspSupp xs)
+susp-supp-drop (ewf xs) = cong ewf (susp-supp-drop xs)
+susp-supp-drop (ewt xs) = refl
+
+pdb-bd-supp-non-empty : (n : ℕ) → (Γ : Ctx m) → (pdb : Γ ⊢pdb) → (b : Bool) → VarSet-NonEmpty (pdb-bd-supp n Γ pdb b)
+pdb-bd-supp-non-empty n ∅ pdb b = ⊥-elim (pdb-odd-length pdb)
+pdb-bd-supp-non-empty n (∅ , A) pdb b = tt
+pdb-bd-supp-non-empty n (Γ , B , A) pdb b with <-cmp n (ty-dim B) | b
+... | tri< a ¬b ¬c | b = pdb-bd-supp-non-empty n Γ (pdb-prefix pdb) b
+... | tri≈ ¬a b₁ ¬c | false = pdb-bd-supp-non-empty n Γ (pdb-prefix pdb) false
+... | tri≈ ¬a b₁ ¬c | true = tt
+... | tri> ¬a ¬b c | b = tt
+
+VarSet-NonEmpty-Special : (xs : VarSet n) → Set
+VarSet-NonEmpty-Special {zero} xs = ⊥
+VarSet-NonEmpty-Special {suc zero} xs = ⊥
+VarSet-NonEmpty-Special {suc (suc n)} (ewf xs) = VarSet-NonEmpty-Special xs
+VarSet-NonEmpty-Special {suc (suc n)} (ewt xs) = ⊤
+
+connect-drop : (xs : VarSet (suc n)) → (ys : VarSet (suc m)) → .⦃ VarSet-NonEmpty-Special ys ⦄ → connect-supp xs (drop ys) ≡ drop (connect-supp xs ys)
+connect-drop xs (ewf (y ∷ ys)) = cong ewf (connect-drop xs (y ∷ ys))
+connect-drop xs (ewt (y ∷ ys)) = refl
+
+pdb-bd-supp-non-empty-special : (n : ℕ) → (Γ : Ctx (suc m)) → (pdb : Γ ⊢pdb) → (b : Bool) → .⦃ NonZero′ m ⦄ → VarSet-NonEmpty-Special (pdb-bd-supp (suc n) Γ pdb b)
+pdb-bd-supp-non-empty-special n (∅ , B , A) pdb b = ⊥-elim (pdb-odd-length pdb)
+pdb-bd-supp-non-empty-special n (Γ , C , B , A) pdb b with <-cmp (suc n) (ty-dim B) | b
+... | tri< a ¬b ¬c | b = pdb-bd-supp-non-empty-special n (Γ , C) (pdb-prefix pdb) b ⦃ focus-ty-dim-to-non-empty (pdb-prefix pdb) (≤-trans (≤-trans (s≤s z≤n) a) (≤-reflexive (ty-dim-≃ (pdb-proj₁ pdb)))) ⦄
+... | tri≈ ¬a b₁ ¬c | false = pdb-bd-supp-non-empty-special n (Γ , C) (pdb-prefix pdb) false ⦃ focus-ty-dim-to-non-empty (pdb-prefix pdb) (≤-trans (≤-trans (s≤s z≤n) (≤-reflexive b₁)) (≤-reflexive (ty-dim-≃ (pdb-proj₁ pdb)))) ⦄
+... | tri≈ ¬a b₁ ¬c | true = tt
+... | tri> ¬a ¬b c | b = tt
+
+susp-pdb-bd-compat : (n : ℕ)
+                   → (Γ : Ctx m)
+                   → (pdb : Γ ⊢pdb)
+                   → (b : Bool)
+                   → suspSupp (pdb-bd-supp n Γ pdb b) ≡ pdb-bd-supp (suc n) (suspCtx Γ) (susp-pdb pdb) b
+susp-pdb-bd-compat n ∅ pdb b = ⊥-elim′ (pdb-odd-length pdb)
+susp-pdb-bd-compat n (∅ , A) pdb b = refl
+susp-pdb-bd-compat n (Γ , B , A) pdb b with <-cmp n (ty-dim B) | <-cmp (suc n) (ty-dim (suspTy B)) | b
+... | tri< a ¬b ¬c | tri< a₁ ¬b₁ ¬c₁ | b = cong ewf (cong ewf (susp-pdb-bd-compat n Γ (pdb-prefix pdb) b))
+... | tri< a ¬b ¬c | tri≈ ¬a b₁ ¬c₁ | b = ⊥-elim (¬a (<-transʳ a (<-transˡ (n<1+n (ty-dim B)) (≤-reflexive (sym (susp-dim B))))))
+... | tri< a ¬b ¬c | tri> ¬a ¬b₁ c | b = ⊥-elim (¬a (<-transʳ a (<-transˡ (n<1+n (ty-dim B)) (≤-reflexive (sym (susp-dim B))))))
+... | tri≈ ¬a b₁ ¬c | tri< a ¬b ¬c₁ | b = ⊥-elim (¬b (trans (cong suc b₁) (sym (susp-dim B))))
+... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | false = cong ewf (cong ewf (susp-pdb-bd-compat n Γ (pdb-prefix pdb) false))
+... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | true = cong ewf (cong ewt (trans (susp-supp-drop (pdb-bd-supp n Γ (pdb-prefix pdb) true) ⦃ pdb-bd-supp-non-empty n Γ (pdb-prefix pdb) true ⦄) (cong drop (susp-pdb-bd-compat n Γ (pdb-prefix pdb) true))))
+... | tri≈ ¬a b₁ ¬c | tri> ¬a₁ ¬b c | b = ⊥-elim (¬b (trans (cong suc b₁) (sym (susp-dim B))))
+... | tri> ¬a ¬b c | tri< a ¬b₁ ¬c | b = ⊥-elim (¬c (s≤s (≤-trans (≤-reflexive (susp-dim B)) c)))
+... | tri> ¬a ¬b c | tri≈ ¬a₁ b₁ ¬c | b = ⊥-elim (¬c (s≤s (≤-trans (≤-reflexive (susp-dim B)) c)))
+... | tri> ¬a ¬b c | tri> ¬a₁ ¬b₁ c₁ | b = cong ewt (cong ewt (susp-pdb-bd-compat n Γ (pdb-prefix pdb) b))
+
+susp-pd-bd-compat : (n : ℕ)
+                  → (Γ : Ctx m)
+                  → (pd : Γ ⊢pd)
+                  → (b : Bool)
+                  → suspSupp (pd-bd-supp n Γ pd b) ≡ pdb-bd-supp (suc n) (suspCtx Γ) (susp-pdb (pd-to-pdb pd)) b
+susp-pd-bd-compat n Γ (Finish pdb) b = susp-pdb-bd-compat n Γ pdb b
+
+connect-susp-pdb-bd-compat : (n : ℕ)
+                      → (Γ : Ctx (suc m))
+                      → (pd : Γ ⊢pd)
+                      → (Δ : Ctx (suc l))
+                      → (pdb : Δ ⊢pdb)
+                      → (b : Bool)
+                      → connect-supp (suspSupp (pd-bd-supp n Γ pd b)) (pdb-bd-supp (suc n) Δ pdb b) ≡ pdb-bd-supp (suc n) (connect-susp Γ Δ) (connect-susp-pdb pd pdb) b
+connect-susp-pdb-bd-compat n Γ pd (∅ , A) pdb b = susp-pd-bd-compat n Γ pd b
+connect-susp-pdb-bd-compat n Γ pd (∅ , B , A) pdb b = ⊥-elim (pdb-odd-length pdb)
+connect-susp-pdb-bd-compat n Γ pd (Δ , C , B , A) pdb b with <-cmp (suc n) (ty-dim B) | <-cmp (suc n) (ty-dim (B [ connect-susp-inc-right (pred (ctxLength Γ)) _ ]ty)) | b
+... | tri< a ¬b ¬c | tri< a₁ ¬b₁ ¬c₁ | b = cong ewf (cong ewf (connect-susp-pdb-bd-compat n Γ pd (Δ , C) (pdb-prefix pdb) b))
+... | tri< a ¬b ¬c | tri≈ ¬a b₁ ¬c₁ | b = ⊥-elim (¬a (<-transˡ a (≤-reflexive (sub-dim (connect-susp-inc-right _ _) B))))
+... | tri< a ¬b ¬c | tri> ¬a ¬b₁ c | b = ⊥-elim ((¬a (<-transˡ a (≤-reflexive (sub-dim (connect-susp-inc-right _ _) B)))))
+... | tri≈ ¬a b₁ ¬c | tri< a ¬b ¬c₁ | b = ⊥-elim (¬b (trans b₁ (sub-dim (connect-susp-inc-right _ _) B)))
+... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | false = cong ewf (cong ewf (connect-susp-pdb-bd-compat n Γ pd (Δ , C) (pdb-prefix pdb) false))
+... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | true = cong ewf (cong ewt (trans (connect-drop (suspSupp (pd-bd-supp n Γ pd true)) (pdb-bd-supp (suc n) (Δ , C) _ true) ⦃ pdb-bd-supp-non-empty-special n (Δ , C) (pdb-prefix pdb) true ⦃ focus-ty-dim-to-non-empty (pdb-prefix pdb) (≤-trans (≤-trans (s≤s z≤n) (≤-reflexive b₁)) (≤-reflexive (ty-dim-≃ (pdb-proj₁ pdb)))) ⦄ ⦄) (cong drop (connect-susp-pdb-bd-compat n Γ pd (Δ , C) (pdb-prefix pdb) true))))
+... | tri≈ ¬a b₁ ¬c | tri> ¬a₁ ¬b c | b = ⊥-elim (¬b (trans b₁ (sub-dim (connect-susp-inc-right _ _) B)))
+... | tri> ¬a ¬b c | tri< a ¬b₁ ¬c | b = ⊥-elim (¬c (<-transʳ (≤-reflexive (sym (sub-dim (connect-susp-inc-right _ _) B))) c))
+... | tri> ¬a ¬b c | tri≈ ¬a₁ b₁ ¬c | b = ⊥-elim (¬c (<-transʳ (≤-reflexive (sym (sub-dim (connect-susp-inc-right _ _) B))) c))
+... | tri> ¬a ¬b c | tri> ¬a₁ ¬b₁ c₁ | b = cong ewt (cong ewt (connect-susp-pdb-bd-compat n Γ pd (Δ , C) (pdb-prefix pdb) b))
+
+connect-susp-pd-bd-compat : (n : ℕ)
+                      → (Γ : Ctx (suc m))
+                      → (pd : Γ ⊢pd)
+                      → (Δ : Ctx (suc l))
+                      → (pd2 : Δ ⊢pd)
+                      → (b : Bool)
+                      → connect-supp (suspSupp (pd-bd-supp n Γ pd b)) (pd-bd-supp (suc n) Δ pd2 b) ≡ pd-bd-supp (suc n) (connect-susp Γ Δ) (connect-susp-pd pd pd2) b
+connect-susp-pd-bd-compat n Γ pd Δ (Finish pdb) b = connect-susp-pdb-bd-compat n Γ pd Δ pdb b
+
+drop-var : (t : Tm n) → .⦃ isVar t ⦄ → drop (FVTm t) ≡ empty
+drop-var (Var zero) = refl
+drop-var (Var (suc i)) = cong ewf (drop-var (Var i))
+
+supp-compat : (n : ℕ) → (T : Tree m) → (b : Bool) → supp-bd n T b ≡ pd-bd-supp n (tree-to-ctx T) (tree-to-pd T) b
+supp-compat zero T false = lem (tree-to-ctx T) (pd-to-pdb (tree-to-pd T))
+  where
+    lem : (Γ : Ctx (suc m)) → (pdb : Γ ⊢pdb) → trueAt (fromℕ m) ≡ pdb-bd-supp zero Γ pdb false
+    lem (∅ , A) pdb = refl
+    lem (∅ , B , A) pdb = ⊥-elim (pdb-odd-length pdb)
+    lem (Γ , C , B , A) pdb with <-cmp zero (ty-dim B)
+    ... | tri< a ¬b ¬c = cong ewf (cong ewf (lem (Γ , C) (pdb-prefix pdb)))
+    ... | tri≈ ¬a b ¬c = cong ewf (cong ewf (lem (Γ , C) (pdb-prefix pdb)))
+supp-compat zero T true = begin
+  FVTm (tree-last-var T)
+    ≡˘⟨ FVTm-≃ (tree-to-pd-focus-tm T) ⟩
+  FVTm (pd-focus-tm (tree-to-pd T))
+    ≡˘⟨ FVTm-≃ (pd-right-base (tree-to-pd T)) ⟩
+  FVTm (pdb-right-base (pd-to-pdb (tree-to-pd T)))
+    ≡⟨ lem (tree-to-ctx T) (pd-to-pdb (tree-to-pd T)) ⟩
+  pd-bd-supp zero (tree-to-ctx T) (tree-to-pd T) true ∎
+  where
+    open ≡-Reasoning
+
+    lem : (Γ : Ctx (suc m)) → (pdb : Γ ⊢pdb) → FVTm (pdb-right-base pdb) ≡ pdb-bd-supp zero Γ pdb true
+    lem (∅ , .⋆) Base = refl
+    lem (∅ , A) (Restr pdb) = ⊥-elim (NonZero′-⊥ (≤-trans (pdb-dim-lem pdb) (≤-reflexive (ty-dim-≃ (pdb-singleton-lem pdb)))))
+    lem (∅ , B , A) pdb = ⊥-elim (pdb-odd-length pdb)
+    lem (Γ , C , B , A) pdb with <-cmp zero (ty-dim B)
+    ... | tri< a ¬b ¬c = begin
+      FVTm (pdb-right-base pdb)
+        ≡⟨ FVTm-≃ (pdb-right-base-prefix pdb a) ⟩
+      FVTm (liftTerm (liftTerm (pdb-right-base (pdb-prefix pdb))))
+        ≡⟨ supp-lift-tm (liftTerm (pdb-right-base (pdb-prefix pdb))) ⟩
+      ewf (FVTm (liftTerm (pdb-right-base (pdb-prefix pdb))))
+        ≡⟨ cong ewf (supp-lift-tm (pdb-right-base (pdb-prefix pdb))) ⟩
+      ewf (ewf (FVTm (pdb-right-base (pdb-prefix pdb))))
+        ≡⟨ cong ewf (cong ewf (lem (Γ , C) (pdb-prefix pdb))) ⟩
+      ewf (ewf (pdb-bd-supp 0 (Γ , C) _ true)) ∎
+        where open ≡-Reasoning
+    ... | tri≈ ¬a b ¬c = begin
+      FVTm (pdb-right-base pdb)
+        ≡⟨ FVTm-≃ (pdb-right-base-0-dim pdb (sym b)) ⟩
+      FVTm 1V
+        ≡˘⟨ cong ewf (cong ewt (drop-var (pdb-right-base (pdb-prefix pdb)) ⦃ pdb-right-base-isVar (pdb-prefix pdb) ⦄)) ⟩
+      ewf (ewt (drop (FVTm (pdb-right-base (pdb-prefix pdb)))))
+        ≡⟨ cong ewf (cong ewt (cong drop (lem (Γ , C) (pdb-prefix pdb)))) ⟩
+      ewf (ewt (drop (pdb-bd-supp 0 (Γ , C) _ true))) ∎
+        where open ≡-Reasoning
+supp-compat (suc n) Sing b = refl
+supp-compat (suc n) (Join S T) b = begin
+  connect-supp (suspSupp (supp-bd n S b)) (supp-bd (suc n) T b)
+    ≡⟨ cong₂ (λ a b → connect-supp (suspSupp a) b) (supp-compat n S b) (supp-compat (suc n) T b) ⟩
+  connect-supp
+    (suspSupp (pd-bd-supp n (tree-to-ctx S) (tree-to-pd S) b))
+    (pd-bd-supp (suc n) (tree-to-ctx T) (tree-to-pd T) b)
+    ≡⟨ connect-susp-pd-bd-compat n (tree-to-ctx S) (tree-to-pd S) (tree-to-ctx T) (tree-to-pd T) b ⟩
+  pd-bd-supp (suc n) (connect-susp (tree-to-ctx S) (tree-to-ctx T))
+      (connect-susp-pd (tree-to-pd S) (tree-to-pd T)) b ∎
+  where
+    open ≡-Reasoning

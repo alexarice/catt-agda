@@ -105,6 +105,9 @@ ty-tgt-≃ : A ≃ty B → ty-tgt A ≃tm ty-tgt B
 ty-tgt-≃ (Star≃ p) = Var≃ p refl
 ty-tgt-≃ (Arr≃ p q r) = r
 
+ty-tgt′-≃ : (p : A ≃ty B) → .⦃ _ : NonZero′ (ty-dim A) ⦄ → ty-tgt′ A ≃tm ty-tgt′ B ⦃ NonZero′-subst (ty-dim-≃ p) it ⦄
+ty-tgt′-≃ (Arr≃ p q r) = r
+
 ty-base-≃ : A ≃ty B → ty-base A ≃ty ty-base B
 ty-base-≃ (Star≃ p) = Star≃ p
 ty-base-≃ (Arr≃ p q r) = q
@@ -122,6 +125,13 @@ ty-src-sub (s ─⟨ A ⟩⟶ t) σ p = refl≃tm
 
 ty-tgt-sub : (A : Ty (suc n)) → (σ : Sub (suc n) (suc m) ⋆) → (ty-dim A > 0) → ty-tgt A [ σ ]tm ≃tm ty-tgt (A [ σ ]ty)
 ty-tgt-sub (s ─⟨ A ⟩⟶ t) σ p = refl≃tm
+
+ty-tgt′-sub : (A : Ty n) → (σ : Sub n m ⋆) → .⦃ _ : NonZero′ (ty-dim A) ⦄ → ty-tgt′ A [ σ ]tm ≃tm ty-tgt′ (A [ σ ]ty) ⦃ NonZero′-subst (sub-dim σ A) it ⦄
+ty-tgt′-sub (s ─⟨ A ⟩⟶ t) σ = refl≃tm
+
+ty-base-dim : (A : Ty n) → ty-dim (ty-base A) ≡ pred (ty-dim A)
+ty-base-dim ⋆ = refl
+ty-base-dim (s ─⟨ A ⟩⟶ t) = refl
 
 truncate-≤ : (d : ℕ) → (A : Ty n) → d ≤ ty-dim A → truncate d (s ─⟨ A ⟩⟶ t) ≃ty truncate d A
 truncate-≤ d A p
@@ -212,52 +222,52 @@ truncate′-lift (suc n) A = trans≃ty (truncate′-≃ {d = n} refl (ty-base-l
 --     lem {Γ = Γ , A} (suc i) ⟨ σ , t ⟩ = {!!}
 -- tm-to-ty-sub (Coh Δ A x τ) σ = assoc-ty σ τ
 
-BoundedSucTm : BoundedTm d Γ t → BoundedTm (suc d) Γ t
-BoundedSucTy : BoundedTy d Γ A → BoundedTy (suc d) Γ A
-BoundedSucSub : BoundedSub d Γ σ → BoundedSub (suc d) Γ σ
+-- BoundedSucTm : BoundedTm d Γ t → BoundedTm (suc d) Γ t
+-- BoundedSucTy : BoundedTy d Γ A → BoundedTy (suc d) Γ A
+-- BoundedSucSub : BoundedSub d Γ σ → BoundedSub (suc d) Γ σ
 
-BoundedSucTm (VarBoundZ p) = VarBoundZ (BoundedSucTy p)
-BoundedSucTm (VarBoundS i p) = VarBoundS i (BoundedSucTm p)
-BoundedSucTm (CohBound S p q) = CohBound S (BoundedSucTy p) (BoundedSucSub q)
+-- BoundedSucTm (VarBoundZ p) = VarBoundZ (BoundedSucTy p)
+-- BoundedSucTm (VarBoundS i p) = VarBoundS i (BoundedSucTm p)
+-- BoundedSucTm (CohBound S p q) = CohBound S (BoundedSucTy p) (BoundedSucSub q)
 
-BoundedSucTy StarBound = StarBound
-BoundedSucTy (ArrBound a b c) = ArrBound (BoundedSucTm a) (BoundedSucTy b) (BoundedSucTm c)
+-- BoundedSucTy StarBound = StarBound
+-- BoundedSucTy (ArrBound a b c) = ArrBound (BoundedSucTm a) (BoundedSucTy b) (BoundedSucTm c)
 
-BoundedSucSub NullBound = NullBound
-BoundedSucSub (ExtBound b x) = ExtBound (BoundedSucSub b) (BoundedSucTm x)
+-- BoundedSucSub NullBound = NullBound
+-- BoundedSucSub (ExtBound b x) = ExtBound (BoundedSucSub b) (BoundedSucTm x)
 
-BoundedLiftTm : BoundedTm d Γ t → BoundedTm d (Γ , A) (liftTerm t)
-BoundedLiftTy : BoundedTy d Γ B → BoundedTy d (Γ , A) (liftType B)
-BoundedLiftSub : BoundedSub d Γ σ → BoundedSub d (Γ , A) (liftSub σ)
+-- BoundedLiftTm : BoundedTm d Γ t → BoundedTm d (Γ , A) (liftTerm t)
+-- BoundedLiftTy : BoundedTy d Γ B → BoundedTy d (Γ , A) (liftType B)
+-- BoundedLiftSub : BoundedSub d Γ σ → BoundedSub d (Γ , A) (liftSub σ)
 
-BoundedLiftTm (VarBoundZ p) = VarBoundS zero (VarBoundZ p)
-BoundedLiftTm (VarBoundS i p) = VarBoundS (suc i) (VarBoundS i p)
-BoundedLiftTm (CohBound S p q) = CohBound S p (BoundedLiftSub q)
+-- BoundedLiftTm (VarBoundZ p) = VarBoundS zero (VarBoundZ p)
+-- BoundedLiftTm (VarBoundS i p) = VarBoundS (suc i) (VarBoundS i p)
+-- BoundedLiftTm (CohBound S p q) = CohBound S p (BoundedLiftSub q)
 
-BoundedLiftTy StarBound = StarBound
-BoundedLiftTy (ArrBound p q r) = ArrBound (BoundedLiftTm p) (BoundedLiftTy q) (BoundedLiftTm r)
+-- BoundedLiftTy StarBound = StarBound
+-- BoundedLiftTy (ArrBound p q r) = ArrBound (BoundedLiftTm p) (BoundedLiftTy q) (BoundedLiftTm r)
 
-BoundedLiftSub NullBound = NullBound
-BoundedLiftSub (ExtBound b x) = ExtBound (BoundedLiftSub b) (BoundedLiftTm x)
+-- BoundedLiftSub NullBound = NullBound
+-- BoundedLiftSub (ExtBound b x) = ExtBound (BoundedLiftSub b) (BoundedLiftTm x)
 
-BoundedGetFst : BoundedTm d (suspCtx Γ) getFst
-BoundedGetSnd : BoundedTm d (suspCtx Γ) getSnd
+-- BoundedGetFst : BoundedTm d (suspCtx Γ) getFst
+-- BoundedGetSnd : BoundedTm d (suspCtx Γ) getSnd
 
-BoundedGetFst {Γ = ∅} = VarBoundS zero (VarBoundZ StarBound)
-BoundedGetFst {Γ = Γ , A} = VarBoundS (Data.Fin.fromℕ (suc _)) BoundedGetFst
-BoundedGetSnd {Γ = ∅} = VarBoundZ StarBound
-BoundedGetSnd {Γ = Γ , A} = VarBoundS (inject₁ (Data.Fin.fromℕ _)) BoundedGetSnd
+-- BoundedGetFst {Γ = ∅} = VarBoundS zero (VarBoundZ StarBound)
+-- BoundedGetFst {Γ = Γ , A} = VarBoundS (Data.Fin.fromℕ (suc _)) BoundedGetFst
+-- BoundedGetSnd {Γ = ∅} = VarBoundZ StarBound
+-- BoundedGetSnd {Γ = Γ , A} = VarBoundS (inject₁ (Data.Fin.fromℕ _)) BoundedGetSnd
 
-BoundedSuspTm : BoundedTm d Γ t → BoundedTm (suc d) (suspCtx Γ) (suspTm t)
-BoundedSuspTy : BoundedTy d Γ A → BoundedTy (suc d) (suspCtx Γ) (suspTy A)
-BoundedSuspSub : BoundedSub d Γ σ → BoundedSub (suc d) (suspCtx Γ) (suspSub σ)
+-- BoundedSuspTm : BoundedTm d Γ t → BoundedTm (suc d) (suspCtx Γ) (suspTm t)
+-- BoundedSuspTy : BoundedTy d Γ A → BoundedTy (suc d) (suspCtx Γ) (suspTy A)
+-- BoundedSuspSub : BoundedSub d Γ σ → BoundedSub (suc d) (suspCtx Γ) (suspSub σ)
 
-BoundedSuspTm (VarBoundZ x) = VarBoundZ (BoundedSuspTy x)
-BoundedSuspTm (VarBoundS i b) = VarBoundS (inject₁ (inject₁ i)) (BoundedSuspTm b)
-BoundedSuspTm (CohBound S p q) = CohBound (suspTree S) (BoundedSuspTy p) (BoundedSuspSub q)
+-- BoundedSuspTm (VarBoundZ x) = VarBoundZ (BoundedSuspTy x)
+-- BoundedSuspTm (VarBoundS i b) = VarBoundS (inject₁ (inject₁ i)) (BoundedSuspTm b)
+-- BoundedSuspTm (CohBound S p q) = CohBound (suspTree S) (BoundedSuspTy p) (BoundedSuspSub q)
 
-BoundedSuspTy StarBound = ArrBound BoundedGetFst StarBound BoundedGetSnd
-BoundedSuspTy (ArrBound p q r) = ArrBound (BoundedSuspTm p) (BoundedSuspTy q) (BoundedSuspTm r)
+-- BoundedSuspTy StarBound = ArrBound BoundedGetFst StarBound BoundedGetSnd
+-- BoundedSuspTy (ArrBound p q r) = ArrBound (BoundedSuspTm p) (BoundedSuspTy q) (BoundedSuspTm r)
 
-BoundedSuspSub NullBound = ExtBound (ExtBound NullBound BoundedGetFst) BoundedGetSnd
-BoundedSuspSub (ExtBound b x) = ExtBound (BoundedSuspSub b) (BoundedSuspTm x)
+-- BoundedSuspSub NullBound = ExtBound (ExtBound NullBound BoundedGetFst) BoundedGetSnd
+-- BoundedSuspSub (ExtBound b x) = ExtBound (BoundedSuspSub b) (BoundedSuspTm x)

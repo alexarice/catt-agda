@@ -16,6 +16,7 @@ open import Data.Product renaming (_,_ to _,,_)
 open import Data.Sum
 open import Data.Nat.Properties
 import Relation.Binary.Reasoning.Setoid as Reasoning
+open import Catt.Globular
 open import Catt.Globular.Properties
 
 getVarFinProp : (t : Tm n) → .⦃ _ : isVar t ⦄ → t ≃tm Var (getVarFin t)
@@ -121,3 +122,10 @@ suspSub-var-to-var ⟨ σ , Var i ⟩ ⦃ v ⦄ = suspSub-var-to-var σ ⦃ proj
 
 suspTm-var : (t : Tm n) → ⦃ isVar t ⦄ → isVar (suspTm t)
 suspTm-var (Var i) = tt
+
+ty-base-globular : (A : Ty n) → ty-is-globular A → ty-is-globular (ty-base A)
+ty-base-globular ⋆ g = tt
+ty-base-globular (s ─⟨ A ⟩⟶ t) (g1 ,, g2 ,, g3) = g2
+
+ty-tgt′-globular : (A : Ty n) → .⦃ _ : NonZero′ (ty-dim A) ⦄ → ty-is-globular A → isVar (ty-tgt′ A)
+ty-tgt′-globular (s ─⟨ A ⟩⟶ t) (g1 ,, g2 ,, g3) = g3

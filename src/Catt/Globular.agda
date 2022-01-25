@@ -6,8 +6,7 @@ open import Catt.Syntax
 open import Data.Nat
 open import Data.Empty
 open import Catt.Tree
-open import Data.Fin
-open import Catt.Variables
+open import Data.Fin using (Fin)
 
 tm-to-ty : (Γ : Ctx n) → (t : Tm n) → Ty n
 tm-to-ty Γ (Var i) = Γ ‼ i
@@ -20,9 +19,21 @@ ty-src : Ty (suc n) → Tm (suc n)
 ty-src ⋆ = 0V
 ty-src (s ─⟨ A ⟩⟶ t) = s
 
+ty-src< : (A : Ty n) → m < ty-dim A → Tm n
+ty-src< (s ─⟨ A ⟩⟶ t) p = s
+
+ty-tgt< : (A : Ty n) → m < ty-dim A → Tm n
+ty-tgt< (s ─⟨ A ⟩⟶ t) p = t
+
 ty-tgt : Ty (suc n) → Tm (suc n)
 ty-tgt ⋆ = 0V
 ty-tgt (s ─⟨ A ⟩⟶ t) = t
+
+ty-src′ : (A : Ty n) → .⦃ NonZero′ (ty-dim A) ⦄ → Tm n
+ty-src′ (s ─⟨ A ⟩⟶ t) = s
+
+ty-tgt′ : (A : Ty n) → .⦃ NonZero′ (ty-dim A) ⦄ → Tm n
+ty-tgt′ (s ─⟨ A ⟩⟶ t) = t
 
 ty-base : Ty n → Ty n
 ty-base ⋆ = ⋆
@@ -47,19 +58,19 @@ truncate d A = truncate′ (ty-dim A ∸ d) A
 
 -- tm-tgt : Tm Γ (suc (suc (suc d))) → Tm Γ (suc (suc d))
 -- tm-tgt t = ty-tgt (tm-to-ty t)
-data BoundedTm : ℕ → Ctx n → Tm n → Set
-data BoundedTy : ℕ → Ctx n → Ty n → Set
-data BoundedSub : ℕ → Ctx n → Sub m n ⋆ → Set
+-- data BoundedTm : ℕ → Ctx n → Tm n → Set
+-- data BoundedTy : ℕ → Ctx n → Ty n → Set
+-- data BoundedSub : ℕ → Ctx n → Sub m n ⋆ → Set
 
-data BoundedTm where
-  VarBoundZ : BoundedTy d Γ A → BoundedTm d (Γ , A) 0V
-  VarBoundS : ∀ i → BoundedTm d Γ (Var i) → BoundedTm d (Γ , A) (Var (suc i))
-  CohBound : (S : Tree n) → BoundedTy d (tree-to-ctx S) A → BoundedSub d Γ σ → BoundedTm d Γ (Coh S A σ)
+-- data BoundedTm where
+--   VarBoundZ : BoundedTy d Γ A → BoundedTm d (Γ , A) 0V
+--   VarBoundS : ∀ i → BoundedTm d Γ (Var i) → BoundedTm d (Γ , A) (Var (suc i))
+--   CohBound : (S : Tree n) → BoundedTy d (tree-to-ctx S) A → BoundedSub d Γ σ → BoundedTm d Γ (Coh S A σ)
 
-data BoundedTy where
-  StarBound : BoundedTy d Γ ⋆
-  ArrBound : BoundedTm d Γ s → BoundedTy d Γ A → BoundedTm d Γ t → BoundedTy (suc d) Γ (s ─⟨ A ⟩⟶ t)
+-- data BoundedTy where
+--   StarBound : BoundedTy d Γ ⋆
+--   ArrBound : BoundedTm d Γ s → BoundedTy d Γ A → BoundedTm d Γ t → BoundedTy (suc d) Γ (s ─⟨ A ⟩⟶ t)
 
-data BoundedSub where
-  NullBound : BoundedSub d Γ ⟨⟩
-  ExtBound : BoundedSub d Γ σ → BoundedTm d Γ t → BoundedSub d Γ ⟨ σ , t ⟩
+-- data BoundedSub where
+--   NullBound : BoundedSub d Γ ⟨⟩
+--   ExtBound : BoundedSub d Γ σ → BoundedTm d Γ t → BoundedSub d Γ ⟨ σ , t ⟩

@@ -4,7 +4,6 @@ module Catt.Connection where
 
 open import Catt.Syntax
 open import Catt.Suspension
-open import Catt.Variables
 open import Data.Nat
 open import Data.Fin using (Fin; suc; zero; toℕ)
 open import Data.Sum
@@ -42,18 +41,18 @@ sub-between-connects {l′ = l′} σ τ s = sub-from-connect (connect-inc-left 
 sub-between-connect-susps : Sub (suc n) (suc l) ⋆ → Sub (suc m) (suc l′) ⋆ → Sub (suc (m + (2 + n))) (suc (l′ + (2 + l))) ⋆
 sub-between-connect-susps σ τ = sub-between-connects (suspSub σ) τ getSnd
 
-connect-var-split : (n m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
-connect-var-split n zero i = inj₁ i
-connect-var-split n (suc m) zero = inj₂ zero
-connect-var-split n (suc m) (suc i) with connect-var-split n m i
-... | inj₁ j = inj₁ j
-... | inj₂ j = inj₂ (suc j)
+-- connect-var-split : (n m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
+-- connect-var-split n zero i = inj₁ i
+-- connect-var-split n (suc m) zero = inj₂ zero
+-- connect-var-split n (suc m) (suc i) with connect-var-split n m i
+-- ... | inj₁ j = inj₁ j
+-- ... | inj₂ j = inj₂ (suc j)
 
-connect-var-split-right : (t : Tm (suc n)) → .⦃ isVar t ⦄ → (m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
-connect-var-split-right t zero i with toℕ (getVarFin t) ≟ toℕ i
-... | yes _ = inj₂ zero
-... | no _ = inj₁ i
-connect-var-split-right t (suc m) zero = inj₂ zero
-connect-var-split-right t (suc m) (suc i) with connect-var-split-right t m i
-... | inj₁ j = inj₁ j
-... | inj₂ j = inj₂ (suc j)
+-- connect-var-split-right : (t : Tm (suc n)) → .⦃ isVar t ⦄ → (m : ℕ) → VarSplit (suc (m + n)) (suc n) (suc m)
+-- connect-var-split-right t zero i with toℕ (getVarFin t) ≟ toℕ i
+-- ... | yes _ = inj₂ zero
+-- ... | no _ = inj₁ i
+-- connect-var-split-right t (suc m) zero = inj₂ zero
+-- connect-var-split-right t (suc m) (suc i) with connect-var-split-right t m i
+-- ... | inj₁ j = inj₁ j
+-- ... | inj₂ j = inj₂ (suc j)

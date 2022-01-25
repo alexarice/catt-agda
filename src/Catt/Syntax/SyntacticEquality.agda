@@ -684,8 +684,8 @@ idSub-id (Add≃ p x) = Ext≃ (lift-sub-≃ (idSub-id p)) refl≃tm
 -- idSub≃-on-sub p Null≃ = Null≃
 -- idSub≃-on-sub p (Ext≃ q r) = Ext≃ (idSub≃-on-sub p q) (idSub≃-on-tm p r)
 
--- ⋆-is-only-0-d-ty : {A : Ty n} → (⋆ {n = n}) ≃ty A
--- ⋆-is-only-0-d-ty {A = ⋆} = Star≃ refl
+⋆-is-only-0-d-ty : {A : Ty n} → .⦃ IsZero (ty-dim A) ⦄ → A ≃ty ⋆ {n = n}
+⋆-is-only-0-d-ty {A = ⋆} = Star≃ refl
 
 ⋆-is-only-ty-in-empty-context : (A : Ty 0) → A ≃ty ⋆ {n = 0}
 ⋆-is-only-ty-in-empty-context ⋆ = refl≃ty

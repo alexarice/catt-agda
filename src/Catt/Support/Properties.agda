@@ -441,10 +441,10 @@ FVTy-comp-⊆ (s ─⟨ A ⟩⟶ t) σ = ∪-⊆ (∪-⊆ (FVTy-comp-⊆ A σ) (
 FVTm-comp-⊆ (Var zero) ⟨ σ , t ⟩ = ∪-⊆-2 (FVSub σ) (FVTm t)
 FVTm-comp-⊆ (Var (suc i)) ⟨ σ , t ⟩ = ⊆-trans (FVTm-comp-⊆ (Var i) σ) (∪-⊆-1 (FVSub σ) (FVTm t))
 FVTm-comp-⊆ {A = ⋆} (Coh S B τ) σ = FVSub-comp-⊆ σ τ
-FVTm-comp-⊆ {A = s ─⟨ A ⟩⟶ t} (Coh S B τ) σ = begin
+FVTm-comp-⊆ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = begin
   FVTm
-      (Coh (suspTree S) (suspTy B) (suspSub τ) [ unrestrict σ ]tm)
-    ≤⟨ FVTm-comp-⊆ (Coh (suspTree S) (suspTy B) (suspSub τ)) (unrestrict σ) ⟩
+      (Coh (suspCtx Δ) (suspTy B) (suspSub τ) [ unrestrict σ ]tm)
+    ≤⟨ FVTm-comp-⊆ (Coh (suspCtx Δ) (suspTy B) (suspSub τ)) (unrestrict σ) ⟩
   FVSub (unrestrict σ)
     ≡⟨ unrestrict-supp σ ⟩
   FVSub σ ∎
@@ -609,33 +609,33 @@ susp-pdb-bd-compat n (Γ , B , A) pdb b with <-cmp n (ty-dim B) | <-cmp (suc n) 
 ... | tri> ¬a ¬b c | tri≈ ¬a₁ b₁ ¬c | b = ⊥-elim (¬c (s≤s (≤-trans (≤-reflexive (susp-dim B)) c)))
 ... | tri> ¬a ¬b c | tri> ¬a₁ ¬b₁ c₁ | b = cong ewt (cong ewt (susp-pdb-bd-compat n Γ (pdb-prefix pdb) b))
 
-susp-pd-bd-compat : (n : ℕ)
-                  → (Γ : Ctx m)
-                  → (pd : Γ ⊢pd)
-                  → (b : Bool)
-                  → suspSupp (pd-bd-supp n Γ pd b) ≡ pdb-bd-supp (suc n) (suspCtx Γ) (susp-pdb (pd-to-pdb pd)) b
-susp-pd-bd-compat n Γ (Finish pdb) b = susp-pdb-bd-compat n Γ pdb b
+-- susp-pd-bd-compat : (n : ℕ)
+--                   → (Γ : Ctx m)
+--                   → .⦃ pd : Γ ⊢pd ⦄
+--                   → (b : Bool)
+--                   → suspSupp (pd-bd-supp n Γ b) ≡ pdb-bd-supp (suc n) (suspCtx Γ) (susp-pdb (pd-to-pdb pd)) b
+-- susp-pd-bd-compat n Γ  b = susp-pdb-bd-compat n Γ pdb b
 
 connect-susp-pdb-bd-compat : (n : ℕ)
                       → (Γ : Ctx (suc m))
-                      → (pd : Γ ⊢pd)
+                      → .⦃ pd : Γ ⊢pd ⦄
                       → (Δ : Ctx (suc l))
                       → (pdb : Δ ⊢pdb)
                       → (b : Bool)
-                      → connect-supp (suspSupp (pd-bd-supp n Γ pd b)) (pdb-bd-supp (suc n) Δ pdb b) ≡ pdb-bd-supp (suc n) (connect-susp Γ Δ) (connect-susp-pdb pd pdb) b
-connect-susp-pdb-bd-compat n Γ pd (∅ , A) pdb b = susp-pd-bd-compat n Γ pd b
-connect-susp-pdb-bd-compat n Γ pd (∅ , B , A) pdb b = ⊥-elim (pdb-odd-length pdb)
-connect-susp-pdb-bd-compat n Γ pd (Δ , C , B , A) pdb b with <-cmp (suc n) (ty-dim B) | <-cmp (suc n) (ty-dim (B [ connect-susp-inc-right (pred (ctxLength Γ)) _ ]ty)) | b
-... | tri< a ¬b ¬c | tri< a₁ ¬b₁ ¬c₁ | b = cong ewf (cong ewf (connect-susp-pdb-bd-compat n Γ pd (Δ , C) (pdb-prefix pdb) b))
+                      → connect-supp (suspSupp (pd-bd-supp n Γ b)) (pdb-bd-supp (suc n) Δ pdb b) ≡ pdb-bd-supp (suc n) (connect-susp Γ Δ) (connect-susp-pdb pd pdb) b
+connect-susp-pdb-bd-compat n Γ ⦃ pd ⦄ (∅ , A) pdb b = susp-pdb-bd-compat n Γ (pd-to-pdb pd) b
+connect-susp-pdb-bd-compat n Γ (∅ , B , A) pdb b = ⊥-elim (pdb-odd-length pdb)
+connect-susp-pdb-bd-compat n Γ (Δ , C , B , A) pdb b with <-cmp (suc n) (ty-dim B) | <-cmp (suc n) (ty-dim (B [ connect-susp-inc-right (pred (ctxLength Γ)) _ ]ty)) | b
+... | tri< a ¬b ¬c | tri< a₁ ¬b₁ ¬c₁ | b = cong ewf (cong ewf (connect-susp-pdb-bd-compat n Γ (Δ , C) (pdb-prefix pdb) b))
 ... | tri< a ¬b ¬c | tri≈ ¬a b₁ ¬c₁ | b = ⊥-elim (¬a (<-transˡ a (≤-reflexive (sub-dim (connect-susp-inc-right _ _) B))))
 ... | tri< a ¬b ¬c | tri> ¬a ¬b₁ c | b = ⊥-elim ((¬a (<-transˡ a (≤-reflexive (sub-dim (connect-susp-inc-right _ _) B)))))
 ... | tri≈ ¬a b₁ ¬c | tri< a ¬b ¬c₁ | b = ⊥-elim (¬b (trans b₁ (sub-dim (connect-susp-inc-right _ _) B)))
-... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | false = cong ewf (cong ewf (connect-susp-pdb-bd-compat n Γ pd (Δ , C) (pdb-prefix pdb) false))
-... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | true = cong ewf (cong ewt (trans (connect-drop (suspSupp (pd-bd-supp n Γ pd true)) (pdb-bd-supp (suc n) (Δ , C) _ true) ⦃ pdb-bd-supp-non-empty-special n (Δ , C) (pdb-prefix pdb) true ⦃ focus-ty-dim-to-non-empty (pdb-prefix pdb) (≤-trans (≤-trans (s≤s z≤n) (≤-reflexive b₁)) (≤-reflexive (ty-dim-≃ (pdb-proj₁ pdb)))) ⦄ ⦄) (cong drop (connect-susp-pdb-bd-compat n Γ pd (Δ , C) (pdb-prefix pdb) true))))
+... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | false = cong ewf (cong ewf (connect-susp-pdb-bd-compat n Γ (Δ , C) (pdb-prefix pdb) false))
+... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | true = cong ewf (cong ewt (trans (connect-drop (suspSupp (pd-bd-supp n Γ true)) (pdb-bd-supp (suc n) (Δ , C) _ true) ⦃ pdb-bd-supp-non-empty-special n (Δ , C) (pdb-prefix pdb) true ⦃ focus-ty-dim-to-non-empty (pdb-prefix pdb) (≤-trans (≤-trans (s≤s z≤n) (≤-reflexive b₁)) (≤-reflexive (ty-dim-≃ (pdb-proj₁ pdb)))) ⦄ ⦄) (cong drop (connect-susp-pdb-bd-compat n Γ (Δ , C) (pdb-prefix pdb) true))))
 ... | tri≈ ¬a b₁ ¬c | tri> ¬a₁ ¬b c | b = ⊥-elim (¬b (trans b₁ (sub-dim (connect-susp-inc-right _ _) B)))
 ... | tri> ¬a ¬b c | tri< a ¬b₁ ¬c | b = ⊥-elim (¬c (<-transʳ (≤-reflexive (sym (sub-dim (connect-susp-inc-right _ _) B))) c))
 ... | tri> ¬a ¬b c | tri≈ ¬a₁ b₁ ¬c | b = ⊥-elim (¬c (<-transʳ (≤-reflexive (sym (sub-dim (connect-susp-inc-right _ _) B))) c))
-... | tri> ¬a ¬b c | tri> ¬a₁ ¬b₁ c₁ | b = cong ewt (cong ewt (connect-susp-pdb-bd-compat n Γ pd (Δ , C) (pdb-prefix pdb) b))
+... | tri> ¬a ¬b c | tri> ¬a₁ ¬b₁ c₁ | b = cong ewt (cong ewt (connect-susp-pdb-bd-compat n Γ (Δ , C) (pdb-prefix pdb) b))
 
 connect-susp-pd-bd-compat : (n : ℕ)
                       → (Γ : Ctx (suc m))
@@ -650,7 +650,7 @@ drop-var : (t : Tm n) → .⦃ isVar t ⦄ → drop (FVTm t) ≡ empty
 drop-var (Var zero) = refl
 drop-var (Var (suc i)) = cong ewf (drop-var (Var i))
 
-supp-compat : (n : ℕ) → (T : Tree m) → (b : Bool) → supp-bd n T b ≡ pd-bd-supp n (tree-to-ctx T) (tree-to-pd T) b
+supp-compat : (n : ℕ) → (T : Tree m) → (b : Bool) → supp-tree-bd n T b ≡ pd-bd-supp n (tree-to-ctx T) (tree-to-pd T) b
 supp-compat zero T false = lem (tree-to-ctx T) (pd-to-pdb (tree-to-pd T))
   where
     lem : (Γ : Ctx (suc m)) → (pdb : Γ ⊢pdb) → trueAt (fromℕ m) ≡ pdb-bd-supp zero Γ pdb false
@@ -697,7 +697,7 @@ supp-compat zero T true = begin
         where open ≡-Reasoning
 supp-compat (suc n) Sing b = refl
 supp-compat (suc n) (Join S T) b = begin
-  connect-supp (suspSupp (supp-bd n S b)) (supp-bd (suc n) T b)
+  connect-supp (suspSupp (supp-tree-bd n S b)) (supp-tree-bd (suc n) T b)
     ≡⟨ cong₂ (λ a b → connect-supp (suspSupp a) b) (supp-compat n S b) (supp-compat (suc n) T b) ⟩
   connect-supp
     (suspSupp (pd-bd-supp n (tree-to-ctx S) (tree-to-pd S) b))

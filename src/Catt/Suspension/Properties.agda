@@ -68,8 +68,8 @@ susp-res-comp-ty (s ─⟨ B ⟩⟶ t) σ = Arr≃ (susp-res-comp-tm s σ) (susp
 
 susp-res-comp-tm (Var zero) ⟨ σ , t ⟩ = refl≃tm
 susp-res-comp-tm (Var (suc i)) ⟨ σ , t ⟩ = susp-res-comp-tm (Var i) σ
-susp-res-comp-tm {A = ⋆} (Coh S B τ) σ = Coh≃ refl≃ refl≃ty (susp-functorial σ τ)
-susp-res-comp-tm {A = s ─⟨ A ⟩⟶ t} (Coh S B τ) σ = trans≃tm (susp-res-comp-tm (Coh (suspTree S) (suspTy B) (suspSub τ)) (unrestrict σ)) (sub-action-≃-tm (refl≃tm {s = Coh (suspTree S) (suspTy B) (suspSub τ)}) (sub-res-unrestrict-comm σ))
+susp-res-comp-tm {A = ⋆} (Coh Δ B τ) σ = Coh≃ refl≃c refl≃ty (susp-functorial σ τ)
+susp-res-comp-tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = trans≃tm (susp-res-comp-tm (Coh (suspCtx Δ) (suspTy B) (suspSub τ)) (unrestrict σ)) (sub-action-≃-tm (refl≃tm {s = Coh (suspCtx Δ) (suspTy B) (suspSub τ)}) (sub-res-unrestrict-comm σ))
 
 susp-res-comp-sub σ ⟨⟩ = Null≃ (susp-res-comp-ty _ σ)
 susp-res-comp-sub σ ⟨ τ , t ⟩ = Ext≃ (susp-res-comp-sub σ τ) (susp-res-comp-tm t σ)

@@ -136,7 +136,7 @@ _∘_ : (σ : Sub n l A) → Sub m n B → Sub m l (B [ σ ]ty)
 Var zero [ ⟨ σ , t ⟩ ]tm = t
 Var (suc x) [ ⟨ σ , t ⟩ ]tm = Var x [ σ ]tm
 _[_]tm {A = ⋆} (Coh T B τ) σ = Coh T B (σ ∘ τ)
-_[_]tm {A = s ─⟨ A ⟩⟶ t} (Coh T B τ) σ = _[_]tm {A = A} (Coh (suspTree T) (suspTy B) (suspSub τ)) (unrestrict σ)
+_[_]tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = _[_]tm {A = A} (Coh (suspCtx Δ) (suspTy B) (suspSub τ)) (unrestrict σ)
 -- Coh (n-fold-suspTree (sl σ) T) (n-fold-suspTy (sl σ) A) ((full-unrestrict σ) ∘ (n-fold-suspSub (sl σ) τ))
 
 -- Coh Δ A (σ ∘ τ)

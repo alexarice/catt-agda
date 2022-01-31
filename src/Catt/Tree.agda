@@ -13,6 +13,13 @@ open import Relation.Nullary
 open import Data.Unit using (⊤; tt)
 open import Relation.Binary.PropositionalEquality
 
+data Tree : ℕ → Set where
+  Sing : Tree 0
+  Join : (S : Tree n) → (T : Tree m) → Tree (m + (2 + n))
+
+variable
+  S S′ T T′ U : Tree n
+
 singleton-ctx : Ctx 1
 singleton-ctx = ∅ , ⋆
 
@@ -38,6 +45,9 @@ connect-tree-length (Join {x} S S′) T = connect-tree-length S′ T + (2 + x)
 connect-tree : (S : Tree n) → (T : Tree m) → Tree (connect-tree-length S T)
 connect-tree Sing T = T
 connect-tree (Join S S′) T = Join S (connect-tree S′ T)
+
+suspTree : Tree n → Tree (2 + n)
+suspTree T = Join T Sing
 
 max : ℕ → ℕ → ℕ
 max zero m = m

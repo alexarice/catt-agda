@@ -11,17 +11,12 @@ open import Relation.Nullary
 variable
   n n′ m m′ l l′ o d d′ d″ : ℕ
 
-data Tree : ℕ → Set where
-  Sing : Tree 0
-  Join : (S : Tree n) → (T : Tree m) → Tree (m + (2 + n))
-
 data Ctx : ℕ → Set
 data Ty : ℕ → Set
 data Tm : ℕ → Set
 data Sub : (n m : ℕ) → (Ty m) → Set
 
 variable
-  S S′ T T′ U U′ : Tree n
   Γ Γ′ Δ Δ′ Υ Θ : Ctx n
   A A′ B C D : Ty n
   s s′ t t′ u : Tm n
@@ -46,7 +41,7 @@ data Sub where
 
 data Tm where
   Var : (i : (Fin n)) → Tm n
-  Coh : (S : Tree n) → (A : Ty (suc n)) → (σ : Sub (suc n) m ⋆) → Tm m
+  Coh : (Δ : Ctx (suc n)) → (A : Ty (suc n)) → (σ : Sub (suc n) m ⋆) → Tm m
 
 pattern 0V {n} = Var {n} 0F
 pattern 1V {n} = Var {n} 1F
@@ -62,3 +57,7 @@ pattern 9V {n} = Var {n} 9F
 ty-dim : Ty n → ℕ
 ty-dim ⋆ = 0
 ty-dim (s ─⟨ A ⟩⟶ t) = suc (ty-dim A)
+
+ctx-dim : Ctx n → ℕ
+ctx-dim ∅ = 0
+ctx-dim (Γ , A) = ctx-dim Γ ⊔ ty-dim A

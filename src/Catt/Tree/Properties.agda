@@ -24,6 +24,69 @@ open import Catt.Globular.Properties
 open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Variables
 open import Catt.Variables.Properties
+open import Relation.Binary using (Setoid)
+
+record TREE : Set where
+  constructor <_>t
+  field
+    {tree-n} : ℕ
+    tr : Tree tree-n
+
+open TREE public
+
+data _≃_ : Tree n → Tree m → Set where
+  Sing≃ : Sing ≃ Sing
+  Join≃ : {S : Tree n} → {S′ : Tree n′} → {T : Tree m} → {T′ : Tree m′} → S ≃ S′ → T ≃ T′ → Join S T ≃ Join S′ T′
+
+refl≃ : T ≃ T
+refl≃ {T = Sing} = Sing≃
+refl≃ {T = Join S T} = Join≃ refl≃ refl≃
+
+sym≃ : S ≃ T → T ≃ S
+sym≃ Sing≃ = Sing≃
+sym≃ (Join≃ p q) = Join≃ (sym≃ p) (sym≃ q)
+
+trans≃ : S ≃ T → T ≃ U → S ≃ U
+trans≃ Sing≃ Sing≃ = Sing≃
+trans≃ (Join≃ p q) (Join≃ p′ q′) = Join≃ (trans≃ p p′) (trans≃ q q′)
+
+tree-setoid : Setoid _ _
+tree-setoid = record { Carrier = TREE
+                     ; _≈_ = λ x y → tr x ≃ tr y
+                     ; isEquivalence = record { refl = refl≃
+                                              ; sym = sym≃
+                                              ; trans = trans≃
+                                              }
+                     }
+
+≃-to-same-n : {S : Tree n} → {T : Tree m} → S ≃ T → n ≡ m
+≃-to-same-n Sing≃ = refl
+≃-to-same-n (Join≃ p q) = cong₂ (λ a b → (a + suc (suc b))) (≃-to-same-n q) (≃-to-same-n p)
+
+≃-to-≡ : {S T : Tree n} → S ≃ T → S ≡ T
+≃-to-≡ {S = S} {T = T} q = subst (λ - → subst Tree - S ≡ T) (≡-irrelevant (≃-to-same-n q) refl) (γ q)
+  where
+    subst-Tree : (p : n ≡ n′) → (q : m ≡ m′) → (S : Tree n) → (T : Tree m) → subst Tree (cong₂ (λ a b → (a + suc (suc b))) q p) (Join S T) ≡ Join (subst Tree p S) (subst Tree q T)
+    subst-Tree refl refl S T = refl
+    γ : {S : Tree n} → {T : Tree m} → (p : S ≃ T) → subst Tree (≃-to-same-n p) S ≡ T
+    γ Sing≃ = refl
+    γ (Join≃ q r) = trans (subst-Tree (≃-to-same-n q) (≃-to-same-n r) _ _) (cong₂ Join (γ q) (γ r))
+
+susp-tree-≃ : S ≃ T → suspTree S ≃ suspTree T
+susp-tree-≃ p = Join≃ p Sing≃
+
+≃-dec : (S : Tree n) → (T : Tree m) → Dec (S ≃ T)
+≃-dec Sing Sing = yes Sing≃
+≃-dec Sing (Join S T) = no λ ()
+≃-dec (Join S T) Sing = no λ ()
+≃-dec (Join S T) (Join S′ T′) with ≃-dec S S′ | ≃-dec T T′
+... | yes p | yes q = yes (Join≃ p q)
+... | yes p | no q = no λ where (Join≃ x y) → q y
+... | no p | q = no λ where (Join≃ x y) → p x
+
+≃-irrel : Irrelevant (S ≃ T)
+≃-irrel Sing≃ Sing≃ = refl
+≃-irrel (Join≃ p q) (Join≃ p′ q′) = cong₂ Join≃ (≃-irrel p p′) (≃-irrel q q′)
 
 join-tree-has-non-zero-dim : (S : Tree n) → (T : Tree m) → ¬ (zero ≡ tree-dim (Join S T))
 join-tree-has-non-zero-dim S T ()

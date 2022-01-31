@@ -50,11 +50,11 @@ ty-dim-ty-base : (A : Ty n) → ty-dim (ty-base A) ≡ pred (ty-dim A)
 ty-dim-ty-base ⋆ = refl
 ty-dim-ty-base (s ─⟨ A ⟩⟶ t) = refl
 
-tm-to-ty-coh-sub : (S : Tree n) → (B : Ty (suc n)) → (τ : Sub (suc n) m ⋆) → (Δ : Ctx l) → (σ : Sub m l A) → tm-to-ty Δ (Coh S B τ [ σ ]tm) ≃ty B [ σ ∘ τ ]ty
-tm-to-ty-coh-sub {A = ⋆} S B τ Δ σ = refl≃ty
-tm-to-ty-coh-sub {A = s ─⟨ A ⟩⟶ t} S B τ Δ σ = begin
-  < tm-to-ty Δ (Coh (suspTree S) (suspTy B) (suspSub τ) [ unrestrict σ ]tm) >ty
-    ≈⟨ tm-to-ty-coh-sub (suspTree S) (suspTy B) (suspSub τ) Δ (unrestrict σ) ⟩
+tm-to-ty-coh-sub : (Δ : Ctx (suc n)) → (B : Ty (suc n)) → (τ : Sub (suc n) m ⋆) → (Γ : Ctx l) → (σ : Sub m l A) → tm-to-ty Γ (Coh Δ B τ [ σ ]tm) ≃ty B [ σ ∘ τ ]ty
+tm-to-ty-coh-sub {A = ⋆} Δ B τ Γ σ = refl≃ty
+tm-to-ty-coh-sub {A = s ─⟨ A ⟩⟶ t} Δ B τ Γ σ = begin
+  < tm-to-ty Γ (Coh (suspCtx Δ) (suspTy B) (suspSub τ) [ unrestrict σ ]tm) >ty
+    ≈⟨ tm-to-ty-coh-sub (suspCtx Δ) (suspTy B) (suspSub τ) Γ (unrestrict σ) ⟩
   < suspTy B [ unrestrict σ ∘ suspSub τ ]ty >ty
     ≈˘⟨ sub-action-≃-ty (refl≃ty {A = suspTy B}) (unrestrict-comp σ τ) ⟩
   < suspTy B [ unrestrict (σ ∘ τ) ]ty >ty

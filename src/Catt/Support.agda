@@ -105,38 +105,17 @@ emp // ys = emp
 (x ∷ xs) // ewf ys = x ∷ (xs // ys)
 (x ∷ xs) // ewt ys = ewf (xs // ys)
 
-supp-bd′ : (d : ℕ) → (Γ : Ctx n) → (b : Bool) → VarSet n
-supp-bd′ d ∅ b = emp
-supp-bd′ d (Γ , A) b with d <? ty-dim A
-... | yes p = ewf (supp-bd′ d Γ b // FVTm (if b then ty-src< A p else ty-tgt< A p))
-... | no p = ewt (supp-bd′ d Γ b)
+supp-tree-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → VarSet (suc n)
+supp-tree-bd zero T false = trueAt (fromℕ _)
+supp-tree-bd zero T true = FVTm (tree-last-var T)
+supp-tree-bd (suc d) Sing b = full
+supp-tree-bd (suc d) (Join S T) b = connect-supp (suspSupp (supp-tree-bd d S b)) (supp-tree-bd (suc d) T b)
 
--- supp-bd′-connect : (d : ℕ) → (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → (b : Bool) → supp-bd′ (suc d) (connect Γ t Δ) b ≡ connect-supp (supp-bd′ (suc d) Γ b) (supp-bd′ (suc d) Δ b)
--- supp-bd′-connect d Γ t (∅ , A) b with (suc d <? ty-dim A)
--- ... | yes p = refl
--- ... | no p = refl
--- supp-bd′-connect d Γ t (Δ , B , A) b with suc d <? ty-dim A | suc d <? ty-dim (A [ connect-inc-right t (ctxLength Δ) ]ty)
--- ... | yes p | yes q = {!!}
--- ... | yes p | no q = ⊥-elim (q (<-transˡ p (≤-reflexive (sub-dim (connect-inc-right t _) A))))
--- ... | no p | yes q = ⊥-elim (p (<-transˡ q (≤-reflexive (sym (sub-dim (connect-inc-right t _) A)))))
--- ... | no p | no q = {!!}
-
-supp-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → VarSet (suc n)
-supp-bd zero T false = trueAt (fromℕ _)
-supp-bd zero T true = FVTm (tree-last-var T)
-supp-bd (suc d) Sing b = full
-supp-bd (suc d) (Join S T) b = connect-supp (suspSupp (supp-bd d S b)) (supp-bd (suc d) T b)
-
-supp-condition : (b : Bool) → (A : Ty (suc n)) → (T : Tree n) → Set
-supp-condition false A T = FVTy A ≡ full
-supp-condition true ⋆ T = ⊥
-supp-condition true (s ─⟨ A ⟩⟶ t) T = NonZero′ (tree-dim T) × FVTy A ∪ FVTm s ≡ supp-bd (pred (tree-dim T)) T false × FVTy A ∪ FVTm t ≡ supp-bd (pred (tree-dim T)) T true
-
-suspSuppBd : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSupp (supp-bd d T b) ≡ supp-bd (suc d) (suspTree T) b
-suspSuppBd zero T false = refl
-suspSuppBd zero T true = refl
-suspSuppBd (suc d) Sing b = refl
-suspSuppBd (suc d) (Join S T) b = refl
+susp-supp-tree-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSupp (supp-tree-bd d T b) ≡ supp-tree-bd (suc d) (suspTree T) b
+susp-supp-tree-bd zero T false = refl
+susp-supp-tree-bd zero T true = refl
+susp-supp-tree-bd (suc d) Sing b = refl
+susp-supp-tree-bd (suc d) (Join S T) b = refl
 
 lookup-isVar : (xs : VarSet n) → (t : Tm n) → .⦃ isVar t ⦄ → Bool
 lookup-isVar (x ∷ xs) (Var zero) = x
@@ -180,5 +159,10 @@ pdb-bd-supp n (Γ , B , A) pdb b = tri-cases (<-cmp n (ty-dim B))
                                             (ewf (if b then ewt (drop (pdb-bd-supp n Γ (pdb-prefix pdb) b)) else (ewf (pdb-bd-supp n Γ (pdb-prefix pdb) b))))
                                             (ewt (ewt (pdb-bd-supp n Γ (pdb-prefix pdb) b)))
 
-pd-bd-supp : (n : ℕ) → (Γ : Ctx m) → (pd : Γ ⊢pd) → (b : Bool) → VarSet m
-pd-bd-supp n Γ pd b = pdb-bd-supp n Γ (pd-to-pdb pd) b
+pd-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pd : Γ ⊢pd ⦄ → (b : Bool) → VarSet m
+pd-bd-supp n Γ b = pdb-bd-supp n Γ (pd-to-pdb it) b
+
+supp-condition : (b : Bool) → (A : Ty (suc n)) → (Γ : Ctx (suc n)) → .⦃ pd : Γ ⊢pd ⦄ → Set
+supp-condition false A Γ = FVTy A ≡ full
+supp-condition true ⋆ Γ = ⊥
+supp-condition true (s ─⟨ A ⟩⟶ t) Γ = NonZero′ (ctx-dim Γ) × FVTy A ∪ FVTm s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false × FVTy A ∪ FVTm t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true

@@ -11,7 +11,6 @@ open import Data.Sum
 open import Data.Product renaming (_,_ to _,,_)
 -- open import Catt.Variables
 
-suspTree : Tree n → Tree (2 + n)
 suspCtx : Ctx n → Ctx (2 + n)
 suspTy : Ty n → Ty (2 + n)
 getFst : Tm (2 + n)
@@ -21,8 +20,6 @@ restrict : Sub (2 + n) m A → (s t : Tm m) → Sub n m (s ─⟨ A ⟩⟶ t)
 unrestrict : Sub n m (s ─⟨ A ⟩⟶ t) → Sub (2 + n) m A
 suspSubRes : (σ : Sub n m A) → Sub n (2 + m) (suspTy A)
 suspSub : Sub n m ⋆ → Sub (2 + n) (2 + m) ⋆
-
-suspTree T = Join T Sing
 
 suspCtx ∅ = ∅ , ⋆ , ⋆
 suspCtx (Γ , A) = (suspCtx Γ) , (suspTy A)
@@ -35,7 +32,7 @@ getFst = Var (fromℕ _)
 getSnd = Var (inject₁ (fromℕ _))
 
 suspTm (Var i) = Var (inject₁ (inject₁ i))
-suspTm (Coh T A σ) = Coh (suspTree T) (suspTy A) (suspSub σ)
+suspTm (Coh Δ A σ) = Coh (suspCtx Δ) (suspTy A) (suspSub σ)
 
 restrict ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ s t = ⟨⟩
 restrict ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = ⟨ restrict σ s t , u ⟩

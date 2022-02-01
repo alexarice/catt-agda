@@ -62,18 +62,6 @@ _∪_ : VarSet n → VarSet n → VarSet n
 emp ∪ emp = emp
 (x ∷ xs) ∪ (y ∷ ys) = (x ∨ y) ∷ xs ∪ ys
 
--- Supp : (x : CtxSyntax n) → VarSet n
--- Supp = ≺-rec (λ {n} _ → VarSet n) r
---   where
---     r : (x : CtxSyntax n) → (∀ {m} → (y : CtxSyntax m) → y ≺ x → VarSet m) → VarSet n
---     r (CtxTm (Var zero) (Γ , A)) rec = ewt (rec (CtxTy A Γ) Tm1)
---     r (CtxTm (Var (suc i)) (Γ , A)) rec = ewf (rec (CtxTm (Var i) Γ) Tm2)
---     r (CtxTm (Coh S A σ) Γ) rec = rec (CtxSub σ Γ) Tm4
---     r (CtxTy ⋆ Γ) rec = empty
---     r (CtxTy (s ─⟨ A ⟩⟶ t) Γ) rec = rec (CtxTy A Γ) Ty2 ∪ rec (CtxTm s Γ) Ty1 ∪ rec (CtxTm t Γ) Ty3
---     r (CtxSub ⟨⟩ Γ) rec = rec (CtxTy _ Γ) Sub1
---     r (CtxSub ⟨ σ , t ⟩ Γ) rec = (rec (CtxSub σ Γ) Sub2) ∪ (rec (CtxTm t Γ) Sub3)
-
 FVCtx : (Γ : Ctx n) → VarSet n
 FVTm : (t : Tm n) → VarSet n
 FVTy : (A : Ty n) → VarSet n
@@ -87,6 +75,25 @@ FVTy (s ─⟨ A ⟩⟶ t) = FVTy A ∪ FVTm s ∪ FVTm t
 FVSub {A = A} ⟨⟩ = FVTy A
 FVSub ⟨ σ , t ⟩ = FVSub σ ∪ FVTm t
 
+⊥-elim′ : ∀ {w} {Whatever : Set w} → .⊥ → Whatever
+⊥-elim′ ()
+
+pdb-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pdb : Γ ⊢pdb ⦄ → (b : Bool) → VarSet m
+pdb-bd-supp n ∅ ⦃ pdb ⦄ b = ⊥-elim′ (pdb-odd-length pdb)
+pdb-bd-supp n (∅ , A) b = ewt emp
+pdb-bd-supp n (Γ , B , A) b = tri-cases (<-cmp n (ty-dim B))
+                                            (ewf (ewf (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)))
+                                            (ewf (if b then ewt (drop (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)) else (ewf (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b))))
+                                            (ewt (ewt (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)))
+
+pd-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pd : Γ ⊢pd ⦄ → (b : Bool) → VarSet m
+pd-bd-supp n Γ b = pdb-bd-supp n Γ ⦃ pd-to-pdb it ⦄ b
+
+supp-condition : (b : Bool) → (A : Ty (suc n)) → (Γ : Ctx (suc n)) → .⦃ pd : Γ ⊢pd ⦄ → Set
+supp-condition false A Γ = FVTy A ≡ full
+supp-condition true ⋆ Γ = ⊥
+supp-condition true (s ─⟨ A ⟩⟶ t) Γ = NonZero′ (ctx-dim Γ) × FVTy A ∪ FVTm s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false × FVTy A ∪ FVTm t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true
+
 TransportVarSet : VarSet n → Sub n m A → VarSet m
 TransportVarSet xs ⟨⟩ = empty
 TransportVarSet (ewf xs) ⟨ σ , t ⟩ = TransportVarSet xs σ
@@ -99,11 +106,6 @@ connect-supp {m = suc m} xs (x ∷ ys) = x ∷ connect-supp xs ys
 suspSupp : VarSet n → VarSet (2 + n)
 suspSupp [] = full
 suspSupp (x ∷ vs) = x ∷ suspSupp vs
-
-_//_ : VarSet n → VarSet n → VarSet n
-emp // ys = emp
-(x ∷ xs) // ewf ys = x ∷ (xs // ys)
-(x ∷ xs) // ewt ys = ewf (xs // ys)
 
 supp-tree-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → VarSet (suc n)
 supp-tree-bd zero T false = trueAt (fromℕ _)
@@ -131,6 +133,11 @@ _≡ᵖ_ = Pointwise _≡_
 FVTmTy : Ctx n → Tm n → VarSet n
 FVTmTy Γ t = FVTy (tm-to-ty Γ t) ∪ FVTm t
 
+is-DC : (Γ : Ctx n) → (xs : VarSet n) → Set
+is-DC ∅ emp = ⊤
+is-DC (Γ , A) (ewf xs) = is-DC Γ xs
+is-DC (Γ , A) (ewt xs) = is-DC Γ xs × (FVTy A ⊆ xs)
+
 DC : (Γ : Ctx n) → VarSet n → VarSet n
 DC ∅ xs = emp
 DC (Γ , A) (ewf xs) = ewf (DC Γ xs)
@@ -144,25 +151,3 @@ SuppTy Γ A = DC Γ (FVTy A)
 
 SuppSub : (Γ : Ctx n) → (σ : Sub m n A) → VarSet n
 SuppSub Γ σ = DC Γ (FVSub σ)
-
-⊥-elim′ : ∀ {w} {Whatever : Set w} → .⊥ → Whatever
-⊥-elim′ ()
-
-pdb-bd-supp : (n : ℕ) → (Γ : Ctx m) → .(pdb : Γ ⊢pdb) → (b : Bool) → VarSet m
-pdb-bd-supp n ∅ pdb b = let
-  .x : ⊥
-  x = (pdb-odd-length pdb)
-  in ⊥-elim′ x
-pdb-bd-supp n (∅ , A) pdb b = ewt emp
-pdb-bd-supp n (Γ , B , A) pdb b = tri-cases (<-cmp n (ty-dim B))
-                                            (ewf (ewf (pdb-bd-supp n Γ (pdb-prefix pdb) b)))
-                                            (ewf (if b then ewt (drop (pdb-bd-supp n Γ (pdb-prefix pdb) b)) else (ewf (pdb-bd-supp n Γ (pdb-prefix pdb) b))))
-                                            (ewt (ewt (pdb-bd-supp n Γ (pdb-prefix pdb) b)))
-
-pd-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pd : Γ ⊢pd ⦄ → (b : Bool) → VarSet m
-pd-bd-supp n Γ b = pdb-bd-supp n Γ (pd-to-pdb it) b
-
-supp-condition : (b : Bool) → (A : Ty (suc n)) → (Γ : Ctx (suc n)) → .⦃ pd : Γ ⊢pd ⦄ → Set
-supp-condition false A Γ = FVTy A ≡ full
-supp-condition true ⋆ Γ = ⊥
-supp-condition true (s ─⟨ A ⟩⟶ t) Γ = NonZero′ (ctx-dim Γ) × FVTy A ∪ FVTm s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false × FVTy A ∪ FVTm t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true

@@ -22,6 +22,7 @@ import Relation.Binary.Reasoning.Setoid as Reasoning
 open import Data.Fin using (Fin; fromℕ; suc; zero)
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Relation.Nullary
 
 -- subst-pdb : {Γ Δ : Ctx (suc n)} → (pdb : Γ ⊢pd[ submax ][ d ]) → Δ ≃c Γ → Δ ⊢pd[ submax ][ d ]
 -- subst-pdb pdb c with ≃c-to-≡ c
@@ -854,6 +855,10 @@ pdb-proj₁ : (pdb : (Γ , B , A) ⊢pdb) → B ≃ty focus-ty (pdb-prefix pdb)
 pdb-proj₁ (Extend pdb p q) = p
 pdb-proj₁ (Restr pdb) = pdb-proj₁ pdb
 
+pdb-proj₂ : (pdb : Γ , B , A ⊢pdb) → A ≃ty liftTerm (focus-tm (pdb-prefix pdb)) ─⟨ liftType (focus-ty (pdb-prefix pdb)) ⟩⟶ 0V
+pdb-proj₂ (Extend pdb p q) = q
+pdb-proj₂ (Restr pdb) = pdb-proj₂ pdb
+
 focus-ty-dim-to-non-empty : {Γ : Ctx (suc n)} → (pdb : Γ ⊢pdb) → (1 ≤ ty-dim (focus-ty pdb)) → NonZero′ n
 focus-ty-dim-to-non-empty (Extend pdb p q) x = it
 focus-ty-dim-to-non-empty (Restr pdb) x = focus-ty-dim-to-non-empty pdb (≤-trans x (≤-trans (≤-reflexive (ty-dim-ty-base (focus-ty pdb))) pred[n]≤n))
@@ -921,6 +926,90 @@ pdb-irrel (Restr pdb) (Restr pdb2) x with pdb-irrel pdb pdb2 lem
         ≡⟨ suc-pred (ty-dim (focus-ty pdb2)) ⟩
       ty-dim (focus-ty pdb2) ∎
 ... | refl = refl
+
+pdb-max-dim : {Γ : Ctx n} → Γ ⊢pdb → ℕ
+pdb-max-dim Base = 0
+pdb-max-dim (Extend {B = B} pdb p q) = ty-dim B
+pdb-max-dim (Restr pdb) = pdb-max-dim pdb
+
+pdb-max-dim-is-A : {Γ : Ctx n} → (pdb : Γ , B , A ⊢pdb) → pdb-max-dim pdb ≡ ty-dim A
+pdb-max-dim-is-A (Extend pdb p q) = refl
+pdb-max-dim-is-A (Restr pdb) = pdb-max-dim-is-A pdb
+
+pdb-max-dim-irrel : (pdb1 : Γ ⊢pdb) → (pdb2 : Γ ⊢pdb) → pdb-max-dim pdb1 ≡ pdb-max-dim pdb2
+pdb-max-dim-irrel {Γ = ∅} pdb1 pdb2 = ⊥-elim (pdb-odd-length pdb1)
+pdb-max-dim-irrel {Γ = ∅ , .⋆} Base Base = refl
+pdb-max-dim-irrel {Γ = ∅ , .⋆} Base (Restr pdb2) = pdb-max-dim-irrel Base pdb2
+pdb-max-dim-irrel {Γ = ∅ , A} (Restr pdb1) pdb2 = pdb-max-dim-irrel pdb1 pdb2
+pdb-max-dim-irrel {Γ = Γ , B , A} pdb1 pdb2 = trans (pdb-max-dim-is-A pdb1) (sym (pdb-max-dim-is-A pdb2))
+
+pdb-max-dim-is-max : (pdb : Γ ⊢pdb) → ty-dim (focus-ty pdb) ≤ pdb-max-dim pdb
+pdb-max-dim-is-max Base = z≤n
+pdb-max-dim-is-max (Extend pdb p q) = ≤-reflexive (lift-ty-dim _)
+pdb-max-dim-is-max (Restr pdb) = ≤-trans (≤-trans (≤-reflexive (ty-dim-ty-base (focus-ty pdb))) pred[n]≤n) (pdb-max-dim-is-max pdb)
+
+pdb-reduce-dim : (pdb : Γ ⊢pdb) → (d : ℕ) → (k : ℕ) → (d + k ≡ ty-dim (focus-ty pdb)) → Γ ⊢pdb
+pdb-reduce-dim pdb d zero p = pdb
+pdb-reduce-dim pdb d (suc k) p = pdb-reduce-dim (Restr pdb ⦃ NonZero′-subst (trans (sym (+-suc d k)) p) it ⦄) d k lem
+  where
+    open ≡-Reasoning
+    lem : d + k ≡ ty-dim (ty-base (focus-ty pdb))
+    lem = begin
+      d + k
+        ≡˘⟨ cong pred (+-suc d k)  ⟩
+      pred (d + suc k)
+        ≡⟨ cong pred p ⟩
+      pred (ty-dim (focus-ty pdb))
+        ≡˘⟨ ty-dim-ty-base (focus-ty pdb) ⟩
+      ty-dim (ty-base (focus-ty pdb)) ∎
+
+pdb-reduce-dim-dim : (pdb : Γ ⊢pdb) → (d : ℕ) → (k : ℕ) → (p : d + k ≡ ty-dim (focus-ty pdb)) → d ≡ ty-dim (focus-ty (pdb-reduce-dim pdb d k p))
+pdb-reduce-dim-dim pdb d zero p = trans (sym (+-identityʳ d)) p
+pdb-reduce-dim-dim pdb d (suc k) p = pdb-reduce-dim-dim (Restr pdb ⦃ NonZero′-subst (trans (sym (+-suc d k)) p) it ⦄) d k lem
+  where
+    open ≡-Reasoning
+    lem : d + k ≡ ty-dim (ty-base (focus-ty pdb))
+    lem = begin
+      d + k
+        ≡˘⟨ cong pred (+-suc d k)  ⟩
+      pred (d + suc k)
+        ≡⟨ cong pred p ⟩
+      pred (ty-dim (focus-ty pdb))
+        ≡˘⟨ ty-dim-ty-base (focus-ty pdb) ⟩
+      ty-dim (ty-base (focus-ty pdb)) ∎
+
+pdb-to-dim : {Γ : Ctx n} → (pdb : Γ ⊢pdb) → (d : ℕ) → (d ≤ pdb-max-dim pdb) → Γ ⊢pdb
+pdb-to-dim pdb d p with d ≤″? ty-dim (focus-ty pdb)
+... | yes (less-than-or-equal {k = k} q) = pdb-reduce-dim pdb d k q
+pdb-to-dim Base .zero z≤n | no q = ⊥-elim (q (less-than-or-equal refl))
+pdb-to-dim (Extend pdb p₁ q₁) d p | no q = ⊥-elim (q (≤⇒≤″ (≤-trans p (≤-reflexive (sym (lift-ty-dim _))))))
+pdb-to-dim (Restr pdb) d p | no q = pdb-to-dim pdb d p
+
+pdb-to-dim-dim : {Γ : Ctx n} → (pdb : Γ ⊢pdb) → (d : ℕ) → (p : d ≤ pdb-max-dim pdb) → d ≡ ty-dim (focus-ty (pdb-to-dim pdb d p))
+pdb-to-dim-dim pdb d p with d ≤″? ty-dim (focus-ty pdb)
+... | yes (less-than-or-equal {k = k} q) = pdb-reduce-dim-dim pdb d k q
+pdb-to-dim-dim Base .zero z≤n | no q = ⊥-elim (q (less-than-or-equal refl))
+pdb-to-dim-dim (Extend pdb p₁ q₁) d p | no q = ⊥-elim (q (≤⇒≤″ (≤-trans p (≤-reflexive (sym (lift-ty-dim _))))))
+pdb-to-dim-dim (Restr pdb) d p | no q = pdb-to-dim-dim pdb d p
+
+pdb-dec : (Γ : Ctx n) → Dec (Γ ⊢pdb)
+pdb-dec ∅ = no (λ x → pdb-odd-length x)
+pdb-dec (∅ , ⋆) = yes Base
+pdb-dec (∅ , s ─⟨ A ⟩⟶ t) = no (λ x → no-term-in-empty-context s)
+pdb-dec (Γ , B , A) with (pdb-dec Γ)
+... | no d = no (λ x → d (pdb-prefix x))
+... | yes d with (ty-dim B ≤? pdb-max-dim d)
+... | no q = no (λ x → q (≤-trans (≤-reflexive (ty-dim-≃ (pdb-proj₁ x))) (≤-trans (pdb-max-dim-is-max (pdb-prefix x)) (≤-reflexive (pdb-max-dim-irrel (pdb-prefix x) d)))))
+... | yes q with ≃ty-dec B (focus-ty new-pdb) | ≃ty-dec A (liftTerm (focus-tm new-pdb) ─⟨ liftType (focus-ty new-pdb) ⟩⟶ 0V)
+  where new-pdb = pdb-to-dim d (ty-dim B) q
+... | yes p | yes r = yes (Extend (pdb-to-dim d (ty-dim B) q) p r)
+... | yes p | no r = no (λ x → r (trans≃ty (pdb-proj₂ x) (reflexive≃ty (cong (λ y → liftTerm (focus-tm y) ─⟨ liftType (focus-ty y) ⟩⟶ 0V) (pdb-irrel (pdb-prefix x) (pdb-to-dim d (ty-dim B) q) (trans (sym (ty-dim-≃ (pdb-proj₁ x))) (pdb-to-dim-dim d (ty-dim B) q)))))))
+... | no p | r = no (λ x → p (trans≃ty (pdb-proj₁ x) (reflexive≃ty (cong focus-ty (pdb-irrel (pdb-prefix x) (pdb-to-dim d (ty-dim B) q) (trans (sym (ty-dim-≃ (pdb-proj₁ x))) (pdb-to-dim-dim d (ty-dim B) q)))))))
+
+pd-dec : (Γ : Ctx n) → Dec (Γ ⊢pd)
+pd-dec Γ with pdb-dec Γ
+... | yes p = yes (Finish (pdb-to-dim p 0 z≤n) ⦃ IsZero-subst (pdb-to-dim-dim p 0 z≤n) it ⦄)
+... | no p = no (λ where (Finish x) → p x)
 
 right-base-≃ : A ≃ty B → s ≃tm t → right-base A s ≃tm right-base B t
 right-base-≃ (Star≃ x) q = q

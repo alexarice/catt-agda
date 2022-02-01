@@ -6,13 +6,14 @@ open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Syntax
 open import Data.Nat
-open import Data.Vec
+open import Data.Nat.Properties
+open import Data.Vec hiding (drop)
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Relation.Binary.PropositionalEquality
 open import Data.Fin using (fromℕ; inject₁; Fin; zero; suc)
 open import Data.Bool renaming (T to Truth)
-open import Data.Bool.Properties
+open import Data.Bool.Properties using (∨-identityʳ)
 open import Data.Empty
 open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Tree
@@ -20,7 +21,39 @@ open import Catt.Tree.Properties
 open import Data.Unit
 import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Catt.Globular
+open import Catt.Globular.Properties
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Pasting
+open import Catt.Pasting.Properties
+open import Catt.Suspension.Pasting
+open import Relation.Binary.Definitions
+open import Relation.Nullary
+
+susp-pdb-bd-compat : (n : ℕ)
+                   → (Γ : Ctx m)
+                   → .⦃ pdb : Γ ⊢pdb ⦄
+                   → (b : Bool)
+                   → suspSupp (pdb-bd-supp n Γ b) ≡ pdb-bd-supp (suc n) (suspCtx Γ) ⦃ susp-pdb pdb ⦄ b
+susp-pdb-bd-compat n ∅ b = ⊥-elim′ (pdb-odd-length it)
+susp-pdb-bd-compat n (∅ , A) b = refl
+susp-pdb-bd-compat n (Γ , B , A) b with <-cmp n (ty-dim B) | <-cmp (suc n) (ty-dim (suspTy B)) | b
+... | tri< a ¬b ¬c | tri< a₁ ¬b₁ ¬c₁ | b = cong ewf (cong ewf (susp-pdb-bd-compat n Γ ⦃ pdb-prefix it ⦄ b))
+... | tri< a ¬b ¬c | tri≈ ¬a b₁ ¬c₁ | b = ⊥-elim (¬a (<-transʳ a (<-transˡ (n<1+n (ty-dim B)) (≤-reflexive (sym (susp-dim B))))))
+... | tri< a ¬b ¬c | tri> ¬a ¬b₁ c | b = ⊥-elim (¬a (<-transʳ a (<-transˡ (n<1+n (ty-dim B)) (≤-reflexive (sym (susp-dim B))))))
+... | tri≈ ¬a b₁ ¬c | tri< a ¬b ¬c₁ | b = ⊥-elim (¬b (trans (cong suc b₁) (sym (susp-dim B))))
+... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | false = cong ewf (cong ewf (susp-pdb-bd-compat n Γ ⦃ pdb-prefix it ⦄ false))
+... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | true = cong ewf (cong ewt (trans (susp-supp-drop (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ true) ⦃ pdb-bd-supp-non-empty n Γ ⦃ pdb-prefix it ⦄ true ⦄) (cong drop (susp-pdb-bd-compat n Γ ⦃ pdb-prefix it ⦄ true))))
+... | tri≈ ¬a b₁ ¬c | tri> ¬a₁ ¬b c | b = ⊥-elim (¬b (trans (cong suc b₁) (sym (susp-dim B))))
+... | tri> ¬a ¬b c | tri< a ¬b₁ ¬c | b = ⊥-elim (¬c (s≤s (≤-trans (≤-reflexive (susp-dim B)) c)))
+... | tri> ¬a ¬b c | tri≈ ¬a₁ b₁ ¬c | b = ⊥-elim (¬c (s≤s (≤-trans (≤-reflexive (susp-dim B)) c)))
+... | tri> ¬a ¬b c | tri> ¬a₁ ¬b₁ c₁ | b = cong ewt (cong ewt (susp-pdb-bd-compat n Γ ⦃ pdb-prefix it ⦄ b))
+
+susp-pd-bd-compat : (n : ℕ)
+                  → (Γ : Ctx m)
+                  → .⦃ pd : Γ ⊢pd ⦄
+                  → (b : Bool)
+                  → suspSupp (pd-bd-supp n Γ b) ≡ pd-bd-supp (suc n) (suspCtx Γ) ⦃ susp-pd pd ⦄ b
+susp-pd-bd-compat n Γ b = susp-pdb-bd-compat n Γ ⦃ pd-to-pdb it ⦄ b
 
 suspSupp∪ : (vs vs′ : VarSet n) → suspSupp vs ∪ suspSupp vs′ ≡ suspSupp (vs ∪ vs′)
 suspSupp∪ emp emp = refl
@@ -97,6 +130,7 @@ suspSuppFull : suspSupp (full {n}) ≡ full
 suspSuppFull {zero} = refl
 suspSuppFull {suc n} = cong ewt suspSuppFull
 
+{-
 suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {T : Tree n} → supp-condition b A T → supp-condition b (suspTy A) (suspTree T)
 suspSuppCondition {b = false} {A} {T} sc = begin
   FVTy (suspTy A) ≡⟨ suspSuppTy A ⟩
@@ -125,6 +159,58 @@ suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {T} (nz ,, sc1 ,, sc2) = it ,
       suspSupp (supp-bd (pred (tree-dim T)) T true) ≡⟨ suspSuppBd (pred (tree-dim T)) T true ⟩
       supp-bd (suc (pred (tree-dim T))) (suspTree T) true ≡⟨ cong (λ - → supp-bd - (suspTree T) true) (suc-pred (tree-dim T)) ⟩
       supp-bd (pred (tree-dim (suspTree T))) (suspTree T) true ∎
+-}
+
+suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {Γ : Ctx (suc n)} → .⦃ pd : Γ ⊢pd ⦄ → supp-condition b A Γ → supp-condition b (suspTy A) (suspCtx Γ) ⦃ susp-pd it ⦄
+suspSuppCondition {b = false} {A} {Γ} sc = begin
+  FVTy (suspTy A)
+    ≡⟨ suspSuppTy A ⟩
+  suspSupp (FVTy A)
+    ≡⟨ cong suspSupp sc ⟩
+  suspSupp full
+    ≡⟨ suspSuppFull ⟩
+  full ∎
+  where
+    open ≡-Reasoning
+suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {Γ} ⦃ pd ⦄ (nz ,, sc1 ,, sc2) = NonZero′-subst (sym (susp-ctx-dim Γ)) it ,, l1 ,, l2
+  where
+    instance _ = nz
+    instance _ = susp-pd {Γ = Γ} (recompute (pd-dec Γ) it)
+    open ≡-Reasoning
+
+    l3 : suc (pred (ctx-dim Γ)) ≡ pred (ctx-dim (suspCtx Γ))
+    l3 = begin
+      suc (pred (ctx-dim Γ))
+        ≡⟨ suc-pred (ctx-dim Γ) ⟩
+      ctx-dim Γ
+        ≡˘⟨ cong pred (susp-ctx-dim Γ) ⟩
+      pred (ctx-dim (suspCtx Γ)) ∎
+
+    l1 : FVTy (suspTy A) ∪ FVTm (suspTm s) ≡
+           pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) false
+    l1 = begin
+      FVTy (suspTy A) ∪ FVTm (suspTm s)
+        ≡⟨ suspSuppTyTm A s ⟩
+      suspSupp (FVTy A ∪ FVTm s)
+        ≡⟨ cong suspSupp sc1 ⟩
+      suspSupp (pd-bd-supp (pred (ctx-dim Γ)) Γ false)
+        ≡⟨ susp-pd-bd-compat (pred (ctx-dim Γ)) Γ false ⟩
+      pd-bd-supp (suc (pred (ctx-dim Γ))) (suspCtx Γ) false
+        ≡⟨ cong (λ x → pd-bd-supp x (suspCtx Γ) false) l3 ⟩
+      pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) false ∎
+
+    l2 : FVTy (suspTy A) ∪ FVTm (suspTm t) ≡
+           pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) true
+    l2 = begin
+      FVTy (suspTy A) ∪ FVTm (suspTm t)
+        ≡⟨ suspSuppTyTm A t ⟩
+      suspSupp (FVTy A ∪ FVTm t)
+        ≡⟨ cong suspSupp sc2 ⟩
+      suspSupp (pd-bd-supp (pred (ctx-dim Γ)) Γ true)
+        ≡⟨ susp-pd-bd-compat (pred (ctx-dim Γ)) Γ true ⟩
+      pd-bd-supp (suc (pred (ctx-dim Γ))) (suspCtx Γ) true
+        ≡⟨ cong (λ x → pd-bd-supp x (suspCtx Γ) true) l3 ⟩
+      pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) true ∎
 
 TransportVarSet-susp : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet (suspSupp xs) (suspSub σ) ≡ suspSupp (TransportVarSet xs σ)
 TransportVarSet-susp emp ⟨⟩ = suspSuppLem _

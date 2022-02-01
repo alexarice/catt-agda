@@ -42,6 +42,10 @@ susp-dim : (A : Ty n) → ty-dim (suspTy A) ≡ suc (ty-dim A)
 susp-dim ⋆ = refl
 susp-dim (s ─⟨ A ⟩⟶ t) = cong suc (susp-dim A)
 
+susp-ctx-dim : (Γ : Ctx n) → .⦃ NonZero′ n ⦄ → ctx-dim (suspCtx Γ) ≡ suc (ctx-dim Γ)
+susp-ctx-dim (∅ , A) = susp-dim A
+susp-ctx-dim (Γ , B , A) = cong₂ _⊔_ (susp-ctx-dim (Γ , B)) (susp-dim A)
+
 lift-ty-dim : (A : Ty n) → ty-dim (liftType A) ≡ ty-dim A
 lift-ty-dim ⋆ = refl
 lift-ty-dim (s ─⟨ A ⟩⟶ t) = cong suc (lift-ty-dim A)

@@ -12,11 +12,10 @@ open import Catt.Support.Properties
 open import Catt.Suspension.Support
 open import Catt.Suspension
 open import Data.Nat
-open import Data.Vec
+open import Data.Vec hiding (drop)
 open import Data.Fin using (fromℕ;inject₁)
 open import Relation.Binary.PropositionalEquality
 open import Data.Bool renaming (T to Truth)
-open import Data.Bool.Properties
 open import Tactic.MonoidSolver
 import Relation.Binary.Reasoning.Setoid as Reasoning
 import Relation.Binary.Reasoning.PartialOrder as PReasoning
@@ -24,6 +23,44 @@ open import Catt.Variables
 open import Catt.Tree
 open import Data.Unit using (tt)
 open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise; Pointwise-≡⇒≡)
+open import Catt.Pasting
+open import Catt.Pasting.Properties
+open import Catt.Connection.Pasting
+open import Relation.Binary.Definitions
+open import Data.Empty
+open import Catt.Globular
+open import Catt.Globular.Properties
+open import Data.Nat.Properties
+
+connect-susp-pdb-bd-compat : (n : ℕ)
+                      → (Γ : Ctx (suc m))
+                      → .⦃ pd : Γ ⊢pd ⦄
+                      → (Δ : Ctx (suc l))
+                      → .⦃ pdb : Δ ⊢pdb ⦄
+                      → (b : Bool)
+                      → connect-supp (suspSupp (pd-bd-supp n Γ b)) (pdb-bd-supp (suc n) Δ b) ≡ pdb-bd-supp (suc n) (connect-susp Γ Δ) ⦃ connect-susp-pdb pd pdb ⦄ b
+connect-susp-pdb-bd-compat n Γ ⦃ pd ⦄ (∅ , A) b = susp-pdb-bd-compat n Γ ⦃ pd-to-pdb pd ⦄ b
+connect-susp-pdb-bd-compat n Γ (∅ , B , A) b = ⊥-elim′ (pdb-odd-length it)
+connect-susp-pdb-bd-compat n Γ (Δ , C , B , A) b with <-cmp (suc n) (ty-dim B) | <-cmp (suc n) (ty-dim (B [ connect-susp-inc-right (pred (ctxLength Γ)) _ ]ty)) | b
+... | tri< a ¬b ¬c | tri< a₁ ¬b₁ ¬c₁ | b = cong ewf (cong ewf (connect-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ b))
+... | tri< a ¬b ¬c | tri≈ ¬a b₁ ¬c₁ | b = ⊥-elim (¬a (<-transˡ a (≤-reflexive (sub-dim (connect-susp-inc-right _ _) B))))
+... | tri< a ¬b ¬c | tri> ¬a ¬b₁ c | b = ⊥-elim ((¬a (<-transˡ a (≤-reflexive (sub-dim (connect-susp-inc-right _ _) B)))))
+... | tri≈ ¬a b₁ ¬c | tri< a ¬b ¬c₁ | b = ⊥-elim (¬b (trans b₁ (sub-dim (connect-susp-inc-right _ _) B)))
+... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | false = cong ewf (cong ewf (connect-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ false))
+... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | true = cong ewf (cong ewt (trans (connect-drop (suspSupp (pd-bd-supp n Γ true)) (pdb-bd-supp (suc n) (Δ , C) ⦃ pdb-prefix it ⦄ true) ⦃ pdb-bd-supp-non-empty-special n (Δ , C) ⦃ pdb-prefix it ⦄ true ⦃ focus-ty-dim-to-non-empty (pdb-prefix it) (≤-trans (≤-trans (s≤s z≤n) (≤-reflexive b₁)) (≤-reflexive (ty-dim-≃ (pdb-proj₁ it)))) ⦄ ⦄) (cong drop (connect-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ true))))
+... | tri≈ ¬a b₁ ¬c | tri> ¬a₁ ¬b c | b = ⊥-elim (¬b (trans b₁ (sub-dim (connect-susp-inc-right _ _) B)))
+... | tri> ¬a ¬b c | tri< a ¬b₁ ¬c | b = ⊥-elim (¬c (<-transʳ (≤-reflexive (sym (sub-dim (connect-susp-inc-right _ _) B))) c))
+... | tri> ¬a ¬b c | tri≈ ¬a₁ b₁ ¬c | b = ⊥-elim (¬c (<-transʳ (≤-reflexive (sym (sub-dim (connect-susp-inc-right _ _) B))) c))
+... | tri> ¬a ¬b c | tri> ¬a₁ ¬b₁ c₁ | b = cong ewt (cong ewt (connect-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ b))
+
+connect-susp-pd-bd-compat : (n : ℕ)
+                      → (Γ : Ctx (suc m))
+                      → .⦃ pd : Γ ⊢pd ⦄
+                      → (Δ : Ctx (suc l))
+                      → .⦃ pd2 : Δ ⊢pd ⦄
+                      → (b : Bool)
+                      → connect-supp (suspSupp (pd-bd-supp n Γ b)) (pd-bd-supp (suc n) Δ b) ≡ pd-bd-supp (suc n) (connect-susp Γ Δ) ⦃ connect-susp-pd pd pd2 ⦄ b
+connect-susp-pd-bd-compat n Γ ⦃ pd ⦄ Δ ⦃ pd2 ⦄ b = connect-susp-pdb-bd-compat n Γ Δ ⦃ pd-to-pdb pd2 ⦄ b
 
 connect-supp-full : ∀ n m → connect-supp {n} {m} full full ≡ full
 connect-supp-full n zero = refl

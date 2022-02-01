@@ -2,6 +2,8 @@
 
 module Catt.Connection.Support where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
@@ -11,26 +13,34 @@ open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Suspension.Support
 open import Catt.Suspension
-open import Data.Nat
-open import Data.Vec hiding (drop)
-open import Data.Fin using (fromℕ;inject₁)
-open import Relation.Binary.PropositionalEquality
-open import Data.Bool renaming (T to Truth)
 open import Tactic.MonoidSolver
-import Relation.Binary.Reasoning.Setoid as Reasoning
-import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Catt.Variables
 open import Catt.Tree
-open import Data.Unit using (tt)
 open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise; Pointwise-≡⇒≡)
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Connection.Pasting
 open import Relation.Binary.Definitions
-open import Data.Empty
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Data.Nat.Properties
+
+VarSet-NonEmpty-Special : (xs : VarSet n) → Set
+VarSet-NonEmpty-Special {zero} xs = ⊥
+VarSet-NonEmpty-Special {suc zero} xs = ⊥
+VarSet-NonEmpty-Special {suc (suc n)} (ewf xs) = VarSet-NonEmpty-Special xs
+VarSet-NonEmpty-Special {suc (suc n)} (ewt xs) = ⊤
+
+connect-drop : (xs : VarSet (suc n)) → (ys : VarSet (suc m)) → .⦃ VarSet-NonEmpty-Special ys ⦄ → connect-supp xs (drop ys) ≡ drop (connect-supp xs ys)
+connect-drop xs (ewf (y ∷ ys)) = cong ewf (connect-drop xs (y ∷ ys))
+connect-drop xs (ewt (y ∷ ys)) = refl
+
+pdb-bd-supp-non-empty-special : (n : ℕ) → (Γ : Ctx (suc m)) → .⦃ pdb : Γ ⊢pdb ⦄ → (b : Bool) → .⦃ NonZero m ⦄ → VarSet-NonEmpty-Special (pdb-bd-supp (suc n) Γ b)
+pdb-bd-supp-non-empty-special n (∅ , B , A) ⦃ pdb ⦄ b = ⊥-elim (pdb-odd-length pdb)
+pdb-bd-supp-non-empty-special n (Γ , C , B , A) b with <-cmp (suc n) (ty-dim B) | b
+... | tri< a ¬b ¬c | b = pdb-bd-supp-non-empty-special n (Γ , C) ⦃ pdb-prefix it ⦄ b ⦃ focus-ty-dim-to-non-empty (pdb-prefix it) (≤-trans (≤-trans (s≤s z≤n) a) (≤-reflexive (ty-dim-≃ (pdb-proj₁ it)))) ⦄
+... | tri≈ ¬a b₁ ¬c | false = pdb-bd-supp-non-empty-special n (Γ , C) ⦃ pdb-prefix it ⦄ false ⦃ focus-ty-dim-to-non-empty (pdb-prefix it) (≤-trans (≤-trans (s≤s z≤n) (≤-reflexive b₁)) (≤-reflexive (ty-dim-≃ (pdb-proj₁ it )))) ⦄
+... | tri≈ ¬a b₁ ¬c | true = tt
+... | tri> ¬a ¬b c | b = tt
 
 connect-susp-pdb-bd-compat : (n : ℕ)
                       → (Γ : Ctx (suc m))
@@ -40,7 +50,7 @@ connect-susp-pdb-bd-compat : (n : ℕ)
                       → (b : Bool)
                       → connect-supp (suspSupp (pd-bd-supp n Γ b)) (pdb-bd-supp (suc n) Δ b) ≡ pdb-bd-supp (suc n) (connect-susp Γ Δ) ⦃ connect-susp-pdb pd pdb ⦄ b
 connect-susp-pdb-bd-compat n Γ ⦃ pd ⦄ (∅ , A) b = susp-pdb-bd-compat n Γ ⦃ pd-to-pdb pd ⦄ b
-connect-susp-pdb-bd-compat n Γ (∅ , B , A) b = ⊥-elim′ (pdb-odd-length it)
+connect-susp-pdb-bd-compat n Γ (∅ , B , A) b = ⊥-elim (pdb-odd-length it)
 connect-susp-pdb-bd-compat n Γ (Δ , C , B , A) b with <-cmp (suc n) (ty-dim B) | <-cmp (suc n) (ty-dim (B [ connect-susp-inc-right (pred (ctxLength Γ)) _ ]ty)) | b
 ... | tri< a ¬b ¬c | tri< a₁ ¬b₁ ¬c₁ | b = cong ewf (cong ewf (connect-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ b))
 ... | tri< a ¬b ¬c | tri≈ ¬a b₁ ¬c₁ | b = ⊥-elim (¬a (<-transˡ a (≤-reflexive (sub-dim (connect-susp-inc-right _ _) B))))

@@ -2,11 +2,20 @@
 
 module Catt.Globular where
 
+open import Catt.Prelude
 open import Catt.Syntax
-open import Data.Nat
-open import Data.Empty
-open import Catt.Tree
-open import Data.Fin using (Fin)
+
+ty-dim : Ty n → ℕ
+ty-dim ⋆ = 0
+ty-dim (s ─⟨ A ⟩⟶ t) = suc (ty-dim A)
+
+ctx-dim : Ctx n → ℕ
+ctx-dim ∅ = 0
+ctx-dim (Γ , A) = ctx-dim Γ ⊔ ty-dim A
+
+lookupHeight : (Γ : Ctx n) → (i : Fin n) → ℕ
+lookupHeight (Γ , A) zero = ty-dim A
+lookupHeight (Γ , A) (suc i) = lookupHeight Γ i
 
 tm-to-ty : (Γ : Ctx n) → (t : Tm n) → Ty n
 tm-to-ty Γ (Var i) = Γ ‼ i
@@ -29,10 +38,10 @@ ty-tgt : Ty (suc n) → Tm (suc n)
 ty-tgt ⋆ = 0V
 ty-tgt (s ─⟨ A ⟩⟶ t) = t
 
-ty-src′ : (A : Ty n) → .⦃ NonZero′ (ty-dim A) ⦄ → Tm n
+ty-src′ : (A : Ty n) → .⦃ NonZero (ty-dim A) ⦄ → Tm n
 ty-src′ (s ─⟨ A ⟩⟶ t) = s
 
-ty-tgt′ : (A : Ty n) → .⦃ NonZero′ (ty-dim A) ⦄ → Tm n
+ty-tgt′ : (A : Ty n) → .⦃ NonZero (ty-dim A) ⦄ → Tm n
 ty-tgt′ (s ─⟨ A ⟩⟶ t) = t
 
 ty-base : Ty n → Ty n

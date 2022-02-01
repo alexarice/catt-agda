@@ -2,16 +2,13 @@
 
 module Catt.Globular.Properties where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Globular
 open import Catt.Suspension
 open import Catt.Syntax.SyntacticEquality
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Fin using (Fin;suc;zero;inject₁)
-open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Reasoning.Setoid as Reasoning
 
 -- src-subbed_:_(A_:_Ty_Γ_(suc_(suc_d)))_→_(σ_:_Sub_Γ_Δ)_→_(ty-src_A)_[_σ_]tm_≡_ty-src_(A_[_σ_]ty)
 -- src-subbed_(s_─⟨_A_⟩⟶_t)_σ_=_refl
@@ -42,7 +39,7 @@ susp-dim : (A : Ty n) → ty-dim (suspTy A) ≡ suc (ty-dim A)
 susp-dim ⋆ = refl
 susp-dim (s ─⟨ A ⟩⟶ t) = cong suc (susp-dim A)
 
-susp-ctx-dim : (Γ : Ctx n) → .⦃ NonZero′ n ⦄ → ctx-dim (suspCtx Γ) ≡ suc (ctx-dim Γ)
+susp-ctx-dim : (Γ : Ctx n) → .⦃ NonZero n ⦄ → ctx-dim (suspCtx Γ) ≡ suc (ctx-dim Γ)
 susp-ctx-dim (∅ , A) = susp-dim A
 susp-ctx-dim (Γ , B , A) = cong₂ _⊔_ (susp-ctx-dim (Γ , B)) (susp-dim A)
 
@@ -109,7 +106,7 @@ ty-tgt-≃ : A ≃ty B → ty-tgt A ≃tm ty-tgt B
 ty-tgt-≃ (Star≃ p) = Var≃ p refl
 ty-tgt-≃ (Arr≃ p q r) = r
 
-ty-tgt′-≃ : (p : A ≃ty B) → .⦃ _ : NonZero′ (ty-dim A) ⦄ → ty-tgt′ A ≃tm ty-tgt′ B ⦃ NonZero′-subst (ty-dim-≃ p) it ⦄
+ty-tgt′-≃ : (p : A ≃ty B) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-tgt′ A ≃tm ty-tgt′ B ⦃ NonZero-subst (ty-dim-≃ p) it ⦄
 ty-tgt′-≃ (Arr≃ p q r) = r
 
 ty-base-≃ : A ≃ty B → ty-base A ≃ty ty-base B
@@ -130,7 +127,7 @@ ty-src-sub (s ─⟨ A ⟩⟶ t) σ p = refl≃tm
 ty-tgt-sub : (A : Ty (suc n)) → (σ : Sub (suc n) (suc m) ⋆) → (ty-dim A > 0) → ty-tgt A [ σ ]tm ≃tm ty-tgt (A [ σ ]ty)
 ty-tgt-sub (s ─⟨ A ⟩⟶ t) σ p = refl≃tm
 
-ty-tgt′-sub : (A : Ty n) → (σ : Sub n m ⋆) → .⦃ _ : NonZero′ (ty-dim A) ⦄ → ty-tgt′ A [ σ ]tm ≃tm ty-tgt′ (A [ σ ]ty) ⦃ NonZero′-subst (sub-dim σ A) it ⦄
+ty-tgt′-sub : (A : Ty n) → (σ : Sub n m ⋆) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-tgt′ A [ σ ]tm ≃tm ty-tgt′ (A [ σ ]ty) ⦃ NonZero-subst (sub-dim σ A) it ⦄
 ty-tgt′-sub (s ─⟨ A ⟩⟶ t) σ = refl≃tm
 
 ty-base-dim : (A : Ty n) → ty-dim (ty-base A) ≡ pred (ty-dim A)

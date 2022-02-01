@@ -2,27 +2,18 @@
 
 module Catt.Support.Properties where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Support
 open import Catt.Variables
 open import Relation.Binary
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Bool using (true;false;Bool) renaming (T to Truth)
-import Data.Bool.Properties as B
-open import Data.Vec hiding (drop)
-open import Relation.Binary.PropositionalEquality
-open import Data.Fin using (Fin; zero; suc; fromℕ) renaming (_≟_ to _f≟_)
-open import Data.Fin.Properties using (toℕ-injective)
 open import Tactic.MonoidSolver
-open import Data.Product renaming (_,_ to _,,_)
 open import Algebra.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Suspension
-import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise)
 open import Data.Sum
-open import Data.Unit using (⊤;tt)
 open import Catt.Globular
 open import Catt.Pasting
 open import Catt.Pasting.Properties
@@ -30,7 +21,6 @@ open import Catt.Connection
 open import Catt.Connection.Pasting
 open import Catt.Suspension
 open import Catt.Suspension.Pasting
-open import Data.Empty
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Tree
@@ -57,7 +47,7 @@ FVSub-≃ (Ext≃ p x) = cong₂ _∪_ (FVSub-≃ p) (FVTm-≃ x)
 
 ∪-assoc : Associative _≡_ (_∪_ {n})
 ∪-assoc emp emp emp = refl
-∪-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) = cong₂ _∷_ (B.∨-assoc x y z) (∪-assoc xs ys zs)
+∪-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) = cong₂ _∷_ (∨-assoc x y z) (∪-assoc xs ys zs)
 
 ∪-left-unit : LeftIdentity _≡_ empty (_∪_ {n})
 ∪-left-unit emp = refl
@@ -65,15 +55,15 @@ FVSub-≃ (Ext≃ p x) = cong₂ _∪_ (FVSub-≃ p) (FVTm-≃ x)
 
 ∪-right-unit : RightIdentity _≡_ empty (_∪_ {n})
 ∪-right-unit emp = refl
-∪-right-unit (x ∷ xs) = cong₂ _∷_ (B.∨-identityʳ x) (∪-right-unit xs)
+∪-right-unit (x ∷ xs) = cong₂ _∷_ (∨-identityʳ x) (∪-right-unit xs)
 
 ∪-comm : Commutative _≡_ (_∪_ {n})
 ∪-comm emp emp = refl
-∪-comm (x ∷ xs) (y ∷ ys) = cong₂ _∷_ (B.∨-comm x y) (∪-comm xs ys)
+∪-comm (x ∷ xs) (y ∷ ys) = cong₂ _∷_ (∨-comm x y) (∪-comm xs ys)
 
 ∪-idem : Idempotent _≡_ (_∪_ {n})
 ∪-idem emp = refl
-∪-idem (x ∷ xs) = cong₂ _∷_ (B.∨-idem x) (∪-idem xs)
+∪-idem (x ∷ xs) = cong₂ _∷_ (∨-idem x) (∪-idem xs)
 
 ∪-left-zero : (xs : VarSet n) → full ∪ xs ≡ full
 ∪-left-zero emp = refl
@@ -81,7 +71,7 @@ FVSub-≃ (Ext≃ p x) = cong₂ _∪_ (FVSub-≃ p) (FVTm-≃ x)
 
 ∪-right-zero : (xs : VarSet n) → xs ∪ full ≡ full
 ∪-right-zero emp = refl
-∪-right-zero (x ∷ xs) = cong₂ _∷_ (B.∨-zeroʳ x) (∪-right-zero xs)
+∪-right-zero (x ∷ xs) = cong₂ _∷_ (∨-zeroʳ x) (∪-right-zero xs)
 
 FVTm-on-var : (t : Tm n) → .⦃ _ : isVar t ⦄ → FVTm t ≡ trueAt (getVarFin t)
 FVTm-on-var (Var i) = refl
@@ -422,7 +412,7 @@ module _ where
 ⊆-cong-∪-1 p = ∪-⊆ (∪-⊆-1 _ _) (⊆-trans p (∪-⊆-2 _ _))
 
 build-⊆-1 : (x : Bool) → {xs ys : VarSet n} → xs ⊆ ys → ewf xs ⊆ (x ∷ ys)
-build-⊆-1 x p = cong₂ _∷_ (sym (B.∨-identityʳ x)) p
+build-⊆-1 x p = cong₂ _∷_ (sym (∨-identityʳ x)) p
 
 build-⊆-2 : (x : Bool) → {xs ys : VarSet n} → xs ⊆ ys → (x ∷ xs) ⊆ ewt ys
 build-⊆-2 x p = cong ewt p
@@ -495,39 +485,3 @@ DC-is-DC : (Γ : Ctx n) → (xs : VarSet n) → is-DC Γ (DC Γ xs)
 DC-is-DC ∅ emp = tt
 DC-is-DC (Γ , A) (ewf xs) = DC-is-DC Γ xs
 DC-is-DC (Γ , A) (ewt xs) = (DC-is-DC Γ (xs ∪ FVTy A)) ,, ⊆-trans (∪-⊆-2 xs (FVTy A)) (DC-⊆ Γ (xs ∪ FVTy A))
-
-VarSet-NonEmpty : (xs : VarSet n) → Set
-VarSet-NonEmpty emp = ⊥
-VarSet-NonEmpty (ewf xs) = VarSet-NonEmpty xs
-VarSet-NonEmpty (ewt xs) = ⊤
-
-susp-supp-drop : (xs : VarSet n) → .⦃ VarSet-NonEmpty xs ⦄ → suspSupp (drop xs) ≡ drop (suspSupp xs)
-susp-supp-drop (ewf xs) = cong ewf (susp-supp-drop xs)
-susp-supp-drop (ewt xs) = refl
-
-pdb-bd-supp-non-empty : (n : ℕ) → (Γ : Ctx m) → .⦃ pdb : Γ ⊢pdb ⦄ → (b : Bool) → VarSet-NonEmpty (pdb-bd-supp n Γ b)
-pdb-bd-supp-non-empty n ∅ ⦃ pdb ⦄ b = ⊥-elim′ (pdb-odd-length pdb)
-pdb-bd-supp-non-empty n (∅ , A) b = tt
-pdb-bd-supp-non-empty n (Γ , B , A) b with <-cmp n (ty-dim B) | b
-... | tri< a ¬b ¬c | b = pdb-bd-supp-non-empty n Γ ⦃ pdb-prefix it ⦄ b
-... | tri≈ ¬a b₁ ¬c | false = pdb-bd-supp-non-empty n Γ ⦃ pdb-prefix it ⦄ false
-... | tri≈ ¬a b₁ ¬c | true = tt
-... | tri> ¬a ¬b c | b = tt
-
-VarSet-NonEmpty-Special : (xs : VarSet n) → Set
-VarSet-NonEmpty-Special {zero} xs = ⊥
-VarSet-NonEmpty-Special {suc zero} xs = ⊥
-VarSet-NonEmpty-Special {suc (suc n)} (ewf xs) = VarSet-NonEmpty-Special xs
-VarSet-NonEmpty-Special {suc (suc n)} (ewt xs) = ⊤
-
-connect-drop : (xs : VarSet (suc n)) → (ys : VarSet (suc m)) → .⦃ VarSet-NonEmpty-Special ys ⦄ → connect-supp xs (drop ys) ≡ drop (connect-supp xs ys)
-connect-drop xs (ewf (y ∷ ys)) = cong ewf (connect-drop xs (y ∷ ys))
-connect-drop xs (ewt (y ∷ ys)) = refl
-
-pdb-bd-supp-non-empty-special : (n : ℕ) → (Γ : Ctx (suc m)) → .⦃ pdb : Γ ⊢pdb ⦄ → (b : Bool) → .⦃ NonZero′ m ⦄ → VarSet-NonEmpty-Special (pdb-bd-supp (suc n) Γ b)
-pdb-bd-supp-non-empty-special n (∅ , B , A) ⦃ pdb ⦄ b = ⊥-elim′ (pdb-odd-length pdb)
-pdb-bd-supp-non-empty-special n (Γ , C , B , A) b with <-cmp (suc n) (ty-dim B) | b
-... | tri< a ¬b ¬c | b = pdb-bd-supp-non-empty-special n (Γ , C) ⦃ pdb-prefix it ⦄ b ⦃ focus-ty-dim-to-non-empty (pdb-prefix it) (≤-trans (≤-trans (s≤s z≤n) a) (≤-reflexive (ty-dim-≃ (pdb-proj₁ it)))) ⦄
-... | tri≈ ¬a b₁ ¬c | false = pdb-bd-supp-non-empty-special n (Γ , C) ⦃ pdb-prefix it ⦄ false ⦃ focus-ty-dim-to-non-empty (pdb-prefix it) (≤-trans (≤-trans (s≤s z≤n) (≤-reflexive b₁)) (≤-reflexive (ty-dim-≃ (pdb-proj₁ it )))) ⦄
-... | tri≈ ¬a b₁ ¬c | true = tt
-... | tri> ¬a ¬b c | b = tt

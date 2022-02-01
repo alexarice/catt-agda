@@ -2,14 +2,8 @@
 
 module Catt.Syntax.Base where
 
-open import Data.Nat
-open import Data.Fin using (Fin;zero;suc)
+open import Catt.Prelude
 open import Data.Fin.Patterns
-open import Data.Bool.Base using (not) renaming (T to Truth)
-open import Relation.Nullary
-
-variable
-  n n′ m m′ l l′ o d d′ d″ : ℕ
 
 data Ctx : ℕ → Set
 data Ty : ℕ → Set
@@ -53,11 +47,3 @@ pattern 6V {n} = Var {n} 6F
 pattern 7V {n} = Var {n} 7F
 pattern 8V {n} = Var {n} 8F
 pattern 9V {n} = Var {n} 9F
-
-ty-dim : Ty n → ℕ
-ty-dim ⋆ = 0
-ty-dim (s ─⟨ A ⟩⟶ t) = suc (ty-dim A)
-
-ctx-dim : Ctx n → ℕ
-ctx-dim ∅ = 0
-ctx-dim (Γ , A) = ctx-dim Γ ⊔ ty-dim A

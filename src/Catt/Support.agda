@@ -2,24 +2,14 @@
 
 module Catt.Support where
 
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Vec hiding (drop ; [_])
+open import Catt.Prelude
+open import Catt.Prelude.Properties
+open import Data.Vec hiding (drop ; [_]) public
 open import Data.Vec.Relation.Binary.Pointwise.Inductive using (Pointwise)
 open import Catt.Syntax
--- open import Catt.Syntax.Properties
--- open import Catt.Dimension
-open import Data.Bool using (true;false;_∨_;Bool;if_then_else_;not)
-open import Data.Fin using (Fin;zero;suc;fromℕ)
-open import Data.Empty using (⊥;⊥-elim)
-open import Data.Unit using (tt; ⊤)
--- open import Catt.Globular
 open import Catt.Tree
 open import Catt.Tree.Properties
-open import Relation.Binary.PropositionalEquality
-open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Suspension
--- open import Catt.Dimension
 open import Relation.Nullary
 open import Relation.Binary.Definitions
 open import Catt.Globular
@@ -75,11 +65,8 @@ FVTy (s ─⟨ A ⟩⟶ t) = FVTy A ∪ FVTm s ∪ FVTm t
 FVSub {A = A} ⟨⟩ = FVTy A
 FVSub ⟨ σ , t ⟩ = FVSub σ ∪ FVTm t
 
-⊥-elim′ : ∀ {w} {Whatever : Set w} → .⊥ → Whatever
-⊥-elim′ ()
-
 pdb-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pdb : Γ ⊢pdb ⦄ → (b : Bool) → VarSet m
-pdb-bd-supp n ∅ ⦃ pdb ⦄ b = ⊥-elim′ (pdb-odd-length pdb)
+pdb-bd-supp n ∅ ⦃ pdb ⦄ b = ⊥-elim (pdb-odd-length pdb)
 pdb-bd-supp n (∅ , A) b = ewt emp
 pdb-bd-supp n (Γ , B , A) b = tri-cases (<-cmp n (ty-dim B))
                                             (ewf (ewf (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)))
@@ -92,7 +79,7 @@ pd-bd-supp n Γ b = pdb-bd-supp n Γ ⦃ pd-to-pdb it ⦄ b
 supp-condition : (b : Bool) → (A : Ty (suc n)) → (Γ : Ctx (suc n)) → .⦃ pd : Γ ⊢pd ⦄ → Set
 supp-condition false A Γ = FVTy A ≡ full
 supp-condition true ⋆ Γ = ⊥
-supp-condition true (s ─⟨ A ⟩⟶ t) Γ = NonZero′ (ctx-dim Γ) × FVTy A ∪ FVTm s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false × FVTy A ∪ FVTm t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true
+supp-condition true (s ─⟨ A ⟩⟶ t) Γ = NonZero (ctx-dim Γ) × FVTy A ∪ FVTm s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false × FVTy A ∪ FVTm t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true
 
 TransportVarSet : VarSet n → Sub n m A → VarSet m
 TransportVarSet xs ⟨⟩ = empty

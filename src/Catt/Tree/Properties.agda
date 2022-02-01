@@ -2,6 +2,8 @@
 
 module Catt.Tree.Properties where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
@@ -10,13 +12,6 @@ open import Catt.Connection.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Tree
-import Relation.Binary.Reasoning.Setoid as Reasoning
-open import Data.Unit using (⊤; tt)
-open import Data.Empty
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Bool using (Bool; true; false; not)
-open import Data.Fin using (Fin; zero; suc; fromℕ)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary
 open import Catt.Globular
@@ -25,6 +20,10 @@ open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Variables
 open import Catt.Variables.Properties
 open import Relation.Binary using (Setoid)
+
+tree-dim-n-disk : (n : ℕ) → tree-dim (n-disk n) ≡ n
+tree-dim-n-disk zero = refl
+tree-dim-n-disk (suc n) = cong suc (trans (max-lem (tree-dim (n-disk n))) (tree-dim-n-disk n))
 
 record TREE : Set where
   constructor <_>t

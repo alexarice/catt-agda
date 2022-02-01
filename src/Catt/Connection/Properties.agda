@@ -2,23 +2,14 @@
 
 module Catt.Connection.Properties where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Connection
 open import Catt.Suspension
 open import Catt.Suspension.Properties
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Fin using (Fin; zero; suc; fromℕ; toℕ)
-open import Data.Empty
-open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Reasoning.Setoid as Reasoning
 open import Catt.Syntax.Bundles
-open import Data.Sum
-open import Data.Product renaming (_,_ to _,,_)
-open import Data.Unit using (⊤; tt)
-open import Data.Bool using (Bool; true; false) renaming (T to Truth)
--- open import Data.Bool.Properties using (T?)
 open import Relation.Nullary
 open import Catt.Variables
 open import Catt.Variables.Properties

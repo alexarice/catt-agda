@@ -2,14 +2,9 @@
 
 module Catt.Suspension where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax.Base
-open import Data.Nat
-open import Data.Fin using (Fin;zero;suc;inject₁;fromℕ)
-open import Relation.Binary.PropositionalEquality
-open import Data.Fin.Properties using (toℕ-injective;toℕ-inject₁)
-open import Data.Sum
-open import Data.Product renaming (_,_ to _,,_)
--- open import Catt.Variables
 
 suspCtx : Ctx n → Ctx (2 + n)
 suspTy : Ty n → Ty (2 + n)

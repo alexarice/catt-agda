@@ -2,6 +2,8 @@
 
 module Catt.Connection.Pasting where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
@@ -11,12 +13,9 @@ open import Catt.Suspension
 open import Catt.Suspension.Pasting
 open import Catt.Connection
 open import Catt.Connection.Properties
-open import Data.Empty
-open import Data.Nat
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Reasoning.Setoid as Reasoning
 
 connect-pdb : (pd : Γ ⊢pd) → Δ ⊢pdb → connect Γ (pd-focus-tm pd) Δ ⊢pdb
 connect-focus-ty : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (pd : Γ ⊢pd) → (pdb : Δ ⊢pdb) → focus-ty (connect-pdb {Δ = Δ} pd pdb) ≃ty focus-ty pdb [ connect-inc-right (pd-focus-tm pd) m ]ty
@@ -73,7 +72,7 @@ connect-pdb pd (Extend {Γ = Δ , _} {A = A} {B = B} pdb p q) = Extend (connect-
         ≈⟨ Arr≃ lem3 lem4 refl≃tm ⟩
       < liftTerm (focus-tm (connect-pdb pd pdb)) ─⟨ liftType (focus-ty (connect-pdb pd pdb)) ⟩⟶ 0V >ty ∎
 
-connect-pdb pd (Restr pdb) = Restr (connect-pdb pd pdb) ⦃ NonZero′-subst (sym (trans (ty-dim-≃ (connect-focus-ty pd pdb)) (sym (sub-dim (connect-inc-right (pd-focus-tm pd) _) (focus-ty pdb))))) it ⦄
+connect-pdb pd (Restr pdb) = Restr (connect-pdb pd pdb) ⦃ NonZero-subst (sym (trans (ty-dim-≃ (connect-focus-ty pd pdb)) (sym (sub-dim (connect-inc-right (pd-focus-tm pd) _) (focus-ty pdb))))) it ⦄
 
 connect-focus-ty pd Base = ⋆-is-only-0-d-ty ⦃ pd-to-pdb-0-d pd ⦄
 connect-focus-ty pd (Extend {Γ = ∅} pdb p q) = ⊥-elim (pdb-odd-length pdb)
@@ -100,9 +99,9 @@ connect-focus-tm pd (Extend {Γ = ∅} pdb p q) = ⊥-elim (pdb-odd-length pdb)
 connect-focus-tm pd (Extend {Γ = Δ , A} pdb p q) = refl≃tm
 connect-focus-tm pd (Restr pdb) = let
   instance .x : _
-           x = NonZero′-subst (sym (trans (ty-dim-≃ (connect-focus-ty pd pdb)) (sym (sub-dim (connect-inc-right (pd-focus-tm pd) _) (focus-ty pdb))))) it
+           x = NonZero-subst (sym (trans (ty-dim-≃ (connect-focus-ty pd pdb)) (sym (sub-dim (connect-inc-right (pd-focus-tm pd) _) (focus-ty pdb))))) it
   instance .y : _
-           y = NonZero′-subst (sub-dim (connect-inc-right (pd-focus-tm pd) _) (focus-ty pdb)) it
+           y = NonZero-subst (sub-dim (connect-inc-right (pd-focus-tm pd) _) (focus-ty pdb)) it
   in begin
   < ty-tgt′ (focus-ty (connect-pdb pd pdb)) >tm
     ≈⟨ ty-tgt′-≃ (connect-focus-ty pd pdb) ⟩

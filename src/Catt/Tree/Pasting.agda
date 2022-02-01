@@ -2,23 +2,18 @@
 
 module Catt.Tree.Pasting where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree
 open import Catt.Pasting
--- open import Catt.Pasting.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Pasting
 open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Connection.Pasting
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Empty
-open import Data.Unit
-open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Reasoning.Setoid as Reasoning
 
 -- Extendability
 n-extendable : ℕ → Tree n → Set

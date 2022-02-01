@@ -2,6 +2,7 @@
 
 module Catt.Tree where
 
+open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Connection
 open import Catt.Suspension
@@ -49,22 +50,6 @@ connect-tree (Join S S′) T = Join S (connect-tree S′ T)
 suspTree : Tree n → Tree (2 + n)
 suspTree T = Join T Sing
 
-max : ℕ → ℕ → ℕ
-max zero m = m
-max (suc n) m = suc (max n (pred m))
-
-max-lem : (n : ℕ) → max n zero ≡ n
-max-lem zero = refl
-max-lem (suc n) = cong suc (max-lem n)
-
-test1 : n ≤ m → max n m ≡ m
-test1 z≤n = refl
-test1 (s≤s p) = cong suc (test1 p)
-
-test2 : n ≥ m → max n m ≡ n
-test2 z≤n = max-lem _
-test2 (s≤s p) = cong suc (test2 p)
-
 tree-dim : Tree n → ℕ
 tree-dim Sing = 0
 tree-dim (Join S T) = max (suc (tree-dim S)) (tree-dim T)
@@ -102,7 +87,3 @@ n-disk (suc n) = Join (n-disk n) Sing
 n-disk-is-linear : (n : ℕ) → is-linear (n-disk n)
 n-disk-is-linear zero = tt
 n-disk-is-linear (suc n) = n-disk-is-linear n
-
-tree-dim-n-disk : (n : ℕ) → tree-dim (n-disk n) ≡ n
-tree-dim-n-disk zero = refl
-tree-dim-n-disk (suc n) = cong suc (trans (max-lem (tree-dim (n-disk n))) (tree-dim-n-disk n)) -- cong suc (tree-dim-n-disk n)

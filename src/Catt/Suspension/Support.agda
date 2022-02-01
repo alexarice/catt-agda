@@ -2,24 +2,15 @@
 
 module Catt.Suspension.Support where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Syntax
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Vec hiding (drop)
 open import Catt.Suspension
 open import Catt.Suspension.Properties
-open import Relation.Binary.PropositionalEquality
-open import Data.Fin using (fromℕ; inject₁; Fin; zero; suc)
-open import Data.Bool renaming (T to Truth)
-open import Data.Bool.Properties using (∨-identityʳ)
-open import Data.Empty
-open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Tree
 open import Catt.Tree.Properties
-open import Data.Unit
-import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Syntax.SyntacticEquality
@@ -29,12 +20,30 @@ open import Catt.Suspension.Pasting
 open import Relation.Binary.Definitions
 open import Relation.Nullary
 
+VarSet-NonEmpty : (xs : VarSet n) → Set
+VarSet-NonEmpty emp = ⊥
+VarSet-NonEmpty (ewf xs) = VarSet-NonEmpty xs
+VarSet-NonEmpty (ewt xs) = ⊤
+
+susp-supp-drop : (xs : VarSet n) → .⦃ VarSet-NonEmpty xs ⦄ → suspSupp (drop xs) ≡ drop (suspSupp xs)
+susp-supp-drop (ewf xs) = cong ewf (susp-supp-drop xs)
+susp-supp-drop (ewt xs) = refl
+
+pdb-bd-supp-non-empty : (n : ℕ) → (Γ : Ctx m) → .⦃ pdb : Γ ⊢pdb ⦄ → (b : Bool) → VarSet-NonEmpty (pdb-bd-supp n Γ b)
+pdb-bd-supp-non-empty n ∅ ⦃ pdb ⦄ b = ⊥-elim (pdb-odd-length pdb)
+pdb-bd-supp-non-empty n (∅ , A) b = tt
+pdb-bd-supp-non-empty n (Γ , B , A) b with <-cmp n (ty-dim B) | b
+... | tri< a ¬b ¬c | b = pdb-bd-supp-non-empty n Γ ⦃ pdb-prefix it ⦄ b
+... | tri≈ ¬a b₁ ¬c | false = pdb-bd-supp-non-empty n Γ ⦃ pdb-prefix it ⦄ false
+... | tri≈ ¬a b₁ ¬c | true = tt
+... | tri> ¬a ¬b c | b = tt
+
 susp-pdb-bd-compat : (n : ℕ)
                    → (Γ : Ctx m)
                    → .⦃ pdb : Γ ⊢pdb ⦄
                    → (b : Bool)
                    → suspSupp (pdb-bd-supp n Γ b) ≡ pdb-bd-supp (suc n) (suspCtx Γ) ⦃ susp-pdb pdb ⦄ b
-susp-pdb-bd-compat n ∅ b = ⊥-elim′ (pdb-odd-length it)
+susp-pdb-bd-compat n ∅ b = ⊥-elim (pdb-odd-length it)
 susp-pdb-bd-compat n (∅ , A) b = refl
 susp-pdb-bd-compat n (Γ , B , A) b with <-cmp n (ty-dim B) | <-cmp (suc n) (ty-dim (suspTy B)) | b
 ... | tri< a ¬b ¬c | tri< a₁ ¬b₁ ¬c₁ | b = cong ewf (cong ewf (susp-pdb-bd-compat n Γ ⦃ pdb-prefix it ⦄ b))
@@ -172,7 +181,7 @@ suspSuppCondition {b = false} {A} {Γ} sc = begin
   full ∎
   where
     open ≡-Reasoning
-suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {Γ} ⦃ pd ⦄ (nz ,, sc1 ,, sc2) = NonZero′-subst (sym (susp-ctx-dim Γ)) it ,, l1 ,, l2
+suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {Γ} ⦃ pd ⦄ (nz ,, sc1 ,, sc2) = NonZero-subst (sym (susp-ctx-dim Γ)) it ,, l1 ,, l2
   where
     instance _ = nz
     instance _ = susp-pd {Γ = Γ} (recompute (pd-dec Γ) it)

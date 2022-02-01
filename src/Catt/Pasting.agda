@@ -2,12 +2,10 @@
 
 module Catt.Pasting where
 
-open import Data.Nat
-open import Data.Nat.Properties
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Syntax.Properties
 open import Catt.Globular
-open import Relation.Binary.PropositionalEquality
 open import Catt.Syntax.SyntacticEquality
 open import Relation.Nullary
 open import Relation.Binary.Definitions
@@ -26,7 +24,7 @@ data _⊢pdb where
          → (p : A ≃ty focus-ty pdb)
          → (q : B ≃ty liftTerm (focus-tm pdb) ─⟨ liftType (focus-ty pdb) ⟩⟶ 0V)
          → Γ , A , B ⊢pdb
-  Restr : (pdb : Γ ⊢pdb) → .⦃ NonZero′ (ty-dim (focus-ty pdb)) ⦄ → Γ ⊢pdb
+  Restr : (pdb : Γ ⊢pdb) → .⦃ NonZero (ty-dim (focus-ty pdb)) ⦄ → Γ ⊢pdb
 
 focus-ty Base = ⋆
 focus-ty (Extend {B = B} pdb p q) = liftType B

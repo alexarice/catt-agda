@@ -2,6 +2,8 @@
 
 module Catt.Tree.Support where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree
@@ -11,28 +13,19 @@ open import Catt.Suspension.Support
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Variables
-open import Data.Nat
-open import Data.Bool using (Bool; true; false)
-open import Data.Fin using (Fin; suc; zero; fromℕ; inject₁)
-open import Relation.Binary.PropositionalEquality
 open import Catt.Suspension
-open import Data.Vec hiding (drop)
-open import Data.Bool using (Bool; true; false; _∨_) renaming (T to Truth)
-open import Data.Nat.Properties
-import Relation.Binary.Reasoning.PartialOrder as PReasoning
 open import Catt.Connection
 open import Catt.Connection.Properties
-open import Data.Unit using (tt)
 open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using ()
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Tree.Pasting
 open import Relation.Binary.Definitions
-open import Data.Empty
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Connection.Support
 open import Catt.Connection.Pasting
+open import Relation.Nullary
 
 drop-var : (t : Tm n) → .⦃ isVar t ⦄ → drop (FVTm t) ≡ empty
 drop-var (Var zero) = refl
@@ -43,7 +36,7 @@ supp-compat zero T false = lem (tree-to-ctx T) ⦃ pd-to-pdb (tree-to-pd T) ⦄
   where
     lem : (Γ : Ctx (suc m)) → .⦃ pdb : Γ ⊢pdb ⦄ → trueAt (fromℕ m) ≡ pdb-bd-supp zero Γ false
     lem (∅ , A) = refl
-    lem (∅ , B , A) = ⊥-elim′ (pdb-odd-length it)
+    lem (∅ , B , A) = ⊥-elim (pdb-odd-length it)
     lem (Γ , C , B , A) with <-cmp zero (ty-dim B)
     ... | tri< a ¬b ¬c = cong ewf (cong ewf (lem (Γ , C) ⦃ pdb-prefix it ⦄))
     ... | tri≈ ¬a b ¬c = cong ewf (cong ewf (lem (Γ , C) ⦃ pdb-prefix it ⦄))
@@ -60,7 +53,7 @@ supp-compat zero T true = begin
 
     lem : (Γ : Ctx (suc m)) → (pdb : Γ ⊢pdb) → FVTm (pdb-right-base pdb) ≡ pdb-bd-supp zero Γ ⦃ pdb ⦄ true
     lem (∅ , .⋆) Base = refl
-    lem (∅ , A) (Restr pdb) = ⊥-elim (NonZero′-⊥ (≤-trans (pdb-dim-lem pdb) (≤-reflexive (ty-dim-≃ (pdb-singleton-lem pdb)))))
+    lem (∅ , A) (Restr pdb) = ⊥-elim (NonZero-⊥ (≤-trans (pdb-dim-lem pdb) (≤-reflexive (ty-dim-≃ (pdb-singleton-lem pdb)))))
     lem (∅ , B , A) pdb = ⊥-elim (pdb-odd-length pdb)
     lem (Γ , C , B , A) pdb with <-cmp zero (ty-dim B)
     ... | tri< a ¬b ¬c = begin
@@ -108,7 +101,7 @@ supp-tree-bd-full zero (Join S T) b () | suc x
 supp-tree-bd-full (suc d) Sing b p = refl
 supp-tree-bd-full (suc d) (Join S T) b p = begin
   connect-supp (suspSupp (supp-tree-bd d S b)) (supp-tree-bd (suc d) T b)
-    ≡⟨ cong₂ (λ a b → connect-supp (suspSupp a) b) (supp-tree-bd-full d S b {!!}) (supp-tree-bd-full (suc d) T b (m⊔n≤o⇒n≤o (suc (tree-dim S)) (tree-dim T) {!!})) ⟩
+    ≡⟨ cong₂ (λ a b → connect-supp (suspSupp a) b) (supp-tree-bd-full d S b (≤-pred (≤-trans (max-inc₁ (suc (tree-dim S)) (tree-dim T)) p))) (supp-tree-bd-full (suc d) T b (≤-trans (max-inc₂ (suc (tree-dim S)) (tree-dim T)) p)) ⟩
   connect-supp (suspSupp full) full
     ≡⟨ cong (λ - → connect-supp - full) suspSuppFull ⟩
   connect-supp full full
@@ -119,22 +112,21 @@ supp-tree-bd-full (suc d) (Join S T) b p = begin
 
 supp-tree-bd-compat : (d : ℕ) → (T : Tree n) → (b : Bool) → FVSub (tree-inc d T b) ≡ supp-tree-bd d T b
 supp-tree-bd-compat zero T false = ∪-left-unit (trueAt (fromℕ _))
-supp-tree-bd-compat zero T true = trans (∪-left-unit (FVTm (tree-last-var T))) {!!}
+supp-tree-bd-compat zero T true = ∪-left-unit (FVTm (tree-last-var T))
 supp-tree-bd-compat (suc d) Sing b = refl
 supp-tree-bd-compat (suc d) (Join S T) b = trans (sub-between-connect-susps-supp (tree-inc d S b) (tree-inc (suc d) T b) (tree-inc-preserve-fst-var d T b)) (cong₂ (λ a b → connect-supp (suspSupp a) b) (supp-tree-bd-compat d S b) (supp-tree-bd-compat (suc d) T b))
 
 linear-tree-supp-lem : (d : ℕ) → (T : Tree n) → .⦃ is-linear T ⦄ → .(tree-dim T ≡ suc d) → supp-tree-bd d T false ∪ supp-tree-bd d T true ∪ ewt empty ≡ full
 linear-tree-supp-lem zero Sing p = refl
 linear-tree-supp-lem zero (Join Sing Sing) p = refl
-linear-tree-supp-lem zero (Join (Join S T) Sing) p with .(join-tree-has-non-zero-dim S T {!!})
-... | ()
+linear-tree-supp-lem zero (Join (Join S T) Sing) ()
 linear-tree-supp-lem (suc d) (Join T Sing) p = begin
   suspSupp (supp-tree-bd d T false) ∪ suspSupp (supp-tree-bd d T true) ∪ ewt empty
     ≡⟨ cong (_∪ ewt empty) (suspSupp∪ (supp-tree-bd d T false) (supp-tree-bd d T true)) ⟩
   suspSupp (supp-tree-bd d T false ∪ supp-tree-bd d T true) ∪ ewt empty
     ≡⟨ lem (supp-tree-bd d T false ∪ supp-tree-bd d T true) ⟩
   suspSupp (supp-tree-bd d T false ∪ supp-tree-bd d T true ∪ ewt empty)
-    ≡⟨ cong suspSupp (linear-tree-supp-lem d T {!!}) ⟩
+    ≡⟨ cong suspSupp (linear-tree-supp-lem d T l2) ⟩
   suspSupp full
     ≡⟨ suspSuppFull ⟩
   full ∎
@@ -142,6 +134,14 @@ linear-tree-supp-lem (suc d) (Join T Sing) p = begin
     open ≡-Reasoning
     lem : (xs : VarSet (suc n)) → suspSupp xs ∪ ewt empty ≡ suspSupp (xs ∪ ewt empty)
     lem (x ∷ xs) = cong ((x ∨ true) ∷_) (trans (∪-right-unit (suspSupp xs)) (cong suspSupp (sym (∪-right-unit xs))))
+
+    l2 : tree-dim T ≡ suc d
+    l2 = cong pred (begin
+      suc (tree-dim T)
+        ≡˘⟨ max-lem (suc (tree-dim T)) ⟩
+      max (suc (tree-dim T)) zero
+        ≡⟨ recompute ((tree-dim (Join T Sing)) ≟ (suc (suc d))) p ⟩
+      suc (suc d) ∎)
 
 supp-tree-bd-include-fst : (d : ℕ) → (T : Tree n) → (b : Bool) → Truth (lookup-isVar (supp-tree-bd (suc d) T b) (Var (fromℕ _)))
 supp-tree-bd-include-fst d Sing b = tt

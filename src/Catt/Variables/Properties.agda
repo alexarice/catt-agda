@@ -2,20 +2,13 @@
 
 module Catt.Variables.Properties where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
-open import Catt.Syntax.Properties
 open import Catt.Variables
-open import Relation.Binary.PropositionalEquality
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Suspension
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc)
-open import Data.Unit using (⊤; tt)
-open import Data.Product renaming (_,_ to _,,_)
-open import Data.Sum
-open import Data.Nat.Properties
-import Relation.Binary.Reasoning.Setoid as Reasoning
 open import Catt.Globular
 open import Catt.Globular.Properties
 
@@ -127,5 +120,5 @@ ty-base-globular : (A : Ty n) → ty-is-globular A → ty-is-globular (ty-base A
 ty-base-globular ⋆ g = tt
 ty-base-globular (s ─⟨ A ⟩⟶ t) (g1 ,, g2 ,, g3) = g2
 
-ty-tgt′-globular : (A : Ty n) → .⦃ _ : NonZero′ (ty-dim A) ⦄ → ty-is-globular A → isVar (ty-tgt′ A)
+ty-tgt′-globular : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-is-globular A → isVar (ty-tgt′ A)
 ty-tgt′-globular (s ─⟨ A ⟩⟶ t) (g1 ,, g2 ,, g3) = g3

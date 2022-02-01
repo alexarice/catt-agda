@@ -2,15 +2,10 @@
 
 module Catt.Variables where
 
+open import Catt.Prelude
 open import Catt.Syntax
-open import Data.Product renaming (_,_ to _,,_)
 open import Data.Sum
-open import Data.Fin
 open import Catt.Syntax.SyntacticEquality
-open import Data.Unit
-open import Data.Empty
-open import Data.Nat
-open import Relation.Binary.PropositionalEquality
 
 VarSplit : ℕ → ℕ → ℕ → Set
 VarSplit n m l = ∀ (i : Fin n) → (Fin m ⊎ (Fin l))

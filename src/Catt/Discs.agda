@@ -2,13 +2,9 @@
 
 module Catt.Discs where
 
+open import Catt.Prelude
 open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
 open import Catt.Globular
-open import Catt.Suspension
-open import Data.Nat
-open import Catt.Tree
-open import Relation.Binary.PropositionalEquality
 
 disc-size : ℕ → ℕ
 sphere-size : ℕ → ℕ

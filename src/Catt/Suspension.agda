@@ -3,7 +3,6 @@
 module Catt.Suspension where
 
 open import Catt.Prelude
-open import Catt.Prelude.Properties
 open import Catt.Syntax.Base
 
 suspCtx : Ctx n → Ctx (2 + n)

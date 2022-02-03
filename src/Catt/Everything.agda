@@ -5,12 +5,16 @@ module Catt.Everything where
 import Catt.Prelude
 import Catt.Prelude.Properties
 
+import Catt.Syntax.Base
 import Catt.Syntax
 import Catt.Syntax.Bundles
 import Catt.Syntax.SyntacticEquality
 
 import Catt.Globular
 import Catt.Globular.Properties
+
+import Catt.Variables
+import Catt.Variables.Properties
 
 import Catt.Pasting
 import Catt.Pasting.Properties
@@ -26,8 +30,14 @@ import Catt.Connection.Pasting
 import Catt.Tree
 import Catt.Tree.Properties
 import Catt.Tree.Pasting
+import Catt.Tree.Unbiased
+import Catt.Tree.Unbiased.Properties
 
 import Catt.Support
+import Catt.Support.Properties
 import Catt.Suspension.Support
 import Catt.Connection.Support
 import Catt.Tree.Support
+
+import Catt.Discs
+import Catt.Discs.Properties

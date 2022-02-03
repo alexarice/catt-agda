@@ -7,10 +7,11 @@ open import Catt.Prelude
 open import Data.Nat.Properties public
 open import Data.Fin.Properties using (toℕ-injective; toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁;inject₁-injective) public
 open import Data.Bool.Properties using (∨-identityʳ;∨-assoc;∨-comm;∨-idem;∨-zeroʳ) public
+open import Relation.Nullary public
 import Relation.Binary.Reasoning.Setoid
 import Relation.Binary.Reasoning.PartialOrder
 open import Algebra.Construct.NaturalChoice.Base
-import Algebra.Construct.NaturalChoice.MaxOp as MaxOp
+import Algebra.Construct.NaturalChoice.MinMaxOp as MinMaxOp
 
 module Reasoning = Relation.Binary.Reasoning.Setoid
 module PReasoning = Relation.Binary.Reasoning.PartialOrder
@@ -50,15 +51,12 @@ max-operator = record
   ; x≥y⇒x⊔y≈x = max-prop₂
   }
 
-private module max-properties = MaxOp max-operator
+private module max-⊓-properties = MinMaxOp ⊓-operator max-operator
 
-open max-properties public
+open max-⊓-properties public
   using ()
   renaming
-  ( ⊔-cong       to  max-cong
-  ; ⊔-congʳ      to  max-congʳ
-  ; ⊔-congˡ      to  max-congˡ
-  ; ⊔-idem       to  max-idem
+  ( ⊔-idem       to  max-idem
   ; ⊔-sel        to  max-sel
   ; ⊔-assoc      to  max-assoc
   ; ⊔-comm       to  max-comm
@@ -70,22 +68,6 @@ open max-properties public
   ; ⊔-zeroʳ      to  max-zeroʳ
   ; ⊔-zero       to  max-zero
 
-  ; ⊔-isMagma                 to  max-isMagma
-  ; ⊔-isSemigroup             to  max-isSemigroup
-  ; ⊔-isCommutativeSemigroup  to  max-isCommutativeSemigroup
-  ; ⊔-isBand                  to  max-isBand
-  ; ⊔-isSemilattice           to  max-isSemilattice
-  ; ⊔-isMonoid                to  max-isMonoid
-  ; ⊔-isSelectiveMagma        to  max-isSelectiveMagma
-
-  ; ⊔-magma                   to  max-magma
-  ; ⊔-semigroup               to  max-semigroup
-  ; ⊔-commutativeSemigroup    to  max-commutativeSemigroup
-  ; ⊔-band                    to  max-band
-  ; ⊔-semilattice             to  max-semilattice
-  ; ⊔-monoid                  to  max-monoid
-  ; ⊔-selectiveMagma          to  max-selectiveMagma
-
   ; x⊔y≈y⇒x≤y  to max-prop-inv₁
   ; x⊔y≈x⇒y≤x  to max-prop-inv₂
   ; x≤x⊔y      to max-inc₁
@@ -96,4 +78,17 @@ open max-properties public
   ; ⊔-mono-≤           to  max-mono-≤
   ; ⊔-monoˡ-≤          to  max-monoˡ-≤
   ; ⊔-monoʳ-≤          to  max-monoʳ-≤
+
+  ; ⊓-distribˡ-⊔ to ⊓-distribˡ-max
+  ; ⊓-distribʳ-⊔ to ⊓-distribʳ-max
   )
+
+max-pred-0 : suc n ≡ max (suc m) 0 → n ≡ m
+max-pred-0 {n} {m} p = begin
+  n
+    ≡⟨ cong pred p ⟩
+  max m 0
+    ≡⟨ max-lem m ⟩
+  m ∎
+  where
+    open ≡-Reasoning

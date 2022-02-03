@@ -23,6 +23,9 @@ connect-≃ p q (Add≃ (Add≃ r s) t) = Add≃ (connect-≃ p q (Add≃ r s)) 
 connect-inc-right-≃ {m = zero} refl q refl = Ext≃ refl≃s q
 connect-inc-right-≃ {m = suc m} refl q refl = Ext≃ (lift-sub-≃ (connect-inc-right-≃ refl q refl)) (Var≃ refl refl)
 
+connect-susp-≃ : Γ ≃c Γ′ → Δ ≃c Δ′ → connect-susp Γ Δ ≃c connect-susp Γ′ Δ′
+connect-susp-≃ p q = connect-≃ (susp-ctx-≃ p) (Var≃ (cong (2 +_) (≃c-preserve-length p)) (cong (λ - → toℕ (inject₁ (fromℕ -))) (≃c-preserve-length p))) q
+
 sub-from-connect-≃ : σ ≃s σ′ → τ ≃s τ′ → sub-from-connect σ τ ≃s sub-from-connect σ′ τ′
 sub-from-connect-≃ p (Ext≃ (Null≃ y) x) = p
 sub-from-connect-≃ p (Ext≃ (Ext≃ q y) x) = Ext≃ (sub-from-connect-≃ p (Ext≃ q y)) x

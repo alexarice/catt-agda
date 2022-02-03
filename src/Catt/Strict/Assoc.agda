@@ -12,7 +12,6 @@ open import Catt.Suspension.Properties
 open import Catt.Suspension.Support
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
-open import Catt.Syntax.Properties
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree
 open import Catt.Tree.Insertion

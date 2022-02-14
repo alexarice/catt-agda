@@ -1,9 +1,8 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
 module Catt.Tree.Insertion.Typing (index : ℕ)
                               (rule : Fin index → Rule)
@@ -11,12 +10,10 @@ module Catt.Tree.Insertion.Typing (index : ℕ)
                               (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
                               (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Connection.Typing index rule lift-rule susp-rule sub-rule
--- open import Catt.Discs
--- open import Catt.Discs.Properties
--- open import Catt.Discs.Typing index rule lift-rule
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Globular.Typing index rule lift-rule
@@ -38,10 +35,6 @@ open import Catt.Typing index rule
 open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Variables
 open import Catt.Variables.Properties
-open import Data.Nat.Properties
-open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Reasoning.Setoid as Reasoning
-open import Data.Bool using (true;false)
 
 branching-path-to-var-height : (S : Tree n)
                              → (P : Path S)
@@ -125,7 +118,7 @@ exterior-sub-Ty : (S : Tree n)
 exterior-sub-Ty (Join S₁ S₂) PHere T
   = apply-sub-sub-typing
       (sub-between-connects-Ty
-        (sub-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T ⦃ NonZero′-subst it it ⦄ (sym it))
+        (sub-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T ⦃ NonZero-subst it it ⦄ (sym (trans (max-lem (suc (tree-dim S₁))) it)))
         getSndTy
         (id-Ty (tree-to-ctx-Ty S₂))
         (tree-last-var-Ty T)
@@ -135,7 +128,7 @@ exterior-sub-Ty (Join S₁ S₂) PHere T
         (reflexive≈tm (id-on-tm (Var (fromℕ _)))))
       (idSub≃-Ty (sym≃c (connect-tree-to-ctx T S₂)) (connect-Ty (tree-to-ctx-Ty T) (tree-last-var-Ty T) (tree-to-ctx-Ty S₂)))
 exterior-sub-Ty (Join S₁ S₂) (PExt P) (Join T Sing)
-  = sub-between-connect-susps-Ty (exterior-sub-Ty S₁ P T ⦃ p = cong pred it ⦄)
+  = sub-between-connect-susps-Ty (exterior-sub-Ty S₁ P T ⦃ p = trans (cong pred it) (max-lem (tree-dim T)) ⦄)
                                  (id-Ty (tree-to-ctx-Ty S₂))
                                  (tree-to-ctx-Ty (insertion-tree S₁ P T))
                                  (tree-to-ctx-Ty S₂)
@@ -181,8 +174,8 @@ sub-from-insertion-lem {A = A} {Γ = Γ} S₁ S₂ T t {σ} {τ} σty τty p = t
       where
         open ≡-Reasoning
 
-    instance x : NonZero′ (tree-dim T)
-             x = NonZero′-subst T-dim-lem it
+    instance x : NonZero (tree-dim T)
+             x = NonZero-subst T-dim-lem it
 
     ty-eq : suspTy (tree-to-ctx S₁ ‼ getVarFin t)
                    [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]ty
@@ -356,7 +349,9 @@ sub-from-insertion-Ty {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ} {τ
       < suspTm (branching-path-to-var S₁ P) [ connect-inc-left getSnd _ ]tm [ σ ]tm >tm
         ≈⟨ p ⟩
       < unbiased-comp (tree-dim (suspTree T)) (suspTree T) [ τ ]tm >tm
-        ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim T) T) susp-functorial-id) (refl≃s {σ = τ}) ⟩
+        ≈⟨ ? ⟩
+      < unbiased-comp (suc (tree-dim T)) (suspTree T) [ τ ]tm >tm
+        ≈˘⟨ sub-action-≃-tm {!!} (refl≃s {σ = τ}) ⟩
       < suspTm (unbiased-comp (tree-dim T) T) [ τ ]tm >tm
         ≈⟨ restrict-susp-full (unbiased-comp (tree-dim T) T) τ refl≃tm refl≃tm ⟩
       < unbiased-comp (tree-dim T) T
@@ -512,7 +507,7 @@ interior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ} {τ} σ
       < suspTm (branching-path-to-var S₁ P) [ connect-inc-left getSnd _ ]tm [ σ ]tm >tm
         ≈⟨ p ⟩
       < unbiased-comp (tree-dim (suspTree T)) (suspTree T) [ τ ]tm >tm
-        ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim T) T) susp-functorial-id) (refl≃s {σ = τ}) ⟩
+        ≈˘⟨ sub-action-≃-tm {!!} (refl≃s {σ = τ}) ⟩
       < suspTm (unbiased-comp (tree-dim T) T) [ τ ]tm >tm
         ≈⟨ restrict-susp-full (unbiased-comp (tree-dim T) T) τ refl≃tm refl≃tm ⟩
       < unbiased-comp (tree-dim T) T
@@ -627,7 +622,7 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) PHere T {σ} {τ} σty τty p = beg
         open Reasoning (tm-setoid-≈ Γ)
 
     dim-lem : tree-dim (suspTree S₁) ≡ tree-dim T
-    dim-lem = insertion-dim-lem (Join S₁ S₂) PHere T σty τty p
+    dim-lem = trans {!!} (insertion-dim-lem (Join S₁ S₂) PHere T σty τty p)
 
     l2 : (0V [ τ ∘ sub-from-linear-tree-unbiased (suspTree S₁) T 0 ]tm)
            ≃tm (0V [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm)
@@ -653,7 +648,7 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) PHere T {σ} {τ} σty τty p = beg
     l1 = begin
       < τ ∘ sub-from-linear-tree-unbiased (suspTree S₁) T 0 >s′
         ≈⟨ sub-from-linear-Eq (suspTree S₁)
-                              (apply-sub-sub-typing (sub-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T ⦃ NonZero′-subst dim-lem it ⦄ (sym dim-lem)) τty)
+                              (apply-sub-sub-typing (sub-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T ⦃ NonZero-subst dim-lem it ⦄ (sym dim-lem)) τty)
                               (apply-sub-sub-typing (connect-susp-inc-left-Ty (tree-to-ctx-Ty S₁) (tree-to-ctx S₂)) σty)
                               l2 ⟩
       < σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) >s′ ∎
@@ -708,7 +703,9 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ = σ} {�
       < suspTm (branching-path-to-var S₁ P) [ connect-inc-left getSnd _ ]tm [ σ ]tm >tm
         ≈⟨ p ⟩
       < unbiased-comp (tree-dim (suspTree T)) (suspTree T) [ τ ]tm >tm
-        ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim T) T) susp-functorial-id) (refl≃s {σ = τ}) ⟩
+        ≈⟨ sub-action-≃-tm (unbiased-comp-≃ (max-lem (suc (tree-dim T))) refl≃) (refl≃s {σ = τ}) ⟩
+      < unbiased-comp (suc (tree-dim T)) (suspTree T) [ τ ]tm >tm
+        ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃c (unbiased-type-susp-lem (tree-dim T) T) susp-functorial-id) (refl≃s {σ = τ}) ⟩
       < suspTm (unbiased-comp (tree-dim T) T) [ τ ]tm >tm
         ≈⟨ restrict-susp-full (unbiased-comp (tree-dim T) T) τ refl≃tm refl≃tm ⟩
       < unbiased-comp (tree-dim T) T

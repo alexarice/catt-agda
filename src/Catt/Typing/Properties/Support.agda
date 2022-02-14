@@ -1,24 +1,22 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ)
-open import Data.Nat
 
 module Catt.Typing.Properties.Support (index : ℕ)
                                       (rule : Fin index → Rule)
                                       (supp-rule : ∀ i a → P.SupportRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Typing index rule
-open import Relation.Binary.PropositionalEquality
-open import Data.Fin.Properties using (toℕ-injective)
-open import Data.Bool using (Bool; true; false)
-open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Tree
+open import Catt.Pasting
 open import Tactic.MonoidSolver
+open import Catt.Globular
 
 open ≡-Reasoning
 
@@ -155,44 +153,45 @@ TransportVarSet-DC {Γ = Γ , A} {Δ = Δ} (ewt xs) (TyExt {σ = σ} {t = t} σt
   TransportVarSet (DC Γ (xs ∪ FVTy A)) σ ∪ FVTm t ∎
 
 supp-condition-preserved : (b : Bool)
-                         → A ≈[ tree-to-ctx T ]ty B
-                         → Typing-Ty (tree-to-ctx T) A
-                         → Typing-Ty (tree-to-ctx T) B
-                         → supp-condition b A T
-                         → supp-condition b B T
-supp-condition-preserved {A = A} {T = T} {B = B} false p Aty Bty sc = begin
+                         → A ≈[ Γ ]ty B
+                         → .⦃ _ : Γ ⊢pd ⦄
+                         → Typing-Ty Γ A
+                         → Typing-Ty Γ B
+                         → supp-condition b A Γ
+                         → supp-condition b B Γ
+supp-condition-preserved {A = A} {Γ = Γ} {B = B} false p Aty Bty sc = begin
   FVTy B
     ≡˘⟨ SuppTyFV Bty ⟩
-  SuppTy (tree-to-ctx T) B
+  SuppTy Γ B
     ≡˘⟨ EqSuppTy p ⟩
-  SuppTy (tree-to-ctx T) A
+  SuppTy Γ A
     ≡⟨ SuppTyFV Aty ⟩
   FVTy A
     ≡⟨ sc ⟩
   full ∎
-supp-condition-preserved {T = T} true (Arr≈ p q r) (TyArr {s = s} {A} {t} sty Aty tty) (TyArr {s = s′} {B} {t′} sty′ Bty tty′) (nz ,, sc1 ,, sc2)
+supp-condition-preserved {Γ = Γ} true (Arr≈ p q r) (TyArr {s = s} {A} {t} sty Aty tty) (TyArr {s = s′} {B} {t′} sty′ Bty tty′) (nz ,, sc1 ,, sc2)
   = nz ,, l1 ,, l2
   where
-    l1 : FVTy B ∪ FVTm s′ ≡ supp-bd (pred (tree-dim T)) T false
+    l1 : FVTy B ∪ FVTm s′ ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false
     l1 = begin
       FVTy B ∪ FVTm s′
         ≡˘⟨ SuppTmChar′ sty′ Bty ⟩
-      SuppTm (tree-to-ctx T) s′
+      SuppTm Γ s′
         ≡˘⟨ EqSuppTm p ⟩
-      SuppTm (tree-to-ctx T) s
+      SuppTm Γ s
         ≡⟨ SuppTmChar′ sty Aty ⟩
       FVTy A ∪ FVTm s
         ≡⟨ sc1 ⟩
-      supp-bd (pred (tree-dim T)) T false ∎
+      pd-bd-supp (pred (ctx-dim Γ)) Γ false ∎
 
-    l2 : FVTy B ∪ FVTm t′ ≡ supp-bd (pred (tree-dim T)) T true
+    l2 : FVTy B ∪ FVTm t′ ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true
     l2 = begin
       FVTy B ∪ FVTm t′
         ≡˘⟨ SuppTmChar′ tty′ Bty ⟩
-      SuppTm (tree-to-ctx T) t′
+      SuppTm Γ t′
         ≡˘⟨ EqSuppTm r ⟩
-      SuppTm (tree-to-ctx T) t
+      SuppTm Γ t
         ≡⟨ SuppTmChar′ tty Aty ⟩
       FVTy A ∪ FVTm t
         ≡⟨ sc2 ⟩
-      supp-bd (pred (tree-dim T)) T true ∎
+      pd-bd-supp (pred (ctx-dim Γ)) Γ true ∎

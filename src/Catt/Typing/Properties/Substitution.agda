@@ -1,9 +1,8 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
 module Catt.Typing.Properties.Substitution (index : ℕ)
                               (rule : Fin index → Rule)
@@ -11,6 +10,7 @@ module Catt.Typing.Properties.Substitution (index : ℕ)
                               (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
                               (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Typing index rule
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
@@ -18,10 +18,6 @@ open import Catt.Suspension
 open import Catt.Suspension.Typing index rule lift-rule susp-rule
 open P index rule
 open import Catt.Typing.Properties.Lifting index rule lift-rule
-open import Data.Fin.Properties using (toℕ-injective)
-open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Reasoning.Setoid as Reasoning
-
 
 sub-typing-implies-ty-typing : {σ : Sub n m A} → Typing-Sub Γ Δ σ → Typing-Ty Δ A
 sub-typing-implies-ty-typing (TyNull x) = x
@@ -88,7 +84,7 @@ apply-sub-eq-tm {A = ⋆} {B = s ─⟨ B ⟩⟶ t} (Coh T C τ) eq with sub-eq-
 ... | ()
 apply-sub-eq-tm {A = s ─⟨ A ⟩⟶ t} {B = ⋆} (Coh T C τ) eq with sub-eq-implies-ty-eq eq
 ... | ()
-apply-sub-eq-tm {A = s ─⟨ A ⟩⟶ t} {B = s₁ ─⟨ B ⟩⟶ t₁} (Coh T C τ) eq = apply-sub-eq-tm (Coh (suspTree T) (suspTy C) (suspSub τ)) (unrestrictEq eq)
+apply-sub-eq-tm {A = s ─⟨ A ⟩⟶ t} {B = s₁ ─⟨ B ⟩⟶ t₁} (Coh Δ C τ) eq = apply-sub-eq-tm (Coh (suspCtx Δ) (suspTy C) (suspSub τ)) (unrestrictEq eq)
 
 apply-sub-eq-sub ⟨⟩ eq = Null≈ (sub-eq-implies-ty-eq eq)
 apply-sub-eq-sub ⟨ μ , t ⟩ eq = Ext≈ (apply-sub-eq-sub μ eq) (apply-sub-eq-tm t eq)

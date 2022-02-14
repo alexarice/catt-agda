@@ -1,9 +1,8 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
 module Catt.Connection.Typing (index : ℕ)
                               (rule : Fin index → Rule)
@@ -11,6 +10,7 @@ module Catt.Connection.Typing (index : ℕ)
                               (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
                               (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Typing index rule
 open import Catt.Suspension
 open import Catt.Suspension.Properties
@@ -19,9 +19,6 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Connection
 open import Catt.Connection.Properties
-open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Reasoning.Setoid as Reasoning
-open import Data.Empty
 open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Suspension.Typing index rule lift-rule susp-rule
 

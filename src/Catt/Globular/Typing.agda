@@ -1,29 +1,23 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
 module Catt.Globular.Typing (index : ℕ)
                               (rule : Fin index → Rule)
                               (lift-rule : ∀ i a → P.LiftRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Typing index rule
 open import Catt.Typing.Properties.Lifting index rule lift-rule
 open P index rule
 open import Catt.Syntax
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Relation.Binary.PropositionalEquality
 open import Catt.Syntax.SyntacticEquality
-open import Data.Nat.Properties
 open import Catt.Support
 open import Catt.Support.Properties
-open import Data.Vec
-open import Data.Bool using (false) renaming (T to Truth)
-open import Data.Empty
-open import Data.Sum
 
 tm-to-ty-prop : Typing-Tm Γ t A → tm-to-ty Γ t ≈[ Γ ]ty A
 tm-to-ty-prop (TyVarZ x y) = y

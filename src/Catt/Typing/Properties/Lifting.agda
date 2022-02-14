@@ -1,9 +1,8 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ)
-open import Data.Nat
 
 module Catt.Typing.Properties.Lifting (index : ℕ)
                                       (rule : Fin index → Rule)
@@ -14,8 +13,7 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing index rule
 open P index rule
-open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Reasoning.Setoid as Reasoning
+open import Catt.Prelude.Properties
 
 lift-ty-typing : Typing-Ty Γ A → Typing-Ty (Γ , B) (liftType A)
 lift-tm-typing : Typing-Tm Γ t A → Typing-Tm (Γ , B) (liftTerm t) (liftType A)

@@ -1,9 +1,8 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ)
-open import Data.Nat
 
 module Catt.Typing.Properties (index : ℕ)
                               (rule : Fin index → Rule)
@@ -11,6 +10,7 @@ module Catt.Typing.Properties (index : ℕ)
                               (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
                               (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Suspension

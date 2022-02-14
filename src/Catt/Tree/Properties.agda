@@ -23,7 +23,7 @@ open import Relation.Binary using (Setoid)
 
 tree-dim-n-disk : (n : ℕ) → tree-dim (n-disk n) ≡ n
 tree-dim-n-disk zero = refl
-tree-dim-n-disk (suc n) = cong suc (trans (max-lem (tree-dim (n-disk n))) (tree-dim-n-disk n))
+tree-dim-n-disk (suc n) = trans (max-lem (suc (tree-dim (n-disk n)))) (cong suc (tree-dim-n-disk n))
 
 record TREE : Set where
   constructor <_>t

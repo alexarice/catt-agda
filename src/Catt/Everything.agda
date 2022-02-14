@@ -48,3 +48,11 @@ import Catt.Discs.Properties
 import Catt.Typing.Base
 import Catt.Typing
 import Catt.Typing.Properties.Base
+import Catt.Typing.Properties.Lifting
+import Catt.Suspension.Typing
+import Catt.Typing.Properties.Substitution
+import Catt.Typing.Properties
+import Catt.Typing.Properties.Support
+import Catt.Connection.Typing
+import Catt.Tree.Typing
+import Catt.Tree.Unbiased.Typing

@@ -6,12 +6,12 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Connection
 open import Catt.Connection.Properties
--- open import Catt.Connection.Support
+open import Catt.Connection.Support
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
--- open import Catt.Suspension.Support
+open import Catt.Suspension.Support
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality

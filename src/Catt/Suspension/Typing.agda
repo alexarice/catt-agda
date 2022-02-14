@@ -1,15 +1,15 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
 module Catt.Suspension.Typing (index : ℕ)
                               (rule : Fin index → Rule)
                               (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
                               (susp-rule : ∀ i a → P.SuspRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Typing index rule
 open import Catt.Syntax
 open import Catt.Support
@@ -20,15 +20,12 @@ open import Catt.Tree.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Suspension.Support
-open import Data.Fin.Properties using (toℕ-inject₁)
 open import Catt.Syntax.SyntacticEquality
-open import Relation.Binary.PropositionalEquality
-open import Data.Vec hiding (drop; restrict)
-open import Data.Bool
-open import Data.Product renaming (_,_ to _,,_)
-open import Data.Empty
+-- open import Data.Vec hiding (drop; restrict)
 open P index rule
 open import Catt.Typing.Properties.Lifting index rule lift-rule
+open import Catt.Pasting
+open import Catt.Suspension.Pasting
 
 suspCtxTy : Typing-Ctx Γ → Typing-Ctx (suspCtx Γ)
 suspTyTy : Typing-Ty Γ A → Typing-Ty (suspCtx Γ) (suspTy A)
@@ -49,7 +46,7 @@ suspTyTy (TyArr p q r) = TyArr (suspTmTy p) (suspTyTy q) (suspTmTy r)
 
 suspTmTy {Γ = Γ , A} (TyVarZ {Γ = Γ} {A = A} x y) = TyVarZ (suspTyTy x) (trans≈ty (reflexive≈ty (sym≃ty (susp-ty-lift A))) (suspTyEq y))
 suspTmTy (TyVarS i tvi x) = TyVarS (inject₁ (inject₁ i)) (suspTmTy tvi) (trans≈ty (reflexive≈ty (sym≃ty (susp-ty-lift _))) (suspTyEq x))
-suspTmTy (TyCoh Aty σty b sc p) = TyCoh (suspTyTy Aty) (suspSubTy σty) b (suspSuppCondition sc) (trans≈ty (reflexive≈ty (sym≃ty (susp-functorial-ty _ _))) (suspTyEq p))
+suspTmTy (TyCoh Aty σty b sc p) = TyCoh ⦃ susp-pd it ⦄ (suspTyTy Aty) (suspSubTy σty) b (suspSuppCondition sc) (trans≈ty (reflexive≈ty (sym≃ty (susp-functorial-ty _ _))) (suspTyEq p))
 
 
 -- suspTmTy (TyComp {T = T} {s = s} {A = A} {t = t} {σ = σ} p q r x y) = TyComp (suspTyTy p) (suspSubTy q) lem1 lem2 (trans≈ty (reflexive≈ty (sym≃ty (susp-functorial-ty σ (s ─⟨ A ⟩⟶ t)))) (suspTyEq y))

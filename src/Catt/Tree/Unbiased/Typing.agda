@@ -1,9 +1,8 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
 module Catt.Tree.Unbiased.Typing (index : ℕ)
                                  (rule : Fin index → Rule)
@@ -11,6 +10,7 @@ module Catt.Tree.Unbiased.Typing (index : ℕ)
                                  (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
                                  (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Typing index rule
 open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Syntax
@@ -21,23 +21,14 @@ open import Catt.Tree.Properties
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Typing index rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Pasting
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Tree.Unbiased.Support
 open import Catt.Tree.Support
-open import Relation.Binary.PropositionalEquality
-open import Relation.Nullary
-open import Data.Empty
-open import Data.Unit using (⊤; tt)
-open import Data.Nat.Properties
-open import Data.Bool using (Bool; true; false)
-open import Data.Product renaming (_,_ to _,,_)
--- open import Catt.Discs
--- open import Catt.Discs.Typing index rule lift-rule
 open import Catt.Suspension
 open import Catt.Suspension.Typing index rule lift-rule susp-rule
-import Relation.Binary.Reasoning.Setoid as Reasoning
-import Relation.Binary.Reasoning.PartialOrder as PReasoning
+open import Catt.Globular
 
 -- unbiased-term-Ty : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ d) → Typing-Tm (tree-to-ctx T) (unbiased-term d T) (unbiased-type d T)
 -- unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → .(tree-dim T ≡ d) → Typing-Sub (tree-to-ctx T) Γ σ
@@ -65,7 +56,7 @@ import Relation.Binary.Reasoning.PartialOrder as PReasoning
 
 unbiased-type-Ty : (d : ℕ) → (T : Tree n) → (d ≤ suc (tree-dim T)) → Typing-Ty (tree-to-ctx T) (unbiased-type d T)
 unbiased-term-Ty : (d : ℕ) → (T : Tree n) → (tree-dim T ≡ d) → Typing-Tm (tree-to-ctx T) (unbiased-term d T) (unbiased-type d T)
-unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → (tree-dim T ≡ d)
+unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≡ d)
                   → Typing-Tm (tree-to-ctx T) (unbiased-comp d T) (unbiased-type d T)
 
 unbiased-type-Ty zero T q = TyStar
@@ -77,17 +68,16 @@ unbiased-type-Ty (suc d) T q =
     utty = unbiased-term-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-pred q))
 
 unbiased-term-Ty d T q with is-linear-dec T
-... | no p = unbiased-comp-Ty d ⦃ NonZero′-subst q (non-linear-has-no-zero-dim T p) ⦄ T q
+... | no p = unbiased-comp-Ty d ⦃ NonZero-subst q (non-linear-has-no-zero-dim T p) ⦄ T q
   where
-    non-linear-has-no-zero-dim : (T : Tree n) → ¬ is-linear T → NonZero′ (tree-dim T)
+    non-linear-has-no-zero-dim : (T : Tree n) → ¬ is-linear T → NonZero (tree-dim T)
     non-linear-has-no-zero-dim Sing p = ⊥-elim (p tt)
-    non-linear-has-no-zero-dim (Join S T) p with tree-dim (Join S T) | join-tree-has-non-zero-dim S T
-    ... | zero | q = ⊥-elim (q refl)
-    ... | suc d | q = it
+    non-linear-has-no-zero-dim (Join S T) p = it
+
 ... | yes p with tree-to-ctx T | tree-to-ctx-Ty T | linear-tree-unbiased-lem d T ⦃ p ⦄ q
 ... | Γ , A | TyAdd Γty x | l = TyVarZ x (reflexive≈ty l)
 
-unbiased-comp-Ty (suc d) T q = TyCoh (unbiased-type-Ty (suc d) T (s≤s (≤-trans (n≤1+n d) (≤-reflexive (sym q))))) (id-Ty (tree-to-ctx-Ty T)) true (unbiased-supp-condition d T q) (reflexive≈ty (id-on-ty _))
+unbiased-comp-Ty (suc d) T q = TyCoh ⦃ tree-to-pd T ⦄ (unbiased-type-Ty (suc d) T (s≤s (≤-trans (n≤1+n d) (≤-reflexive (sym q))))) (id-Ty (tree-to-ctx-Ty T)) true (unbiased-supp-condition d T q) (reflexive≈ty (id-on-ty _))
 
 -- sub-from-sphere-unbiased-Ty : (d : ℕ) → (T : Tree n) → .(d ≡ tree-dim T) → Typing-Sub (Sphere d) (tree-to-ctx T) (sub-from-sphere-unbiased d T)
 -- sub-from-sphere-unbiased-Ty d T p = sub-from-sphere-Ty d (unbiased-type-Ty d T (≤-reflexive p)) (unbiased-type-dim d T)
@@ -95,29 +85,30 @@ unbiased-comp-Ty (suc d) T q = TyCoh (unbiased-type-Ty (suc d) T (s≤s (≤-tra
 -- sub-from-disc-unbiased-Ty : (d : ℕ) → .⦃ NonZero′ d ⦄ → (T : Tree n) → .(d ≡ tree-dim T) → Typing-Sub (Disc d) (tree-to-ctx T) (sub-from-disc-unbiased d T)
 -- sub-from-disc-unbiased-Ty d T p = sub-from-disc-Ty d (unbiased-type-Ty d T (≤-reflexive p)) (unbiased-type-dim d T) (term-conversion (unbiased-comp-Ty d T (sym p) id-Ty) (reflexive≈ty (id-on-ty (unbiased-type d T))))
 
-sub-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero′ (tree-dim T) ⦄ → (d : ℕ) → (tree-dim T ≡ tree-dim S + d) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T d)
-sub-from-linear-tree-unbiased-Ty Sing T d p = TyExt (TyNull (unbiased-type-Ty d T (≤-trans (≤-reflexive (sym p)) (n≤1+n (tree-dim T))))) TyStar (unbiased-comp-Ty d ⦃ NonZero′-subst p it ⦄ T p)
-sub-from-linear-tree-unbiased-Ty (Join S Sing) T d p = unrestrictTy (sub-from-linear-tree-unbiased-Ty S T (suc d) (trans p (sym (+-suc (tree-dim S) d))))
+sub-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim T) ⦄ → (d : ℕ) → (tree-dim T ≡ tree-dim S + d) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T d)
+sub-from-linear-tree-unbiased-Ty Sing T d p = TyExt (TyNull (unbiased-type-Ty d T (≤-trans (≤-reflexive (sym p)) (n≤1+n (tree-dim T))))) TyStar (unbiased-comp-Ty d ⦃ NonZero-subst p it ⦄ T p)
+sub-from-linear-tree-unbiased-Ty (Join S Sing) T d p = unrestrictTy (sub-from-linear-tree-unbiased-Ty S T (suc d) (trans p (trans (cong (_+ d) (max-lem (suc (tree-dim S)))) (sym (+-suc (tree-dim S) d)))))
 
-sub-from-linear-tree-unbiased-Ty-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero′ (tree-dim T) ⦄ → .(tree-dim T ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T 0)
+sub-from-linear-tree-unbiased-Ty-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim T) ⦄ → .(tree-dim T ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T 0)
 sub-from-linear-tree-unbiased-Ty-0 S T p = sub-from-linear-tree-unbiased-Ty S T 0 (trans (recompute ((tree-dim T) ≟ (tree-dim S)) p) (sym (+-identityʳ (tree-dim S))))
 
 sub-from-linear-tree-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → Typing-Tm Γ t A → Typing-Ty Γ A → (p : ty-dim A ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) Γ (sub-from-linear-tree S t A p)
 sub-from-linear-tree-Ty Sing tty TyStar p = TyExt (TyNull TyStar) TyStar tty
 sub-from-linear-tree-Ty (Join S Sing) tty (TyArr sty Aty sty′) p
   rewrite (≃c-to-≡ (susp-lin-tree S)) =
-    TyExt (TyExt (sub-from-linear-tree-Ty S sty Aty (cong pred p)) (‼-Ty (tree-to-ctx-Ty S) zero)
-                 (term-conversion sty′ (reflexive≈ty (sym≃ty (sub-from-linear-tree-‼-0 S _ _ (cong pred p))))))
+    TyExt (TyExt (sub-from-linear-tree-Ty S sty Aty (max-pred-0 p)) (‼-Ty (tree-to-ctx-Ty S) zero)
+                 (term-conversion sty′ (reflexive≈ty (sym≃ty (sub-from-linear-tree-‼-0 S _ _ (max-pred-0 p))))))
           (TyArr (var-Ty (TyAdd (tree-to-ctx-Ty S) (‼-Ty (tree-to-ctx-Ty S) zero)) (suc zero))
                  (lift-ty-typing (‼-Ty (tree-to-ctx-Ty S) zero))
                  (var-Ty (TyAdd (tree-to-ctx-Ty S) (‼-Ty (tree-to-ctx-Ty S) zero)) zero))
-          (term-conversion tty (reflexive≈ty (sym≃ty (Arr≃ (sub-from-linear-tree-0V S _ _ (cong pred p))
-                                                           (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S _ _ _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S _ _ (cong pred p)))
+          (term-conversion tty (reflexive≈ty (sym≃ty (Arr≃ (sub-from-linear-tree-0V S _ _ (max-pred-0 p))
+                                                           (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S _ _ _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S _ _ (max-pred-0 p)))
                                                            refl≃tm))))
 
 identity-Ty : Typing-Tm Γ t A → Typing-Ty Γ A → Typing-Tm Γ (identity t A) (t ─⟨ A ⟩⟶ t)
 identity-Ty {t = t} {A = A} tty Aty
-  = TyCoh (unbiased-type-Ty (suc (ty-dim A))
+  = TyCoh ⦃ tree-to-pd (n-disk (ty-dim A)) ⦄
+          (unbiased-type-Ty (suc (ty-dim A))
                             (n-disk (ty-dim A))
                             (s≤s (≤-reflexive (sym (tree-dim-n-disk (ty-dim A))))))
           (sub-from-linear-tree-Ty (n-disk (ty-dim A)) ⦃ n-disk-is-linear (ty-dim A) ⦄
@@ -131,8 +122,8 @@ identity-Ty {t = t} {A = A} tty Aty
       lem-supp : full ⊆ FVTy (unbiased-type (suc (ty-dim A)) (n-disk (ty-dim A)))
       lem-supp = begin
         full
-          ≡˘⟨ supp-bd-full (ty-dim A) (n-disk (ty-dim A)) false (≤-reflexive (tree-dim-n-disk (ty-dim A))) ⟩
-        supp-bd (ty-dim A) (n-disk (ty-dim A)) false
+          ≡˘⟨ supp-tree-bd-full (ty-dim A) (n-disk (ty-dim A)) false (≤-reflexive (tree-dim-n-disk (ty-dim A))) ⟩
+        supp-tree-bd (ty-dim A) (n-disk (ty-dim A)) false
           ≡˘⟨ supp-unbiased-lem (ty-dim A) (n-disk (ty-dim A)) (≤-reflexive (sym (tree-dim-n-disk (ty-dim A)))) false ⟩
         FVTy (unbiased-type (ty-dim A) (n-disk (ty-dim A))) ∪
           FVTm
@@ -187,22 +178,22 @@ identity-Ty {t = t} {A = A} tty Aty
 
 sub-from-linear-tree-≈ : (S : Tree n) → .⦃ _ : is-linear S ⦄ → s ≈[ Γ ]tm t → (r : A ≈[ Γ ]ty B) → (p : ty-dim A ≡ tree-dim S) → sub-from-linear-tree S s A p ≈[ Γ ]s sub-from-linear-tree S t B (trans (sym (ty-dim-≈ r)) p)
 sub-from-linear-tree-≈ Sing a Star≈ p = Ext≈ (Null≈ Star≈) a
-sub-from-linear-tree-≈ (Join S Sing) a (Arr≈ b c d) p = Ext≈ (Ext≈ (sub-from-linear-tree-≈ S b c (cong pred p)) d) a
+sub-from-linear-tree-≈ (Join S Sing) a (Arr≈ b c d) p = Ext≈ (Ext≈ (sub-from-linear-tree-≈ S b c (max-pred-0 p)) d) a
 
 identity-≈ : s ≈[ Γ ]tm t → A ≈[ Γ ]ty B → identity s A ≈[ Γ ]tm identity t B
-identity-≈ {A = A} {B = B} p q = trans≈tm (reflexive≈tm (Coh≃ (n-disk-≃ (ty-dim-≈ q)) (unbiased-type-≃ (cong suc (ty-dim-≈ q)) (n-disk-≃ (ty-dim-≈ q))) (sub-from-linear-tree-≃ (n-disk-≃ (ty-dim-≈ q)) ⦃ n-disk-is-linear (ty-dim A) ⦄ ⦃ n-disk-is-linear (ty-dim B) ⦄ refl≃tm refl≃ty (sym (tree-dim-n-disk (ty-dim A))) (trans (ty-dim-≈ q) (sym (tree-dim-n-disk (ty-dim B))))))) (Coh≈ refl≈ty (sub-from-linear-tree-≈ (n-disk (ty-dim B)) ⦃ n-disk-is-linear (ty-dim B) ⦄ p q (trans (ty-dim-≈ q) (sym (tree-dim-n-disk (ty-dim B))))))
+identity-≈ {A = A} {B = B} p q = trans≈tm (reflexive≈tm (Coh≃ (tree-to-ctx-≃ (n-disk-≃ (ty-dim-≈ q))) (unbiased-type-≃ (cong suc (ty-dim-≈ q)) (n-disk-≃ (ty-dim-≈ q))) (sub-from-linear-tree-≃ (n-disk-≃ (ty-dim-≈ q)) ⦃ n-disk-is-linear (ty-dim A) ⦄ ⦃ n-disk-is-linear (ty-dim B) ⦄ refl≃tm refl≃ty (sym (tree-dim-n-disk (ty-dim A))) (trans (ty-dim-≈ q) (sym (tree-dim-n-disk (ty-dim B))))))) (Coh≈ refl≈ty (sub-from-linear-tree-≈ (n-disk (ty-dim B)) ⦃ n-disk-is-linear (ty-dim B) ⦄ p q (trans (ty-dim-≈ q) (sym (tree-dim-n-disk (ty-dim B))))))
 
 sub-from-linear-tree-to-term-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {t : Tm m} → {A : Ty m} → (p : ty-dim A ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) Γ (sub-from-linear-tree S t A p) → Typing-Tm Γ t A
 sub-from-linear-tree-to-term-Ty Sing {A = ⋆} p (TyExt σty Bty tty) = tty
 sub-from-linear-tree-to-term-Ty (Join S Sing) {A = s ─⟨ A ⟩⟶ t} p σty
   rewrite ≃c-to-≡ (susp-lin-tree S) with σty
-... | TyExt τty Bty tty = term-conversion tty (reflexive≈ty (Arr≃ (sub-from-linear-tree-0V S s A (cong pred p)) (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S s A _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S s A (cong pred p))) refl≃tm))
+... | TyExt τty Bty tty = term-conversion tty (reflexive≈ty (Arr≃ (sub-from-linear-tree-0V S s A (max-pred-0 p)) (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S s A _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S s A (max-pred-0 p))) refl≃tm))
 
 sub-from-linear-tree-to-type-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {t : Tm m} → {A : Ty m} → (p : ty-dim A ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) Γ (sub-from-linear-tree S t A p) → Typing-Ty Γ A
 sub-from-linear-tree-to-type-Ty Sing {A = ⋆} p (TyExt σty Bty tty) = TyStar
 sub-from-linear-tree-to-type-Ty (Join S Sing) {A = s ─⟨ A ⟩⟶ t} p σty
   rewrite ≃c-to-≡ (susp-lin-tree S) with σty
-... | TyExt (TyExt τty Aty sty) Bty tty = TyArr (sub-from-linear-tree-to-term-Ty S (cong pred p) τty) (sub-from-linear-tree-to-type-Ty S (cong pred p) τty) (term-conversion sty (reflexive≈ty (sub-from-linear-tree-‼-0 S s A (cong pred p))))
+... | TyExt (TyExt τty Aty sty) Bty tty = TyArr (sub-from-linear-tree-to-term-Ty S (max-pred-0 p) τty) (sub-from-linear-tree-to-type-Ty S (max-pred-0 p) τty) (term-conversion sty (reflexive≈ty (sub-from-linear-tree-‼-0 S s A (max-pred-0 p))))
 
 identity-to-term-Ty : Typing-Tm Γ (identity t A) B → Typing-Tm Γ t A
 identity-to-term-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-term-Ty (n-disk (ty-dim A)) ⦃ n-disk-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disk (ty-dim A))) σty

@@ -8,6 +8,8 @@ open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Globular
 open import Catt.Suspension
+open import Catt.Connection
+open import Catt.Tree
 open import Catt.Syntax.SyntacticEquality
 
 -- src-subbed_:_(A_:_Ty_Γ_(suc_(suc_d)))_→_(σ_:_Sub_Γ_Δ)_→_(ty-src_A)_[_σ_]tm_≡_ty-src_(A_[_σ_]ty)
@@ -41,7 +43,34 @@ susp-dim (s ─⟨ A ⟩⟶ t) = cong suc (susp-dim A)
 
 susp-ctx-dim : (Γ : Ctx n) → .⦃ NonZero n ⦄ → ctx-dim (suspCtx Γ) ≡ suc (ctx-dim Γ)
 susp-ctx-dim (∅ , A) = susp-dim A
-susp-ctx-dim (Γ , B , A) = cong₂ _⊔_ (susp-ctx-dim (Γ , B)) (susp-dim A)
+susp-ctx-dim (Γ , B , A) = cong₂ max (susp-ctx-dim (Γ , B)) (susp-dim A)
+
+connect-ctx-dim : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → ctx-dim (connect Γ t Δ) ≡ max (ctx-dim Γ) (ctx-dim Δ)
+connect-ctx-dim Γ t (∅ , ⋆) = sym (max-lem (ctx-dim Γ))
+connect-ctx-dim Γ t (∅ , s ─⟨ A ⟩⟶ t₁) = ⊥-elim (no-term-in-empty-context s)
+connect-ctx-dim Γ t (Δ , B , A) = begin
+  max (ctx-dim (connect Γ t (Δ , B)))
+      (ty-dim (A [ connect-inc-right t (ctxLength Δ) ]ty))
+    ≡⟨ cong₂ max (connect-ctx-dim Γ t (Δ , B)) (sym (sub-dim (connect-inc-right t (ctxLength Δ)) A)) ⟩
+  max (max (ctx-dim Γ) (ctx-dim (Δ , B))) (ty-dim A)
+    ≡⟨ max-assoc (ctx-dim Γ) (ctx-dim (Δ , B)) (ty-dim A) ⟩
+  max (ctx-dim Γ) (max (ctx-dim (Δ , B)) (ty-dim A)) ∎
+  where
+    open ≡-Reasoning
+
+connect-susp-ctx-dim : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → ctx-dim (connect-susp Γ Δ) ≡ max (suc (ctx-dim Γ)) (ctx-dim Δ)
+connect-susp-ctx-dim Γ Δ = trans (connect-ctx-dim (suspCtx Γ) getSnd Δ) (cong (λ - → max - (ctx-dim Δ)) (susp-ctx-dim Γ))
+
+tree-dim-ctx-dim : (T : Tree n) → ctx-dim (tree-to-ctx T) ≡ tree-dim T
+tree-dim-ctx-dim Sing = refl
+tree-dim-ctx-dim (Join S T) = begin
+  ctx-dim (connect-susp (tree-to-ctx S) (tree-to-ctx T))
+    ≡⟨ connect-susp-ctx-dim (tree-to-ctx S) (tree-to-ctx T) ⟩
+  max (suc (ctx-dim (tree-to-ctx S))) (ctx-dim (tree-to-ctx T))
+    ≡⟨ cong₂ max (cong suc (tree-dim-ctx-dim S )) (tree-dim-ctx-dim T) ⟩
+  max (suc (tree-dim S)) (tree-dim T) ∎
+  where
+    open ≡-Reasoning
 
 lift-ty-dim : (A : Ty n) → ty-dim (liftType A) ≡ ty-dim A
 lift-ty-dim ⋆ = refl

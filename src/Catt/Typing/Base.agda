@@ -2,9 +2,8 @@
 
 module Catt.Typing.Base where
 
+open import Catt.Prelude
 open import Catt.Syntax
-open import Data.Nat
-open import Data.Fin
 
 record Rule : Set₁ where
   field

@@ -1,8 +1,7 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
-open import Data.Fin using (Fin; zero; suc)
-open import Data.Nat
 
 module Catt.Typing.Properties.Base (index : ℕ) (rule : Fin index → Rule) where
 
@@ -10,15 +9,12 @@ open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing index rule
-open import Relation.Binary.PropositionalEquality
 open import Relation.Binary using (Setoid)
 open import Catt.Suspension
 open import Catt.Tree
 open import Catt.Globular
-open import Function.Bundles
+-- open import Function.Bundles
 open import Catt.Support
-open import Data.Product renaming (_,_ to _,,_)
-open import Data.Unit
 open import Catt.Variables
 
 private
@@ -54,8 +50,8 @@ reflexive≈ty (Star≃ x) = Star≈
 reflexive≈ty (Arr≃ p q r) = Arr≈ (reflexive≈tm p) (reflexive≈ty q) (reflexive≈tm r)
 
 reflexive≈tm (Var≃ x y) = Var≈ y
-reflexive≈tm (Coh≃ p q r) with ≃-to-same-n p
-... | refl with ≃-to-≡ p
+reflexive≈tm (Coh≃ p q r) with ≃c-preserve-length p
+... | refl with ≃c-to-≡ p
 ... | refl = Coh≈ (reflexive≈ty q) (reflexive≈s r)
 
 reflexive≈s (Null≃ x) = Null≈ (reflexive≈ty x)
@@ -207,10 +203,10 @@ transport-typing-sub σty p q r with ≃c-preserve-length p | ≃c-preserve-leng
 ... | refl | refl | refl with ≃s-to-≡ r
 ... | refl = σty
 
-coh-sub-ty : Typing-Tm Γ (Coh T A τ) B → Typing-Sub (tree-to-ctx T) Γ τ
+coh-sub-ty : Typing-Tm Γ (Coh Δ A τ) B → Typing-Sub Δ Γ τ
 coh-sub-ty (TyCoh x τty b x₂ x₃) = τty
 
-coh-ty-ty : Typing-Tm Γ (Coh T A τ) B → Typing-Ty (tree-to-ctx T) A
+coh-ty-ty : Typing-Tm Γ (Coh Δ A τ) B → Typing-Ty Δ A
 coh-ty-ty (TyCoh Aty τty b a c) = Aty
 
 sub-to-ctx-Ty : Typing-Sub Γ Δ σ → Typing-Ctx Γ
@@ -233,10 +229,6 @@ ty-dim-≈ (Arr≈ _ p _) = cong suc (ty-dim-≈ p)
 
 module _ {i : Index} (a : rule i .Rule.Args) where
   open Rule (rule i)
-
-  BoundRule : Set
-  BoundRule = ∀ {d}
-            → (BoundedTm d (tgtCtx a) (lhs a)) ⇔ (BoundedTm d (tgtCtx a) (rhs a))
 
   LiftRule : Set
   LiftRule = {A : Ty (len a)}

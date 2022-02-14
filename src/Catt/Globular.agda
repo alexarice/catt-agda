@@ -11,7 +11,7 @@ ty-dim (s ─⟨ A ⟩⟶ t) = suc (ty-dim A)
 
 ctx-dim : Ctx n → ℕ
 ctx-dim ∅ = 0
-ctx-dim (Γ , A) = ctx-dim Γ ⊔ ty-dim A
+ctx-dim (Γ , A) = max (ctx-dim Γ) (ty-dim A)
 
 lookupHeight : (Γ : Ctx n) → (i : Fin n) → ℕ
 lookupHeight (Γ , A) zero = ty-dim A

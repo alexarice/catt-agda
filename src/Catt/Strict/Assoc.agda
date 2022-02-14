@@ -2,37 +2,28 @@
 
 module Catt.Strict.Assoc where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Connection
 open import Catt.Connection.Properties
-open import Catt.Connection.Support
+-- open import Catt.Connection.Support
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
-open import Catt.Suspension.Support
+-- open import Catt.Suspension.Support
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
-open import Catt.Tree.Insertion.Support
+-- open import Catt.Tree.Insertion.Support
 open import Catt.Tree.Properties
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 open import Catt.Typing.Base
-open import Data.Bool using (true)
-open import Data.Fin using (Fin;zero;suc;fromℕ)
-open import Data.Fin.Properties using (toℕ-injective)
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Product renaming (_,_ to _,,_)
-open import Data.Unit using (⊤;tt)
-open import Relation.Binary.PropositionalEquality
-open import Relation.Nullary
 
-import Relation.Binary.Reasoning.PartialOrder as PReasoning
-import Relation.Binary.Reasoning.Setoid as Reasoning
 open Rule
 
 record InsertionData : Set where
@@ -57,22 +48,6 @@ module _ where
   open InsertionData
   insertionRule : Rule
   insertionRule .Args = InsertionData
-  -- insertionRule .tctCount = 2
-  -- insertionRule .eqtCount = 1
-  -- insertionRule .tgtHeight zero a = a .id-d′
-  -- insertionRule .tgtHeight (suc i) a = a .id-d″
-  -- insertionRule .tctLen zero a = a .id-l
-  -- insertionRule .tctLen (suc i) a = a .id-l
-  -- insertionRule .tct zero a = Coh (tree-to-ctx (a .id-S)) (a .id-A) (a .id-σ)
-  -- insertionRule .tct (suc i) a = Coh (tree-to-ctx (a .id-T)) (a .id-B) (a .id-τ)
-  -- insertionRule .tctTy zero a = a .id-C
-  -- insertionRule .tctTy (suc i) a = a .id-D
-  -- insertionRule .tctCtx zero a = a .id-Γ
-  -- insertionRule .tctCtx (suc i) a = a .id-Γ
-  -- insertionRule .eqtLen zero a = a .id-l
-  -- insertionRule .eqtCtx zero a = a .id-Γ
-  -- insertionRule .eqtlhs zero a = branching-path-to-var (a .id-S) (a .id-P) [ a .id-σ ]tm
-  -- insertionRule .eqtrhs zero a = Coh (tree-to-ctx (a .id-T)) (unbiased-type (tree-to-pd (a .id-T))) (a .id-τ)
   insertionRule .len a = a .id-l
   insertionRule .tgtCtx a = a .id-Γ
   insertionRule .lhs a = Coh (a .id-S) (a .id-A) (a .id-σ)
@@ -300,7 +275,6 @@ module _ where
 --         open Reasoning (ty-setoid-≈ id-Γ)
 
 module Support where
-  open import Catt.Tree.Insertion.Support
 
   modifyRule : Rule → Rule
   modifyRule r .Args = Σ[ a ∈ r .Args ] SuppTm (r .tgtCtx a) (r .lhs a) ≡ SuppTm (r .tgtCtx a) (r .rhs a)

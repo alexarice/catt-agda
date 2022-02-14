@@ -2,25 +2,17 @@
 
 module Catt.Tree.Insertion where
 
+open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Suspension
-open import Catt.Discs
-open import Catt.Discs.Properties
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc)
-open import Data.Unit
-open import Data.Empty
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Syntax.SyntacticEquality
-open import Relation.Binary.PropositionalEquality
 open import Catt.Tree.Unbiased
 open import Catt.Variables
 open import Catt.Variables.Properties
-open import Data.Sum
--- open import Catt.PartialSubstitution
 
 data Path : Tree n → Set where
   PHere : {S : Tree m} → {T : Tree n} → Path (Join S T)

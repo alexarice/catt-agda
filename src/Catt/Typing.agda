@@ -1,22 +1,15 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc; toℕ)
 
 module Catt.Typing (index : ℕ) (rule : Fin index → Rule) where
 
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
-open import Data.Nat
-open import Data.Nat.Properties
 open import Relation.Binary.PropositionalEquality
 open import Catt.Support
-open import Catt.Tree
-open import Catt.Tree.Support
-open import Data.Bool using (Bool; true; false)
-open import Data.Empty
-open import Data.Product renaming (_,_ to _,,_)
+open import Catt.Pasting
 
 open Rule
 
@@ -24,7 +17,6 @@ private
   Index : Set
   Index = Fin index
 
--- data _≈c_ : (Γ : Ctx m) → (Δ : Ctx m) → Set
 data _≈[_]tm_ : Tm n → Ctx n → Tm n → Set
 data _≈[_]ty_ : Ty n → Ctx n → Ty n → Set
 data _≈[_]s_ : (σ : Sub n m A) → Ctx m → (τ : Sub n m B) → Set
@@ -33,15 +25,11 @@ data Typing-Tm : (Γ : Ctx m) → Tm m → Ty m → Set
 data Typing-Ty : (Γ : Ctx m) → Ty m → Set
 data Typing-Sub : (Γ : Ctx m) → (Δ : Ctx n) → Sub m n A → Set
 
--- data _≈c_ where
---   Emp≈ : ∅ ≈c ∅
---   Add≈ : Γ ≈c Γ′ → A ≈ty A′ → (Γ , A) ≈c (Γ′ , A′)
-
 data _≈[_]tm_ where
   Var≈ : {i j : Fin n} → (toℕ i ≡ toℕ j) → (Var i) ≈[ Γ ]tm (Var j)
   Sym≈ : s ≈[ Γ ]tm t → t ≈[ Γ ]tm s
   Trans≈ : s ≈[ Γ ]tm t → t ≈[ Γ ]tm u → s ≈[ Γ ]tm u
-  Coh≈ : A ≈[ tree-to-ctx T ]ty B → σ ≈[ Γ ]s τ → (Coh T A σ) ≈[ Γ ]tm (Coh T B τ)
+  Coh≈ : A ≈[ Δ ]ty B → σ ≈[ Γ ]s τ → (Coh Δ A σ) ≈[ Γ ]tm (Coh Δ B τ)
   Rule≈ : (i : Index)
         → (a : rule i .Args)
         → {C : Ty (rule i .len a)}
@@ -63,7 +51,7 @@ data Typing-Ctx where
 data Typing-Tm where
   TyVarZ : Typing-Ty Γ A → liftType A ≈[ Γ , A ]ty B → Typing-Tm (Γ , A) 0V B
   TyVarS : (i : Fin (ctxLength Γ)) → Typing-Tm Γ (Var i) A → liftType A ≈[ Γ , C ]ty B → Typing-Tm (Γ , C) (Var (suc i)) B
-  TyCoh : Typing-Ty (tree-to-ctx T) A → Typing-Sub (tree-to-ctx T) Γ σ → (b : Bool) → supp-condition b A T → (A [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh T A σ) B
+  TyCoh : .⦃ pd : Δ ⊢pd ⦄ → Typing-Ty Δ A → Typing-Sub Δ Γ σ → (b : Bool) → supp-condition b A Δ → (A [ σ ]ty) ≈[ Γ ]ty B → Typing-Tm Γ (Coh Δ A σ) B
 
 data Typing-Ty where
   TyStar : Typing-Ty Γ ⋆

@@ -2,6 +2,8 @@
 
 module Catt.Tree.Insertion.Properties where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
@@ -16,18 +18,7 @@ open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
-open import Catt.Discs
-open import Catt.Discs.Properties
-open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Reasoning.Setoid as Reasoning
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc; fromℕ; inject₁)
-open import Relation.Nullary
-open import Data.Sum
-open import Data.Unit using (⊤; tt)
-open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Globular
-open import Data.Bool using (Bool; true)
 
 branching-path-to-var-is-var : (S : Tree n) → (P : Path S) → .⦃ _ : is-branching-path P ⦄ → isVar (branching-path-to-var S P)
 branching-path-to-var-is-var (Join S T) PHere = var-to-var-comp-tm 0V (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
@@ -152,7 +143,7 @@ insertion-eq : (S : Tree n)
              → (T : Tree m)
              → .⦃ _ : has-linear-height (path-length P) T ⦄
              → .⦃ p : height-of-branching P ≡ tree-dim T ⦄
-             → branching-path-to-var S P [ exterior-sub S P T ]tm ≃tm Coh T (unbiased-type (tree-dim T) T) (interior-sub S P T)
+             → branching-path-to-var S P [ exterior-sub S P T ]tm ≃tm Coh (tree-to-ctx T) (unbiased-type (tree-dim T) T) (interior-sub S P T)
 insertion-eq (Join S₁ S₂) PHere T = begin
   < 0V [ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm
        [ exterior-sub (Join S₁ S₂) PHere T ]tm >tm
@@ -179,13 +170,13 @@ insertion-eq (Join S₁ S₂) PHere T = begin
     ≈⟨ sub-action-≃-tm (sub-from-linear-tree-unbiased-0V (suspTree S₁) T 0) refl≃s ⟩
   < unbiased-comp (tree-dim (suspTree S₁)) T [ connect-inc-left (tree-last-var T) _ ]tm >tm
     ≡⟨⟩
-  < Coh T (unbiased-type (suc (tree-dim S₁)) T) (connect-inc-left (tree-last-var T) _ ∘ idSub) >tm
-    ≈⟨ Coh≃ refl≃ (unbiased-type-≃ (recompute ((suc (tree-dim S₁)) ≟ (tree-dim T)) it) refl≃) lem ⟩
-  < Coh T (unbiased-type (tree-dim T) T)
+  < Coh (tree-to-ctx T) (unbiased-type (tree-dim (suspTree S₁)) T) (connect-inc-left (tree-last-var T) _ ∘ idSub) >tm
+    ≈⟨ Coh≃ refl≃c (unbiased-type-≃ (trans (max-lem (suc (tree-dim S₁))) (recompute (suc (tree-dim S₁) ≟ tree-dim T) it)) refl≃) lem ⟩
+  < Coh (tree-to-ctx T) (unbiased-type (tree-dim T) T)
       (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
        connect-inc-left (tree-last-var T) _) >tm
     ≡⟨⟩
-  < Coh T (unbiased-type (tree-dim T) T) (interior-sub (Join S₁ S₂) PHere T) >tm ∎
+  < Coh (tree-to-ctx T) (unbiased-type (tree-dim T) T) (interior-sub (Join S₁ S₂) PHere T) >tm ∎
   where
     lem : connect-inc-left (tree-last-var T) _ ∘ idSub
           ≃s idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘ connect-inc-left (tree-last-var T) _
@@ -222,11 +213,11 @@ insertion-eq (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p = p ⦄ = let
     ≈˘⟨ sub-action-≃-tm (susp-functorial-tm (exterior-sub S₁ P T) (branching-path-to-var S₁ P)) refl≃s ⟩
   < suspTm (branching-path-to-var S₁ P [ exterior-sub S₁ P T ]tm)
     [ connect-susp-inc-left (insertion-tree-size S₁ P T) _ ]tm >tm
-    ≈⟨ sub-action-≃-tm (susp-tm-≃ (insertion-eq S₁ P T)) refl≃s ⟩
-  < suspTm (Coh T (unbiased-type (tree-dim T) T) (interior-sub S₁ P T))
+    ≈⟨ sub-action-≃-tm (susp-tm-≃ (insertion-eq S₁ P T ⦃ p = trans x (max-lem (tree-dim T)) ⦄)) refl≃s ⟩
+  < suspTm (Coh (tree-to-ctx T) (unbiased-type (tree-dim T) T) (interior-sub S₁ P T))
     [ connect-susp-inc-left (insertion-tree-size S₁ P T) _ ]tm >tm
-    ≈⟨ Coh≃ refl≃ (unbiased-type-susp-lem (tree-dim T) T) refl≃s ⟩
-  < Coh (Join T Sing) (unbiased-type (tree-dim (Join T Sing)) (Join T Sing)) (interior-sub (Join S₁ S₂) (PExt P) (Join T Sing)) >tm ∎
+    ≈⟨ Coh≃ refl≃c (trans≃ty (susp-ty-≃ (unbiased-type-≃ (sym (max-lem (tree-dim T))) refl≃)) (unbiased-type-susp-lem (max (tree-dim T) (pred (tree-dim Sing))) T)) refl≃s ⟩
+  < Coh (suspCtx (tree-to-ctx T)) (unbiased-type (tree-dim (Join T Sing)) (Join T Sing)) (interior-sub (Join S₁ S₂) (PExt P) (Join T Sing)) >tm ∎
   where
     open Reasoning tm-setoid
 
@@ -246,10 +237,10 @@ insertion-eq (Join S₁ S₂) (PShift P) T = begin
   < branching-path-to-var S₂ P [ exterior-sub S₂ P T ]tm
     [ connect-susp-inc-right _ (insertion-tree-size S₂ P T) ]tm >tm
     ≈⟨ sub-action-≃-tm (insertion-eq S₂ P T) refl≃s ⟩
-  < Coh T (unbiased-type (tree-dim T) T) (interior-sub S₂ P T)
+  < Coh (tree-to-ctx T) (unbiased-type (tree-dim T) T) (interior-sub S₂ P T)
     [ connect-susp-inc-right _ (insertion-tree-size S₂ P T) ]tm >tm
     ≡⟨⟩
-  < Coh T (unbiased-type (tree-dim T) T) (interior-sub (Join S₁ S₂) (PShift P) T) >tm ∎
+  < Coh (tree-to-ctx T) (unbiased-type (tree-dim T) T) (interior-sub (Join S₁ S₂) (PShift P) T) >tm ∎
   where
     open Reasoning tm-setoid
 

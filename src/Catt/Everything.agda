@@ -32,12 +32,19 @@ import Catt.Tree.Properties
 import Catt.Tree.Pasting
 import Catt.Tree.Unbiased
 import Catt.Tree.Unbiased.Properties
+import Catt.Tree.Insertion
+import Catt.Tree.Insertion.Properties
 
 import Catt.Support
 import Catt.Support.Properties
 import Catt.Suspension.Support
 import Catt.Connection.Support
 import Catt.Tree.Support
+import Catt.Tree.Unbiased.Support
 
 import Catt.Discs
 import Catt.Discs.Properties
+
+import Catt.Typing.Base
+import Catt.Typing
+import Catt.Typing.Properties.Base

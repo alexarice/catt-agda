@@ -50,6 +50,7 @@ import Catt.Tree.Insertion.Support
 
 import Catt.Discs
 import Catt.Discs.Properties
+import Catt.Discs.Support
 
 import Catt.Typing.Base
 import Catt.Typing
@@ -67,5 +68,7 @@ import Catt.Tree.Insertion.Typing
 
 import Catt.Dyck.Typing
 import Catt.Dyck.Pruning.Typing
+
+import Catt.Discs.Typing
 
 import Catt.Strict.Assoc

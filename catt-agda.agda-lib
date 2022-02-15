@@ -1,3 +1,4 @@
 name: catt-agda
 include: src/
 depend: standard-library
+flags: --safe --without-K --exact-split

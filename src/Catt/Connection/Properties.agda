@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Connection.Properties where
 
 open import Catt.Prelude
@@ -264,49 +262,6 @@ sub-between-connect-susps-comp : (σ : Sub (suc n) (suc l) ⋆)
                                → sub-between-connect-susps σ′ τ′ ∘ sub-between-connect-susps σ τ
                                ≃s sub-between-connect-susps (σ′ ∘ σ) (τ′ ∘ τ)
 sub-between-connect-susps-comp σ τ σ′ τ′ p = trans≃s (sub-between-connects-comp (suspSub σ) τ getSnd (suspSub σ′) getSnd τ′ (sym≃tm (susp-sub-preserve-getSnd σ′)) p) (sub-between-connects-≃ (suspSub σ′ ∘ suspSub σ) (suspSub (σ′ ∘ σ)) (τ′ ∘ τ) getSnd (τ′ ∘ τ) getSnd refl refl (sym≃s (susp-functorial σ′ σ)) refl≃s refl≃tm)
-
--- connect-var-split-compat : (t : Tm (suc n)) → (m : ℕ) → VarSplitCompat (connect-inc-left t m) (connect-inc-right t m) (connect-var-split n m)
--- connect-var-split-compat t zero i = id-on-tm (Var i)
--- connect-var-split-compat t (suc m) zero = refl≃tm
--- connect-var-split-compat {n = n} t (suc m) (suc i) with connect-var-split n m i | connect-var-split-compat t m i
--- ... | inj₁ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left t m)) (lift-tm-≃ p)
--- ... | inj₂ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right t m)) (lift-tm-≃ p)
-
--- connect-var-split-right-compat : (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → (m : ℕ) → VarSplitCompat (connect-inc-left t m) (connect-inc-right t m) (connect-var-split-right t m)
--- connect-var-split-right-compat t zero i with toℕ (getVarFin t) ≟ toℕ i
--- ... | no p = id-on-tm (Var i)
--- ... | yes eq = trans≃tm (getVarFinProp t) (Var≃ refl eq)
--- connect-var-split-right-compat t (suc m) zero = refl≃tm
--- connect-var-split-right-compat t (suc m) (suc i) with connect-var-split-right t m i | connect-var-split-right-compat t m i
--- ... | inj₁ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-left t m)) (lift-tm-≃ p)
--- ... | inj₂ j | p = trans≃tm (apply-lifted-sub-tm-≃ (Var j) (connect-inc-right t m)) (lift-tm-≃ p)
-
--- connect-var-split-full : (t : Tm (suc n)) → (m : ℕ) → VarSplitFull₁ (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄ (connect-var-split n m)
--- connect-var-split-full t zero i = cong inj₁ (varToVarFunction-idSub (suc _) i)
--- connect-var-split-full {n} t (suc m) i = trans (cong (connect-var-split n (suc m)) (varToVarFunction-lift (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄ i)) lem
---   where
---     instance _ = connect-inc-left-var-to-var t m
---     lem : connect-var-split n (suc m)
---             (suc (varToVarFunction (connect-inc-left t m) i))
---             ≡ inj₁ i
---     lem with connect-var-split n m (varToVarFunction (connect-inc-left t m) i) | connect-var-split-full t m i
---     ... | inj₁ x | refl = refl
---     ... | inj₂ y | ()
-
--- connect-var-split-right-full : (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → (m : ℕ) → VarSplitFull₂ (connect-inc-right t m) ⦃ connect-inc-right-var-to-var t m ⦄ (connect-var-split-right t m)
--- connect-var-split-right-full (Var j) zero zero with toℕ j ≟ toℕ j
--- ... | yes p = refl
--- ... | no p = ⊥-elim (p refl)
--- connect-var-split-right-full (Var j) (suc m) zero = refl
--- connect-var-split-right-full (Var j) (suc m) (suc i) = trans (cong (connect-var-split-right (Var j) (suc m)) (varToVarFunction-lift (connect-inc-right (Var j) m) ⦃ connect-inc-right-var-to-var (Var j) m ⦄ i)) lem
---   where
---     instance _ = connect-inc-right-var-to-var (Var j) m
---     lem : connect-var-split-right (Var j) (suc m)
---             (suc (varToVarFunction (connect-inc-right (Var j) m) i))
---             ≡ inj₂ (suc i)
---     lem with connect-var-split-right (Var j) m (varToVarFunction (connect-inc-right (Var j) m) i) | connect-var-split-right-full (Var j) m i
---     ... | inj₁ x | ()
---     ... | inj₂ y | refl = refl
 
 sub-from-connect-lift : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → liftSub (sub-from-connect σ τ) ≃s sub-from-connect (liftSub σ) (liftSub τ)
 sub-from-connect-lift σ ⟨ ⟨⟩ , t ⟩ = refl≃s

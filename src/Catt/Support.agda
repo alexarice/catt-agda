@@ -1,5 +1,3 @@
-{-# OPTIONS --without-K --safe --exact-split #-}
-
 module Catt.Support where
 
 open import Catt.Prelude
@@ -19,11 +17,6 @@ open import Catt.Pasting
 open import Catt.Tree.Pasting
 open import Catt.Connection.Pasting
 open import Catt.Variables
-
--- record VarSet (Γ : Ctx n) : Set where
---   constructor [_]v
---   field
---     get : Vec Bool (ctxLength Γ)
 
 VarSet : ℕ → Set
 VarSet = Vec Bool

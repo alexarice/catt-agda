@@ -1,5 +1,3 @@
-{-# OPTIONS --without-K --safe --exact-split #-}
-
 module Catt.Prelude where
 
 open import Data.Nat hiding (NonZero) public
@@ -56,7 +54,3 @@ tri-case> : {X : Set} {x y : ℕ} → x > y → (t : Tri (x < y) (x ≡ y) (x > 
 tri-case> p (tri< a ¬b ¬c) A B C = ⊥-elim (¬c p)
 tri-case> p (tri≈ ¬a b ¬c) A B C = ⊥-elim (¬c p)
 tri-case> p (tri> ¬a ¬b c) A B C = refl
-
--- max : ℕ → ℕ → ℕ
--- max zero m = m
--- max (suc n) m = suc (max n (pred m))

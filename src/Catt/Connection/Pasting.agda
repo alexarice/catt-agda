@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Connection.Pasting where
 
 open import Catt.Prelude
@@ -15,7 +13,6 @@ open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Relation.Binary.PropositionalEquality
 
 connect-pdb : (pd : Γ ⊢pd) → Δ ⊢pdb → connect Γ (pd-focus-tm pd) Δ ⊢pdb
 connect-focus-ty : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (pd : Γ ⊢pd) → (pdb : Δ ⊢pdb) → focus-ty (connect-pdb {Δ = Δ} pd pdb) ≃ty focus-ty pdb [ connect-inc-right (pd-focus-tm pd) m ]ty

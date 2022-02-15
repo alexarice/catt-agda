@@ -1,5 +1,3 @@
-{-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
-
 open import Catt.Prelude
 open import Catt.Typing.Base
 

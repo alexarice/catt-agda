@@ -57,6 +57,6 @@ tri-case> p (tri< a ¬b ¬c) A B C = ⊥-elim (¬c p)
 tri-case> p (tri≈ ¬a b ¬c) A B C = ⊥-elim (¬c p)
 tri-case> p (tri> ¬a ¬b c) A B C = refl
 
-max : ℕ → ℕ → ℕ
-max zero m = m
-max (suc n) m = suc (max n (pred m))
+-- max : ℕ → ℕ → ℕ
+-- max zero m = m
+-- max (suc n) m = suc (max n (pred m))

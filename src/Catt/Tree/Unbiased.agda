@@ -30,7 +30,7 @@ sub-from-linear-tree-unbiased (Join S Sing) T d = unrestrict (sub-from-linear-tr
 
 sub-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) → (A : Ty m) → .(ty-dim A ≡ tree-dim S) → Sub (suc n) m ⋆
 sub-from-linear-tree Sing t A p = ⟨ ⟨⟩ , t ⟩
-sub-from-linear-tree (Join S Sing) t (s ─⟨ A ⟩⟶ s′) p = ⟨ ⟨ (sub-from-linear-tree S s A (trans (cong pred p) (max-lem (tree-dim S)))) , s′ ⟩ , t ⟩
+sub-from-linear-tree (Join S Sing) t (s ─⟨ A ⟩⟶ s′) p = ⟨ ⟨ (sub-from-linear-tree S s A (cong pred p)) , s′ ⟩ , t ⟩
 
 identity : (t : Tm n) → (A : Ty n) → Tm n
-identity t A = Coh (tree-to-ctx (n-disk (ty-dim A))) (unbiased-type (suc (ty-dim A)) (n-disk (ty-dim A))) (sub-from-linear-tree (n-disk (ty-dim A)) ⦃ n-disk-is-linear (ty-dim A) ⦄ t A (sym (tree-dim-n-disk (ty-dim A))))
+identity t A = Coh (tree-to-ctx (n-disc (ty-dim A))) (unbiased-type (suc (ty-dim A)) (n-disc (ty-dim A))) (sub-from-linear-tree (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ t A (sym (tree-dim-n-disc (ty-dim A))))

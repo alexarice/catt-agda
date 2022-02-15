@@ -41,6 +41,7 @@ import Catt.Suspension.Support
 import Catt.Connection.Support
 import Catt.Tree.Support
 import Catt.Tree.Unbiased.Support
+import Catt.Tree.Insertion.Support
 
 import Catt.Discs
 import Catt.Discs.Properties
@@ -54,5 +55,9 @@ import Catt.Typing.Properties.Substitution
 import Catt.Typing.Properties
 import Catt.Typing.Properties.Support
 import Catt.Connection.Typing
+
 import Catt.Tree.Typing
 import Catt.Tree.Unbiased.Typing
+import Catt.Tree.Insertion.Typing
+
+import Catt.Strict.Assoc

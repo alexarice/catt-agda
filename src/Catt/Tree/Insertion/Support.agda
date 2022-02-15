@@ -24,6 +24,8 @@ open import Catt.Variables
 open import Catt.Tree.Unbiased.Support
 open import Catt.Tree.Support
 open import Catt.Tree.Pasting
+open import Catt.Globular
+open import Catt.Globular.Properties
 
 insertion-tree-dim : (S : Tree n)
                    → (P : Path S)
@@ -33,15 +35,17 @@ insertion-tree-dim : (S : Tree n)
                    → ⦃ p : height-of-branching P ≡ tree-dim T ⦄
                    → tree-dim S ≡ tree-dim (insertion-tree S P T)
 insertion-tree-dim (Join S₁ S₂) PHere T ⦃ p = p ⦄ = begin
-  max (suc (tree-dim S₁)) (tree-dim S₂)
-    ≡⟨ cong (λ - → max - (tree-dim S₂)) p ⟩
-  max (tree-dim T) (tree-dim S₂)
+  suc (pred (tree-dim S₂) ⊔ tree-dim S₁)
+    ≡˘⟨ ⊔-lem (tree-dim S₁) (tree-dim S₂) ⟩
+  suc (tree-dim S₁) ⊔ tree-dim S₂
+    ≡⟨ cong (_⊔ tree-dim S₂) it ⟩
+  tree-dim T ⊔ tree-dim S₂
     ≡˘⟨ connect-tree-dim T S₂ ⟩
   tree-dim (connect-tree T S₂) ∎
   where
     open ≡-Reasoning
-insertion-tree-dim (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p = p ⦄ = cong (λ - → max (suc -) (tree-dim S₂)) (insertion-tree-dim S₁ P T ⦃ p = trans (cong pred p) (max-lem (tree-dim T)) ⦄)
-insertion-tree-dim (Join S₁ S₂) (PShift P) T ⦃ p = p ⦄ = cong (max (suc (tree-dim S₁))) (insertion-tree-dim S₂ P T)
+insertion-tree-dim (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p = p ⦄ = cong (λ - → suc (pred (tree-dim S₂) ⊔ -)) (insertion-tree-dim S₁ P T ⦃ p = cong pred p ⦄)
+insertion-tree-dim (Join S₁ S₂) (PShift P) T ⦃ p = p ⦄ = cong (λ - → suc (pred - ⊔ tree-dim S₁)) (insertion-tree-dim S₂ P T)
 
 -- exterior-sub-supp-full : (S : Tree n)
 --                        → (P : Path S)
@@ -218,7 +222,7 @@ exterior-sub-preserve-bd (suc d) (Join S₁ S₂) PHere T b = begin
       FVTm (tree-last-var T)
         ≤⟨ supp-tree-bd-include-last d T b ⟩
       supp-tree-bd (suc d) T b
-        ≡˘⟨ sub-from-linear-tree-supp (suc d) (suspTree S₁) b T (sym (trans (max-lem (suc (tree-dim S₁))) it)) ⟩
+        ≡˘⟨ sub-from-linear-tree-supp (suc d) (suspTree S₁) b T (sym it) ⟩
       TransportVarSet (suspSupp (supp-tree-bd d S₁ b))
         (sub-from-linear-tree-unbiased (suspTree S₁) T 0) ∎
       where
@@ -242,7 +246,7 @@ exterior-sub-preserve-bd (suc d) (Join S₁ S₂) PHere T b = begin
         (TransportVarSet (suspSupp (supp-tree-bd d S₁ b))
          (unrestrict (sub-from-linear-tree-unbiased S₁ T 1)))
         (TransportVarSet (supp-tree-bd (suc d) S₂ b) idSub)
-        ≡⟨ cong₂ connect-supp (sub-from-linear-tree-supp (suc d) (suspTree S₁) b T (sym (trans (max-lem (suc (tree-dim S₁))) it))) (TransportVarSet-id (supp-tree-bd (suc d) S₂ b)) ⟩
+        ≡⟨ cong₂ connect-supp (sub-from-linear-tree-supp (suc d) (suspTree S₁) b T (sym it)) (TransportVarSet-id (supp-tree-bd (suc d) S₂ b)) ⟩
       connect-supp (supp-tree-bd (suc d) T b) (supp-tree-bd (suc d) S₂ b) ∎
 
 exterior-sub-preserve-bd (suc d) (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p = p ⦄ b = begin
@@ -254,7 +258,7 @@ exterior-sub-preserve-bd (suc d) (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p =
   connect-supp
     (suspSupp (TransportVarSet (supp-tree-bd d S₁ b) (exterior-sub S₁ P T)))
     (TransportVarSet (supp-tree-bd (suc d) S₂ b) idSub)
-    ≡⟨ cong₂ (λ a → connect-supp (suspSupp a)) (exterior-sub-preserve-bd d S₁ P T ⦃ p = trans (cong pred p) (max-lem (tree-dim T)) ⦄ b) (TransportVarSet-id (supp-tree-bd (suc d) S₂ b)) ⟩
+    ≡⟨ cong₂ (λ a → connect-supp (suspSupp a)) (exterior-sub-preserve-bd d S₁ P T ⦃ p = cong pred p ⦄ b) (TransportVarSet-id (supp-tree-bd (suc d) S₂ b)) ⟩
   connect-supp (suspSupp (supp-tree-bd d (insertion-tree S₁ P T) b))
       (supp-tree-bd (suc d) S₂ b) ∎
   where
@@ -318,9 +322,20 @@ insertion-supp-condition false A S P T sc = begin
   where
     open ≡-Reasoning
 insertion-supp-condition true (s ─⟨ A ⟩⟶ t) S P T ⦃ p = p ⦄ (nz ,, sc1 ,, sc2)
-  = NonZero-subst ? nz ,, l1 ,, l2
+  = NonZero-subst lem nz ,, trans l1 (supp-pred-compat (insertion-tree S P T) false) ,, trans l2 (supp-pred-compat (insertion-tree S P T) true)
   where
     open ≡-Reasoning
+    instance _ = tree-to-pd S
+
+    lem : ctx-dim (tree-to-ctx S) ≡ ctx-dim (tree-to-ctx (insertion-tree S P T))
+    lem = begin
+      ctx-dim (tree-to-ctx S)
+        ≡⟨ tree-dim-ctx-dim S ⟩
+      tree-dim S
+        ≡⟨ insertion-tree-dim S P T ⟩
+      tree-dim (insertion-tree S P T)
+        ≡˘⟨ tree-dim-ctx-dim (insertion-tree S P T) ⟩
+      ctx-dim (tree-to-ctx (insertion-tree S P T)) ∎
 
     l1 : FVTy (A [ exterior-sub S P T ]ty) ∪
            FVTm (s [ exterior-sub S P T ]tm)
@@ -335,7 +350,11 @@ insertion-supp-condition true (s ─⟨ A ⟩⟶ t) S P T ⦃ p = p ⦄ (nz ,, s
         TransportVarSet (FVTm s) (exterior-sub S P T)
         ≡˘⟨ TransportVarSet-∪ (FVTy A) (FVTm s) (exterior-sub S P T) ⟩
       TransportVarSet (FVTy A ∪ FVTm s) (exterior-sub S P T)
-        ≡⟨ cong (λ - → TransportVarSet - (exterior-sub S P T)) ? ⟩
+        ≡⟨ cong (λ - → TransportVarSet - (exterior-sub S P T)) sc1 ⟩
+      TransportVarSet
+        (pd-bd-supp (pred (ctx-dim (tree-to-ctx S))) (tree-to-ctx S) false)
+        (exterior-sub S P T)
+        ≡˘⟨ cong (λ - → TransportVarSet - (exterior-sub S P T)) (supp-pred-compat S false) ⟩
       TransportVarSet (supp-tree-bd (pred (tree-dim S)) S false) (exterior-sub S P T)
         ≡⟨ exterior-sub-preserve-bd (pred (tree-dim S)) S P T false ⟩
       supp-tree-bd (pred (tree-dim S)) (insertion-tree S P T) false
@@ -355,11 +374,13 @@ insertion-supp-condition true (s ─⟨ A ⟩⟶ t) S P T ⦃ p = p ⦄ (nz ,, s
         TransportVarSet (FVTm t) (exterior-sub S P T)
         ≡˘⟨ TransportVarSet-∪ (FVTy A) (FVTm t) (exterior-sub S P T) ⟩
       TransportVarSet (FVTy A ∪ FVTm t) (exterior-sub S P T)
-        ≡⟨ cong (λ - → TransportVarSet - (exterior-sub S P T)) ? ⟩
+        ≡⟨ cong (λ - → TransportVarSet - (exterior-sub S P T)) sc2 ⟩
+      TransportVarSet
+        (pd-bd-supp (pred (ctx-dim (tree-to-ctx S))) (tree-to-ctx S) true)
+        (exterior-sub S P T)
+        ≡˘⟨ cong (λ - → TransportVarSet - (exterior-sub S P T)) (supp-pred-compat S true) ⟩
       TransportVarSet (supp-tree-bd (pred (tree-dim S)) S true) (exterior-sub S P T)
         ≡⟨ exterior-sub-preserve-bd (pred (tree-dim S)) S P T true ⟩
       supp-tree-bd (pred (tree-dim S)) (insertion-tree S P T) true
         ≡⟨ cong (λ - → supp-tree-bd (pred -) (insertion-tree S P T) true) (insertion-tree-dim S P T) ⟩
       supp-tree-bd (pred (tree-dim (insertion-tree S P T))) (insertion-tree S P T) true ∎
-
-    l3 : (b : Bool) → (T : Tree n) → supp-tree-bd (pred (tree-dim T)) T ≡

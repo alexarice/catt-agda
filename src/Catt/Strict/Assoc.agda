@@ -18,10 +18,11 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
--- open import Catt.Tree.Insertion.Support
+open import Catt.Tree.Insertion.Support
 open import Catt.Tree.Properties
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
+open import Catt.Tree.Pasting
 open import Catt.Typing.Base
 
 open Rule
@@ -50,8 +51,8 @@ module _ where
   insertionRule .Args = InsertionData
   insertionRule .len a = a .id-l
   insertionRule .tgtCtx a = a .id-Γ
-  insertionRule .lhs a = Coh (a .id-S) (a .id-A) (a .id-σ)
-  insertionRule .rhs a = Coh (insertion-tree (a .id-S) (a .id-P) (a .id-T))
+  insertionRule .lhs a = Coh (tree-to-ctx (a .id-S)) (a .id-A) (a .id-σ)
+  insertionRule .rhs a = Coh (tree-to-ctx (insertion-tree (a .id-S) (a .id-P) (a .id-T)))
                              (a .id-A [ exterior-sub (a .id-S) (a .id-P) (a .id-T) ]ty)
                              (sub-from-insertion (a .id-S) (a .id-P) (a .id-T) (a .id-σ) (a .id-τ))
 
@@ -85,14 +86,14 @@ module _ where
   open import Catt.Typing 1 (λ x → insertionRule)
 
   Ins≈ : (S : Tree n)
-       → (ty : Typing-Tm Γ (Coh S A σ) C)
+       → (ty : Typing-Tm Γ (Coh (tree-to-ctx S) A σ) C)
        → (P : Path S)
        → .⦃ bp : is-branching-path P ⦄
        → (T : Tree m)
        → (branching-path-to-var S P [ σ ]tm) ≃tm unbiased-comp (tree-dim T) T [ τ ]tm
        → .⦃ lh : has-linear-height (path-length P) T ⦄
-       → Coh S A σ ≈[ Γ ]tm
-         Coh (insertion-tree S P T)
+       → Coh (tree-to-ctx S) A σ ≈[ Γ ]tm
+         Coh (tree-to-ctx (insertion-tree S P T))
              (A [ exterior-sub S P T ]ty)
              (sub-from-insertion S P T σ τ)
   Ins≈ {Γ = Γ} {A = A} {σ = σ} {τ = τ} S ty P T p
@@ -103,12 +104,12 @@ module _ where
   lift-rule : ∀ i a → LiftRule {i} a
   lift-rule i a tc = begin
     liftTerm (insertionRule .lhs a) ≡⟨⟩
-    Coh id-S id-A (liftSub id-σ)
+    Coh (tree-to-ctx id-S) id-A (liftSub id-σ)
       ≈⟨ Ins≈ id-S tc id-P id-T lem ⟩
-    Coh (insertion-tree id-S id-P id-T)
+    Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
         (id-A [ exterior-sub id-S id-P id-T ]ty)
         (sub-from-insertion id-S id-P id-T (liftSub id-σ) (liftSub id-τ))
-        ≈⟨ reflexive≈tm (Coh≃ refl≃ refl≃ty (sym≃s (lift-sub-from-insertion id-S id-P id-T id-σ id-τ))) ⟩
+        ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (sym≃s (lift-sub-from-insertion id-S id-P id-T id-σ id-τ))) ⟩
     liftTerm (insertionRule .rhs a) ∎
 
     where
@@ -132,13 +133,13 @@ module _ where
 
   susp-rule : ∀ i a → SuspRule {i} a
   susp-rule i a tc = begin
-    Coh (suspTree id-S) (suspTy id-A) (suspSub id-σ)
+    Coh (tree-to-ctx (suspTree id-S)) (suspTy id-A) (suspSub id-σ)
       ≈⟨ Ins≈ (suspTree id-S) tc (PExt id-P) (suspTree id-T) lem ⟩
-    Coh (insertion-tree (suspTree id-S) (PExt id-P) (suspTree id-T))
+    Coh (tree-to-ctx (insertion-tree (suspTree id-S) (PExt id-P) (suspTree id-T)))
         (suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty)
         (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (suspSub id-σ) (suspSub id-τ))
-        ≈⟨ reflexive≈tm (Coh≃ refl≃ lem-ty (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
-    Coh (suspTree (insertion-tree id-S id-P id-T))
+        ≈⟨ reflexive≈tm (Coh≃ refl≃c lem-ty (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
+    Coh (tree-to-ctx (suspTree (insertion-tree id-S id-P id-T)))
         (suspTy (id-A [ exterior-sub id-S id-P id-T ]ty))
         (suspSub (sub-from-insertion id-S id-P id-T id-σ id-τ)) ∎
     where
@@ -184,12 +185,12 @@ module _ where
   sub-rule : ∀ i a → SubRule {i} a
   sub-rule i a {σ = σ} {Δ = Δ} σty tc = begin
     insertionRule .lhs a [ σ ]tm ≡⟨⟩
-    Coh id-S id-A (σ ∘ id-σ)
+    Coh (tree-to-ctx id-S) id-A (σ ∘ id-σ)
       ≈⟨ Ins≈ {τ = σ ∘ id-τ} id-S tc id-P id-T lem ⟩
-    Coh (insertion-tree id-S id-P id-T)
+    Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
         (id-A [ exterior-sub id-S id-P id-T ]ty)
         (sub-from-insertion id-S id-P id-T (σ ∘ id-σ) (σ ∘ id-τ)) ≈⟨ Coh≈ refl≈ty (reflexive≈s (sub-from-insertion-sub id-S id-P id-T id-σ id-τ σ)) ⟩
-    Coh (insertion-tree id-S id-P id-T)
+    Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
         (id-A [ exterior-sub id-S id-P id-T ]ty)
         (σ ∘ sub-from-insertion id-S id-P id-T id-σ id-τ) ≡⟨⟩
     insertionRule .rhs a [ σ ]tm ∎
@@ -288,17 +289,17 @@ module Support where
     open import Catt.Typing.Properties.Base 1 (λ x → modifyRule insertionRule)
 
     InsSupp≈ : (S : Tree n)
-             → (ty : Typing-Tm Γ (Coh S A σ) C)
+             → (ty : Typing-Tm Γ (Coh (tree-to-ctx S) A σ) C)
              → (P : Path S)
              → .⦃ bp : is-branching-path P ⦄
              → (T : Tree m)
              → (branching-path-to-var S P [ σ ]tm) ≃tm unbiased-comp (tree-dim T) T [ τ ]tm
              → .⦃ lh : has-linear-height (path-length P) T ⦄
-             → SuppTm Γ (Coh S A σ) ≡ SuppTm Γ (Coh (insertion-tree S P T)
+             → SuppTm Γ (Coh (tree-to-ctx S) A σ) ≡ SuppTm Γ (Coh (tree-to-ctx (insertion-tree S P T))
                (A [ exterior-sub S P T ]ty)
                (sub-from-insertion S P T σ τ))
-             → Coh S A σ ≈[ Γ ]tm
-             Coh (insertion-tree S P T)
+             → Coh (tree-to-ctx S) A σ ≈[ Γ ]tm
+             Coh (tree-to-ctx (insertion-tree S P T))
                (A [ exterior-sub S P T ]ty)
                (sub-from-insertion S P T σ τ)
     InsSupp≈ {Γ = Γ} {A = A} {σ = σ} {τ = τ} S ty P T p sc
@@ -307,12 +308,12 @@ module Support where
     lift-rule-supp : ∀ i a → LiftRule {i} a
     lift-rule-supp i (a ,, sc) tc = begin
       liftTerm (insertionRule .lhs a) ≡⟨⟩
-      Coh id-S id-A (liftSub id-σ)
+      Coh (tree-to-ctx id-S) id-A (liftSub id-σ)
         ≈⟨ InsSupp≈ id-S tc id-P id-T lem lem2 ⟩
-      Coh (insertion-tree id-S id-P id-T)
+      Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
           (id-A [ exterior-sub id-S id-P id-T ]ty)
           (sub-from-insertion id-S id-P id-T (liftSub id-σ) (liftSub id-τ))
-          ≈⟨ reflexive≈tm (Coh≃ refl≃ refl≃ty (sym≃s (lift-sub-from-insertion id-S id-P id-T id-σ id-τ))) ⟩
+          ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (sym≃s (lift-sub-from-insertion id-S id-P id-T id-σ id-τ))) ⟩
       liftTerm (insertionRule .rhs a) ∎
 
       where
@@ -332,8 +333,8 @@ module Support where
           where
             open Reasoning tm-setoid
 
-        lem2 : SuppTm (id-Γ , A) (Coh (id-S) (id-A) (liftSub (id-σ)))
-          ≡ SuppTm (id-Γ , A) (Coh (insertion-tree (id-S) (id-P) (id-T))
+        lem2 : SuppTm (id-Γ , A) (Coh (tree-to-ctx id-S) id-A (liftSub id-σ))
+             ≡ SuppTm (id-Γ , A) (Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
                                    (id-A [ exterior-sub (id-S) (id-P) (id-T) ]ty)
                                    (sub-from-insertion (id-S) (id-P) (id-T) (liftSub (id-σ)) (liftSub id-τ)))
         lem2 = begin
@@ -353,13 +354,13 @@ module Support where
 
     susp-rule-supp : ∀ i a → SuspRule {i} a
     susp-rule-supp i (a ,, sc) tc = begin
-      Coh (suspTree id-S) (suspTy id-A) (suspSub id-σ)
+      Coh (tree-to-ctx (suspTree id-S)) (suspTy id-A) (suspSub id-σ)
         ≈⟨ InsSupp≈ (suspTree id-S) tc (PExt id-P) (suspTree id-T) lem lem2 ⟩
-      Coh (insertion-tree (suspTree id-S) (PExt id-P) (suspTree id-T))
+      Coh (tree-to-ctx (insertion-tree (suspTree id-S) (PExt id-P) (suspTree id-T)))
           (suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty)
           (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (suspSub id-σ) (suspSub id-τ))
-          ≈⟨ reflexive≈tm (Coh≃ refl≃ lem-ty (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
-      Coh (suspTree (insertion-tree id-S id-P id-T))
+          ≈⟨ reflexive≈tm (Coh≃ refl≃c lem-ty (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
+      Coh (tree-to-ctx (suspTree (insertion-tree id-S id-P id-T)))
           (suspTy (id-A [ exterior-sub id-S id-P id-T ]ty))
           (suspSub (sub-from-insertion id-S id-P id-T id-σ id-τ)) ∎
       where
@@ -405,7 +406,7 @@ module Support where
                        (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (suspSub id-σ) (suspSub id-τ))
         lem2 = begin
           SuppSub (suspCtx id-Γ) (suspSub id-σ)
-            ≡⟨ SuspSuppTmProp (Coh id-S id-A id-σ) (Coh (insertion-tree id-S id-P id-T)
+            ≡⟨ SuspSuppTmProp (Coh (tree-to-ctx id-S) id-A id-σ) (Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
                                                         (id-A [ exterior-sub id-S id-P id-T ]ty)
                                                         (sub-from-insertion id-S id-P id-T id-σ id-τ)) sc ⟩
           SuppSub (suspCtx id-Γ) (suspSub (sub-from-insertion id-S id-P id-T id-σ id-τ))
@@ -428,12 +429,12 @@ module Support where
     sub-rule-supp : ∀ i a → SubRule {i} a
     sub-rule-supp i (a ,, sc) {σ = σ} {Δ = Δ} σty tc = begin
       insertionRule .lhs a [ σ ]tm ≡⟨⟩
-      Coh id-S id-A (σ ∘ id-σ)
+      Coh (tree-to-ctx id-S) id-A (σ ∘ id-σ)
         ≈⟨ InsSupp≈ {τ = σ ∘ id-τ} id-S tc id-P id-T lem lem2 ⟩
-      Coh (insertion-tree id-S id-P id-T)
+      Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
           (id-A [ exterior-sub id-S id-P id-T ]ty)
           (sub-from-insertion id-S id-P id-T (σ ∘ id-σ) (σ ∘ id-τ)) ≈⟨ Coh≈ refl≈ty (reflexive≈s (sub-from-insertion-sub id-S id-P id-T id-σ id-τ σ)) ⟩
-      Coh (insertion-tree id-S id-P id-T)
+      Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
           (id-A [ exterior-sub id-S id-P id-T ]ty)
           (σ ∘ sub-from-insertion id-S id-P id-T id-σ id-τ) ≡⟨⟩
       insertionRule .rhs a [ σ ]tm ∎
@@ -499,7 +500,7 @@ module Support where
       σty = coh-sub-ty tty
 
       τty : Typing-Sub (tree-to-ctx id-T) id-Γ id-τ
-      τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx-Ty id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) (trans≃tm id-eq (Coh≃ refl≃ refl≃ty (id-right-unit id-τ))))
+      τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx-Ty id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) (trans≃tm id-eq (Coh≃ refl≃c refl≃ty (id-right-unit id-τ))))
 
       lem : FVSub (sub-from-insertion id-S id-P id-T id-σ id-τ
                   ∘ exterior-sub id-S id-P id-T)
@@ -566,8 +567,8 @@ module _ where
 
   conv-rule : ∀ i a → ConvRule {i} a
   conv-rule i a (TyCoh {B = B} Aty σty b sc p)
-    = TyCoh (apply-sub-ty-typing Aty
-                                 (exterior-sub-Ty id-S id-P id-T ⦃ p = dim-lem ⦄))
+    = TyCoh ⦃ tree-to-pd (insertion-tree id-S id-P id-T) ⦄
+            (apply-sub-ty-typing Aty (exterior-sub-Ty id-S id-P id-T ⦃ p = dim-lem ⦄))
             (sub-from-insertion-Ty id-S id-P id-T σty τty id-eq)
             b
             (insertion-supp-condition b _ id-S id-P id-T ⦃ p = dim-lem ⦄ sc)
@@ -576,7 +577,7 @@ module _ where
       open InsertionData a
 
       τty : Typing-Sub (tree-to-ctx id-T) id-Γ id-τ
-      τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx-Ty id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) (trans≃tm id-eq (Coh≃ refl≃ refl≃ty (id-right-unit id-τ))))
+      τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx-Ty id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) (trans≃tm id-eq (Coh≃ refl≃c refl≃ty (id-right-unit id-τ))))
 
       dim-lem : height-of-branching id-P ≡ tree-dim id-T
       dim-lem = insertion-dim-lem id-S id-P id-T σty τty id-eq

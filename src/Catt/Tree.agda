@@ -52,7 +52,7 @@ suspTree T = Join T Sing
 
 tree-dim : Tree n → ℕ
 tree-dim Sing = 0
-tree-dim (Join S T) = max (suc (tree-dim S)) (tree-dim T)
+tree-dim (Join S T) = suc (pred (tree-dim T) ⊔ tree-dim S)
 
 is-linear : Tree n → Set
 is-linear Sing = ⊤
@@ -80,10 +80,10 @@ tree-inc zero T true = ⟨ ⟨⟩ , (tree-last-var T) ⟩
 tree-inc (suc d) Sing b = ⟨ ⟨⟩ , 0V ⟩
 tree-inc (suc d) (Join S T) b = sub-between-connect-susps (tree-inc d S b) (tree-inc (suc d) T b)
 
-n-disk : (n : ℕ) → Tree (n * 2)
-n-disk zero = Sing
-n-disk (suc n) = Join (n-disk n) Sing
+n-disc : (n : ℕ) → Tree (n * 2)
+n-disc zero = Sing
+n-disc (suc n) = Join (n-disc n) Sing
 
-n-disk-is-linear : (n : ℕ) → is-linear (n-disk n)
-n-disk-is-linear zero = tt
-n-disk-is-linear (suc n) = n-disk-is-linear n
+n-disc-is-linear : (n : ℕ) → is-linear (n-disc n)
+n-disc-is-linear zero = tt
+n-disc-is-linear (suc n) = n-disc-is-linear n

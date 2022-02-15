@@ -43,32 +43,40 @@ susp-dim (s ─⟨ A ⟩⟶ t) = cong suc (susp-dim A)
 
 susp-ctx-dim : (Γ : Ctx n) → .⦃ NonZero n ⦄ → ctx-dim (suspCtx Γ) ≡ suc (ctx-dim Γ)
 susp-ctx-dim (∅ , A) = susp-dim A
-susp-ctx-dim (Γ , B , A) = cong₂ max (susp-ctx-dim (Γ , B)) (susp-dim A)
+susp-ctx-dim (Γ , B , A) = cong₂ _⊔_ (susp-ctx-dim (Γ , B)) (susp-dim A)
 
-connect-ctx-dim : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → ctx-dim (connect Γ t Δ) ≡ max (ctx-dim Γ) (ctx-dim Δ)
-connect-ctx-dim Γ t (∅ , ⋆) = sym (max-lem (ctx-dim Γ))
+connect-ctx-dim : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → ctx-dim (connect Γ t Δ) ≡ ctx-dim Γ ⊔ ctx-dim Δ
+connect-ctx-dim Γ t (∅ , ⋆) = sym (⊔-identityʳ (ctx-dim Γ))
 connect-ctx-dim Γ t (∅ , s ─⟨ A ⟩⟶ t₁) = ⊥-elim (no-term-in-empty-context s)
 connect-ctx-dim Γ t (Δ , B , A) = begin
-  max (ctx-dim (connect Γ t (Δ , B)))
-      (ty-dim (A [ connect-inc-right t (ctxLength Δ) ]ty))
-    ≡⟨ cong₂ max (connect-ctx-dim Γ t (Δ , B)) (sym (sub-dim (connect-inc-right t (ctxLength Δ)) A)) ⟩
-  max (max (ctx-dim Γ) (ctx-dim (Δ , B))) (ty-dim A)
-    ≡⟨ max-assoc (ctx-dim Γ) (ctx-dim (Δ , B)) (ty-dim A) ⟩
-  max (ctx-dim Γ) (max (ctx-dim (Δ , B)) (ty-dim A)) ∎
+  ctx-dim (connect Γ t (Δ , B)) ⊔ ty-dim (A [ connect-inc-right t (ctxLength Δ) ]ty)
+    ≡⟨ cong₂ _⊔_ (connect-ctx-dim Γ t (Δ , B)) (sym (sub-dim (connect-inc-right t (ctxLength Δ)) A)) ⟩
+  ctx-dim Γ ⊔ ctx-dim (Δ , B) ⊔ ty-dim A
+    ≡⟨ ⊔-assoc (ctx-dim Γ) (ctx-dim (Δ , B)) (ty-dim A) ⟩
+  ctx-dim Γ ⊔ (ctx-dim (Δ , B) ⊔ ty-dim A) ∎
   where
     open ≡-Reasoning
 
-connect-susp-ctx-dim : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → ctx-dim (connect-susp Γ Δ) ≡ max (suc (ctx-dim Γ)) (ctx-dim Δ)
-connect-susp-ctx-dim Γ Δ = trans (connect-ctx-dim (suspCtx Γ) getSnd Δ) (cong (λ - → max - (ctx-dim Δ)) (susp-ctx-dim Γ))
+connect-susp-ctx-dim : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → ctx-dim (connect-susp Γ Δ) ≡ suc (ctx-dim Γ) ⊔ ctx-dim Δ
+connect-susp-ctx-dim Γ Δ = begin
+  ctx-dim (connect-susp Γ Δ)
+    ≡⟨ connect-ctx-dim (suspCtx Γ) getSnd Δ ⟩
+  ctx-dim (suspCtx Γ) ⊔ ctx-dim Δ
+    ≡⟨ cong (_⊔ ctx-dim Δ) (susp-ctx-dim Γ) ⟩
+  suc (ctx-dim Γ) ⊔ ctx-dim Δ ∎
+  where
+    open ≡-Reasoning
 
 tree-dim-ctx-dim : (T : Tree n) → ctx-dim (tree-to-ctx T) ≡ tree-dim T
 tree-dim-ctx-dim Sing = refl
 tree-dim-ctx-dim (Join S T) = begin
   ctx-dim (connect-susp (tree-to-ctx S) (tree-to-ctx T))
     ≡⟨ connect-susp-ctx-dim (tree-to-ctx S) (tree-to-ctx T) ⟩
-  max (suc (ctx-dim (tree-to-ctx S))) (ctx-dim (tree-to-ctx T))
-    ≡⟨ cong₂ max (cong suc (tree-dim-ctx-dim S )) (tree-dim-ctx-dim T) ⟩
-  max (suc (tree-dim S)) (tree-dim T) ∎
+  suc (ctx-dim (tree-to-ctx S)) ⊔ ctx-dim (tree-to-ctx T)
+    ≡⟨ cong₂ (λ a → suc a ⊔_) (tree-dim-ctx-dim S) (tree-dim-ctx-dim T) ⟩
+  suc (tree-dim S) ⊔ tree-dim T
+    ≡⟨ ⊔-lem (tree-dim S) (tree-dim T) ⟩
+  suc (pred (tree-dim T) ⊔ tree-dim S) ∎
   where
     open ≡-Reasoning
 

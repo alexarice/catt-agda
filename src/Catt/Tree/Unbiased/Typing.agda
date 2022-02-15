@@ -87,7 +87,7 @@ unbiased-comp-Ty (suc d) T q = TyCoh ⦃ tree-to-pd T ⦄ (unbiased-type-Ty (suc
 
 sub-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim T) ⦄ → (d : ℕ) → (tree-dim T ≡ tree-dim S + d) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T d)
 sub-from-linear-tree-unbiased-Ty Sing T d p = TyExt (TyNull (unbiased-type-Ty d T (≤-trans (≤-reflexive (sym p)) (n≤1+n (tree-dim T))))) TyStar (unbiased-comp-Ty d ⦃ NonZero-subst p it ⦄ T p)
-sub-from-linear-tree-unbiased-Ty (Join S Sing) T d p = unrestrictTy (sub-from-linear-tree-unbiased-Ty S T (suc d) (trans p (trans (cong (_+ d) (max-lem (suc (tree-dim S)))) (sym (+-suc (tree-dim S) d)))))
+sub-from-linear-tree-unbiased-Ty (Join S Sing) T d p = unrestrictTy (sub-from-linear-tree-unbiased-Ty S T (suc d) (trans p (sym (+-suc (tree-dim S) d))))
 
 sub-from-linear-tree-unbiased-Ty-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim T) ⦄ → .(tree-dim T ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T 0)
 sub-from-linear-tree-unbiased-Ty-0 S T p = sub-from-linear-tree-unbiased-Ty S T 0 (trans (recompute ((tree-dim T) ≟ (tree-dim S)) p) (sym (+-identityʳ (tree-dim S))))
@@ -96,107 +96,107 @@ sub-from-linear-tree-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → Typing-T
 sub-from-linear-tree-Ty Sing tty TyStar p = TyExt (TyNull TyStar) TyStar tty
 sub-from-linear-tree-Ty (Join S Sing) tty (TyArr sty Aty sty′) p
   rewrite (≃c-to-≡ (susp-lin-tree S)) =
-    TyExt (TyExt (sub-from-linear-tree-Ty S sty Aty (max-pred-0 p)) (‼-Ty (tree-to-ctx-Ty S) zero)
-                 (term-conversion sty′ (reflexive≈ty (sym≃ty (sub-from-linear-tree-‼-0 S _ _ (max-pred-0 p))))))
+    TyExt (TyExt (sub-from-linear-tree-Ty S sty Aty (cong pred p)) (‼-Ty (tree-to-ctx-Ty S) zero)
+                 (term-conversion sty′ (reflexive≈ty (sym≃ty (sub-from-linear-tree-‼-0 S _ _ (cong pred p))))))
           (TyArr (var-Ty (TyAdd (tree-to-ctx-Ty S) (‼-Ty (tree-to-ctx-Ty S) zero)) (suc zero))
                  (lift-ty-typing (‼-Ty (tree-to-ctx-Ty S) zero))
                  (var-Ty (TyAdd (tree-to-ctx-Ty S) (‼-Ty (tree-to-ctx-Ty S) zero)) zero))
-          (term-conversion tty (reflexive≈ty (sym≃ty (Arr≃ (sub-from-linear-tree-0V S _ _ (max-pred-0 p))
-                                                           (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S _ _ _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S _ _ (max-pred-0 p)))
+          (term-conversion tty (reflexive≈ty (sym≃ty (Arr≃ (sub-from-linear-tree-0V S _ _ (cong pred p))
+                                                           (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S _ _ _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S _ _ (cong pred p)))
                                                            refl≃tm))))
 
 identity-Ty : Typing-Tm Γ t A → Typing-Ty Γ A → Typing-Tm Γ (identity t A) (t ─⟨ A ⟩⟶ t)
 identity-Ty {t = t} {A = A} tty Aty
-  = TyCoh ⦃ tree-to-pd (n-disk (ty-dim A)) ⦄
+  = TyCoh ⦃ tree-to-pd (n-disc (ty-dim A)) ⦄
           (unbiased-type-Ty (suc (ty-dim A))
-                            (n-disk (ty-dim A))
-                            (s≤s (≤-reflexive (sym (tree-dim-n-disk (ty-dim A))))))
-          (sub-from-linear-tree-Ty (n-disk (ty-dim A)) ⦃ n-disk-is-linear (ty-dim A) ⦄
+                            (n-disc (ty-dim A))
+                            (s≤s (≤-reflexive (sym (tree-dim-n-disc (ty-dim A))))))
+          (sub-from-linear-tree-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄
                                    tty
                                    Aty
-                                   (sym (tree-dim-n-disk (ty-dim A))))
+                                   (sym (tree-dim-n-disc (ty-dim A))))
           false
           (full-⊆ lem-supp)
           (reflexive≈ty (Arr≃ (l1 false) l2 (l1 true)))
     where
-      lem-supp : full ⊆ FVTy (unbiased-type (suc (ty-dim A)) (n-disk (ty-dim A)))
+      lem-supp : full ⊆ FVTy (unbiased-type (suc (ty-dim A)) (n-disc (ty-dim A)))
       lem-supp = begin
         full
-          ≡˘⟨ supp-tree-bd-full (ty-dim A) (n-disk (ty-dim A)) false (≤-reflexive (tree-dim-n-disk (ty-dim A))) ⟩
-        supp-tree-bd (ty-dim A) (n-disk (ty-dim A)) false
-          ≡˘⟨ supp-unbiased-lem (ty-dim A) (n-disk (ty-dim A)) (≤-reflexive (sym (tree-dim-n-disk (ty-dim A)))) false ⟩
-        FVTy (unbiased-type (ty-dim A) (n-disk (ty-dim A))) ∪
+          ≡˘⟨ supp-tree-bd-full (ty-dim A) (n-disc (ty-dim A)) false (≤-reflexive (tree-dim-n-disc (ty-dim A))) ⟩
+        supp-tree-bd (ty-dim A) (n-disc (ty-dim A)) false
+          ≡˘⟨ supp-unbiased-lem (ty-dim A) (n-disc (ty-dim A)) (≤-reflexive (sym (tree-dim-n-disc (ty-dim A)))) false ⟩
+        FVTy (unbiased-type (ty-dim A) (n-disc (ty-dim A))) ∪
           FVTm
-          (unbiased-term (ty-dim A) (tree-bd (ty-dim A) (n-disk (ty-dim A)))
-           [ tree-inc (ty-dim A) (n-disk (ty-dim A)) false ]tm)
+          (unbiased-term (ty-dim A) (tree-bd (ty-dim A) (n-disc (ty-dim A)))
+           [ tree-inc (ty-dim A) (n-disc (ty-dim A)) false ]tm)
           ≤⟨ ∪-⊆-1 _ _ ⟩
-        FVTy (unbiased-type (ty-dim A) (n-disk (ty-dim A))) ∪
-        FVTm (unbiased-term (ty-dim A) (tree-bd (ty-dim A) (n-disk (ty-dim A)))
-          [ tree-inc (ty-dim A) (n-disk (ty-dim A)) false ]tm) ∪
-        FVTm (unbiased-term (ty-dim A) (tree-bd (ty-dim A) (n-disk (ty-dim A)))
-          [ tree-inc (ty-dim A) (n-disk (ty-dim A)) true ]tm) ∎
+        FVTy (unbiased-type (ty-dim A) (n-disc (ty-dim A))) ∪
+        FVTm (unbiased-term (ty-dim A) (tree-bd (ty-dim A) (n-disc (ty-dim A)))
+          [ tree-inc (ty-dim A) (n-disc (ty-dim A)) false ]tm) ∪
+        FVTm (unbiased-term (ty-dim A) (tree-bd (ty-dim A) (n-disc (ty-dim A)))
+          [ tree-inc (ty-dim A) (n-disc (ty-dim A)) true ]tm) ∎
         where
           open PReasoning (⊆-poset _)
 
-      instance _ = n-disk-is-linear (ty-dim A)
+      instance _ = n-disc-is-linear (ty-dim A)
       l1 : (b : Bool) →
-           (unbiased-term (ty-dim A) (tree-bd (ty-dim A) (n-disk (ty-dim A)))
-             [ tree-inc (ty-dim A) (n-disk (ty-dim A)) b ]tm
-             [ sub-from-linear-tree (n-disk (ty-dim A)) t A (sym (tree-dim-n-disk (ty-dim A))) ]tm)
+           (unbiased-term (ty-dim A) (tree-bd (ty-dim A) (n-disc (ty-dim A)))
+             [ tree-inc (ty-dim A) (n-disc (ty-dim A)) b ]tm
+             [ sub-from-linear-tree (n-disc (ty-dim A)) t A (sym (tree-dim-n-disc (ty-dim A))) ]tm)
          ≃tm t
       l1 b = begin
-        < unbiased-term (ty-dim A) (tree-bd (ty-dim A) (n-disk (ty-dim A)))
-           [ tree-inc (ty-dim A) (n-disk (ty-dim A)) b ]tm
-           [ sub-from-linear-tree (n-disk (ty-dim A)) t A _ ]tm >tm
-          ≈⟨ sub-action-≃-tm (sub-action-≃-tm (unbiased-term-≃ refl (tree-bd-full (ty-dim A) (n-disk (ty-dim A)) (≤-reflexive (tree-dim-n-disk (ty-dim A))))) (tree-inc-full (ty-dim A) (n-disk (ty-dim A)) b (≤-reflexive (tree-dim-n-disk (ty-dim A))))) refl≃s ⟩
-        < unbiased-term (ty-dim A) (n-disk (ty-dim A))
+        < unbiased-term (ty-dim A) (tree-bd (ty-dim A) (n-disc (ty-dim A)))
+           [ tree-inc (ty-dim A) (n-disc (ty-dim A)) b ]tm
+           [ sub-from-linear-tree (n-disc (ty-dim A)) t A _ ]tm >tm
+          ≈⟨ sub-action-≃-tm (sub-action-≃-tm (unbiased-term-≃ refl (tree-bd-full (ty-dim A) (n-disc (ty-dim A)) (≤-reflexive (tree-dim-n-disc (ty-dim A))))) (tree-inc-full (ty-dim A) (n-disc (ty-dim A)) b (≤-reflexive (tree-dim-n-disc (ty-dim A))))) refl≃s ⟩
+        < unbiased-term (ty-dim A) (n-disc (ty-dim A))
           [ idSub ]tm
-          [ sub-from-linear-tree (n-disk (ty-dim A)) t A (sym (tree-dim-n-disk (ty-dim A))) ]tm >tm
-          ≈⟨ sub-action-≃-tm (id-on-tm (unbiased-term (ty-dim A) (n-disk (ty-dim A)))) refl≃s ⟩
-        < unbiased-term (ty-dim A) (n-disk (ty-dim A))
-          [ sub-from-linear-tree (n-disk (ty-dim A)) t A _ ]tm >tm
-          ≈⟨ sub-action-≃-tm (unbiased-term-disk (ty-dim A)) refl≃s ⟩
-        < 0V [ sub-from-linear-tree (n-disk (ty-dim A)) t A _ ]tm >tm
-          ≈⟨ sub-from-linear-tree-0V (n-disk (ty-dim A)) t A (sym (tree-dim-n-disk (ty-dim A))) ⟩
+          [ sub-from-linear-tree (n-disc (ty-dim A)) t A (sym (tree-dim-n-disc (ty-dim A))) ]tm >tm
+          ≈⟨ sub-action-≃-tm (id-on-tm (unbiased-term (ty-dim A) (n-disc (ty-dim A)))) refl≃s ⟩
+        < unbiased-term (ty-dim A) (n-disc (ty-dim A))
+          [ sub-from-linear-tree (n-disc (ty-dim A)) t A _ ]tm >tm
+          ≈⟨ sub-action-≃-tm (unbiased-term-disc (ty-dim A)) refl≃s ⟩
+        < 0V [ sub-from-linear-tree (n-disc (ty-dim A)) t A _ ]tm >tm
+          ≈⟨ sub-from-linear-tree-0V (n-disc (ty-dim A)) t A (sym (tree-dim-n-disc (ty-dim A))) ⟩
         < t >tm ∎
         where
           open Reasoning tm-setoid
 
-      l2 : unbiased-type (ty-dim A) (n-disk (ty-dim A))
-           [ sub-from-linear-tree (n-disk (ty-dim A)) t A (sym (tree-dim-n-disk (ty-dim A))) ]ty
+      l2 : unbiased-type (ty-dim A) (n-disc (ty-dim A))
+           [ sub-from-linear-tree (n-disc (ty-dim A)) t A (sym (tree-dim-n-disc (ty-dim A))) ]ty
          ≃ty A
       l2 = begin
-        < unbiased-type (ty-dim A) (n-disk (ty-dim A))
-          [ sub-from-linear-tree (n-disk (ty-dim A)) t A _ ]ty >ty
-          ≈⟨ sub-action-≃-ty (unbiased-type-disk (ty-dim A)) refl≃s ⟩
-        < tree-to-ctx (n-disk (ty-dim A)) ‼ zero
-          [ sub-from-linear-tree (n-disk (ty-dim A)) t A _ ]ty >ty
-          ≈⟨ sub-from-linear-tree-‼-0 (n-disk (ty-dim A)) t A (sym (tree-dim-n-disk (ty-dim A))) ⟩
+        < unbiased-type (ty-dim A) (n-disc (ty-dim A))
+          [ sub-from-linear-tree (n-disc (ty-dim A)) t A _ ]ty >ty
+          ≈⟨ sub-action-≃-ty (unbiased-type-disc (ty-dim A)) refl≃s ⟩
+        < tree-to-ctx (n-disc (ty-dim A)) ‼ zero
+          [ sub-from-linear-tree (n-disc (ty-dim A)) t A _ ]ty >ty
+          ≈⟨ sub-from-linear-tree-‼-0 (n-disc (ty-dim A)) t A (sym (tree-dim-n-disc (ty-dim A))) ⟩
         < A >ty ∎
         where
           open Reasoning ty-setoid
 
 sub-from-linear-tree-≈ : (S : Tree n) → .⦃ _ : is-linear S ⦄ → s ≈[ Γ ]tm t → (r : A ≈[ Γ ]ty B) → (p : ty-dim A ≡ tree-dim S) → sub-from-linear-tree S s A p ≈[ Γ ]s sub-from-linear-tree S t B (trans (sym (ty-dim-≈ r)) p)
 sub-from-linear-tree-≈ Sing a Star≈ p = Ext≈ (Null≈ Star≈) a
-sub-from-linear-tree-≈ (Join S Sing) a (Arr≈ b c d) p = Ext≈ (Ext≈ (sub-from-linear-tree-≈ S b c (max-pred-0 p)) d) a
+sub-from-linear-tree-≈ (Join S Sing) a (Arr≈ b c d) p = Ext≈ (Ext≈ (sub-from-linear-tree-≈ S b c (cong pred p)) d) a
 
 identity-≈ : s ≈[ Γ ]tm t → A ≈[ Γ ]ty B → identity s A ≈[ Γ ]tm identity t B
-identity-≈ {A = A} {B = B} p q = trans≈tm (reflexive≈tm (Coh≃ (tree-to-ctx-≃ (n-disk-≃ (ty-dim-≈ q))) (unbiased-type-≃ (cong suc (ty-dim-≈ q)) (n-disk-≃ (ty-dim-≈ q))) (sub-from-linear-tree-≃ (n-disk-≃ (ty-dim-≈ q)) ⦃ n-disk-is-linear (ty-dim A) ⦄ ⦃ n-disk-is-linear (ty-dim B) ⦄ refl≃tm refl≃ty (sym (tree-dim-n-disk (ty-dim A))) (trans (ty-dim-≈ q) (sym (tree-dim-n-disk (ty-dim B))))))) (Coh≈ refl≈ty (sub-from-linear-tree-≈ (n-disk (ty-dim B)) ⦃ n-disk-is-linear (ty-dim B) ⦄ p q (trans (ty-dim-≈ q) (sym (tree-dim-n-disk (ty-dim B))))))
+identity-≈ {A = A} {B = B} p q = trans≈tm (reflexive≈tm (Coh≃ (tree-to-ctx-≃ (n-disc-≃ (ty-dim-≈ q))) (unbiased-type-≃ (cong suc (ty-dim-≈ q)) (n-disc-≃ (ty-dim-≈ q))) (sub-from-linear-tree-≃ (n-disc-≃ (ty-dim-≈ q)) ⦃ n-disc-is-linear (ty-dim A) ⦄ ⦃ n-disc-is-linear (ty-dim B) ⦄ refl≃tm refl≃ty (sym (tree-dim-n-disc (ty-dim A))) (trans (ty-dim-≈ q) (sym (tree-dim-n-disc (ty-dim B))))))) (Coh≈ refl≈ty (sub-from-linear-tree-≈ (n-disc (ty-dim B)) ⦃ n-disc-is-linear (ty-dim B) ⦄ p q (trans (ty-dim-≈ q) (sym (tree-dim-n-disc (ty-dim B))))))
 
 sub-from-linear-tree-to-term-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {t : Tm m} → {A : Ty m} → (p : ty-dim A ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) Γ (sub-from-linear-tree S t A p) → Typing-Tm Γ t A
 sub-from-linear-tree-to-term-Ty Sing {A = ⋆} p (TyExt σty Bty tty) = tty
 sub-from-linear-tree-to-term-Ty (Join S Sing) {A = s ─⟨ A ⟩⟶ t} p σty
   rewrite ≃c-to-≡ (susp-lin-tree S) with σty
-... | TyExt τty Bty tty = term-conversion tty (reflexive≈ty (Arr≃ (sub-from-linear-tree-0V S s A (max-pred-0 p)) (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S s A _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S s A (max-pred-0 p))) refl≃tm))
+... | TyExt τty Bty tty = term-conversion tty (reflexive≈ty (Arr≃ (sub-from-linear-tree-0V S s A (cong pred p)) (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S s A _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S s A (cong pred p))) refl≃tm))
 
 sub-from-linear-tree-to-type-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {t : Tm m} → {A : Ty m} → (p : ty-dim A ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) Γ (sub-from-linear-tree S t A p) → Typing-Ty Γ A
 sub-from-linear-tree-to-type-Ty Sing {A = ⋆} p (TyExt σty Bty tty) = TyStar
 sub-from-linear-tree-to-type-Ty (Join S Sing) {A = s ─⟨ A ⟩⟶ t} p σty
   rewrite ≃c-to-≡ (susp-lin-tree S) with σty
-... | TyExt (TyExt τty Aty sty) Bty tty = TyArr (sub-from-linear-tree-to-term-Ty S (max-pred-0 p) τty) (sub-from-linear-tree-to-type-Ty S (max-pred-0 p) τty) (term-conversion sty (reflexive≈ty (sub-from-linear-tree-‼-0 S s A (max-pred-0 p))))
+... | TyExt (TyExt τty Aty sty) Bty tty = TyArr (sub-from-linear-tree-to-term-Ty S (cong pred p) τty) (sub-from-linear-tree-to-type-Ty S (cong pred p) τty) (term-conversion sty (reflexive≈ty (sub-from-linear-tree-‼-0 S s A (cong pred p))))
 
 identity-to-term-Ty : Typing-Tm Γ (identity t A) B → Typing-Tm Γ t A
-identity-to-term-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-term-Ty (n-disk (ty-dim A)) ⦃ n-disk-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disk (ty-dim A))) σty
+identity-to-term-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-term-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty
 
 identity-to-type-Ty : Typing-Tm Γ (identity t A) B → Typing-Ty Γ A
-identity-to-type-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-type-Ty (n-disk (ty-dim A)) ⦃ n-disk-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disk (ty-dim A))) σty
+identity-to-type-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-type-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty

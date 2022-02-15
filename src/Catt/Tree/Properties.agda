@@ -21,9 +21,9 @@ open import Catt.Variables
 open import Catt.Variables.Properties
 open import Relation.Binary using (Setoid)
 
-tree-dim-n-disk : (n : ℕ) → tree-dim (n-disk n) ≡ n
-tree-dim-n-disk zero = refl
-tree-dim-n-disk (suc n) = trans (max-lem (suc (tree-dim (n-disk n)))) (cong suc (tree-dim-n-disk n))
+tree-dim-n-disc : (n : ℕ) → tree-dim (n-disc n) ≡ n
+tree-dim-n-disc zero = refl
+tree-dim-n-disc (suc n) = cong suc (tree-dim-n-disc n)
 
 record TREE : Set where
   constructor <_>t
@@ -156,7 +156,7 @@ tree-bd-full : (d : ℕ) → (T : Tree n) → (tree-dim T ≤ d) → tree-bd d T
 tree-bd-full zero Sing p = Sing≃
 tree-bd-full zero (Join S T) ()
 tree-bd-full (suc d) Sing p = Sing≃
-tree-bd-full (suc d) (Join S T) p = Join≃ (tree-bd-full d S (≤-trans (max-inc₁ (tree-dim S) (pred (tree-dim T))) (≤-pred p))) (tree-bd-full (suc d) T (≤-trans (max-inc₂ (suc (tree-dim S)) (tree-dim T)) p))
+tree-bd-full (suc d) (Join S T) p = Join≃ (tree-bd-full d S (≤-trans (m≤n⊔m (pred (tree-dim T)) (tree-dim S)) (≤-pred p))) (tree-bd-full (suc d) T (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p))
 
 tree-inc-glob : (d₁ d₂ : ℕ) → (T : Tree n) → (b₁ b₂ : Bool) → d₁ < d₂ → tree-inc d₂ T b₂ ∘ tree-inc d₁ (tree-bd d₂ T) b₁ ≃s tree-inc d₁ T b₁
 tree-inc-glob zero (suc d₂) T false b₂ p = Ext≃ refl≃s (tree-inc-preserve-fst-var d₂ T b₂)
@@ -190,7 +190,7 @@ tree-inc-full zero (Join S T) b ()
 tree-inc-full (suc d) Sing b p = refl≃s
 tree-inc-full (suc d) (Join S T) b p = begin
   < sub-between-connect-susps (tree-inc d S b) (tree-inc (suc d) T b) >s
-    ≈⟨ sub-between-connect-susps-≃ (tree-inc d S b) idSub (tree-inc (suc d) T b) idSub (≃-to-same-n (tree-bd-full d S (≤-trans (max-inc₁ (tree-dim S) (pred (tree-dim T))) (≤-pred p)))) (≃-to-same-n (tree-bd-full (suc d) T (≤-trans (max-inc₂ (suc (tree-dim S)) (tree-dim T)) p))) (tree-inc-full d S b (≤-trans (max-inc₁ (tree-dim S) (pred (tree-dim T))) (≤-pred p))) (tree-inc-full (suc d) T b (≤-trans (max-inc₂ (suc (tree-dim S)) (tree-dim T)) p)) ⟩
+    ≈⟨ sub-between-connect-susps-≃ (tree-inc d S b) idSub (tree-inc (suc d) T b) idSub (≃-to-same-n (tree-bd-full d S (m⊔n≤o⇒n≤o (pred (tree-dim T)) (tree-dim S) (≤-pred p)))) (≃-to-same-n (tree-bd-full (suc d) T (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p))) (tree-inc-full d S b (m⊔n≤o⇒n≤o (pred (tree-dim T)) (tree-dim S) (≤-pred p))) (tree-inc-full (suc d) T b (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p)) ⟩
   < sub-between-connect-susps idSub idSub >s
     ≈⟨ sub-between-connect-susps-id _ _ ⟩
   < idSub >s ∎
@@ -212,7 +212,16 @@ tree-inc-glob-step d T b₁ b₂ = begin
 tree-dim-bd : (d : ℕ) → (T : Tree n) → tree-dim (tree-bd d T) ≡ d ⊓ tree-dim T
 tree-dim-bd zero T = refl
 tree-dim-bd (suc d) Sing = refl
-tree-dim-bd (suc d) (Join S T) = trans (cong₂ max (cong suc (tree-dim-bd d S)) (tree-dim-bd (suc d) T)) (sym (⊓-distribˡ-max (suc d) (suc (tree-dim S)) (tree-dim T)))
+tree-dim-bd (suc d) (Join S T) = cong suc (begin
+  pred (tree-dim (tree-bd (suc d) T)) ⊔ tree-dim (tree-bd d S)
+    ≡⟨ cong₂ (λ a → (pred a) ⊔_) (tree-dim-bd (suc d) T) (tree-dim-bd d S) ⟩
+  pred (suc d ⊓ tree-dim T) ⊔ (d ⊓ tree-dim S)
+    ≡⟨ cong (_⊔ (d ⊓ tree-dim S)) (∸-distribʳ-⊓ 1 (suc d) (tree-dim T)) ⟩
+  (d ⊓ pred (tree-dim T)) ⊔ (d ⊓ tree-dim S)
+    ≡˘⟨ ⊓-distribˡ-⊔ d (pred (tree-dim T)) (tree-dim S) ⟩
+  d ⊓ (pred (tree-dim T) ⊔ tree-dim S) ∎)
+  where
+    open ≡-Reasoning
 
 tree-dim-bd′ : (d : ℕ) → (T : Tree n) → d ≤ tree-dim T → tree-dim (tree-bd d T) ≡ d
 tree-dim-bd′ d T p = trans (tree-dim-bd d T) (m≤n⇒m⊓n≡m p)
@@ -225,11 +234,29 @@ tree-inc-susp-lem (suc d) (Join S T) b = sym≃s (id-left-unit _)
 
 linear-tree-dim : (S : Tree n) → .⦃ is-linear S ⦄ → tm-height (tree-to-ctx S) 0V ≡ tree-dim S
 linear-tree-dim Sing = refl
-linear-tree-dim (Join S Sing) = trans (susp-tm-height 0V (tree-to-ctx S)) (trans (cong suc (linear-tree-dim S)) (sym (max-lem (suc (tree-dim S)))))
+linear-tree-dim (Join S Sing) = begin
+  tm-height (suspCtx (tree-to-ctx S)) 0V
+    ≡⟨ susp-tm-height 0V (tree-to-ctx S) ⟩
+  suc (tm-height (tree-to-ctx S) 0V)
+    ≡⟨ cong suc (linear-tree-dim S) ⟩
+  suc (tree-dim S) ∎
+  where
+    open ≡-Reasoning
 
-connect-tree-dim : (S : Tree n) → (T : Tree m) → tree-dim (connect-tree S T) ≡ max (tree-dim S) (tree-dim T)
+connect-tree-dim : (S : Tree n) → (T : Tree m) → tree-dim (connect-tree S T) ≡ tree-dim S ⊔ tree-dim T
 connect-tree-dim Sing T = refl
-connect-tree-dim (Join S₁ S₂) T = trans (cong (max (suc (tree-dim S₁))) (connect-tree-dim S₂ T)) (sym (max-assoc (suc (tree-dim S₁)) (tree-dim S₂) (tree-dim T)))
+connect-tree-dim (Join S₁ S₂) T = begin
+  suc (pred (tree-dim (connect-tree S₂ T)) ⊔ tree-dim S₁)
+    ≡˘⟨ ⊔-lem (tree-dim S₁) (tree-dim (connect-tree S₂ T)) ⟩
+  suc (tree-dim S₁) ⊔ tree-dim (connect-tree S₂ T)
+    ≡⟨ cong (suc (tree-dim S₁) ⊔_) (connect-tree-dim S₂ T) ⟩
+  suc (tree-dim S₁) ⊔ (tree-dim S₂ ⊔ tree-dim T)
+    ≡˘⟨ ⊔-assoc (suc (tree-dim S₁)) (tree-dim S₂) (tree-dim T) ⟩
+  suc (tree-dim S₁) ⊔ tree-dim S₂ ⊔ tree-dim T
+    ≡⟨ cong (_⊔ tree-dim T) (⊔-lem (tree-dim S₁) (tree-dim S₂)) ⟩
+  suc (pred (tree-dim S₂) ⊔ tree-dim S₁) ⊔ tree-dim T ∎
+  where
+    open ≡-Reasoning
 
 connect-tree-length-lem : (S : Tree n) → (T : Tree m) → connect-tree-length S T ≡ tree-size T + tree-size S
 connect-tree-length-lem Sing T = sym (+-identityʳ _)
@@ -337,8 +364,8 @@ susp-lin-tree (Join S Sing) = begin
   where
     open Reasoning ctx-setoid
 
-n-disk-≃ : n ≡ m → n-disk n ≃ n-disk m
-n-disk-≃ refl = refl≃
+n-disc-≃ : n ≡ m → n-disc n ≃ n-disc m
+n-disc-≃ refl = refl≃
 
 tree-dim-≃ : S ≃ T → tree-dim S ≡ tree-dim T
 tree-dim-≃ p with ≃-to-same-n p

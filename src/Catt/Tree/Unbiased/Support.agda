@@ -139,7 +139,7 @@ sub-from-linear-tree-supp-lem zero d′ (Join S Sing) T false p = begin
   FVTy (unbiased-type d′ T) ∪ FVTm (getFst [ unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ]tm)
     ≡˘⟨ cong (λ - → FVTy (unbiased-type d′ T) ∪ FVTm -) (≃tm-to-≡ (unrestrict-fst (sub-from-linear-tree-unbiased S T (suc d′)))) ⟩
   FVTy (unbiased-type d′ T) ∪ FVTm (unbiased-term d′ (tree-bd d′ T) [ tree-inc d′ T false ]tm)
-    ≡⟨ supp-unbiased-lem d′ T (≤-trans (m≤n+m d′ (suc (tree-dim S))) (≤-reflexive (sym (trans p (cong (λ - → suc (- + d′)) (max-lem (tree-dim S))))))) false ⟩
+    ≡⟨ supp-unbiased-lem d′ T (≤-trans (m≤n+m d′ (suc (tree-dim S))) (≤-reflexive (sym p))) false ⟩
   supp-tree-bd d′ T false ∎
   where
     open ≡-Reasoning
@@ -147,7 +147,7 @@ sub-from-linear-tree-supp-lem zero d′ (Join S Sing) T true p = begin
   FVTy (unbiased-type d′ T) ∪ (FVTm (getSnd [ unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ]tm))
     ≡˘⟨ cong (λ - → FVTy (unbiased-type d′ T) ∪ FVTm -) (≃tm-to-≡ (unrestrict-snd (sub-from-linear-tree-unbiased S T (suc d′)))) ⟩
   FVTy (unbiased-type d′ T) ∪ FVTm (unbiased-term d′ (tree-bd d′ T) [ tree-inc d′ T true ]tm)
-    ≡⟨ supp-unbiased-lem d′ T (≤-trans (m≤n+m d′ (suc (tree-dim S))) (≤-reflexive (sym (trans p (cong (λ - → suc (- + d′)) (max-lem (tree-dim S))))))) true ⟩
+    ≡⟨ supp-unbiased-lem d′ T (≤-trans (m≤n+m d′ (suc (tree-dim S))) (≤-reflexive (sym p))) true ⟩
   supp-tree-bd d′ T true ∎
   where
     open ≡-Reasoning
@@ -167,7 +167,7 @@ sub-from-linear-tree-supp-lem (suc d) d′ (Join S Sing) T b p = begin
   FVSub (unrestrict (sub-from-linear-tree-unbiased S T (suc d′) ∘ tree-inc d S b))
     ≡⟨ unrestrict-supp (sub-from-linear-tree-unbiased S T (suc d′) ∘ tree-inc d S b) ⟩
   FVSub (sub-from-linear-tree-unbiased S T (suc d′) ∘ tree-inc d S b)
-    ≡⟨ sub-from-linear-tree-supp-lem d (suc d′) S T b (trans p (trans (cong (λ - → suc (- + d′)) (max-lem (tree-dim S))) (sym (+-suc (tree-dim S) d′)))) ⟩
+    ≡⟨ sub-from-linear-tree-supp-lem d (suc d′) S T b (trans p (sym (+-suc (tree-dim S) d′))) ⟩
   supp-tree-bd (d + suc d′) T b
     ≡⟨ cong (λ - → supp-tree-bd - T b) (+-suc d d′) ⟩
   supp-tree-bd (suc d + d′) T b ∎

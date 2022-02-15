@@ -92,6 +92,18 @@ supp-compat (suc n) (Join S T) b = let
   where
     open ≡-Reasoning
 
+supp-pred-compat : (T : Tree m) → (b : Bool) → supp-tree-bd (pred (tree-dim T)) T b ≡ pd-bd-supp (pred (ctx-dim (tree-to-ctx T))) (tree-to-ctx T) ⦃ tree-to-pd T ⦄ b
+supp-pred-compat T b = let
+  instance _ = tree-to-pd T
+  in begin
+  supp-tree-bd (pred (tree-dim T)) T b
+    ≡⟨ supp-compat (pred (tree-dim T)) T b ⟩
+  pd-bd-supp (pred (tree-dim T)) (tree-to-ctx T) b
+    ≡˘⟨ cong (λ - → pd-bd-supp - (tree-to-ctx T) b) (cong pred (tree-dim-ctx-dim T)) ⟩
+  pd-bd-supp (pred (ctx-dim (tree-to-ctx T))) (tree-to-ctx T) b ∎
+  where
+    open ≡-Reasoning
+
 supp-tree-bd-full : (d : ℕ) → (T : Tree n) → (b : Bool) → tree-dim T ≤ d → supp-tree-bd d T b ≡ full
 supp-tree-bd-full zero Sing false p = refl
 supp-tree-bd-full zero Sing true p = refl
@@ -101,7 +113,7 @@ supp-tree-bd-full zero (Join S T) b () | suc x
 supp-tree-bd-full (suc d) Sing b p = refl
 supp-tree-bd-full (suc d) (Join S T) b p = begin
   connect-supp (suspSupp (supp-tree-bd d S b)) (supp-tree-bd (suc d) T b)
-    ≡⟨ cong₂ (λ a b → connect-supp (suspSupp a) b) (supp-tree-bd-full d S b (≤-pred (≤-trans (max-inc₁ (suc (tree-dim S)) (tree-dim T)) p))) (supp-tree-bd-full (suc d) T b (≤-trans (max-inc₂ (suc (tree-dim S)) (tree-dim T)) p)) ⟩
+    ≡⟨ cong₂ (λ a b → connect-supp (suspSupp a) b) (supp-tree-bd-full d S b (m⊔n≤o⇒n≤o (pred (tree-dim T)) (tree-dim S) (≤-pred p))) (supp-tree-bd-full (suc d) T b (≤-trans (≤-trans (m≤n⊔m (suc (tree-dim S)) (tree-dim T)) (≤-reflexive (⊔-lem (tree-dim S) (tree-dim T)))) p)) ⟩
   connect-supp (suspSupp full) full
     ≡⟨ cong (λ - → connect-supp - full) suspSuppFull ⟩
   connect-supp full full
@@ -136,12 +148,7 @@ linear-tree-supp-lem (suc d) (Join T Sing) p = begin
     lem (x ∷ xs) = cong ((x ∨ true) ∷_) (trans (∪-right-unit (suspSupp xs)) (cong suspSupp (sym (∪-right-unit xs))))
 
     l2 : tree-dim T ≡ suc d
-    l2 = cong pred (begin
-      suc (tree-dim T)
-        ≡˘⟨ max-lem (suc (tree-dim T)) ⟩
-      max (suc (tree-dim T)) zero
-        ≡⟨ recompute ((tree-dim (Join T Sing)) ≟ (suc (suc d))) p ⟩
-      suc (suc d) ∎)
+    l2 = cong pred (recompute ((tree-dim (Join T Sing)) ≟ (suc (suc d))) p)
 
 supp-tree-bd-include-fst : (d : ℕ) → (T : Tree n) → (b : Bool) → Truth (lookup-isVar (supp-tree-bd (suc d) T b) (Var (fromℕ _)))
 supp-tree-bd-include-fst d Sing b = tt

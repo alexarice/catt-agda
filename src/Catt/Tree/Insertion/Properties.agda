@@ -171,7 +171,7 @@ insertion-eq (Join S₁ S₂) PHere T = begin
   < unbiased-comp (tree-dim (suspTree S₁)) T [ connect-inc-left (tree-last-var T) _ ]tm >tm
     ≡⟨⟩
   < Coh (tree-to-ctx T) (unbiased-type (tree-dim (suspTree S₁)) T) (connect-inc-left (tree-last-var T) _ ∘ idSub) >tm
-    ≈⟨ Coh≃ refl≃c (unbiased-type-≃ (trans (max-lem (suc (tree-dim S₁))) (recompute (suc (tree-dim S₁) ≟ tree-dim T) it)) refl≃) lem ⟩
+    ≈⟨ Coh≃ refl≃c (unbiased-type-≃ (recompute ((suc (tree-dim S₁)) ≟ (tree-dim T)) it) refl≃) lem ⟩
   < Coh (tree-to-ctx T) (unbiased-type (tree-dim T) T)
       (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
        connect-inc-left (tree-last-var T) _) >tm
@@ -213,10 +213,10 @@ insertion-eq (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p = p ⦄ = let
     ≈˘⟨ sub-action-≃-tm (susp-functorial-tm (exterior-sub S₁ P T) (branching-path-to-var S₁ P)) refl≃s ⟩
   < suspTm (branching-path-to-var S₁ P [ exterior-sub S₁ P T ]tm)
     [ connect-susp-inc-left (insertion-tree-size S₁ P T) _ ]tm >tm
-    ≈⟨ sub-action-≃-tm (susp-tm-≃ (insertion-eq S₁ P T ⦃ p = trans x (max-lem (tree-dim T)) ⦄)) refl≃s ⟩
+    ≈⟨ sub-action-≃-tm (susp-tm-≃ (insertion-eq S₁ P T)) refl≃s ⟩
   < suspTm (Coh (tree-to-ctx T) (unbiased-type (tree-dim T) T) (interior-sub S₁ P T))
     [ connect-susp-inc-left (insertion-tree-size S₁ P T) _ ]tm >tm
-    ≈⟨ Coh≃ refl≃c (trans≃ty (susp-ty-≃ (unbiased-type-≃ (sym (max-lem (tree-dim T))) refl≃)) (unbiased-type-susp-lem (max (tree-dim T) (pred (tree-dim Sing))) T)) refl≃s ⟩
+    ≈⟨ Coh≃ refl≃c (unbiased-type-susp-lem (tree-dim T) T) refl≃s ⟩
   < Coh (suspCtx (tree-to-ctx T)) (unbiased-type (tree-dim (Join T Sing)) (Join T Sing)) (interior-sub (Join S₁ S₂) (PExt P) (Join T Sing)) >tm ∎
   where
     open Reasoning tm-setoid

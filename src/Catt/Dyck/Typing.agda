@@ -1,16 +1,16 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
 module Catt.Dyck.Typing (index : ℕ)
-                              (rule : Fin index → Rule)
-                              (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
-                              (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
-                              (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
+                        (rule : Fin index → Rule)
+                        (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
+                        (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
+                        (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Typing index rule
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
@@ -21,15 +21,8 @@ open import Catt.Globular.Typing index rule lift-rule
 open import Catt.Typing.Properties.Substitution index rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Properties
 open import Catt.Dyck.Properties
-open import Data.Bool
-open import Data.Nat.Properties
-open import Relation.Binary.PropositionalEquality
-open import Data.Empty
 open import Catt.Syntax.SyntacticEquality
 open P index rule
-import Relation.Binary.Reasoning.Setoid as Reasoning
-
-
 
 dyck-to-ctx-Ty : (dy : Dyck n d) → Typing-Ctx (dyck-to-ctx dy)
 dyck-type-Ty : (dy : Dyck n d) → Typing-Ty (dyck-to-ctx dy) (dyck-type dy)
@@ -50,6 +43,7 @@ dyck-term-Ty End = TyVarZ TyStar refl≈ty
 dyck-term-Ty (⇑ dy) = TyVarZ (dyck-pre-type-Ty dy) refl≈ty
 dyck-term-Ty (⇓ dy) = term-conversion (ty-tgt-Ty (dyck-type-Ty dy) (<-transˡ 0<1+n (≤-reflexive (sym (dyck-type-dim dy))))) (reflexive≈ty (ty-base-lift (dyck-pre-type dy)))
 
+{-
 dyck-inc-1-Ty : (n : ℕ) → (dy : Dyck m d) → (b : Bool) → Typing-Sub (dyck-to-ctx (dyck-bd-1 n dy)) (dyck-to-ctx dy) (dyck-inc-1 n dy b)
 dyck-inc-2-Ty : (n : ℕ) → (dy : Dyck m (n + d)) → (b : Bool) → Typing-Sub (dyck-to-ctx (dyck-bd-2 n dy)) (dyck-to-ctx dy) (dyck-inc-2 n dy b)
 
@@ -122,7 +116,7 @@ dyck-inc-1-Ty (suc n) (⇓ dy) b = dyck-inc-1-Ty n dy b
 dyck-inc-2-Ty zero dy b = dyck-inc-1-Ty zero dy b
 dyck-inc-2-Ty (suc n) (⇑ dy) b = lift-sub-typing (lift-sub-typing (dyck-inc-2-Ty n dy b))
 dyck-inc-2-Ty (suc n) (⇓ dy) b = dyck-inc-2-Ty (suc (suc n)) dy b
-
+-}
 -- dyck-inc-Ty : (n : ℕ) → (dy : Dyck m d) → (b : Bool) → Typing-Sub (dyck-to-ctx (dyck-bd n dy)) (dyck-to-ctx dy) (dyck-inc n dy b)
 -- dyck-inc-Ty {m = zero} n End b = id-Ty (TyAdd TyEmp TyStar)
 -- dyck-inc-Ty {m = zero} n (⇓ dy) b = ⊥-elim (dyck-zero-lem dy)

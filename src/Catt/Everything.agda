@@ -35,6 +35,11 @@ import Catt.Tree.Unbiased.Properties
 import Catt.Tree.Insertion
 import Catt.Tree.Insertion.Properties
 
+import Catt.Dyck
+import Catt.Dyck.Properties
+import Catt.Dyck.Pruning
+import Catt.Dyck.Pruning.Properties
+
 import Catt.Support
 import Catt.Support.Properties
 import Catt.Suspension.Support
@@ -59,5 +64,8 @@ import Catt.Connection.Typing
 import Catt.Tree.Typing
 import Catt.Tree.Unbiased.Typing
 import Catt.Tree.Insertion.Typing
+
+import Catt.Dyck.Typing
+import Catt.Dyck.Pruning.Typing
 
 import Catt.Strict.Assoc

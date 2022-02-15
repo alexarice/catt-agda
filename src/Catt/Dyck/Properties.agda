@@ -2,24 +2,15 @@
 
 module Catt.Dyck.Properties where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Fin using (Fin;suc;zero)
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Dyck
-open import Relation.Binary.PropositionalEquality
-open import Relation.Binary
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Variables
-open import Catt.Syntax.SyntacticEquality
-open import Data.Fin using (zero)
-open import Relation.Nullary
-open import Data.Bool using (Bool;true;false)
-open import Data.Empty
-open import Data.Unit using (⊤; tt)
-import Relation.Binary.Reasoning.Setoid as Reasoning
 
 data _≃d_ : Dyck n d → Dyck n′ d′ → Set where
   End≃ : End ≃d End
@@ -47,7 +38,8 @@ reflexive≃d refl = refl≃d
 ≃d-to-≡ : dy ≃d ey → dy ≡ ey
 ≃d-to-≡ End≃ = refl
 ≃d-to-≡ (⇑≃ p) = cong ⇑ (≃d-to-≡ p)
-≃d-to-≡ (⇓≃ p) = cong ⇓ (≃d-to-≡ p)
+≃d-to-≡ (⇓≃ p) with ≃d-to-≡ p
+... | refl = refl
 
 record DYCK : Set where
   constructor <_>d
@@ -68,7 +60,7 @@ dyck-setoid = record { Carrier = DYCK
                      }
 
 
-connect-dyck-≃ : {gy : Dyck n d} → dy ≃d ey → fy ≃d gy → connect-dyck dy fy ≃d connect-dyck ey gy
+connect-dyck-≃ : {gy : Dyck n d} → (p : dy ≃d ey) → fy ≃d gy → connect-dyck dy fy ≃d connect-dyck ey gy
 connect-dyck-≃ p End≃ = p
 connect-dyck-≃ p (⇑≃ q) = ⇑≃ (connect-dyck-≃ p q)
 connect-dyck-≃ p (⇓≃ q) = ⇓≃ (connect-dyck-≃ p q)
@@ -247,7 +239,7 @@ dyck-zero-lem (⇓ dy) = dyck-zero-lem dy
 --   < ty-tgt (dyck-type dy) >tm ∎
 --   where
 --     open Reasoning tm-setoid
-
+{-
 dyck-type-inc-1 : (n : ℕ) → (dy : Dyck m d) → (b : Bool) → dyck-type (dyck-bd-1 n dy) [ dyck-inc-1 n dy b ]ty ≃ty dyck-type dy
 dyck-type-inc-2 : (n : ℕ) → (dy : Dyck m (n + d)) → (b : Bool) → dyck-type (dyck-bd-2 n dy) [ dyck-inc-2 n dy b ]ty ≃ty truncate′ n (dyck-type dy)
 dyck-term-inc-1 : (n : ℕ) → (dy : Dyck m d) → (b : Bool) → dyck-term (dyck-bd-1 (suc n) dy) [ dyck-inc-1 (suc n) dy b ]tm ≃tm dyck-term dy
@@ -399,7 +391,8 @@ dyck-term-inc-1 n (⇓ dy) b = begin
   < ty-tgt (dyck-type dy) >tm ∎
   where
     open Reasoning tm-setoid
-
+-}
+{-
 dyck-type-bd-2 : (n : ℕ) → (dy : Dyck m (n + d)) → dyck-type (dyck-bd-2 n dy) ≃ty dyck-to-ctx (dyck-bd-2 n dy) ‼ zero
 dyck-type-bd-2 zero End = refl≃ty
 dyck-type-bd-2 zero (⇑ dy) = refl≃ty
@@ -452,3 +445,4 @@ dyck-bd-2-glob n′ zero (⇑ dy) = dyck-bd-1-2-glob (suc n′) 0 tt dy
 dyck-bd-2-glob n′ (suc n) (⇑ dy) = trans≃d (dyck-bd-2-glob n′ n dy) (dyck-bd-2-≃ (suc (suc (n + suc n′))) (sym≃d (dyck-subst-⇑ (+-assoc (suc n) (suc n′) _) dy)))
 dyck-bd-2-glob n′ zero (⇓ dy) = dyck-bd-2-glob n′ 1 dy
 dyck-bd-2-glob n′ (suc n) (⇓ dy) = trans≃d (dyck-bd-2-glob n′ (suc (suc n)) dy) (sym≃d (dyck-bd-2-≃ (suc (suc n + suc n′)) (dyck-subst-⇓ (+-assoc (suc (suc n)) (suc n′) _) dy)))
+-}

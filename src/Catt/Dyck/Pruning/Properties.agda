@@ -2,18 +2,16 @@
 
 module Catt.Dyck.Pruning.Properties where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
-open import Data.Nat
 open import Catt.Dyck
 open import Catt.Dyck.Properties
 open import Catt.Dyck.Pruning
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Globular
 open import Catt.Globular.Properties
-import Relation.Binary.Reasoning.Setoid as Reasoning
-open import Data.Nat.Properties
-open import Relation.Binary.PropositionalEquality
 
 dyck-type-prune : (p : Peak dy) → dyck-type (prune-peak p) ≃ty dyck-type dy [ prune-project p ]ty
 dyck-term-prune : (p : Peak dy) → dyck-term (prune-peak p) ≃tm dyck-term dy [ prune-project p ]tm

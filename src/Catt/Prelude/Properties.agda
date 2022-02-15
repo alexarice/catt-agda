@@ -8,6 +8,7 @@ open import Data.Nat.Properties public
 open import Data.Fin.Properties using (toℕ-injective; toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁;inject₁-injective) public
 open import Data.Bool.Properties using (∨-identityʳ;∨-assoc;∨-comm;∨-idem;∨-zeroʳ) public
 open import Relation.Nullary public
+open import Relation.Binary using (Setoid) public
 import Relation.Binary.Reasoning.Setoid
 import Relation.Binary.Reasoning.PartialOrder
 open import Algebra.Construct.NaturalChoice.Base

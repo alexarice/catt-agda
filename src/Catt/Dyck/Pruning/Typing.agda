@@ -1,16 +1,16 @@
 {-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
 
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Nat
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ; fromℕ)
 
 module Catt.Dyck.Pruning.Typing (index : ℕ)
-                                 (rule : Fin index → Rule)
-                                 (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
-                                 (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
-                                 (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
+                                (rule : Fin index → Rule)
+                                (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
+                                (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
+                                (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Typing index rule
 open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
@@ -18,14 +18,12 @@ open import Catt.Dyck.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree.Unbiased.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing index rule lift-rule
-
 open import Catt.Dyck
 open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Properties
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 open import Catt.Syntax.Bundles
-import Relation.Binary.Reasoning.Setoid as Reasoning
 
 prune-project-Ty : (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) (dyck-to-ctx (prune-peak p)) (prune-project p)
 prune-project-Ty (⇕pk dy)

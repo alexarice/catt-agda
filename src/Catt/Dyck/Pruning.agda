@@ -2,8 +2,8 @@
 
 module Catt.Dyck.Pruning where
 
+open import Catt.Prelude
 open import Catt.Syntax
-open import Data.Nat
 open import Catt.Dyck
 open import Catt.Tree.Unbiased
 open import Catt.Globular

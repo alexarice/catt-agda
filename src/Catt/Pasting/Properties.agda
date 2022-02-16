@@ -197,7 +197,7 @@ right-base-≃ (Arr≃ x p q) _ = right-base-≃ p q
 right-base-< : 0 < ty-dim A → right-base A s ≃tm right-base A t
 right-base-< {A = s ─⟨ A ⟩⟶ t} p = refl≃tm
 
-right-base-base : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → right-base A s ≃tm right-base (ty-base A) (ty-tgt′ A)
+right-base-base : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → right-base A s ≃tm right-base (ty-base A) (ty-tgt A)
 right-base-base (s ─⟨ A ⟩⟶ t) = refl≃tm
 
 right-base-lift : (A : Ty n) → (t : Tm n) → right-base (liftType A) (liftTerm t) ≃tm liftTerm (right-base A t)
@@ -262,7 +262,7 @@ focus-ty-is-globular (Restr pdb) = ty-base-globular (focus-ty pdb) (focus-ty-is-
 
 focus-tm-is-globular Base = tt
 focus-tm-is-globular (Extend pdb p q) = tt
-focus-tm-is-globular (Restr pdb) = ty-tgt′-globular (focus-ty pdb) (focus-ty-is-globular pdb)
+focus-tm-is-globular (Restr pdb) = ty-tgt-globular (focus-ty pdb) (focus-ty-is-globular pdb)
 
 right-base-isVar : (A : Ty n) → ty-is-globular A → (t : Tm n) → isVar t → isVar (right-base A t)
 right-base-isVar ⋆ g t iv = iv

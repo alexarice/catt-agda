@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Dyck.Pruning.Properties where
 
 open import Catt.Prelude
@@ -77,10 +75,10 @@ dyck-type-prune (⇓pk {dy = dy} p) = begin
 dyck-term-prune (⇕pk dy) = refl≃tm
 dyck-term-prune (⇑pk p) = refl≃tm
 dyck-term-prune (⇓pk {dy = dy} p) = begin
-  < ty-tgt (dyck-type (prune-peak p)) >tm
-    ≈⟨ ty-tgt-≃ (dyck-type-prune p) ⟩
-  < ty-tgt (dyck-type dy [ prune-project p ]ty) >tm
-    ≈˘⟨ ty-tgt-sub (dyck-type dy) (prune-project p) (<-transˡ 0<1+n (≤-reflexive (sym (dyck-type-dim dy)))) ⟩
+  < ty-tgt′ (dyck-type (prune-peak p)) >tm
+    ≈⟨ ty-tgt′-≃ (dyck-type-prune p) ⟩
+  < ty-tgt′ (dyck-type dy [ prune-project p ]ty) >tm
+    ≈˘⟨ ty-tgt′-sub (dyck-type dy) (prune-project p) ⦃ NonZero-subst (sym (dyck-type-dim dy)) it ⦄ ⟩
   < dyck-term (⇓ dy) [ prune-project (⇓pk p) ]tm >tm ∎
   where
     open Reasoning tm-setoid

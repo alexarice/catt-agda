@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Tree.Properties where
 
 open import Catt.Prelude
@@ -12,14 +10,10 @@ open import Catt.Connection.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Tree
-open import Relation.Binary.PropositionalEquality
-open import Relation.Nullary
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Data.Product renaming (_,_ to _,,_)
 open import Catt.Variables
 open import Catt.Variables.Properties
-open import Relation.Binary using (Setoid)
 
 tree-dim-n-disc : (n : ℕ) → tree-dim (n-disc n) ≡ n
 tree-dim-n-disc zero = refl
@@ -94,7 +88,7 @@ connect-tree-≃ (Join≃ p p′) q = Join≃ p (connect-tree-≃ p′ q)
 connect-tree-to-ctx : (S : Tree n) → (T : Tree m)
                     → tree-to-ctx (connect-tree S T) ≃c connect (tree-to-ctx S) (tree-last-var S) (tree-to-ctx T)
 
-connect-tree-to-ctx Sing T = sym≃c (connect-left-unit (tree-to-ctx T)) -- sym≃c (connect-pdb-left-unit (tree-to-ctx T))
+connect-tree-to-ctx Sing T = sym≃c (connect-left-unit (tree-to-ctx T))
 connect-tree-to-ctx (Join S₁ S₂) T = begin
   < tree-to-ctx (connect-tree (Join S₁ S₂) T) >c ≡⟨⟩
   < connect-susp (tree-to-ctx S₁) (tree-to-ctx (connect-tree S₂ T)) >c

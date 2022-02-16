@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Tree.Insertion where
 
 open import Catt.Prelude
@@ -78,50 +76,6 @@ exterior-sub (Join S₁ S₂) (PExt P) (Join T Sing) =
 exterior-sub (Join S₁ S₂) (PShift P) T =
   sub-between-connect-susps idSub
                             (exterior-sub S₂ P T)
-{-
-insertion-var-split : (S : Tree n)
-                    → (P : Path S)
-                    → .⦃ bp : is-branching-path P ⦄
-                    → (T : Tree m)
-                    → .⦃ lh : has-linear-height (path-length P) T ⦄
-                    → VarSplit (suc (insertion-tree-size S P T)) (suc n) (suc m)
-insertion-var-split (Join S₁ S₂) PHere T i with connect-var-split (tree-size T) (tree-size S₂) (idSub≃-func (connect-tree-to-ctx T S₂) i)
-... | inj₁ j = inj₂ j
-... | inj₂ j = inj₁ (varToVarFunction (connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ⦃ connect-susp-inc-right-var-to-var (tree-size S₁) (tree-size S₂) ⦄ j)
-insertion-var-split (Join S₁ S₂) (PExt P) (Join T Sing) i with connect-var-split (2 + insertion-tree-size S₁ P T) (tree-size S₂) i
-... | inj₂ j = inj₁ (varToVarFunction (connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ⦃ connect-susp-inc-right-var-to-var (tree-size S₁) (tree-size S₂) ⦄ j)
-... | inj₁ j with susp-var-split (insertion-var-split S₁ P T) j
-... | inj₁ k = inj₁ (varToVarFunction (connect-susp-inc-left (tree-size S₁) (tree-size S₂)) ⦃ connect-susp-inc-left-var-to-var (tree-size S₁) (tree-size S₂) ⦄ k)
-... | inj₂ k = inj₂ k
-insertion-var-split (Join S₁ S₂) (PShift P) T i with connect-var-split-right getSnd (insertion-tree-size S₂ P T) i
-... | inj₁ j = inj₁ (varToVarFunction (connect-susp-inc-left (tree-size S₁) (tree-size S₂)) ⦃ connect-susp-inc-left-var-to-var (tree-size S₁) (tree-size S₂) ⦄ j)
-... | inj₂ j with insertion-var-split S₂ P T j
-... | inj₁ k = inj₁ (varToVarFunction (connect-susp-inc-right (tree-size S₁) (tree-size S₂)) ⦃ connect-susp-inc-right-var-to-var (tree-size S₁) (tree-size S₂) ⦄ k)
-... | inj₂ k = inj₂ k
-
-sub-from-insertion-func : (S : Tree n)
-                        → (P : Path S)
-                        → .⦃ bp : is-branching-path P ⦄
-                        → (T : Tree m)
-                        → .⦃ lh : has-linear-height (path-length P) T ⦄
-                        → (σ : Sub (suc n) l)
-                        → (τ : Sub (suc m) l)
-                        → (i : Fin (suc (insertion-tree-size S P T)))
-                        → Tm l
-sub-from-insertion-func S P T σ τ i with insertion-var-split S P T i
-... | inj₁ j = Var j [ σ ]tm
-... | inj₂ j = Var j [ τ ]tm
-
-sub-from-insertion : (S : Tree n)
-                   → (P : Path S)
-                   → .⦃ bp : is-branching-path P ⦄
-                   → (T : Tree m)
-                   → .⦃ lh : has-linear-height (path-length P) T ⦄
-                   → (σ : Sub (suc n) l)
-                   → (τ : Sub (suc m) l)
-                   → Sub (suc (insertion-tree-size S P T)) l
-sub-from-insertion S P T σ τ = sub-from-function (sub-from-insertion-func S P T σ τ)
--}
 
 sub-from-insertion : (S : Tree n)
                    → (P : Path S)

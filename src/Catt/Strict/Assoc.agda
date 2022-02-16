@@ -1,5 +1,3 @@
-{-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
-
 module Catt.Strict.Assoc where
 
 open import Catt.Prelude
@@ -41,7 +39,6 @@ record InsertionData : Set where
     id-T : Tree id-m
     id-τ : Sub (suc id-m) id-l ⋆
     .⦃ id-lh ⦄ : has-linear-height (path-length id-P) id-T
-    -- .⦃ id-p ⦄ : height-of-branching id-P ≡ tree-dim id-T
     id-eq : branching-path-to-var id-S id-P [ id-σ ]tm ≃tm unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm
 
 module _ where
@@ -211,69 +208,6 @@ module _ where
           open Reasoning tm-setoid
 
       open Reasoning (tm-setoid-≈ Δ)
-
--- open import Catt.Typing.Properties 1 (λ x → insertionRule) lift-rule susp-rule sub-rule
-
--- example-ctx : Ctx 7
--- example-ctx = ∅ , ⋆ , ⋆ , 1V ─⟨ ⋆ ⟩⟶ 0V , ⋆ , 2V ─⟨ ⋆ ⟩⟶ 0V , ⋆ , 2V ─⟨ ⋆ ⟩⟶ 0V
-
--- example-tree : Tree 6
--- example-tree = Join Sing (Join Sing (Join Sing Sing))
-
--- test1 : tree-to-ctx (example-tree) ≡ example-ctx
--- test1 = refl
-
--- test2 : unbiased-type 1 example-tree ≡ 6V ─⟨ ⋆ ⟩⟶ 1V
--- test2 = refl
-
--- example-tm-1 : Tm 7
--- example-tm-1 = Coh example-tree (6V ─⟨ ⋆ ⟩⟶ 1V) (idSub _)
-
--- example-tm-2 : Tm 7
--- example-tm-2 = Coh (Join Sing (Join Sing Sing)) (4V ─⟨ ⋆ ⟩⟶ 1V)
---   ⟨ ⟨ ⟨ ⟨ ⟨ ⟨⟩ , 6V ⟩ , 5V ⟩ , 4V ⟩ , 1V ⟩ ,
---     Coh (Join Sing (Join Sing Sing)) (4V ─⟨ ⋆ ⟩⟶ 1V)
---     ⟨ ⟨ ⟨ ⟨ ⟨ ⟨⟩ , 5V ⟩ , 3V ⟩ , 2V ⟩ , 1V ⟩ , 0V ⟩ ⟩
-
--- open import Data.Bool
--- open import Data.Product renaming (_,_ to _,,_)
--- open import Catt.Tree.Unbiased.Typing 1 (λ x → insertionRule) lift-rule susp-rule sub-rule
-
--- example-tm-1-Ty : Typing-Tm example-ctx example-tm-1 (6V ─⟨ ⋆ ⟩⟶ 1V)
--- example-tm-1-Ty = TyCoh (TyArr (var-Ty (example-ctx) (suc (suc (suc (suc (suc (suc zero))))))) TyStar (var-Ty example-ctx (suc zero))) id-Ty true (refl ,, refl) refl≈ty
-
--- example-tm-2-Ty : Typing-Tm example-ctx example-tm-2 (6V ─⟨ ⋆ ⟩⟶ 1V)
--- example-tm-2-Ty = TyCoh (unbiased-type-Ty 1 (Join Sing (Join Sing Sing)) (s≤s z≤n))
---   (TyExt (TyExt (TyExt (TyExt (TyExt (TyNull TyStar) (var-Ty example-ctx (suc (suc (suc (suc (suc (suc zero)))))))) (var-Ty example-ctx (suc (suc (suc (suc (suc zero))))))) (var-Ty example-ctx (suc (suc (suc (suc zero)))))) (var-Ty example-ctx (suc zero))) (TyCoh (unbiased-type-Ty 1 (Join Sing (Join Sing Sing)) (s≤s z≤n)) (TyExt (TyExt (TyExt (TyExt (TyExt (TyNull TyStar) (var-Ty example-ctx (suc (suc (suc (suc (suc zero))))))) (var-Ty example-ctx (suc (suc (suc zero))))) (var-Ty example-ctx (suc (suc zero)))) (var-Ty example-ctx (suc zero))) (var-Ty example-ctx zero)) true (refl ,, refl) refl≈ty))
---   true (refl ,, refl) refl≈ty
-
--- example-ins : example-tm-2 ≈[ example-ctx ]tm example-tm-1
--- example-ins = Ins≈ (Join Sing (Join Sing Sing)) example-tm-2-Ty (PShift PHere) (Join Sing (Join Sing Sing)) refl≃tm
-
--- open import Catt.Tree.Insertion.Typing 1 (λ i → insertionRule) lift-rule susp-rule sub-rule
-
--- convRule : ∀ i a → ConvRule {i} a
--- convRule i a (TyCoh {B = B} Aty σty b sc p) = TyCoh (apply-sub-ty-typing Aty (exterior-sub-Ty id-S id-P id-T ⦃ p = insertion-dim-lem id-S id-P id-T σty τty p′ ⦄)) (sub-from-insertion-Ty id-S id-P id-T σty τty p′) b {!!} lem
---   where
---     open InsertionData a
-
---     p′ = trans≃tm id-eq (Coh≃ refl≃ refl≃ty (sym≃s (id-right-unit _)))
-
---     τty : Typing-Sub (tree-to-ctx id-T) id-Γ id-τ
---     τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) id-eq)
-
---     lem : id-A [ exterior-sub id-S id-P id-T ]ty [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
---             ≈[ id-Γ ]ty B
---     lem = begin
---       id-A [ exterior-sub id-S id-P id-T ]ty [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
---         ≈˘⟨ reflexive≈ty (assoc-ty _ _ id-A) ⟩
---       id-A [ sub-from-insertion id-S id-P id-T id-σ id-τ ∘ exterior-sub id-S id-P id-T ]ty
---         ≈⟨ apply-sub-eq-ty id-A (exterior-sub-comm id-S id-P id-T σty τty p′) ⟩
---       id-A [ id-σ ]ty
---         ≈⟨ p ⟩
---       B ∎
---       where
---         open Reasoning (ty-setoid-≈ id-Γ)
 
 module Support where
 

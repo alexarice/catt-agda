@@ -39,9 +39,11 @@ import Catt.Dyck
 import Catt.Dyck.Properties
 import Catt.Dyck.Pruning
 import Catt.Dyck.Pruning.Properties
+import Catt.Dyck.FromTree
 
 import Catt.Support
 import Catt.Support.Properties
+import Catt.Support.Context
 import Catt.Suspension.Support
 import Catt.Connection.Support
 import Catt.Tree.Support
@@ -60,6 +62,7 @@ import Catt.Suspension.Typing
 import Catt.Typing.Properties.Substitution
 import Catt.Typing.Properties
 import Catt.Typing.Properties.Support
+import Catt.Typing.Properties.Conversion
 import Catt.Connection.Typing
 
 import Catt.Tree.Typing
@@ -72,3 +75,6 @@ import Catt.Dyck.Pruning.Typing
 import Catt.Discs.Typing
 
 import Catt.Strict.Assoc
+import Catt.Typing.Weak
+
+import Catt.Syntax.Complexity

@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Tree.Insertion.Support where
 
 open import Catt.Prelude
@@ -46,96 +44,6 @@ insertion-tree-dim (Join S₁ S₂) PHere T ⦃ p = p ⦄ = begin
     open ≡-Reasoning
 insertion-tree-dim (Join S₁ S₂) (PExt P) (Join T Sing) ⦃ p = p ⦄ = cong (λ - → suc (pred (tree-dim S₂) ⊔ -)) (insertion-tree-dim S₁ P T ⦃ p = cong pred p ⦄)
 insertion-tree-dim (Join S₁ S₂) (PShift P) T ⦃ p = p ⦄ = cong (λ - → suc (pred - ⊔ tree-dim S₁)) (insertion-tree-dim S₂ P T)
-
--- exterior-sub-supp-full : (S : Tree n)
---                        → (P : Path S)
---                        → .⦃ _ : is-branching-path P ⦄
---                        → (T : Tree m)
---                        → .⦃ _ : has-linear-height (path-length P) T ⦄
---                        → .⦃ p : height-of-branching P ≡ tree-dim T ⦄
---                        → FVSub (exterior-sub S P T) ≡ full
--- exterior-sub-supp-full (Join S₁ S₂) PHere T = begin
---   FVSub (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
---     ∘ sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T
---                            ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
---                            (idSub _) (tree-last-var T))
---     ≡˘⟨ TransportVarSet-sub (sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T
---                            ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
---                            (idSub _) (tree-last-var T)) (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))) ⟩
---   TransportVarSet (FVSub (sub-between-connects
---       (sub-from-disc-unbiased (suc (tree-dim S₁)) T
---         ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
---       (idSub (suc _)) (tree-last-var T)))
---     (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)))
---     ≡⟨ cong (λ - → TransportVarSet - (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)))) lem ⟩
---   TransportVarSet full (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)))
---     ≡⟨ TransportVarSet-full (idSub≃ (sym≃c (connect-tree-to-ctx T S₂))) ⟩
---   FVSub (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)))
---     ≡⟨ idSub≃-supp (sym≃c (connect-tree-to-ctx T S₂)) ⟩
---   full ∎
---   where
---     open ≡-Reasoning
-
---     l2 : FVSub (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘ idSub≃ (linear-tree-compat (suspTree S₁))) ≡ full
---     l2 = begin
---       FVSub (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
---         ≡˘⟨ TransportVarSet-sub (idSub≃ (linear-tree-compat (suspTree S₁))) (sub-from-disc-unbiased (suc (tree-dim S₁)) T) ⟩
---       TransportVarSet (FVSub (idSub≃ (linear-tree-compat (suspTree S₁))))
---         (sub-from-disc-unbiased (suc (tree-dim S₁)) T)
---         ≡⟨ cong (λ - → TransportVarSet - (sub-from-disc-unbiased (suc (tree-dim S₁)) T))
---              (idSub≃-supp (linear-tree-compat (suspTree S₁))) ⟩
---       TransportVarSet full (sub-from-disc-unbiased (suc (tree-dim S₁)) T)
---         ≡⟨ TransportVarSet-full (sub-from-disc-unbiased (suc (tree-dim S₁)) T) ⟩
---       FVSub (sub-from-disc-unbiased (suc (tree-dim S₁)) T)
---         ≡⟨ sub-from-disc-supp (suc (tree-dim S₁)) (unbiased-type (suc (tree-dim S₁)) T) (unbiased-type-dim (suc (tree-dim S₁)) T) (unbiased-comp (suc (tree-dim S₁)) T (idSub _)) ⟩
---       FVTy (unbiased-type (suc (tree-dim S₁)) T) ∪
---         FVTm (unbiased-comp (suc (tree-dim S₁)) T (idSub (suc _))) ≡⟨⟩
---       FVTy (unbiased-type (suc (tree-dim S₁)) T) ∪
---         FVSub (idSub _)
---         ≡⟨ cong (FVTy (unbiased-type (suc (tree-dim S₁)) T) ∪_) (idSub-supp (suc _)) ⟩
---       FVTy (unbiased-type (suc (tree-dim S₁)) T) ∪ full
---         ≡⟨ ∪-right-zero (FVTy (unbiased-type (suc (tree-dim S₁)) T)) ⟩
---       full ∎
-
---     lem : FVSub (sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T
---                                       ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
---                                       (idSub (suc _))
---                                       (tree-last-var T))
---           ≡ full
---     lem = begin
---       FVSub (sub-between-connects (sub-from-disc-unbiased (suc (tree-dim S₁)) T
---                                   ∘ idSub≃ (linear-tree-compat (suspTree S₁)))
---                                   (idSub (suc _))
---                                   (tree-last-var T))
---         ≡⟨ sub-between-connect-supp (sub-from-disc-unbiased (suc (tree-dim S₁)) T
---                                   ∘ idSub≃ (linear-tree-compat (suspTree S₁))) (idSub _) (tree-last-var T) {!!} {!!} ⟩
---       connect-supp (FVSub (sub-from-disc-unbiased (suc (tree-dim S₁)) T ∘ idSub≃ (linear-tree-compat (suspTree S₁))))
---                    (FVSub (idSub (suc _)))
---         ≡⟨ cong₂ connect-supp l2 (idSub-supp _) ⟩
---       connect-supp full full
---         ≡⟨ connect-supp-full _ _ ⟩
---       full ∎
-
--- exterior-sub-supp-full (Join S₁ S₂) (PExt P) (Join T Sing) = begin
---   FVSub (sub-between-connect-susps (exterior-sub S₁ P T) (idSub _))
---     ≡⟨ sub-between-connect-susps-supp (exterior-sub S₁ P T) (idSub _) (id-on-tm (Var (fromℕ _))) ⟩
---   connect-supp (suspSupp (FVSub (exterior-sub S₁ P T))) (FVSub (idSub (suc _)))
---     ≡⟨ cong₂ connect-supp (trans (cong suspSupp (exterior-sub-supp-full S₁ P T ⦃ p = cong pred it ⦄)) suspSuppFull) (idSub-supp _) ⟩
---   connect-supp full full
---     ≡⟨ connect-supp-full (suc (suc (insertion-tree-size S₁ P T))) _ ⟩
---   full ∎
---   where
---     open ≡-Reasoning
--- exterior-sub-supp-full (Join S₁ S₂) (PShift P) T = begin
---   FVSub (sub-between-connect-susps (idSub _) (exterior-sub S₂ P T))
---     ≡⟨ sub-between-connect-susps-supp (idSub _) (exterior-sub S₂ P T) (sym≃tm (exterior-sub-fst-var S₂ P T)) ⟩
---   connect-supp (suspSupp (FVSub (idSub (suc _)))) (FVSub (exterior-sub S₂ P T))
---     ≡⟨ cong₂ connect-supp (trans (cong suspSupp (idSub-supp _)) suspSuppFull) (exterior-sub-supp-full S₂ P T) ⟩
---   connect-supp full full
---     ≡⟨ connect-supp-full (suc (suc _)) (insertion-tree-size S₂ P T) ⟩
---   full ∎
---   where
---     open ≡-Reasoning
 
 exterior-sub-preserve-bd : (d : ℕ)
                          → (S : Tree n)

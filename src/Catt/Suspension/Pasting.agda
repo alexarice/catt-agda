@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Suspension.Pasting where
 
 open import Catt.Prelude
@@ -45,11 +43,11 @@ susp-focus-tm (Restr pdb) = let
   instance .y : _
            y = NonZero-subst (sym (trans (ty-dim-≃ (susp-focus-ty pdb)) (susp-dim (focus-ty pdb)))) it
   in begin
-  < ty-tgt′ (focus-ty (susp-pdb pdb)) ⦃ y ⦄ >tm
-    ≈⟨ ty-tgt′-≃ (susp-focus-ty pdb) ⦃ y ⦄ ⟩
-  < ty-tgt′ (suspTy (focus-ty pdb)) >tm
-    ≈⟨ ty-tgt′-susp (focus-ty pdb) ⟩
-  < suspTm (ty-tgt′ (focus-ty pdb)) >tm ∎
+  < ty-tgt (focus-ty (susp-pdb pdb)) ⦃ y ⦄ >tm
+    ≈⟨ ty-tgt-≃ (susp-focus-ty pdb) ⦃ y ⦄ ⟩
+  < ty-tgt (suspTy (focus-ty pdb)) >tm
+    ≈⟨ ty-tgt-susp (focus-ty pdb) ⟩
+  < suspTm (ty-tgt (focus-ty pdb)) >tm ∎
   where
     open Reasoning tm-setoid
 
@@ -63,10 +61,10 @@ susp-pd-focus (Finish pdb) = let
   instance .y : _
            y = NonZero-subst (sym (susp-dim (focus-ty pdb))) it
   in begin
-  < ty-tgt′ (focus-ty (susp-pdb pdb)) >tm
-    ≈⟨ ty-tgt′-≃ (susp-focus-ty pdb) ⟩
-  < ty-tgt′ (suspTy (focus-ty pdb)) ⦃ y ⦄ >tm
-    ≈⟨ ty-tgt′-≃ (susp-ty-≃ ⋆-is-only-0-d-ty) ⟩
-  < ty-tgt′ (suspTy ⋆) >tm ∎
+  < ty-tgt (focus-ty (susp-pdb pdb)) >tm
+    ≈⟨ ty-tgt-≃ (susp-focus-ty pdb) ⟩
+  < ty-tgt (suspTy (focus-ty pdb)) ⦃ y ⦄ >tm
+    ≈⟨ ty-tgt-≃ (susp-ty-≃ ⋆-is-only-0-d-ty) ⟩
+  < ty-tgt (suspTy ⋆) >tm ∎
   where
     open Reasoning tm-setoid

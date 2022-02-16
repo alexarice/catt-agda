@@ -1,20 +1,12 @@
-{-# OPTIONS --without-K --safe --exact-split #-}
-
 module Catt.Support.Context where
 
+open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Variables
 open import Catt.Variables.Properties
-open import Data.Fin renaming (_≟_ to _f≟_)
-open import Data.Empty
 open import Relation.Nullary
-open import Relation.Binary.PropositionalEquality
-open import Data.Vec
-open import Data.Product renaming (_,_ to _,,_)
-open import Data.Nat
-open import Data.Unit
 
 subctx-inc-ty : (A : Ty n) → (σ : Sub m n ⋆) → .⦃ varToVar σ ⦄ → .(FVTy A ⊆ FVSub σ) → Ty m
 subctx-inc-tm : (t : Tm n) → (σ : Sub m n ⋆) → .⦃ varToVar σ ⦄ → .(FVTm t ⊆ FVSub σ) → Tm m

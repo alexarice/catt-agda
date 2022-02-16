@@ -32,7 +32,7 @@ dyck-type dy = liftType (dyck-pre-type dy)
 
 dyck-term End = 0V
 dyck-term (⇑ d) = 0V
-dyck-term (⇓ d) = ty-tgt (dyck-type d)
+dyck-term (⇓ d) = ty-tgt′ (dyck-type d)
 
 data Peak : ∀ {n} → Dyck (suc n) d → Set where
   ⇕pk : (dy : Dyck n d) → Peak (⇓ (⇑ dy))

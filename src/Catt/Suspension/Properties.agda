@@ -1,5 +1,3 @@
-{-# OPTIONS --without-K --safe --exact-split #-}
-
 module Catt.Suspension.Properties where
 
 open import Catt.Prelude
@@ -12,15 +10,6 @@ open import Relation.Nullary
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Variables
-
--- susp-src-compat : (A : Ty n (suc d)) → suspTm (ty-src A) ≃tm ty-src (suspTy A)
--- susp-src-compat (s ─⟨ A ⟩⟶ t) = refl≃tm
-
--- susp-tgt-compat : (A : Ty n (suc d)) → suspTm (ty-tgt A) ≃tm ty-tgt (suspTy A)
--- susp-tgt-compat (s ─⟨ A ⟩⟶ t) = refl≃tm
-
--- susp-base-compat : (A : Ty n (suc d)) → suspTy (ty-base A) ≃ty ty-base (suspTy A)
--- susp-base-compat (s ─⟨ A ⟩⟶ t) = refl≃ty
 
 getFst-Lem : suspCtx Γ ≃c suspCtx Δ → getFst {n = ctxLength Γ} ≃tm getFst {n = ctxLength Δ}
 getFst-Lem p = Var≃ (≃c-preserve-length p) (cong (λ - → suc (toℕ (fromℕ (pred (pred -))))) (≃c-preserve-length p))
@@ -39,10 +28,6 @@ susp-functorial-id {suc n} = Ext≃ (trans≃s (susp-sub-lift idSub) (lift-sub-�
 suspSub-preserve-star : (σ : Sub n m ⋆) → suspTy ⋆ [ suspSub σ ]ty ≃ty suspTy (⋆ {n = m})
 suspSub-preserve-star ⟨⟩ = refl≃ty
 suspSub-preserve-star ⟨ σ , t ⟩ = trans≃ty (lift-sub-comp-lem-ty {t = suspTm t} (suspSub σ) (getFst ─⟨ ⋆ ⟩⟶ getSnd)) (suspSub-preserve-star σ)
-
--- lookupHeight-suspCtx : (Γ : Ctx n) → (i : Fin (ctxLength Γ)) → suc (lookupHeight Γ i) ≡ lookupHeight (suspCtx Γ) (inject₁ (inject₁ i))
--- lookupHeight-suspCtx (Γ , A) zero = refl
--- lookupHeight-suspCtx (Γ , A) (suc i) = lookupHeight-suspCtx Γ i
 
 inject-susp-sub : (σ : Sub n m ⋆) → (i : Fin n) → Var (inject₁ (inject₁ i)) [ suspSub σ ]tm ≃tm suspTm (Var i [ σ ]tm)
 inject-susp-sub ⟨ σ , t ⟩ zero = refl≃tm
@@ -105,97 +90,6 @@ getSnd-unrestrict : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → getSnd [ unrestrict
 getSnd-unrestrict ⟨⟩ = refl≃tm
 getSnd-unrestrict ⟨ σ , t ⟩ = getSnd-unrestrict σ
 
-{-
-susp-var-split-compat : {vs : VarSplit n m l} → VarSplitCompat σ τ vs → VarSplitCompat (suspSub σ) (suspSub τ) (susp-var-split vs)
-susp-var-split-compat {σ = σ} {τ = τ} {vs = vs} vsc i with suspension-vars i
-... | inj₁ (inj₁ refl) = sym≃tm (susp-sub-preserve-getFst τ)
-... | inj₁ (inj₂ refl) = sym≃tm (susp-sub-preserve-getSnd τ)
-... | inj₂ (j ,, refl) with vs j | vsc j
-... | inj₁ k | p = trans≃tm (inject-susp-sub σ k) (susp-tm-≃ p)
-... | inj₂ k | p = trans≃tm (inject-susp-sub τ k) (susp-tm-≃ p)
-
-
-module _  where
-  private
-    minus1 : ∀ {n} → Fin (suc (suc n)) → Fin (suc n)
-    minus1 zero = zero
-    minus1 (suc i) = i
-
-    lem : (n : ℕ) → (k : Fin n) → fromℕ n ≢ (inject₁ k)
-    lem zero ()
-    lem (suc n) (suc k) p = lem n k (cong minus1 p)
-
-    varToVarSuspSub-preserve-fst : (σ : Sub n m) → .⦃ _ : varToVar σ ⦄ → varToVarFunction (suspSub σ) ⦃ suspSub-var-to-var σ ⦄ (fromℕ _) ≡ fromℕ _
-    varToVarSuspSub-preserve-fst ⟨⟩ = refl
-    varToVarSuspSub-preserve-fst ⟨ σ , Var i ⟩ ⦃ v ⦄ = varToVarSuspSub-preserve-fst σ ⦃ proj₁ v ⦄
-
-    varToVarSuspSub-preserve-snd : (σ : Sub n m) → .⦃ _ : varToVar σ ⦄ → varToVarFunction (suspSub σ) ⦃ suspSub-var-to-var σ ⦄ (inject₁ (fromℕ _)) ≡ inject₁ (fromℕ _)
-    varToVarSuspSub-preserve-snd ⟨⟩ = refl
-    varToVarSuspSub-preserve-snd ⟨ σ , Var i ⟩ ⦃ v ⦄ = varToVarSuspSub-preserve-snd σ ⦃ proj₁ v ⦄
-
-    varToVarSuspSub-preserve-inject : (σ : Sub n m) → .⦃ _ : varToVar σ ⦄ → (k : Fin n) → varToVarFunction (suspSub σ) ⦃ suspSub-var-to-var σ ⦄ (inject₁ (inject₁ k)) ≡ inject₁ (inject₁ (varToVarFunction σ k))
-    varToVarSuspSub-preserve-inject ⟨ σ , Var i ⟩ zero = refl
-    varToVarSuspSub-preserve-inject ⟨ σ , Var i ⟩ ⦃ v ⦄ (suc k) = varToVarSuspSub-preserve-inject σ ⦃ proj₁ v ⦄ k
-
-  susp-var-split-fst : (vs : VarSplit n m l) → susp-var-split vs (fromℕ _) ≡ inj₂ (fromℕ _)
-  susp-var-split-fst {n = n} vs with suspension-vars (fromℕ (suc n))
-  ... | inj₁ (inj₁ x) = refl
-  ... | inj₁ (inj₂ y) = ⊥-elim (lem (suc n) (fromℕ n) y)
-  ... | inj₂ (k ,, p) = ⊥-elim (lem (suc n) (inject₁ k) p)
-
-  susp-var-split-snd : (vs : VarSplit n m l) → susp-var-split vs (inject₁ (fromℕ _)) ≡ inj₂ (inject₁ (fromℕ _))
-  susp-var-split-snd {n = n} vs with suspension-vars (inject₁ (fromℕ n))
-  ... | inj₁ (inj₁ x) = ⊥-elim (lem (suc n) (fromℕ n) (sym x))
-  ... | inj₁ (inj₂ y) = refl
-  ... | inj₂ (k ,, p) = ⊥-elim (lem n k (inject₁-injective p))
-
-  susp-var-split-inject : (vs : VarSplit n m l) → (k : Fin n) → susp-var-split vs (inject₁ (inject₁ k)) ≡ Data.Sum.map (λ - → inject₁ (inject₁ -)) (λ - → inject₁ (inject₁ -)) (vs k)
-  susp-var-split-inject vs k with suspension-vars (inject₁ (inject₁ k))
-  ... | inj₁ (inj₁ x) = ⊥-elim (lem (suc _) (inject₁ k) (sym x))
-  ... | inj₁ (inj₂ y) = ⊥-elim (lem _ k (sym (inject₁-injective y)))
-  ... | inj₂ (j ,, p) with (inject₁-injective (inject₁-injective p))
-  ... | refl with vs j
-  ... | inj₁ x = refl
-  ... | inj₂ y = refl
-
-  susp-var-split-full : (τ : Sub l n) → .⦃ _ : varToVar τ ⦄ → (vs : VarSplit n m l) → VarSplitFull₂ τ vs → VarSplitFull₂ (suspSub τ) ⦃ suspSub-var-to-var τ ⦄ (susp-var-split vs)
-  susp-var-split-full τ vs vsf i with suspension-vars i
-  ... | inj₁ (inj₁ refl) = let
-    instance _ = suspSub-var-to-var τ
-    in begin
-    susp-var-split vs (varToVarFunction (suspSub τ) (suc (fromℕ _)))
-      ≡⟨ cong (susp-var-split vs) (varToVarSuspSub-preserve-fst τ) ⟩
-    susp-var-split vs (fromℕ (suc _))
-      ≡⟨ susp-var-split-fst vs ⟩
-    inj₂ (fromℕ (suc _)) ∎
-    where
-      open ≡-Reasoning
-  ... | inj₁ (inj₂ refl) = let
-    instance _ = suspSub-var-to-var τ
-    in begin
-    susp-var-split vs (varToVarFunction (suspSub τ) (inject₁ (fromℕ _)))
-      ≡⟨ cong (susp-var-split vs) (varToVarSuspSub-preserve-snd τ) ⟩
-    susp-var-split vs (inject₁ (fromℕ _))
-      ≡⟨ susp-var-split-snd vs ⟩
-    inj₂ (inject₁ (fromℕ _)) ∎
-    where
-      open ≡-Reasoning
-  ... | inj₂ (k ,, refl) = let
-    instance - = suspSub-var-to-var τ
-    in begin
-      susp-var-split vs (varToVarFunction (suspSub τ) (inject₁ (inject₁ k)))
-        ≡⟨ cong (susp-var-split vs) (varToVarSuspSub-preserve-inject τ k) ⟩
-      susp-var-split vs (inject₁ (inject₁ (varToVarFunction τ k)))
-        ≡⟨ susp-var-split-inject vs (varToVarFunction τ k) ⟩
-      Data.Sum.map (λ - → inject₁ (inject₁ -))
-        (λ - → inject₁ (inject₁ -)) (vs (varToVarFunction τ k))
-        ≡⟨ cong (Data.Sum.map (λ - → inject₁ (inject₁ -))
-        (λ - → inject₁ (inject₁ -))) (vsf k) ⟩
-      inj₂ (inject₁ (inject₁ k)) ∎
-    where
-      open ≡-Reasoning
--}
-
 susp-tm-glob : (t : Tm n) → ⦃ isVar t ⦄ → isVar (suspTm t)
 susp-tm-glob (Var i) = tt
 
@@ -215,5 +109,8 @@ tm-to-ty-susp (Coh S A σ) Γ = susp-functorial-ty σ A
 ty-base-susp : (A : Ty n) → .⦃ NonZero (ty-dim A) ⦄ → ty-base (suspTy A) ≃ty suspTy (ty-base A)
 ty-base-susp (s ─⟨ A ⟩⟶ t) = refl≃ty
 
-ty-tgt′-susp : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-tgt′ (suspTy A) ⦃ NonZero-subst (sym (susp-dim A)) it ⦄ ≃tm suspTm (ty-tgt′ A)
-ty-tgt′-susp (s ─⟨ A ⟩⟶ t) = refl≃tm
+ty-src-susp : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-src (suspTy A) ⦃ NonZero-subst (sym (susp-dim A)) it ⦄ ≃tm suspTm (ty-src A)
+ty-src-susp (s ─⟨ A ⟩⟶ t) = refl≃tm
+
+ty-tgt-susp : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-tgt (suspTy A) ⦃ NonZero-subst (sym (susp-dim A)) it ⦄ ≃tm suspTm (ty-tgt A)
+ty-tgt-susp (s ─⟨ A ⟩⟶ t) = refl≃tm

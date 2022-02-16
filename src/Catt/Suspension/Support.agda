@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Suspension.Support where
 
 open import Catt.Prelude
@@ -138,37 +136,6 @@ suspSuppSub ⟨ σ , t ⟩ = begin
 suspSuppFull : suspSupp (full {n}) ≡ full
 suspSuppFull {zero} = refl
 suspSuppFull {suc n} = cong ewt suspSuppFull
-
-{-
-suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {T : Tree n} → supp-condition b A T → supp-condition b (suspTy A) (suspTree T)
-suspSuppCondition {b = false} {A} {T} sc = begin
-  FVTy (suspTy A) ≡⟨ suspSuppTy A ⟩
-  suspSupp (FVTy A) ≡⟨ cong suspSupp sc ⟩
-  suspSupp full ≡⟨ suspSuppFull ⟩
-  full ∎
-  where
-    open ≡-Reasoning
-suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {T} (nz ,, sc1 ,, sc2) = it ,, l1 ,, l2
-  where
-    instance _ = nz
-    open ≡-Reasoning
-
-    l1 : FVTy (suspTy A) ∪ FVTm (suspTm s) ≡ supp-bd (tree-dim T) (suspTree T) false
-    l1 = begin
-      FVTy (suspTy A) ∪ FVTm (suspTm s) ≡⟨ suspSuppTyTm A s ⟩
-      suspSupp (FVTy A ∪ FVTm s) ≡⟨ cong suspSupp sc1 ⟩
-      suspSupp (supp-bd (pred (tree-dim T)) T false) ≡⟨ suspSuppBd (pred (tree-dim T)) T false ⟩
-      supp-bd (suc (pred (tree-dim T))) (suspTree T) false ≡⟨ cong (λ - → supp-bd - (suspTree T) false) (suc-pred (tree-dim T)) ⟩
-      supp-bd (tree-dim T) (suspTree T) false ∎
-
-    l2 : FVTy (suspTy A) ∪ FVTm (suspTm t) ≡ supp-bd (tree-dim T) (suspTree T) true
-    l2 = begin
-      FVTy (suspTy A) ∪ FVTm (suspTm t) ≡⟨ suspSuppTyTm A t ⟩
-      suspSupp (FVTy A ∪ FVTm t) ≡⟨ cong suspSupp sc2 ⟩
-      suspSupp (supp-bd (pred (tree-dim T)) T true) ≡⟨ suspSuppBd (pred (tree-dim T)) T true ⟩
-      supp-bd (suc (pred (tree-dim T))) (suspTree T) true ≡⟨ cong (λ - → supp-bd - (suspTree T) true) (suc-pred (tree-dim T)) ⟩
-      supp-bd (pred (tree-dim (suspTree T))) (suspTree T) true ∎
--}
 
 suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {Γ : Ctx (suc n)} → .⦃ pd : Γ ⊢pd ⦄ → supp-condition b A Γ → supp-condition b (suspTy A) (suspCtx Γ) ⦃ susp-pd it ⦄
 suspSuppCondition {b = false} {A} {Γ} sc = begin

@@ -1,5 +1,3 @@
-{-# OPTIONS --without-K --safe --exact-split #-}
-
 module Catt.Syntax.Base where
 
 open import Catt.Prelude

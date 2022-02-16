@@ -1,9 +1,6 @@
-{-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
-
+open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
-open import Data.Fin using (Fin; zero; suc; inject₁; toℕ)
-open import Data.Nat
 
 module Catt.Typing.Properties.Conversion (index : ℕ)
                                          (rule : Fin index → Rule)
@@ -13,18 +10,16 @@ module Catt.Typing.Properties.Conversion (index : ℕ)
                                          (supp-rule : ∀ i a → P.SupportRule index rule {i} a)
                                          (conv-rule : ∀ i a → P.ConvRule index rule {i} a) where
 
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Typing index rule
 open import Catt.Typing.Properties.Support index rule supp-rule
 open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing index rule lift-rule
-open import Data.Fin.Properties using (toℕ-injective)
-open import Relation.Binary.PropositionalEquality
 open import Function
 open import Function.Construct.Identity
 open import Function.Construct.Composition
 open import Function.Construct.Symmetry
-import Relation.Binary.Reasoning.Setoid as Reasoning
 
 module E = Equivalence
 

@@ -30,7 +30,7 @@ focus-ty (Restr pdb) = ty-base (focus-ty pdb)
 
 focus-tm Base = 0V
 focus-tm (Extend pdb p q) = 0V
-focus-tm (Restr pdb) = ty-tgt′ (focus-ty pdb)
+focus-tm (Restr pdb) = ty-tgt (focus-ty pdb)
 
 data _⊢pd : (Ctx n) → Set where
   Finish : (pdb : Γ ⊢pdb) → .⦃ IsZero (ty-dim (focus-ty pdb)) ⦄ → Γ ⊢pd

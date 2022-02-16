@@ -1,21 +1,14 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Syntax.Complexity where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Data.List
-open import Data.Nat
-open import Data.Nat.Properties
-open import Data.Unit
-open import Data.Empty
-open import Data.Product renaming (_,_ to _,,_)
-open import Data.Sum
-open import Relation.Binary.PropositionalEquality
 open import Relation.Binary
 open import Induction.WellFounded
 import Data.Nat.Induction as I
 open import Algebra.Bundles
-import Relation.Binary.Reasoning.StrictPartialOrder as SPReasoning
+open import Catt.Globular
 
 Ordinal : Set
 Ordinal = List ℕ
@@ -158,10 +151,6 @@ module _ where
   CommutativeMonoid._∙_ ♯-comm-monoid = _♯_
   CommutativeMonoid.ε ♯-comm-monoid = []
   CommutativeMonoid.isCommutativeMonoid ♯-comm-monoid = ♯-is-comm-monoid
-
-  -- isOrd-tail : (y : ℕ) → (ys : Ordinal) → ⦃ isOrd (y ∷ ys) ⦄ → isOrd ys
-  -- isOrd-tail y [] = tt
-  -- isOrd-tail y (x ∷ ys) = it
 
   add-<ᵒ : (xs ys : Ordinal) → .⦃ NE ys ⦄ → xs <ᵒ ys ♯ xs
   add-<ᵒ [] (y ∷ ys) = EmpO

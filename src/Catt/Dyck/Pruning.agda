@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Dyck.Pruning where
 
 open import Catt.Prelude

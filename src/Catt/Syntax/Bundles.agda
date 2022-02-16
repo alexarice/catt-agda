@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Syntax.Bundles where
 
 open import Catt.Syntax
@@ -20,14 +18,6 @@ record TY : Set where
     ty : Ty ty-ctx-n
 
 open TY public
-
--- record TY′ (n : ℕ) : Set where
---   constructor <_>ty′
---   field
---     {ty-d′} : ℕ
---     ty′ : Ty n ty-d′
-
--- open TY′ public
 
 record TM : Set where
   constructor <_>tm

@@ -1,19 +1,15 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Dyck.FromTree where
 
+open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
-open import Data.Nat
 open import Catt.Dyck
 open import Catt.Dyck.Properties
 open import Catt.Suspension
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Syntax.SyntacticEquality
-open import Data.Unit
-open import Data.Empty
-import Relation.Binary.Reasoning.Setoid as Reasoning
 
 n-extendable : ℕ → Tree n → Set
 n-extendable zero T = ⊤
@@ -45,7 +41,7 @@ pred-n-extendable (suc n) (Join S Sing) = pred-n-extendable n S
 pred-n-extendable (suc n) (Join S T@(Join _ _)) = pred-n-extendable (suc n) T
 
 
-dyck-to-tree : Dyck n d → Tree n
+dyck-to-tree : Dyck n d → Tree (n * 2)
 dyck-to-tree-is-n-extendable : (dy : Dyck n d) → n-extendable d (dyck-to-tree dy)
 
 dyck-to-tree End = Sing
@@ -56,7 +52,13 @@ dyck-to-tree-is-n-extendable End = tt
 dyck-to-tree-is-n-extendable (⇑ {d = d} dy) = extended-tree-is-more-extendable d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄
 dyck-to-tree-is-n-extendable (⇓ {d = d} dy) = pred-n-extendable d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄
 
-tree-to-dyck : (d : ℕ) → (T : Tree n) → .⦃ n-extendable d T ⦄ → Dyck n d
+tree-to-dyck-len : (d : ℕ) → (T : Tree n) → .⦃ n-extendable d T ⦄ → ℕ
+tree-to-dyck-len zero Sing = 0
+tree-to-dyck-len zero (Join S T) = tree-to-dyck-len 0 T + suc (tree-to-dyck-len zero S)
+tree-to-dyck-len (suc d) (Join S Sing) = suc (tree-to-dyck-len d S)
+tree-to-dyck-len (suc d) (Join S T@(Join _ _)) = tree-to-dyck-len (suc d) T + suc (tree-to-dyck-len zero S)
+
+tree-to-dyck : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄ → Dyck (tree-to-dyck-len d T) d
 tree-to-dyck zero Sing = End
 tree-to-dyck zero (Join S T) = connect-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T)
 tree-to-dyck (suc d) (Join S Sing) = susp-dyck (tree-to-dyck d S)

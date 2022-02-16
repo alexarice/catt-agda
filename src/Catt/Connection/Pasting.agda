@@ -100,11 +100,11 @@ connect-focus-tm pd (Restr pdb) = let
   instance .y : _
            y = NonZero-subst (sub-dim (connect-inc-right (pd-focus-tm pd) _) (focus-ty pdb)) it
   in begin
-  < ty-tgt′ (focus-ty (connect-pdb pd pdb)) >tm
-    ≈⟨ ty-tgt′-≃ (connect-focus-ty pd pdb) ⟩
-  < ty-tgt′ (focus-ty pdb [ connect-inc-right (pd-focus-tm pd) _ ]ty) ⦃ y ⦄ >tm
-    ≈˘⟨ ty-tgt′-sub (focus-ty pdb) (connect-inc-right (pd-focus-tm pd) _) ⟩
-  < ty-tgt′ (focus-ty pdb) [ connect-inc-right (pd-focus-tm pd) _ ]tm >tm ∎
+  < ty-tgt (focus-ty (connect-pdb pd pdb)) >tm
+    ≈⟨ ty-tgt-≃ (connect-focus-ty pd pdb) ⟩
+  < ty-tgt (focus-ty pdb [ connect-inc-right (pd-focus-tm pd) _ ]ty) ⦃ y ⦄ >tm
+    ≈˘⟨ ty-tgt-sub (focus-ty pdb) (connect-inc-right (pd-focus-tm pd) _) ⟩
+  < ty-tgt (focus-ty pdb) [ connect-inc-right (pd-focus-tm pd) _ ]tm >tm ∎
   where
     open Reasoning tm-setoid
 

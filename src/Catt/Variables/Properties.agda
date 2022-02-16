@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Variables.Properties where
 
 open import Catt.Prelude
@@ -14,16 +12,6 @@ open import Catt.Globular.Properties
 
 getVarFinProp : (t : Tm n) → .⦃ _ : isVar t ⦄ → t ≃tm Var (getVarFin t)
 getVarFinProp (Var j) = refl≃tm
-
--- ty-globular-src : (A : Ty n (suc d)) → (ty-is-globular A) → isVar (ty-src A)
--- ty-globular-tgt : (A : Ty n (suc d)) → (ty-is-globular A) → isVar (ty-tgt A)
--- ty-globular-base : (A : Ty n (suc d)) → (ty-is-globular A) → ty-is-globular (ty-base A)
-
--- ty-globular-src (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = vs
-
--- ty-globular-tgt (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = vt
-
--- ty-globular-base (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = gA
 
 varToVarFunctionProp : (σ : Sub n m ⋆) → .⦃ v : varToVar σ ⦄ → (i : Fin n) → Var (varToVarFunction σ i) ≃tm Var i [ σ ]tm
 varToVarFunctionProp ⟨ σ , Var j ⟩ zero = refl≃tm
@@ -120,5 +108,8 @@ ty-base-globular : (A : Ty n) → ty-is-globular A → ty-is-globular (ty-base A
 ty-base-globular ⋆ g = tt
 ty-base-globular (s ─⟨ A ⟩⟶ t) (g1 ,, g2 ,, g3) = g2
 
-ty-tgt′-globular : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-is-globular A → isVar (ty-tgt′ A)
-ty-tgt′-globular (s ─⟨ A ⟩⟶ t) (g1 ,, g2 ,, g3) = g3
+ty-src-globular : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-is-globular A → isVar (ty-src A)
+ty-src-globular (s ─⟨ A ⟩⟶ t) (g1 ,, g2 ,, g3) = g1
+
+ty-tgt-globular : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-is-globular A → isVar (ty-tgt A)
+ty-tgt-globular (s ─⟨ A ⟩⟶ t) (g1 ,, g2 ,, g3) = g3

@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Syntax.SyntacticEquality where
 
 open import Catt.Prelude
@@ -160,7 +158,6 @@ sub-setoid = record { Carrier = SUB
 
 ≃c-to-≡ : Γ ≃c Δ → Γ ≡ Δ
 ≃ty-to-≡ : A ≃ty B → A ≡ B
--- ≃ty-to-subst-≡ : {A : Ty n d} → {B : Ty n d′} → A ≃ty B → (p : d ≡ d′) → subst (Ty n) p A ≡ B
 ≃tm-to-≡ : s ≃tm t → s ≡ t
 ≃s-to-≡ : σ ≃s τ → σ ≡ τ
 
@@ -168,22 +165,12 @@ sub-setoid = record { Carrier = SUB
 ≃c-to-≡ (Add≃ p q)
   rewrite ≃c-to-≡ p
   rewrite ≃ty-to-≡ q = refl
-  -- rewrite ≃c-to-≡ p
-  -- = lem (≃ty-preserve-height q) (≃ty-to-subst-≡ q (≃ty-preserve-height q))
-  -- where
-  --   lem : {A : Ty n} {B : Ty n} → subst (Ty n) p A ≡ B → Γ , A ≡ Γ , B
-  --   lem refl refl = refl
 
 ≃ty-to-≡ (Star≃ x) = refl
 ≃ty-to-≡ (Arr≃ p q r)
   rewrite ≃tm-to-≡ p
   rewrite ≃ty-to-≡ q
   rewrite ≃tm-to-≡ r = refl
--- ≃ty-to-subst-≡ (Star≃ x) refl = refl
--- ≃ty-to-subst-≡ (Arr≃ p q r) refl
---   rewrite ≃tm-to-≡ p
---   rewrite ≃ty-to-≡ q
---   rewrite ≃tm-to-≡ r = refl
 
 ≃tm-to-≡ (Var≃ x y) with toℕ-injective y
 ... | refl = refl
@@ -210,24 +197,6 @@ lift-tm-≃ (Coh≃ q r s) = Coh≃ q r (lift-sub-≃ s)
 
 lift-sub-≃ (Null≃ x) = Null≃ (lift-ty-≃ x)
 lift-sub-≃ (Ext≃ q r) = Ext≃ (lift-sub-≃ q) (lift-tm-≃ r)
-
--- ty-base-≃ : A ≃ty B → ty-base A ≃ty ty-base B
--- ty-base-≃ (Arr≃ _ p _) = p
-
--- ty-src-≃ : A ≃ty B → ty-src A ≃tm ty-src B
--- ty-src-≃ (Arr≃ p _ _) = p
-
--- ty-tgt-≃ : A ≃ty B → ty-tgt A ≃tm ty-tgt B
--- ty-tgt-≃ (Arr≃ _ _ p) = p
-
--- ty-base-subbed : (A : Ty n (suc d)) → (σ : Sub n m) → ty-base A [ σ ]ty ≃ty ty-base (A [ σ ]ty)
--- ty-base-subbed (s ─⟨ A ⟩⟶ t) σ = refl≃ty
-
--- ty-src-subbed : (A : Ty n (suc d)) → (σ : Sub n m) → ty-src A [ σ ]tm ≃tm ty-src (A [ σ ]ty)
--- ty-src-subbed (s ─⟨ A ⟩⟶ t) σ = refl≃tm
-
--- ty-tgt-subbed : (A : Ty n (suc d)) → (σ : Sub n m) → ty-tgt A [ σ ]tm ≃tm ty-tgt (A [ σ ]ty)
--- ty-tgt-subbed (s ─⟨ A ⟩⟶ t) σ = refl≃tm
 
 susp-ctx-≃ : Γ ≃c Δ → suspCtx Γ ≃c suspCtx Δ
 susp-ty-≃ : A ≃ty B → suspTy A ≃ty suspTy B
@@ -328,7 +297,6 @@ susp-sub-lift ⟨ σ , t ⟩ = Ext≃ (susp-sub-lift σ) (susp-tm-lift t)
 lift-subbed-ty-≃ : (B : Ty n) → (σ : Sub n m A) → {t : Tm (suc _)} → (liftType B) [ ⟨ liftSub σ , t ⟩ ]ty ≃ty liftType (B [ σ ]ty)
 lift-subbed-tm-≃ : (s : Tm n) → (σ : Sub n m A) → {t : Tm (suc _)} → (liftTerm s) [ ⟨ liftSub σ , t ⟩ ]tm ≃tm liftTerm (s [ σ ]tm)
 lift-subbed-sub-≃ : (τ : Sub l n B) → (σ : Sub n m A) → {t : Tm (suc _)} → ⟨ liftSub σ , t ⟩ ∘ liftSub τ ≃s liftSub (σ ∘ τ)
--- lift-subbed-var-≃ : (i : Fin (ctxLength Γ)) → (σ : Sub Γ Δ) → Var i [ liftSub {A = A} σ ]tm ≃tm liftTerm {A = A} (Var i [ σ ]tm)
 
 lift-subbed-ty-≃ ⋆ σ = refl≃ty
 lift-subbed-ty-≃ (s ─⟨ B ⟩⟶ t) σ = Arr≃ (lift-subbed-tm-≃ s σ) (lift-subbed-ty-≃ B σ) (lift-subbed-tm-≃ t σ)
@@ -347,7 +315,6 @@ lift-subbed-tm-≃ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ {t = u} = begin
 
 lift-subbed-sub-≃ {B = B} ⟨⟩ σ {t = t} = Null≃ (lift-subbed-ty-≃ B σ {t})
 lift-subbed-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (lift-subbed-sub-≃ τ σ) (lift-subbed-tm-≃ t σ)
-
 
 ‼-≃ : (i : Fin (ctxLength Γ)) → (j : Fin (ctxLength Δ)) → toℕ i ≡ toℕ j → Γ ≃c Δ → Γ ‼ i ≃ty Δ ‼ j
 ‼-≃ zero zero p (Add≃ q x) = lift-ty-≃ x
@@ -612,47 +579,12 @@ idSub-id : {Γ Δ : Ctx n} → (p : Γ ≃c Δ) → idSub≃ p ≃s idSub {n}
 idSub-id Emp≃ = refl≃s
 idSub-id (Add≃ p x) = Ext≃ (lift-sub-≃ (idSub-id p)) refl≃tm
 
--- idSub≃-on-ty p (Star≃ x) = Star≃ (trans≃c (sym≃c p) x)
--- idSub≃-on-ty p (Arr≃ q r s) = Arr≃ (idSub≃-on-tm p q) (idSub≃-on-ty p r) (idSub≃-on-tm p s)
-
--- idSub≃-on-tm p (Var≃ x) = lem p _ _ x
---   where
---     lem : (p : Γ ≃c Δ) → (i : Fin (ctxLength Γ)) → (j : Fin (ctxLength Υ)) → toℕ i ≡ toℕ j → Var i [ idSub≃ p ]tm ≃tm Var {Γ = Υ} j
---     lem {Γ = Γ , A} {Υ = Υ , A′} (Add≃ p x) zero zero q = Var≃ refl
---     lem {Γ = Γ , A} {Υ = Υ , A′} (Add≃ p x) (suc i) (suc j) q = trans≃tm (apply-lifted-sub-tm-≃ (Var i) (idSub≃ p)) (lift-tm-≃ {!!} (lem p i j (cong pred q)))
--- idSub≃-on-tm p (Coh≃ q r s) = Coh≃ q r (idSub≃-on-sub p s)
-
--- idSub≃-on-sub p Null≃ = Null≃
--- idSub≃-on-sub p (Ext≃ q r) = Ext≃ (idSub≃-on-sub p q) (idSub≃-on-tm p r)
-
 ⋆-is-only-0-d-ty : {A : Ty n} → .⦃ IsZero (ty-dim A) ⦄ → A ≃ty ⋆ {n = n}
 ⋆-is-only-0-d-ty {A = ⋆} = Star≃ refl
 
 ⋆-is-only-ty-in-empty-context : (A : Ty 0) → A ≃ty ⋆ {n = 0}
 ⋆-is-only-ty-in-empty-context ⋆ = refl≃ty
 ⋆-is-only-ty-in-empty-context (s ─⟨ A ⟩⟶ t) = ⊥-elim (no-term-in-empty-context s)
-
--- sub-from-function-≃ : (f : (i : Fin n) → Tm m)
---                     → (f2 : (i : Fin n) → Tm m)
---                     → ((i : Fin n) → f i ≃tm f2 i)
---                     → sub-from-function f ≃s sub-from-function f2
--- sub-from-function-≃ {n = zero} f f2 eq = Null≃ refl
--- sub-from-function-≃ {n = suc n} f f2 eq = Ext≃ (sub-from-function-≃ (λ i → f (suc i)) (λ i → f2 (suc i)) (λ i → eq (suc i))) (eq zero)
-
--- lift-sub-from-function : (f : (i : Fin n) → Tm m)
---                        → liftSub (sub-from-function f) ≃s sub-from-function (λ i → liftTerm (f i))
--- lift-sub-from-function {n = zero} f = Null≃ refl
--- lift-sub-from-function {n = suc n} f = Ext≃ (lift-sub-from-function (λ i → f (suc i))) refl≃tm
-
--- sub-≃-term-wise : (σ : Sub n m) → (τ : Sub n m) → ((i : Fin n) → Var i [ σ ]tm ≃tm Var i [ τ ]tm) → σ ≃s τ
--- sub-≃-term-wise ⟨⟩ ⟨⟩ f = Null≃ refl
--- sub-≃-term-wise ⟨ σ , t ⟩ ⟨ τ , s ⟩ f = Ext≃ (sub-≃-term-wise σ τ (λ i → f (suc i))) (f zero)
-
--- sub-from-function-prop : (f : (i : Fin n) → Tm m)
---                        → (i : Fin n)
---                        → Var i [ sub-from-function f ]tm ≃tm f i
--- sub-from-function-prop f zero = refl≃tm
--- sub-from-function-prop f (suc i) = sub-from-function-prop (λ j → f (suc j)) i
 
 liftType-inj : liftType A ≃ty liftType B → A ≃ty B
 liftTerm-inj : liftTerm s ≃tm liftTerm t → s ≃tm t

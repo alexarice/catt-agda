@@ -1,5 +1,3 @@
-{-# OPTIONS --without-K --safe --exact-split --postfix-projections #-}
-
 open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
@@ -21,7 +19,6 @@ open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Suspension.Support
 open import Catt.Syntax.SyntacticEquality
--- open import Data.Vec hiding (drop; restrict)
 open P index rule
 open import Catt.Typing.Properties.Lifting index rule lift-rule
 open import Catt.Pasting
@@ -48,28 +45,6 @@ suspTmTy {Γ = Γ , A} (TyVarZ {Γ = Γ} {A = A} x y) = TyVarZ (suspTyTy x) (tra
 suspTmTy (TyVarS i tvi x) = TyVarS (inject₁ (inject₁ i)) (suspTmTy tvi) (trans≈ty (reflexive≈ty (sym≃ty (susp-ty-lift _))) (suspTyEq x))
 suspTmTy (TyCoh Aty σty b sc p) = TyCoh ⦃ susp-pd it ⦄ (suspTyTy Aty) (suspSubTy σty) b (suspSuppCondition sc) (trans≈ty (reflexive≈ty (sym≃ty (susp-functorial-ty _ _))) (suspTyEq p))
 
-
--- suspTmTy (TyComp {T = T} {s = s} {A = A} {t = t} {σ = σ} p q r x y) = TyComp (suspTyTy p) (suspSubTy q) lem1 lem2 (trans≈ty (reflexive≈ty (sym≃ty (susp-functorial-ty σ (s ─⟨ A ⟩⟶ t)))) (suspTyEq y))
---   where
---     open ≡-Reasoning
---
-
---     lem1 : FVTy (suspTy A) ∪ FVTm (suspTm s) ≡ supp-bd (pred (tree-dim (suspTree T))) (suspTree T) false
---     lem1 = begin
---       FVTy (suspTy A) ∪ FVTm (suspTm s) ≡⟨ suspSuppTyTm A s ⟩
---       suspSupp (FVTy A ∪ FVTm s) ≡⟨ cong suspSupp r ⟩
---       suspSupp (supp-bd (pred (tree-dim T)) T false) ≡⟨ suspSuppBd (pred (tree-dim T)) T false ⟩
---       supp-bd (suc (pred (tree-dim T))) (suspTree T) false ≡⟨ cong (λ - → supp-bd - (suspTree T) false) (suc-pred (tree-dim T)) ⟩
---       supp-bd (pred (tree-dim (suspTree T))) (suspTree T) false ∎
-
---     lem2 : FVTy (suspTy A) ∪ FVTm (suspTm t) ≡ supp-bd (pred (tree-dim (suspTree T))) (suspTree T) true
---     lem2 = begin
---       FVTy (suspTy A) ∪ FVTm (suspTm t) ≡⟨ suspSuppTyTm A t ⟩
---       suspSupp (FVTy A ∪ FVTm t) ≡⟨ cong suspSupp x ⟩
---       suspSupp (supp-bd (pred (tree-dim T)) T true) ≡⟨ suspSuppBd (pred (tree-dim T)) T true ⟩
---       supp-bd (suc (pred (tree-dim T))) (suspTree T) true ≡⟨ cong (λ - → supp-bd - (suspTree T) true) (suc-pred (tree-dim T)) ⟩
---       supp-bd (pred (tree-dim (suspTree T))) (suspTree T) true ∎
-
 suspSubTy (TyNull x) = TyExt (TyExt (TyNull TyStar) TyStar getFstTy) TyStar getSndTy
 suspSubTy (TyExt p q r) = TyExt (suspSubTy p) (suspTyTy q) (term-conversion (suspTmTy r) (reflexive≈ty (susp-functorial-ty _ _)))
 
@@ -79,13 +54,8 @@ getFstTy {Γ = Γ , A} = lift-tm-typing getFstTy
 getSndTy {Γ = ∅} = TyVarZ TyStar Star≈
 getSndTy {Γ = Γ , A} = lift-tm-typing getSndTy
 
--- suspCtxEq Emp≈ = refl≈c
--- suspCtxEq (Add≈ eq x) = Add≈ (suspCtxEq eq) (suspTyEq x)
-
 suspTyEq Star≈ = refl≈ty
-
 suspTyEq (Arr≈ q r s) = Arr≈ (suspTmEq q) (suspTyEq r) (suspTmEq s)
-
 suspTmEq (Var≈ x) = Var≈ (begin
   toℕ (inject₁ (inject₁ _)) ≡⟨ toℕ-inject₁ (inject₁ _) ⟩
   toℕ (inject₁ _) ≡⟨ toℕ-inject₁ _ ⟩
@@ -95,6 +65,7 @@ suspTmEq (Var≈ x) = Var≈ (begin
   toℕ (inject₁ (inject₁ _)) ∎)
   where
     open ≡-Reasoning
+
 suspTmEq (Sym≈ eq) = Sym≈ (suspTmEq eq)
 suspTmEq (Trans≈ eq eq′) = Trans≈ (suspTmEq eq) (suspTmEq eq′)
 suspTmEq (Coh≈ q r) = Coh≈ (suspTyEq q) (suspSubEq r)

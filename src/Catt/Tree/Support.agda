@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Tree.Support where
 
 open import Catt.Prelude
@@ -25,7 +23,6 @@ open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Connection.Support
 open import Catt.Connection.Pasting
-open import Relation.Nullary
 
 drop-var : (t : Tm n) → .⦃ isVar t ⦄ → drop (FVTm t) ≡ empty
 drop-var (Var zero) = refl

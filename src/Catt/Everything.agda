@@ -53,6 +53,7 @@ import Catt.Tree.Insertion.Support
 import Catt.Discs
 import Catt.Discs.Properties
 import Catt.Discs.Support
+import Catt.Discs.Pasting
 
 import Catt.Typing.Base
 import Catt.Typing

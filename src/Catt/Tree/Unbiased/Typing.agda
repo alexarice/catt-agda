@@ -73,8 +73,8 @@ sub-from-linear-tree-Ty (Join S Sing) tty (TyArr sty Aty sty′) p
                                                            (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S _ _ _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S _ _ (cong pred p)))
                                                            refl≃tm))))
 
-identity-Ty : Typing-Tm Γ t A → Typing-Ty Γ A → Typing-Tm Γ (identity t A) (t ─⟨ A ⟩⟶ t)
-identity-Ty {t = t} {A = A} tty Aty
+identity-tree-Ty : Typing-Tm Γ t A → Typing-Ty Γ A → Typing-Tm Γ (identity-tree t A) (t ─⟨ A ⟩⟶ t)
+identity-tree-Ty {t = t} {A = A} tty Aty
   = TyCoh ⦃ tree-to-pd (n-disc (ty-dim A)) ⦄
           (unbiased-type-Ty (suc (ty-dim A))
                             (n-disc (ty-dim A))
@@ -148,8 +148,8 @@ sub-from-linear-tree-≈ : (S : Tree n) → .⦃ _ : is-linear S ⦄ → s ≈[ 
 sub-from-linear-tree-≈ Sing a Star≈ p = Ext≈ (Null≈ Star≈) a
 sub-from-linear-tree-≈ (Join S Sing) a (Arr≈ b c d) p = Ext≈ (Ext≈ (sub-from-linear-tree-≈ S b c (cong pred p)) d) a
 
-identity-≈ : s ≈[ Γ ]tm t → A ≈[ Γ ]ty B → identity s A ≈[ Γ ]tm identity t B
-identity-≈ {A = A} {B = B} p q = trans≈tm (reflexive≈tm (Coh≃ (tree-to-ctx-≃ (n-disc-≃ (ty-dim-≈ q))) (unbiased-type-≃ (cong suc (ty-dim-≈ q)) (n-disc-≃ (ty-dim-≈ q))) (sub-from-linear-tree-≃ (n-disc-≃ (ty-dim-≈ q)) ⦃ n-disc-is-linear (ty-dim A) ⦄ ⦃ n-disc-is-linear (ty-dim B) ⦄ refl≃tm refl≃ty (sym (tree-dim-n-disc (ty-dim A))) (trans (ty-dim-≈ q) (sym (tree-dim-n-disc (ty-dim B))))))) (Coh≈ refl≈ty (sub-from-linear-tree-≈ (n-disc (ty-dim B)) ⦃ n-disc-is-linear (ty-dim B) ⦄ p q (trans (ty-dim-≈ q) (sym (tree-dim-n-disc (ty-dim B))))))
+identity-tree-≈ : s ≈[ Γ ]tm t → A ≈[ Γ ]ty B → identity-tree s A ≈[ Γ ]tm identity-tree t B
+identity-tree-≈ {A = A} {B = B} p q = trans≈tm (reflexive≈tm (Coh≃ (tree-to-ctx-≃ (n-disc-≃ (ty-dim-≈ q))) (unbiased-type-≃ (cong suc (ty-dim-≈ q)) (n-disc-≃ (ty-dim-≈ q))) (sub-from-linear-tree-≃ (n-disc-≃ (ty-dim-≈ q)) ⦃ n-disc-is-linear (ty-dim A) ⦄ ⦃ n-disc-is-linear (ty-dim B) ⦄ refl≃tm refl≃ty (sym (tree-dim-n-disc (ty-dim A))) (trans (ty-dim-≈ q) (sym (tree-dim-n-disc (ty-dim B))))))) (Coh≈ refl≈ty (sub-from-linear-tree-≈ (n-disc (ty-dim B)) ⦃ n-disc-is-linear (ty-dim B) ⦄ p q (trans (ty-dim-≈ q) (sym (tree-dim-n-disc (ty-dim B))))))
 
 sub-from-linear-tree-to-term-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {t : Tm m} → {A : Ty m} → (p : ty-dim A ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) Γ (sub-from-linear-tree S t A p) → Typing-Tm Γ t A
 sub-from-linear-tree-to-term-Ty Sing {A = ⋆} p (TyExt σty Bty tty) = tty
@@ -163,8 +163,8 @@ sub-from-linear-tree-to-type-Ty (Join S Sing) {A = s ─⟨ A ⟩⟶ t} p σty
   rewrite ≃c-to-≡ (susp-lin-tree S) with σty
 ... | TyExt (TyExt τty Aty sty) Bty tty = TyArr (sub-from-linear-tree-to-term-Ty S (cong pred p) τty) (sub-from-linear-tree-to-type-Ty S (cong pred p) τty) (term-conversion sty (reflexive≈ty (sub-from-linear-tree-‼-0 S s A (cong pred p))))
 
-identity-to-term-Ty : Typing-Tm Γ (identity t A) B → Typing-Tm Γ t A
-identity-to-term-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-term-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty
+identity-tree-to-term-Ty : Typing-Tm Γ (identity-tree t A) B → Typing-Tm Γ t A
+identity-tree-to-term-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-term-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty
 
-identity-to-type-Ty : Typing-Tm Γ (identity t A) B → Typing-Ty Γ A
-identity-to-type-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-type-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty
+identity-tree-to-type-Ty : Typing-Tm Γ (identity-tree t A) B → Typing-Ty Γ A
+identity-tree-to-type-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-type-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty

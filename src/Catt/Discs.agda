@@ -31,3 +31,6 @@ sub-from-disc d A p t = ⟨ sub-from-sphere d A p , t ⟩
 
 sub-from-sphere zero ⋆ p = ⟨⟩
 sub-from-sphere (suc d) (s ─⟨ A ⟩⟶ t) p = ⟨ ⟨ (sub-from-sphere d A (cong pred p)) , s ⟩ , t ⟩
+
+identity : (t : Tm n) → (A : Ty n) → Tm n
+identity t A = Coh (Disc (ty-dim A)) (0V ─⟨ liftType (sphere-type (ty-dim A)) ⟩⟶ 0V) (sub-from-disc (ty-dim A) A refl t)

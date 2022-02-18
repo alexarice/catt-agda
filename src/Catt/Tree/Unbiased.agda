@@ -30,5 +30,5 @@ sub-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) 
 sub-from-linear-tree Sing t A p = ⟨ ⟨⟩ , t ⟩
 sub-from-linear-tree (Join S Sing) t (s ─⟨ A ⟩⟶ s′) p = ⟨ ⟨ (sub-from-linear-tree S s A (cong pred p)) , s′ ⟩ , t ⟩
 
-identity : (t : Tm n) → (A : Ty n) → Tm n
-identity t A = Coh (tree-to-ctx (n-disc (ty-dim A))) (unbiased-type (suc (ty-dim A)) (n-disc (ty-dim A))) (sub-from-linear-tree (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ t A (sym (tree-dim-n-disc (ty-dim A))))
+identity-tree : (t : Tm n) → (A : Ty n) → Tm n
+identity-tree t A = Coh (tree-to-ctx (n-disc (ty-dim A))) (unbiased-type (suc (ty-dim A)) (n-disc (ty-dim A))) (sub-from-linear-tree (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ t A (sym (tree-dim-n-disc (ty-dim A))))

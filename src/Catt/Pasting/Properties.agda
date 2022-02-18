@@ -185,9 +185,12 @@ pdb-dec (Γ , B , A) with (pdb-dec Γ)
 ... | yes p | no r = no (λ x → r (trans≃ty (pdb-proj₂ x) (reflexive≃ty (cong (λ y → liftTerm (focus-tm y) ─⟨ liftType (focus-ty y) ⟩⟶ 0V) (pdb-irrel (pdb-prefix x) (pdb-to-dim d (ty-dim B) q) (trans (sym (ty-dim-≃ (pdb-proj₁ x))) (pdb-to-dim-dim d (ty-dim B) q)))))))
 ... | no p | r = no (λ x → p (trans≃ty (pdb-proj₁ x) (reflexive≃ty (cong focus-ty (pdb-irrel (pdb-prefix x) (pdb-to-dim d (ty-dim B) q) (trans (sym (ty-dim-≃ (pdb-proj₁ x))) (pdb-to-dim-dim d (ty-dim B) q)))))))
 
+pdb-to-pd : (Γ : Ctx n) → Γ ⊢pdb → Γ ⊢pd
+pdb-to-pd Γ pdb = Finish (pdb-to-dim pdb 0 z≤n) ⦃ IsZero-subst (pdb-to-dim-dim pdb 0 z≤n) it ⦄
+
 pd-dec : (Γ : Ctx n) → Dec (Γ ⊢pd)
 pd-dec Γ with pdb-dec Γ
-... | yes p = yes (Finish (pdb-to-dim p 0 z≤n) ⦃ IsZero-subst (pdb-to-dim-dim p 0 z≤n) it ⦄)
+... | yes p = yes (pdb-to-pd Γ p)
 ... | no p = no (λ where (Finish x) → p x)
 
 right-base-≃ : A ≃ty B → s ≃tm t → right-base A s ≃tm right-base B t

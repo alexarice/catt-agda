@@ -11,17 +11,19 @@ module Catt.Dyck.Pruning.Typing (index : ℕ)
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Typing index rule
-open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
+-- open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
+open import Catt.Typing.Properties.Lifting index rule lift-rule
 open import Catt.Dyck.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Tree.Unbiased.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing index rule lift-rule
 open import Catt.Dyck
 open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Properties
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
+open import Catt.Discs
+open import Catt.Discs.Properties
+open import Catt.Discs.Typing index rule lift-rule
 open import Catt.Syntax.Bundles
+open P index rule
 
 prune-project-Ty : (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) (dyck-to-ctx (prune-peak p)) (prune-project p)
 prune-project-Ty (⇕pk dy)

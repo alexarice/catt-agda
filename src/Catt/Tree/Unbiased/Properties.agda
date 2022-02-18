@@ -176,8 +176,8 @@ sub-from-linear-tree-sub : (a : S ≃ T) → .⦃ _ : is-linear S ⦄ → .⦃ _
 sub-from-linear-tree-sub Sing≃ t A p σ = refl≃s
 sub-from-linear-tree-sub (Join≃ a Sing≃) t (s ─⟨ A ⟩⟶ s′) p σ = Ext≃ (Ext≃ (sub-from-linear-tree-sub a s A (cong pred p) σ) refl≃tm) refl≃tm
 
-identity-sub : (t : Tm n) → (A : Ty n) → (σ : Sub n m ⋆) → identity t A [ σ ]tm ≃tm identity (t [ σ ]tm) (A [ σ ]ty)
-identity-sub t A σ = Coh≃ (tree-to-ctx-≃ (n-disc-≃ (sub-dim σ A))) (unbiased-type-≃ (cong suc (sub-dim σ A)) (n-disc-≃ (sub-dim σ A))) (sub-from-linear-tree-sub (n-disc-≃ (sub-dim σ A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ ⦃ n-disc-is-linear (ty-dim (A [ σ ]ty)) ⦄ t A (sym (tree-dim-n-disc (ty-dim A))) σ)
+identity-tree-sub : (t : Tm n) → (A : Ty n) → (σ : Sub n m ⋆) → identity-tree t A [ σ ]tm ≃tm identity-tree (t [ σ ]tm) (A [ σ ]ty)
+identity-tree-sub t A σ = Coh≃ (tree-to-ctx-≃ (n-disc-≃ (sub-dim σ A))) (unbiased-type-≃ (cong suc (sub-dim σ A)) (n-disc-≃ (sub-dim σ A))) (sub-from-linear-tree-sub (n-disc-≃ (sub-dim σ A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ ⦃ n-disc-is-linear (ty-dim (A [ σ ]ty)) ⦄ t A (sym (tree-dim-n-disc (ty-dim A))) σ)
 
-identity-≃ : s ≃tm t → A ≃ty B → identity s A ≃tm identity t B
-identity-≃ {A = A} {B = B} p q = Coh≃ (tree-to-ctx-≃ (n-disc-≃ (ty-dim-≃ q))) (unbiased-type-≃ (cong suc (ty-dim-≃ q)) (n-disc-≃ (ty-dim-≃ q))) (sub-from-linear-tree-≃ (n-disc-≃ (ty-dim-≃ q)) ⦃ n-disc-is-linear (ty-dim A) ⦄ ⦃ n-disc-is-linear (ty-dim B) ⦄ p q (sym (tree-dim-n-disc (ty-dim A))) (sym (tree-dim-n-disc (ty-dim B))))
+identity-tree-≃ : s ≃tm t → A ≃ty B → identity-tree s A ≃tm identity-tree t B
+identity-tree-≃ {A = A} {B = B} p q = Coh≃ (tree-to-ctx-≃ (n-disc-≃ (ty-dim-≃ q))) (unbiased-type-≃ (cong suc (ty-dim-≃ q)) (n-disc-≃ (ty-dim-≃ q))) (sub-from-linear-tree-≃ (n-disc-≃ (ty-dim-≃ q)) ⦃ n-disc-is-linear (ty-dim A) ⦄ ⦃ n-disc-is-linear (ty-dim B) ⦄ p q (sym (tree-dim-n-disc (ty-dim A))) (sym (tree-dim-n-disc (ty-dim B))))

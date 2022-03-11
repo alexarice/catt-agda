@@ -77,7 +77,3 @@ suspSubEq (Ext≈ p x) = Ext≈ (suspSubEq p) (suspTmEq x)
 unrestrictTy : Typing-Sub Γ Δ σ → Typing-Sub (suspCtx Γ) Δ (unrestrict σ)
 unrestrictTy (TyNull (TyArr p q r)) = TyExt (TyExt (TyNull q) TyStar p) TyStar r
 unrestrictTy (TyExt σty Aty x) = TyExt (unrestrictTy σty) (suspTyTy Aty) (term-conversion x (reflexive≈ty (unrestrict-comp-ty _ _)))
-
-unrestrictEq : σ ≈[ Δ ]s τ → unrestrict σ ≈[ Δ ]s unrestrict τ
-unrestrictEq (Null≈ (Arr≈ p q r)) = Ext≈ (Ext≈ (Null≈ q) p) r
-unrestrictEq (Ext≈ eq x) = Ext≈ (unrestrictEq eq) x

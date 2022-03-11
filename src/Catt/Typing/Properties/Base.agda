@@ -119,6 +119,10 @@ transport-typing : Typing-Tm Γ t A → t ≃tm s → Typing-Tm Γ s A
 transport-typing tty p with ≃tm-to-≡ p
 ... | refl = tty
 
+transport-typing-full : Typing-Tm Γ t A → t ≃tm s → A ≃ty B → Typing-Tm Γ s B
+transport-typing-full tty p q with ≃tm-to-≡ p | ≃ty-to-≡ q
+... | refl | refl = tty
+
 transport-typing-ctx : Typing-Ctx Γ → Γ ≃c Δ → Typing-Ctx Δ
 transport-typing-ctx Γty p with ≃c-preserve-length p
 ... | refl with ≃c-to-≡ p
@@ -158,6 +162,10 @@ replaceSub-Ty (TyExt {σ = σ} {A = A} σty Aty sty) tty = TyExt σty Aty (term-
 ty-dim-≈ : A ≈[ Γ ]ty B → ty-dim A ≡ ty-dim B
 ty-dim-≈ Star≈ = refl
 ty-dim-≈ (Arr≈ _ p _) = cong suc (ty-dim-≈ p)
+
+unrestrictEq : σ ≈[ Δ ]s τ → unrestrict σ ≈[ Δ ]s unrestrict τ
+unrestrictEq (Null≈ (Arr≈ p q r)) = Ext≈ (Ext≈ (Null≈ q) p) r
+unrestrictEq (Ext≈ eq x) = Ext≈ (unrestrictEq eq) x
 
 module _ {i : Index} (a : rule i .Rule.Args) where
   open Rule (rule i)

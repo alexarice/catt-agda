@@ -16,7 +16,7 @@ open import Catt.Globular
 open import Catt.Typing index rule
 open import Catt.Typing.Properties.Base index rule public
 open import Catt.Typing.Properties.Lifting index rule lift-rule public
-open import Catt.Typing.Properties.Substitution index rule lift-rule susp-rule sub-rule public
+open import Catt.Typing.Properties.Substitution.Suspended index rule lift-rule susp-rule sub-rule public
 open import Catt.Variables
 
 unrestrict-restrict-≈ : (σ : Sub (2 + n) m A) → s ≈[ Δ ]tm getFst [ σ ]tm → t ≈[ Δ ]tm getSnd [ σ ]tm → unrestrict (restrict σ s t) ≈[ Δ ]s σ

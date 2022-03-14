@@ -14,26 +14,31 @@ open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Variables
 open import Catt.Variables.Properties
+open import Relation.Binary
+open import Relation.Binary.Definitions
 
 tree-dim-n-disc : (n : ℕ) → tree-dim (n-disc n) ≡ n
 tree-dim-n-disc zero = refl
 tree-dim-n-disc (suc n) = cong suc (tree-dim-n-disc n)
 
-record TREE : Set where
+record TREE (X : Set) : Set where
   constructor <_>t
   field
     {tree-n} : ℕ
-    tr : Tree tree-n
+    tr : Tree X tree-n
 
 open TREE public
 
-data _≃_ : Tree n → Tree m → Set where
-  Sing≃ : Sing ≃ Sing
-  Join≃ : {S : Tree n} → {S′ : Tree n′} → {T : Tree m} → {T′ : Tree m′} → S ≃ S′ → T ≃ T′ → Join S T ≃ Join S′ T′
+data TreeEq (_∼_ : Rel X) : Tree X n → Tree X m → Set where
+  Sing≃ : {x y : X} → x ∼ y → TreeEq _∼_ (Sing x) (Sing y)
+  Join≃ : {x y : X} → x ∼ y → {S : Tree n} → {S′ : Tree n′} → {T : Tree m} → {T′ : Tree m′} → TreeEq _∼_ S S′ → TreeEq _∼_ T T′ → TreeEq _∼_ (Join x S T) (Join y S′ T′)
 
-refl≃ : T ≃ T
-refl≃ {T = Sing} = Sing≃
-refl≃ {T = Join S T} = Join≃ refl≃ refl≃
+_≃⊤_ : Tree⊤ n → Tree⊤ m → Set
+_≃⊤_ = TreeEq (λ _ _ → ⊤)
+
+reflTree : {_∼_ : Rel X} → Reflexive _∼_ → TreeEq _∼_ T T
+reflTree {T = Sing} p = Sing≃ p
+reflTree {T = Join S T} p = Join≃ p reflTree reflTree
 
 sym≃ : S ≃ T → T ≃ S
 sym≃ Sing≃ = Sing≃

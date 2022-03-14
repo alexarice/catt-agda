@@ -11,6 +11,7 @@ open import Data.Unit using (⊤; tt) public
 
 variable
   n n′ m m′ l l′ o d d′ d″ : ℕ
+  X Y Z : Set
 
 ⊥-elim : ∀ {w} {Whatever : Set w} → .⊥ → Whatever
 ⊥-elim ()

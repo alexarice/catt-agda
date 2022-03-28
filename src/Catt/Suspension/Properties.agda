@@ -114,3 +114,7 @@ ty-src-susp (s ─⟨ A ⟩⟶ t) = refl≃tm
 
 ty-tgt-susp : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-tgt (suspTy A) ⦃ NonZero-subst (sym (susp-dim A)) it ⦄ ≃tm suspTm (ty-tgt A)
 ty-tgt-susp (s ─⟨ A ⟩⟶ t) = refl≃tm
+
+unrestrict-comp-left : (σ : Sub n l A) → (τ : Sub m n (s ─⟨ B ⟩⟶ t)) → σ ∘ unrestrict τ ≃s unrestrict (σ ∘ τ)
+unrestrict-comp-left σ ⟨⟩ = refl≃s
+unrestrict-comp-left σ ⟨ τ , t ⟩ = Ext≃ (unrestrict-comp-left σ τ) refl≃tm

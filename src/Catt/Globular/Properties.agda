@@ -56,7 +56,7 @@ connect-susp-ctx-dim Γ Δ = begin
   where
     open ≡-Reasoning
 
-tree-dim-ctx-dim : (T : Tree X n) → ctx-dim (tree-to-ctx T) ≡ tree-dim T
+tree-dim-ctx-dim : (T : Tree Xr l n) → ctx-dim (tree-to-ctx T) ≡ tree-dim T
 tree-dim-ctx-dim (Sing _) = refl
 tree-dim-ctx-dim (Join _ S T) = begin
   ctx-dim (connect-susp (tree-to-ctx S) (tree-to-ctx T))

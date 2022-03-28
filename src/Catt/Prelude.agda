@@ -8,13 +8,38 @@ open import Data.Product renaming (_,_ to _,,_) hiding (map) public
 open import Relation.Binary.Definitions
 open import Data.Empty using (⊥) public
 open import Data.Unit using (⊤; tt) public
+open import Level using (0ℓ) public
 
 variable
-  n n′ m m′ l l′ o d d′ d″ : ℕ
+  n n′ m m′ l l′ l″ o d d′ d″ : ℕ
   X Y Z : Set
 
 ⊥-elim : ∀ {w} {Whatever : Set w} → .⊥ → Whatever
 ⊥-elim ()
+
+ISet : Set₁
+ISet = ℕ → Set
+
+⊤ISet : ISet
+⊤ISet n = ⊤
+
+ISetRel : ISet → Set₁
+ISetRel X = ∀ {n} {m} → X n → X m → Set
+
+FullISetRel : (X : ISet) → ISetRel X
+FullISetRel X _ _ = ⊤
+
+variable
+  Xr Yr : ISet
+
+ISRRefl : ISetRel Xr → Set
+ISRRefl {Xr = Xr} _∼_ = ∀ {l} {x : Xr l} → x ∼ x
+
+ISRSym : ISetRel Xr → Set
+ISRSym {Xr = Xr} _∼_ = ∀ {l l′} {x : Xr l} {y : Xr l′} → x ∼ y → y ∼ x
+
+ISRTrans : ISetRel Xr → Set
+ISRTrans {Xr = Xr} _∼_ = ∀ {l l′ l″} {x : Xr l} {y : Xr l′} {z : Xr l″} → x ∼ y → y ∼ z → x ∼ z
 
 record NonZero (n : ℕ) : Set where
   field

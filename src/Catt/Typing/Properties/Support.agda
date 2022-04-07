@@ -77,7 +77,7 @@ SuppTyFV (TyArr {n} {Γ = Γ} {s} {A} {t} sty Aty tty) = begin
   FVTy A ∪ FVTm s ∪ FVTm t ∎
 
 SuppSubFV (TyNull x) = SuppTyFV x
-SuppSubFV {Δ = Δ} (TyExt {σ = σ} {A = A} {t = t} σty Aty tty) = begin
+SuppSubFV {Δ = Δ} (TyExt {σ = σ} {t = t} {A = A} σty tty) = begin
   DC Δ (FVSub σ ∪ FVTm t)
     ≡⟨ DC-cup Δ (FVSub σ) (FVTm t) ⟩
   SuppSub Δ σ ∪ SuppTm Δ t
@@ -92,36 +92,37 @@ SuppSubFV {Δ = Δ} (TyExt {σ = σ} {A = A} {t = t} σty Aty tty) = begin
     ≡⟨ cong (_∪ FVTm t) (SuppSubFV σty) ⟩
   FVSub σ ∪ FVTm t ∎
 
-SuppTmChar (TyVarZ {Γ = Γ} {A = A} {B = B} Aty p) = begin
+SuppTmChar (TyConv {Γ = Γ} {s = s} {A = A} {B = B} tty p) = begin
+  SuppTm Γ s
+    ≡⟨ SuppTmChar tty ⟩
+  SuppTy Γ A ∪ FVTm s
+    ≡⟨ cong (_∪ FVTm s) (EqSuppTy p) ⟩
+  SuppTy Γ B ∪ FVTm s ∎
+
+SuppTmChar (TyVar {Γ = Γ , A} zero) = begin
   ewt (DC Γ (empty ∪ FVTy A))
     ≡⟨ cong (λ - → ewt (DC Γ -)) (∪-left-unit (FVTy A)) ⟩
-  ewt (DC Γ (FVTy A))
+  ewt (SuppTy Γ A)
     ≡˘⟨ cong ewt (∪-right-unit (SuppTy Γ A)) ⟩
   ewt (SuppTy Γ A ∪ empty)
     ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewt empty) (supp-lift-ty A) ⟩
-  SuppTy (Γ , A) (liftType A) ∪ ewt empty
-    ≡⟨ cong (_∪ ewt empty) (EqSuppTy p) ⟩
-  SuppTy (Γ , A) B ∪ ewt empty ∎
+  SuppTy (Γ , A) (liftType A) ∪ ewt empty ∎
 
-SuppTmChar (TyVarS {Γ = Γ} {A = A} {C = C} {B = B} i tty x) = begin
+SuppTmChar (TyVar {Γ = Γ , A} (suc i)) = begin
   ewf (SuppTm Γ (Var i))
-    ≡⟨ cong ewf (SuppTmChar tty) ⟩
-  ewf (SuppTy Γ A ∪ FVTm (Var i))
-    ≡˘⟨ cong (λ - → DC (Γ , C) - ∪ ewf (FVTm (Var i))) (supp-lift-ty A) ⟩
-  SuppTy (Γ , C) (liftType A) ∪ ewf (FVTm (Var i))
-    ≡⟨ cong (_∪ ewf (FVTm (Var i))) (EqSuppTy x) ⟩
-  SuppTy (Γ , C) B ∪ ewf (FVTm (Var i)) ∎
+    ≡⟨ cong ewf (SuppTmChar (TyVar i)) ⟩
+  ewf (SuppTy Γ (Γ ‼ i) ∪ FVTm (Var i))
+    ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewf (FVTm (Var i))) (supp-lift-ty (Γ ‼ i)) ⟩
+  SuppTy (Γ , A) (liftType (Γ ‼ i)) ∪ ewf (FVTm (Var i)) ∎
 
-SuppTmChar {Γ = Γ} (TyCoh {A = A} {σ = σ} {B = B} Aty σty b s p) = begin
+SuppTmChar {Γ = Γ} (TyCoh {Δ = Δ} {A = A} {σ = σ} Aty σty b s) = begin
   SuppSub Γ σ
     ≡⟨ cong (DC Γ) (trans (FVTy-comp-⊆ A σ) (∪-comm (FVSub σ) (FVTy (A [ σ ]ty)))) ⟩
   DC Γ (FVTy (A [ σ ]ty) ∪ FVSub σ)
     ≡⟨ DC-cup Γ (FVTy (A [ σ ]ty)) (FVSub σ) ⟩
   SuppTy Γ (A [ σ ]ty) ∪ SuppSub Γ σ
     ≡⟨ cong (SuppTy Γ (A [ σ ]ty) ∪_) (SuppSubFV σty) ⟩
-  SuppTy Γ (A [ σ ]ty) ∪ FVSub σ
-    ≡⟨ cong (_∪ FVSub σ) (EqSuppTy p) ⟩
-  SuppTy Γ B ∪ FVSub σ ∎
+  SuppTy Γ (A [ σ ]ty) ∪ FVSub σ ∎
 
 SuppTmChar′ {Γ = Γ} {t = t} {A = A} tty Aty = begin
   SuppTm Γ t
@@ -132,8 +133,8 @@ SuppTmChar′ {Γ = Γ} {t = t} {A = A} tty Aty = begin
 
 TransportVarSet-DC : {σ : Sub n m ⋆} → (xs : VarSet n) → Typing-Sub Γ Δ σ → DC Δ (TransportVarSet xs σ) ≡ TransportVarSet (DC Γ xs) σ
 TransportVarSet-DC emp (TyNull x) = DC-empty _
-TransportVarSet-DC (ewf xs) (TyExt σty Aty tty) = TransportVarSet-DC xs σty
-TransportVarSet-DC {Γ = Γ , A} {Δ = Δ} (ewt xs) (TyExt {σ = σ} {t = t} σty Aty tty) = begin
+TransportVarSet-DC (ewf xs) (TyExt σty tty) = TransportVarSet-DC xs σty
+TransportVarSet-DC {Γ = Γ , A} {Δ = Δ} (ewt xs) (TyExt {σ = σ} {t = t} σty tty) = begin
   DC Δ (TransportVarSet xs σ ∪ FVTm t)
     ≡⟨ DC-cup Δ (TransportVarSet xs σ) (FVTm t) ⟩
   DC Δ (TransportVarSet xs σ) ∪ DC Δ (FVTm t)

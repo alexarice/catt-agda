@@ -31,10 +31,10 @@ restrictTy : {σ : Sub (2 + n) m A}
            → s ≈[ Δ ]tm getFst [ σ ]tm
            → t ≈[ Δ ]tm getSnd [ σ ]tm
            → Typing-Sub Γ Δ (restrict σ s t)
-restrictTy {Γ = ∅} (TyExt (TyExt (TyNull z) v y) w x) Γty sty tty p q = TyNull (TyArr sty z tty)
-restrictTy {Γ = ∅ , A} (TyExt (TyExt (TyExt σty v z) w y) u x) (TyAdd TyEmp Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty v z) w y) TyEmp sty tty p q) Aty (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
-restrictTy {Γ = ∅ , B , A} (TyExt (TyExt (TyExt σty v z) w y) u x) (TyAdd Γty Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty v z) w y) Γty sty tty p q) Aty (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
-restrictTy {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty v z) w y) u x) (TyAdd Γty Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty v z) w y) Γty sty tty p q) Aty (term-conversion x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
+restrictTy {Γ = ∅} (TyExt (TyExt (TyNull z) y) x) Γty sty tty p q = TyNull (TyArr sty z tty)
+restrictTy {Γ = ∅ , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd TyEmp Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty z) y) TyEmp sty tty p q) (TyConv x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
+restrictTy {Γ = ∅ , B , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd Γty Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty z) y) Γty sty tty p q) (TyConv x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
+restrictTy {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd Γty Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty z) y) Γty sty tty p q) (TyConv x (sym≈ty (trans≈ty (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _))) (apply-sub-eq-ty (suspTy A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))))
 
 truncate′-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate′ d A ≈[ Γ ]ty truncate′ d′ A′
 truncate′-≈ {d = zero} refl p = p

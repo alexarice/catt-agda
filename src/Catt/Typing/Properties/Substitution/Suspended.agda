@@ -32,7 +32,7 @@ apply-sub-tm-typing {B = ⋆} tty σty = S.apply-sub-tm-typing tty σty
 apply-sub-tm-typing {B = u ─⟨ B ⟩⟶ v} {t = t} {σ = σ} tty σty = transport-typing-full (apply-sub-tm-typing (suspTmTy tty) (unrestrictTy σty)) (sym≃tm (unrestrict-comp-tm t σ)) (sym≃ty (unrestrict-comp-ty _ σ))
 
 apply-sub-sub-typing (TyNull x) σty = TyNull (apply-sub-ty-typing x σty)
-apply-sub-sub-typing (TyExt {A = A} τty Aty tty) σty = TyExt (apply-sub-sub-typing τty σty) Aty (term-conversion (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ A))))
+apply-sub-sub-typing (TyExt {A = A} τty tty) σty = TyExt (apply-sub-sub-typing τty σty) (TyConv (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ A))))
 
 apply-sub-ty-eq σty Star≈ = refl≈ty
 apply-sub-ty-eq σty (Arr≈ p q r) = Arr≈ (apply-sub-tm-eq σty p) (apply-sub-ty-eq σty q) (apply-sub-tm-eq σty r)

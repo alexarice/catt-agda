@@ -35,9 +35,9 @@ unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-d
 
 unbiased-type-Ty zero T q = TyStar
 unbiased-type-Ty (suc d) T q =
-  TyArr (term-conversion (apply-sub-tm-typing utty (tree-inc-Ty d T false)) (reflexive≈ty (sym≃ty (unbiased-type-prop d T d ≤-refl false))))
+  TyArr (TyConv (apply-sub-tm-typing utty (tree-inc-Ty d T false)) (reflexive≈ty (sym≃ty (unbiased-type-prop d T d ≤-refl false))))
         (unbiased-type-Ty d T (≤-trans (n≤1+n d) q))
-        (term-conversion (apply-sub-tm-typing utty (tree-inc-Ty d T true)) (reflexive≈ty (sym≃ty (unbiased-type-prop d T d ≤-refl true))))
+        (TyConv (apply-sub-tm-typing utty (tree-inc-Ty d T true)) (reflexive≈ty (sym≃ty (unbiased-type-prop d T d ≤-refl true))))
   where
     utty = unbiased-term-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-pred q))
 
@@ -49,33 +49,30 @@ unbiased-term-Ty d T q with is-linear-dec T
     non-linear-has-no-zero-dim (Join S T) p = it
 
 ... | yes p with tree-to-ctx T | tree-to-ctx-Ty T | linear-tree-unbiased-lem d T ⦃ p ⦄ q
-... | Γ , A | TyAdd Γty x | l = TyVarZ x (reflexive≈ty l)
+... | Γ , A | TyAdd Γty x | l = TyConv (TyVar zero) (reflexive≈ty l)
 
-unbiased-comp-Ty (suc d) T q = TyCoh ⦃ tree-to-pd T ⦄ (unbiased-type-Ty (suc d) T (s≤s (≤-trans (n≤1+n d) (≤-reflexive (sym q))))) (id-Ty (tree-to-ctx-Ty T)) true (unbiased-supp-condition d T q) (reflexive≈ty (id-on-ty _))
+unbiased-comp-Ty (suc d) T q = TyConv (TyCoh ⦃ tree-to-pd T ⦄ (unbiased-type-Ty (suc d) T (s≤s (≤-trans (n≤1+n d) (≤-reflexive (sym q))))) id-Ty true (unbiased-supp-condition d T q)) (reflexive≈ty (id-on-ty _))
 
 sub-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim T) ⦄ → (d : ℕ) → (tree-dim T ≡ tree-dim S + d) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T d)
-sub-from-linear-tree-unbiased-Ty Sing T d p = TyExt (TyNull (unbiased-type-Ty d T (≤-trans (≤-reflexive (sym p)) (n≤1+n (tree-dim T))))) TyStar (unbiased-comp-Ty d ⦃ NonZero-subst p it ⦄ T p)
+sub-from-linear-tree-unbiased-Ty Sing T d p = TyExt (TyNull (unbiased-type-Ty d T (≤-trans (≤-reflexive (sym p)) (n≤1+n (tree-dim T))))) (unbiased-comp-Ty d ⦃ NonZero-subst p it ⦄ T p)
 sub-from-linear-tree-unbiased-Ty (Join S Sing) T d p = unrestrictTy (sub-from-linear-tree-unbiased-Ty S T (suc d) (trans p (sym (+-suc (tree-dim S) d))))
 
 sub-from-linear-tree-unbiased-Ty-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim T) ⦄ → .(tree-dim T ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) (tree-to-ctx T) (sub-from-linear-tree-unbiased S T 0)
 sub-from-linear-tree-unbiased-Ty-0 S T p = sub-from-linear-tree-unbiased-Ty S T 0 (trans (recompute ((tree-dim T) ≟ (tree-dim S)) p) (sym (+-identityʳ (tree-dim S))))
 
 sub-from-linear-tree-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → Typing-Tm Γ t A → Typing-Ty Γ A → (p : ty-dim A ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) Γ (sub-from-linear-tree S t A p)
-sub-from-linear-tree-Ty Sing tty TyStar p = TyExt (TyNull TyStar) TyStar tty
+sub-from-linear-tree-Ty Sing tty TyStar p = TyExt (TyNull TyStar) tty
 sub-from-linear-tree-Ty (Join S Sing) tty (TyArr sty Aty sty′) p
   rewrite (≃c-to-≡ (susp-lin-tree S)) =
-    TyExt (TyExt (sub-from-linear-tree-Ty S sty Aty (cong pred p)) (‼-Ty (tree-to-ctx-Ty S) zero)
-                 (term-conversion sty′ (reflexive≈ty (sym≃ty (sub-from-linear-tree-‼-0 S _ _ (cong pred p))))))
-          (TyArr (var-Ty (TyAdd (tree-to-ctx-Ty S) (‼-Ty (tree-to-ctx-Ty S) zero)) (suc zero))
-                 (lift-ty-typing (‼-Ty (tree-to-ctx-Ty S) zero))
-                 (var-Ty (TyAdd (tree-to-ctx-Ty S) (‼-Ty (tree-to-ctx-Ty S) zero)) zero))
-          (term-conversion tty (reflexive≈ty (sym≃ty (Arr≃ (sub-from-linear-tree-0V S _ _ (cong pred p))
+    TyExt (TyExt (sub-from-linear-tree-Ty S sty Aty (cong pred p))
+                 (TyConv sty′ (reflexive≈ty (sym≃ty (sub-from-linear-tree-‼-0 S _ _ (cong pred p))))))
+          (TyConv tty (reflexive≈ty (sym≃ty (Arr≃ (sub-from-linear-tree-0V S _ _ (cong pred p))
                                                            (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S _ _ _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S _ _ (cong pred p)))
                                                            refl≃tm))))
 
 identity-tree-Ty : Typing-Tm Γ t A → Typing-Ty Γ A → Typing-Tm Γ (identity-tree t A) (t ─⟨ A ⟩⟶ t)
 identity-tree-Ty {t = t} {A = A} tty Aty
-  = TyCoh ⦃ tree-to-pd (n-disc (ty-dim A)) ⦄
+  = TyConv (TyCoh ⦃ tree-to-pd (n-disc (ty-dim A)) ⦄
           (unbiased-type-Ty (suc (ty-dim A))
                             (n-disc (ty-dim A))
                             (s≤s (≤-reflexive (sym (tree-dim-n-disc (ty-dim A))))))
@@ -84,7 +81,7 @@ identity-tree-Ty {t = t} {A = A} tty Aty
                                    Aty
                                    (sym (tree-dim-n-disc (ty-dim A))))
           false
-          (full-⊆ lem-supp)
+          (full-⊆ lem-supp))
           (reflexive≈ty (Arr≃ (l1 false) l2 (l1 true)))
     where
       lem-supp : full ⊆ FVTy (unbiased-type (suc (ty-dim A)) (n-disc (ty-dim A)))
@@ -152,19 +149,21 @@ identity-tree-≈ : s ≈[ Γ ]tm t → A ≈[ Γ ]ty B → identity-tree s A �
 identity-tree-≈ {A = A} {B = B} p q = trans≈tm (reflexive≈tm (Coh≃ (tree-to-ctx-≃ (n-disc-≃ (ty-dim-≈ q))) (unbiased-type-≃ (cong suc (ty-dim-≈ q)) (n-disc-≃ (ty-dim-≈ q))) (sub-from-linear-tree-≃ (n-disc-≃ (ty-dim-≈ q)) ⦃ n-disc-is-linear (ty-dim A) ⦄ ⦃ n-disc-is-linear (ty-dim B) ⦄ refl≃tm refl≃ty (sym (tree-dim-n-disc (ty-dim A))) (trans (ty-dim-≈ q) (sym (tree-dim-n-disc (ty-dim B))))))) (Coh≈ refl≈ty (sub-from-linear-tree-≈ (n-disc (ty-dim B)) ⦃ n-disc-is-linear (ty-dim B) ⦄ p q (trans (ty-dim-≈ q) (sym (tree-dim-n-disc (ty-dim B))))))
 
 sub-from-linear-tree-to-term-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {t : Tm m} → {A : Ty m} → (p : ty-dim A ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) Γ (sub-from-linear-tree S t A p) → Typing-Tm Γ t A
-sub-from-linear-tree-to-term-Ty Sing {A = ⋆} p (TyExt σty Bty tty) = tty
+sub-from-linear-tree-to-term-Ty Sing {A = ⋆} p (TyExt σty tty) = tty
 sub-from-linear-tree-to-term-Ty (Join S Sing) {A = s ─⟨ A ⟩⟶ t} p σty
   rewrite ≃c-to-≡ (susp-lin-tree S) with σty
-... | TyExt τty Bty tty = term-conversion tty (reflexive≈ty (Arr≃ (sub-from-linear-tree-0V S s A (cong pred p)) (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S s A _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S s A (cong pred p))) refl≃tm))
+... | TyExt τty tty = TyConv tty (reflexive≈ty (Arr≃ (sub-from-linear-tree-0V S s A (cong pred p)) (trans≃ty (lift-sub-comp-lem-ty (sub-from-linear-tree S s A _) (tree-to-ctx S ‼ zero)) (sub-from-linear-tree-‼-0 S s A (cong pred p))) refl≃tm))
 
 sub-from-linear-tree-to-type-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {t : Tm m} → {A : Ty m} → (p : ty-dim A ≡ tree-dim S) → Typing-Sub (tree-to-ctx S) Γ (sub-from-linear-tree S t A p) → Typing-Ty Γ A
-sub-from-linear-tree-to-type-Ty Sing {A = ⋆} p (TyExt σty Bty tty) = TyStar
+sub-from-linear-tree-to-type-Ty Sing {A = ⋆} p (TyExt σty tty) = TyStar
 sub-from-linear-tree-to-type-Ty (Join S Sing) {A = s ─⟨ A ⟩⟶ t} p σty
   rewrite ≃c-to-≡ (susp-lin-tree S) with σty
-... | TyExt (TyExt τty Aty sty) Bty tty = TyArr (sub-from-linear-tree-to-term-Ty S (cong pred p) τty) (sub-from-linear-tree-to-type-Ty S (cong pred p) τty) (term-conversion sty (reflexive≈ty (sub-from-linear-tree-‼-0 S s A (cong pred p))))
+... | TyExt (TyExt τty sty) tty = TyArr (sub-from-linear-tree-to-term-Ty S (cong pred p) τty) (sub-from-linear-tree-to-type-Ty S (cong pred p) τty) (TyConv sty (reflexive≈ty (sub-from-linear-tree-‼-0 S s A (cong pred p))))
 
 identity-tree-to-term-Ty : Typing-Tm Γ (identity-tree t A) B → Typing-Tm Γ t A
-identity-tree-to-term-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-term-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty
+identity-tree-to-term-Ty (TyConv tty p) = identity-tree-to-term-Ty tty
+identity-tree-to-term-Ty {A = A} (TyCoh Uty σty _ _) = sub-from-linear-tree-to-term-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty
 
 identity-tree-to-type-Ty : Typing-Tm Γ (identity-tree t A) B → Typing-Ty Γ A
-identity-tree-to-type-Ty {A = A} (TyCoh Uty σty _ _ _) = sub-from-linear-tree-to-type-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty
+identity-tree-to-type-Ty (TyConv tty p) = identity-tree-to-type-Ty tty
+identity-tree-to-type-Ty {A = A} (TyCoh Uty σty _ _) = sub-from-linear-tree-to-type-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty

@@ -17,7 +17,7 @@ open import Catt.Suspension
 
 sub-typing-implies-ty-typing : {σ : Sub n m A} → Typing-Sub Γ Δ σ → Typing-Ty Δ A
 sub-typing-implies-ty-typing (TyNull x) = x
-sub-typing-implies-ty-typing (TyExt σty Aty x) = sub-typing-implies-ty-typing σty
+sub-typing-implies-ty-typing (TyExt σty x) = sub-typing-implies-ty-typing σty
 
 sub-eq-implies-ty-eq : {σ : Sub n m A} → {τ : Sub n m B} → σ ≈[ Δ ]s τ → A ≈[ Δ ]ty B
 sub-eq-implies-ty-eq (Null≈ x) = x
@@ -33,12 +33,13 @@ apply-sub-sub-eq : {σ : Sub n m ⋆} → Typing-Sub Γ Δ σ → τ ≈[ Γ ]s 
 apply-sub-ty-typing TyStar σty = sub-typing-implies-ty-typing σty
 apply-sub-ty-typing (TyArr sty Aty tty) σty = TyArr (apply-sub-tm-typing sty σty) (apply-sub-ty-typing Aty σty) (apply-sub-tm-typing tty σty)
 
-apply-sub-tm-typing (TyVarZ x y) (TyExt {A = A} {t = t} σty Aty tty) = term-conversion tty (trans≈ty (sym≈ty (reflexive≈ty (lift-sub-comp-lem-ty {t = t} _ A))) (apply-sub-ty-eq (TyExt σty Aty tty) y))
-apply-sub-tm-typing (TyVarS {A = A} i tvi x) (TyExt {t = t} σty Aty tty) = term-conversion (apply-sub-tm-typing tvi σty) (trans≈ty (sym≈ty (reflexive≈ty (lift-sub-comp-lem-ty {t = t} _ A))) (apply-sub-ty-eq (TyExt σty Aty tty) x))
-apply-sub-tm-typing (TyCoh {A = A} Aty τty b sc p) σty = TyCoh Aty (apply-sub-sub-typing τty σty) b sc (trans≈ty (reflexive≈ty (assoc-ty _ _ A)) (apply-sub-ty-eq σty p))
+apply-sub-tm-typing (TyConv tty p) σty = TyConv (apply-sub-tm-typing tty σty) (apply-sub-ty-eq σty p)
+apply-sub-tm-typing (TyVar zero) (TyExt {σ = σ} {A = A} σty x) = TyConv x (reflexive≈ty (sym≃ty (lift-sub-comp-lem-ty σ A)))
+apply-sub-tm-typing {Γ = Γ , _} (TyVar (suc i)) (TyExt {σ = σ} σty x) = TyConv (apply-sub-tm-typing (TyVar i) σty) (reflexive≈ty (sym≃ty (lift-sub-comp-lem-ty σ (Γ ‼ i))))
+apply-sub-tm-typing (TyCoh {A = A} Aty τty b sc) σty = TyConv (TyCoh Aty (apply-sub-sub-typing τty σty) b sc) (reflexive≈ty (assoc-ty _ _ A))
 
 apply-sub-sub-typing (TyNull x) σty = TyNull (apply-sub-ty-typing x σty)
-apply-sub-sub-typing (TyExt {A = A} τty Aty tty) σty = TyExt (apply-sub-sub-typing τty σty) Aty (term-conversion (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ A))))
+apply-sub-sub-typing (TyExt {A = A} τty tty) σty = TyExt (apply-sub-sub-typing τty σty) (TyConv (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ A))))
 
 apply-sub-ty-eq σty Star≈ = refl≈ty
 apply-sub-ty-eq σty (Arr≈ p q r) = Arr≈ (apply-sub-tm-eq σty p) (apply-sub-ty-eq σty q) (apply-sub-tm-eq σty r)

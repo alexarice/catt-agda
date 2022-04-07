@@ -41,17 +41,17 @@ suspCtxTy (TyAdd ty x) = TyAdd (suspCtxTy ty) (suspTyTy x)
 suspTyTy TyStar = TyArr getFstTy TyStar getSndTy
 suspTyTy (TyArr p q r) = TyArr (suspTmTy p) (suspTyTy q) (suspTmTy r)
 
-suspTmTy {Γ = Γ , A} (TyVarZ {Γ = Γ} {A = A} x y) = TyVarZ (suspTyTy x) (trans≈ty (reflexive≈ty (sym≃ty (susp-ty-lift A))) (suspTyEq y))
-suspTmTy (TyVarS i tvi x) = TyVarS (inject₁ (inject₁ i)) (suspTmTy tvi) (trans≈ty (reflexive≈ty (sym≃ty (susp-ty-lift _))) (suspTyEq x))
-suspTmTy (TyCoh Aty σty b sc p) = TyCoh ⦃ susp-pd it ⦄ (suspTyTy Aty) (suspSubTy σty) b (suspSuppCondition sc) (trans≈ty (reflexive≈ty (sym≃ty (susp-functorial-ty _ _))) (suspTyEq p))
+suspTmTy (TyConv tty p) = TyConv (suspTmTy tty) (suspTyEq p)
+suspTmTy {Γ = Γ} (TyVar i) = TyConv (TyVar (inject₁ (inject₁ i))) (reflexive≈ty (susp-‼ Γ i))
+suspTmTy (TyCoh Aty σty b sc) = TyConv (TyCoh ⦃ susp-pd it ⦄ (suspTyTy Aty) (suspSubTy σty) b (suspSuppCondition sc)) (reflexive≈ty (sym≃ty (susp-functorial-ty _ _)))
 
-suspSubTy (TyNull x) = TyExt (TyExt (TyNull TyStar) TyStar getFstTy) TyStar getSndTy
-suspSubTy (TyExt p q r) = TyExt (suspSubTy p) (suspTyTy q) (term-conversion (suspTmTy r) (reflexive≈ty (susp-functorial-ty _ _)))
+suspSubTy (TyNull x) = TyExt (TyExt (TyNull TyStar) getFstTy) getSndTy
+suspSubTy (TyExt p r) = TyExt (suspSubTy p) (TyConv (suspTmTy r) (reflexive≈ty (susp-functorial-ty _ _)))
 
-getFstTy {Γ = ∅} = TyVarS zero (TyVarZ TyStar Star≈) Star≈
+getFstTy {Γ = ∅} = TyVar (suc zero)
 getFstTy {Γ = Γ , A} = lift-tm-typing getFstTy
 
-getSndTy {Γ = ∅} = TyVarZ TyStar Star≈
+getSndTy {Γ = ∅} = TyVar zero
 getSndTy {Γ = Γ , A} = lift-tm-typing getSndTy
 
 suspTyEq Star≈ = refl≈ty
@@ -75,5 +75,5 @@ suspSubEq (Null≈ x) = refl≈s
 suspSubEq (Ext≈ p x) = Ext≈ (suspSubEq p) (suspTmEq x)
 
 unrestrictTy : Typing-Sub Γ Δ σ → Typing-Sub (suspCtx Γ) Δ (unrestrict σ)
-unrestrictTy (TyNull (TyArr p q r)) = TyExt (TyExt (TyNull q) TyStar p) TyStar r
-unrestrictTy (TyExt σty Aty x) = TyExt (unrestrictTy σty) (suspTyTy Aty) (term-conversion x (reflexive≈ty (unrestrict-comp-ty _ _)))
+unrestrictTy (TyNull (TyArr p q r)) = TyExt (TyExt (TyNull q) p) r
+unrestrictTy (TyExt σty x) = TyExt (unrestrictTy σty) (TyConv x (reflexive≈ty (unrestrict-comp-ty _ _)))

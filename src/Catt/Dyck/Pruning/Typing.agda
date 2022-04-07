@@ -26,24 +26,22 @@ open P index rule
 
 prune-project-Ty : (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) (dyck-to-ctx (prune-peak p)) (prune-project p)
 prune-project-Ty (⇕pk dy)
-  = TyExt (TyExt (id-Ty (dyck-to-ctx-Ty dy))
-                 (dyck-type-Ty dy)
-                 (term-conversion (dyck-term-Ty dy) (reflexive≈ty (sym≃ty (id-on-ty (dyck-type dy))))))
-          (dyck-pre-type-Ty dy)
-          (term-conversion (identity-Ty (dyck-term-Ty dy) (dyck-type-Ty dy))
+  = TyExt (TyExt id-Ty
+                 (TyConv (dyck-term-Ty dy) (reflexive≈ty (sym≃ty (id-on-ty (dyck-type dy))))))
+          (TyConv (identity-Ty (dyck-term-Ty dy) (dyck-type-Ty dy))
                            (reflexive≈ty (sym≃ty (Arr≃ (trans≃tm (lift-sub-comp-lem-tm idSub (dyck-term dy)) (id-on-tm (dyck-term dy)))
                                                        (trans≃ty (lift-sub-comp-lem-ty idSub (dyck-type dy)) (id-on-ty (dyck-type dy)))
                                                        refl≃tm))))
 prune-project-Ty (⇑pk {dy = dy} p)
   = TyExt (TyExt (lift-sub-typing (lift-sub-typing (prune-project-Ty p)))
-                 (dyck-type-Ty dy)
-                   (TyVarS zero (TyVarZ (dyck-type-Ty (prune-peak p)) (reflexive≈ty (lift-ty-≃ (dyck-type-prune p)))) (reflexive≈ty l1)))
-          (dyck-pre-type-Ty dy)
-          (TyVarZ (dyck-pre-type-Ty (prune-peak p)) (reflexive≈ty (trans≃ty (dyck-type-prune (⇑pk p)) (Arr≃ (lift-sub-comp-lem-tm ⟨ (liftSub (liftSub (prune-project p))) , 1V ⟩ (liftTerm (dyck-term dy))) (lift-sub-comp-lem-ty ⟨ (liftSub (liftSub (prune-project p))) , 1V ⟩ (liftType (dyck-type dy))) refl≃tm))))
+                 (TyConv (TyVar (suc zero)) (reflexive≈ty l1)))
+          (TyConv (TyVar zero) (reflexive≈ty (trans≃ty (dyck-type-prune (⇑pk p)) (Arr≃ (lift-sub-comp-lem-tm ⟨ liftSub (liftSub (prune-project p)) , 1V ⟩ (liftTerm (dyck-term dy))) (lift-sub-comp-lem-ty ⟨ (liftSub (liftSub (prune-project p))) , 1V ⟩ (liftType (dyck-type dy))) refl≃tm))))
   where
-    l1 : liftType (liftType (dyck-type dy [ prune-project p ]ty)) ≃ty
+    l1 : liftType (liftType (dyck-type (prune-peak p))) ≃ty
            (dyck-type dy [ liftSub (liftSub (prune-project p)) ]ty)
     l1 = begin
+      < liftType (liftType (dyck-type (prune-peak p))) >ty
+        ≈⟨ lift-ty-≃ (lift-ty-≃ (dyck-type-prune p)) ⟩
       < liftType (liftType (dyck-type dy [ prune-project p ]ty)) >ty
         ≈˘⟨ lift-ty-≃ (apply-lifted-sub-ty-≃ (dyck-type dy) (prune-project p)) ⟩
       < liftType (dyck-type dy [ liftSub (prune-project p) ]ty) >ty
@@ -55,7 +53,7 @@ prune-project-Ty (⇓pk p) = prune-project-Ty p
 
 
 prune-Eq : {Γ : Ctx n} → (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) Γ σ → {t : Tm n} → {A : Ty n} → peak-term p [ σ ]tm ≃tm identity t A → σ ≈[ Γ ]s prune-sub p σ ∘ prune-project p
-prune-Eq {Γ = Γ} (⇕pk dy) (TyExt {t = u} (TyExt {σ = σ} {t = s} σty Aty sty) Bty tty) {t} {A} q = Ext≈ (Ext≈ (reflexive≈s (sym≃s (id-right-unit σ))) l1) l2
+prune-Eq {Γ = Γ} (⇕pk dy) (TyExt {t = u} (TyExt {σ = σ} {t = s} σty sty) tty) {t} {A} q = Ext≈ (Ext≈ (reflexive≈s (sym≃s (id-right-unit σ))) l1) l2
   where
     ity : Typing-Tm Γ (identity t A) _
     ity = transport-typing tty q
@@ -99,7 +97,7 @@ prune-Eq {Γ = Γ} (⇕pk dy) (TyExt {t = u} (TyExt {σ = σ} {t = s} σty Aty s
 
 
 
-prune-Eq (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty Aty sty) Bty tty) {t} {A} q = Ext≈ (Ext≈ lem refl≈tm) refl≈tm
+prune-Eq (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty sty) tty) {t} {A} q = Ext≈ (Ext≈ lem refl≈tm) refl≈tm
   where
     l4 : peak-term p [ σ ]tm ≃tm identity t A
     l4 = begin
@@ -128,8 +126,8 @@ prune-Eq (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty Aty sty) Bty
 prune-Eq (⇓pk p) σty q = prune-Eq p σty q
 
 prune-sub-Ty : {Γ : Ctx n} → (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) Γ σ → {t : Tm n} → {A : Ty n} → peak-term p [ σ ]tm ≃tm identity t A → Typing-Sub (dyck-to-ctx (prune-peak p)) Γ (prune-sub p σ)
-prune-sub-Ty (⇕pk dy) (TyExt (TyExt σty Aty sty) Bty tty) q = σty
-prune-sub-Ty (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty Aty sty) Bty tty) {t} {A} q = TyExt (TyExt (prune-sub-Ty p σty l4) (dyck-type-Ty (prune-peak p)) (term-conversion sty l1)) (dyck-pre-type-Ty (prune-peak p)) (term-conversion tty (Arr≈ l2 l3 refl≈tm))
+prune-sub-Ty (⇕pk dy) (TyExt (TyExt σty sty) tty) q = σty
+prune-sub-Ty (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty sty) tty) {t} {A} q = TyExt (TyExt (prune-sub-Ty p σty l4) (TyConv sty l1)) (TyConv tty (Arr≈ l2 l3 refl≈tm))
   where
     l4 : peak-term p [ σ ]tm ≃tm identity t A
     l4 = begin

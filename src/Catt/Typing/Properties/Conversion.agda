@@ -32,43 +32,41 @@ term-conversion′ (Var≈ x)  with toℕ-injective x
 ... | refl = id-⇔ _
 term-conversion′ (Sym≈ p) = sym-⇔ (term-conversion′ p)
 term-conversion′ (Trans≈ p q) = (term-conversion′ p) ∘-⇔ (term-conversion′ q)
-term-conversion′ (Coh≈ {A = A} {B = B} {σ = σ} {Γ = Γ} {τ = τ} p q) = mk⇔ f g
+term-conversion′ {A = C} (Coh≈ {A = A} {Δ = Δ} {B = B} {σ = σ} {Γ = Γ} {τ = τ} p q) = mk⇔ (f C) (g C)
   where
-    f : Typing-Tm _ (Coh _ _ _) _ → Typing-Tm _ (Coh _ _ _) _
-    f (TyCoh {B = C} Aty σty b sc x) = TyCoh (E.f (type-conversion′ p) Aty)
-                                     (E.f (sub-conversion′ q) σty)
-                                     b
-                                     (supp-condition-preserved b p Aty (E.f (type-conversion′ p) Aty) sc)
-                                     lem
+    f : ∀ C → Typing-Tm Γ (Coh Δ A σ) C → Typing-Tm Γ (Coh Δ B τ) C
+    f C (TyConv tty p) = TyConv (f _ tty) p
+    f C (TyCoh Aty σty b sc) = TyConv (TyCoh (E.f (type-conversion′ p) Aty)
+                                   (E.f (sub-conversion′ q) σty)
+                                   b
+                                   (supp-condition-preserved b p Aty (E.f (type-conversion′ p) Aty) sc))
+                                   lem
       where
         open Reasoning (ty-setoid-≈ Γ)
-        lem : (B [ τ ]ty) ≈[ Γ ]ty C
+        lem : (B [ τ ]ty) ≈[ Γ ]ty A [ σ ]ty
         lem = begin
           B [ τ ]ty
             ≈˘⟨ apply-sub-eq-ty B q ⟩
           B [ σ ]ty
             ≈˘⟨ apply-sub-ty-eq σty p ⟩
-          A [ σ ]ty
-            ≈⟨ x ⟩
-          C ∎
+          A [ σ ]ty ∎
 
-    g : Typing-Tm _ (Coh _ _ _) _ → Typing-Tm _ (Coh _ _ _) _
-    g (TyCoh {B = C} Bty τty b sc x) = TyCoh (E.g (type-conversion′ p) Bty)
+    g : ∀ C → Typing-Tm Γ (Coh Δ B τ) C → Typing-Tm Γ (Coh Δ A σ) C
+    g C (TyConv tty p) = TyConv (g _ tty) p
+    g C (TyCoh Bty τty b sc) = TyConv (TyCoh (E.g (type-conversion′ p) Bty)
                                      (E.g (sub-conversion′ q) τty)
                                      b
-                                     (supp-condition-preserved b (sym≈ty p) Bty (E.g (type-conversion′ p) Bty) sc)
+                                     (supp-condition-preserved b (sym≈ty p) Bty (E.g (type-conversion′ p) Bty) sc))
                                      lem
       where
         open Reasoning (ty-setoid-≈ Γ)
-        lem : (A [ σ ]ty) ≈[ Γ ]ty C
+        lem : (A [ σ ]ty) ≈[ Γ ]ty B [ τ ]ty
         lem = begin
           A [ σ ]ty
             ≈⟨ apply-sub-eq-ty A q ⟩
           A [ τ ]ty
             ≈⟨ apply-sub-ty-eq τty p ⟩
-          B [ τ ]ty
-            ≈⟨ x ⟩
-          C ∎
+          B [ τ ]ty ∎
 
 term-conversion′ (Rule≈ i a tty) = mk⇔ f g
   where
@@ -78,7 +76,7 @@ term-conversion′ (Rule≈ i a tty) = mk⇔ f g
 
     g : Typing-Tm (rule i .Rule.tgtCtx a) (rule i .Rule.rhs a) _ →
           Typing-Tm (rule i .Rule.tgtCtx a) (rule i .Rule.lhs a) _
-    g tty′ = term-conversion tty (Ty-unique (conv-rule i a tty) tty′)
+    g tty′ = TyConv tty (Ty-unique (conv-rule i a tty) tty′)
 
 type-conversion′ Star≈ = id-⇔ (Typing-Ty _ ⋆)
 type-conversion′ (Arr≈ p q r) = mk⇔ f g
@@ -98,16 +96,16 @@ sub-conversion′ (Null≈ x) = mk⇔ (λ where (TyNull y) → TyNull (E.f (type
 sub-conversion′ (Ext≈ p x) = mk⇔ f g
   where
     f : Typing-Sub _ _ ⟨ _ , _ ⟩ → Typing-Sub _ _ ⟨ _ , _ ⟩
-    f (TyExt {A = A} σty Aty tty) = TyExt (E.f (sub-conversion′ p) σty)
-                                    Aty
+    f (TyExt {A = A} σty tty) = TyExt (E.f (sub-conversion′ p) σty)
+
                                     (E.f (full-term-conv′ x (apply-sub-eq-ty A p)) tty)
 
     g : Typing-Sub _ _ ⟨ _ , _ ⟩ → Typing-Sub _ _ ⟨ _ , _ ⟩
-    g (TyExt {A = A} σty Aty tty) = TyExt (E.g (sub-conversion′ p) σty)
-                                    Aty
+    g (TyExt {A = A} σty tty) = TyExt (E.g (sub-conversion′ p) σty)
+
                                     (E.g (full-term-conv′ x (apply-sub-eq-ty A p)) tty)
 
-full-term-conv′ p eq = (term-conversion′ p) ∘-⇔ (mk⇔ (λ tty → term-conversion tty eq) (λ tty → term-conversion tty (sym≈ty eq)))
+full-term-conv′ p eq = (term-conversion′ p) ∘-⇔ (mk⇔ (λ tty → TyConv tty eq) (λ tty → TyConv tty (sym≈ty eq)))
 
 type-conversion : A ≈[ Γ ]ty B → Typing-Ty Γ A → Typing-Ty Γ B
 sub-conversion : σ ≈[ Δ ]s τ → Typing-Sub Γ Δ σ → Typing-Sub Γ Δ τ

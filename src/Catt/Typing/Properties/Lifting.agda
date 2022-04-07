@@ -24,12 +24,12 @@ lift-sub-equality : σ ≈[ Γ ]s τ → (liftSub σ) ≈[ Γ , A ]s (liftSub τ
 lift-ty-typing TyStar = TyStar
 lift-ty-typing (TyArr p q r) = TyArr (lift-tm-typing p) (lift-ty-typing q) (lift-tm-typing r)
 
-lift-tm-typing (TyVarZ x y) = TyVarS zero (TyVarZ x y) refl≈ty
-lift-tm-typing (TyVarS i tvi x) = TyVarS (suc i) (TyVarS i tvi x) refl≈ty
-lift-tm-typing (TyCoh {A = A} Aty σty b sc p) = TyCoh Aty (lift-sub-typing σty) b sc (trans≈ty (reflexive≈ty (apply-lifted-sub-ty-≃ A _)) (lift-ty-equality p))
+lift-tm-typing (TyConv tty p) = TyConv (lift-tm-typing tty) (lift-ty-equality p)
+lift-tm-typing (TyVar i) = TyVar (suc i)
+lift-tm-typing (TyCoh {A = A} Aty σty b sc) = TyConv (TyCoh Aty (lift-sub-typing σty) b sc) (reflexive≈ty (apply-lifted-sub-ty-≃ A _))
 
 lift-sub-typing (TyNull x) = TyNull (lift-ty-typing x)
-lift-sub-typing (TyExt {A = A} p q r) = TyExt (lift-sub-typing p) q (term-conversion (lift-tm-typing r) (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ A _))))
+lift-sub-typing (TyExt {A = A} p r) = TyExt (lift-sub-typing p) (TyConv (lift-tm-typing r) (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ A _))))
 
 lift-ty-equality Star≈ = Star≈
 lift-ty-equality (Arr≈ q r s) = Arr≈ (lift-tm-equality q) (lift-ty-equality r) (lift-tm-equality s)
@@ -44,13 +44,13 @@ lift-tm-equality {A = A} (Rule≈ i a tc) = lift-rule i a (lift-tm-typing tc)
 lift-sub-equality (Null≈ x) = Null≈ (lift-ty-equality x)
 lift-sub-equality (Ext≈ eq x) = Ext≈ (lift-sub-equality eq) (lift-tm-equality x)
 
-id-Ty : Typing-Ctx Γ → Typing-Sub Γ Γ idSub
-id-Ty TyEmp = TyNull TyStar
-id-Ty (TyAdd Γty x) = TyExt (lift-sub-typing (id-Ty Γty)) x (TyVarZ x (reflexive≈ty (trans≃ty (sym≃ty (id-on-ty (liftType _))) (lift-sub-comp-lem-ty (liftSub idSub) _))))
+id-Ty : Typing-Sub Γ Γ idSub
+id-Ty {Γ = ∅} = TyNull TyStar
+id-Ty {Γ = Γ , A} = TyExt (lift-sub-typing id-Ty) (TyConv (TyVar zero) (reflexive≈ty (sym≃ty (trans≃ty (apply-lifted-sub-ty-≃ A idSub) (lift-ty-≃ (id-on-ty A))))))
 
-idSub≃-Ty : (p : Γ ≃c Δ) → Typing-Ctx Γ → Typing-Sub Γ Δ (idSub≃ p)
-idSub≃-Ty Emp≃ Γty = TyNull TyStar
-idSub≃-Ty (Add≃ {A = A} {A′ = A′} p x) (TyAdd Γty y) = TyExt (lift-sub-typing (idSub≃-Ty p Γty)) y (TyVarZ (transport-typing-ty y p x) (reflexive≈ty lem))
+idSub≃-Ty : (p : Γ ≃c Δ) → Typing-Sub Γ Δ (idSub≃ p)
+idSub≃-Ty Emp≃ = TyNull TyStar
+idSub≃-Ty (Add≃ {A = A} {A′ = A′} p x) = TyExt (lift-sub-typing (idSub≃-Ty p)) (TyConv (TyVar zero) (reflexive≈ty (sym≃ty (trans≃ty (apply-lifted-sub-ty-≃ A (idSub≃ p)) (lift-ty-≃ (trans≃ty (idSub≃-on-ty p A) x))))))
   where
     open Reasoning ty-setoid
 

@@ -18,19 +18,17 @@ open import Catt.Support
 open import Catt.Support.Properties
 
 tm-to-ty-prop : Typing-Tm Γ t A → tm-to-ty Γ t ≈[ Γ ]ty A
-tm-to-ty-prop (TyVarZ x y) = y
-tm-to-ty-prop (TyVarS i tty x) = trans≈ty (lift-ty-equality (tm-to-ty-prop tty)) x
-tm-to-ty-prop (TyCoh v w x y z) = z
+tm-to-ty-prop (TyConv tty p) = trans≈ty (tm-to-ty-prop tty) p
+tm-to-ty-prop (TyVar i) = refl≈ty
+tm-to-ty-prop (TyCoh v w x y) = refl≈ty
 
 tm-to-ty-Ty : Typing-Tm Γ t A → Typing-Tm Γ t (tm-to-ty Γ t)
-tm-to-ty-Ty (TyVarZ x y) = TyVarZ x refl≈ty
-tm-to-ty-Ty (TyVarS i tty x) = TyVarS i (tm-to-ty-Ty tty) refl≈ty
-tm-to-ty-Ty (TyCoh v w x y z) = TyCoh v w x y refl≈ty
+tm-to-ty-Ty (TyConv tty p) = tm-to-ty-Ty tty
+tm-to-ty-Ty (TyVar i) = TyVar i
+tm-to-ty-Ty (TyCoh v w x y) = TyCoh v w x y
 
 Ty-unique : Typing-Tm Γ t A → Typing-Tm Γ t B → A ≈[ Γ ]ty B
-Ty-unique (TyVarZ x y) (TyVarZ w z) = trans≈ty (sym≈ty y) z
-Ty-unique (TyVarS _ tty x) (TyVarS _ tty2 y) = trans≈ty (trans≈ty (sym≈ty x) (lift-ty-equality (Ty-unique tty tty2))) y
-Ty-unique (TyCoh _ _ _ _ x) (TyCoh _ _ _ _ y) = trans≈ty (sym≈ty x) y
+Ty-unique tty1 tty2 = trans≈ty (sym≈ty (tm-to-ty-prop tty1)) (tm-to-ty-prop tty2)
 
 Ty-unique-≃ : s ≃tm t → Typing-Tm Γ s A → Typing-Tm Γ t B → A ≈[ Γ ]ty B
 Ty-unique-≃ p tty tty2 with ≃tm-to-≡ p
@@ -40,7 +38,7 @@ tm-height-is-ty-dim : Typing-Tm Δ t A → tm-height Δ t ≡ ty-dim A
 tm-height-is-ty-dim tty = ≈ty-preserve-height (tm-to-ty-prop tty)
 
 sub-tm-height : (t : Tm n) → (Γ : Ctx n) → {σ : Sub n m A} → Typing-Sub Γ Δ σ → tm-height Γ t + ty-dim A ≡ tm-height Δ (t [ σ ]tm)
-sub-tm-height {A = A} {Δ = Δ} (Var zero) (Γ , B) (TyExt {σ = σ} {t = t} σty Aty x) = begin
+sub-tm-height {A = A} {Δ = Δ} (Var zero) (Γ , B) (TyExt {σ = σ} {t = t} σty x) = begin
   ty-dim (liftType B) + ty-dim A
     ≡⟨ cong (_+ ty-dim A) (lift-ty-dim B) ⟩
   ty-dim B + ty-dim A
@@ -50,7 +48,7 @@ sub-tm-height {A = A} {Δ = Δ} (Var zero) (Γ , B) (TyExt {σ = σ} {t = t} σt
   tm-height Δ (Var zero [ ⟨ σ , t ⟩ ]tm) ∎
   where
     open ≡-Reasoning
-sub-tm-height {A = A} (Var (suc i)) (Γ , B) (TyExt {σ = σ} {t = t} σty Aty x) = begin
+sub-tm-height {A = A} (Var (suc i)) (Γ , B) (TyExt {σ = σ} {t = t} σty x) = begin
   ty-dim (liftType (Γ ‼ i)) + ty-dim A
     ≡⟨ cong (_+ ty-dim A) (lift-ty-dim (Γ ‼ i)) ⟩
   ty-dim (Γ ‼ i) + ty-dim A

@@ -101,11 +101,6 @@ sub-setoid-≈ {m} n Δ = record { Carrier = SUB′ n m
 ≈ty-preserve-height Star≈ = refl
 ≈ty-preserve-height (Arr≈ x p x₁) = cong suc (≈ty-preserve-height p)
 
-term-conversion : Typing-Tm Γ t A → A ≈[ Γ ]ty B → Typing-Tm Γ t B
-term-conversion (TyVarZ x y) eq = TyVarZ x (trans≈ty y eq)
-term-conversion (TyVarS i tvi x) eq = TyVarS i tvi (trans≈ty x eq)
-term-conversion (TyCoh Aty σty b sc p) eq = TyCoh Aty σty b sc (trans≈ty p eq)
-
 src-eq : (s ─⟨ A ⟩⟶ t) ≈[ Γ ]ty (s′ ─⟨ A′ ⟩⟶ t′) → s ≈[ Γ ]tm s′
 src-eq (Arr≈ p q r) = p
 
@@ -140,24 +135,18 @@ transport-typing-sub σty p q r with ≃c-preserve-length p | ≃c-preserve-leng
 ... | refl = σty
 
 coh-sub-ty : Typing-Tm Γ (Coh Δ A τ) B → Typing-Sub Δ Γ τ
-coh-sub-ty (TyCoh x τty b x₂ x₃) = τty
+coh-sub-ty (TyConv tty p) = coh-sub-ty tty
+coh-sub-ty (TyCoh x τty b x₂) = τty
 
 coh-ty-ty : Typing-Tm Γ (Coh Δ A τ) B → Typing-Ty Δ A
-coh-ty-ty (TyCoh Aty τty b a c) = Aty
+coh-ty-ty (TyConv tty p) = coh-ty-ty tty
+coh-ty-ty (TyCoh Aty τty b a) = Aty
 
-sub-to-ctx-Ty : Typing-Sub Γ Δ σ → Typing-Ctx Γ
-sub-to-ctx-Ty (TyNull x) = TyEmp
-sub-to-ctx-Ty (TyExt σty Aty tty) = TyAdd (sub-to-ctx-Ty σty) Aty
-
-var-Ty : Typing-Ctx Γ → (i : Fin n) → Typing-Tm Γ (Var i) (Γ ‼ i)
-var-Ty (TyAdd Γty Aty) zero = TyVarZ Aty refl≈ty
-var-Ty (TyAdd Γty Aty) (suc i) = TyVarS i (var-Ty Γty i) refl≈ty
-
-isVar-Ty : Typing-Ctx Γ → (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
-isVar-Ty Γty (Var i) = var-Ty Γty i
+isVar-Ty : (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
+isVar-Ty (Var i) = TyVar i
 
 replaceSub-Ty : {Γ : Ctx (suc n)} → Typing-Sub Γ Δ σ → Typing-Tm Δ t (Γ ‼ zero [ σ ]ty) → Typing-Sub Γ Δ (replaceSub σ t)
-replaceSub-Ty (TyExt {σ = σ} {A = A} σty Aty sty) tty = TyExt σty Aty (term-conversion tty (reflexive≈ty (lift-sub-comp-lem-ty σ A)))
+replaceSub-Ty (TyExt {σ = σ} {A = A} σty sty) tty = TyExt σty (TyConv tty (reflexive≈ty (lift-sub-comp-lem-ty σ A)))
 
 ty-dim-≈ : A ≈[ Γ ]ty B → ty-dim A ≡ ty-dim B
 ty-dim-≈ Star≈ = refl

@@ -434,7 +434,7 @@ module Support where
       σty = coh-sub-ty tty
 
       τty : Typing-Sub (tree-to-ctx id-T) id-Γ id-τ
-      τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx-Ty id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) (trans≃tm id-eq (Coh≃ refl≃c refl≃ty (id-right-unit id-τ))))
+      τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) (trans≃tm id-eq (Coh≃ refl≃c refl≃ty (id-right-unit id-τ))))
 
       lem : FVSub (sub-from-insertion id-S id-P id-T id-σ id-τ
                   ∘ exterior-sub id-S id-P id-T)
@@ -467,18 +467,16 @@ module _ where
   toSuppTyping-Ty TyStar = Support.TyStar
   toSuppTyping-Ty (TyArr sty Aty tty) = Support.TyArr (toSuppTyping-Tm sty) (toSuppTyping-Ty Aty) (toSuppTyping-Tm tty)
 
-  toSuppTyping-Tm (TyVarZ Aty p) = Support.TyVarZ (toSuppTyping-Ty Aty) (toSuppEq-Ty p)
-  toSuppTyping-Tm (TyVarS i tty p) = Support.TyVarS i (toSuppTyping-Tm tty) (toSuppEq-Ty p)
-  toSuppTyping-Tm (TyCoh Aty σty b sc p) = Support.TyCoh (toSuppTyping-Ty Aty)
+  toSuppTyping-Tm (TyConv tty p) = Support.TyConv (toSuppTyping-Tm tty) (toSuppEq-Ty p)
+  toSuppTyping-Tm (TyVar i) = Support.TyVar i
+  toSuppTyping-Tm (TyCoh Aty σty b sc) = Support.TyCoh (toSuppTyping-Ty Aty)
                                                          (toSuppTyping-Sub σty)
                                                          b
                                                          sc
-                                                         (toSuppEq-Ty p)
 
   toSuppTyping-Sub (TyNull Aty) = Support.TyNull (toSuppTyping-Ty Aty)
-  toSuppTyping-Sub (TyExt σty Aty tty) = Support.TyExt (toSuppTyping-Sub σty)
-                                                       (toSuppTyping-Ty Aty)
-                                                       (toSuppTyping-Tm tty)
+  toSuppTyping-Sub (TyExt σty tty) = Support.TyExt (toSuppTyping-Sub σty)
+                                                   (toSuppTyping-Tm tty)
 
   toSuppEq-Ty Star≈ = Support.Star≈
   toSuppEq-Ty (Arr≈ p q r) = Support.Arr≈ (toSuppEq-Tm p) (toSuppEq-Ty q) (toSuppEq-Tm r)
@@ -500,33 +498,32 @@ module _ where
 
 
   conv-rule : ∀ i a → ConvRule {i} a
-  conv-rule i a (TyCoh {B = B} Aty σty b sc p)
-    = TyCoh ⦃ tree-to-pd (insertion-tree id-S id-P id-T) ⦄
+  conv-rule i a (TyConv tty p) = TyConv (conv-rule i a tty) p
+  conv-rule i a (TyCoh Aty σty b sc)
+    = TyConv (TyCoh ⦃ tree-to-pd (insertion-tree id-S id-P id-T) ⦄
             (apply-sub-ty-typing Aty (exterior-sub-Ty id-S id-P id-T ⦃ p = dim-lem ⦄))
             (sub-from-insertion-Ty id-S id-P id-T σty τty id-eq)
             b
-            (insertion-supp-condition b _ id-S id-P id-T ⦃ p = dim-lem ⦄ sc)
+            (insertion-supp-condition b _ id-S id-P id-T ⦃ p = dim-lem ⦄ sc))
             lem
     where
       open InsertionData a
 
       τty : Typing-Sub (tree-to-ctx id-T) id-Γ id-τ
-      τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (tree-to-ctx-Ty id-S) (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) (trans≃tm id-eq (Coh≃ refl≃c refl≃ty (id-right-unit id-τ))))
+      τty = coh-sub-ty (transport-typing (apply-sub-tm-typing (isVar-Ty (branching-path-to-var id-S id-P) ⦃ branching-path-to-var-is-var id-S id-P ⦄) σty) (trans≃tm id-eq (Coh≃ refl≃c refl≃ty (id-right-unit id-τ))))
 
       dim-lem : height-of-branching id-P ≡ tree-dim id-T
       dim-lem = insertion-dim-lem id-S id-P id-T σty τty id-eq
 
       lem : id-A [ exterior-sub id-S id-P id-T ]ty
                  [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
-          ≈[ id-Γ ]ty B
+          ≈[ id-Γ ]ty (id-A [ id-σ ]ty)
       lem = begin
         id-A [ exterior-sub id-S id-P id-T ]ty
              [ sub-from-insertion id-S id-P id-T id-σ id-τ ]ty
           ≈˘⟨ reflexive≈ty (assoc-ty _ _ id-A) ⟩
         id-A [ sub-from-insertion id-S id-P id-T id-σ id-τ ∘ exterior-sub id-S id-P id-T ]ty
           ≈⟨ apply-sub-eq-ty id-A (exterior-sub-comm id-S id-P id-T σty τty id-eq) ⟩
-        id-A [ id-σ ]ty
-          ≈⟨ p ⟩
-        B ∎
+        id-A [ id-σ ]ty ∎
         where
           open Reasoning (ty-setoid-≈ _)

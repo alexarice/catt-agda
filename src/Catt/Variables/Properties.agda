@@ -44,6 +44,12 @@ liftType-preserve-is-globular (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = liftTerm-
 ≃s-preserve-var-to-var (Null≃ x) c = tt
 ≃s-preserve-var-to-var (Ext≃ p (Var≃ x x₁)) c = (≃s-preserve-var-to-var p (proj₁ c)) ,, tt
 
+getVarFin-≃ : (p : s ≃tm t) → .⦃ v : isVar s ⦄ → getVarFin s ≡ getVarFin t ⦃ ≃tm-preserve-isVar p v ⦄
+getVarFin-≃ (Var≃ x y) = toℕ-injective y
+
+getVarFin-lift : (t : Tm n) → .⦃ v : isVar t ⦄ → getVarFin (liftTerm t) ⦃ liftTerm-preserve-isVar t v ⦄ ≡ suc (getVarFin t)
+getVarFin-lift (Var i) = refl
+
 varToVarFunction-≃ : {σ τ : Sub n m ⋆} → (p : σ ≃s τ) → .⦃ _ : varToVar σ ⦄ → (i : Fin n) → varToVarFunction σ i ≡ varToVarFunction τ ⦃ ≃s-preserve-var-to-var p it ⦄ i
 varToVarFunction-≃ p i with ≃s-to-≡ p
 ... | refl = refl

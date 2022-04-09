@@ -12,16 +12,6 @@ open import Catt.Tree.Unbiased
 open import Catt.Variables
 open import Catt.Variables.Properties
 
-data Path : Tree n → Set where
-  PHere : {S : Tree m} → {T : Tree n} → Path (Join S T)
-  PExt : {S : Tree m} {T : Tree n} → Path S → Path (Join S T)
-  PShift : {S : Tree m} {T : Tree n} → Path T → Path (Join S T)
-
-path-length : {T : Tree n} → Path T → ℕ
-path-length PHere = 0
-path-length (PExt P) = suc (path-length P)
-path-length (PShift P) = path-length P
-
 has-linear-height : ℕ → Tree n → Set
 has-linear-height zero T = ⊤
 has-linear-height (suc n) Sing = ⊥

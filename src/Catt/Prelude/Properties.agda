@@ -3,9 +3,8 @@ module Catt.Prelude.Properties where
 open import Catt.Prelude
 
 open import Data.Nat.Properties public
-open import Data.Fin.Properties using (toℕ-injective; toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁;inject₁-injective) public
+open import Data.Fin.Properties using (toℕ-injective; toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁;inject₁-injective; toℕ-cast) public
 open import Data.Bool.Properties using (∨-identityʳ;∨-assoc;∨-comm;∨-idem;∨-zeroʳ) public
-open import Relation.Nullary public
 open import Relation.Binary using (Setoid) public
 import Relation.Binary.Reasoning.Setoid
 import Relation.Binary.Reasoning.PartialOrder
@@ -40,3 +39,9 @@ NonZero-⊥ {suc n} ()
 ⊔-lem : (n m : ℕ) → suc n ⊔ m ≡ suc (pred m ⊔ n)
 ⊔-lem n zero = refl
 ⊔-lem n (suc m) = cong suc (⊔-comm n m)
+
+proof-≡ : {I : Set} → {P : I → Set} → (c : Cases P) → {i : I} → doesC c ≡ i → P i
+proof-≡ {P = P} (case _ proof) refl = proof
+
+cases-≡ : {I A : Set} → {P : I → Set} → (c : Cases P) → (f : ∀ i (p : P i) → A) → {i : I} → (p : doesC c ≡ i) → cases c f ≡ f i (proof-≡ c p)
+cases-≡ (case doesC₁ proofC₁) f refl = refl

@@ -2,12 +2,14 @@ module Catt.Prelude where
 
 open import Data.Nat hiding (NonZero) public
 open import Data.Bool using (not;Bool;true;false;_∨_;if_then_else_) renaming (T to Truth) public
-open import Data.Fin using (Fin; zero; suc; inject₁; fromℕ; toℕ) renaming (_≟_ to _f≟_) public
+open import Data.Fin using (Fin; zero; suc; inject₁; fromℕ; toℕ; cast; opposite; splitAt; inject+; raise) renaming (_≟_ to _f≟_; _<?_ to _f<?_) public
 open import Relation.Binary.PropositionalEquality public
 open import Data.Product renaming (_,_ to _,,_) hiding (map) public
 open import Relation.Binary.Definitions
 open import Data.Empty using (⊥) public
 open import Data.Unit using (⊤; tt) public
+open import Relation.Nullary public
+open import Data.Fin.Patterns public
 
 variable
   n n′ m m′ l l′ o d d′ d″ : ℕ
@@ -54,3 +56,14 @@ tri-case> : {X : Set} {x y : ℕ} → x > y → (t : Tri (x < y) (x ≡ y) (x > 
 tri-case> p (tri< a ¬b ¬c) A B C = ⊥-elim (¬c p)
 tri-case> p (tri≈ ¬a b ¬c) A B C = ⊥-elim (¬c p)
 tri-case> p (tri> ¬a ¬b c) A B C = refl
+
+record Cases {I : Set} (P : I → Set) : Set where
+  constructor case
+  field
+    doesC : I
+    proofC : P doesC
+
+open Cases public
+
+cases : {I A : Set} → {P : I → Set} → Cases P → (∀ i (p : P i) → A) → A
+cases (case d p) f = f d p

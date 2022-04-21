@@ -12,6 +12,7 @@ open import Relation.Nullary public
 open import Data.Fin.Patterns public
 
 variable
+  X Y Z : Set
   n n′ m m′ l l′ o d d′ d″ : ℕ
 
 ⊥-elim : ∀ {w} {Whatever : Set w} → .⊥ → Whatever

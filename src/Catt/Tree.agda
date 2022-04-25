@@ -85,3 +85,7 @@ n-disc (suc n) = Join (n-disc n) Sing
 n-disc-is-linear : (n : ℕ) → is-linear (n-disc n)
 n-disc-is-linear zero = tt
 n-disc-is-linear (suc n) = n-disc-is-linear n
+
+is-join : Tree n → Set
+is-join Sing = ⊥
+is-join (Join S T) = ⊤

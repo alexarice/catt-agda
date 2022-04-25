@@ -135,7 +135,7 @@ sub-from-linear-tree-supp-lem zero d′ Sing T true p = begin
     open ≡-Reasoning
 sub-from-linear-tree-supp-lem zero d′ (Join S Sing) T false p = begin
   FVTy (unbiased-type d′ T) ∪ FVTm (getFst [ unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ]tm)
-    ≡˘⟨ cong (λ - → FVTy (unbiased-type d′ T) ∪ FVTm -) (≃tm-to-≡ (unrestrict-fst (sub-from-linear-tree-unbiased S T (suc d′)))) ⟩
+    ≡⟨ cong (λ - → FVTy (unbiased-type d′ T) ∪ FVTm -) (≃tm-to-≡ (unrestrict-fst (sub-from-linear-tree-unbiased S T (suc d′)))) ⟩
   FVTy (unbiased-type d′ T) ∪ FVTm (unbiased-term d′ (tree-bd d′ T) [ tree-inc d′ T false ]tm)
     ≡⟨ supp-unbiased-lem d′ T (≤-trans (m≤n+m d′ (suc (tree-dim S))) (≤-reflexive (sym p))) false ⟩
   supp-tree-bd d′ T false ∎
@@ -143,7 +143,7 @@ sub-from-linear-tree-supp-lem zero d′ (Join S Sing) T false p = begin
     open ≡-Reasoning
 sub-from-linear-tree-supp-lem zero d′ (Join S Sing) T true p = begin
   FVTy (unbiased-type d′ T) ∪ (FVTm (getSnd [ unrestrict (sub-from-linear-tree-unbiased S T (suc d′)) ]tm))
-    ≡˘⟨ cong (λ - → FVTy (unbiased-type d′ T) ∪ FVTm -) (≃tm-to-≡ (unrestrict-snd (sub-from-linear-tree-unbiased S T (suc d′)))) ⟩
+    ≡⟨ cong (λ - → FVTy (unbiased-type d′ T) ∪ FVTm -) (≃tm-to-≡ (unrestrict-snd (sub-from-linear-tree-unbiased S T (suc d′)))) ⟩
   FVTy (unbiased-type d′ T) ∪ FVTm (unbiased-term d′ (tree-bd d′ T) [ tree-inc d′ T true ]tm)
     ≡⟨ supp-unbiased-lem d′ T (≤-trans (m≤n+m d′ (suc (tree-dim S))) (≤-reflexive (sym p))) true ⟩
   supp-tree-bd d′ T true ∎

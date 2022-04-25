@@ -118,7 +118,7 @@ linear-tree-unbiased-lem (suc d) (Join S Sing) p = begin
 
 sub-from-linear-tree-unbiased-0V : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → 0V [ sub-from-linear-tree-unbiased S T d ]tm ≃tm unbiased-comp (d + tree-dim S) T
 sub-from-linear-tree-unbiased-0V Sing T d = unbiased-comp-≃ (sym (+-identityʳ d)) refl≃
-sub-from-linear-tree-unbiased-0V (Join S Sing) T d = trans≃tm (sym≃tm (unrestrict-comp-tm 0V (sub-from-linear-tree-unbiased S T (suc d)))) (trans≃tm (sub-from-linear-tree-unbiased-0V S T (suc d)) (unbiased-comp-≃ (sym (+-suc d (tree-dim S))) refl≃))
+sub-from-linear-tree-unbiased-0V (Join S Sing) T d = trans≃tm (unrestrict-comp-tm 0V (sub-from-linear-tree-unbiased S T (suc d))) (trans≃tm (sub-from-linear-tree-unbiased-0V S T (suc d)) (unbiased-comp-≃ (sym (+-suc d (tree-dim S))) refl≃))
 
 sub-from-linear-tree-0V : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) → (A : Ty m) → (p : ty-dim A ≡ tree-dim S) → 0V [ sub-from-linear-tree S t A p ]tm ≃tm t
 sub-from-linear-tree-0V Sing t A p = refl≃tm

@@ -472,13 +472,13 @@ susp-functorial-ty σ ⋆ = Arr≃ (susp-sub-preserve-getFst σ) (Star≃ refl) 
 susp-functorial-ty σ (s ─⟨ A ⟩⟶ t) = Arr≃ (susp-functorial-tm σ s) (susp-functorial-ty σ A) (susp-functorial-tm σ t)
 
 unrestrict-comp : (σ : Sub l o (s ─⟨ A ⟩⟶ t)) → (τ : Sub m l ⋆) → unrestrict (σ ∘ τ) ≃s unrestrict σ ∘ suspSub τ
-unrestrict-comp-tm : (u : Tm l) → (σ : Sub l o (s ─⟨ A ⟩⟶ t)) → u [ σ ]tm ≃tm suspTm u [ unrestrict σ ]tm
-unrestrict-comp-ty : (B : Ty l) → (σ : Sub l o (s ─⟨ A ⟩⟶ t)) → B [ σ ]ty ≃ty suspTy B [ unrestrict σ ]ty
-unrestrict-fst : (σ : Sub l o (s ─⟨ A ⟩⟶ t)) → s ≃tm getFst [ unrestrict σ ]tm
-unrestrict-snd : (σ : Sub l o (s ─⟨ A ⟩⟶ t)) → t ≃tm getSnd [ unrestrict σ ]tm
+unrestrict-comp-tm : (u : Tm l) → (σ : Sub l o (s ─⟨ A ⟩⟶ t)) → suspTm u [ unrestrict σ ]tm ≃tm u [ σ ]tm
+unrestrict-comp-ty : (B : Ty l) → (σ : Sub l o (s ─⟨ A ⟩⟶ t)) → suspTy B [ unrestrict σ ]ty ≃ty B [ σ ]ty
+unrestrict-fst : (σ : Sub l o (s ─⟨ A ⟩⟶ t)) → getFst [ unrestrict σ ]tm ≃tm s
+unrestrict-snd : (σ : Sub l o (s ─⟨ A ⟩⟶ t)) → getSnd [ unrestrict σ ]tm ≃tm t
 
-unrestrict-comp σ ⟨⟩ = Ext≃ (Ext≃ refl≃s (unrestrict-fst σ)) (unrestrict-snd σ)
-unrestrict-comp σ ⟨ τ , u ⟩ = Ext≃ (unrestrict-comp σ τ) (unrestrict-comp-tm u σ)
+unrestrict-comp σ ⟨⟩ = sym≃s (Ext≃ (Ext≃ refl≃s (unrestrict-fst σ)) (unrestrict-snd σ))
+unrestrict-comp σ ⟨ τ , u ⟩ = Ext≃ (unrestrict-comp σ τ) (sym≃tm (unrestrict-comp-tm u σ))
 
 unrestrict-comp-tm (Var zero) ⟨ σ , t ⟩ = refl≃tm
 unrestrict-comp-tm (Var (suc i)) ⟨ σ , t ⟩ = unrestrict-comp-tm (Var i) σ

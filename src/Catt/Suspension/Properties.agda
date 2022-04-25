@@ -82,14 +82,6 @@ restrict-susp-full : (u : Tm n)
 restrict-susp-full (Var i) σ p q = restrict-susp (Var i) σ
 restrict-susp-full (Coh S A τ) σ p q = sub-action-≃-tm (refl≃tm {s = suspTm (Coh S A τ)}) (sym≃s (unrestrict-restrict-≃ σ p q))
 
-getFst-unrestrict : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → getFst [ unrestrict σ ]tm ≃tm s
-getFst-unrestrict ⟨⟩ = refl≃tm
-getFst-unrestrict ⟨ σ , t ⟩ = getFst-unrestrict σ
-
-getSnd-unrestrict : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → getSnd [ unrestrict σ ]tm ≃tm t
-getSnd-unrestrict ⟨⟩ = refl≃tm
-getSnd-unrestrict ⟨ σ , t ⟩ = getSnd-unrestrict σ
-
 susp-tm-glob : (t : Tm n) → ⦃ isVar t ⦄ → isVar (suspTm t)
 susp-tm-glob (Var i) = tt
 

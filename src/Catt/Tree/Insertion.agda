@@ -7,6 +7,7 @@ open import Catt.Connection.Properties
 open import Catt.Suspension
 open import Catt.Tree
 open import Catt.Tree.Properties
+open import Catt.Tree.Path
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree.Unbiased
 open import Catt.Variables
@@ -18,8 +19,19 @@ has-linear-height (suc n) Sing = ⊥
 has-linear-height (suc n) (Join T Sing) = has-linear-height n T
 has-linear-height (suc n) (Join T (Join _ _)) = ⊥
 
-insertion-tree-size :  (S : Tree n) → (P : Path S) → (T : Tree m) → .⦃ has-linear-height (path-length P) T ⦄ → ℕ
-insertion-tree : (S : Tree n) → (P : Path S) → (T : Tree m) → .⦃ _ : has-linear-height (path-length P) T ⦄ → Tree (insertion-tree-size S P T)
+is-branching-path : {T : Tree n} → Path T → Set
+is-branching-path {T = Sing} PHere = ⊥
+is-branching-path {T = Join S T} PHere = is-linear S
+is-branching-path (PExt P) = is-branching-path P
+is-branching-path (PShift P) = is-branching-path P
+
+height-of-branching : {T : Tree n} → (P : Path T) → .⦃ is-branching-path P ⦄ → ℕ
+height-of-branching {T = Join S T} PHere = suc (tree-dim S)
+height-of-branching (PExt P) = suc (height-of-branching P)
+height-of-branching (PShift P) = height-of-branching P
+
+insertion-tree-size :  (S : Tree n) → (P : Path S) → .⦃ is-branching-path P ⦄ → (T : Tree m) → .⦃ has-linear-height (path-length P) T ⦄ → ℕ
+insertion-tree : (S : Tree n) → (P : Path S) → .⦃ _ : is-branching-path P ⦄ → (T : Tree m) → .⦃ _ : has-linear-height (path-length P) T ⦄ → Tree (insertion-tree-size S P T)
 
 insertion-tree-size {m = m} (Join S₁ S₂) (PHere) T = connect-tree-length T S₂
 insertion-tree-size (Join {m = m} S₁ S₂) (PExt P) (Join T Sing) = m + suc (suc (insertion-tree-size S₁ P T))
@@ -29,20 +41,10 @@ insertion-tree (Join S₁ S₂) PHere T = connect-tree T S₂
 insertion-tree (Join S₁ S₂) (PExt P) (Join T Sing) = Join (insertion-tree S₁ P T) S₂
 insertion-tree (Join S₁ S₂) (PShift P) T = Join S₁ (insertion-tree S₂ P T)
 
-interior-sub : (S : Tree n) → (P : Path S) → (T : Tree m) → .⦃ _ : has-linear-height (path-length P) T ⦄ → Sub (suc m) (suc (insertion-tree-size S P T)) ⋆
+interior-sub : (S : Tree n) → (P : Path S) → .⦃ _ : is-branching-path P ⦄ → (T : Tree m) → .⦃ _ : has-linear-height (path-length P) T ⦄ → Sub (suc m) (suc (insertion-tree-size S P T)) ⋆
 interior-sub (Join S₁ S₂) PHere T = idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘ connect-inc-left (tree-last-var T) _
 interior-sub (Join S₁ S₂) (PExt P) (Join T Sing) = connect-susp-inc-left (insertion-tree-size S₁ P T) (tree-size S₂) ∘ suspSub (interior-sub S₁ P T)
 interior-sub (Join S₁ S₂) (PShift P) T = connect-susp-inc-right (tree-size S₁) (insertion-tree-size S₂ P T) ∘ interior-sub S₂ P T
-
-is-branching-path : {T : Tree n} → Path T → Set
-is-branching-path {T = Join S T} PHere = is-linear S
-is-branching-path (PExt P) = is-branching-path P
-is-branching-path (PShift P) = is-branching-path P
-
-height-of-branching : {T : Tree n} → (P : Path T) → .⦃ is-branching-path P ⦄ → ℕ
-height-of-branching {T = Join S T} PHere = suc (tree-dim S)
-height-of-branching (PExt P) = suc (height-of-branching P)
-height-of-branching (PShift P) = height-of-branching P
 
 branching-path-to-var : (T : Tree n) → (P : Path T) → .⦃ bp : is-branching-path P ⦄ → Tm (suc n)
 branching-path-to-var (Join S T) (PHere) = 0V [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm

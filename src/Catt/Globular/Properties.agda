@@ -85,7 +85,7 @@ tm-to-ty-coh-sub {A = s ─⟨ A ⟩⟶ t} Δ B τ Γ σ = begin
   < suspTy B [ unrestrict σ ∘ suspSub τ ]ty >ty
     ≈˘⟨ sub-action-≃-ty (refl≃ty {A = suspTy B}) (unrestrict-comp σ τ) ⟩
   < suspTy B [ unrestrict (σ ∘ τ) ]ty >ty
-    ≈˘⟨ unrestrict-comp-ty B (σ ∘ τ) ⟩
+    ≈⟨ unrestrict-comp-ty B (σ ∘ τ) ⟩
   < B [ σ ∘ τ ]ty >ty ∎
   where
     open Reasoning ty-setoid

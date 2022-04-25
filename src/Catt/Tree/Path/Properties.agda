@@ -14,6 +14,10 @@ open import Data.Sum
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
 
+maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-Maximal P ⦄ → not-here P
+maximal-join-not-here {T = Join S T} (PExt P) = tt
+maximal-join-not-here {T = Join S T} (PShift P) = tt
+
 path-to-var-is-var : (P : Path T) → isVar (path-to-var P)
 path-to-var-is-var PHere = tt
 path-to-var-is-var (PExt P) = var-to-var-comp-tm (suspTm (path-to-var P)) ⦃ suspTm-var (path-to-var P) ⦃ path-to-var-is-var P ⦄ ⦄ (connect-susp-inc-left _ _) ⦃ connect-susp-inc-left-var-to-var _ _ ⦄

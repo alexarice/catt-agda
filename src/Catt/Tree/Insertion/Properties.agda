@@ -6,6 +6,7 @@ open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree
+open import Catt.Tree.Path
 open import Catt.Tree.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Unbiased
@@ -23,6 +24,11 @@ branching-path-to-var-is-var (Join S T) PHere = var-to-var-comp-tm 0V (connect-s
 branching-path-to-var-is-var (Join S T) (PExt P) = var-to-var-comp-tm (suspTm (branching-path-to-var S P)) ⦃ suspTm-var (branching-path-to-var S P) ⦃ branching-path-to-var-is-var S P ⦄ ⦄ (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
 branching-path-to-var-is-var (Join S T) (PShift P) = var-to-var-comp-tm (branching-path-to-var T P) ⦃ branching-path-to-var-is-var T P ⦄ (connect-susp-inc-right (tree-size S) (tree-size T)) ⦃ connect-susp-inc-right-var-to-var (tree-size S) (tree-size T) ⦄
 
+height-of-branching-non-zero : (S : Tree n) → (P : Path S) → .⦃ _ : is-branching-path P ⦄ → NonZero (height-of-branching P)
+height-of-branching-non-zero (Join S T) PHere = it
+height-of-branching-non-zero (Join S T) (PExt P) = it
+height-of-branching-non-zero (Join S T) (PShift P) = height-of-branching-non-zero T P
+
 exterior-sub-fst-var : (S : Tree n)
                      → (P : Path S)
                      → .⦃ bp : is-branching-path P ⦄
@@ -34,7 +40,7 @@ exterior-sub-fst-var (Join S₁ S₂) PHere T = begin
   < Var (fromℕ (insertion-tree-size (Join S₁ S₂) PHere T)) >tm
     ≈˘⟨ idSub≃-fst-var (sym≃c (connect-tree-to-ctx T S₂)) ⟩
   < Var (fromℕ _) [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ]tm >tm
-    ≈˘⟨ sub-action-≃-tm (sub-between-connects-fst-var (sub-from-linear-tree-unbiased (suspTree S₁) T 0) idSub (tree-last-var T) (sym≃tm (unrestrict-fst (sub-from-linear-tree-unbiased S₁ T 1)))) (refl≃s {σ = idSub≃ (sym≃c (connect-tree-to-ctx T S₂))}) ⟩
+    ≈˘⟨ sub-action-≃-tm (sub-between-connects-fst-var (sub-from-linear-tree-unbiased (suspTree S₁) T 0) idSub (tree-last-var T) (unrestrict-fst (sub-from-linear-tree-unbiased S₁ T 1))) (refl≃s {σ = idSub≃ (sym≃c (connect-tree-to-ctx T S₂))}) ⟩
   < Var (fromℕ _)
     [ sub-between-connects (sub-from-linear-tree-unbiased (suspTree S₁) T 0)
                            idSub
@@ -73,7 +79,7 @@ exterior-sub-last-var (Join S₁ S₂) PHere T = begin
   < tree-last-var S₂
     [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
     ∘ (connect-inc-right (tree-last-var T) (tree-size S₂) ∘ idSub) ]tm >tm
-    ≈˘⟨ sub-action-≃-tm (refl≃tm {s = tree-last-var S₂}) (sub-action-≃-sub (sub-between-connects-inc-right (sub-from-linear-tree-unbiased (suspTree S₁) T 0) getSnd idSub (tree-last-var T) (sym≃tm (unrestrict-snd (sub-from-linear-tree-unbiased S₁ T 1))) (id-on-tm (Var (fromℕ _)))) refl≃s) ⟩
+    ≈˘⟨ sub-action-≃-tm (refl≃tm {s = tree-last-var S₂}) (sub-action-≃-sub (sub-between-connects-inc-right (sub-from-linear-tree-unbiased (suspTree S₁) T 0) getSnd idSub (tree-last-var T) (unrestrict-snd (sub-from-linear-tree-unbiased S₁ T 1)) (id-on-tm (Var (fromℕ _)))) refl≃s) ⟩
   < tree-last-var S₂
     [ idSub≃ (sym≃c (connect-tree-to-ctx T S₂))
     ∘ (sub-between-connects (sub-from-linear-tree-unbiased (suspTree S₁) T 0)

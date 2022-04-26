@@ -167,3 +167,9 @@ identity-tree-to-term-Ty {A = A} (TyCoh Uty σty _ _) = sub-from-linear-tree-to-
 identity-tree-to-type-Ty : Typing-Tm Γ (identity-tree t A) B → Typing-Ty Γ A
 identity-tree-to-type-Ty (TyConv tty p) = identity-tree-to-type-Ty tty
 identity-tree-to-type-Ty {A = A} (TyCoh Uty σty _ _) = sub-from-linear-tree-to-type-Ty (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ (sym (tree-dim-n-disc (ty-dim A))) σty
+
+unbiased-comp-lemma : (d : ℕ) → (T : Tree n) → Typing-Tm Γ (unbiased-comp d T) A → NonZero d
+unbiased-comp-lemma zero T (TyConv tty x) = unbiased-comp-lemma zero T tty
+unbiased-comp-lemma zero T (TyCoh x x₁ false ())
+unbiased-comp-lemma zero T (TyCoh x x₁ true ())
+unbiased-comp-lemma (suc d) T tty = it

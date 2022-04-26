@@ -8,6 +8,7 @@ open import Catt.Suspension
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
+open import Catt.Tree.Label
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree.Unbiased
 open import Catt.Variables
@@ -51,6 +52,11 @@ branching-path-to-var (Join S T) (PHere) = 0V [ connect-susp-inc-left (tree-size
 branching-path-to-var (Join S T) (PExt P) = suspTm (branching-path-to-var S P) [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm
 branching-path-to-var (Join S T) (PShift P) ⦃ bp ⦄ = branching-path-to-var T P ⦃ bp ⦄ [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm
 
+branching-path-to-type : (T : Tree n) → (P : Path T) → .⦃ bp : is-branching-path P ⦄ → Ty (suc n)
+branching-path-to-type (Join S T) PHere = suspTy (unbiased-type (tree-dim S) S) [ connect-susp-inc-left (tree-size S) (tree-size T) ]ty
+branching-path-to-type (Join S T) (PExt P) = suspTy (branching-path-to-type S P) [ connect-susp-inc-left (tree-size S) (tree-size T) ]ty
+branching-path-to-type (Join S T) (PShift P) = branching-path-to-type T P [ connect-susp-inc-right (tree-size S) (tree-size T) ]ty
+
 exterior-sub : (S : Tree n)
              → (P : Path S)
              → .⦃ _ : is-branching-path P ⦄
@@ -87,3 +93,28 @@ sub-from-insertion (Join S₁ S₂) (PExt P) (Join T Sing) σ τ
 sub-from-insertion (Join S₁ S₂) (PShift P) T σ τ
   = sub-from-connect (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
                      (sub-from-insertion S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ)
+
+sub-from-insertion-label-helper : (S : Tree n)
+                                → (P : Path S)
+                                → .⦃ bp : is-branching-path P ⦄
+                                → (T : Tree m)
+                                → .⦃ lh : has-linear-height (path-length P) T ⦄
+                                → (σ : Label o S)
+                                → (τ : Label o T)
+                                → Label o (insertion-tree S P T)
+sub-from-insertion-label-helper (Join S₁ S₂) PHere T (LJoin x σ σ′) τ = connect-label τ σ′
+sub-from-insertion-label-helper (Join S₁ S₂) (PExt P) (Join T Sing) (LJoin x σ σ′) (LJoin y τ (LSing z))
+  = LJoin y (sub-from-insertion-label-helper S₁ P T σ τ) σ′
+sub-from-insertion-label-helper (Join S₁ S₂) (PShift P) T (LJoin x σ σ′) τ
+  = LJoin x σ (sub-from-insertion-label-helper S₂ P T σ′ τ)
+
+sub-from-insertion-label : (S : Tree n)
+                         → (P : Path S)
+                         → .⦃ bp : is-branching-path P ⦄
+                         → (T : Tree m)
+                         → .⦃ lh : has-linear-height (path-length P) T ⦄
+                         → (σ : Sub (suc n) l A)
+                         → (τ : Sub (suc m) l A)
+                         → Sub (suc (insertion-tree-size S P T)) l A
+sub-from-insertion-label {A = A} S P T σ τ
+  = label-to-sub (sub-from-insertion-label-helper S P T (to-label S σ) (to-label T τ)) A

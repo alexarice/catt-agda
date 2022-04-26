@@ -258,3 +258,11 @@ first-label-prop (LJoin x L M) A = begin
 
 ‼l-prop-2 : (σ : Sub (suc (tree-size S)) m A) → (P : Path S) → to-label S σ ‼l P ≃tm path-to-var P [ σ ]tm
 ‼l-prop-2 {S = S} σ P = trans≃tm (‼l-prop (to-label S σ) P (sub-type σ)) (sub-action-≃-tm (refl≃tm {s = path-to-var P}) (sub-to-label-to-sub S σ))
+
+replace-first-label : (L : Label m S) → (t : Tm m) → first-label (replace-label L t) ≃tm t
+replace-first-label (LSing x) t = refl≃tm
+replace-first-label (LJoin x L M) t = refl≃tm
+
+connect-first-label : (L : Label m S) → (M : Label m T) → first-label (connect-label L M) ≃tm first-label L
+connect-first-label (LSing x) M = replace-first-label M x
+connect-first-label (LJoin x L₁ L₂) M = refl≃tm

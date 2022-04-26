@@ -19,6 +19,10 @@ first-label : Label n S → Tm n
 first-label (LSing x) = x
 first-label (LJoin x L M) = x
 
+last-label : Label n S → Tm n
+last-label (LSing x) = x
+last-label (LJoin x L M) = last-label M
+
 label-to-tree : {S : Tree n} → (L : Label m S) → Tree n
 label-to-tree {S = S} L = S
 
@@ -46,3 +50,15 @@ _‼l_ : Label m S → Path S → Tm m
 L ‼l PHere = first-label L
 LJoin x L M ‼l PExt P = L ‼l P
 LJoin x L M ‼l PShift P = M ‼l P
+
+replace-label : Label m S
+              → Tm m
+              → Label m S
+replace-label (LSing _) t = LSing t
+replace-label (LJoin _ L M) t = LJoin t L M
+
+connect-label : (L : Label m S)
+              → (M : Label m T)
+              → Label m (connect-tree S T)
+connect-label (LSing x) M = replace-label M x
+connect-label (LJoin x L L′) M = LJoin x L (connect-label L′ M)

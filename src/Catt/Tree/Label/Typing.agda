@@ -114,3 +114,14 @@ sub-maximal-equality {S = S} {Γ = Γ} {σ = σ} {τ = τ} σty τty f = begin
         open Reasoning tm-setoid
 
     open Reasoning (sub-setoid-≈ (suc (tree-size S)) Γ)
+
+replace-label-Ty : Typing-Label Γ L A → Typing-Tm Γ t A → t ≈[ Γ ]tm first-label L → Typing-Label Γ (replace-label L t) A
+replace-label-Ty (TySing x) tty p = TySing tty
+replace-label-Ty (TyJoin x Lty Lty′) tty p = TyJoin tty (label-typing-conv Lty (Arr≈ (sym≈tm p) refl≈ty refl≈tm)) Lty′
+
+connect-label-Ty : (Lty : Typing-Label Γ L A)
+                 → (Mty : Typing-Label Γ M A)
+                 → last-label L ≈[ Γ ]tm first-label M
+                 → Typing-Label Γ (connect-label L M) A
+connect-label-Ty (TySing x) Mty p = replace-label-Ty Mty x p
+connect-label-Ty {M = M} (TyJoin {M = L′} x Lty Lty′) Mty p = TyJoin x (label-typing-conv Lty (reflexive≈ty (Arr≃ refl≃tm refl≃ty (sym≃tm (connect-first-label L′ M))))) (connect-label-Ty Lty′ Mty p)

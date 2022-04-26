@@ -11,6 +11,8 @@ open import Catt.Tree.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
+open import Catt.Tree.Label
+open import Catt.Tree.Label.Properties
 open import Catt.Variables
 open import Catt.Variables.Properties
 open import Catt.Connection
@@ -782,3 +784,120 @@ sub-from-insertion-sub (Join S₁ S₂) (PShift P) T σ τ μ = begin
         ≈⟨ sub-from-insertion-sub S₂ P T (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ μ ⟩
       < μ ∘ sub-from-insertion S₂ P T
           (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)) τ >s ∎
+
+sub-from-insertion-label-helper-≃ : (S : Tree n)
+                                  → (P : Path S)
+                                  → .⦃ bp : is-branching-path P ⦄
+                                  → (T : Tree m)
+                                  → .⦃ lh : has-linear-height (path-length P) T ⦄
+                                  → ∀ {σ : Label l S} {σ′ : Label l′ S}
+                                  → σ ≃l σ′
+                                  → ∀ {τ} {τ′}
+                                  → τ ≃l τ′
+                                  → sub-from-insertion-label-helper S P T σ τ ≃l sub-from-insertion-label-helper S P T σ′ τ′
+sub-from-insertion-label-helper-≃ (Join S₁ S₂) PHere T (LJoin≃ x p p′) q = connect-label-≃ q p′
+sub-from-insertion-label-helper-≃ (Join S₁ S₂) (PExt P) (Join T Sing) (LJoin≃ x p p′) (LJoin≃ y q (LSing≃ z)) = LJoin≃ y (sub-from-insertion-label-helper-≃ S₁ P T p q) p′
+sub-from-insertion-label-helper-≃ (Join S₁ S₂) (PShift P) T (LJoin≃ x p p′) q = LJoin≃ x p (sub-from-insertion-label-helper-≃ S₂ P T p′ q)
+
+lift-sub-from-insertion-label-helper : (S : Tree n)
+                                     → (P : Path S)
+                                     → .⦃ bp : is-branching-path P ⦄
+                                     → (T : Tree m)
+                                     → .⦃ lh : has-linear-height (path-length P) T ⦄
+                                     → (σ : Label l S)
+                                     → (τ : Label l T)
+                                     → liftLabel (sub-from-insertion-label-helper S P T σ τ) ≃l sub-from-insertion-label-helper S P T (liftLabel σ) (liftLabel τ)
+lift-sub-from-insertion-label-helper (Join S₁ S₂) PHere T (LJoin x σ σ′) τ = lift-connect-label τ σ′
+lift-sub-from-insertion-label-helper (Join S₁ S₂) (PExt P) (Join T Sing) (LJoin x σ σ′) (LJoin y τ (LSing z)) = LJoin≃ refl≃tm (lift-sub-from-insertion-label-helper S₁ P T σ τ) refl≃l
+lift-sub-from-insertion-label-helper (Join S₁ S₂) (PShift P) T (LJoin x σ σ′) τ = LJoin≃ refl≃tm refl≃l (lift-sub-from-insertion-label-helper S₂ P T σ′ τ)
+
+lift-sub-from-insertion-label : (S : Tree n)
+                              → (P : Path S)
+                              → .⦃ bp : is-branching-path P ⦄
+                              → (T : Tree m)
+                              → .⦃ lh : has-linear-height (path-length P) T ⦄
+                              → (σ : Sub (suc n) l A)
+                              → (τ : Sub (suc m) l A)
+                              → liftSub (sub-from-insertion-label S P T σ τ) ≃s sub-from-insertion-label S P T (liftSub σ) (liftSub τ)
+lift-sub-from-insertion-label {A = A} S P T σ τ = begin
+  < liftSub (sub-from-insertion-label S P T σ τ) >s
+    ≈˘⟨ lift-label-to-sub (sub-from-insertion-label-helper S P T (to-label S σ) (to-label T τ)) A ⟩
+  < label-to-sub (liftLabel (sub-from-insertion-label-helper S P T (to-label S σ) (to-label T τ))) (liftType A) >s
+    ≈⟨ label-to-sub-≃ (lift-sub-from-insertion-label-helper S P T (to-label S σ) (to-label T τ)) refl≃ty ⟩
+  < label-to-sub (sub-from-insertion-label-helper S P T (liftLabel (to-label S σ)) (liftLabel (to-label T τ))) (liftType A) >s
+    ≈⟨ label-to-sub-≃ (sub-from-insertion-label-helper-≃ S P T (lift-to-label S σ) (lift-to-label T τ)) refl≃ty ⟩
+  < sub-from-insertion-label S P T (liftSub σ) (liftSub τ) >s ∎
+  where
+    open Reasoning sub-setoid
+
+susp-sub-from-insertion-label-helper : (S : Tree n)
+                                     → (P : Path S)
+                                     → .⦃ bp : is-branching-path P ⦄
+                                     → (T : Tree m)
+                                     → .⦃ lh : has-linear-height (path-length P) T ⦄
+                                     → (σ : Label l S)
+                                     → (τ : Label l T)
+                                     → suspLabel (sub-from-insertion-label-helper S P T σ τ) ≃l sub-from-insertion-label-helper S P T (suspLabel σ) (suspLabel τ)
+susp-sub-from-insertion-label-helper (Join S₁ S₂) PHere T (LJoin x σ σ′) τ = susp-connect-label τ σ′
+susp-sub-from-insertion-label-helper (Join S₁ S₂) (PExt P) (Join T Sing) (LJoin x σ σ′) (LJoin y τ (LSing z)) = LJoin≃ refl≃tm (susp-sub-from-insertion-label-helper S₁ P T σ τ) refl≃l
+susp-sub-from-insertion-label-helper (Join S₁ S₂) (PShift P) T (LJoin x σ σ′) τ = LJoin≃ refl≃tm refl≃l (susp-sub-from-insertion-label-helper S₂ P T σ′ τ)
+
+susp-sub-from-insertion-label : (S : Tree n)
+                              → (P : Path S)
+                              → .⦃ bp : is-branching-path P ⦄
+                              → (T : Tree m)
+                              → .⦃ lh : has-linear-height (path-length P) T ⦄
+                              → (σ : Sub (suc n) l ⋆)
+                              → (τ : Sub (suc m) l ⋆)
+                              → sub-from-insertion-label (suspTree S) (PExt P) (suspTree T) (suspSub σ) (suspSub τ) ≃s suspSub (sub-from-insertion-label S P T σ τ)
+susp-sub-from-insertion-label S P T σ τ = begin
+  < sub-from-insertion-label (suspTree S) (PExt P) (suspTree T) (suspSub σ) (suspSub τ) >s ≡⟨⟩
+  < label-to-sub (sub-from-insertion-label-helper (suspTree S) (PExt P) (suspTree T) (to-label (suspTree S) (suspSub σ)) (to-label (suspTree T) (suspSub τ))) ⋆ >s
+    ≈⟨ label-to-sub-≃ (sub-from-insertion-label-helper-≃ (suspTree S) (PExt P) (suspTree T) (susp-to-label S σ) (susp-to-label T τ)) refl≃ty ⟩
+  < label-to-sub (sub-from-insertion-label-helper (suspTree S) (PExt P) (suspTree T)
+                 (LJoin getFst (suspLabel (to-label S σ)) (LSing getSnd))
+                 (LJoin getFst (suspLabel (to-label T τ)) (LSing getSnd)))
+                 ⋆ >s
+    ≡⟨⟩
+  < unrestrict (label-to-sub (sub-from-insertion-label-helper S P T (suspLabel (to-label S σ))
+                                                                    (suspLabel (to-label T τ)))
+                             (getFst ─⟨ ⋆ ⟩⟶ getSnd)) >s
+    ≈˘⟨ unrestrict-≃ (label-to-sub-≃ (susp-sub-from-insertion-label-helper S P T (to-label S σ) (to-label T τ)) refl≃ty) ⟩
+  < unrestrict (label-to-sub (suspLabel (sub-from-insertion-label-helper S P T (to-label S σ) (to-label T τ))) (getFst ─⟨ ⋆ ⟩⟶ getSnd)) >s
+    ≈⟨ unrestrict-≃ (label-to-sub-susp (sub-from-insertion-label-helper S P T (to-label S σ) (to-label T τ)) ⋆) ⟩
+  < suspSub (sub-from-insertion-label S P T σ τ) >s ∎
+  where
+    open Reasoning sub-setoid
+
+sub-from-insertion-label-helper-sub : (S : Tree n)
+                                    → (P : Path S)
+                                    → .⦃ bp : is-branching-path P ⦄
+                                    → (T : Tree m)
+                                    → .⦃ lh : has-linear-height (path-length P) T ⦄
+                                    → (σ : Label l S)
+                                    → (τ : Label l T)
+                                    → (μ : Sub l l′ A)
+                                    → sub-from-insertion-label-helper S P T (σ [ μ ]l) (τ [ μ ]l) ≃l sub-from-insertion-label-helper S P T σ τ [ μ ]l
+sub-from-insertion-label-helper-sub (Join S₁ S₂) PHere T (LJoin x σ σ′) τ μ = connect-label-comp τ σ′ μ
+sub-from-insertion-label-helper-sub (Join S₁ S₂) (PExt P) (Join T Sing) (LJoin x σ σ′) (LJoin y τ (LSing z)) μ = LJoin≃ refl≃tm (sub-from-insertion-label-helper-sub S₁ P T σ τ μ) refl≃l
+sub-from-insertion-label-helper-sub (Join S₁ S₂) (PShift P) T (LJoin x σ σ′) τ μ = LJoin≃ refl≃tm refl≃l (sub-from-insertion-label-helper-sub S₂ P T σ′ τ μ)
+
+sub-from-insertion-label-sub : (S : Tree n)
+                             → (P : Path S)
+                             → .⦃ bp : is-branching-path P ⦄
+                             → (T : Tree m)
+                             → .⦃ lh : has-linear-height (path-length P) T ⦄
+                             → (σ : Sub (suc n) l A)
+                             → (τ : Sub (suc m) l A)
+                             → (μ : Sub l l′ B)
+                             → sub-from-insertion-label S P T (μ ∘ σ) (μ ∘ τ) ≃s μ ∘ sub-from-insertion-label S P T σ τ
+sub-from-insertion-label-sub {A = A} S P T σ τ μ = begin
+  < label-to-sub (sub-from-insertion-label-helper S P T (to-label S (μ ∘ σ)) (to-label T (μ ∘ τ))) (A [ μ ]ty) >s
+    ≈⟨ label-to-sub-≃ (sub-from-insertion-label-helper-≃ S P T (to-label-comp S σ μ) (to-label-comp T τ μ)) refl≃ty ⟩
+  < label-to-sub (sub-from-insertion-label-helper S P T (to-label S σ [ μ ]l) (to-label T τ [ μ ]l)) (A [ μ ]ty) >s
+    ≈⟨ label-to-sub-≃ (sub-from-insertion-label-helper-sub S P T (to-label S σ) (to-label T τ) μ) refl≃ty ⟩
+  < label-to-sub (sub-from-insertion-label-helper S P T (to-label S σ) (to-label T τ) [ μ ]l) (A [ μ ]ty) >s
+    ≈⟨ label-comp-to-sub-comp (sub-from-insertion-label-helper S P T (to-label S σ) (to-label T τ)) μ A ⟩
+  < μ ∘ sub-from-insertion-label S P T σ τ >s ∎
+  where
+    open Reasoning sub-setoid

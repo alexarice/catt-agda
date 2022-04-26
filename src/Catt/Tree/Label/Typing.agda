@@ -52,6 +52,11 @@ label-typing-conv : Typing-Label Γ L A → A ≈[ Γ ]ty B → Typing-Label Γ 
 label-typing-conv (TySing tty) p = TySing (TyConv tty p)
 label-typing-conv (TyJoin tty Lty Mty) p = TyJoin (TyConv tty p) (label-typing-conv Lty (Arr≈ refl≈tm p refl≈tm)) (label-typing-conv Mty p)
 
+
+label-eq-conv : (L : Label m S) → A ≈[ Γ ]ty B → label-to-sub L A ≈[ Γ ]s label-to-sub L B
+label-eq-conv (LSing x) p = Ext≈ (Null≈ p) refl≈tm
+label-eq-conv (LJoin x L M) p = sub-from-connect-≈ (unrestrictEq (label-eq-conv L (Arr≈ refl≈tm p refl≈tm))) (label-eq-conv M p)
+
 label-comp-Ty : Typing-Label Γ L A → Typing-Sub Γ Δ σ → Typing-Label Δ (L [ σ ]l) (A [ σ ]ty)
 label-comp-Ty (TySing tty) σty = TySing (apply-sub-tm-typing tty σty)
 label-comp-Ty {σ = σ} (TyJoin {M = M} tty Lty Mty) σty

@@ -34,6 +34,7 @@ suspLabel : Label m S → Label (2 + m) S
 suspLabel (LSing x) = LSing (suspTm x)
 suspLabel (LJoin x L M) = LJoin (suspTm x) (suspLabel L) (suspLabel M)
 
+infixr 30 _[_]l
 _[_]l : Label m S → (σ : Sub m n B) → Label n S
 LSing x [ σ ]l = LSing (x [ σ ]tm)
 LJoin x S T [ σ ]l = LJoin (x [ σ ]tm) (S [ σ ]l) (T [ σ ]l)
@@ -62,3 +63,21 @@ connect-label : (L : Label m S)
               → Label m (connect-tree S T)
 connect-label (LSing x) M = replace-label M x
 connect-label (LJoin x L L′) M = LJoin x L (connect-label L′ M)
+
+liftLabel : Label m S → Label (suc m) S
+liftLabel (LSing x) = LSing (liftTerm x)
+liftLabel (LJoin x L M) = LJoin (liftTerm x) (liftLabel L) (liftLabel M)
+
+connect-tree-inc-left : (S : Tree n) → (T : Tree m) → Label (suc (connect-tree-length S T)) S
+connect-tree-inc-left Sing T = LSing (Var (fromℕ _))
+connect-tree-inc-left (Join S₁ S₂) T = connect-label (to-label (suspTree S₁) (connect-susp-inc-left _ _)) (connect-tree-inc-left S₂ T [ connect-susp-inc-right _ _ ]l)
+
+connect-tree-inc-right : (S : Tree n) → (T : Tree m) → Label (suc (connect-tree-length S T)) T
+connect-tree-inc-right Sing T = id-label T
+connect-tree-inc-right (Join S₁ S₂) T = connect-tree-inc-right S₂ T [ connect-susp-inc-right _ _ ]l
+
+label-between-connect-trees : (L : Label (suc m) S) → (M : Label (suc n) T) → (S′ : Tree m) → (T′ : Tree n) → Label (suc (connect-tree-length S′ T′)) (connect-tree S T)
+label-between-connect-trees L M S′ T′ = connect-label (L [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]l) (M [ label-to-sub (connect-tree-inc-right S′ T′) ⋆ ]l)
+
+label-between-joins : (L : Label (suc m) S) → (M : Label (suc n) T) → (S′ : Tree m) → (T′ : Tree n) → Label (suc (n + (2 + m))) (Join S T)
+label-between-joins L M S′ T′ = label-between-connect-trees (LJoin getFst (suspLabel L) (LSing getSnd)) M (suspTree S′) T′

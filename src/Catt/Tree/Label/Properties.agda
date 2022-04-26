@@ -16,7 +16,7 @@ open import Catt.Tree.Path.Properties
 
 data _≃l_ : {S : Tree n} → Label m S → Label l S → Set where
   LSing≃ : s ≃tm t → LSing s ≃l LSing t
-  LJoin≃ : ∀ {L L′ : Label m S} {M M′ : Label m T} → s ≃tm t → L ≃l L′ → M ≃l M′ → LJoin s L M ≃l LJoin t L′ M′
+  LJoin≃ : ∀ {L : Label m S} {L′ : Label m′ S} {M : Label m T} {M′ : Label m′ T} → s ≃tm t → L ≃l L′ → M ≃l M′ → LJoin s L M ≃l LJoin t L′ M′
 
 refl≃l : L ≃l L
 refl≃l {L = LSing x} = LSing≃ refl≃tm
@@ -30,6 +30,23 @@ trans≃l : L ≃l L′ → L′ ≃l M → L ≃l M
 trans≃l (LSing≃ x) (LSing≃ y) = LSing≃ (trans≃tm x y)
 trans≃l (LJoin≃ x p q) (LJoin≃ y r s) = LJoin≃ (trans≃tm x y) (trans≃l p r) (trans≃l q s)
 
+record LABEL (S : Tree n) : Set where
+  constructor <_>l
+  field
+    {label-n} : ℕ
+    label : Label label-n S
+
+open LABEL public
+
+label-setoid : (S : Tree n) → Setoid _ _
+label-setoid S = record { Carrier = LABEL S
+                        ; _≈_ = λ x y → label x ≃l label y
+                        ; isEquivalence = record { refl = refl≃l
+                                                 ; sym = sym≃l
+                                                 ; trans = trans≃l
+                                                 }
+                        }
+
 first-label-≃ : L ≃l M → first-label L ≃tm first-label M
 first-label-≃ (LSing≃ x) = x
 first-label-≃ (LJoin≃ x p q) = x
@@ -37,6 +54,26 @@ first-label-≃ (LJoin≃ x p q) = x
 label-to-sub-≃ : L ≃l M → A ≃ty B → label-to-sub L A ≃s label-to-sub M B
 label-to-sub-≃ (LSing≃ x) q = Ext≃ (Null≃ q) x
 label-to-sub-≃ (LJoin≃ x p r) q = sub-from-connect-≃ (unrestrict-≃ (label-to-sub-≃ p (Arr≃ x q (first-label-≃ r)))) (label-to-sub-≃ r q)
+
+sub-action-≃-label : L ≃l M → σ ≃s τ → L [ σ ]l ≃l M [ τ ]l
+sub-action-≃-label (LSing≃ x) q = LSing≃ (sub-action-≃-tm x q)
+sub-action-≃-label (LJoin≃ x p p′) q = LJoin≃ (sub-action-≃-tm x q) (sub-action-≃-label p q) (sub-action-≃-label p′ q)
+
+replace-label-≃ : L ≃l M → s ≃tm t → replace-label L s ≃l replace-label M t
+replace-label-≃ (LSing≃ x) q = LSing≃ q
+replace-label-≃ (LJoin≃ x p p′) q = LJoin≃ q p p′
+
+connect-label-≃ : L ≃l L′ → M ≃l M′ → connect-label L M ≃l connect-label L′ M′
+connect-label-≃ (LSing≃ x) q = replace-label-≃ q x
+connect-label-≃ (LJoin≃ x p p′) q = LJoin≃ x p (connect-label-≃ p′ q)
+
+id-on-label : (L : Label m S) → L [ idSub ]l ≃l L
+id-on-label (LSing x) = LSing≃ (id-on-tm x)
+id-on-label (LJoin x L M) = LJoin≃ (id-on-tm x) (id-on-label L) (id-on-label M)
+
+susp-functorial-label : (σ : Sub m n ⋆) → (L : Label m S) → suspLabel (L [ σ ]l) ≃l suspLabel L [ suspSub σ ]l
+susp-functorial-label σ (LSing x) = LSing≃ (susp-functorial-tm σ x)
+susp-functorial-label σ (LJoin x L M) = LJoin≃ (susp-functorial-tm σ x) (susp-functorial-label σ L) (susp-functorial-label σ M)
 
 Same-Leaves : (L M : Label m S) → Set
 Same-Leaves {S = S} L M = ∀ (P : Path S) → .⦃ is-Maximal P ⦄ → L ‼l P ≃tm M ‼l P
@@ -86,6 +123,21 @@ label-comp-to-sub-comp (LJoin x L M) σ A = begin
         ≈⟨ unrestrict-comp-higher σ (label-to-sub L (x ─⟨ A ⟩⟶ first-label M)) ⟩
       < σ ∘ unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M)) >s ∎
 
+replace-label-comp : (L : Label m S) → (t : Tm m) → (σ : Sub m n A) → replace-label (L [ σ ]l) (t [ σ ]tm) ≃l replace-label L t [ σ ]l
+replace-label-comp (LSing x) t σ = refl≃l
+replace-label-comp (LJoin x L M) t σ = refl≃l
+
+connect-label-comp : (L : Label m S) → (M : Label m T) → (σ : Sub m n A) → connect-label (L [ σ ]l) (M [ σ ]l) ≃l connect-label L M [ σ ]l
+connect-label-comp (LSing x) M σ = replace-label-comp M x σ
+connect-label-comp (LJoin x L L′) M σ = LJoin≃ refl≃tm refl≃l (connect-label-comp L′ M σ)
+
+assoc-label : (τ : Sub n l B) → (σ : Sub m n A) → (L : Label m S) → L [ τ ∘ σ ]l ≃l L [ σ ]l [ τ ]l
+assoc-label τ σ (LSing x) = LSing≃ (assoc-tm τ σ x)
+assoc-label τ σ (LJoin x L M) = LJoin≃ (assoc-tm τ σ x) (assoc-label τ σ L) (assoc-label τ σ M)
+
+to-label-comp : (S : Tree n) → (σ : Sub (suc n) m A) → (μ : Sub m l B) → to-label S (μ ∘ σ) ≃l to-label S σ [ μ ]l
+to-label-comp S σ μ = assoc-label μ σ (id-label S)
+
 first-label-susp : (L : Label n S) → first-label (suspLabel L) ≃tm suspTm (first-label L)
 first-label-susp (LSing x) = refl≃tm
 first-label-susp (LJoin x L M) = refl≃tm
@@ -121,6 +173,14 @@ label-to-sub-susp (LJoin x L M) A = begin
       < unrestrict (suspSubRes (label-to-sub L (x ─⟨ A ⟩⟶ first-label M))) >s
         ≈˘⟨ sub-res-unrestrict-comm (label-to-sub L (x ─⟨ A ⟩⟶ first-label M)) ⟩
       < suspSubRes (unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M))) >s ∎
+
+susp-replace-label : (L : Label m S) → (t : Tm m) → suspLabel (replace-label L t) ≃l replace-label (suspLabel L) (suspTm t)
+susp-replace-label (LSing x) t = refl≃l
+susp-replace-label (LJoin x L M) t = refl≃l
+
+susp-connect-label : (L : Label m S) → (M : Label m T) → suspLabel (connect-label L M) ≃l connect-label (suspLabel L) (suspLabel M)
+susp-connect-label (LSing x) M = susp-replace-label M x
+susp-connect-label (LJoin x L L′) M = LJoin≃ refl≃tm refl≃l (susp-connect-label L′ M)
 
 id-first-label : (T : Tree n) → first-label (id-label T) ≃tm Var (fromℕ n)
 id-first-label Sing = refl≃tm
@@ -214,6 +274,33 @@ first-label-prop (LJoin x L M) A = begin
   where
     open Reasoning tm-setoid
 
+last-label-prop : (L : Label m S) → (A : Ty m) → last-label L ≃tm tree-last-var S [ label-to-sub L A ]tm
+last-label-prop (LSing x) A = refl≃tm
+last-label-prop (LJoin {S = S} {T = T} x L M) A = begin
+  < last-label M >tm
+    ≈⟨ last-label-prop M A ⟩
+  < tree-last-var T [ label-to-sub M A ]tm >tm
+    ≈˘⟨ sub-action-≃-tm (refl≃tm {s = tree-last-var T}) (sub-from-connect-inc-right (unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M))) getSnd (label-to-sub M A) lem) ⟩
+  < tree-last-var T
+    [ sub-from-connect (unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M))) (label-to-sub M A)
+      ∘ connect-susp-inc-right (tree-size S) (tree-size T) ]tm >tm
+    ≈⟨ assoc-tm _ _ (tree-last-var T) ⟩
+  < tree-last-var T
+    [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm
+    [ sub-from-connect (unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M))) (label-to-sub M A) ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+
+    lem : (getSnd [ unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M))
+             ]tm)
+            ≃tm (Var (fromℕ _) [ label-to-sub M A ]tm)
+    lem = begin
+      < getSnd [ unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M)) ]tm >tm
+        ≈⟨ unrestrict-snd (label-to-sub L (x ─⟨ A ⟩⟶ first-label M)) ⟩
+      < first-label M >tm
+        ≈⟨ first-label-prop M A ⟩
+      < Var (fromℕ _) [ label-to-sub M A ]tm >tm ∎
+
 ‼l-prop : (L : Label m S) → (P : Path S) → (A : Ty m) → L ‼l P ≃tm path-to-var P [ label-to-sub L A ]tm
 ‼l-prop L PHere A = first-label-prop L A
 ‼l-prop (LJoin x L M) (PExt P) A = begin
@@ -266,3 +353,75 @@ replace-first-label (LJoin x L M) t = refl≃tm
 connect-first-label : (L : Label m S) → (M : Label m T) → first-label (connect-label L M) ≃tm first-label L
 connect-first-label (LSing x) M = replace-first-label M x
 connect-first-label (LJoin x L₁ L₂) M = refl≃tm
+
+label-join-lem : (t : Tm m) → (L : Label m S) → (M : Label m T) → (A : Ty m)
+               → getSnd [ unrestrict (label-to-sub L (t ─⟨ A ⟩⟶ first-label M)) ]tm ≃tm Var (fromℕ _) [ label-to-sub M A ]tm
+label-join-lem t L M A = begin
+ < getSnd [ unrestrict (label-to-sub L (t ─⟨ A ⟩⟶ first-label M)) ]tm >tm
+   ≈⟨ unrestrict-snd (label-to-sub L (t ─⟨ A ⟩⟶ first-label M)) ⟩
+ < first-label M >tm
+   ≈⟨ first-label-prop M A ⟩
+ < Var (fromℕ _) [ label-to-sub M A ]tm >tm ∎
+   where
+     open Reasoning tm-setoid
+
+lift-replace-label : (L : Label m S) → (t : Tm m) → liftLabel (replace-label L t) ≃l replace-label (liftLabel L) (liftTerm t)
+lift-replace-label (LSing x) t = refl≃l
+lift-replace-label (LJoin x L M) t = refl≃l
+
+lift-connect-label : (L : Label m S) → (M : Label m T) → liftLabel (connect-label L M) ≃l connect-label (liftLabel L) (liftLabel M)
+lift-connect-label (LSing x) M = lift-replace-label M x
+lift-connect-label (LJoin x L L′) M = LJoin≃ refl≃tm refl≃l (lift-connect-label L′ M)
+
+lift-first-label : (L : Label m S) → first-label (liftLabel L) ≃tm liftTerm (first-label L)
+lift-first-label (LSing x) = refl≃tm
+lift-first-label (LJoin x L M) = refl≃tm
+
+lift-label-to-sub : (L : Label m S) → (A : Ty m) → label-to-sub (liftLabel L) (liftType A) ≃s liftSub (label-to-sub L A)
+lift-label-to-sub (LSing x) A = refl≃s
+lift-label-to-sub (LJoin x L M) A = begin
+  < sub-from-connect (unrestrict (label-to-sub (liftLabel L) (liftTerm x ─⟨ liftType A ⟩⟶ first-label (liftLabel M))))
+                     (label-to-sub (liftLabel M) (liftType A)) >s
+    ≈⟨ sub-from-connect-≃ lem (lift-label-to-sub M A) ⟩
+  < sub-from-connect (liftSub (unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M)))) (liftSub (label-to-sub M A)) >s
+    ≈˘⟨ sub-from-connect-lift (unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M))) (label-to-sub M A) ⟩
+  < liftSub (sub-from-connect (unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M)))
+                              (label-to-sub M A)) >s ∎
+  where
+    open Reasoning sub-setoid
+
+    lem : unrestrict
+            (label-to-sub (liftLabel L)
+             (liftTerm x ─⟨ liftType A ⟩⟶ first-label (liftLabel M)))
+            ≃s liftSub (unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M)))
+    lem = begin
+      < unrestrict (label-to-sub (liftLabel L) (liftTerm x ─⟨ liftType A ⟩⟶ first-label (liftLabel M))) >s
+        ≈⟨ unrestrict-≃ (label-to-sub-≃ (refl≃l {L = liftLabel L}) (Arr≃ refl≃tm refl≃ty (lift-first-label M))) ⟩
+      < unrestrict (label-to-sub (liftLabel L) (liftType (x ─⟨ A ⟩⟶ first-label M))) >s
+        ≈⟨ unrestrict-≃ (lift-label-to-sub L (x ─⟨ A ⟩⟶ first-label M)) ⟩
+      < unrestrict (liftSub (label-to-sub L (x ─⟨ A ⟩⟶ first-label M))) >s
+        ≈⟨ unrestrict-lift (label-to-sub L (x ─⟨ A ⟩⟶ first-label M)) ⟩
+      < liftSub (unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M))) >s ∎
+
+apply-lifted-sub-label-≃ : (L : Label m S) → (σ : Sub m n A) → L [ liftSub σ ]l ≃l liftLabel (L [ σ ]l)
+apply-lifted-sub-label-≃ (LSing x) σ = LSing≃ (apply-lifted-sub-tm-≃ x σ)
+apply-lifted-sub-label-≃ (LJoin x L M) σ = LJoin≃ (apply-lifted-sub-tm-≃ x σ) (apply-lifted-sub-label-≃ L σ) (apply-lifted-sub-label-≃ M σ)
+
+lift-to-label : (S : Tree n) → (σ : Sub (suc n) m A) → liftLabel (to-label S σ) ≃l to-label S (liftSub σ)
+lift-to-label S σ = sym≃l (apply-lifted-sub-label-≃ (id-label S) σ)
+
+susp-to-label : (S : Tree n) → (σ : Sub (suc n) m ⋆) → to-label (suspTree S) (suspSub σ) ≃l LJoin getFst (suspLabel (to-label S σ)) (LSing getSnd)
+susp-to-label S σ = LJoin≃ (sym≃tm (susp-sub-preserve-getFst σ)) lem (LSing≃ (sym≃tm (susp-sub-preserve-getSnd σ)))
+  where
+    open Reasoning (label-setoid _)
+
+    lem : suspLabel (id-label S) [ connect-susp-inc-left _ 0 ]l
+                                 [ suspSub σ ]l
+          ≃l suspLabel (to-label S σ)
+    lem = begin
+      < suspLabel (id-label S) [ connect-susp-inc-left _ 0 ]l
+                               [ suspSub σ ]l >l
+        ≈⟨ sub-action-≃-label (id-on-label (suspLabel (id-label S))) refl≃s ⟩
+      < suspLabel (id-label S) [ suspSub σ ]l >l
+        ≈˘⟨ susp-functorial-label σ (id-label S) ⟩
+      < suspLabel (id-label S [ σ ]l) >l ∎

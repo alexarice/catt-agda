@@ -75,6 +75,22 @@ exterior-sub (Join S₁ S₂) (PShift P) T =
   sub-between-connect-susps idSub
                             (exterior-sub S₂ P T)
 
+exterior-sub-label : (S : Tree n)
+                   → (P : Path S)
+                   → .⦃ _ : is-branching-path P ⦄
+                   → (T : Tree m)
+                   → .⦃ _ : has-linear-height (path-length P) T ⦄
+                   → Label (suc (insertion-tree-size S P T)) S
+exterior-sub-label (Join S₁ S₂) PHere T
+  = label-between-connect-trees (to-label (suspTree S₁) (sub-from-linear-tree-unbiased (suspTree S₁) T 0))
+                                (id-label S₂)
+                                T
+                                S₂
+exterior-sub-label (Join S₁ S₂) (PExt P) (Join T Sing)
+  = label-between-joins (exterior-sub-label S₁ P T) (id-label S₂) (insertion-tree S₁ P T) S₂
+exterior-sub-label (Join S₁ S₂) (PShift P) T
+  = label-between-joins (id-label S₁) (exterior-sub-label S₂ P T) S₁ (insertion-tree S₂ P T)
+
 sub-from-insertion : (S : Tree n)
                    → (P : Path S)
                    → .⦃ bp : is-branching-path P ⦄

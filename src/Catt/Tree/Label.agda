@@ -81,3 +81,6 @@ label-between-connect-trees L M S′ T′ = connect-label (L [ label-to-sub (con
 
 label-between-joins : (L : Label (suc m) S) → (M : Label (suc n) T) → (S′ : Tree m) → (T′ : Tree n) → Label (suc (n + (2 + m))) (Join S T)
 label-between-joins L M S′ T′ = label-between-connect-trees (LJoin getFst (suspLabel L) (LSing getSnd)) M (suspTree S′) T′
+
+Maximal-func : ℕ → (S : Tree n) → Set
+Maximal-func m S = ∀ (P : Path S) → .⦃ is-Maximal P ⦄ → Tm m

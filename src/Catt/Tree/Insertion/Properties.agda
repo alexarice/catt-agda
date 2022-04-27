@@ -901,3 +901,30 @@ sub-from-insertion-label-sub {A = A} S P T σ τ μ = begin
   < μ ∘ sub-from-insertion-label S P T σ τ >s ∎
   where
     open Reasoning sub-setoid
+
+exterior-sub-first-label : (S : Tree n)
+                         → (P : Path S)
+                         → .⦃ _ : is-branching-path P ⦄
+                         → (T : Tree m)
+                         → .⦃ _ : has-linear-height (path-length P) T ⦄
+                         → first-label (exterior-sub-label S P T) ≃tm (Var (fromℕ (insertion-tree-size S P T)))
+exterior-sub-first-label (Join S₁ S₂) PHere T = begin
+  < first-label (exterior-sub-label (Join S₁ S₂) PHere T) >tm
+    ≈⟨ label-between-connect-trees-first-label (to-label (suspTree S₁) (sub-from-linear-tree-unbiased (suspTree S₁) T 0)) (id-label S₂) T S₂ ⟩
+  < first-label (to-label (suspTree S₁) (sub-from-linear-tree-unbiased (suspTree S₁) T 0)) [ label-to-sub (connect-tree-inc-left T S₂) ⋆ ]tm >tm
+    ≈⟨ sub-action-≃-tm (‼l-prop-2 {S = suspTree S₁} (sub-from-linear-tree-unbiased (suspTree S₁) T 0) PHere) refl≃s ⟩
+  < Var (fromℕ _)
+    [ sub-from-linear-tree-unbiased (suspTree S₁) T 0 ]tm
+    [ label-to-sub (connect-tree-inc-left T S₂) ⋆ ]tm >tm
+    ≈⟨ sub-action-≃-tm (unrestrict-fst (sub-from-linear-tree-unbiased S₁ T 1)) refl≃s ⟩
+  < Var (fromℕ _) [ label-to-sub (connect-tree-inc-left T S₂) ⋆ ]tm >tm
+    ≈˘⟨ ‼l-prop (connect-tree-inc-left T S₂) PHere ⋆ ⟩
+  < first-label (connect-tree-inc-left T S₂) >tm
+    ≈⟨ connect-tree-inc-left-first-label T S₂ ⟩
+  < Var (fromℕ (connect-tree-length T S₂)) >tm ∎
+  where
+    open Reasoning tm-setoid
+exterior-sub-first-label (Join S₁ S₂) (PExt P) (Join T Sing)
+  = label-between-joins-first-label (exterior-sub-label S₁ P T) (id-label S₂) (insertion-tree S₁ P T) S₂
+exterior-sub-first-label (Join S₁ S₂) (PShift P) T
+  = label-between-joins-first-label (id-label S₁) (exterior-sub-label S₂ P T) S₁ (insertion-tree S₂ P T)

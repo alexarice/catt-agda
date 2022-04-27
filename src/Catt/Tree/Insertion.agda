@@ -91,6 +91,19 @@ exterior-sub-label (Join S₁ S₂) (PExt P) (Join T Sing)
 exterior-sub-label (Join S₁ S₂) (PShift P) T
   = label-between-joins (id-label S₁) (exterior-sub-label S₂ P T) S₁ (insertion-tree S₂ P T)
 
+-- exterior-max-func : (S : Tree n)
+--                   → (P : Path S)
+--                   → .⦃ _ : is-branching-path P ⦄
+--                   → (T : Tree m)
+--                   → .⦃ _ : has-linear-height (path-length P) T ⦄
+--                   → Maximal-func (suc (insertion-tree-size S P T)) S
+-- exterior-max-func (Join S₁ S₂) PHere T (PExt Q) = unbiased-comp (tree-dim T) T [ label-to-sub (connect-tree-inc-left T S₂) ⋆ ]tm
+-- exterior-max-func (Join S₁ S₂) PHere T (PShift Q) = path-to-var (path-inc-right T Q)
+-- exterior-max-func (Join S₁ S₂) (PExt P) (Join T Sing) (PExt Q) = suspTm (exterior-max-func S₁ P T Q) [ connect-susp-inc-left _ _ ]tm
+-- exterior-max-func (Join S₁ S₂) (PExt P) (Join T Sing) (PShift Q) = path-to-var (PShift {S = insertion-tree S₁ P T} Q)
+-- exterior-max-func (Join S₁ S₂) (PShift P) T (PExt Q) = path-to-var (PExt {T = insertion-tree S₂ P T} Q)
+-- exterior-max-func (Join S₁ S₂) (PShift P) T (PShift Q) = {!exterior-max-func S₁ P T Q [ ]!}
+
 sub-from-insertion : (S : Tree n)
                    → (P : Path S)
                    → .⦃ bp : is-branching-path P ⦄

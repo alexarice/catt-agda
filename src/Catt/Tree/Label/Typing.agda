@@ -15,6 +15,9 @@ open import Catt.Tree
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
 open import Catt.Tree.Path
+open import Catt.Tree.Path.Properties
+open import Catt.Tree.Properties
+open import Catt.Tree.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Suspension
 open import Catt.Suspension.Typing index rule lift-rule susp-rule
 open import Catt.Connection
@@ -130,3 +133,84 @@ connect-label-Ty : (Lty : Typing-Label Γ L A)
                  → Typing-Label Γ (connect-label L M) A
 connect-label-Ty (TySing x) Mty p = replace-label-Ty Mty x p
 connect-label-Ty {M = M} (TyJoin {M = L′} x Lty Lty′) Mty p = TyJoin x (label-typing-conv Lty (reflexive≈ty (Arr≃ refl≃tm refl≃ty (sym≃tm (connect-first-label L′ M))))) (connect-label-Ty Lty′ Mty p)
+
+connect-tree-inc-left-Ty : (S : Tree n)
+                         → (T : Tree m)
+                         → Typing-Label (tree-to-ctx (connect-tree S T)) (connect-tree-inc-left S T) ⋆
+connect-tree-inc-left-Ty Sing T = TySing (fst-var-Ty (tree-to-ctx T))
+connect-tree-inc-left-Ty (Join S₁ S₂) T
+  = connect-label-Ty (to-label-Ty (suspTree S₁) (connect-susp-inc-left-Ty (tree-to-ctx (connect-tree S₂ T))))
+                     (label-comp-Ty (connect-tree-inc-left-Ty S₂ T) (connect-susp-inc-right-Ty (tree-to-ctx S₁)))
+                     (reflexive≈tm lem)
+  where
+    open Reasoning tm-setoid
+
+    lem : last-label
+            (to-label (suspTree S₁)
+             (connect-susp-inc-left _ (connect-tree-length S₂ T)))
+            ≃tm
+            first-label
+            (connect-tree-inc-left S₂ T [
+             connect-susp-inc-right _ (connect-tree-length S₂ T) ]l)
+    lem = begin
+      < getSnd [ connect-susp-inc-left _ (connect-tree-length S₂ T) ]tm >tm
+        ≈⟨ connect-inc-fst-var getSnd (connect-tree-length S₂ T) ⟩
+      < Var (fromℕ _) [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]tm >tm
+        ≈˘⟨ sub-action-≃-tm (connect-tree-inc-left-first-label S₂ T) refl≃s ⟩
+      < first-label (connect-tree-inc-left S₂ T)
+        [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]tm >tm
+        ≈˘⟨ first-label-comp (connect-tree-inc-left S₂ T) (connect-susp-inc-right _ (connect-tree-length S₂ T)) ⟩
+      < first-label
+      (connect-tree-inc-left S₂ T [
+       connect-susp-inc-right _ (connect-tree-length S₂ T) ]l) >tm ∎
+
+connect-tree-inc-right-Ty : (S : Tree n)
+                          → (T : Tree m)
+                          → Typing-Label (tree-to-ctx (connect-tree S T)) (connect-tree-inc-right S T) ⋆
+connect-tree-inc-right-Ty Sing T = id-label-Ty T
+connect-tree-inc-right-Ty (Join S₁ S₂) T = label-comp-Ty (connect-tree-inc-right-Ty S₂ T) (connect-susp-inc-right-Ty (tree-to-ctx S₁))
+
+label-between-connect-trees-Ty : (S′ : Tree n)
+                               → (T′ : Tree m)
+                               → Typing-Label (tree-to-ctx S′) L ⋆
+                               → Typing-Label (tree-to-ctx T′) M ⋆
+                               → last-label L ≈[ tree-to-ctx S′ ]tm tree-last-var S′
+                               → first-label M ≈[ tree-to-ctx T′ ]tm Var (fromℕ (tree-size T′))
+                               → Typing-Label (tree-to-ctx (connect-tree S′ T′)) (label-between-connect-trees L M S′ T′) ⋆
+label-between-connect-trees-Ty {L = L} {M = M} S′ T′ Lty Mty p q
+  = connect-label-Ty (label-comp-Ty Lty (label-typing-to-sub (connect-tree-inc-left-Ty S′ T′) TyStar))
+                     (label-comp-Ty Mty (label-typing-to-sub (connect-tree-inc-right-Ty S′ T′) TyStar))
+                     lem
+  where
+    open Reasoning (tm-setoid-≈ _)
+    lem : last-label (L [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]l) ≈[
+            tree-to-ctx (connect-tree S′ T′) ]tm
+            first-label (M [ label-to-sub (connect-tree-inc-right S′ T′) ⋆ ]l)
+    lem = begin
+      last-label (L [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]l)
+        ≈⟨ reflexive≈tm (last-label-comp L (label-to-sub (connect-tree-inc-left S′ T′) ⋆)) ⟩
+      last-label L [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]tm
+        ≈⟨ apply-sub-tm-eq (label-typing-to-sub (connect-tree-inc-left-Ty S′ T′) TyStar) p ⟩
+      tree-last-var S′ [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]tm
+        ≈˘⟨ reflexive≈tm (sub-action-≃-tm (last-path-to-var S′) refl≃s) ⟩
+      path-to-var (last-path S′) [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]tm
+        ≈˘⟨ reflexive≈tm (‼l-prop (connect-tree-inc-left S′ T′) (last-path S′) ⋆) ⟩
+      connect-tree-inc-left S′ T′ ‼l last-path S′
+        ≈⟨ reflexive≈tm (last-path-‼ (connect-tree-inc-left S′ T′)) ⟩
+      last-label (connect-tree-inc-left S′ T′)
+        ≈⟨ reflexive≈tm (connect-tree-inc-first-label S′ T′) ⟩
+      first-label (connect-tree-inc-right S′ T′)
+        ≈⟨ reflexive≈tm (‼l-prop (connect-tree-inc-right S′ T′) PHere ⋆) ⟩
+      Var (fromℕ (tree-size T′)) [ label-to-sub (connect-tree-inc-right S′ T′) ⋆ ]tm
+        ≈˘⟨ apply-sub-tm-eq (label-typing-to-sub (connect-tree-inc-right-Ty S′ T′) TyStar) q ⟩
+      first-label M [ label-to-sub (connect-tree-inc-right S′ T′) ⋆ ]tm
+        ≈˘⟨ reflexive≈tm (first-label-comp M (label-to-sub (connect-tree-inc-right S′ T′) ⋆)) ⟩
+      first-label (M [ label-to-sub (connect-tree-inc-right S′ T′) ⋆ ]l) ∎
+
+label-between-joins-Ty : (S′ : Tree n)
+                       → (T′ : Tree m)
+                       → Typing-Label (tree-to-ctx S′) L ⋆
+                       → Typing-Label (tree-to-ctx T′) M ⋆
+                       → first-label M ≈[ tree-to-ctx T′ ]tm Var (fromℕ (tree-size T′))
+                       → Typing-Label (tree-to-ctx (Join S′ T′)) (label-between-joins L M S′ T′) ⋆
+label-between-joins-Ty S′ T′ Lty Mty p = label-between-connect-trees-Ty (suspTree S′) T′ (TyJoin getFstTy (suspLabelTy Lty) (TySing getSndTy)) Mty refl≈tm p

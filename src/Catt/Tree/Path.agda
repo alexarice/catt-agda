@@ -66,3 +66,16 @@ is-Maximal {S = Sing} PHere = ⊤
 is-Maximal {S = Join S T} PHere = ⊥
 is-Maximal (PExt P) = is-Maximal P
 is-Maximal (PShift P) = not-here P × is-Maximal P
+
+last-path : (T : Tree n) → Path T
+last-path Sing = PHere
+last-path (Join S T) = PShift (last-path T)
+
+path-inc-left : (P : Path S) → (T : Tree n) → Path (connect-tree S T)
+path-inc-left PHere T = PHere
+path-inc-left (PExt P) T = PExt P
+path-inc-left (PShift P) T = PShift (path-inc-left P T)
+
+path-inc-right : (S : Tree n) → (P : Path T) → Path (connect-tree S T)
+path-inc-right Sing P = P
+path-inc-right (Join S₁ S₂) P = PShift (path-inc-right S₂ P)

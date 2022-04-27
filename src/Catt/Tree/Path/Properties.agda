@@ -497,3 +497,7 @@ var-to-path-to-var T (Var i) = begin
   < Var i >tm ∎
   where
     open Reasoning tm-setoid
+
+last-path-to-var : (T : Tree n) → path-to-var (last-path T) ≃tm tree-last-var T
+last-path-to-var Sing = refl≃tm
+last-path-to-var (Join S T) = sub-action-≃-tm (last-path-to-var T) refl≃s

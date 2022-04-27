@@ -51,6 +51,10 @@ first-label-≃ : L ≃l M → first-label L ≃tm first-label M
 first-label-≃ (LSing≃ x) = x
 first-label-≃ (LJoin≃ x p q) = x
 
+last-label-≃ : L ≃l M → last-label L ≃tm last-label M
+last-label-≃ (LSing≃ x) = x
+last-label-≃ (LJoin≃ x p q) = last-label-≃ q
+
 label-to-sub-≃ : L ≃l M → A ≃ty B → label-to-sub L A ≃s label-to-sub M B
 label-to-sub-≃ (LSing≃ x) q = Ext≃ (Null≃ q) x
 label-to-sub-≃ (LJoin≃ x p r) q = sub-from-connect-≃ (unrestrict-≃ (label-to-sub-≃ p (Arr≃ x q (first-label-≃ r)))) (label-to-sub-≃ r q)
@@ -87,6 +91,10 @@ Same-Leaves-proj₂ f P = f (PShift P) ⦃ maximal-join-not-here P ,, it ⦄
 first-label-comp : (M : Label n S) → (σ : Sub n m A) → first-label (M [ σ ]l) ≃tm first-label M [ σ ]tm
 first-label-comp (LSing x) σ = refl≃tm
 first-label-comp (LJoin x L M) σ = refl≃tm
+
+last-label-comp : (M : Label n S) → (σ : Sub n m A) → last-label (M [ σ ]l) ≃tm last-label M [ σ ]tm
+last-label-comp (LSing x) σ = refl≃tm
+last-label-comp (LJoin x L M) σ = last-label-comp M σ
 
 label-comp-to-sub-comp : (L : Label m S)
                        → (σ : Sub m n B)
@@ -346,6 +354,12 @@ last-label-prop (LJoin {S = S} {T = T} x L M) A = begin
 ‼l-prop-2 : (σ : Sub (suc (tree-size S)) m A) → (P : Path S) → to-label S σ ‼l P ≃tm path-to-var P [ σ ]tm
 ‼l-prop-2 {S = S} σ P = trans≃tm (‼l-prop (to-label S σ) P (sub-type σ)) (sub-action-≃-tm (refl≃tm {s = path-to-var P}) (sub-to-label-to-sub S σ))
 
+‼l-comp : (L : Label m S) → (P : Path S) → (σ : Sub m n A) → (L [ σ ]l) ‼l P ≃tm L ‼l P [ σ ]tm
+‼l-comp (LSing x) PHere σ = refl≃tm
+‼l-comp (LJoin x L M) PHere σ = refl≃tm
+‼l-comp (LJoin x L M) (PExt P) σ = ‼l-comp L P σ
+‼l-comp (LJoin x L M) (PShift P) σ = ‼l-comp M P σ
+
 replace-first-label : (L : Label m S) → (t : Tm m) → first-label (replace-label L t) ≃tm t
 replace-first-label (LSing x) t = refl≃tm
 replace-first-label (LJoin x L M) t = refl≃tm
@@ -425,3 +439,80 @@ susp-to-label S σ = LJoin≃ (sym≃tm (susp-sub-preserve-getFst σ)) lem (LSin
       < suspLabel (id-label S) [ suspSub σ ]l >l
         ≈˘⟨ susp-functorial-label σ (id-label S) ⟩
       < suspLabel (id-label S [ σ ]l) >l ∎
+
+
+
+connect-tree-inc-left-first-label : (S : Tree n)
+                                  → (T : Tree m)
+                                  → first-label (connect-tree-inc-left S T) ≃tm Var (fromℕ (connect-tree-length S T))
+connect-tree-inc-left-first-label Sing T = refl≃tm
+connect-tree-inc-left-first-label (Join S₁ S₂) T = connect-inc-left-fst-var getSnd (connect-tree-length S₂ T)
+
+replace-label-prop : (L : Label m S) → (t : Tm m) → t ≃tm first-label L → replace-label L t ≃l L
+replace-label-prop (LSing x) t p = LSing≃ p
+replace-label-prop (LJoin x L M) t p = LJoin≃ p refl≃l refl≃l
+
+connect-tree-inc-first-label : (S : Tree n)
+                             → (T : Tree m)
+                             → last-label (connect-tree-inc-left S T) ≃tm first-label (connect-tree-inc-right S T)
+connect-tree-inc-first-label Sing T = sym≃tm (id-first-label T)
+connect-tree-inc-first-label (Join S₁ S₂) T = begin
+  < last-label (replace-label (connect-tree-inc-left S₂ T [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]l)
+                              (getSnd [ connect-susp-inc-left _ (connect-tree-length S₂ T) ]tm)) >tm
+    ≈⟨ last-label-≃ (replace-label-prop (connect-tree-inc-left S₂ T [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]l) (getSnd [ connect-susp-inc-left _ (connect-tree-length S₂ T) ]tm) lem) ⟩
+  < last-label (connect-tree-inc-left S₂ T [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]l) >tm
+    ≈⟨ last-label-comp (connect-tree-inc-left S₂ T) (connect-susp-inc-right _ (connect-tree-length S₂ T)) ⟩
+  < last-label (connect-tree-inc-left S₂ T) [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]tm >tm
+    ≈⟨ sub-action-≃-tm (connect-tree-inc-first-label S₂ T) refl≃s ⟩
+  < first-label (connect-tree-inc-right S₂ T) [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]tm >tm
+    ≈˘⟨ first-label-comp (connect-tree-inc-right S₂ T) (connect-susp-inc-right _ (connect-tree-length S₂ T)) ⟩
+  < first-label (connect-tree-inc-right S₂ T [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]l) >tm ∎
+  where
+    open Reasoning tm-setoid
+    lem : (getSnd [ connect-susp-inc-left _ (connect-tree-length S₂ T) ]tm)
+            ≃tm
+            first-label
+            (connect-tree-inc-left S₂ T [
+             connect-susp-inc-right _ (connect-tree-length S₂ T) ]l)
+    lem = begin
+      < getSnd [ connect-susp-inc-left _ (connect-tree-length S₂ T) ]tm >tm
+        ≈⟨ connect-inc-fst-var getSnd (connect-tree-length S₂ T) ⟩
+      < Var (fromℕ (connect-tree-length S₂ T)) [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]tm >tm
+        ≈˘⟨ sub-action-≃-tm (connect-tree-inc-left-first-label S₂ T) refl≃s ⟩
+      < first-label (connect-tree-inc-left S₂ T) [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]tm >tm
+        ≈˘⟨ first-label-comp (connect-tree-inc-left S₂ T) (connect-susp-inc-right _ (connect-tree-length S₂ T)) ⟩
+      < first-label (connect-tree-inc-left S₂ T [ connect-susp-inc-right _ (connect-tree-length S₂ T) ]l) >tm ∎
+
+last-path-‼ : (L : Label m S) → L ‼l last-path S ≃tm last-label L
+last-path-‼ (LSing x) = refl≃tm
+last-path-‼ (LJoin x L M) = last-path-‼ M
+
+label-between-connect-trees-first-label : (L : Label (suc m) S)
+                                        → (M : Label (suc n) T)
+                                        → (S′ : Tree m)
+                                        → (T′ : Tree n)
+                                        → first-label (label-between-connect-trees L M S′ T′) ≃tm first-label L [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]tm
+label-between-connect-trees-first-label L M S′ T′ = begin
+  < first-label (label-between-connect-trees L M S′ T′) >tm
+    ≈⟨ connect-first-label (L [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]l) (M [ label-to-sub (connect-tree-inc-right S′ T′) ⋆ ]l) ⟩
+  < first-label (L [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]l) >tm
+    ≈⟨ first-label-comp L (label-to-sub (connect-tree-inc-left S′ T′) ⋆) ⟩
+  < first-label L [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+
+label-between-joins-first-label : (L : Label (suc m) S)
+                                → (M : Label (suc n) T)
+                                → (S′ : Tree m)
+                                → (T′ : Tree n)
+                                → first-label (label-between-joins L M S′ T′) ≃tm Var (fromℕ (n + (2 + m)))
+label-between-joins-first-label L M S′ T′ = begin
+  < first-label (label-between-joins L M S′ T′) >tm
+    ≈⟨ label-between-connect-trees-first-label (LJoin getFst (suspLabel L) (LSing getSnd)) M (suspTree S′) T′ ⟩
+  < getFst [ label-to-sub (connect-tree-inc-left (suspTree S′) T′) ⋆ ]tm >tm
+    ≈˘⟨ ‼l-prop (connect-tree-inc-left (suspTree S′) T′) PHere ⋆ ⟩
+  < first-label (connect-tree-inc-left (suspTree S′) T′) >tm
+    ≈⟨ connect-tree-inc-left-first-label (suspTree S′) T′ ⟩
+  < Var (fromℕ (connect-tree-length (suspTree S′) T′)) >tm ∎
+  where
+    open Reasoning tm-setoid

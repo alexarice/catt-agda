@@ -707,7 +707,7 @@ sub-from-insertion-label-Ty {A = A} S P T {σ} {τ} σty τty p = label-typing-t
                      (apply-sub-tm-typing (unbiased-comp-Ty (tree-dim T) ⦃ NonZero-subst (insertion-dim-lem S P T σty τty p) (height-of-branching-non-zero S P) ⦄ T refl) (transport-typing-sub τty refl≃c refl≃c (sym≃s (sub-to-label-to-sub T τ))))
 
 
-{-
+
 interior-sub-comm : (S : Tree n)
                    → (P : Path S)
                    → .⦃ bp : is-branching-path P ⦄
@@ -1131,4 +1131,112 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) (PShift P) T {σ} {τ} σty τty p 
         open Reasoning sub-setoid
 
     open Reasoning (sub-setoid-≈ (suc (tree-size (Join S₁ S₂))) Γ)
--}
+
+exterior-sub-label-Ty : (S : Tree n)
+                      → (P : Path S)
+                      → .⦃ _ : is-branching-path P ⦄
+                      → (T : Tree m)
+                      → .⦃ _ : has-linear-height (path-length P) T ⦄
+                      → .⦃ p : height-of-branching P ≡ tree-dim T ⦄
+                      → Typing-Label (tree-to-ctx (insertion-tree S P T)) (exterior-sub-label S P T) ⋆
+exterior-sub-label-Ty (Join S₁ S₂) PHere T
+  = label-between-connect-trees-Ty T
+                                   S₂
+                                   (to-label-Ty (suspTree S₁) (sub-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T ⦃ NonZero-subst it it ⦄ (sym it)))
+                                   (id-label-Ty S₂)
+                                   (reflexive≈tm (unrestrict-snd (sub-from-linear-tree-unbiased S₁ T 1)))
+                                   (reflexive≈tm (id-first-label S₂))
+exterior-sub-label-Ty (Join S₁ S₂) (PExt P) (Join T Sing)
+  = label-between-joins-Ty (insertion-tree S₁ P T)
+                           S₂
+                           (exterior-sub-label-Ty S₁ P T ⦃ p = cong pred it ⦄)
+                           (id-label-Ty S₂)
+                           (reflexive≈tm (id-first-label S₂))
+exterior-sub-label-Ty (Join S₁ S₂) (PShift P) T
+  = label-between-joins-Ty S₁
+                           (insertion-tree S₂ P T)
+                           (id-label-Ty S₁)
+                           (exterior-sub-label-Ty S₂ P T)
+                           (reflexive≈tm (exterior-sub-first-label S₂ P T))
+
+-- exterior-sub-label-comm-lem : (S : Tree n)
+--                             → (P : Path S)
+--                             → .⦃ _ : is-branching-path P ⦄
+--                             → (T : Tree m)
+--                             → .⦃ _ : has-linear-height (path-length P) T ⦄
+--                             → {σ : Label l S}
+--                             → {τ : Label l T}
+--                             → Typing-Label Γ σ A
+--                             → Typing-Label Γ τ A
+--                             → branching-path-to-var S P [ label-to-sub σ A ]tm ≃tm unbiased-comp (tree-dim T) T [ label-to-sub τ A ]tm
+--                             → Same-Leaves (exterior-sub-label S P T [ label-to-sub (sub-from-insertion-label-helper S P T σ τ) A ]l) σ
+-- exterior-sub-label-comm-lem S P T {σ} σty τty p Q = begin
+--   < (exterior-sub-label S P T [ label-to-sub (sub-from-insertion-label-helper S P T _ _) _ ]l) ‼l Q >tm
+--     ≈⟨ ‼l-comp (exterior-sub-label S P T) Q (label-to-sub (sub-from-insertion-label-helper S P T _ _) _) ⟩
+--   < exterior-sub-label S P T ‼l Q [ label-to-sub (sub-from-insertion-label-helper S P T _ _) _ ]tm >tm
+--     ≈⟨ lem S P T σty τty p Q ⟩
+--   < σ ‼l Q >tm ∎
+--   where
+--     open Reasoning tm-setoid
+
+--     lem : (S : Tree n)
+--         → (P : Path S)
+--         → .⦃ _ : is-branching-path P ⦄
+--         → (T : Tree m)
+--         → .⦃ _ : has-linear-height (path-length P) T ⦄
+--         → {σ : Label l S}
+--         → {τ : Label l T}
+--         → Typing-Label Γ σ A
+--         → Typing-Label Γ τ A
+--         → branching-path-to-var S P [ label-to-sub σ A ]tm ≃tm unbiased-comp (tree-dim T) T [ label-to-sub τ A ]tm
+--         → (Q : Path S)
+--         → .⦃ is-Maximal Q ⦄
+--         → exterior-sub-label S P T ‼l Q [ label-to-sub (sub-from-insertion-label-helper S P T σ τ) A ]tm ≃tm σ ‼l Q
+--     lem (Join S₁ S₂) PHere T {σ = LJoin x σ σ′} {τ} (TyJoin xty σty σty′) τty p Q = {!!}
+--     lem (Join S₁ S₂) (PExt P) (Join T Sing) {LJoin x σ σ′} {LJoin y τ (LSing z)} (TyJoin xty σty σty′) (TyJoin yty τty (TySing zty)) p (PExt Q) = {!!}
+--     lem (Join S₁ S₂) (PExt P) (Join T Sing) {LJoin x σ σ′} {LJoin y τ (LSing z)} (TyJoin xty σty σty′) (TyJoin yty τty (TySing zty)) p (PShift Q) = {!!}
+--       where
+--         l1 : exterior-sub-label (Join S₁ S₂) (PExt P) (Join T Sing) ‼l PShift Q ≃tm {!!}
+--         l1 = begin
+--           {!!}
+--             ≈⟨ {!!} ⟩
+--           {!!} ∎
+
+--     lem (Join S₁ S₂) (PShift P) T {σ = LJoin x σ σ′} {τ} (TyJoin xty σty σty′) τty p Q = {!!}
+
+-- exterior-sub-label-comm : (S : Tree n)
+--                         → (P : Path S)
+--                         → .⦃ _ : is-branching-path P ⦄
+--                         → (T : Tree m)
+--                         → .⦃ _ : has-linear-height (path-length P) T ⦄
+--                         → {σ : Sub (suc n) l A}
+--                         → {τ : Sub (suc m) l A}
+--                         → Typing-Sub (tree-to-ctx S) Γ σ
+--                         → Typing-Sub (tree-to-ctx T) Γ τ
+--                         → branching-path-to-var S P [ σ ]tm ≃tm unbiased-comp (tree-dim T) T [ τ ]tm
+--                         → sub-from-insertion-label S P T σ τ ∘ label-to-sub (exterior-sub-label S P T) ⋆ ≈[ Γ ]s σ
+-- exterior-sub-label-comm {A = A} S P T {σ} {τ} σty τty p = begin
+--   < sub-from-insertion-label S P T σ τ ∘ label-to-sub (exterior-sub-label S P T) ⋆ >s′
+--     ≈˘⟨ reflexive≈s (label-comp-to-sub-comp (exterior-sub-label S P T) (sub-from-insertion-label S P T σ τ) ⋆) ⟩
+--   < label-to-sub (exterior-sub-label S P T [ sub-from-insertion-label S P T σ τ ]l) A >s′
+--     ≈⟨ label-maximal-equality (label-comp-Ty (exterior-sub-label-Ty S P T ⦃ p = insertion-dim-lem S P T σty τty p ⦄) (sub-from-insertion-label-Ty S P T σty τty p))
+--                               (to-label-Ty S σty)
+--                               (exterior-sub-label-comm-lem S P T (to-label-Ty S σty) (to-label-Ty T τty) lem) ⟩
+--   < label-to-sub (to-label S σ) A >s′
+--     ≈⟨ reflexive≈s (sub-to-label-to-sub S σ) ⟩
+--   < σ >s′ ∎
+--   where
+--     lem : branching-path-to-var S P [ label-to-sub (to-label S σ) (sub-type σ) ]tm
+--             ≃tm
+--           unbiased-comp (tree-dim T) T [ label-to-sub (to-label T τ) (sub-type σ) ]tm
+--     lem = begin
+--       < branching-path-to-var S P [ label-to-sub (to-label S σ) (sub-type σ) ]tm >tm
+--         ≈⟨ sub-action-≃-tm (refl≃tm {s = branching-path-to-var S P}) (sub-to-label-to-sub S σ) ⟩
+--       < branching-path-to-var S P [ σ ]tm >tm
+--         ≈⟨ p ⟩
+--       < unbiased-comp (tree-dim T) T [ τ ]tm >tm
+--         ≈˘⟨ sub-action-≃-tm (refl≃tm {s = unbiased-comp (tree-dim T) T}) (sub-to-label-to-sub T τ) ⟩
+--       < unbiased-comp (tree-dim T) T [ label-to-sub (to-label T τ) (sub-type σ) ]tm >tm ∎
+--       where
+--         open Reasoning tm-setoid
+--     open Reasoning (sub-setoid-≈ _ _)

@@ -21,8 +21,18 @@ connect-≃ p q (Add≃ (Add≃ r s) t) = Add≃ (connect-≃ p q (Add≃ r s)) 
 connect-inc-right-≃ {m = zero} refl q refl = Ext≃ refl≃s q
 connect-inc-right-≃ {m = suc m} refl q refl = Ext≃ (lift-sub-≃ (connect-inc-right-≃ refl q refl)) (Var≃ refl refl)
 
+connect-inc-left-≃ : {t : Tm (suc n)} → {t′ : Tm (suc n′)} → n ≡ n′ → m ≡ m′ → connect-inc-left t m ≃s connect-inc-left t′ m′
+connect-inc-left-≃ {m = zero} refl refl = refl≃s
+connect-inc-left-≃ {m = suc m} {t = t} {t′} refl refl = lift-sub-≃ (connect-inc-left-≃ {t = t} {t′} refl refl)
+
 connect-susp-≃ : Γ ≃c Γ′ → Δ ≃c Δ′ → connect-susp Γ Δ ≃c connect-susp Γ′ Δ′
 connect-susp-≃ p q = connect-≃ (susp-ctx-≃ p) (Var≃ (cong (2 +_) (≃c-preserve-length p)) (cong (λ - → toℕ (inject₁ (fromℕ -))) (≃c-preserve-length p))) q
+
+connect-susp-inc-right-≃ : n ≡ n′ → m ≡ m′ → connect-susp-inc-right n m ≃s connect-susp-inc-right n′ m′
+connect-susp-inc-right-≃ refl refl = refl≃s
+
+connect-susp-inc-left-≃ : n ≡ n′ → m ≡ m′ → connect-susp-inc-left n m ≃s connect-susp-inc-left n′ m′
+connect-susp-inc-left-≃ refl refl = refl≃s
 
 sub-from-connect-≃ : σ ≃s σ′ → τ ≃s τ′ → sub-from-connect σ τ ≃s sub-from-connect σ′ τ′
 sub-from-connect-≃ p (Ext≃ (Null≃ y) x) = p

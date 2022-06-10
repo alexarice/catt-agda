@@ -3,7 +3,7 @@ module Catt.Prelude where
 open import Data.Nat hiding (NonZero) public
 open import Data.Bool using (not;Bool;true;false;_∨_;if_then_else_) renaming (T to Truth) public
 open import Data.Fin using (Fin; zero; suc; inject₁; fromℕ; toℕ; cast; opposite; splitAt; inject+; raise) renaming (_≟_ to _f≟_; _<?_ to _f<?_) public
-open import Relation.Binary.PropositionalEquality public
+open import Relation.Binary.PropositionalEquality hiding ([_]) public
 open import Data.Product renaming (_,_ to _,,_) hiding (map) public
 open import Relation.Binary.Definitions
 open import Data.Empty using (⊥) public
@@ -12,7 +12,7 @@ open import Relation.Nullary public
 open import Data.Fin.Patterns public
 
 variable
-  X Y Z : Set
+  -- X Y Z : Set
   n n′ m m′ l l′ o d d′ d″ : ℕ
 
 ⊥-elim : ∀ {w} {Whatever : Set w} → .⊥ → Whatever
@@ -68,3 +68,16 @@ open Cases public
 
 cases : {I A : Set} → {P : I → Set} → Cases P → (∀ i (p : P i) → A) → A
 cases (case d p) f = f d p
+
+record IrrelΣ {a b} (A : Set a) (B : A → Set b) : Set (a Agda.Primitive.⊔ b) where
+  constructor ⟦_⟧
+  field
+    carrier : A
+    .⦃ prop ⦄ : B carrier
+
+open IrrelΣ public
+
+IrrelΣ-syntax : ∀ {a} {b} (A : Set a) → (A → Set b) → Set (a Agda.Primitive.⊔ b)
+IrrelΣ-syntax = IrrelΣ
+
+syntax IrrelΣ-syntax A (λ x → B) = IΣ[ x ∈ A ] B

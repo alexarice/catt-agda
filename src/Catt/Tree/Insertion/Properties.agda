@@ -21,19 +21,19 @@ open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Globular
 
-branching-path-to-var-is-var : (S : Tree n) → (P : Path S) → .⦃ _ : is-branching-path P ⦄ → isVar (branching-path-to-var S P)
-branching-path-to-var-is-var (Join S T) PHere = var-to-var-comp-tm 0V (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
-branching-path-to-var-is-var (Join S T) (PExt P) = var-to-var-comp-tm (suspTm (branching-path-to-var S P)) ⦃ suspTm-var (branching-path-to-var S P) ⦃ branching-path-to-var-is-var S P ⦄ ⦄ (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
-branching-path-to-var-is-var (Join S T) (PShift P) = var-to-var-comp-tm (branching-path-to-var T P) ⦃ branching-path-to-var-is-var T P ⦄ (connect-susp-inc-right (tree-size S) (tree-size T)) ⦃ connect-susp-inc-right-var-to-var (tree-size S) (tree-size T) ⦄
+branching-path-to-var-is-var : (S : Tree n) → (p : BranchingPoint S) → isVar (branching-path-to-var S p)
+branching-path-to-var-is-var (Join S T) BPHere = var-to-var-comp-tm 0V (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
+branching-path-to-var-is-var (Join S T) (BPExt P) = var-to-var-comp-tm (suspTm (branching-path-to-var S P)) ⦃ suspTm-var (branching-path-to-var S P) ⦃ branching-path-to-var-is-var S P ⦄ ⦄ (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
+branching-path-to-var-is-var (Join S T) (BPShift P) = var-to-var-comp-tm (branching-path-to-var T P) ⦃ branching-path-to-var-is-var T P ⦄ (connect-susp-inc-right (tree-size S) (tree-size T)) ⦃ connect-susp-inc-right-var-to-var (tree-size S) (tree-size T) ⦄
 
-height-of-branching-non-zero : (S : Tree n) → (P : Path S) → .⦃ _ : is-branching-path P ⦄ → NonZero (height-of-branching P)
-height-of-branching-non-zero (Join S T) PHere = it
-height-of-branching-non-zero (Join S T) (PExt P) = it
-height-of-branching-non-zero (Join S T) (PShift P) = height-of-branching-non-zero T P
-
+height-of-branching-non-zero : (S : Tree n) → (p : BranchingPoint S) → NonZero (height-of-branching p)
+height-of-branching-non-zero (Join S T) BPHere = it
+height-of-branching-non-zero (Join S T) (BPExt P) = it
+height-of-branching-non-zero (Join S T) (BPShift P) = height-of-branching-non-zero T P
+{-
 exterior-sub-fst-var : (S : Tree n)
                      → (P : Path S)
-                     → .⦃ bp : is-branching-path P ⦄
+                     → .⦃ bp : is-branching-path  ⦄
                      → (T : Tree m)
                      → .⦃ lh : has-linear-height (path-length P) T ⦄
                      → .⦃ p : height-of-branching P ≡ tree-dim T ⦄
@@ -928,3 +928,4 @@ exterior-sub-first-label (Join S₁ S₂) (PExt P) (Join T Sing)
   = label-between-joins-first-label (exterior-sub-label S₁ P T) (id-label S₂) (insertion-tree S₁ P T) S₂
 exterior-sub-first-label (Join S₁ S₂) (PShift P) T
   = label-between-joins-first-label (id-label S₁) (exterior-sub-label S₂ P T) S₁ (insertion-tree S₂ P T)
+-}

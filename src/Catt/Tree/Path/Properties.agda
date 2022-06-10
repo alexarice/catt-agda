@@ -3,6 +3,7 @@ module Catt.Tree.Path.Properties where
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Tree
+open import Catt.Tree.Properties
 open import Catt.Syntax
 open import Catt.Tree.Path
 open import Catt.Variables
@@ -14,46 +15,91 @@ open import Data.Sum
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
 
-maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-Maximal P ⦄ → not-here P
-maximal-join-not-here {T = Join S T} (PExt P) = tt
-maximal-join-not-here {T = Join S T} (PShift P) = tt
+data _≃p_ : Path X → Path Y → Set where
+  ≃Here : S ≃ S′ → PHere {S = S} ≃p PHere {S = S′}
+  ≃Ext : ∀ {P : Path (someTree S)} {Q : Path (someTree S′)} → P ≃p Q → T ≃ T′ → PExt {T = T} P ≃p PExt {T = T′} Q
+  ≃Shift : ∀ {P : Path (someTree T)} {Q : Path (someTree T′)} → S ≃ S′ → P ≃p Q → PShift {S = S} P ≃p PShift {S = S′} Q
+  ≃Other : s ≃tm t → POther {S = X} s ≃p POther {S = Y} t
 
-path-to-var-is-var : (P : Path T) → isVar (path-to-var P)
-path-to-var-is-var PHere = tt
-path-to-var-is-var (PExt P) = var-to-var-comp-tm (suspTm (path-to-var P)) ⦃ suspTm-var (path-to-var P) ⦃ path-to-var-is-var P ⦄ ⦄ (connect-susp-inc-left _ _) ⦃ connect-susp-inc-left-var-to-var _ _ ⦄
-path-to-var-is-var (PShift P) = var-to-var-comp-tm (path-to-var P) ⦃ path-to-var-is-var P ⦄ (connect-susp-inc-right _ _) ⦃ connect-susp-inc-right-var-to-var _ _ ⦄
+refl≃p : P ≃p P
+refl≃p {P = PHere} = ≃Here refl≃
+refl≃p {P = PExt P} = ≃Ext refl≃p refl≃
+refl≃p {P = PShift P} = ≃Shift refl≃ refl≃p
+refl≃p {P = POther x} = ≃Other refl≃tm
 
--- fin-cases-1-fromℕ : ∀ m → fin-cases-1 (fromℕ m) ≡ nothing
--- fin-cases-1-fromℕ zero = refl
--- fin-cases-1-fromℕ (suc m) = cong (map suc) (fin-cases-1-fromℕ m)
+sym≃p : P ≃p Q → Q ≃p P
+sym≃p (≃Here x) = ≃Here (sym≃ x)
+sym≃p (≃Ext p x) = ≃Ext (sym≃p p) (sym≃ x)
+sym≃p (≃Shift x p) = ≃Shift (sym≃ x) (sym≃p p)
+sym≃p (≃Other x) = ≃Other (sym≃tm x)
 
--- fin-cases-fromℕ : ∀ m n → doesC (fin-cases (fromℕ (m + (2 + n)))) ≡ 2F
--- fin-cases-fromℕ zero n = cong (λ - → doesC {P = fin-condition zero n} (maybe′ (case 1F) (case 2F tt) (map suc -))) (fin-cases-1-fromℕ n)
--- fin-cases-fromℕ (suc m) n = fin-cases-fromℕ m n
+trans≃p : P ≃p Q → Q ≃p Q′ → P ≃p Q′
+trans≃p (≃Here x) (≃Here y) = ≃Here (trans≃ x y)
+trans≃p (≃Ext p x) (≃Ext q y) = ≃Ext (trans≃p p q) (trans≃ x y)
+trans≃p (≃Shift x p) (≃Shift y q) = ≃Shift (trans≃ x y) (trans≃p p q)
+trans≃p (≃Other x) (≃Other y) = ≃Other (trans≃tm x y)
 
--- var-to-path-shift : (S : Tree n) (T : Tree m) → (t : Tm (suc m)) → .⦃ _ : isVar t ⦄ → var-to-path (Join S T) (t [ connect-susp-inc-right n m ]tm) ⦃ var-to-var-comp-tm t (connect-susp-inc-right _ _) ⦃ connect-susp-inc-right-var-to-var n m ⦄ ⦄ ≡ PShift (var-to-path T t)
--- var-to-path-shift S T (Var i) = {!!}
---   where
---     lem : ∀ n m (i : Fin (suc m)) → getVarFin (Var i [ connect-susp-inc-right n m ]tm) ⦃ var-to-var-comp-tm (Var i) (connect-susp-inc-right n m) ⦃ connect-susp-inc-right-var-to-var n m ⦄ ⦄ ≡ inject≤ i (s≤s (m≤m+n m (2 + n)))
---     lem n zero 0F = {!!}
---     lem n (suc m) i = {!!}
+record PATH : Set where
+  constructor <_>p
+  field
+    {path-n} : ℕ
+    {path-X} : MaybeTree path-n
+    path : Path path-X
 
--- splitAt′-fromℕ : ∀ m n o (p : m + suc n ≡ suc o) → splitAt′ m (suc n) (suc o) p (fromℕ o) ≡ inj₂ (fromℕ n)
--- splitAt′-fromℕ zero n o refl = cong inj₂ (cast-refl (fromℕ n))
--- splitAt′-fromℕ (suc zero) n .(suc n) refl = cong inj₂ (cast-refl (fromℕ n))
--- splitAt′-fromℕ (suc (suc m)) n .(suc (m + suc n)) refl = cong (map suc (λ x → x)) (splitAt′-fromℕ (suc m) n (m + suc n) refl)
+open PATH public
 
-cast-fromℕ : ∀ {n} {m} → .(p : suc n ≡ suc m) → cast p (fromℕ n) ≡ fromℕ m
-cast-fromℕ {zero} {zero} p = refl
-cast-fromℕ {suc n} {suc m} p = cong suc (cast-fromℕ (cong pred p))
+path-setoid : Setoid _ _
+path-setoid = record { Carrier = PATH
+                        ; _≈_ = λ x y → path x ≃p path y
+                        ; isEquivalence = record { refl = refl≃p
+                                                 ; sym = sym≃p
+                                                 ; trans = trans≃p
+                                                 }
+                        }
 
-opposite-fromℕ : ∀ n → opposite (fromℕ n) ≡ 0F
-opposite-fromℕ zero = refl
-opposite-fromℕ (suc n) = cong inject₁ (opposite-fromℕ n)
+≃p-to-same-n : {X : MaybeTree n} → {Y : MaybeTree m} → {P : Path X} → {Q : Path Y} → P ≃p Q → n ≡ m
+≃p-to-same-n (≃Here x) = cong suc (≃-to-same-n x)
+≃p-to-same-n (≃Ext p x) = cong₂ (λ a b → suc a + suc b) (≃-to-same-n x) (≃p-to-same-n p)
+≃p-to-same-n (≃Shift x p) = cong₂ (λ a b → a + suc (suc b)) (≃p-to-same-n p) (≃-to-same-n x)
+≃p-to-same-n (≃Other x) = ≃tm-to-same-length x
 
-cast-refl : (i : Fin n) → cast refl i ≡ i
-cast-refl 0F = refl
-cast-refl (suc i) = cong suc (cast-refl i)
+path-to-term-≃ : P ≃p Q → path-to-term P ≃tm path-to-term Q
+path-to-term-≃ (≃Here x) = Var≃ (cong suc (≃-to-same-n x)) (cong (λ - → toℕ (fromℕ -)) (≃-to-same-n x))
+path-to-term-≃ (≃Ext p x) = sub-action-≃-tm (susp-tm-≃ (path-to-term-≃ p)) (connect-susp-inc-left-≃ (cong pred (≃p-to-same-n p)) (≃-to-same-n x))
+path-to-term-≃ (≃Shift x p) = sub-action-≃-tm (path-to-term-≃ p) (connect-susp-inc-right-≃ (≃-to-same-n x) (cong pred (≃p-to-same-n p)))
+path-to-term-≃ (≃Other x) = x
+
+-- maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-Maximal P ⦄ → not-here P
+-- maximal-join-not-here {T = Join S T} (PExt P) = tt
+-- maximal-join-not-here {T = Join S T} (PShift P) = tt
+
+path-to-term-is-var : (P : PPath T) → isVar (path-to-term (carrier P))
+path-to-term-is-var ⟦ PHere ⟧ = tt
+path-to-term-is-var ⟦ PExt P ⟧ = var-to-var-comp-tm (suspTm (path-to-term P)) ⦃ suspTm-var (path-to-term P) ⦃ path-to-term-is-var ⟦ P ⟧ ⦄ ⦄ (connect-susp-inc-left _ _) ⦃ connect-susp-inc-left-var-to-var _ _ ⦄
+path-to-term-is-var ⟦ PShift P ⟧ = var-to-var-comp-tm (path-to-term P) ⦃ path-to-term-is-var ⟦ P ⟧ ⦄ (connect-susp-inc-right _ _) ⦃ connect-susp-inc-right-var-to-var _ _ ⦄
+
+-- var-to-path-is-path : (S : Tree n) → (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → is-Path (var-to-path S t)
+-- var-to-path-helper-is-path : (S : Tree n) → (T : Tree m) → (i : Fin (m + ((suc n) + 2))) → is-Path (var-to-path-helper S T i)
+-- var-to-path-helper-1-is-path : (S : Tree n) → (T : Tree m) → (i : Fin (suc n + 2)) → is-Path (var-to-path-helper-1 S T i)
+-- var-to-path-helper-2-is-path : (S : Tree n) → (T : Tree m) → (i : Fin 2) → is-Path (var-to-path-helper-2 S T i)
+
+-- [,]′-prop : ∀ {A B C : Set} → (f : A → C) → (g : B → C) → (P : C → Set) → (∀ x → P (f x)) → (∀ x → P (g x)) → ∀ x → P ([ f , g ]′ x)
+-- [,]′-prop f g P a b (inj₁ x) = a x
+-- [,]′-prop f g P a b (inj₂ y) = b y
+
+-- var-to-path-is-path Sing t = tt
+-- var-to-path-is-path (Join S₁ S₂) t = var-to-path-helper-is-path S₁ S₂ (cast _ (getVarFin t))
+
+-- var-to-path-helper-is-path S T i with splitAt (tree-size T) i
+-- ... | inj₁ x = var-to-path-is-path T (Var (inject₁ x))
+-- ... | inj₂ y = var-to-path-helper-1-is-path S T y
+
+-- var-to-path-helper-1-is-path S T i with splitAt (suc (tree-size S)) i
+-- ... | inj₁ x = var-to-path-is-path S (Var x)
+-- ... | inj₂ y = var-to-path-helper-2-is-path S T y
+
+-- var-to-path-helper-2-is-path S T 0F = tt
+-- var-to-path-helper-2-is-path S T 1F = tt
 
 var-connect-susp-inc-left : (i : Fin (3 + m)) → (n : ℕ) → Var i [ connect-susp-inc-left m n ]tm ≃tm Var (raise n i)
 var-connect-susp-inc-left i zero = id-on-tm (Var i)
@@ -84,8 +130,6 @@ var-cast p i = Var≃ (sym p) (toℕ-cast p i)
 open import Data.Fin.Properties
 open import Data.Fin using (inject≤; lower₁;join)
 
-
-
 fromℕ≢inject₁ : (n : ℕ) → (i : Fin n) → toℕ (fromℕ n) ≢ toℕ (inject₁ i)
 fromℕ≢inject₁ (suc n) 0F ()
 fromℕ≢inject₁ (suc n) (suc i) p = fromℕ≢inject₁ n i (cong pred p)
@@ -94,18 +138,18 @@ fromℕ≢inject+ : (n m : ℕ) → (i : Fin (suc n)) → fromℕ (n + suc m) �
 fromℕ≢inject+ zero m 0F ()
 fromℕ≢inject+ (suc n) m (suc i) p = fromℕ≢inject+ n m i (Data.Fin.Properties.suc-injective p)
 
-path-to-fin-lem : (P : Path T) → path-to-fin P ≡ fromℕ _ → P ≡ PHere
-path-to-fin-lem PHere p = refl
-path-to-fin-lem {T = Join {n} {m} S T} (PExt P) p = ⊥-elim (fromℕ≢inject₁ (2 + n) (inject₁ (path-to-fin P)) (sym lem))
+path-to-fin-lem : (P : PPath T) → path-to-fin P ≡ fromℕ _ → P ≡ PPHere
+path-to-fin-lem ⟦ PHere ⟧ p = refl
+path-to-fin-lem {T = Join {n} {m} S T} ⟦ PExt P ⟧ p = ⊥-elim (fromℕ≢inject₁ (2 + n) (inject₁ (path-to-fin ⟦ P ⟧)) (sym lem))
   where
     open ≡-Reasoning
-    lem : toℕ (inject₁ (inject₁ (path-to-fin P))) ≡ toℕ (fromℕ (2 + n))
+    lem : toℕ (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))) ≡ toℕ (fromℕ (2 + n))
     lem = +-cancelˡ-≡ m (begin
-      m + toℕ (inject₁ (inject₁ (path-to-fin P)))
-        ≡˘⟨ toℕ-raise m (inject₁ (inject₁ (path-to-fin P))) ⟩
-      toℕ (raise m (inject₁ (inject₁ (path-to-fin P))))
-        ≡˘⟨ toℕ-cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P)))) ⟩
-      toℕ (cast _ (raise m (inject₁ (inject₁ (path-to-fin P)))))
+      m + toℕ (inject₁ (inject₁ (path-to-fin ⟦ P ⟧)))
+        ≡˘⟨ toℕ-raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))) ⟩
+      toℕ (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))))
+        ≡˘⟨ toℕ-cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧)))) ⟩
+      toℕ (cast _ (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧)))))
         ≡⟨ cong toℕ p ⟩
       toℕ (fromℕ (m + (2 + n)))
         ≡⟨ toℕ-fromℕ (m + (2 + n)) ⟩
@@ -113,7 +157,7 @@ path-to-fin-lem {T = Join {n} {m} S T} (PExt P) p = ⊥-elim (fromℕ≢inject�
         ≡˘⟨ cong (m +_) (toℕ-fromℕ (suc (suc n))) ⟩
       m + toℕ (fromℕ (2 + n)) ∎)
 
-path-to-fin-lem {T = Join {n} {m} S T} (PShift PHere) p = ⊥-elim (lem n lem2)
+path-to-fin-lem {T = Join {n} {m} S T} ⟦ PShift PHere ⟧ p = ⊥-elim (lem n lem2)
   where
     lem : ∀ (n : ℕ) → n ≡ suc n → ⊥
     lem zero ()
@@ -133,22 +177,21 @@ path-to-fin-lem {T = Join {n} {m} S T} (PShift PHere) p = ⊥-elim (lem n lem2)
       toℕ (fromℕ (m + (2 + n)))
         ≡⟨ toℕ-fromℕ (m + (2 + n)) ⟩
       m + (2 + n) ∎))
-path-to-fin-lem {T = Join {n} {m} S T} (PShift (PExt P)) p = ⊥-elim (fromℕ≢inject+ (_ + (2 + _)) (suc n) _ (sym p))
-path-to-fin-lem {T = Join {n} {m} S T} (PShift (PShift P)) p = ⊥-elim (fromℕ≢inject+ (_ + (2 + _)) (suc n) (path-to-fin (PShift P)) (sym p))
+path-to-fin-lem {T = Join {n} {m} S T} ⟦ PShift (PExt P) ⟧ p = ⊥-elim (fromℕ≢inject+ (_ + (2 + _)) (suc n) _ (sym p))
+path-to-fin-lem {T = Join {n} {m} S T} ⟦ PShift (PShift P) ⟧ p = ⊥-elim (fromℕ≢inject+ (_ + (2 + _)) (suc n) (path-to-fin ⟦ PShift P ⟧) (sym p))
 
-
-path-to-var-is-path-to-fin : (P : Path T) → path-to-var P ≃tm Var (path-to-fin P)
-path-to-var-is-path-to-fin PHere = refl≃tm
-path-to-var-is-path-to-fin {T = Join {n} {m} S T} (PExt P) = begin
-  < suspTm (path-to-var P) [ connect-susp-inc-left n m ]tm >tm
-    ≈⟨ sub-action-≃-tm (susp-tm-≃ (path-to-var-is-path-to-fin P)) refl≃s ⟩
-  < Var (inject₁ (inject₁ (path-to-fin P))) [ connect-susp-inc-left n m ]tm >tm
-    ≈⟨ var-connect-susp-inc-left (inject₁ (inject₁ (path-to-fin P))) m ⟩
-  < Var (raise m (inject₁ (inject₁ (path-to-fin P)))) >tm
-    ≈˘⟨ var-cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P)))) ⟩
-  < Var (cast _ (raise m (inject₁ (inject₁ (path-to-fin P))))) >tm ∎
+path-to-term-is-path-to-fin : (P : PPath T) → path-to-term (carrier P) ≃tm Var (path-to-fin P)
+path-to-term-is-path-to-fin ⟦ PHere ⟧ = refl≃tm
+path-to-term-is-path-to-fin {T = Join {n} {m} S T} ⟦ PExt P ⟧ = begin
+  < suspTm (path-to-term P) [ connect-susp-inc-left n m ]tm >tm
+    ≈⟨ sub-action-≃-tm (susp-tm-≃ (path-to-term-is-path-to-fin ⟦ P ⟧)) refl≃s ⟩
+  < Var (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))) [ connect-susp-inc-left n m ]tm >tm
+    ≈⟨ var-connect-susp-inc-left (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))) m ⟩
+  < Var (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧)))) >tm
+    ≈˘⟨ var-cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧)))) ⟩
+  < Var (cast _ (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))))) >tm ∎
   where open Reasoning tm-setoid
-path-to-var-is-path-to-fin {T = Join {n} {m} S T} (PShift PHere) = begin
+path-to-term-is-path-to-fin {T = Join {n} {m} S T} ⟦ PShift PHere ⟧ = begin
   < Var (fromℕ m) [ connect-susp-inc-right n m ]tm >tm
     ≈˘⟨ connect-inc-fst-var getSnd m ⟩
   < getSnd [ connect-susp-inc-left n m ]tm >tm
@@ -174,62 +217,62 @@ path-to-var-is-path-to-fin {T = Join {n} {m} S T} (PShift PHere) = begin
       where
         open ≡-Reasoning
     open Reasoning tm-setoid
-path-to-var-is-path-to-fin {T = Join {n} {m} S T} (PShift P@(PExt _)) = begin
-  < path-to-var P [ connect-susp-inc-right n m ]tm >tm
-    ≈⟨ sub-action-≃-tm (path-to-var-is-path-to-fin P) refl≃s ⟩
-  < Var (path-to-fin P) [ connect-susp-inc-right n m ]tm >tm
-    ≈⟨ var-connect-susp-inc-right (path-to-fin P) n (λ y → l2 (path-to-fin-lem P y)) ⟩
-  < Var (inject+ (2 + n) (path-to-fin P)) >tm ∎
+path-to-term-is-path-to-fin {T = Join {n} {m} S T} ⟦ PShift P@(PExt _) ⟧ = begin
+  < path-to-term P [ connect-susp-inc-right n m ]tm >tm
+    ≈⟨ sub-action-≃-tm (path-to-term-is-path-to-fin ⟦ P ⟧) refl≃s ⟩
+  < Var (path-to-fin ⟦ P ⟧) [ connect-susp-inc-right n m ]tm >tm
+    ≈⟨ var-connect-susp-inc-right (path-to-fin ⟦ P ⟧) n (λ y → l2 (path-to-fin-lem ⟦ P ⟧ y)) ⟩
+  < Var (inject+ (2 + n) (path-to-fin ⟦ P ⟧)) >tm ∎
   where
     open Reasoning tm-setoid
 
-    l2 : P ≢ PHere
+    l2 : ⟦ P ⟧ ≢ PPHere
     l2 ()
 
-path-to-var-is-path-to-fin {T = Join {n} {m} S T} (PShift P@(PShift _)) = begin
-  < path-to-var P [ connect-susp-inc-right n m ]tm >tm
-    ≈⟨ sub-action-≃-tm (path-to-var-is-path-to-fin P) refl≃s ⟩
-  < Var (path-to-fin P) [ connect-susp-inc-right n m ]tm >tm
-    ≈⟨ var-connect-susp-inc-right (path-to-fin P) n (λ y → l2 (path-to-fin-lem P y)) ⟩
-  < Var (inject+ (2 + n) (path-to-fin P)) >tm ∎
+path-to-term-is-path-to-fin {T = Join {n} {m} S T} ⟦ PShift P@(PShift _) ⟧ = begin
+  < path-to-term P [ connect-susp-inc-right n m ]tm >tm
+    ≈⟨ sub-action-≃-tm (path-to-term-is-path-to-fin ⟦ P ⟧) refl≃s ⟩
+  < Var (path-to-fin ⟦ P ⟧) [ connect-susp-inc-right n m ]tm >tm
+    ≈⟨ var-connect-susp-inc-right (path-to-fin ⟦ P ⟧) n (λ y → l2 (path-to-fin-lem ⟦ P ⟧ y)) ⟩
+  < Var (inject+ (2 + n) (path-to-fin ⟦ P ⟧)) >tm ∎
   where
     open Reasoning tm-setoid
 
-    l2 : P ≢ PHere
+    l2 : ⟦ P ⟧ ≢ PPHere
     l2 ()
 
 vtph-end : (S : Tree n) → (T : Tree m) → (i : Fin 2) → var-to-path-helper S T (raise m (raise (suc n) i)) ≡ var-to-path-helper-2 S T i
 vtph-end S T i = begin
   var-to-path-helper S T (raise _ (raise (suc _) i))
-    ≡⟨ cong [ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , var-to-path-helper-1 S T ]′ (splitAt-raise _ (suc _ + 2) (raise (suc _) i)) ⟩
+    ≡⟨ cong [ (λ x → PPShift (var-to-path T (Var (inject₁ x)))) , var-to-path-helper-1 S T ]′ (splitAt-raise _ (suc _ + 2) (raise (suc _) i)) ⟩
   var-to-path-helper-1 S T (raise (suc _) i)
-    ≡⟨ cong [ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt-raise (suc _) 2 i) ⟩
+    ≡⟨ cong [ (λ x → PPExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt-raise (suc _) 2 i) ⟩
   var-to-path-helper-2 S T i ∎
   where
     open ≡-Reasoning
 
-vtph-ext : (S : Tree n) → (T : Tree m) → (i : Fin (suc n)) → var-to-path-helper S T (raise m (inject+ 2 i)) ≡ PExt (var-to-path S (Var i))
+vtph-ext : (S : Tree n) → (T : Tree m) → (i : Fin (suc n)) → var-to-path-helper S T (raise m (inject+ 2 i)) ≡ PPExt (var-to-path S (Var i))
 vtph-ext S T i = begin
   var-to-path-helper S T (raise (tree-size T) (inject+ 2 i))
-    ≡⟨ cong [ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ (splitAt-raise _ (suc _ + 2) (inject+ 2 i)) ⟩
+    ≡⟨ cong [ (λ x → PPShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ (splitAt-raise _ (suc _ + 2) (inject+ 2 i)) ⟩
   var-to-path-helper-1 S T (inject+ 2 i)
-    ≡⟨ cong [ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt-inject+ (suc (tree-size S)) 2 i) ⟩
-  PExt (var-to-path S (Var i)) ∎
+    ≡⟨ cong [ (λ x → PPExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt-inject+ (suc (tree-size S)) 2 i) ⟩
+  PPExt (var-to-path S (Var i)) ∎
   where
     open ≡-Reasoning
 
-vtph-shift : (S : Tree n) → (T : Tree m) → (i : Fin m) → var-to-path-helper S T (inject+ (suc n + 2) i) ≡ PShift (var-to-path T (Var (inject₁ i)))
-vtph-shift S T i = cong [ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , var-to-path-helper-1 S T ]′ (splitAt-inject+ _ (suc _ + 2) i)
+vtph-shift : (S : Tree n) → (T : Tree m) → (i : Fin m) → var-to-path-helper S T (inject+ (suc n + 2) i) ≡ PPShift (var-to-path T (Var (inject₁ i)))
+vtph-shift S T i = cong [ (λ x → PPShift (var-to-path T (Var (inject₁ x)))) , var-to-path-helper-1 S T ]′ (splitAt-inject+ _ (suc _ + 2) i)
 
-path-to-fin-to-path : (P : Path T) → var-to-path T (Var (path-to-fin P)) ≡ P
+path-to-fin-to-path : (P : PPath T) → var-to-path T (Var (path-to-fin P)) ≡ P
 
-path-to-fin-to-path {T = Sing} PHere = refl
-path-to-fin-to-path {T = Join {n} {m} S T} PHere = begin
+path-to-fin-to-path {T = Sing} ⟦ PHere ⟧ = refl
+path-to-fin-to-path {T = Join {n} {m} S T} ⟦ PHere ⟧ = begin
   var-to-path-helper S T (cast _ (fromℕ (m + suc (suc n))))
     ≡⟨ cong (var-to-path-helper S T) (toℕ-injective lem) ⟩
   var-to-path-helper S T (raise m (raise (suc n) 1F))
     ≡⟨ vtph-end S T 1F ⟩
-  PHere ∎
+  PPHere ∎
   where
     open ≡-Reasoning
 
@@ -248,48 +291,48 @@ path-to-fin-to-path {T = Join {n} {m} S T} PHere = begin
         ≡˘⟨ toℕ-raise m (suc (raise n 1F)) ⟩
       toℕ (raise m (suc (raise n 1F))) ∎
 
-path-to-fin-to-path {T = Join {n} {m} S T} (PExt P) = begin
-  var-to-path-helper S T (cast _ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P))))))
+path-to-fin-to-path {T = Join {n} {m} S T} (⟦ PExt P ⟧) = begin
+  var-to-path-helper S T (cast _ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))))))
     ≡⟨ cong (var-to-path-helper S T) (toℕ-injective lem) ⟩
-  var-to-path-helper S T (raise m (inject+ 2 (path-to-fin P)))
-    ≡⟨ vtph-ext S T (path-to-fin P) ⟩
-  PExt (var-to-path S (Var (path-to-fin P)))
-    ≡⟨ cong PExt (path-to-fin-to-path P) ⟩
-  PExt P ∎
+  var-to-path-helper S T (raise m (inject+ 2 (path-to-fin ⟦ P ⟧)))
+    ≡⟨ vtph-ext S T (path-to-fin ⟦ P ⟧) ⟩
+  PPExt (var-to-path S (Var (path-to-fin ⟦ P ⟧)))
+    ≡⟨ cong PPExt (path-to-fin-to-path ⟦ P ⟧) ⟩
+  PPExt ⟦ P ⟧ ∎
   where
     open ≡-Reasoning
 
-    lem2 : toℕ (inject₁ (inject₁ (path-to-fin P))) ≡
-             toℕ (inject+ 2 (path-to-fin P))
+    lem2 : toℕ (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))) ≡
+             toℕ (inject+ 2 (path-to-fin ⟦ P ⟧))
     lem2 = begin
-       toℕ (inject₁ (inject₁ (path-to-fin P)))
-         ≡⟨ toℕ-inject₁ (inject₁ (path-to-fin P)) ⟩
-       toℕ (inject₁ (path-to-fin P))
-         ≡⟨ toℕ-inject₁ (path-to-fin P) ⟩
-       toℕ (path-to-fin P)
-         ≡⟨ toℕ-inject+ 2 (path-to-fin P) ⟩
-       toℕ (inject+ 2 (path-to-fin P)) ∎
+       toℕ (inject₁ (inject₁ (path-to-fin ⟦ P ⟧)))
+         ≡⟨ toℕ-inject₁ (inject₁ (path-to-fin ⟦ P ⟧)) ⟩
+       toℕ (inject₁ (path-to-fin ⟦ P ⟧))
+         ≡⟨ toℕ-inject₁ (path-to-fin ⟦ P ⟧) ⟩
+       toℕ (path-to-fin ⟦ P ⟧)
+         ≡⟨ toℕ-inject+ 2 (path-to-fin ⟦ P ⟧) ⟩
+       toℕ (inject+ 2 (path-to-fin ⟦ P ⟧)) ∎
 
-    lem : toℕ (cast _ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P)))))) ≡ toℕ (raise m (inject+ 2 (path-to-fin P)))
+    lem : toℕ (cast _ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧)))))) ≡ toℕ (raise m (inject+ 2 (path-to-fin ⟦ P ⟧)))
     lem = begin
-      toℕ (cast _ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P))))))
-        ≡⟨ toℕ-cast _ (cast _ (raise m (inject₁ (inject₁ (path-to-fin P))))) ⟩
-      toℕ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P)))))
-        ≡⟨ toℕ-cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P)))) ⟩
-      toℕ (raise m (inject₁ (inject₁ (path-to-fin P))))
-        ≡⟨ toℕ-raise m (inject₁ (inject₁ (path-to-fin P))) ⟩
-      m + toℕ (inject₁ (inject₁ (path-to-fin P)))
+      toℕ (cast _ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))))))
+        ≡⟨ toℕ-cast _ (cast _ (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))))) ⟩
+      toℕ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧)))))
+        ≡⟨ toℕ-cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧)))) ⟩
+      toℕ (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))))
+        ≡⟨ toℕ-raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))) ⟩
+      m + toℕ (inject₁ (inject₁ (path-to-fin ⟦ P ⟧)))
         ≡⟨ cong (m +_) lem2 ⟩
-      m + toℕ (inject+ 2 (path-to-fin P))
-        ≡˘⟨ toℕ-raise m (inject+ 2 (path-to-fin P)) ⟩
-      toℕ (raise m (inject+ 2 (path-to-fin P))) ∎
+      m + toℕ (inject+ 2 (path-to-fin ⟦ P ⟧))
+        ≡˘⟨ toℕ-raise m (inject+ 2 (path-to-fin ⟦ P ⟧)) ⟩
+      toℕ (raise m (inject+ 2 (path-to-fin ⟦ P ⟧))) ∎
 
-path-to-fin-to-path {T = Join {n} {m} S T} (PShift PHere) = begin
+path-to-fin-to-path {T = Join {n} {m} S T} ⟦ PShift PHere ⟧ = begin
   var-to-path-helper S T (cast _ (cast (cong suc (sym (+-suc m (suc n)))) (inject₁ (fromℕ (m + suc n)))))
     ≡⟨ cong (var-to-path-helper S T) (toℕ-injective lem) ⟩
   var-to-path-helper S T (raise m (raise (suc n) 0F))
     ≡⟨ vtph-end S T 0F ⟩
-  PShift PHere ∎
+  PPShift PPHere ∎
   where
     open ≡-Reasoning
 
@@ -312,74 +355,74 @@ path-to-fin-to-path {T = Join {n} {m} S T} (PShift PHere) = begin
         ≡˘⟨ toℕ-raise m (suc (raise n 0F)) ⟩
       toℕ (raise m (suc (raise n 0F))) ∎
 
-path-to-fin-to-path {T = Join {n} {m} S T} (PShift P@(PExt _)) = begin
-  var-to-path-helper S T (cast _ (inject+ (suc (suc n)) (path-to-fin P)))
+path-to-fin-to-path {T = Join {n} {m} S T} ⟦ PShift P@(PExt _) ⟧ = begin
+  var-to-path-helper S T (cast _ (inject+ (suc (suc n)) (path-to-fin ⟦ P ⟧)))
     ≡⟨ cong (var-to-path-helper S T) (toℕ-injective lem) ⟩
-  var-to-path-helper S T (inject+ (suc n + 2) (lower₁ (path-to-fin P) l1))
-    ≡⟨ vtph-shift S T (lower₁ (path-to-fin P) l1) ⟩
-  PShift (var-to-path T (Var (inject₁ (lower₁ (path-to-fin P) l1))))
-    ≡⟨ cong (λ - → PShift (var-to-path T (Var -))) (inject₁-lower₁ (path-to-fin P) l1) ⟩
-  PShift (var-to-path T (Var (path-to-fin P)))
-    ≡⟨ cong PShift (path-to-fin-to-path P) ⟩
-  PShift P ∎
+  var-to-path-helper S T (inject+ (suc n + 2) (lower₁ (path-to-fin ⟦ P ⟧) l1))
+    ≡⟨ vtph-shift S T (lower₁ (path-to-fin ⟦ P ⟧) l1) ⟩
+  PPShift (var-to-path T (Var (inject₁ (lower₁ (path-to-fin ⟦ P ⟧) l1))))
+    ≡⟨ cong (λ - → PPShift (var-to-path T (Var -))) (inject₁-lower₁ (path-to-fin ⟦ P ⟧) l1) ⟩
+  PPShift (var-to-path T (Var (path-to-fin ⟦ P ⟧)))
+    ≡⟨ cong PPShift (path-to-fin-to-path ⟦ P ⟧) ⟩
+  PPShift ⟦ P ⟧ ∎
   where
     open ≡-Reasoning
 
-    l2 : P ≢ PHere
+    l2 : ⟦ P ⟧ ≢ PPHere
     l2 ()
 
-    l1 : m ≢ toℕ (path-to-fin P)
-    l1 p = l2 (path-to-fin-lem P (toℕ-injective (sym (trans (toℕ-fromℕ (_ + (2 + _))) p))))
+    l1 : m ≢ toℕ (path-to-fin ⟦ P ⟧)
+    l1 p = l2 (path-to-fin-lem ⟦ P ⟧ (toℕ-injective (sym (trans (toℕ-fromℕ (_ + (2 + _))) p))))
 
-    lem : toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin P))) ≡
-            toℕ (inject+ (suc n + 2) (lower₁ (path-to-fin P) l1))
+    lem : toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin ⟦ P ⟧))) ≡
+            toℕ (inject+ (suc n + 2) (lower₁ (path-to-fin ⟦ P ⟧) l1))
     lem = begin
-      toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin P)))
-        ≡⟨ toℕ-cast _ (inject+ (suc (suc n)) (path-to-fin P)) ⟩
-      toℕ (inject+ (2 + n) (path-to-fin P))
-        ≡˘⟨ toℕ-inject+ (2 + n) (path-to-fin P) ⟩
-      toℕ (path-to-fin P)
-        ≡˘⟨ toℕ-lower₁ (path-to-fin P) l1 ⟩
-      toℕ (lower₁ (path-to-fin P) l1)
-        ≡⟨ toℕ-inject+ (suc (n + 2)) (lower₁ (path-to-fin P) l1) ⟩
-      toℕ (inject+ (suc (n + 2)) (lower₁ (path-to-fin P) l1)) ∎
+      toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin ⟦ P ⟧)))
+        ≡⟨ toℕ-cast _ (inject+ (suc (suc n)) (path-to-fin ⟦ P ⟧)) ⟩
+      toℕ (inject+ (2 + n) (path-to-fin ⟦ P ⟧))
+        ≡˘⟨ toℕ-inject+ (2 + n) (path-to-fin ⟦ P ⟧) ⟩
+      toℕ (path-to-fin ⟦ P ⟧)
+        ≡˘⟨ toℕ-lower₁ (path-to-fin ⟦ P ⟧) l1 ⟩
+      toℕ (lower₁ (path-to-fin ⟦ P ⟧) l1)
+        ≡⟨ toℕ-inject+ (suc (n + 2)) (lower₁ (path-to-fin ⟦ P ⟧) l1) ⟩
+      toℕ (inject+ (suc (n + 2)) (lower₁ (path-to-fin ⟦ P ⟧) l1)) ∎
 
-path-to-fin-to-path {T = Join {n} {m} S T} (PShift P@(PShift _)) = begin
-  var-to-path-helper S T (cast _ (inject+ (suc (suc n)) (path-to-fin P)))
+path-to-fin-to-path {T = Join {n} {m} S T} ⟦ PShift P@(PShift _) ⟧ = begin
+  var-to-path-helper S T (cast _ (inject+ (suc (suc n)) (path-to-fin ⟦ P ⟧)))
     ≡⟨ cong (var-to-path-helper S T) (toℕ-injective lem) ⟩
-  var-to-path-helper S T (inject+ (suc n + 2) (lower₁ (path-to-fin P) l1))
-    ≡⟨ vtph-shift S T (lower₁ (path-to-fin P) l1) ⟩
-  PShift (var-to-path T (Var (inject₁ (lower₁ (path-to-fin P) l1))))
-    ≡⟨ cong (λ - → PShift (var-to-path T (Var -))) (inject₁-lower₁ (path-to-fin P) l1) ⟩
-  PShift (var-to-path T (Var (path-to-fin P)))
-    ≡⟨ cong PShift (path-to-fin-to-path P) ⟩
-  PShift P ∎
+  var-to-path-helper S T (inject+ (suc n + 2) (lower₁ (path-to-fin ⟦ P ⟧) l1))
+    ≡⟨ vtph-shift S T (lower₁ (path-to-fin ⟦ P ⟧) l1) ⟩
+  PPShift (var-to-path T (Var (inject₁ (lower₁ (path-to-fin ⟦ P ⟧) l1))))
+    ≡⟨ cong (λ - → PPShift (var-to-path T (Var -))) (inject₁-lower₁ (path-to-fin ⟦ P ⟧) l1) ⟩
+  PPShift (var-to-path T (Var (path-to-fin ⟦ P ⟧)))
+    ≡⟨ cong PPShift (path-to-fin-to-path ⟦ P ⟧) ⟩
+  PPShift ⟦ P ⟧ ∎
   where
     open ≡-Reasoning
 
-    l2 : P ≢ PHere
+    l2 : ⟦ P ⟧ ≢ PPHere
     l2 ()
 
-    l1 : m ≢ toℕ (path-to-fin P)
-    l1 p = l2 (path-to-fin-lem P (toℕ-injective (sym (trans (toℕ-fromℕ (_ + (2 + _))) p))))
+    l1 : m ≢ toℕ (path-to-fin ⟦ P ⟧)
+    l1 p = l2 (path-to-fin-lem ⟦ P ⟧ (toℕ-injective (sym (trans (toℕ-fromℕ (_ + (2 + _))) p))))
 
-    lem : toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin P))) ≡
-            toℕ (inject+ (suc n + 2) (lower₁ (path-to-fin P) l1))
+    lem : toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin ⟦ P ⟧))) ≡
+            toℕ (inject+ (suc n + 2) (lower₁ (path-to-fin ⟦ P ⟧) l1))
     lem = begin
-      toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin P)))
-        ≡⟨ toℕ-cast _ (inject+ (suc (suc n)) (path-to-fin P)) ⟩
-      toℕ (inject+ (2 + n) (path-to-fin P))
-        ≡˘⟨ toℕ-inject+ (2 + n) (path-to-fin P) ⟩
-      toℕ (path-to-fin P)
-        ≡˘⟨ toℕ-lower₁ (path-to-fin P) l1 ⟩
-      toℕ (lower₁ (path-to-fin P) l1)
-        ≡⟨ toℕ-inject+ (suc (n + 2)) (lower₁ (path-to-fin P) l1) ⟩
-      toℕ (inject+ (suc (n + 2)) (lower₁ (path-to-fin P) l1)) ∎
+      toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin ⟦ P ⟧)))
+        ≡⟨ toℕ-cast _ (inject+ (suc (suc n)) (path-to-fin ⟦ P ⟧)) ⟩
+      toℕ (inject+ (2 + n) (path-to-fin ⟦ P ⟧))
+        ≡˘⟨ toℕ-inject+ (2 + n) (path-to-fin ⟦ P ⟧) ⟩
+      toℕ (path-to-fin ⟦ P ⟧)
+        ≡˘⟨ toℕ-lower₁ (path-to-fin ⟦ P ⟧) l1 ⟩
+      toℕ (lower₁ (path-to-fin ⟦ P ⟧) l1)
+        ≡⟨ toℕ-inject+ (suc (n + 2)) (lower₁ (path-to-fin ⟦ P ⟧) l1) ⟩
+      toℕ (inject+ (suc (n + 2)) (lower₁ (path-to-fin ⟦ P ⟧) l1)) ∎
 
-path-to-var-to-path : (P : Path T) → var-to-path T (path-to-var P) ⦃ path-to-var-is-var P ⦄ ≡ P
-path-to-var-to-path {T = T} P = begin
-  var-to-path T (path-to-var P) ⦃ path-to-var-is-var P ⦄
-    ≡⟨ lem (path-to-var P) (Var (path-to-fin P)) (≃tm-to-≡ (path-to-var-is-path-to-fin P)) ⟩
+path-to-term-to-path : (P : PPath T) → var-to-path T (path-to-term (carrier P)) ⦃ path-to-term-is-var P ⦄ ≡ P
+path-to-term-to-path {T = T} P = begin
+  var-to-path T (path-to-term (carrier P)) ⦃ path-to-term-is-var P ⦄
+    ≡⟨ lem (path-to-term (carrier P)) (Var (path-to-fin P)) (≃tm-to-≡ (path-to-term-is-path-to-fin P)) ⟩
   var-to-path T (Var (path-to-fin P))
     ≡⟨ path-to-fin-to-path P ⟩
   P ∎
@@ -390,17 +433,16 @@ path-to-var-to-path {T = T} P = begin
     lem : (t s : Tm (suc _)) → .⦃ v : isVar s ⦄ → (p : t ≡ s) → var-to-path T t ⦃ subst isVar (sym p) v ⦄ ≡ var-to-path T s
     lem t s refl = refl
 
-path-to-fin-shift-lem : (S : Tree n) → (P : Path T) → P ≢ PHere → path-to-fin (PShift {S = S} P) ≡ inject+ (2 + n) (path-to-fin P)
-path-to-fin-shift-lem S PHere p = ⊥-elim (p refl)
-path-to-fin-shift-lem S (PExt P) p = refl
-path-to-fin-shift-lem S (PShift P) p = refl
-
+path-to-fin-shift-lem : (S : Tree n) → (P : PPath T) → P ≢ PPHere → path-to-fin (PPShift {S = S} P) ≡ inject+ (2 + n) (path-to-fin P)
+path-to-fin-shift-lem S ⟦ PHere ⟧ p = ⊥-elim (p refl)
+path-to-fin-shift-lem S ⟦ PExt P ⟧ p = refl
+path-to-fin-shift-lem S ⟦ PShift P ⟧ p = refl
 
 var-to-path-to-fin : (T : Tree n) → (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → toℕ (path-to-fin (var-to-path T t)) ≡ toℕ (getVarFin t)
 
 var-helper-to-fin : (S : Tree n) → (T : Tree m) → (i : Fin (m + ((suc n) + 2))) → toℕ (path-to-fin (var-to-path-helper S T i)) ≡ toℕ i
 var-helper-to-fin {n} {m} S T i = begin
-  toℕ (path-to-fin ([ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ (splitAt (tree-size T) i)))
+  toℕ (path-to-fin ([ (λ x → PPShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ (splitAt (tree-size T) i)))
     ≡⟨ lem (splitAt (tree-size T) i) ⟩
   toℕ ([ inject+ (suc _ + 2) , raise (tree-size T) ]′ (splitAt (tree-size T) i))
     ≡⟨ cong toℕ (join-splitAt (tree-size T) (suc _ + 2) i) ⟩
@@ -408,7 +450,7 @@ var-helper-to-fin {n} {m} S T i = begin
   where
     open ≡-Reasoning
 
-    l2 : ∀ x → toℕ (path-to-fin ([ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ x)) ≡ toℕ (raise m (join (suc (tree-size S)) 2 x))
+    l2 : ∀ x → toℕ (path-to-fin ([ (λ x → PPExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ x)) ≡ toℕ (raise m (join (suc (tree-size S)) 2 x))
     l2 (inj₁ x) = begin
       toℕ (cast _ (raise m (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x)))))))
         ≡⟨ toℕ-cast _ (raise m (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x)))))) ⟩
@@ -450,7 +492,7 @@ var-helper-to-fin {n} {m} S T i = begin
         ≡˘⟨ toℕ-raise m (suc (raise n 1F)) ⟩
       toℕ (raise m (suc (raise n 1F))) ∎
 
-    l3 : ∀ x → var-to-path T (Var (inject₁ x)) ≡ PHere → toℕ (inject₁ x) ≡ toℕ (fromℕ m)
+    l3 : ∀ x → var-to-path T (Var (inject₁ x)) ≡ PPHere → toℕ (inject₁ x) ≡ toℕ (fromℕ m)
     l3 x p = begin
       toℕ (inject₁ x)
         ≡˘⟨ var-to-path-to-fin T (Var (inject₁ x)) ⟩
@@ -458,9 +500,9 @@ var-helper-to-fin {n} {m} S T i = begin
         ≡⟨ cong toℕ (cong path-to-fin p) ⟩
       toℕ (fromℕ m) ∎
 
-    lem : ∀ x → toℕ (path-to-fin ([ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ x)) ≡ toℕ (join _ (suc _ + 2) x)
+    lem : ∀ x → toℕ (path-to-fin ([ (λ x → PPShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ x)) ≡ toℕ (join _ (suc _ + 2) x)
     lem (inj₁ x) = begin
-      toℕ (path-to-fin (PShift (var-to-path T (Var (inject₁ x)))))
+      toℕ (path-to-fin (PPShift (var-to-path T (Var (inject₁ x)))))
         ≡⟨ cong toℕ (path-to-fin-shift-lem S (var-to-path T (Var (inject₁ x))) λ y → fromℕ≢inject₁ m x (sym (l3 x y))) ⟩
       toℕ (inject+ (2 + n) (path-to-fin (var-to-path T (Var (inject₁ x)))))
         ≡˘⟨ toℕ-inject+ (2 + n) (path-to-fin (var-to-path T (Var (inject₁ x)))) ⟩
@@ -472,7 +514,7 @@ var-helper-to-fin {n} {m} S T i = begin
         ≡⟨ toℕ-inject+ (suc (n + 2)) x ⟩
       toℕ (inject+ (suc (n + 2)) x) ∎
     lem (inj₂ y) = begin
-      toℕ (path-to-fin ([ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt (suc _) y)))
+      toℕ (path-to-fin ([ (λ x → PPExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt (suc _) y)))
         ≡⟨ l2 (splitAt (suc _) y) ⟩
       toℕ (raise m (join (suc (tree-size S)) 2 (splitAt (suc (tree-size S)) y)))
         ≡⟨ cong toℕ (cong (raise m) (join-splitAt (suc (tree-size S)) 2 y)) ⟩
@@ -488,16 +530,16 @@ var-to-path-to-fin (Join S T) t = begin
   where
     open ≡-Reasoning
 
-var-to-path-to-var : (T : Tree n) → (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → path-to-var (var-to-path T t) ≃tm t
-var-to-path-to-var T (Var i) = begin
-  < path-to-var (var-to-path T (Var i)) >tm
-    ≈⟨ path-to-var-is-path-to-fin (var-to-path T (Var i)) ⟩
+var-to-path-to-term : (T : Tree n) → (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → path-to-term (carrier (var-to-path T t)) ≃tm t
+var-to-path-to-term T (Var i) = begin
+  < path-to-term (carrier (var-to-path T (Var i))) >tm
+    ≈⟨ path-to-term-is-path-to-fin (var-to-path T (Var i)) ⟩
   < Var (path-to-fin (var-to-path T (Var i))) >tm
     ≈⟨ Var≃ refl (var-to-path-to-fin T (Var i)) ⟩
   < Var i >tm ∎
   where
     open Reasoning tm-setoid
 
-last-path-to-var : (T : Tree n) → path-to-var (last-path T) ≃tm tree-last-var T
-last-path-to-var Sing = refl≃tm
-last-path-to-var (Join S T) = sub-action-≃-tm (last-path-to-var T) refl≃s
+last-path-to-term : (T : Tree n) → path-to-term (carrier (last-path T)) ≃tm tree-last-var T
+last-path-to-term Sing = refl≃tm
+last-path-to-term (Join S T) = sub-action-≃-tm (last-path-to-term T) refl≃s

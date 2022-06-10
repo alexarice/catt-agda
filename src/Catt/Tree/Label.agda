@@ -7,80 +7,91 @@ open import Catt.Suspension
 open import Catt.Connection
 open import Catt.Tree.Path
 
-
-data Label (m : ℕ) : Tree n → Set where
-  LSing : (x : Tm m) → Label m Sing
-  LJoin : (x : Tm m) → (L : Label m S) → (M : Label m T) → Label m (Join S T)
+data Label (X : MaybeTree m) : Tree n → Set where
+  LSing : (P : Path X) → Label X Sing
+  LJoin : (P : Path X) → (L : Label X S) → (M : Label X T) → Label X (Join S T)
 
 variable
-  L L′ M M′  : Label n S
+  L L′ M M′  : Label X S
 
-first-label : Label n S → Tm n
+first-label : Label X S → Path X
 first-label (LSing x) = x
 first-label (LJoin x L M) = x
 
-last-label : Label n S → Tm n
+first-label-term : {X : MaybeTree m} → Label X S → Tm m
+first-label-term L = path-to-term (first-label L)
+
+last-label : Label X S → Path X
 last-label (LSing x) = x
 last-label (LJoin x L M) = last-label M
 
-label-to-tree : {S : Tree n} → (L : Label m S) → Tree n
+last-label-term : {X : MaybeTree m} → Label X S → Tm m
+last-label-term L = path-to-term (last-label L)
+
+label-to-tree : {S : Tree n} → (L : Label X S) → Tree n
 label-to-tree {S = S} L = S
 
-label-to-sub : {S : Tree n} → Label m S → (A : Ty m) → Sub (suc n) m A
-label-to-sub (LSing x) A = ⟨ ⟨⟩ , x ⟩
-label-to-sub (LJoin x L M) A = sub-from-connect (unrestrict (label-to-sub L (x ─⟨ A ⟩⟶ first-label M))) (label-to-sub M A)
+label-to-sub : {X : MaybeTree m} {S : Tree n} → Label X S → (A : Ty m) → Sub (suc n) m A
+label-to-sub (LSing x) A = ⟨ ⟨⟩ , path-to-term x ⟩
+label-to-sub (LJoin x L M) A = sub-from-connect (unrestrict (label-to-sub L (path-to-term x ─⟨ A ⟩⟶ first-label-term M))) (label-to-sub M A)
 
-suspLabel : Label m S → Label (2 + m) S
-suspLabel (LSing x) = LSing (suspTm x)
-suspLabel (LJoin x L M) = LJoin (suspTm x) (suspLabel L) (suspLabel M)
+map-label : (Path X → Path Y) → Label X S → Label Y S
+map-label f (LSing P) = LSing (f P)
+map-label f (LJoin P L M) = LJoin (f P) (map-label f L) (map-label f M)
 
-infixr 30 _[_]l
-_[_]l : Label m S → (σ : Sub m n B) → Label n S
-LSing x [ σ ]l = LSing (x [ σ ]tm)
-LJoin x S T [ σ ]l = LJoin (x [ σ ]tm) (S [ σ ]l) (T [ σ ]l)
+map-term-label : {X : MaybeTree n} {Y : MaybeTree m} → (Tm n → Tm m) → Label X S → Label Y S
+map-term-label f L = map-label (λ - → POther (f (path-to-term -))) L
 
-id-label : (S : Tree n) → Label (suc n) S
-id-label Sing = LSing 0V
-id-label (Join S T) = LJoin (Var (fromℕ _)) ((suspLabel (id-label S)) [ (connect-susp-inc-left _ _) ]l) ((id-label T) [ (connect-susp-inc-right _ _) ]l)
+suspLabel : Label (Other n) S → Label (Other (2 + n)) S
+suspLabel = map-term-label suspTm
 
-to-label : (S : Tree n) → (σ : Sub (suc n) m A) → Label m S
-to-label S σ = id-label S [ σ ]l
+infixr 30 _[_]<_>l
+_[_]<_>l : {X : MaybeTree m} → Label X S → (σ : Sub m n B) → (Y : MaybeTree n) → Label Y S
+L [ σ ]< Y >l = map-term-label (_[ σ ]tm) L
 
-infix 45 _‼l_
-_‼l_ : Label m S → Path S → Tm m
-L ‼l PHere = first-label L
-LJoin x L M ‼l PExt P = L ‼l P
-LJoin x L M ‼l PShift P = M ‼l P
+id-label : (S : Tree n) → Label (someTree S) S
+id-label Sing = LSing PHere
+id-label (Join S T) = LJoin PHere (map-label PExt (id-label S)) (map-label PShift (id-label T))
 
-replace-label : Label m S
-              → Tm m
-              → Label m S
+to-label : (S : Tree n) → (σ : Sub (suc n) m A) → (Y : MaybeTree m) → Label Y S
+to-label S σ Y = id-label S [ σ ]< Y >l
+
+infix 45 _‼<_>_
+_‼<_>_ : {X : MaybeTree m} → Label X S → Ty m → Path (someTree S) → Path X
+L ‼< A > PHere = first-label L
+L ‼< A > POther t = POther (t [ label-to-sub L A ]tm)
+LJoin x L M ‼< A > PExt P = L ‼< path-to-term x ─⟨ A ⟩⟶ first-label-term M > P
+LJoin x L M ‼< A > PShift P = M ‼< A > P
+
+replace-label : Label X S
+              → Path X
+              → Label X S
 replace-label (LSing _) t = LSing t
 replace-label (LJoin _ L M) t = LJoin t L M
 
-connect-label : (L : Label m S)
-              → (M : Label m T)
-              → Label m (connect-tree S T)
+connect-label : (L : Label X S)
+              → (M : Label X T)
+              → Label X (connect-tree S T)
 connect-label (LSing x) M = replace-label M x
 connect-label (LJoin x L L′) M = LJoin x L (connect-label L′ M)
 
-liftLabel : Label m S → Label (suc m) S
-liftLabel (LSing x) = LSing (liftTerm x)
-liftLabel (LJoin x L M) = LJoin (liftTerm x) (liftLabel L) (liftLabel M)
+liftLabel : Label (Other n)  S → Label (Other (suc n)) S
+liftLabel = map-term-label liftTerm
 
-connect-tree-inc-left : (S : Tree n) → (T : Tree m) → Label (suc (connect-tree-length S T)) S
-connect-tree-inc-left Sing T = LSing (Var (fromℕ _))
-connect-tree-inc-left (Join S₁ S₂) T = connect-label (to-label (suspTree S₁) (connect-susp-inc-left _ _)) (connect-tree-inc-left S₂ T [ connect-susp-inc-right _ _ ]l)
+label-comp : Label (someTree T) S → Label X T → Label X S
+label-comp (LSing P) M = LSing (M ‼< ⋆ > P)
+label-comp (LJoin P L L′) M = LJoin (M ‼< ⋆ > P) (label-comp L M) (label-comp L′ M)
 
-connect-tree-inc-right : (S : Tree n) → (T : Tree m) → Label (suc (connect-tree-length S T)) T
+connect-tree-inc-left : (S : Tree n) → (T : Tree m) → Label (someTree (connect-tree S T)) S
+connect-tree-inc-left Sing T = LSing PHere
+connect-tree-inc-left (Join S₁ S₂) T = LJoin PHere (map-label PExt (id-label S₁)) (map-label PShift (connect-tree-inc-left S₂ T))
+
+connect-tree-inc-right : (S : Tree n) → (T : Tree m) → Label (someTree (connect-tree S T)) T
 connect-tree-inc-right Sing T = id-label T
-connect-tree-inc-right (Join S₁ S₂) T = connect-tree-inc-right S₂ T [ connect-susp-inc-right _ _ ]l
+connect-tree-inc-right (Join S₁ S₂) T = map-label PShift (connect-tree-inc-right S₂ T)
 
-label-between-connect-trees : (L : Label (suc m) S) → (M : Label (suc n) T) → (S′ : Tree m) → (T′ : Tree n) → Label (suc (connect-tree-length S′ T′)) (connect-tree S T)
-label-between-connect-trees L M S′ T′ = connect-label (L [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]l) (M [ label-to-sub (connect-tree-inc-right S′ T′) ⋆ ]l)
+label-between-connect-trees : (L : Label (someTree S′) S) → (M : Label (someTree T′) T) → Label (someTree (connect-tree S′ T′)) (connect-tree S T)
+label-between-connect-trees {S′ = S′} {T′ = T′} L M = connect-label (label-comp L (connect-tree-inc-left S′ T′)) (label-comp M (connect-tree-inc-right S′ T′))
 
-label-between-joins : (L : Label (suc m) S) → (M : Label (suc n) T) → (S′ : Tree m) → (T′ : Tree n) → Label (suc (n + (2 + m))) (Join S T)
-label-between-joins L M S′ T′ = label-between-connect-trees (LJoin getFst (suspLabel L) (LSing getSnd)) M (suspTree S′) T′
-
-Maximal-func : ℕ → (S : Tree n) → Set
-Maximal-func m S = ∀ (P : Path S) → .⦃ is-Maximal P ⦄ → Tm m
+label-between-joins : (L : Label (someTree S′) S) → (M : Label (someTree T′) T) → Label (someTree (Join S′ T′)) (Join S T)
+label-between-joins L M = label-between-connect-trees (LJoin PHere (map-label PExt L) (LSing (PShift PHere))) M

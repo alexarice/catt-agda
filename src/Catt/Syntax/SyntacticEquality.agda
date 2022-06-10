@@ -156,6 +156,10 @@ sub-setoid = record { Carrier = SUB
 ≃s-to-codomain-≡ : {σ : Sub n m A} → {τ : Sub n′ m′ B} → σ ≃s τ → m ≡ m′
 ≃s-to-codomain-≡ p = ≃ty-to-same-length (≃s-to-same-ty p)
 
+≃tm-to-same-length : {s : Tm n} → {t : Tm m} → s ≃tm t → n ≡ m
+≃tm-to-same-length (Var≃ x y) = x
+≃tm-to-same-length (Coh≃ x y z) = ≃s-to-codomain-≡ z
+
 ≃c-to-≡ : Γ ≃c Δ → Γ ≡ Δ
 ≃ty-to-≡ : A ≃ty B → A ≡ B
 ≃tm-to-≡ : s ≃tm t → s ≡ t

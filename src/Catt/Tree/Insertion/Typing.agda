@@ -39,10 +39,9 @@ open import Catt.Variables
 open import Catt.Variables.Properties
 
 branching-path-to-var-height : (S : Tree n)
-                             → (P : Path S)
-                             → .⦃ bp : is-branching-path P ⦄
-                             → tm-height (tree-to-ctx S) (branching-path-to-var S P) ≡ height-of-branching P
-branching-path-to-var-height (Join S₁ S₂) PHere = begin
+                             → (p : BranchingPoint S)
+                             → tm-height (tree-to-ctx S) (branching-path-to-var S p) ≡ height-of-branching p
+branching-path-to-var-height (Join S₁ S₂) BPHere = begin
   tm-height (connect-susp (tree-to-ctx S₁) (tree-to-ctx S₂))
       (0V [ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm)
     ≡˘⟨ sub-tm-height-0 0V (tree-to-ctx (suspTree S₁)) (connect-susp-inc-left-Ty (tree-to-ctx S₂)) ⟩
@@ -53,7 +52,7 @@ branching-path-to-var-height (Join S₁ S₂) PHere = begin
   suc (tree-dim S₁) ∎
   where
     open ≡-Reasoning
-branching-path-to-var-height (Join S₁ S₂) (PExt P) = begin
+branching-path-to-var-height (Join S₁ S₂) (BPExt P) = begin
   tm-height (connect-susp (tree-to-ctx S₁) (tree-to-ctx S₂))
       (suspTm (branching-path-to-var S₁ P)
         [ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm)
@@ -65,7 +64,7 @@ branching-path-to-var-height (Join S₁ S₂) (PExt P) = begin
   suc (height-of-branching P) ∎
   where
     open ≡-Reasoning
-branching-path-to-var-height (Join S₁ S₂) (PShift P) = begin
+branching-path-to-var-height (Join S₁ S₂) (BPShift P) = begin
   tm-height (connect-susp (tree-to-ctx S₁) (tree-to-ctx S₂))
       (branching-path-to-var S₂ P [ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
     ≡˘⟨ sub-tm-height-0 (branching-path-to-var S₂ P) (tree-to-ctx S₂) (connect-susp-inc-right-Ty (tree-to-ctx S₁)) ⟩
@@ -75,11 +74,13 @@ branching-path-to-var-height (Join S₁ S₂) (PShift P) = begin
   where
     open ≡-Reasoning
 
-branching-path-to-var-Ty : (T : Tree n) → (P : Path T) → .⦃ bp : is-branching-path P ⦄ → Typing-Tm (tree-to-ctx T) (branching-path-to-var T P) (branching-path-to-type T P)
-branching-path-to-var-Ty (Join S T) PHere = apply-sub-tm-typing (suspTmTy (TyConv (TyVar 0F) (reflexive≈ty (linear-tree-unbiased-lem (tree-dim S) S refl)))) (connect-susp-inc-left-Ty (tree-to-ctx T))
-branching-path-to-var-Ty (Join S T) (PExt P) = apply-sub-tm-typing (suspTmTy (branching-path-to-var-Ty S P)) (connect-susp-inc-left-Ty (tree-to-ctx T))
-branching-path-to-var-Ty (Join S T) (PShift P) = apply-sub-tm-typing (branching-path-to-var-Ty T P) (connect-susp-inc-right-Ty (tree-to-ctx S))
+branching-path-to-var-Ty : (T : Tree n) → (p : BranchingPoint T) → Typing-Tm (tree-to-ctx T) (branching-path-to-var T p) (branching-path-to-type T p)
+branching-path-to-var-Ty (Join S T) BPHere = apply-sub-tm-typing (suspTmTy (TyConv (TyVar 0F) (reflexive≈ty (linear-tree-unbiased-lem (tree-dim S) S refl)))) (connect-susp-inc-left-Ty (tree-to-ctx T))
+branching-path-to-var-Ty (Join S T) (BPExt P) = apply-sub-tm-typing (suspTmTy (branching-path-to-var-Ty S P)) (connect-susp-inc-left-Ty (tree-to-ctx T))
+branching-path-to-var-Ty (Join S T) (BPShift P) = apply-sub-tm-typing (branching-path-to-var-Ty T P) (connect-susp-inc-right-Ty (tree-to-ctx S))
 
+
+{-
 insertion-dim-lem : (S : Tree n)
                   → (P : Path S)
                   → .⦃ bp : is-branching-path P ⦄
@@ -1240,3 +1241,4 @@ exterior-sub-label-Ty (Join S₁ S₂) (PShift P) T
 --       where
 --         open Reasoning tm-setoid
 --     open Reasoning (sub-setoid-≈ _ _)
+-}

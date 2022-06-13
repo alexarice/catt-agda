@@ -46,10 +46,26 @@ insertion-tree (Join S₁ S₂) (BPHere) T = connect-tree T S₂
 insertion-tree (Join S₁ S₂) (BPExt P) (Join T Sing) = Join (insertion-tree S₁ P T) S₂
 insertion-tree (Join S₁ S₂) (BPShift P) T = Join S₁ (insertion-tree S₂ P T)
 
-interior-sub : (S : Tree n) → (p : BranchingPoint S) → (T : Tree m) → .⦃ _ : has-linear-height (bp-height p) T ⦄ → Sub (suc m) (suc (insertion-tree-size S p T)) ⋆
-interior-sub (Join S₁ S₂) (BPHere) T = idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘ connect-inc-left (tree-last-var T) _
-interior-sub (Join S₁ S₂) (BPExt P) (Join T Sing) = connect-susp-inc-left (insertion-tree-size S₁ P T) (tree-size S₂) ∘ suspSub (interior-sub S₁ P T)
-interior-sub (Join S₁ S₂) (BPShift P) T = connect-susp-inc-right (tree-size S₁) (insertion-tree-size S₂ P T) ∘ interior-sub S₂ P T
+-- interior-sub : (S : Tree n) → (p : BranchingPoint S) → (T : Tree m) → .⦃ _ : has-linear-height (bp-height p) T ⦄ → Sub (suc m) (suc (insertion-tree-size S p T)) ⋆
+-- interior-sub (Join S₁ S₂) (BPHere) T = idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘ connect-inc-left (tree-last-var T) _
+-- interior-sub (Join S₁ S₂) (BPExt P) (Join T Sing) = connect-susp-inc-left (insertion-tree-size S₁ P T) (tree-size S₂) ∘ suspSub (interior-sub S₁ P T)
+-- interior-sub (Join S₁ S₂) (BPShift P) T = connect-susp-inc-right (tree-size S₁) (insertion-tree-size S₂ P T) ∘ interior-sub S₂ P T
+
+interior-sub-label : (S : Tree n)
+                   → (p : BranchingPoint S)
+                   → (T : Tree m)
+                   → .⦃ _ : has-linear-height (bp-height p) T ⦄
+                   → Label (someTree (insertion-tree S p T)) T
+interior-sub-label (Join S₁ S₂) BPHere T = connect-tree-inc-left T S₂
+interior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing) = LJoin PHere (map-label PExt (interior-sub-label S₁ p T)) (LSing (PShift PHere))
+interior-sub-label (Join S₁ S₂) (BPShift p) T = map-label PShift (interior-sub-label S₂ p T)
+
+interior-sub : (S : Tree n)
+             → (p : BranchingPoint S)
+             → (T : Tree m)
+             → .⦃ _ : has-linear-height (bp-height p) T ⦄
+             → Sub (suc m) (suc (insertion-tree-size S p T)) ⋆
+interior-sub S p T = label-to-sub (interior-sub-label S p T) ⋆
 
 branching-path-to-var : (T : Tree n) → (p : BranchingPoint T) → Tm (suc n)
 branching-path-to-var (Join S T) (BPHere) = 0V [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm
@@ -73,6 +89,13 @@ exterior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing)
   = label-between-joins (exterior-sub-label S₁ p T) (id-label S₂)
 exterior-sub-label (Join S₁ S₂) (BPShift p) T
   = label-between-joins (id-label S₁) (exterior-sub-label S₂ p T)
+
+exterior-sub : (S : Tree n)
+             → (p : BranchingPoint S)
+             → (T : Tree m)
+             → .⦃ _ : has-linear-height (bp-height p) T ⦄
+             → Sub (suc (tree-size S)) (suc (insertion-tree-size S p T)) ⋆
+exterior-sub S p T = label-to-sub (exterior-sub-label S p T) ⋆
 
 {-
 exterior-sub : (S : Tree n)

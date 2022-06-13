@@ -100,11 +100,12 @@ id-label-Ty (Join S T)
 to-label-Ty : (S : Tree n) → Typing-Sub (tree-to-ctx S) (COT-to-Ctx ΔT) σ → Typing-Label ΔT (to-label S σ (COT-to-MT ΔT)) (sub-type σ)
 to-label-Ty S σty = label-sub-Ty (id-label-Ty S) σty
 
+-- label-maximal-equality : Typing-Label Γ L A → Typing-Label Γ M B → Same-Leaves L M → label-to-sub L A ≈[ Γ ]s label-to-sub M B
+-- label-maximal-equality (TySing sty) (TySing tty) f = Ext≈ (Null≈ (Ty-unique-≃ (f PHere) sty tty)) (reflexive≈tm (f PHere))
+-- label-maximal-equality (TyJoin {M = LSing x} sty Lty Mty) (TyJoin {M = LSing x₁} tty Lty′ Mty′) f = unrestrictEq (label-maximal-equality Lty Lty′ (Same-Leaves-proj₁ f))
+-- label-maximal-equality (TyJoin {M = LJoin x M M₁} sty Lty Mty) (TyJoin {M = LJoin x₁ M′ M′₁} tty Lty′ Mty′) f = sub-from-connect-≈ (unrestrictEq (label-maximal-equality Lty Lty′ (Same-Leaves-proj₁ f))) (label-maximal-equality Mty Mty′ (Same-Leaves-proj₂ f))
+
 {-
-label-maximal-equality : Typing-Label Γ L A → Typing-Label Γ M B → Same-Leaves L M → label-to-sub L A ≈[ Γ ]s label-to-sub M B
-label-maximal-equality (TySing sty) (TySing tty) f = Ext≈ (Null≈ (Ty-unique-≃ (f PHere) sty tty)) (reflexive≈tm (f PHere))
-label-maximal-equality (TyJoin {M = LSing x} sty Lty Mty) (TyJoin {M = LSing x₁} tty Lty′ Mty′) f = unrestrictEq (label-maximal-equality Lty Lty′ (Same-Leaves-proj₁ f))
-label-maximal-equality (TyJoin {M = LJoin x M M₁} sty Lty Mty) (TyJoin {M = LJoin x₁ M′ M′₁} tty Lty′ Mty′) f = sub-from-connect-≈ (unrestrictEq (label-maximal-equality Lty Lty′ (Same-Leaves-proj₁ f))) (label-maximal-equality Mty Mty′ (Same-Leaves-proj₂ f))
 
 sub-maximal-equality : Typing-Sub (tree-to-ctx S) Γ σ → Typing-Sub (tree-to-ctx S) Γ τ → (∀ (P : Path S) → .⦃ is-Maximal P ⦄ → path-to-var P [ σ ]tm ≃tm path-to-var P [ τ ]tm) → σ ≈[ Γ ]s τ
 sub-maximal-equality {S = S} {Γ = Γ} {σ = σ} {τ = τ} σty τty f = begin

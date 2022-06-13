@@ -498,17 +498,17 @@ connect-first-label : (L : Label X S) → (M : Label X T) → first-label-term (
 connect-first-label (LSing x) M = replace-first-label M x
 connect-first-label (LJoin x L₁ L₂) M = refl≃tm
 
-{-
-label-join-lem : (t : Tm m) → (L : Label (Tm m) S) → (M : Label (Tm m) T) → (A : Ty m)
-               → getSnd [ unrestrict (label-to-sub L (t ─⟨ A ⟩⟶ first-label M)) ]tm ≃tm Var (fromℕ _) [ label-to-sub M A ]tm
+label-join-lem : (t : Tm m) → (L : Label X S) → (M : Label X T) → (A : Ty m)
+               → getSnd [ unrestrict (label-to-sub L (t ─⟨ A ⟩⟶ first-label-term M)) ]tm ≃tm Var (fromℕ _) [ label-to-sub M A ]tm
 label-join-lem t L M A = begin
- < getSnd [ unrestrict (label-to-sub L (t ─⟨ A ⟩⟶ first-label M)) ]tm >tm
-   ≈⟨ unrestrict-snd (label-to-sub L (t ─⟨ A ⟩⟶ first-label M)) ⟩
- < first-label M >tm
+ < getSnd [ unrestrict (label-to-sub L (t ─⟨ A ⟩⟶ first-label-term M)) ]tm >tm
+   ≈⟨ unrestrict-snd (label-to-sub L (t ─⟨ A ⟩⟶ first-label-term M)) ⟩
+ < first-label-term M >tm
    ≈⟨ first-label-prop M A ⟩
  < Var (fromℕ _) [ label-to-sub M A ]tm >tm ∎
    where
      open Reasoning tm-setoid
+{-
 
 lift-replace-label : (L : Label (Tm m) S) → (t : Tm m) → liftLabel (replace-label L t) ≃l replace-label (liftLabel L) (liftTerm t)
 lift-replace-label (LSing x) t = refl≃l

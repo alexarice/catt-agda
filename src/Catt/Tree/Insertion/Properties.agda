@@ -7,6 +7,7 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree
 open import Catt.Tree.Path
+open import Catt.Tree.Path.Properties
 open import Catt.Tree.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Unbiased
@@ -30,6 +31,26 @@ height-of-branching-non-zero : (S : Tree n) → (p : BranchingPoint S) → NonZe
 height-of-branching-non-zero (Join S T) BPHere = it
 height-of-branching-non-zero (Join S T) (BPExt P) = it
 height-of-branching-non-zero (Join S T) (BPShift P) = height-of-branching-non-zero T P
+
+exterior-sub-first-label : (S : Tree n)
+                         → (p : BranchingPoint S)
+                         → (T : Tree m)
+                         → .⦃ _ : has-linear-height (bp-height p) T ⦄
+                         → first-label-term (exterior-sub-label S p T) ≃tm Var (fromℕ (insertion-tree-size S p T))
+exterior-sub-first-label (Join S₁ S₂) BPHere T = begin
+  < getFst [ unrestrict (sub-from-linear-tree-unbiased S₁ T 1) ]tm
+           [ label-to-sub (connect-tree-inc-left T S₂) ⋆ ]tm >tm
+    ≈⟨ sub-action-≃-tm (unrestrict-fst (sub-from-linear-tree-unbiased S₁ T 1)) refl≃s ⟩
+  < Var (fromℕ _) [ label-to-sub (connect-tree-inc-left T S₂) ⋆ ]tm >tm
+    ≈˘⟨ first-label-prop (connect-tree-inc-left T S₂) ⋆ ⟩
+  < first-label-term (connect-tree-inc-left T S₂) >tm
+    ≈⟨ connect-tree-inc-left-first-label T S₂ ⟩
+  < Var (fromℕ (connect-tree-length T S₂)) >tm ∎
+  where
+    open Reasoning tm-setoid
+exterior-sub-first-label (Join S₁ S₂) (BPExt p) (Join T Sing) = refl≃tm
+exterior-sub-first-label (Join S₁ S₂) (BPShift p) T = refl≃tm
+
 {-
 exterior-sub-fst-var : (S : Tree n)
                      → (P : Path S)

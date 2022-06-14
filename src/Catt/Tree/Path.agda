@@ -110,31 +110,26 @@ last-path : (T : Tree n) → PPath T
 last-path Sing = PPHere
 last-path (Join S T) = PPShift (last-path T)
 
-{-
-not-here : (P : Path S) → Set
-not-here PHere = ⊥
-not-here (PExt P) = ⊤
-not-here (PShift P) = ⊤
-not-here (POther t) = ⊥
+not-here : (P : PPath S) → Set
+not-here ⟦ PHere ⟧ = ⊥
+not-here ⟦ PExt P ⟧ = ⊤
+not-here ⟦ PShift P ⟧ = ⊤
 
-is-Maximal : Path S → Set
-is-Maximal {S = Sing} PHere = ⊤
-is-Maximal {S = Join S T} PHere = ⊥
-is-Maximal (PExt P) = is-Maximal P
-is-Maximal (PShift P) = not-here P × is-Maximal P
-is-Maximal (POther P) = ⊥
+is-Maximal : PPath S → Set
+is-Maximal {S = Sing} ⟦ PHere ⟧ = ⊤
+is-Maximal {S = Join S T} ⟦ PHere ⟧ = ⊥
+is-Maximal ⟦ PExt P ⟧ = is-Maximal ⟦ P ⟧
+is-Maximal ⟦ PShift P ⟧ = not-here ⟦ P ⟧ × is-Maximal ⟦ P ⟧
+is-Maximal ⟦ POther P ⟧ = ⊥
 
+-- path-inc-left : (P : Path S) → .⦃ is-Path P ⦄ → (T : Tree n) → Path (connect-tree S T)
+-- path-inc-left PHere T = PHere
+-- path-inc-left (PExt P) T = PExt P
+-- path-inc-left (PShift P) T = PShift (path-inc-left P T)
 
+-- path-inc-right : (S : Tree n) → (P : Path T) → Path (connect-tree S T)
+-- path-inc-right Sing P = P
+-- path-inc-right (Join S₁ S₂) P = PShift (path-inc-right S₂ P)
 
-path-inc-left : (P : Path S) → .⦃ is-Path P ⦄ → (T : Tree n) → Path (connect-tree S T)
-path-inc-left PHere T = PHere
-path-inc-left (PExt P) T = PExt P
-path-inc-left (PShift P) T = PShift (path-inc-left P T)
-
-path-inc-right : (S : Tree n) → (P : Path T) → Path (connect-tree S T)
-path-inc-right Sing P = P
-path-inc-right (Join S₁ S₂) P = PShift (path-inc-right S₂ P)
-
-path-func : Set → (S : Tree n) → Set
-path-func X S = ∀ (P : Path S) → .⦃ is-Maximal P ⦄ → X
--}
+-- path-func : Set → (S : Tree n) → Set
+-- path-func X S = ∀ (P : Path S) → .⦃ is-Maximal P ⦄ → X

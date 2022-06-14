@@ -67,6 +67,15 @@ interior-sub : (S : Tree n)
              → Sub (suc m) (suc (insertion-tree-size S p T)) ⋆
 interior-sub S p T = label-to-sub (interior-sub-label S p T) ⋆
 
+is-linear-max-path : (T : Tree n) → .⦃ is-linear T ⦄ → PPath T
+is-linear-max-path Sing = ⟦ PHere ⟧
+is-linear-max-path (Join S Sing) = PPExt (is-linear-max-path S)
+
+branching-path-to-path : (T : Tree n) → (p : BranchingPoint T) → PPath T
+branching-path-to-path (Join S T) BPHere = PPExt (is-linear-max-path S)
+branching-path-to-path (Join S T) (BPExt p) = PPExt (branching-path-to-path S p)
+branching-path-to-path (Join S T) (BPShift p) = PPShift (branching-path-to-path T p)
+
 branching-path-to-var : (T : Tree n) → (p : BranchingPoint T) → Tm (suc n)
 branching-path-to-var (Join S T) (BPHere) = 0V [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm
 branching-path-to-var (Join S T) (BPExt P) = suspTm (branching-path-to-var S P) [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm

@@ -267,3 +267,54 @@ label-between-joins-Ty : Typing-Label (incTree S′) L ⋆
                        → first-label-term M ≈[ tree-to-ctx T′ ]tm Var (fromℕ (tree-size T′))
                        → Typing-Label (incTree (Join S′ T′)) (label-between-joins L M) ⋆
 label-between-joins-Ty Lty Mty p = label-between-connect-trees-Ty (TyJoin TyHere (label-typing-conv (label-pext-Ty Lty) (reflexive≈ty (id-on-ty (suspTy ⋆)))) (TySing (TyShift TyHere))) Mty refl≈tm p
+
+
+data _≃Ml<_>_ : Label X S → Bool → Label Y T → Set where
+  MlSingf : LSing P ≃Ml< false > LSing Q
+  MlSingt : path-to-term P ≃tm path-to-term Q → LSing P ≃Ml< true > LSing Q
+  MlJoin : {b : Bool} → L ≃Ml< true > L′ → M ≃Ml< false > M′ → LJoin P L M ≃Ml< b > LJoin Q L′ M′
+
+max-eq-to-eq : {L : Label (COT-to-MT ΓS) S}
+             → {M : Label (COT-to-MT ΔT) T}
+             → L ≃Ml< true > M
+             → Typing-Label ΓS L A
+             → Typing-Label ΔT M B
+             → (p : COT-to-Ctx ΓS ≃c COT-to-Ctx ΔT)
+             → idSub≃ p ∘ label-to-sub L A ≈[ COT-to-Ctx ΔT ]s label-to-sub M B
+max-eq-to-eq (MlSingt {P = P} x) (TySing Pty) (TySing Qty) p = let
+  eq = trans≃tm (idSub≃-on-tm p (path-to-term P)) x
+  in Ext≈ (Null≈ (Ty-unique-≃ eq (apply-sub-tm-typing (path-to-term-Ty Pty) (idSub≃-Ty p)) (path-to-term-Ty Qty))) (reflexive≈tm eq)
+max-eq-to-eq {A = A} {B = B} (MlJoin q MlSingf) (TyJoin {P = P} {L = L} Pty Lty (TySing {P = P′} Pty′)) (TyJoin {P = Q} {L = M} Qty Mty (TySing {P = Q′} QTy′)) p = begin
+  < idSub≃ p ∘
+       unrestrict
+       (label-to-sub L
+        (path-to-term P ─⟨ A ⟩⟶ first-label-term (LSing P′))) >s′
+    ≈˘⟨ reflexive≈s (unrestrict-comp-higher (idSub≃ p) (label-to-sub L (path-to-term P ─⟨ A ⟩⟶ path-to-term P′))) ⟩
+  < unrestrict (idSub≃ p ∘ label-to-sub L (path-to-term P ─⟨ A ⟩⟶ path-to-term P′)) >s′
+    ≈⟨ unrestrictEq (max-eq-to-eq q Lty Mty p) ⟩
+  < unrestrict (label-to-sub M (path-to-term Q ─⟨ B ⟩⟶ first-label-term (LSing Q′))) >s′ ∎
+  where
+    open Reasoning (sub-setoid-≈ _)
+max-eq-to-eq {A = A} {B = B} (MlJoin q q′@(MlJoin a b)) (TyJoin {P = P} {L = L} {M = L′} Pty Lty Lty′) (TyJoin {P = Q} {L = M} {M = M′} Qty Mty Mty′) p = begin
+  < idSub≃ p
+  ∘ sub-from-connect (unrestrict (label-to-sub L (path-to-term P ─⟨ A ⟩⟶ first-label-term L′)))
+                     (label-to-sub L′ A) >s′
+    ≈⟨ reflexive≈s (sub-from-connect-sub (unrestrict (label-to-sub L (path-to-term P ─⟨ A ⟩⟶ first-label-term L′))) (label-to-sub L′ A) (idSub≃ p)) ⟩
+  < sub-from-connect (idSub≃ p ∘ unrestrict (label-to-sub L (path-to-term P ─⟨ A ⟩⟶ first-label-term L′)))
+                     (idSub≃ p ∘ label-to-sub L′ A) >s′
+    ≈˘⟨ reflexive≈s (sub-from-connect-≃ (unrestrict-comp-higher (idSub≃ p) (label-to-sub L (path-to-term P ─⟨ A ⟩⟶ first-label-term L′))) refl≃s) ⟩
+  < sub-from-connect
+    (unrestrict (idSub≃ p ∘ label-to-sub L (path-to-term P ─⟨ A ⟩⟶ first-label-term L′)))
+    (idSub≃ p ∘ label-to-sub L′ A) >s′
+    ≈⟨ sub-from-connect-≈ (unrestrictEq (max-eq-to-eq q Lty Mty p)) (max-eq-to-eq (MlJoin a b) Lty′ Mty′ p) ⟩
+  < sub-from-connect
+    (unrestrict (label-to-sub M (path-to-term Q ─⟨ B ⟩⟶ path-to-term (first-label M′))))
+    (label-to-sub M′ B) >s′ ∎
+  where
+    open Reasoning (sub-setoid-≈ _)
+
+connect-label-inc-left : (L : Label X S)
+                       → (M : Label X T)
+                       → label-comp (connect-tree-inc-left S T) (connect-label L M) ≃Ml< true > L
+connect-label-inc-left (LSing P) M = MlSingt (replace-first-label M P)
+connect-label-inc-left (LJoin P L L′) M = {!!}

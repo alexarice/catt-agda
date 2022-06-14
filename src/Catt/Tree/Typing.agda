@@ -76,4 +76,4 @@ sub-from-linear-Eq {σ = σ} {τ = τ} (Join T Sing) σty τty p = begin
       < Var zero [ restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm) ]tm >tm ∎
       where
         open Reasoning tm-setoid
-    open Reasoning (sub-setoid-≈ _ _)
+    open Reasoning (sub-setoid-≈ _)

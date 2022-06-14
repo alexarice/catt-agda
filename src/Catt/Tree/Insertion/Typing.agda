@@ -763,6 +763,34 @@ sub-from-insertion-Ty {A = A} S P T {σ} {τ} σty τty p
                                                                refl)
                                              (transport-typing-sub τty refl≃c refl≃c (sym≃s (sub-to-label-to-sub T τ (Other _)))))
 
+interior-sub-label-comm : (S : Tree n)
+                        → (P : BranchingPoint S)
+                        → (T : Tree m)
+                        → .⦃ lh : has-linear-height (bp-height P) T ⦄
+                        → {L : Label (COT-to-MT ΓS) S}
+                        → {M : Label (COT-to-MT ΓS) T}
+                        → Typing-Label ΓS L ⋆
+                        → Typing-Label ΓS M ⋆
+                        → path-to-term (L ‼< ⋆ > carrier (branching-path-to-path S P)) ≃tm unbiased-comp (tree-dim T) T [ label-to-sub M ⋆ ]tm
+                        → label-comp (interior-sub-label S P T) (sub-from-insertion-label S P T L M) ≃Ml< true > M
+interior-sub-label-comm (Join S₁ S₂) BPHere T {L = LJoin Q L L′} {M} (TyJoin Qty Lty Lty′) Mty p = {!!}
+interior-sub-label-comm (Join S₁ S₂) (BPExt P) T {L = L} {M} Lty Mty p = {!!}
+interior-sub-label-comm (Join S₁ S₂) (BPShift P) T {L = L} {M} Lty Mty p = {!!}
+
+
+interior-sub-comm : (S : Tree n)
+                  → (P : BranchingPoint S)
+                  → (T : Tree m)
+                  → .⦃ lh : has-linear-height (bp-height P) T ⦄
+                  → {σ : Sub (suc n) l A}
+                  → {τ : Sub (suc m) l A}
+                  → Typing-Sub (tree-to-ctx S) Γ σ
+                  → Typing-Sub (tree-to-ctx T) Γ τ
+                  → branching-path-to-var S P [ σ ]tm ≃tm unbiased-comp (tree-dim T) T [ τ ]tm
+                  → sub-from-insertion S P T σ τ ∘ interior-sub S P T ≈[ Γ ]s τ
+interior-sub-comm S P T σty τty p = {!!}
+
+
 
 {-
 interior-sub-comm : (S : Tree n)

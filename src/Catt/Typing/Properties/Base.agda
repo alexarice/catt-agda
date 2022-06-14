@@ -88,8 +88,8 @@ tm-setoid-≈ {n} Γ = record { Carrier = Tm n
                                              }
                     }
 
-sub-setoid-≈ : ℕ → Ctx m → Setoid _ _
-sub-setoid-≈ {m} n Δ = record { Carrier = SUB′ n m
+sub-setoid-≈ : Ctx m → Setoid _ _
+sub-setoid-≈ {m} Δ = record { Carrier = SUB′ m
                     ; _≈_ = λ x y → sub′ x ≈[ Δ ]s sub′ y
                     ; isEquivalence = record { refl = refl≈s
                                              ; sym = sym≈s

@@ -17,7 +17,7 @@ private
 
 data _≈[_]tm_ : Tm n → Ctx n → Tm n → Set
 data _≈[_]ty_ : Ty n → Ctx n → Ty n → Set
-data _≈[_]s_ : (σ : Sub n m A) → Ctx m → (τ : Sub n m B) → Set
+data _≈[_]s_ : (σ : Sub n m A) → Ctx m → (τ : Sub n′ m B) → Set
 data Typing-Ctx : (Γ : Ctx m) → Set
 data Typing-Tm : (Γ : Ctx m) → Tm m → Ty m → Set
 data Typing-Ty : (Γ : Ctx m) → Ty m → Set

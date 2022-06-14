@@ -37,10 +37,11 @@ record SUB : Set where
 
 open SUB public
 
-record SUB′ (n : ℕ) (m : ℕ) : Set where
+record SUB′ (m : ℕ) : Set where
   constructor <_>s′
   field
+    {s-n′} : ℕ
     {s-ty′} : Ty m
-    sub′ : Sub n m s-ty′
+    sub′ : Sub s-n′ m s-ty′
 
 open SUB′ public

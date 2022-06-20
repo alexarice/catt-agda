@@ -33,6 +33,13 @@ data Typing-Path : (Γ : CtxOrTree n) → Path (COT-to-MT Γ) → (A : Ty n) →
   TyShift : Typing-Path (incTree T) P A → Typing-Path (incTree (Join S T)) (PShift P) (A [ connect-susp-inc-right (tree-size S) (tree-size T) ]ty)
   TyOther : Typing-Tm (COT-to-Ctx ΓS) t A → Typing-Path ΓS (POther t) A
 
+transport-path-typing : Typing-Path ΓS P A → P ≃p Q → A ≈[ COT-to-Ctx ΓS ]ty B → Typing-Path ΓS Q B
+transport-path-typing (TyPConv Pty x) p q = transport-path-typing Pty p (trans≈ty x q)
+transport-path-typing TyHere (≃Here x) Star≈ = TyHere
+transport-path-typing (TyExt Pty) (≃Ext p x) q = TyPConv (TyExt (transport-path-typing Pty p refl≈ty)) q
+transport-path-typing (TyShift Pty) (≃Shift x p) q = TyPConv (TyShift (transport-path-typing Pty p refl≈ty)) q
+transport-path-typing (TyOther x) (≃Other y) q = TyOther (TyConv (transport-typing x y) q)
+
 path-to-term-Ty : Typing-Path ΓS P A → Typing-Tm (COT-to-Ctx ΓS) (path-to-term P) A
 path-to-term-Ty (TyPConv Pty p) = TyConv (path-to-term-Ty Pty) p
 path-to-term-Ty {ΓS = incTree S} TyHere = fst-var-Ty (tree-to-ctx S)

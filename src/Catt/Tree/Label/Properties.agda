@@ -57,6 +57,14 @@ last-label-≃ : L ≃l M → last-label L ≃p last-label M
 last-label-≃ (LSing≃ x) = x
 last-label-≃ (LJoin≃ x p q) = last-label-≃ q
 
+map-label-pext-≃ : L ≃l M → map-label (PExt {T = T}) L ≃l map-label (PExt {T = T}) M
+map-label-pext-≃ (LSing≃ x) = LSing≃ (≃Ext x refl≃)
+map-label-pext-≃ (LJoin≃ x p q) = LJoin≃ (≃Ext x refl≃) (map-label-pext-≃ p) (map-label-pext-≃ q)
+
+map-label-pshift-≃ : L ≃l M → map-label (PShift {S = S}) L ≃l map-label (PShift {S = S}) M
+map-label-pshift-≃ (LSing≃ x) = LSing≃ (≃Shift refl≃ x)
+map-label-pshift-≃ (LJoin≃ x p q) = LJoin≃ (≃Shift refl≃ x) (map-label-pshift-≃ p) (map-label-pshift-≃ q)
+
 label-to-sub-≃ : L ≃l M → A ≃ty B → label-to-sub L A ≃s label-to-sub M B
 label-to-sub-≃ (LSing≃ x) q = Ext≃ (Null≃ q) (path-to-term-≃ x)
 label-to-sub-≃ (LJoin≃ x p r) q = sub-from-connect-≃ (unrestrict-≃ (label-to-sub-≃ p (Arr≃ (path-to-term-≃ x) q (path-to-term-≃ (first-label-≃ r))))) (label-to-sub-≃ r q)
@@ -72,6 +80,18 @@ replace-label-≃ (LJoin≃ x p p′) q = LJoin≃ q p p′
 connect-label-≃ : L ≃l L′ → M ≃l M′ → connect-label L M ≃l connect-label L′ M′
 connect-label-≃ (LSing≃ x) q = replace-label-≃ q x
 connect-label-≃ (LJoin≃ x p p′) q = LJoin≃ x p (connect-label-≃ p′ q)
+
+label-func-to-label-≃ : {L : Label-func X S} → {M : Label-func Y S} → ((P : PPath S) → L P ≃p M P) → label-func-to-label L ≃l label-func-to-label M
+label-func-to-label-≃ {S = Sing} f = LSing≃ (f PPHere)
+label-func-to-label-≃ {S = Join S T} f = LJoin≃ (f PPHere) (label-func-to-label-≃ (λ P → f (PPExt P))) (label-func-to-label-≃ (λ P → f (PPShift P)))
+
+label-func-to-label-map : (f : Path X → Path Y) → (L : Label-func X S) → label-func-to-label (map-label-func f L) ≃l map-label f (label-func-to-label L)
+label-func-to-label-map {S = Sing} f L = LSing≃ refl≃p
+label-func-to-label-map {S = Join S T} f L = LJoin≃ refl≃p (label-func-to-label-map f (label-func₁ L)) (label-func-to-label-map f (label-func₂ L))
+
+first-label-func-to-label : (L : Label-func X S) → first-label (label-func-to-label L) ≃p L PPHere
+first-label-func-to-label {S = Sing} L = refl≃p
+first-label-func-to-label {S = Join S S₁} L = refl≃p
 
 first-map-label : (f : Path X → Path Y) → (L : Label X S) → first-label (map-label f L) ≃p f (first-label L)
 first-map-label f (LSing P) = refl≃p
@@ -324,6 +344,36 @@ susp-connect-label (LJoin x L L′) M = LJoin≃ refl≃tm refl≃l (susp-connec
 id-first-label : (T : Tree n) → first-label (id-label T) ≃p (PHere {S = T})
 id-first-label Sing = refl≃p
 id-first-label (Join S T) = refl≃p
+
+id-label-func-compat : (S : Tree n) → label-func-to-label (id-label-func S) ≃l id-label S
+id-label-func-compat Sing = refl≃l
+id-label-func-compat (Join S T) = LJoin≃ refl≃p l1 l2
+  where
+    l1 : label-func-to-label (label-func₁ (id-label-func (Join S T))) ≃l
+           map-label PExt (id-label S)
+    l1 = begin
+      < label-func-to-label (label-func₁ (id-label-func (Join S T))) >l
+        ≡⟨⟩
+      < label-func-to-label (map-label-func PExt (id-label-func S)) >l
+        ≈⟨ label-func-to-label-map PExt (id-label-func S) ⟩
+      < map-label PExt (label-func-to-label (id-label-func S)) >l
+        ≈⟨ map-label-pext-≃ (id-label-func-compat S) ⟩
+      < map-label PExt (id-label S) >l ∎
+      where
+        open Reasoning (label-setoid S)
+
+    l2 : label-func-to-label (label-func₂ (id-label-func (Join S T))) ≃l
+           map-label PShift (id-label T)
+    l2 = begin
+      < label-func-to-label (label-func₂ (id-label-func (Join S T))) >l
+        ≡⟨⟩
+      < label-func-to-label (map-label-func PShift (id-label-func T)) >l
+        ≈⟨ label-func-to-label-map PShift (id-label-func T) ⟩
+      < map-label PShift (label-func-to-label (id-label-func T)) >l
+        ≈⟨ map-label-pshift-≃ (id-label-func-compat T) ⟩
+      < map-label PShift (id-label T) >l ∎
+      where
+        open Reasoning (label-setoid T)
 
 id-label-is-id-sub : (S : Tree n) → label-to-sub (id-label S) ⋆ ≃s idSub {suc n}
 id-label-is-id-sub Sing = refl≃s
@@ -578,50 +628,56 @@ connect-tree-inc-left-first-label : (S : Tree n)
 connect-tree-inc-left-first-label Sing T = refl≃tm
 connect-tree-inc-left-first-label (Join S₁ S₂) T = refl≃tm
 
+connect-tree-inc-left-func-first-label : (S : Tree n)
+                                       → (T : Tree m)
+                                       → path-to-term (connect-tree-inc-left-func S T PPHere) ≃tm Var (fromℕ (connect-tree-length S T))
+connect-tree-inc-left-func-first-label Sing T = refl≃tm
+connect-tree-inc-left-func-first-label (Join S₁ S₂) T = refl≃tm
+
 replace-label-prop : (L : Label X S) → (P : Path X) → P ≃p first-label L → replace-label L P ≃l L
 replace-label-prop (LSing x) t p = LSing≃ p
 replace-label-prop (LJoin x L M) t p = LJoin≃ p refl≃l refl≃l
 
-label-index-to-term : {X : MaybeTree n} → (L : Label X T) → (A : Ty n) → (P : Path (someTree T)) → path-to-term (L ‼< A > P) ≃tm path-to-term P [ label-to-sub L A ]tm
-label-index-to-term L A PHere = first-label-prop L A
-label-index-to-term (LJoin Q L M) A (PExt P) = begin
-  < path-to-term (L ‼< path-to-term Q ─⟨ A ⟩⟶ first-label-term M > P) >tm
-    ≈⟨ label-index-to-term L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M) P ⟩
-  < path-to-term P [ label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M) ]tm >tm
-    ≈˘⟨ unrestrict-comp-tm (path-to-term P) (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M)) ⟩
-  < suspTm (path-to-term P) [ unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M)) ]tm >tm
-    ≈˘⟨ sub-action-≃-tm (refl≃tm {s = suspTm (path-to-term P)}) (sub-from-connect-inc-left (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M))) getSnd (label-to-sub M A)) ⟩
-  < suspTm (path-to-term P) [ sub-from-connect (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M)))
-                                               (label-to-sub M A)
-                            ∘ connect-susp-inc-left _ _ ]tm >tm
-    ≈⟨ assoc-tm _ _ (suspTm (path-to-term P)) ⟩
-  < suspTm (path-to-term P) [ connect-susp-inc-left _ _ ]tm
-                            [ sub-from-connect (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M)))
-                                               (label-to-sub M A) ]tm >tm ∎
-  where
-    open Reasoning tm-setoid
-label-index-to-term (LJoin Q L M) A (PShift P) = begin
-  < path-to-term (M ‼< A > P) >tm
-    ≈⟨ label-index-to-term M A P ⟩
-  < path-to-term P [ label-to-sub M A ]tm >tm
-    ≈˘⟨ sub-action-≃-tm (refl≃tm {s = path-to-term P}) (sub-from-connect-inc-right (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M))) getSnd (label-to-sub M A) (trans≃tm (unrestrict-snd (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M))) (first-label-prop M A))) ⟩
-  < path-to-term P [ sub-from-connect (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M)))
-                                      (label-to-sub M A)
-                   ∘ connect-susp-inc-right _ _ ]tm >tm
-    ≈⟨ assoc-tm _ _ (path-to-term P ) ⟩
-  < path-to-term P [ connect-susp-inc-right _ _ ]tm
-                   [ sub-from-connect (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M))) (label-to-sub M A) ]tm >tm ∎
-  where
-    open Reasoning tm-setoid
-label-index-to-term L A (POther x) = refl≃tm
+-- label-index-to-term : {X : MaybeTree n} → (L : Label X T) → (A : Ty n) → (P : Path (someTree T)) → path-to-term (L ‼< A > P) ≃tm path-to-term P [ label-to-sub L A ]tm
+-- label-index-to-term L A PHere = first-label-prop L A
+-- label-index-to-term (LJoin Q L M) A (PExt P) = begin
+--   < path-to-term (L ‼< path-to-term Q ─⟨ A ⟩⟶ first-label-term M > P) >tm
+--     ≈⟨ label-index-to-term L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M) P ⟩
+--   < path-to-term P [ label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M) ]tm >tm
+--     ≈˘⟨ unrestrict-comp-tm (path-to-term P) (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M)) ⟩
+--   < suspTm (path-to-term P) [ unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M)) ]tm >tm
+--     ≈˘⟨ sub-action-≃-tm (refl≃tm {s = suspTm (path-to-term P)}) (sub-from-connect-inc-left (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M))) getSnd (label-to-sub M A)) ⟩
+--   < suspTm (path-to-term P) [ sub-from-connect (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M)))
+--                                                (label-to-sub M A)
+--                             ∘ connect-susp-inc-left _ _ ]tm >tm
+--     ≈⟨ assoc-tm _ _ (suspTm (path-to-term P)) ⟩
+--   < suspTm (path-to-term P) [ connect-susp-inc-left _ _ ]tm
+--                             [ sub-from-connect (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M)))
+--                                                (label-to-sub M A) ]tm >tm ∎
+--   where
+--     open Reasoning tm-setoid
+-- label-index-to-term (LJoin Q L M) A (PShift P) = begin
+--   < path-to-term (M ‼< A > P) >tm
+--     ≈⟨ label-index-to-term M A P ⟩
+--   < path-to-term P [ label-to-sub M A ]tm >tm
+--     ≈˘⟨ sub-action-≃-tm (refl≃tm {s = path-to-term P}) (sub-from-connect-inc-right (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M))) getSnd (label-to-sub M A) (trans≃tm (unrestrict-snd (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M))) (first-label-prop M A))) ⟩
+--   < path-to-term P [ sub-from-connect (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M)))
+--                                       (label-to-sub M A)
+--                    ∘ connect-susp-inc-right _ _ ]tm >tm
+--     ≈⟨ assoc-tm _ _ (path-to-term P ) ⟩
+--   < path-to-term P [ connect-susp-inc-right _ _ ]tm
+--                    [ sub-from-connect (unrestrict (label-to-sub L (path-to-term Q ─⟨ A ⟩⟶ first-label-term M))) (label-to-sub M A) ]tm >tm ∎
+--   where
+--     open Reasoning tm-setoid
+-- label-index-to-term L A (POther x) = refl≃tm
 
-first-label-comp : (L : Label (someTree T) S) → (M : Label X T) → first-label (label-comp L M) ≃p M ‼< ⋆ > first-label L
-first-label-comp (LSing P) M = refl≃p
-first-label-comp (LJoin P L L′) M = refl≃p
+-- first-label-comp : (L : Label (someTree T) S) → (M : Label X T) → first-label (label-comp L M) ≃p M ‼< ⋆ > first-label L
+-- first-label-comp (LSing P) M = refl≃p
+-- first-label-comp (LJoin P L L′) M = refl≃p
 
-last-label-comp : (L : Label (someTree T) S) → (M : Label X T) → last-label (label-comp L M) ≃p M ‼< ⋆ > last-label L
-last-label-comp (LSing P) M = refl≃p
-last-label-comp (LJoin P L L′) M = last-label-comp L′ M
+-- last-label-comp : (L : Label (someTree T) S) → (M : Label X T) → last-label (label-comp L M) ≃p M ‼< ⋆ > last-label L
+-- last-label-comp (LSing P) M = refl≃p
+-- last-label-comp (LJoin P L L′) M = last-label-comp L′ M
 
 connect-tree-inc-first-label : (S : Tree n)
                              → (T : Tree m)
@@ -701,3 +757,34 @@ label-between-joins-first-label L M S′ T′ = begin
   where
     open Reasoning tm-setoid
 -}
+
+-- ‼<>-≃ : L ≃l M → A ≃ty B → P ≃p Q → L ‼< A > P ≃p M ‼< B > Q
+-- ‼<>-≃ p q (≃Here x) = first-label-≃ p
+-- ‼<>-≃ p q (≃Other x) = ≃Other (sub-action-≃-tm x (label-to-sub-≃ p q))
+-- ‼<>-≃ (LJoin≃ y p p′) q (≃Ext r x) = ‼<>-≃ p (Arr≃ (path-to-term-≃ y) q (path-to-term-≃ (first-label-≃ p′))) r
+-- ‼<>-≃ (LJoin≃ y p p′) q (≃Shift x r) = ‼<>-≃ p′ q r
+
+
+-- connect-label-inc-left : (L : Label X S) → (M : Label X T)
+--                        → (P : PPath S)
+--                        → path-to-term (connect-label L M ‼< A > connect-tree-inc-left-func S T P)
+--                        ≃tm path-to-term (L ‼< A > carrier P)
+-- connect-label-inc-left (LSing Q) M ⟦ PHere ⟧ = replace-first-label M Q
+-- connect-label-inc-left (LJoin Q L L′) M ⟦ PHere ⟧ = refl≃tm
+-- connect-label-inc-left (LJoin Q L L′) M ⟦ PExt P ⟧ = path-to-term-≃ (‼<>-≃ (refl≃l {L = L}) (Arr≃ refl≃tm refl≃ty (connect-first-label L′ M)) (refl≃p {P = P}))
+-- connect-label-inc-left (LJoin Q L L′) M ⟦ PShift P ⟧ = connect-label-inc-left L′ M ⟦ P ⟧
+
+-- ‼-ppath : (L : Label X S) → (P : PPath S) → L ‼< A > carrier P ≃p L ‼< B > carrier P
+-- ‼-ppath L ⟦ PHere ⟧ = refl≃p
+-- ‼-ppath (LJoin Q L M) ⟦ PExt P ⟧ = ‼-ppath L ⟦ P ⟧
+-- ‼-ppath (LJoin Q L M) ⟦ PShift P ⟧ = ‼-ppath M ⟦ P ⟧
+
+-- replace-not-here : (L : Label X S) → (P : Path X) → (Z : PPath S) → .⦃ not-here Z ⦄ → replace-label L P ‼< A > carrier Z ≃p L ‼< A > carrier Z
+-- replace-not-here (LSing Q) P ⟦ PHere ⟧ = ⊥-elim it
+-- replace-not-here (LSing Q) P ⟦ POther x ⟧ = ⊥-elim it
+-- replace-not-here (LJoin Q L M) P ⟦ PExt Z ⟧ = ‼-ppath L ⟦ Z ⟧
+-- replace-not-here (LJoin Q L M) P ⟦ PShift Z ⟧ = refl≃p
+
+replace-func-not-here : (L : Label-func X S) → (P : Path X) → (Z : PPath S) → .⦃ not-here Z ⦄ → replace-label-func L P Z ≃p L Z
+replace-func-not-here L P ⟦ PExt Z ⟧ = refl≃p
+replace-func-not-here L P ⟦ PShift Z ⟧ = refl≃p

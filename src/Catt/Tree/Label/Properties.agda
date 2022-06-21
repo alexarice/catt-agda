@@ -15,6 +15,82 @@ open import Catt.Syntax.Bundles
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
 
+open Reasoning tm-setoid
+
+extend-ppath : (P : PPath S) → (L : Label X S A) → (carrier P >>= L) ≃p ap L P
+extend-ppath ⟦ PHere ⟧ L = refl≃p
+extend-ppath ⟦ PExt P ⟧ L = extend-ppath ⟦ P ⟧ (label₁ L)
+extend-ppath ⟦ PShift P ⟧ L = extend-ppath ⟦ P ⟧ (label₂ L)
+
+label-to-sub-path : (L : Label X S A) → (P : Path (someTree S)) → path-to-term P [ label-to-sub L ]tm ≃tm path-to-term (P >>= L)
+label-to-sub-lem : (L : Label X (Join S T) A) → getSnd [ unrestrict (label-to-sub (label₁ L)) ]tm ≃tm Var (fromℕ m) [ label-to-sub (label₂ L) ]tm
+
+label-to-sub-path {S = Sing} L PHere = refl≃tm
+label-to-sub-path {S = Sing} L (POther t) = refl≃tm
+label-to-sub-path {S = Join S T} L PHere = begin
+  < Var (fromℕ _) [ sub-from-connect (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ]tm >tm
+    ≈⟨ sub-from-connect-fst-var (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ⟩
+  < getFst [ unrestrict (label-to-sub (label₁ L)) ]tm >tm
+    ≈⟨ unrestrict-fst (label-to-sub (label₁ L)) ⟩
+  < apt L PPHere >tm ∎
+label-to-sub-path {S = Join S T} L (PExt P) = begin
+  < suspTm (path-to-term P) [ connect-susp-inc-left _ _ ]tm
+                            [ sub-from-connect (unrestrict (label-to-sub (label₁ L)))
+                                               (label-to-sub (label₂ L)) ]tm >tm
+    ≈˘⟨ assoc-tm _ _ (suspTm (path-to-term P)) ⟩
+  < suspTm (path-to-term P) [ sub-from-connect (unrestrict (label-to-sub (label₁ L)))
+                                               (label-to-sub (label₂ L))
+                            ∘ connect-susp-inc-left _ _ ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = suspTm (path-to-term P)}) (sub-from-connect-inc-left (unrestrict (label-to-sub (label₁ L))) getSnd (label-to-sub (label₂ L))) ⟩
+  < suspTm (path-to-term P) [ unrestrict (label-to-sub (label₁ L)) ]tm >tm
+    ≈⟨ unrestrict-comp-tm (path-to-term P) (label-to-sub (label₁ L)) ⟩
+  < path-to-term P [ label-to-sub (label₁ L) ]tm >tm
+    ≈⟨ label-to-sub-path (label₁ L) P ⟩
+  < path-to-term (P >>= label₁ L) >tm ∎
+label-to-sub-path {S = Join S T} L (PShift P) = begin
+  < path-to-term P [ connect-susp-inc-right _ _ ]tm
+                   [ sub-from-connect (unrestrict (label-to-sub (label₁ L)))
+                                      (label-to-sub (label₂ L)) ]tm >tm
+    ≈˘⟨ assoc-tm _ _ (path-to-term P) ⟩
+  < path-to-term P [ sub-from-connect (unrestrict (label-to-sub (label₁ L)))
+                                      (label-to-sub (label₂ L))
+                   ∘ connect-susp-inc-right _ _ ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = path-to-term P}) (sub-from-connect-inc-right (unrestrict (label-to-sub (label₁ L))) getSnd (label-to-sub (label₂ L)) (label-to-sub-lem L)) ⟩
+  < path-to-term P [ label-to-sub (label₂ L) ]tm >tm
+    ≈⟨ label-to-sub-path (label₂ L) P ⟩
+  < path-to-term (P >>= label₂ L) >tm ∎
+label-to-sub-path {S = Join S T} L (POther t) = refl≃tm
+
+label-to-sub-lem L = begin
+  < getSnd [ unrestrict (label-to-sub (label₁ L)) ]tm >tm
+    ≈⟨ unrestrict-snd (label-to-sub (label₁ L)) ⟩
+  < apt L (PPShift PPHere) >tm
+    ≡⟨⟩
+  < apt (label₂ L) PPHere >tm
+    ≈˘⟨ label-to-sub-path (label₂ L) PHere ⟩
+  < Var (fromℕ _) [ label-to-sub (label₂ L) ]tm >tm ∎
+
+label-to-sub-ppath : (L : Label X S A) → (P : PPath S) → path-to-term (carrier P) [ label-to-sub L ]tm ≃tm apt L P
+label-to-sub-ppath L ⟦ P ⟧ = begin
+  < path-to-term P [ label-to-sub L ]tm >tm
+    ≈⟨ label-to-sub-path L P ⟩
+  < path-to-term (P >>= L) >tm
+    ≈⟨ path-to-term-≃ (extend-ppath ⟦ P ⟧ L) ⟩
+  < apt L ⟦ P ⟧ >tm ∎
+
+connect-tree-inc-left-pphere : (S : Tree n)
+                             → (T : Tree m)
+                             → ap (connect-tree-inc-left S T) PPHere ≃p (PHere {S = connect-tree S T})
+connect-tree-inc-left-pphere Sing T = refl≃p
+connect-tree-inc-left-pphere (Join S₁ S₂) T = refl≃p
+
+connect-tree-inc-pphere : (S : Tree n)
+                        → (T : Tree m)
+                        → ap (connect-tree-inc-left S T) (last-path S) ≃p ap (connect-tree-inc-right S T) PPHere
+connect-tree-inc-pphere Sing T = refl≃p
+connect-tree-inc-pphere (Join S₁ S₂) T = ≃Shift refl≃ (connect-tree-inc-pphere S₂ T)
+
+{-
 data _≃l_ : {S : Tree n} → Label X S → Label Y S → Set where
   LSing≃ : P ≃p Q → LSing P ≃l LSing Q
   LJoin≃ : ∀ {L : Label X S } {L′ : Label Y S} {M : Label X T} {M′ : Label Y T} → P ≃p Q → L ≃l L′ → M ≃l M′ → LJoin P L M ≃l LJoin Q L′ M′
@@ -788,3 +864,4 @@ label-between-joins-first-label L M S′ T′ = begin
 replace-func-not-here : (L : Label-func X S) → (P : Path X) → (Z : PPath S) → .⦃ not-here Z ⦄ → replace-label-func L P Z ≃p L Z
 replace-func-not-here L P ⟦ PExt Z ⟧ = refl≃p
 replace-func-not-here L P ⟦ PShift Z ⟧ = refl≃p
+-}

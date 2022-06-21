@@ -29,70 +29,70 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing index rule lift-rule
 
-data Typing-Label : (Γ : CtxOrTree m) → Label (COT-to-MT Γ) S → (A : Ty m) → Set where
-  TySing : Typing-Path ΓS P A → Typing-Label ΓS (LSing P) A
-  TyJoin : Typing-Path ΓS P A → Typing-Label ΓS L (path-to-term P ─⟨ A ⟩⟶ path-to-term (M ‼l PPHere)) → Typing-Label ΓS M A → Typing-Label ΓS (LJoin P L M) A
+data Typing-Label : (ΓS : CtxOrTree m) → Label (COT-to-MT ΓS) S A → Set where
+  TySing : {L : Label (COT-to-MT ΓS) Sing A} → Typing-Path ΓS (ap L PPHere) A → Typing-Label ΓS L
+  TyJoin : Typing-Path ΓS (ap L PPHere) (lty L)
+         → Typing-Label ΓS (label₁ L)
+         → Typing-Label ΓS (label₂ L)
+         → Typing-Label ΓS L
 
-data Typing-Label-func : (ΓS : CtxOrTree m) → Label-func (COT-to-MT ΓS) S → (A : Ty m) → Set where
-  TyFSing : {L : Label-func (COT-to-MT ΓS) Sing} → Typing-Path ΓS (L PPHere) A → Typing-Label-func ΓS L A
-  TyFJoin : {L : Label-func (COT-to-MT ΓS) (Join S T)}
-          → Typing-Path ΓS (L PPHere) A
-          → Typing-Label-func ΓS (label-func₁ L) (path-to-term (L PPHere) ─⟨ A ⟩⟶ path-to-term (L (PPShift PPHere)))
-          → Typing-Label-func ΓS (label-func₂ L) A
-          → Typing-Label-func ΓS L A
+ap-pphere-Ty : Typing-Label ΓS L → Typing-Path ΓS (ap L PPHere) (lty L)
+ap-pphere-Ty (TySing xty) = xty
+ap-pphere-Ty (TyJoin xty Lty Mty) = xty
 
-label-func-pext-Ty : {L : Label-func (someTree S) U}
-                   → Typing-Label-func (incTree S) L A
-                   → Typing-Label-func (incTree (Join S T)) (map-label-func PExt L) (suspTy A [ connect-susp-inc-left (tree-size S) (tree-size T) ]ty)
-label-func-pext-Ty (TyFSing xty) = TyFSing (TyExt xty)
-label-func-pext-Ty (TyFJoin xty Lty Mty) = TyFJoin (TyExt xty) (label-func-pext-Ty Lty) (label-func-pext-Ty Mty)
+apt-pphere-Ty : Typing-Label ΓS L → Typing-Tm (COT-to-Ctx ΓS) (apt L PPHere) (lty L)
+apt-pphere-Ty Lty = path-to-term-Ty (ap-pphere-Ty Lty)
 
-label-func-pshift-Ty : {L : Label-func (someTree T) U}
-                     → Typing-Label-func (incTree T) L A
-                     → Typing-Label-func (incTree (Join S T)) (map-label-func PShift L) (A [ connect-susp-inc-right (tree-size S) (tree-size T) ]ty)
-label-func-pshift-Ty (TyFSing xty) = TyFSing (TyShift xty)
-label-func-pshift-Ty (TyFJoin xty Lty Mty) = TyFJoin (TyShift xty) (label-func-pshift-Ty Lty) (label-func-pshift-Ty Mty)
+label₁-Ty : Typing-Label ΓS L → Typing-Label ΓS (label₁ L)
+label₁-Ty (TyJoin x Lty Mty) = Lty
 
-id-label-func-Ty2 : (S : Tree n) → Typing-Label-func (incTree S) (id-label-func S) ⋆
-id-label-func-Ty2 Sing = TyFSing TyHere
-id-label-func-Ty2 (Join S₁ S₂) = TyFJoin TyHere {!!} (label-func-pshift-Ty (id-label-func-Ty2 S₂))
+label₂-Ty : Typing-Label ΓS L → Typing-Label ΓS (label₂ L)
+label₂-Ty (TyJoin x Lty Mty) = Mty
 
-label-func-sub-Ty : {L : Label-func (COT-to-MT ΓS) S}
-                  → Typing-Label-func ΓS L A
+convert-type-Ty : Typing-Label ΓS L
+                → lty L ≈[ COT-to-Ctx ΓS ]ty B
+                → Typing-Label ΓS (convert-type L B)
+convert-type-Ty (TySing x) p = TySing (TyPConv x p)
+convert-type-Ty (TyJoin x Lty Mty) p = TyJoin (TyPConv x p) (convert-type-Ty Lty (Arr≈ refl≈tm p refl≈tm)) (convert-type-Ty Mty p)
+
+label-to-sub-Ty : Typing-Label ΓS L
+                → Typing-Ty (COT-to-Ctx ΓS) (lty L)
+                → Typing-Sub (tree-to-ctx (ltree L)) (COT-to-Ctx ΓS) (label-to-sub L)
+label-to-sub-Ty (TySing xty) Aty = TyExt (TyNull Aty) (path-to-term-Ty xty)
+label-to-sub-Ty {L = L} (TyJoin xty Lty Mty) Aty
+  = sub-from-connect-Ty (unrestrictTy (label-to-sub-Ty Lty (TyArr (path-to-term-Ty xty) Aty (apt-pphere-Ty Mty))))
+                        getSndTy
+                        (label-to-sub-Ty Mty Aty)
+                        (reflexive≈tm (label-to-sub-lem L))
+
+map-pext-Ty : Typing-Label (incTree S) L
+            → Typing-Label (incTree (Join S T)) (map-pext L)
+map-pext-Ty (TySing xty) = TySing (TyExt xty)
+map-pext-Ty (TyJoin xty Lty Mty) = TyJoin (TyExt xty) (map-pext-Ty Lty) (map-pext-Ty Mty)
+
+map-pshift-Ty : Typing-Label (incTree T) L
+              → Typing-Label (incTree (Join S T)) (map-pshift L)
+map-pshift-Ty (TySing xty) = TySing (TyShift xty)
+map-pshift-Ty (TyJoin xty Lty Mty) = TyJoin (TyShift xty) (map-pshift-Ty Lty) (map-pshift-Ty Mty)
+
+id-label-Ty : (S : Tree n) → Typing-Label (incTree S) (id-label S)
+id-label-Ty Sing = TySing TyHere
+id-label-Ty (Join S₁ S₂) = TyJoin TyHere
+                                  (convert-type-Ty (map-pext-Ty (id-label-Ty S₁)) (reflexive≈ty (Arr≃ (connect-inc-left-fst-var getSnd (tree-size S₂))
+                                                                                                      refl≃ty
+                                                                                                      (connect-inc-fst-var getSnd (tree-size S₂)))))
+                                  (map-pshift-Ty (id-label-Ty S₂))
+
+label-sub-Ty : Typing-Label ΓS L
                   → Typing-Sub (COT-to-Ctx ΓS) (COT-to-Ctx ΔT) σ
-                  → Typing-Label-func ΔT (map-label-func (λ Z → POther (path-to-term Z [ σ ]tm)) L) (A [ σ ]ty)
-label-func-sub-Ty (TyFSing xty) σty = TyFSing (TyOther (apply-sub-tm-typing (path-to-term-Ty xty) σty))
-label-func-sub-Ty (TyFJoin xty Lty Mty) σty = TyFJoin (TyOther (apply-sub-tm-typing (path-to-term-Ty xty) σty)) (label-func-sub-Ty Lty σty) (label-func-sub-Ty Mty σty)
+                  → Typing-Label ΔT (label-sub L (COT-to-MT ΔT) σ)
+label-sub-Ty (TySing xty) σty = TySing (TyOther (apply-sub-tm-typing (path-to-term-Ty xty) σty))
+label-sub-Ty (TyJoin xty Lty Mty) σty = TyJoin (TyOther (apply-sub-tm-typing (path-to-term-Ty xty) σty)) (label-sub-Ty Lty σty) (label-sub-Ty Mty σty)
 
-to-label-func-Ty : (S : Tree n) → (ΓS : CtxOrTree m) → Typing-Sub (tree-to-ctx S) (COT-to-Ctx ΓS) σ → Typing-Label-func ΓS (to-label-func S σ (COT-to-MT ΓS)) (sub-type σ)
-to-label-func-Ty S ΓS σty = label-func-sub-Ty (id-label-func-Ty2 S) σty
+to-label-Ty : (S : Tree n) → (ΓS : CtxOrTree m) → Typing-Sub (tree-to-ctx S) (COT-to-Ctx ΓS) σ → Typing-Label ΓS (to-label S σ (COT-to-MT ΓS))
+to-label-Ty S ΓS σty = label-sub-Ty (id-label-Ty S) σty
 
-first-label-Ty : Typing-Label ΓS L A → Typing-Path ΓS (first-label L) A
-first-label-Ty (TySing tty) = tty
-first-label-Ty (TyJoin tty Lty Mty) = tty
-
-first-label-term-Ty : Typing-Label ΓS L A → Typing-Tm (COT-to-Ctx ΓS) (first-label-term L) A
-first-label-term-Ty Lty = path-to-term-Ty (first-label-Ty Lty)
-
-label-typing-to-sub : Typing-Label ΓS L A → Typing-Ty (COT-to-Ctx ΓS) A → Typing-Sub (tree-to-ctx (label-to-tree L)) (COT-to-Ctx ΓS) (label-to-sub L A)
-label-typing-to-sub (TySing tty) Aty = TyExt (TyNull Aty) (path-to-term-Ty tty)
-label-typing-to-sub {A = A} (TyJoin {P = P} {L = L} {M = M} tty Lty Mty) Aty
-  = sub-from-connect-Ty (unrestrictTy (label-typing-to-sub Lty (TyArr (path-to-term-Ty tty) Aty (first-label-term-Ty Mty)))) getSndTy (label-typing-to-sub Mty Aty) (reflexive≈tm lem)
-  where
-    open Reasoning tm-setoid
-    lem : getSnd [ unrestrict (label-to-sub L (path-to-term P ─⟨ A ⟩⟶ first-label-term M)) ]tm
-          ≃tm Var (fromℕ _) [ label-to-sub M A ]tm
-    lem = begin
-      < getSnd [ unrestrict (label-to-sub L (path-to-term P ─⟨ A ⟩⟶ first-label-term M)) ]tm >tm
-        ≈⟨ unrestrict-snd (label-to-sub L (path-to-term P ─⟨ A ⟩⟶ first-label-term M)) ⟩
-      < first-label-term M >tm
-        ≈⟨ first-label-prop M A ⟩
-      < Var (fromℕ _) [ label-to-sub M A ]tm >tm ∎
-
-label-typing-conv : Typing-Label ΓS L A → A ≈[ COT-to-Ctx ΓS ]ty B → Typing-Label ΓS L B
-label-typing-conv (TySing tty) p = TySing (TyPConv tty p)
-label-typing-conv (TyJoin tty Lty Mty) p = TyJoin (TyPConv tty p) (label-typing-conv Lty (Arr≈ refl≈tm p refl≈tm)) (label-typing-conv Mty p)
-
+{-
 transport-label-typing : Typing-Label ΓS L A → L ≃l M → A ≈[ COT-to-Ctx ΓS ]ty B → Typing-Label ΓS M B
 transport-label-typing (TySing x) (LSing≃ y) q = TySing (transport-path-typing x y q)
 transport-label-typing (TyJoin x Lty Mty) (LJoin≃ y p p′) q
@@ -103,125 +103,43 @@ transport-label-typing (TyJoin x Lty Mty) (LJoin≃ y p p′) q
 label-eq-conv : (L : Label X S) → A ≈[ Γ ]ty B → label-to-sub L A ≈[ Γ ]s label-to-sub L B
 label-eq-conv (LSing x) p = Ext≈ (Null≈ p) refl≈tm
 label-eq-conv (LJoin x L M) p = sub-from-connect-≈ (unrestrictEq (label-eq-conv L (Arr≈ refl≈tm p refl≈tm))) (label-eq-conv M p)
-
-label-sub-Ty : Typing-Label ΓS L A → Typing-Sub (COT-to-Ctx ΓS) (COT-to-Ctx ΔT) σ → Typing-Label ΔT (L [ σ ]< COT-to-MT ΔT >l) (A [ σ ]ty)
-label-sub-Ty (TySing tty) σty = TySing (TyOther (apply-sub-tm-typing (path-to-term-Ty tty) σty))
-label-sub-Ty {σ = σ} (TyJoin {M = M} tty Lty Mty) σty
-  = TyJoin (TyOther (apply-sub-tm-typing (path-to-term-Ty tty) σty)) (label-typing-conv (label-sub-Ty Lty σty) (reflexive≈ty (Arr≃ refl≃tm refl≃ty (sym≃tm (first-label-sub M σ))))) (label-sub-Ty Mty σty)
-
-label-pext-Ty : Typing-Label (incTree S) L A → Typing-Label (incTree (Join S T)) (map-label PExt L) (suspTy A [ connect-susp-inc-left (tree-size S) (tree-size T) ]ty)
-label-pext-Ty (TySing xty) = TySing (TyExt xty)
-label-pext-Ty (TyJoin {M = M} xty Lty Mty) = TyJoin (TyExt xty) (label-typing-conv (label-pext-Ty Lty) (reflexive≈ty (Arr≃ refl≃tm refl≃ty (sym≃tm (first-label-term-pext M))))) (label-pext-Ty Mty)
-
-label-pshift-Ty : Typing-Label (incTree T) L A → Typing-Label (incTree (Join S T)) (map-label PShift L) (A [ connect-susp-inc-right (tree-size S) (tree-size T) ]ty)
-label-pshift-Ty (TySing xty) = TySing (TyShift xty)
-label-pshift-Ty (TyJoin {M = M} xty Lty Mty) = TyJoin (TyShift xty) (label-typing-conv (label-pshift-Ty Lty) (reflexive≈ty (Arr≃ refl≃tm refl≃ty (sym≃tm (first-label-term-pshift M))))) (label-pshift-Ty Mty)
-
-id-label-Ty : (S : Tree n) → Typing-Label (incTree S) (id-label S) ⋆
-id-label-Ty Sing = TySing TyHere
-id-label-Ty (Join S T)
-  = TyJoin TyHere
-           (label-typing-conv (label-pext-Ty (id-label-Ty S)) (reflexive≈ty (Arr≃ (connect-inc-left-fst-var getSnd _) refl≃ty lem)))
-           (label-pshift-Ty (id-label-Ty T))
-  where
-    open Reasoning tm-setoid
-
-
-    lem : getSnd [ connect-susp-inc-left _ _ ]tm
-          ≃tm first-label-term (map-label PShift (id-label T))
-    lem = begin
-      < getSnd [ connect-susp-inc-left _ _ ]tm >tm
-        ≈⟨ connect-inc-fst-var getSnd _ ⟩
-      < Var (fromℕ _) [ connect-susp-inc-right _ _ ]tm >tm
-        ≈˘⟨ sub-action-≃-tm (path-to-term-≃ (id-first-label T)) refl≃s ⟩
-      < first-label-term (id-label T) [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm >tm
-        ≈˘⟨ first-label-term-pshift (id-label T) ⟩
-      < first-label-term (map-label PShift (id-label T)) >tm ∎
-
-id-label-func-Ty : (S : Tree n) → Typing-Label (incTree S) (label-func-to-label (id-label-func S)) ⋆
-id-label-func-Ty S = transport-label-typing (id-label-Ty S) (sym≃l (id-label-func-compat S)) refl≈ty
-
-to-label-Ty : (S : Tree n) → Typing-Sub (tree-to-ctx S) (COT-to-Ctx ΔT) σ → Typing-Label ΔT (to-label S σ (COT-to-MT ΔT)) (sub-type σ)
-to-label-Ty S σty = label-sub-Ty (id-label-Ty S) σty
-
-replace-label-Ty : Typing-Label ΓS L A → Typing-Path ΓS P A → path-to-term P ≈[ COT-to-Ctx ΓS ]tm first-label-term L → Typing-Label ΓS (replace-label L P) A
-replace-label-Ty (TySing x) tty p = TySing tty
-replace-label-Ty (TyJoin x Lty Lty′) tty p = TyJoin tty (label-typing-conv Lty (Arr≈ (sym≈tm p) refl≈ty refl≈tm)) Lty′
-
-connect-label-Ty : (Lty : Typing-Label ΓS L A)
-                 → (Mty : Typing-Label ΓS M A)
-                 → last-label-term L ≈[ COT-to-Ctx ΓS ]tm first-label-term M
-                 → Typing-Label ΓS (connect-label L M) A
-connect-label-Ty (TySing x) Mty p = replace-label-Ty Mty x p
-connect-label-Ty {M = M} (TyJoin {M = L′} x Lty Lty′) Mty p = TyJoin x (label-typing-conv Lty (reflexive≈ty (Arr≃ refl≃tm refl≃ty (sym≃tm (connect-first-label L′ M))))) (connect-label-Ty Lty′ Mty p)
-
-connect-label-func-Ty : {L : Label-func (COT-to-MT ΓS) S}
-                      → {M : Label-func (COT-to-MT ΓS) T}
-                      → (Lty : Typing-Label ΓS (label-func-to-label L) A)
-                      → (Mty : Typing-Label ΓS (label-func-to-label M) A)
-                      → path-to-term (L (last-path S)) ≈[ COT-to-Ctx ΓS ]tm path-to-term (M PPHere)
-                      → Typing-Label ΓS (label-func-to-label (connect-label-func L M)) A
-connect-label-func-Ty (TySing x) (TySing y) p = TySing x
-connect-label-func-Ty (TySing x) (TyJoin y Mty Mty′) p = TyJoin x {!!} {!!}
-connect-label-func-Ty (TyJoin x Lty Lty₁) Mty p = {!!}
+-}
+connect-label-Ty : (Lty : Typing-Label ΓS L)
+                 → (Mty : Typing-Label ΓS M)
+                 → apt L (last-path S) ≈[ COT-to-Ctx ΓS ]tm apt M PPHere
+                 → Typing-Label ΓS (connect-label L M)
+connect-label-Ty (TySing x) (TySing y) p = TySing x
+connect-label-Ty (TySing x) (TyJoin y Mty Mty′) p = TyJoin x (convert-type-Ty Mty (Arr≈ (sym≈tm p) refl≈ty refl≈tm)) Mty′
+connect-label-Ty (TyJoin x Lty Lty′) Mty p = TyJoin x Lty (connect-label-Ty Lty′ Mty p)
 
 connect-tree-inc-left-Ty : (S : Tree n)
                          → (T : Tree m)
-                         → Typing-Label (incTree (connect-tree S T)) (connect-tree-inc-left S T) ⋆
+                         → Typing-Label (incTree (connect-tree S T)) (connect-tree-inc-left S T)
 connect-tree-inc-left-Ty Sing T = TySing TyHere
 connect-tree-inc-left-Ty (Join S₁ S₂) T
-  = TyJoin TyHere
-           (label-typing-conv (label-pext-Ty (id-label-Ty S₁)) (reflexive≈ty (Arr≃ (connect-inc-left-fst-var getSnd _) refl≃ty lem)))
-           (label-pshift-Ty (connect-tree-inc-left-Ty S₂ T))
-  where
-    open Reasoning tm-setoid
-    lem : getSnd [ connect-susp-inc-left (tree-size S₁) (tree-size (connect-tree S₂ T)) ]tm
-          ≃tm first-label-term (map-label PShift (connect-tree-inc-left S₂ T))
-    lem = begin
-      < getSnd [ connect-susp-inc-left (tree-size S₁) (tree-size (connect-tree S₂ T)) ]tm >tm
-        ≈⟨ connect-inc-fst-var getSnd (tree-size (connect-tree S₂ T)) ⟩
-      < Var (fromℕ (tree-size (connect-tree S₂ T))) [ connect-susp-inc-right (tree-size S₁) (tree-size (connect-tree S₂ T)) ]tm >tm
-        ≈˘⟨ sub-action-≃-tm (connect-tree-inc-left-first-label S₂ T) refl≃s ⟩
-      < first-label-term (connect-tree-inc-left S₂ T) [ connect-susp-inc-right (tree-size S₁) (tree-size (connect-tree S₂ T)) ]tm
-        >tm
-        ≈˘⟨ first-label-term-pshift (connect-tree-inc-left S₂ T) ⟩
-      < first-label-term (map-label PShift (connect-tree-inc-left S₂ T)) >tm ∎
-
-connect-tree-inc-left-func-Ty : (S : Tree n)
-                              → (T : Tree m)
-                              → Typing-Label (incTree (connect-tree S T)) (label-func-to-label (connect-tree-inc-left-func S T)) ⋆
-connect-tree-inc-left-func-Ty Sing T = TySing TyHere
-connect-tree-inc-left-func-Ty (Join S₁ S₂) T
-  = TyJoin TyHere
-           (transport-label-typing (label-pext-Ty (id-label-Ty S₁))
-                                   (trans≃l (map-label-pext-≃ (sym≃l (id-label-func-compat S₁))) (sym≃l (label-func-to-label-map PExt (id-label-func S₁))))
-                                   (reflexive≈ty (Arr≃ (connect-inc-left-fst-var getSnd _) refl≃ty lem)))
-           (transport-label-typing (label-pshift-Ty (connect-tree-inc-left-func-Ty S₂ T)) (sym≃l (label-func-to-label-map PShift (connect-tree-inc-left-func S₂ T))) refl≈ty)
-  where
-    open Reasoning tm-setoid
-    lem : getSnd [ connect-susp-inc-left (tree-size S₁) (tree-size (connect-tree S₂ T)) ]tm
-          ≃tm path-to-term (first-label (label-func-to-label (label-func₂ (connect-tree-inc-left-func (Join S₁ S₂) T))))
-    lem = begin
-      < getSnd [ connect-susp-inc-left (tree-size S₁) (tree-size (connect-tree S₂ T)) ]tm >tm
-        ≈⟨ connect-inc-fst-var getSnd (tree-size (connect-tree S₂ T)) ⟩
-      < Var (fromℕ (tree-size (connect-tree S₂ T))) [ connect-susp-inc-right (tree-size S₁) (tree-size (connect-tree S₂ T)) ]tm >tm
-        ≈˘⟨ sub-action-≃-tm (connect-tree-inc-left-func-first-label S₂ T) refl≃s ⟩
-      < path-to-term (PShift {S = S₁}(connect-tree-inc-left-func S₂ T PPHere)) >tm
-        ≈˘⟨ path-to-term-≃ (first-label-func-to-label (label-func₂ (connect-tree-inc-left-func (Join S₁ S₂) T))) ⟩
-      < path-to-term (first-label (label-func-to-label (label-func₂ (connect-tree-inc-left-func (Join S₁ S₂) T)))) >tm ∎
-
-connect-tree-inc-right-func-Ty : (S : Tree n)
-                               → (T : Tree m)
-                               → Typing-Label (incTree (connect-tree S T)) (label-func-to-label (connect-tree-inc-right-func S T)) ⋆
-connect-tree-inc-right-func-Ty Sing T = id-label-func-Ty T
-connect-tree-inc-right-func-Ty (Join S₁ S₂) T = transport-label-typing (label-pshift-Ty (connect-tree-inc-right-func-Ty S₂ T)) (sym≃l (label-func-to-label-map PShift (connect-tree-inc-right-func S₂ T))) refl≈ty
+  = TyJoin TyHere (convert-type-Ty (map-pext-Ty (id-label-Ty S₁)) (reflexive≈ty (Arr≃ (connect-inc-left-fst-var getSnd (connect-tree-length S₂ T))
+                                                                                      refl≃ty
+                                                                                      lem)))
+                  (map-pshift-Ty (connect-tree-inc-left-Ty S₂ T))
+    where
+      open Reasoning tm-setoid
+      lem : getSnd [ connect-susp-inc-left (tree-size S₁) (tree-size (connect-tree S₂ T)) ]tm
+          ≃tm apt (connect-tree-inc-left (Join S₁ S₂) T) (PPShift PPHere)
+      lem = begin
+        < getSnd [ connect-susp-inc-left (tree-size S₁) (tree-size (connect-tree S₂ T)) ]tm >tm
+          ≈⟨ connect-inc-fst-var getSnd (connect-tree-length S₂ T) ⟩
+        < Var (fromℕ (connect-tree-length S₂ T)) [ connect-susp-inc-right (tree-size S₁) (connect-tree-length S₂ T) ]tm >tm
+          ≈˘⟨ sub-action-≃-tm (path-to-term-≃ (connect-tree-inc-left-pphere S₂ T)) refl≃s ⟩
+        < apt (connect-tree-inc-left S₂ T) PPHere
+          [ connect-susp-inc-right (tree-size S₁) (connect-tree-length S₂ T) ]tm >tm ∎
 
 connect-tree-inc-right-Ty : (S : Tree n)
                           → (T : Tree m)
-                          → Typing-Label (incTree (connect-tree S T)) (connect-tree-inc-right S T) ⋆
+                          → Typing-Label (incTree (connect-tree S T)) (connect-tree-inc-right S T)
 connect-tree-inc-right-Ty Sing T = id-label-Ty T
-connect-tree-inc-right-Ty (Join S₁ S₂) T = label-pshift-Ty (connect-tree-inc-right-Ty S₂ T)
+connect-tree-inc-right-Ty (Join S₁ S₂) T = map-pshift-Ty (connect-tree-inc-right-Ty S₂ T)
 
+{-
 -- label-index-Ty : Typing-Label ΓS L A
 --                → Typing-Ty (COT-to-Ctx ΓS) A
 --                → Typing-Path (incTree (label-to-tree L)) P B
@@ -264,61 +182,105 @@ connect-tree-inc-right-Ty (Join S₁ S₂) T = label-pshift-Ty (connect-tree-inc
 --         ≈⟨ assoc-ty _ _ B ⟩
 --       < B [ connect-susp-inc-right _ _ ]ty
 --           [ sub-from-connect (unrestrict (label-to-sub L (path-to-term P ─⟨ A ⟩⟶ first-label-term M))) (label-to-sub M A) ]ty >ty ∎
+-}
 
--- label-comp-Ty : Typing-Label (incTree T) L A
---               → Typing-Label ΓS M ⋆
---               → Typing-Label ΓS (label-comp L M) (A [ label-to-sub M ⋆ ]ty)
--- label-comp-Ty (TySing x) Mty = TySing (label-index-Ty Mty TyStar x)
--- label-comp-Ty {M = M} (TyJoin {P = P} {L = L} {M = L′} x Lty Lty′) Mty
---   = TyJoin (label-index-Ty Mty TyStar x)
---            (label-typing-conv (label-comp-Ty Lty Mty) (reflexive≈ty (sym≃ty (Arr≃ (label-index-to-term M ⋆ P)
---                                                                                   refl≃ty
---                                                                                   (trans≃tm (path-to-term-≃ (first-label-comp L′ M))
---                                                                                             (label-index-to-term M ⋆ (first-label L′)))))))
---            (label-comp-Ty Lty′ Mty)
+extend-Ty : Typing-Path (incTree S) P A → Typing-Label ΓS L → Typing-Ty (COT-to-Ctx ΓS) (lty L) → Typing-Path ΓS (P >>= L) (A [ label-to-sub L ]ty)
+extend-Ty (TyPConv Pty x) Lty Aty = TyPConv (extend-Ty Pty Lty Aty) (apply-sub-ty-eq (label-to-sub-Ty Lty Aty) x)
+extend-Ty TyHere Lty Aty = ap-pphere-Ty Lty
+extend-Ty {L = L} (TyExt {A = A} Pty) Lty Aty = TyPConv (extend-Ty Pty (label₁-Ty Lty) (TyArr (apt-pphere-Ty Lty) Aty (apt-pphere-Ty (label₂-Ty Lty)))) (reflexive≈ty lem)
+  where
+    open Reasoning ty-setoid
+    lem : A [ label-to-sub (label₁ L) ]ty
+      ≃ty suspTy A [ connect-susp-inc-left _ _ ]ty
+                   [ label-to-sub L ]ty
+    lem = begin
+      < A [ label-to-sub (label₁ L) ]ty >ty
+        ≈˘⟨ unrestrict-comp-ty A (label-to-sub (label₁ L)) ⟩
+      < suspTy A [ unrestrict (label-to-sub (label₁ L)) ]ty >ty
+        ≈˘⟨ sub-action-≃-ty (refl≃ty {A = suspTy A}) (sub-from-connect-inc-left (unrestrict (label-to-sub (label₁ L))) getSnd (label-to-sub (label₂ L))) ⟩
+      < suspTy A [ sub-from-connect (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L))
+                 ∘ connect-susp-inc-left _ _ ]ty >ty
+        ≈⟨ assoc-ty _ _ (suspTy A) ⟩
+      < suspTy A [ connect-susp-inc-left _ _ ]ty
+                 [ sub-from-connect (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ]ty >ty ∎
+extend-Ty {L = L} (TyShift {A = A} Pty) Lty Aty = TyPConv (extend-Ty Pty (label₂-Ty Lty) Aty) (reflexive≈ty lem)
+  where
+    open Reasoning ty-setoid
+    lem : A [ label-to-sub (label₂ L) ]ty
+      ≃ty A [ connect-susp-inc-right _ _ ]ty
+            [ label-to-sub L ]ty
+    lem = begin
+      < A [ label-to-sub (label₂ L) ]ty >ty
+        ≈˘⟨ sub-action-≃-ty (refl≃ty {A = A}) (sub-from-connect-inc-right (unrestrict (label-to-sub (label₁ L))) getSnd (label-to-sub (label₂ L)) (label-to-sub-lem L)) ⟩
+      < A [ sub-from-connect (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L))
+          ∘ connect-susp-inc-right _ _ ]ty >ty
+        ≈⟨ assoc-ty _ _ A ⟩
+      < A [ connect-susp-inc-right _ _ ]ty
+          [ sub-from-connect (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ]ty >ty ∎
+extend-Ty (TyOther x) Lty Aty = TyOther (apply-sub-tm-typing x (label-to-sub-Ty Lty Aty))
 
--- label-between-connect-trees-Ty : Typing-Label (incTree S′) L ⋆
---                                → Typing-Label (incTree T′) M ⋆
---                                → last-label-term L ≈[ tree-to-ctx S′ ]tm tree-last-var S′
---                                → first-label-term M ≈[ tree-to-ctx T′ ]tm Var (fromℕ (tree-size T′))
---                                → Typing-Label (incTree (connect-tree S′ T′)) (label-between-connect-trees L M) ⋆
--- label-between-connect-trees-Ty {S′ = S′} {L = L} {T′ = T′} {M = M} Lty Mty p q
---   = connect-label-Ty (label-comp-Ty Lty (connect-tree-inc-left-Ty _ _))
---                      (label-comp-Ty Mty (connect-tree-inc-right-Ty _ _))
---                      lem
---   where
---     open Reasoning (tm-setoid-≈ _)
+label-comp-Ty : Typing-Label (incTree T) L
+              → Typing-Label ΓS M
+              → Typing-Ty (COT-to-Ctx ΓS) (lty M)
+              → Typing-Label ΓS (label-comp L M)
+label-comp-Ty (TySing x) Mty Aty = TySing (extend-Ty x Mty Aty)
+label-comp-Ty {L = L} {M = M} (TyJoin x Lty Lty′) Mty Aty
+  = TyJoin (extend-Ty x Mty Aty)
+           (convert-type-Ty (label-comp-Ty Lty Mty Aty) (reflexive≈ty (Arr≃ (label-to-sub-path M (ap L PPHere)) refl≃ty (label-to-sub-path M (ap L (PPShift PPHere))))))
+           (label-comp-Ty Lty′ Mty Aty)
 
---     lem : last-label-term (label-comp L (connect-tree-inc-left S′ T′))
---           ≈[ tree-to-ctx (connect-tree S′ T′) ]tm
---           first-label-term (label-comp M (connect-tree-inc-right S′ T′))
---     lem = begin
---       last-label-term (label-comp L (connect-tree-inc-left S′ T′))
---         ≈⟨ reflexive≈tm (path-to-term-≃ (last-label-comp L (connect-tree-inc-left S′ T′))) ⟩
---       path-to-term (connect-tree-inc-left S′ T′ ‼< ⋆ > last-label L)
---         ≈⟨ reflexive≈tm (label-index-to-term (connect-tree-inc-left S′ T′) ⋆ (last-label L)) ⟩
---       path-to-term (last-label L) [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]tm
---         ≈⟨ apply-sub-tm-eq (label-typing-to-sub (connect-tree-inc-left-Ty S′ T′) TyStar) p ⟩
---       tree-last-var S′ [ label-to-sub (connect-tree-inc-left S′ T′) ⋆ ]tm
---         ≈˘⟨ reflexive≈tm (last-label-prop (connect-tree-inc-left S′ T′) ⋆) ⟩
---       last-label-term (connect-tree-inc-left S′ T′)
---         ≈⟨ reflexive≈tm (path-to-term-≃ (connect-tree-inc-first-label S′ T′)) ⟩
---       first-label-term (connect-tree-inc-right S′ T′)
---         ≈⟨ reflexive≈tm (first-label-prop (connect-tree-inc-right S′ T′) ⋆) ⟩
---       Var (fromℕ (tree-size T′)) [ label-to-sub (connect-tree-inc-right S′ T′) ⋆ ]tm
---         ≈˘⟨ apply-sub-tm-eq (label-typing-to-sub (connect-tree-inc-right-Ty S′ T′) TyStar) q ⟩
---       path-to-term (first-label M) [ label-to-sub (connect-tree-inc-right S′ T′) ⋆ ]tm
---         ≈˘⟨ reflexive≈tm (label-index-to-term (connect-tree-inc-right S′ T′) ⋆ (first-label M)) ⟩
---       path-to-term (connect-tree-inc-right S′ T′ ‼< ⋆ > first-label M)
---         ≈˘⟨ reflexive≈tm (path-to-term-≃ (first-label-comp M (connect-tree-inc-right S′ T′))) ⟩
---       first-label-term (label-comp M (connect-tree-inc-right S′ T′)) ∎
 
--- label-between-joins-Ty : Typing-Label (incTree S′) L ⋆
---                        → Typing-Label (incTree T′) M ⋆
---                        → first-label-term M ≈[ tree-to-ctx T′ ]tm Var (fromℕ (tree-size T′))
---                        → Typing-Label (incTree (Join S′ T′)) (label-between-joins L M) ⋆
--- label-between-joins-Ty Lty Mty p = label-between-connect-trees-Ty (TyJoin TyHere (label-typing-conv (label-pext-Ty Lty) (reflexive≈ty (id-on-ty (suspTy ⋆)))) (TySing (TyShift TyHere))) Mty refl≈tm p
+label-between-connect-trees-Ty : Typing-Label (incTree S′) L
+                               → Typing-Label (incTree T′) M
+                               → apt L (last-path S) ≈[ tree-to-ctx S′ ]tm tree-last-var S′
+                               → apt M PPHere ≈[ tree-to-ctx T′ ]tm Var (fromℕ (tree-size T′))
+                               → Typing-Label (incTree (connect-tree S′ T′)) (label-between-connect-trees L M)
+label-between-connect-trees-Ty {S′ = S′} {S = S} {L = L} {T′ = T′} {M = M} Lty Mty p q
+  = connect-label-Ty (label-comp-Ty Lty (connect-tree-inc-left-Ty _ _) TyStar)
+                     (label-comp-Ty Mty (connect-tree-inc-right-Ty _ _) TyStar)
+                     {!!}
+  where
+    open Reasoning (tm-setoid-≈ _)
 
+    lem : path-to-term (ap L (last-path S) >>= connect-tree-inc-left S′ T′)
+        ≈[ tree-to-ctx (connect-tree S′ T′) ]tm
+          path-to-term (ap M ⟦ PHere ⟧ >>= connect-tree-inc-right S′ T′)
+    lem = begin
+      path-to-term (ap L (last-path S) >>= connect-tree-inc-left S′ T′)
+        ≈˘⟨ reflexive≈tm (label-to-sub-path (connect-tree-inc-left S′ T′) (ap L (last-path S))) ⟩
+      apt L (last-path S) [ label-to-sub (connect-tree-inc-left S′ T′) ]tm
+        ≈⟨ apply-sub-tm-eq (label-to-sub-Ty (connect-tree-inc-left-Ty S′ T′) TyStar) p ⟩
+      tree-last-var S′ [ label-to-sub (connect-tree-inc-left S′ T′) ]tm
+        ≈˘⟨ reflexive≈tm (sub-action-≃-tm (last-path-to-term S′) refl≃s) ⟩
+      path-to-term (carrier (last-path S′)) [ label-to-sub (connect-tree-inc-left S′ T′) ]tm
+        ≈⟨ reflexive≈tm (label-to-sub-ppath (connect-tree-inc-left S′ T′) (last-path S′)) ⟩
+      apt (connect-tree-inc-left S′ T′) (last-path S′)
+        ≈⟨ reflexive≈tm (path-to-term-≃ (connect-tree-inc-pphere S′ T′)) ⟩
+      apt (connect-tree-inc-right S′ T′) PPHere
+        ≈˘⟨ reflexive≈tm (label-to-sub-ppath (connect-tree-inc-right S′ T′) PPHere) ⟩
+      Var (fromℕ (tree-size T′)) [ label-to-sub (connect-tree-inc-right S′ T′) ]tm
+        ≈˘⟨ apply-sub-tm-eq (label-to-sub-Ty (connect-tree-inc-right-Ty S′ T′) TyStar) q ⟩
+      apt M PPHere [ label-to-sub (connect-tree-inc-right S′ T′) ]tm
+        ≈⟨ reflexive≈tm (label-to-sub-path (connect-tree-inc-right S′ T′) (ap M PPHere)) ⟩
+      path-to-term (ap M PPHere >>= connect-tree-inc-right S′ T′) ∎
+
+label-between-joins-Ty : Typing-Label (incTree S′) L
+                       → Typing-Label (incTree T′) M
+                       → apt M PPHere ≈[ tree-to-ctx T′ ]tm Var (fromℕ (tree-size T′))
+                       → Typing-Label (incTree (Join S′ T′)) (label-between-joins L M)
+label-between-joins-Ty {S′ = S′} {L = L} {T′ = T′} {M = M} Lty Mty p
+  = TyJoin TyHere (convert-type-Ty (map-pext-Ty Lty) (Arr≈ (reflexive≈tm (connect-inc-left-fst-var getSnd _)) refl≈ty lem)) (map-pshift-Ty Mty)
+  where
+    open Reasoning (tm-setoid-≈ _)
+    lem : (getSnd [ connect-susp-inc-left (tree-size S′) (tree-size T′) ]tm) ≈[ _ ]tm apt (label-between-joins L M) (PPShift PPHere)
+    lem = begin
+      getSnd [ connect-susp-inc-left (tree-size S′) (tree-size T′) ]tm
+        ≈⟨ reflexive≈tm (connect-inc-fst-var getSnd (tree-size T′)) ⟩
+      Var (fromℕ _) [ connect-susp-inc-right (tree-size S′) (tree-size T′) ]tm
+        ≈˘⟨ apply-sub-tm-eq (connect-susp-inc-right-Ty (tree-to-ctx S′)) p ⟩
+      apt M ⟦ PHere ⟧ [ connect-susp-inc-right (tree-size S′) (tree-size T′) ]tm ∎
+
+{-
 
 data _≃Ml<_>_ : Label X S → Bool → Label Y T → Set where
   MlSingf : LSing P ≃Ml< false > LSing Q
@@ -369,3 +331,4 @@ max-eq-to-eq {A = A} {B = B} (MlJoin q q′@(MlJoin a b)) (TyJoin {P = P} {L = L
 --                        → label-comp (connect-tree-inc-left S T) (connect-label L M) ≃Ml< true > L
 -- connect-label-inc-left (LSing P) M = MlSingt (replace-first-label M P)
 -- connect-label-inc-left (LJoin P L L′) M = {!!}
+-}

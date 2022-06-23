@@ -19,6 +19,10 @@ variable
 maybeTreeSize : (X : MaybeTree n) → ℕ
 maybeTreeSize {n} X = n
 
+suspMaybeTree : MaybeTree n → MaybeTree (2 + n)
+suspMaybeTree (someTree x) = someTree (suspTree x)
+suspMaybeTree (Other _) = Other (2 + _)
+
 data CtxOrTree : ℕ → Set where
   incTree : Tree n → CtxOrTree (suc n)
   incCtx : Ctx n → CtxOrTree n
@@ -133,3 +137,7 @@ is-Maximal ⟦ POther P ⟧ = ⊥
 
 -- path-func : Set → (S : Tree n) → Set
 -- path-func X S = ∀ (P : Path S) → .⦃ is-Maximal P ⦄ → X
+
+susp-path : Path X → Path (suspMaybeTree X)
+susp-path {X = someTree x} P = PExt P
+susp-path {X = Other _} (POther x) = POther (suspTm x)

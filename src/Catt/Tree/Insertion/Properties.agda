@@ -32,24 +32,24 @@ height-of-branching-non-zero (Join S T) BPHere = it
 height-of-branching-non-zero (Join S T) (BPExt P) = it
 height-of-branching-non-zero (Join S T) (BPShift P) = height-of-branching-non-zero T P
 
--- exterior-sub-first-label : (S : Tree n)
---                          → (p : BranchingPoint S)
---                          → (T : Tree m)
---                          → .⦃ _ : has-linear-height (bp-height p) T ⦄
---                          → first-label-term (exterior-sub-label S p T) ≃tm Var (fromℕ (insertion-tree-size S p T))
--- exterior-sub-first-label (Join S₁ S₂) BPHere T = begin
---   < getFst [ unrestrict (sub-from-linear-tree-unbiased S₁ T 1) ]tm
---            [ label-to-sub (connect-tree-inc-left T S₂) ⋆ ]tm >tm
---     ≈⟨ sub-action-≃-tm (unrestrict-fst (sub-from-linear-tree-unbiased S₁ T 1)) refl≃s ⟩
---   < Var (fromℕ _) [ label-to-sub (connect-tree-inc-left T S₂) ⋆ ]tm >tm
---     ≈˘⟨ first-label-prop (connect-tree-inc-left T S₂) ⋆ ⟩
---   < first-label-term (connect-tree-inc-left T S₂) >tm
---     ≈⟨ connect-tree-inc-left-first-label T S₂ ⟩
---   < Var (fromℕ (connect-tree-length T S₂)) >tm ∎
---   where
---     open Reasoning tm-setoid
--- exterior-sub-first-label (Join S₁ S₂) (BPExt p) (Join T Sing) = refl≃tm
--- exterior-sub-first-label (Join S₁ S₂) (BPShift p) T = refl≃tm
+exterior-sub-pphere : (S : Tree n)
+                         → (p : BranchingPoint S)
+                         → (T : Tree m)
+                         → .⦃ _ : has-linear-height (bp-height p) T ⦄
+                         → apt (exterior-sub-label S p T) PPHere ≃tm Var (fromℕ (insertion-tree-size S p T))
+exterior-sub-pphere (Join S₁ S₂) BPHere T = begin
+  < getFst [ unrestrict (sub-from-linear-tree-unbiased S₁ T 1) ]tm
+           [ label-to-sub (connect-tree-inc-left T S₂) ]tm >tm
+    ≈⟨ sub-action-≃-tm (unrestrict-fst (sub-from-linear-tree-unbiased S₁ T 1)) refl≃s ⟩
+  < Var (fromℕ _) [ label-to-sub (connect-tree-inc-left T S₂) ]tm >tm
+    ≈⟨ label-to-sub-ppath (connect-tree-inc-left T S₂) PPHere ⟩
+  < apt (connect-tree-inc-left T S₂) ⟦ PHere ⟧ >tm
+    ≈⟨ path-to-term-≃ (connect-tree-inc-left-pphere T S₂) ⟩
+  < Var (fromℕ _) >tm ∎
+  where
+    open Reasoning tm-setoid
+exterior-sub-pphere (Join S₁ S₂) (BPExt p) (Join T Sing) = refl≃tm
+exterior-sub-pphere (Join S₁ S₂) (BPShift p) T = refl≃tm
 
 {-
 exterior-sub-fst-var : (S : Tree n)

@@ -78,6 +78,10 @@ path-to-term-is-var ⟦ PHere ⟧ = tt
 path-to-term-is-var ⟦ PExt P ⟧ = var-to-var-comp-tm (suspTm (path-to-term P)) ⦃ suspTm-var (path-to-term P) ⦃ path-to-term-is-var ⟦ P ⟧ ⦄ ⦄ (connect-susp-inc-left _ _) ⦃ connect-susp-inc-left-var-to-var _ _ ⦄
 path-to-term-is-var ⟦ PShift P ⟧ = var-to-var-comp-tm (path-to-term P) ⦃ path-to-term-is-var ⟦ P ⟧ ⦄ (connect-susp-inc-right _ _) ⦃ connect-susp-inc-right-var-to-var _ _ ⦄
 
+susp-path-to-term : (P : Path X) → path-to-term (susp-path P) ≃tm suspTm (path-to-term P)
+susp-path-to-term {X = someTree x} P = id-on-tm (suspTm (path-to-term P))
+susp-path-to-term {X = Other _} (POther x) = refl≃tm
+
 -- var-to-path-is-path : (S : Tree n) → (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → is-Path (var-to-path S t)
 -- var-to-path-helper-is-path : (S : Tree n) → (T : Tree m) → (i : Fin (m + ((suc n) + 2))) → is-Path (var-to-path-helper S T i)
 -- var-to-path-helper-1-is-path : (S : Tree n) → (T : Tree m) → (i : Fin (suc n + 2)) → is-Path (var-to-path-helper-1 S T i)

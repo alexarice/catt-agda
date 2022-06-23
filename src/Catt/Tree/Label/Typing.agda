@@ -238,7 +238,7 @@ label-between-connect-trees-Ty : Typing-Label (incTree S′) L
 label-between-connect-trees-Ty {S′ = S′} {S = S} {L = L} {T′ = T′} {M = M} Lty Mty p q
   = connect-label-Ty (label-comp-Ty Lty (connect-tree-inc-left-Ty _ _) TyStar)
                      (label-comp-Ty Mty (connect-tree-inc-right-Ty _ _) TyStar)
-                     {!!}
+                     lem
   where
     open Reasoning (tm-setoid-≈ _)
 
@@ -279,6 +279,17 @@ label-between-joins-Ty {S′ = S′} {L = L} {T′ = T′} {M = M} Lty Mty p
       Var (fromℕ _) [ connect-susp-inc-right (tree-size S′) (tree-size T′) ]tm
         ≈˘⟨ apply-sub-tm-eq (connect-susp-inc-right-Ty (tree-to-ctx S′)) p ⟩
       apt M ⟦ PHere ⟧ [ connect-susp-inc-right (tree-size S′) (tree-size T′) ]tm ∎
+
+replace-label-Ty : Typing-Label ΓS L
+                 → Typing-Path ΓS P (lty L)
+                 → apt L PPHere ≈[ COT-to-Ctx ΓS ]tm path-to-term P
+                 → Typing-Label ΓS (replace-label L P)
+replace-label-Ty (TySing x) Pty p = TySing Pty
+replace-label-Ty (TyJoin x Lty Mty) Pty p = TyJoin Pty (convert-type-Ty Lty (Arr≈ p refl≈ty refl≈tm)) Mty
+
+label-to-sub-convert-type : (L : Label (COT-to-MT ΓS) S A) → B ≈[ COT-to-Ctx ΓS ]ty A → label-to-sub (convert-type L B) ≈[ COT-to-Ctx ΓS ]s label-to-sub L
+label-to-sub-convert-type {S = Sing} L p = Ext≈ (Null≈ p) refl≈tm
+label-to-sub-convert-type {S = Join S T} L p = sub-from-connect-≈ (unrestrictEq (label-to-sub-convert-type (label₁ L) (Arr≈ refl≈tm p refl≈tm))) (label-to-sub-convert-type (label₂ L) p)
 
 {-
 

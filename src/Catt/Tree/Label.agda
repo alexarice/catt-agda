@@ -40,6 +40,12 @@ map-pext L .ap Z = PExt (ap L Z)
 map-pshift : Label (someTree T) U A → Label (someTree (Join S T)) U (A [ connect-susp-inc-right (tree-size S) (tree-size T) ]ty)
 map-pshift L .ap Z = PShift (ap L Z)
 
+lift-label : Label (Other n) S A → Label (Other (suc n)) S (liftType A)
+lift-label L .ap Z = POther (liftTerm (apt L Z))
+
+susp-label : Label X S A → Label (suspMaybeTree X) S (suspTy A)
+susp-label L .ap Z = susp-path (ap L Z)
+
 label-sub : {X : MaybeTree n} → Label X S A → (Y : MaybeTree m) → (σ : Sub n m B) → Label Y S (A [ σ ]ty)
 label-sub L Y σ .ap Z = POther (apt L Z [ σ ]tm)
 
@@ -48,7 +54,7 @@ label-to-sub {S = Sing} L = ⟨ ⟨⟩ , (apt L PPHere) ⟩
 label-to-sub {S = Join S₁ S₂} L = sub-from-connect (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L))
 
 id-label : (S : Tree n) → Label (someTree S) S ⋆
-id-label S .ap ⟦ P ⟧ = P
+id-label S .ap P = carrier P
 
 to-label : (S : Tree n) → (σ : Sub (suc n) m A) → (Y : MaybeTree m) → Label Y S A
 to-label S σ Y .ap ⟦ Z ⟧ = POther (path-to-term Z [ σ ]tm)
@@ -80,9 +86,6 @@ connect-label L M = label-split (ap L PPHere) (helper L M)
     helper {S = Sing} L M ⟦ Z ⟧ = ap M ⟦ Z ⟧
     helper {S = Join S₁ S₂} L M ⟦ PExt Z ⟧ = ap L ⟦ PExt Z ⟧
     helper {S = Join S₁ S₂} L M ⟦ PShift Z ⟧ = connect-label (label₂ L) M .ap ⟦ Z ⟧
-
--- liftLabel : Label (Other n)  S → Label (Other (suc n)) S
--- liftLabel = map-term-label liftTerm
 
 connect-tree-inc-left : (S : Tree n) → (T : Tree m) → Label (someTree (connect-tree S T)) S ⋆
 connect-tree-inc-left Sing T .ap P = PHere

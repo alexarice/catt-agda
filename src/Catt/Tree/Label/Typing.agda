@@ -110,7 +110,7 @@ connect-label-Ty : (Lty : Typing-Label ΓS L)
                  → Typing-Label ΓS (connect-label L M)
 connect-label-Ty (TySing x) (TySing y) p = TySing x
 connect-label-Ty (TySing x) (TyJoin y Mty Mty′) p = TyJoin x (convert-type-Ty Mty (Arr≈ (sym≈tm p) refl≈ty refl≈tm)) Mty′
-connect-label-Ty (TyJoin x Lty Lty′) Mty p = TyJoin x Lty (connect-label-Ty Lty′ Mty p)
+connect-label-Ty {L = L} {M = M} (TyJoin x Lty Lty′) Mty p = TyJoin x (convert-type-Ty Lty (reflexive≈ty (Arr≃ refl≃tm refl≃ty (sym≃tm (path-to-term-≃ (connect-label-pphere (label₂ L) M)))))) (connect-label-Ty Lty′ Mty p)
 
 connect-tree-inc-left-Ty : (S : Tree n)
                          → (T : Tree m)

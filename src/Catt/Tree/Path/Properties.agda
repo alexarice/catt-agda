@@ -19,7 +19,19 @@ data _≃p_ : Path X → Path Y → Set where
   ≃Here : S ≃ S′ → PHere {S = S} ≃p PHere {S = S′}
   ≃Ext : ∀ {P : Path (someTree S)} {Q : Path (someTree S′)} → P ≃p Q → T ≃ T′ → PExt {T = T} P ≃p PExt {T = T′} Q
   ≃Shift : ∀ {P : Path (someTree T)} {Q : Path (someTree T′)} → S ≃ S′ → P ≃p Q → PShift {S = S} P ≃p PShift {S = S′} Q
-  ≃Other : s ≃tm t → POther {S = X} s ≃p POther {S = Y} t
+  ≃Other : path-to-term P ≃tm path-to-term Q → P ≃p Q
+
+≃p-to-same-n : {X : MaybeTree n} → {Y : MaybeTree m} → {P : Path X} → {Q : Path Y} → P ≃p Q → n ≡ m
+≃p-to-same-n (≃Here x) = cong suc (≃-to-same-n x)
+≃p-to-same-n (≃Ext p x) = cong₂ (λ a b → suc a + suc b) (≃-to-same-n x) (≃p-to-same-n p)
+≃p-to-same-n (≃Shift x p) = cong₂ (λ a b → a + suc (suc b)) (≃p-to-same-n p) (≃-to-same-n x)
+≃p-to-same-n (≃Other x) = ≃tm-to-same-length x
+
+path-to-term-≃ : P ≃p Q → path-to-term P ≃tm path-to-term Q
+path-to-term-≃ (≃Here x) = Var≃ (cong suc (≃-to-same-n x)) (cong (λ - → toℕ (fromℕ -)) (≃-to-same-n x))
+path-to-term-≃ (≃Ext p x) = sub-action-≃-tm (susp-tm-≃ (path-to-term-≃ p)) (connect-susp-inc-left-≃ (cong pred (≃p-to-same-n p)) (≃-to-same-n x))
+path-to-term-≃ (≃Shift x p) = sub-action-≃-tm (path-to-term-≃ p) (connect-susp-inc-right-≃ (≃-to-same-n x) (cong pred (≃p-to-same-n p)))
+path-to-term-≃ (≃Other x) = x
 
 refl≃p : P ≃p P
 refl≃p {P = PHere} = ≃Here refl≃
@@ -35,9 +47,12 @@ sym≃p (≃Other x) = ≃Other (sym≃tm x)
 
 trans≃p : P ≃p Q → Q ≃p Q′ → P ≃p Q′
 trans≃p (≃Here x) (≃Here y) = ≃Here (trans≃ x y)
+trans≃p (≃Here x) (≃Other y) = ≃Other (trans≃tm (path-to-term-≃ (≃Here x)) y)
 trans≃p (≃Ext p x) (≃Ext q y) = ≃Ext (trans≃p p q) (trans≃ x y)
+trans≃p (≃Ext p x) (≃Other y) = ≃Other (trans≃tm (path-to-term-≃ (≃Ext p x)) y)
 trans≃p (≃Shift x p) (≃Shift y q) = ≃Shift (trans≃ x y) (trans≃p p q)
-trans≃p (≃Other x) (≃Other y) = ≃Other (trans≃tm x y)
+trans≃p (≃Shift x p) (≃Other y) = ≃Other (trans≃tm (path-to-term-≃ (≃Shift x p)) y)
+trans≃p (≃Other x) p = ≃Other (trans≃tm x (path-to-term-≃ p))
 
 record PATH : Set where
   constructor <_>p
@@ -57,17 +72,15 @@ path-setoid = record { Carrier = PATH
                                                  }
                         }
 
-≃p-to-same-n : {X : MaybeTree n} → {Y : MaybeTree m} → {P : Path X} → {Q : Path Y} → P ≃p Q → n ≡ m
-≃p-to-same-n (≃Here x) = cong suc (≃-to-same-n x)
-≃p-to-same-n (≃Ext p x) = cong₂ (λ a b → suc a + suc b) (≃-to-same-n x) (≃p-to-same-n p)
-≃p-to-same-n (≃Shift x p) = cong₂ (λ a b → a + suc (suc b)) (≃p-to-same-n p) (≃-to-same-n x)
-≃p-to-same-n (≃Other x) = ≃tm-to-same-length x
+ppath-≃ : S ≃ T → PPath S → PPath T
+ppath-≃ p ⟦ PHere ⟧ = ⟦ PHere ⟧
+ppath-≃ (Join≃ p q) ⟦ PExt Z ⟧ = PPExt (ppath-≃ p ⟦ Z ⟧)
+ppath-≃ (Join≃ p q) ⟦ PShift Z ⟧ = PPShift (ppath-≃ q ⟦ Z ⟧)
 
-path-to-term-≃ : P ≃p Q → path-to-term P ≃tm path-to-term Q
-path-to-term-≃ (≃Here x) = Var≃ (cong suc (≃-to-same-n x)) (cong (λ - → toℕ (fromℕ -)) (≃-to-same-n x))
-path-to-term-≃ (≃Ext p x) = sub-action-≃-tm (susp-tm-≃ (path-to-term-≃ p)) (connect-susp-inc-left-≃ (cong pred (≃p-to-same-n p)) (≃-to-same-n x))
-path-to-term-≃ (≃Shift x p) = sub-action-≃-tm (path-to-term-≃ p) (connect-susp-inc-right-≃ (≃-to-same-n x) (cong pred (≃p-to-same-n p)))
-path-to-term-≃ (≃Other x) = x
+ppath-≃-≃p : (p : S ≃ T) → (P : PPath S) → carrier (ppath-≃ p P) ≃p carrier P
+ppath-≃-≃p p ⟦ PHere ⟧ = ≃Here (sym≃ p)
+ppath-≃-≃p (Join≃ p q) ⟦ PExt P ⟧ = ≃Ext (ppath-≃-≃p p ⟦ P ⟧) (sym≃ q)
+ppath-≃-≃p (Join≃ p q) ⟦ PShift P ⟧ = ≃Shift (sym≃ p) (ppath-≃-≃p q ⟦ P ⟧)
 
 -- maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-Maximal P ⦄ → not-here P
 -- maximal-join-not-here {T = Join S T} (PExt P) = tt

@@ -102,6 +102,21 @@ exterior-sub : (S : Tree n)
              → Sub (suc (tree-size S)) (suc (insertion-tree-size S p T)) ⋆
 exterior-sub S p T = label-to-sub (exterior-sub-label S p T)
 
+-- sub-from-insertion-label-func : (S : Tree n)
+--                               → (p : BranchingPoint S)
+--                               → (T : Tree m)
+--                               → .⦃ lh : has-linear-height (bp-height p) T ⦄
+--                               → (L : Label-func X S)
+--                               → (M : Label-func X T)
+--                               → Label-func X (insertion-tree S p T)
+-- sub-from-insertion-label-func (Join S₁ S₂) BPHere T L M = connect-label M (label₂ L)
+-- sub-from-insertion-label-func (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap ⟦ PHere ⟧ = ap M PPHere
+-- sub-from-insertion-label-func (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap ⟦ PExt Z ⟧ = sub-from-insertion-label S₁ p T (convert-type (label₁ L) (apt M PPHere ─⟨ _ ⟩⟶ apt M (PPShift PPHere))) (label₁ M) .ap ⟦ Z ⟧
+-- sub-from-insertion-label-func (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap ⟦ PShift Z ⟧ = replace-label (label₂ L) (ap M (PPShift PPHere)) .ap ⟦ Z ⟧
+-- sub-from-insertion-label-func (Join S₁ S₂) (BPShift p) T L M .ap ⟦ PHere ⟧ = ap L PPHere
+-- sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M .ap ⟦ PExt Z ⟧ = ap L ⟦ PExt Z ⟧
+-- sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M .ap ⟦ PShift Z ⟧ = sub-from-insertion-label S₂ p T (label₂ L) M .ap ⟦ Z ⟧
+
 sub-from-insertion-label : (S : Tree n)
                         → (p : BranchingPoint S)
                         → (T : Tree m)

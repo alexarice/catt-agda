@@ -7,26 +7,20 @@ open import Catt.Suspension
 open import Catt.Connection
 open import Catt.Tree.Path
 
-record Label (X : MaybeTree m) (S : Tree n) (A : Ty m) : Set where
-  field
-    ap : PPath S → Path X
+Label : (X : MaybeTree m) → (S : Tree n) → Set
+Label X S = PPath S → Path X
 
-  apt : PPath S → Tm m
-  apt Z = path-to-term (ap Z)
-
-  lty : Ty m
-  lty = A
-
-  ltree : Tree n
-  ltree = S
-
-open Label public
+Label′ : (T : Tree m) → (S : Tree n) → Set
+Label′ T S = PPath S → PPath T
 
 variable
-  L L′ M M′ : Label X S A
+  L L′ M M′ : Label X S
 
 convert-type : Label X S A → (B : Ty _) → Label X S B
 convert-type L B .ap Z = ap L Z
+
+prepend : Label-func′ S T → Label X S A → Label X T A
+prepend L M .ap Z = ap M (L Z)
 
 label₁ : (L : Label X (Join S T) A) → Label X S (apt L PPHere ─⟨ A ⟩⟶ apt L (PPShift PPHere))
 label₁ L .ap Z = ap L (PPExt Z)
@@ -34,11 +28,14 @@ label₁ L .ap Z = ap L (PPExt Z)
 label₂ : (L : Label X (Join S T) A) → Label X T A
 label₂ L .ap Z = ap L (PPShift Z)
 
+map-lf : (Path X → Path Y) → Label-func X S → Label-func Y S
+map-lf f L Z = f (L Z)
+
 map-pext : Label (someTree S) U A → Label (someTree (Join S T)) U (suspTy A [ connect-susp-inc-left (tree-size S) (tree-size T) ]ty)
-map-pext L .ap Z = PExt (ap L Z)
+map-pext L .ap = map-lf PExt (ap L)
 
 map-pshift : Label (someTree T) U A → Label (someTree (Join S T)) U (A [ connect-susp-inc-right (tree-size S) (tree-size T) ]ty)
-map-pshift L .ap Z = PShift (ap L Z)
+map-pshift L .ap = map-lf PShift (ap L)
 
 lift-label : Label (Other n) S A → Label (Other (suc n)) S (liftType A)
 lift-label L .ap Z = POther (liftTerm (apt L Z))
@@ -57,7 +54,7 @@ id-label : (S : Tree n) → Label (someTree S) S ⋆
 id-label S .ap P = carrier P
 
 to-label : (S : Tree n) → (σ : Sub (suc n) m A) → (Y : MaybeTree m) → Label Y S A
-to-label S σ Y .ap ⟦ Z ⟧ = POther (path-to-term Z [ σ ]tm)
+to-label S σ Y .ap Z = POther (path-to-term (carrier Z) [ σ ]tm)
 
 infixl 1 _>>=_
 _>>=_ : Path (someTree S) → Label X S A → Path X
@@ -69,23 +66,26 @@ POther x >>= L = POther (x [ label-to-sub L ]tm)
 label-comp : Label (someTree T) S A → (M : Label X T B) → Label X S (A [ label-to-sub M ]ty)
 label-comp L M .ap P = ap L P >>= M
 
-label-split : Path X → ((P : PPath S) → .⦃ not-here P ⦄ → Path X) → Label X S A
-label-split P f .ap ⟦ PHere ⟧ = P
-label-split P f .ap ⟦ PExt Z ⟧ = f ⟦ PExt Z ⟧
-label-split P f .ap ⟦ PShift Z ⟧ = f ⟦ PShift Z ⟧
+replace-label-func : Label-func X S → Path X → Label-func X S
+replace-label-func L P ⟦ PHere ⟧ = P
+replace-label-func L P ⟦ PExt Z ⟧ = L ⟦ PExt Z ⟧
+replace-label-func L P ⟦ PShift Z ⟧ = L ⟦ PShift Z ⟧
 
 replace-label : Label X S A → Path X → Label X S A
-replace-label L P = label-split P λ Q → ap L Q
+replace-label L P .ap = replace-label-func (ap L) P
+
+connect-label-func : Label-func X S
+                   → Label-func X T
+                   → Label-func X (connect-tree S T)
+connect-label-func {S = Sing} L M = replace-label-func M (L PPHere)
+connect-label-func {S = Join S₁ S₂} L M ⟦ PHere ⟧ = L PPHere
+connect-label-func {S = Join S₁ S₂} L M ⟦ PExt Z ⟧ = L ⟦ PExt Z ⟧
+connect-label-func {S = Join S₁ S₂} L M ⟦ PShift Z ⟧ = connect-label-func (λ x → L (PPShift x)) M ⟦ Z ⟧
 
 connect-label : Label X S A
               → Label X T A
               → Label X (connect-tree S T) A
-connect-label L M = label-split (ap L PPHere) (helper L M)
-  where
-    helper : Label X S A → Label X T A → (P : PPath (connect-tree S T)) → .⦃ not-here P ⦄ → Path X
-    helper {S = Sing} L M ⟦ Z ⟧ = ap M ⟦ Z ⟧
-    helper {S = Join S₁ S₂} L M ⟦ PExt Z ⟧ = ap L ⟦ PExt Z ⟧
-    helper {S = Join S₁ S₂} L M ⟦ PShift Z ⟧ = connect-label (label₂ L) M .ap ⟦ Z ⟧
+connect-label L M .ap = connect-label-func (ap L) (ap M)
 
 connect-tree-inc-left : (S : Tree n) → (T : Tree m) → Label (someTree (connect-tree S T)) S ⋆
 connect-tree-inc-left Sing T .ap P = PHere

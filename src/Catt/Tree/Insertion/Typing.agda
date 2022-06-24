@@ -514,6 +514,8 @@ sub-from-insertion-pphere : (S : Tree n)
                           → branching-path-to-type S p [ label-to-sub L ]ty ≈[ Γ ]ty unbiased-type (tree-dim T) T [ label-to-sub M ]ty
                           → apt (sub-from-insertion-label S p T L M) PPHere ≈[ Γ ]tm apt L PPHere
 sub-from-insertion-pphere (Join S₁ S₂) BPHere T L M p = begin
+  apt (connect-label M (label₂ L)) PPHere
+    ≈⟨ reflexive≈tm (path-to-term-≃ (connect-label-pphere M (label₂ L))) ⟩
   apt M PPHere
     ≈˘⟨ reflexive≈tm (label-to-sub-ppath M PPHere) ⟩
   Var (fromℕ _) [ label-to-sub M ]tm

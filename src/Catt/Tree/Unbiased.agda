@@ -5,6 +5,7 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Suspension
 open import Catt.Tree
+open import Catt.Tree.Boundary
 open import Catt.Tree.Properties
 open import Catt.Globular
 open import Relation.Nullary

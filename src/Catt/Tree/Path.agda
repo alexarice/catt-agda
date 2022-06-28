@@ -2,6 +2,7 @@ module Catt.Tree.Path where
 
 open import Catt.Prelude
 open import Catt.Tree
+open import Catt.Tree.Properties
 open import Catt.Syntax
 open import Catt.Suspension
 open import Catt.Connection
@@ -9,88 +10,37 @@ open import Catt.Variables
 open import Data.Sum
 open import Catt.Prelude.Properties
 
-data MaybeTree : ℕ → Set where
-  someTree : Tree n → MaybeTree (suc n)
-  Other : (n : ℕ) → MaybeTree n
+data Path : Tree n → Set where
+  PHere : Path S
+  PExt : Path S → Path (Join S T)
+  PShift : Path T → Path (Join S T)
 
 variable
-  X Y Z : MaybeTree n
+  P P′ Q Q′ : Path S
 
-maybeTreeSize : (X : MaybeTree n) → ℕ
-maybeTreeSize {n} X = n
-
-suspMaybeTree : MaybeTree n → MaybeTree (2 + n)
-suspMaybeTree (someTree x) = someTree (suspTree x)
-suspMaybeTree (Other _) = Other (2 + _)
-
-data CtxOrTree : ℕ → Set where
-  incTree : Tree n → CtxOrTree (suc n)
-  incCtx : Ctx n → CtxOrTree n
-
-variable
-  ΓS ΔT : CtxOrTree n
-
-COT-to-MT : CtxOrTree n → MaybeTree n
-COT-to-MT (incTree x) = someTree x
-COT-to-MT (incCtx x) = Other _
-
-COT-to-Ctx : CtxOrTree n → Ctx n
-COT-to-Ctx (incTree x) = tree-to-ctx x
-COT-to-Ctx (incCtx x) = x
-
-data Path : MaybeTree n → Set where
-  PHere : {S : Tree n} → Path (someTree S)
-  PExt : {S : Tree m} {T : Tree n} → Path (someTree S) → Path (someTree (Join S T))
-  PShift : {S : Tree m} {T : Tree n} → Path (someTree T) → Path (someTree (Join S T))
-  POther : {S : MaybeTree n} → Tm n → Path S
-
-variable
-  P P′ Q Q′ : Path X
-
-
-is-Path : Path (someTree S) → Set
-is-Path PHere = ⊤
-is-Path (PExt P) = is-Path P
-is-Path (PShift P) = is-Path P
-is-Path (POther x) = ⊥
-
-PPath : Tree n → Set
-PPath T = IΣ[ P ∈ Path (someTree T) ] is-Path P
-
-PPHere : PPath S
-PPHere = ⟦ PHere ⟧
-
-PPExt : PPath S → PPath (Join S T)
-PPExt ⟦ P ⟧ = ⟦ PExt P ⟧
-
-PPShift : PPath T → PPath (Join S T)
-PPShift ⟦ P ⟧ = ⟦ PShift P ⟧
-
-path-length : {T : MaybeTree n} → (P : Path T) → ℕ
+path-length : (P : Path T) → ℕ
 path-length PHere = 0
 path-length (PExt P) = suc (path-length P)
 path-length (PShift P) = path-length P
-path-length (POther t) = 0
 
-path-to-term : {T : MaybeTree n} → (P : Path T) → Tm n
+path-to-term : {T : Tree n} → (P : Path T) → Tm (suc n)
 path-to-term PHere = Var (fromℕ _)
 path-to-term (PExt P) = suspTm (path-to-term P) [ connect-susp-inc-left _ _ ]tm
 path-to-term (PShift P) = path-to-term P [ connect-susp-inc-right _ _ ]tm
-path-to-term (POther t) = t
 
-path-to-fin : {T : Tree n} → (P : PPath T) → Fin (suc n)
-path-to-fin ⟦ PHere ⟧ = fromℕ _
-path-to-fin {T = Join {n} {m} S T} ⟦ PExt P ⟧ = cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin ⟦ P ⟧))))
-path-to-fin {T = Join {n} {m} S T} ⟦ PShift PHere ⟧ = cast (cong suc (sym (+-suc m (suc n)))) (inject₁ (fromℕ _))
-path-to-fin {T = Join {n} {m} S T} ⟦ PShift P@(PExt _) ⟧ = inject+ (2 + n) (path-to-fin ⟦ P ⟧)
-path-to-fin {T = Join {n} S T} ⟦ PShift P@(PShift _) ⟧ = inject+ (2 + n) (path-to-fin ⟦ P ⟧)
+path-to-fin : {T : Tree n} → (P : Path T) → Fin (suc n)
+path-to-fin PHere = fromℕ _
+path-to-fin {T = Join {n} {m} S T} (PExt P) = cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P))))
+path-to-fin {T = Join {n} {m} S T} (PShift PHere) = cast (cong suc (sym (+-suc m (suc n)))) (inject₁ (fromℕ _))
+path-to-fin {T = Join {n} {m} S T} (PShift P@(PExt _)) = inject+ (2 + n) (path-to-fin P)
+path-to-fin {T = Join {n} S T} (PShift P@(PShift _)) = inject+ (2 + n) (path-to-fin P)
 
-var-to-path : (T : Tree n) → (t : Tm (suc n)) → .⦃ isVar t ⦄ → PPath T
-var-to-path-helper : (S : Tree n) → (T : Tree m) → Fin (m + ((suc n) + 2)) → PPath (Join S T)
-var-to-path-helper-1 : (S : Tree n) → (T : Tree m) → Fin (suc n + 2) → PPath (Join S T)
-var-to-path-helper-2 : (S : Tree n) → (T : Tree m) → Fin 2 → PPath (Join S T)
+var-to-path : (T : Tree n) → (t : Tm (suc n)) → .⦃ isVar t ⦄ → Path T
+var-to-path-helper : (S : Tree n) → (T : Tree m) → Fin (m + ((suc n) + 2)) → Path (Join S T)
+var-to-path-helper-1 : (S : Tree n) → (T : Tree m) → Fin (suc n + 2) → Path (Join S T)
+var-to-path-helper-2 : (S : Tree n) → (T : Tree m) → Fin 2 → Path (Join S T)
 
-var-to-path Sing t = PPHere
+var-to-path Sing t = PHere
 var-to-path (Join {n} {m} S T) t = var-to-path-helper S T (cast lem (getVarFin t))
   where
     open ≡-Reasoning
@@ -103,28 +53,36 @@ var-to-path (Join {n} {m} S T) t = var-to-path-helper S T (cast lem (getVarFin t
         ≡⟨ cong (λ - → m + suc -) (+-comm 2 n) ⟩
       m + (suc n + 2) ∎
 
-var-to-path-helper S T i = [ (λ x → PPShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ (splitAt (tree-size T) i)
+var-to-path-helper S T i = [ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ (splitAt (tree-size T) i)
 
-var-to-path-helper-1 S T i = [ (λ x → PPExt (var-to-path S (Var x))) , (var-to-path-helper-2 S T) ]′ (splitAt (suc (tree-size S)) i)
+var-to-path-helper-1 S T i = [ (λ x → PExt (var-to-path S (Var x))) , (var-to-path-helper-2 S T) ]′ (splitAt (suc (tree-size S)) i)
 
-var-to-path-helper-2 S T 0F = PPShift PPHere
-var-to-path-helper-2 S T 1F = PPHere
+var-to-path-helper-2 S T 0F = PShift PHere
+var-to-path-helper-2 S T 1F = PHere
 
-last-path : (T : Tree n) → PPath T
-last-path Sing = PPHere
-last-path (Join S T) = PPShift (last-path T)
+last-path : (T : Tree n) → Path T
+last-path Sing = PHere
+last-path (Join S T) = PShift (last-path T)
 
-not-here : (P : PPath S) → Set
-not-here ⟦ PHere ⟧ = ⊥
-not-here ⟦ PExt P ⟧ = ⊤
-not-here ⟦ PShift P ⟧ = ⊤
+not-here : (P : Path S) → Set
+not-here PHere = ⊥
+not-here (PExt P) = ⊤
+not-here (PShift P) = ⊤
 
-is-Maximal : PPath S → Set
-is-Maximal {S = Sing} ⟦ PHere ⟧ = ⊤
-is-Maximal {S = Join S T} ⟦ PHere ⟧ = ⊥
-is-Maximal ⟦ PExt P ⟧ = is-Maximal ⟦ P ⟧
-is-Maximal ⟦ PShift P ⟧ = not-here ⟦ P ⟧ × is-Maximal ⟦ P ⟧
-is-Maximal ⟦ POther P ⟧ = ⊥
+is-Maximal : Path S → Set
+is-Maximal {S = Sing} PHere = ⊤
+is-Maximal {S = Join S T} PHere = ⊥
+is-Maximal (PExt P) = is-Maximal P
+is-Maximal (PShift P) = not-here P × is-Maximal P
+
+ppath-≃ : S ≃ T → Path S → Path T
+ppath-≃ p PHere = PHere
+ppath-≃ (Join≃ p q) (PExt Z) = PExt (ppath-≃ p Z)
+ppath-≃ (Join≃ p q) (PShift Z) = PShift (ppath-≃ q Z)
+
+is-linear-max-path : (T : Tree n) → .⦃ is-linear T ⦄ → Path T
+is-linear-max-path Sing = PHere
+is-linear-max-path (Join S Sing) = PExt (is-linear-max-path S)
 
 -- path-inc-left : (P : Path S) → .⦃ is-Path P ⦄ → (T : Tree n) → Path (connect-tree S T)
 -- path-inc-left PHere T = PHere
@@ -138,6 +96,6 @@ is-Maximal ⟦ POther P ⟧ = ⊥
 -- path-func : Set → (S : Tree n) → Set
 -- path-func X S = ∀ (P : Path S) → .⦃ is-Maximal P ⦄ → X
 
-susp-path : Path X → Path (suspMaybeTree X)
-susp-path {X = someTree x} P = PExt P
-susp-path {X = Other _} (POther x) = POther (suspTm x)
+-- susp-path : Path X → Path (suspMaybeTree X)
+-- susp-path {X = someTree x} P = PExt P
+-- susp-path {X = Other _} (POther x) = POther (suspTm x)

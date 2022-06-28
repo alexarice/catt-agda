@@ -10,6 +10,7 @@ open import Data.Empty using (⊥) public
 open import Data.Unit using (⊤; tt) public
 open import Relation.Nullary public
 open import Data.Fin.Patterns public
+open import Data.Wrap public
 
 variable
   -- X Y Z : Set

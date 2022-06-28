@@ -5,7 +5,9 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree
+open import Catt.Tree.Boundary
 open import Catt.Tree.Properties
+open import Catt.Tree.Boundary.Properties
 open import Catt.Connection.Support
 open import Catt.Suspension.Support
 open import Catt.Support

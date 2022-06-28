@@ -52,10 +52,10 @@ interior-sub-label : (S : Tree n)
                   → .⦃ _ : has-linear-height (bp-height p) T ⦄
                   → Label (someTree (insertion-tree S p T)) T ⋆
 interior-sub-label (Join S₁ S₂) BPHere T = connect-tree-inc-left T S₂
-interior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing) .ap ⟦ PHere ⟧ = PHere
-interior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing) .ap ⟦ PExt P ⟧ = PExt (interior-sub-label S₁ p T .ap ⟦ P ⟧)
-interior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing) .ap ⟦ PShift PHere ⟧ = PShift PHere
-interior-sub-label (Join S₁ S₂) (BPShift p) T .ap P = PShift (interior-sub-label S₂ p T .ap P)
+interior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing) .ap PHere = SHere
+interior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing) .ap (PExt P) = SExt (interior-sub-label S₁ p T .ap P)
+interior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing) .ap (PShift PHere) = SShift SHere
+interior-sub-label (Join S₁ S₂) (BPShift p) T .ap P = SShift (interior-sub-label S₂ p T .ap P)
 
 interior-sub : (S : Tree n)
              → (p : BranchingPoint S)
@@ -64,14 +64,10 @@ interior-sub : (S : Tree n)
              → Sub (suc m) (suc (insertion-tree-size S p T)) ⋆
 interior-sub S p T = label-to-sub (interior-sub-label S p T)
 
-is-linear-max-path : (T : Tree n) → .⦃ is-linear T ⦄ → PPath T
-is-linear-max-path Sing = ⟦ PHere ⟧
-is-linear-max-path (Join S Sing) = PPExt (is-linear-max-path S)
-
-branching-path-to-path : (T : Tree n) → (p : BranchingPoint T) → PPath T
-branching-path-to-path (Join S T) BPHere = PPExt (is-linear-max-path S)
-branching-path-to-path (Join S T) (BPExt p) = PPExt (branching-path-to-path S p)
-branching-path-to-path (Join S T) (BPShift p) = PPShift (branching-path-to-path T p)
+branching-path-to-path : (T : Tree n) → (p : BranchingPoint T) → Path T
+branching-path-to-path (Join S T) BPHere = PExt (is-linear-max-path S)
+branching-path-to-path (Join S T) (BPExt p) = PExt (branching-path-to-path S p)
+branching-path-to-path (Join S T) (BPShift p) = PShift (branching-path-to-path T p)
 
 branching-path-to-var : (T : Tree n) → (p : BranchingPoint T) → Tm (suc n)
 branching-path-to-var (Join S T) (BPHere) = 0V [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm
@@ -89,7 +85,7 @@ exterior-sub-label : (S : Tree n)
                   → .⦃ _ : has-linear-height (bp-height p) T ⦄
                   → Label (someTree (insertion-tree S p T)) S ⋆
 exterior-sub-label (Join S₁ S₂) BPHere T
-  = label-between-connect-trees (to-label (suspTree S₁) (sub-from-linear-tree-unbiased (suspTree S₁) T 0) (someTree T)) (id-label S₂)
+  = label-between-connect-trees (label-from-linear-tree-unbiased (suspTree S₁) T 0) (id-label S₂)
 exterior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing)
   = label-between-joins (exterior-sub-label S₁ p T) (id-label S₂)
 exterior-sub-label (Join S₁ S₂) (BPShift p) T
@@ -102,21 +98,6 @@ exterior-sub : (S : Tree n)
              → Sub (suc (tree-size S)) (suc (insertion-tree-size S p T)) ⋆
 exterior-sub S p T = label-to-sub (exterior-sub-label S p T)
 
--- sub-from-insertion-label-func : (S : Tree n)
---                               → (p : BranchingPoint S)
---                               → (T : Tree m)
---                               → .⦃ lh : has-linear-height (bp-height p) T ⦄
---                               → (L : Label-func X S)
---                               → (M : Label-func X T)
---                               → Label-func X (insertion-tree S p T)
--- sub-from-insertion-label-func (Join S₁ S₂) BPHere T L M = connect-label M (label₂ L)
--- sub-from-insertion-label-func (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap ⟦ PHere ⟧ = ap M PPHere
--- sub-from-insertion-label-func (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap ⟦ PExt Z ⟧ = sub-from-insertion-label S₁ p T (convert-type (label₁ L) (apt M PPHere ─⟨ _ ⟩⟶ apt M (PPShift PPHere))) (label₁ M) .ap ⟦ Z ⟧
--- sub-from-insertion-label-func (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap ⟦ PShift Z ⟧ = replace-label (label₂ L) (ap M (PPShift PPHere)) .ap ⟦ Z ⟧
--- sub-from-insertion-label-func (Join S₁ S₂) (BPShift p) T L M .ap ⟦ PHere ⟧ = ap L PPHere
--- sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M .ap ⟦ PExt Z ⟧ = ap L ⟦ PExt Z ⟧
--- sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M .ap ⟦ PShift Z ⟧ = sub-from-insertion-label S₂ p T (label₂ L) M .ap ⟦ Z ⟧
-
 sub-from-insertion-label : (S : Tree n)
                         → (p : BranchingPoint S)
                         → (T : Tree m)
@@ -125,12 +106,12 @@ sub-from-insertion-label : (S : Tree n)
                         → (M : Label X T A)
                         → Label X (insertion-tree S p T) A
 sub-from-insertion-label (Join S₁ S₂) BPHere T L M = connect-label M (label₂ L)
-sub-from-insertion-label (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap ⟦ PHere ⟧ = ap M PPHere
-sub-from-insertion-label (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap ⟦ PExt Z ⟧ = sub-from-insertion-label S₁ p T (convert-type (label₁ L) (apt M PPHere ─⟨ _ ⟩⟶ apt M (PPShift PPHere))) (label₁ M) .ap ⟦ Z ⟧
-sub-from-insertion-label (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap ⟦ PShift Z ⟧ = replace-label (label₂ L) (ap M (PPShift PPHere)) .ap ⟦ Z ⟧
-sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M .ap ⟦ PHere ⟧ = ap L PPHere
-sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M .ap ⟦ PExt Z ⟧ = ap L ⟦ PExt Z ⟧
-sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M .ap ⟦ PShift Z ⟧ = sub-from-insertion-label S₂ p T (label₂ L) M .ap ⟦ Z ⟧
+sub-from-insertion-label (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap PHere = ap M PHere
+sub-from-insertion-label (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap (PExt Z) = sub-from-insertion-label S₁ p T (convert-type (label₁ L) (apt M PHere ─⟨ _ ⟩⟶ apt M (PShift PHere))) (label₁ M) .ap Z
+sub-from-insertion-label (Join S₁ S₂) (BPExt p) (Join T Sing) L M .ap (PShift Z) = replace-label (label₂ L) (ap M (PShift PHere)) .ap Z
+sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M .ap PHere = ap L PHere
+sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M .ap (PExt Z) = ap L (PExt Z)
+sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M .ap (PShift Z) = sub-from-insertion-label S₂ p T (label₂ L) M .ap Z
 
 sub-from-insertion : (S : Tree n)
                          → (p : BranchingPoint S)
@@ -140,4 +121,4 @@ sub-from-insertion : (S : Tree n)
                          → (τ : Sub (suc m) l A)
                          → Sub (suc (insertion-tree-size S p T)) l A
 sub-from-insertion {l = l} {A = A} S P T σ τ
-  = label-to-sub (sub-from-insertion-label S P T (to-label S σ (Other l)) (to-label T τ (Other l)))
+  = label-to-sub (sub-from-insertion-label S P T (to-label S σ) (to-label T τ))

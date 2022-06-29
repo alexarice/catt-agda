@@ -86,6 +86,11 @@ ppath-≃-≃tm p PHere = ≃Here (sym≃ p)
 ppath-≃-≃tm (Join≃ p q) (PExt P) = ≃Ext (ppath-≃-≃tm p P) (sym≃ q)
 ppath-≃-≃tm (Join≃ p q) (PShift P) = ≃Shift (sym≃ p) (ppath-≃-≃tm q P)
 
+ppath-refl : (P : Path S) → ppath-≃ refl≃ P ≡ P
+ppath-refl PHere = refl
+ppath-refl (PExt P) = cong PExt (ppath-refl P)
+ppath-refl (PShift P) = cong PShift (ppath-refl P)
+
 -- -- maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-Maximal P ⦄ → not-here P
 -- -- maximal-join-not-here {T = Join S T} (PExt P) = tt
 -- -- maximal-join-not-here {T = Join S T} (PShift P) = tt

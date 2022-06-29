@@ -17,7 +17,7 @@ data Tree : ℕ → Set where
   Join : (S : Tree n) → (T : Tree m) → Tree (m + (2 + n))
 
 variable
-  S S′ T T′ U : Tree n
+  S S′ T T′ U U′ : Tree n
 
 singleton-ctx : Ctx 1
 singleton-ctx = ∅ , ⋆

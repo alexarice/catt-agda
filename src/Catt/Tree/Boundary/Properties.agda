@@ -29,7 +29,18 @@ tree-inc-label-last-path : (d : ℕ) → (T : Tree n) → (b : Bool) → tree-in
 tree-inc-label-last-path d Sing b = refl≃stm
 tree-inc-label-last-path d (Join S T) b = ≃SShift refl≃ (tree-inc-label-last-path d T b)
 
+is-linear-bd : (d : ℕ) → (S : Tree n) → .⦃ is-linear S ⦄ → is-linear (tree-bd d S)
+is-linear-bd zero S = tt
+is-linear-bd (suc d) Sing = tt
+is-linear-bd (suc d) (Join S Sing) = is-linear-bd d S
 
+connect-tree-bd : (d : ℕ)
+                → (S : Tree n)
+                → (T : Tree m)
+                → connect-tree (tree-bd (suc d) S) (tree-bd (suc d) T)
+                ≃ tree-bd (suc d) (connect-tree S T)
+connect-tree-bd d Sing T = refl≃
+connect-tree-bd d (Join S₁ S₂) T = Join≃ refl≃ (connect-tree-bd d S₂ T)
 
 -- tree-inc-preserve-fst-var : (d : ℕ) → (T : Tree n) → (b : Bool) → Var (fromℕ _) [ tree-inc (suc d) T b ]tm ≃tm Var {suc (tree-size T)} (fromℕ _)
 -- tree-inc-preserve-fst-var d Sing b = refl≃tm

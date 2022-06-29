@@ -319,6 +319,12 @@ connect-tree-inc-phere : (S : Tree n)
 connect-tree-inc-phere Sing T = refl≃stm
 connect-tree-inc-phere (Join S₁ S₂) T = ≃SShift refl≃ (connect-tree-inc-phere S₂ T)
 
+connect-tree-inc-right-last-path : (S : Tree n)
+                                 → (T : Tree m)
+                                 → connect-tree-inc-right S T .ap (last-path T) ≃stm path-to-stm (last-path (connect-tree S T))
+connect-tree-inc-right-last-path Sing T = refl≃stm
+connect-tree-inc-right-last-path (Join S₁ S₂) T = ≃SShift refl≃ (connect-tree-inc-right-last-path S₂ T)
+
 susp-stm-to-term : (a : STm X) → stm-to-term (susp-stm a) ≃tm suspTm (stm-to-term a)
 susp-label-to-sub′ : (L : Label X S A) → ((P : Path S) → apt (susp-label L) P ≃tm suspTm (apt L P)) → label-to-sub (susp-label L) ≃s suspSubRes (label-to-sub L)
 susp-label-to-sub : (L : Label X S A) → label-to-sub (susp-label L) ≃s suspSubRes (label-to-sub L)
@@ -353,6 +359,31 @@ susp-label-to-sub′ {S = Join S T} {A = A} L f = begin
     open Reasoning sub-setoid
 
 susp-label-to-sub L = susp-label-to-sub′ L (λ P → susp-stm-to-term (ap L P))
+
+label-to-sub-map-pshift : (L : Label (someTree T) S A) → label-to-sub (map-pshift {S = U} L) ≃s connect-susp-inc-right (tree-size U) (tree-size T) ∘ label-to-sub L
+label-to-sub-map-pshift {U = U} L = begin
+  < label-to-sub (map-pshift {S = U} L) >s
+    ≈⟨ label-to-sub-≃ (map-pshift {S = U} L) (label-sub L (connect-susp-inc-right (tree-size U) _)) [ (λ P → [ refl≃tm ]) ] refl≃ty ⟩
+  < label-to-sub (label-sub L (connect-susp-inc-right (tree-size U) _)) >s
+    ≈⟨ label-sub-to-sub L (connect-susp-inc-right (tree-size U) _) ⟩
+  < connect-susp-inc-right (tree-size U) _ ∘ label-to-sub L >s ∎
+  where
+    open Reasoning sub-setoid
+
+label-to-sub-map-pext : (L : Label (someTree T) S A) → label-to-sub (map-pext {T = U} L) ≃s connect-susp-inc-left (tree-size T) (tree-size U) ∘ suspSubRes (label-to-sub L)
+label-to-sub-map-pext {U = U} L = begin
+  < label-to-sub (map-pext {T = U} L) >s
+    ≈˘⟨ label-to-sub-≃  (label-sub (susp-label L) (connect-susp-inc-left _ (tree-size U)))
+                        (map-pext {T = U} L)
+                        [ (λ P → [ sub-action-≃-tm (id-on-tm (suspTm (stm-to-term (ap L P)))) refl≃s ]) ]
+                        refl≃ty ⟩
+  < label-to-sub (label-sub (susp-label L) (connect-susp-inc-left _ (tree-size U))) >s
+    ≈⟨ label-sub-to-sub (susp-label L) (connect-susp-inc-left _ (tree-size U)) ⟩
+  < connect-susp-inc-left _ (tree-size U) ∘ label-to-sub (susp-label L) >s
+    ≈⟨ sub-action-≃-sub (susp-label-to-sub L) refl≃s ⟩
+  < connect-susp-inc-left _ (tree-size U) ∘ suspSubRes (label-to-sub L) >s ∎
+  where
+    open Reasoning sub-setoid
 
 lift-stm-to-term : (a : STm (Other n)) → stm-to-term (lift-stm a) ≃tm liftTerm (stm-to-term a)
 lift-label-to-sub′ : (L : Label (Other n) S A) → ((P : Path S) → apt (lift-label L) P ≃tm liftTerm (apt L P)) → label-to-sub (lift-label L) ≃s liftSub (label-to-sub L)
@@ -552,3 +583,88 @@ label-to-sub-≃′ L M (p ,, [ q ]) r with ≃-to-same-n p
 --   < stm-to-term (a >>= susp-label L) >tm ∎ ]
 --   where
 --     open Reasoning tm-setoid
+
+SCoh-shift : (S : Tree n) → (A : Ty (suc n)) → (L : Label (someTree T) S B) → SCoh S A (map-pshift {S = U} L) ≃stm SShift {S = U} (SCoh S A L)
+SCoh-shift {U = U} S A L .get = begin
+  < Coh (tree-to-ctx S) A idSub [ label-to-sub (map-pshift {S = U} L) ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh (tree-to-ctx S) A idSub}) (label-to-sub-map-pshift {U = U} L) ⟩
+  < Coh (tree-to-ctx S) A idSub [ connect-susp-inc-right _ _ ∘ label-to-sub L ]tm
+    >tm
+    ≈⟨ assoc-tm (connect-susp-inc-right _ _) (label-to-sub L) (Coh (tree-to-ctx S) A idSub) ⟩
+  < Coh (tree-to-ctx S) A idSub [ label-to-sub L ]tm [ connect-susp-inc-right _ _ ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+
+SCoh-ext : (S : Tree n) → (A : Ty (suc n)) → (L : Label (someTree T) S B) → SCoh S A (map-pext {T = U} L) ≃stm SExt {T = U} (SCoh S A L)
+SCoh-ext {U = U} S A L .get = begin
+  < Coh (tree-to-ctx S) A idSub [ label-to-sub (map-pext {T = U} L) ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh (tree-to-ctx S) A idSub}) (label-to-sub-map-pext {U = U} L) ⟩
+  < Coh (tree-to-ctx S) A idSub [ connect-susp-inc-left _ (tree-size U)
+                                ∘ suspSubRes (label-to-sub L) ]tm >tm
+    ≈⟨ assoc-tm (connect-susp-inc-left _ (tree-size U)) (suspSubRes (label-to-sub L)) (Coh (tree-to-ctx S) A idSub) ⟩
+  < Coh (tree-to-ctx S) A idSub [ suspSubRes (label-to-sub L) ]tm
+                                [ connect-susp-inc-left _ (tree-size U) ]tm >tm
+    ≈˘⟨ sub-action-≃-tm (susp-res-comp-tm (Coh (tree-to-ctx S) A idSub) (label-to-sub L)) refl≃s ⟩
+  < suspTm (Coh (tree-to-ctx S) A idSub [ label-to-sub L ]tm) [ connect-susp-inc-left _ _ ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+
+extend-map-pshift : (a : STm (someTree S)) → (L : Label (someTree T) S A) → (a >>= map-pshift {S = U} L) ≃stm SShift {S = U} (a >>= L)
+map-pshift-comp : (L : Label (someTree T) S A) → (M : Label (someTree U) T B)
+                → label-comp L (map-pshift {S = U′} M) ≃l map-pshift {S = U′} (label-comp L M)
+map-pshift-comp L M .get Z = extend-map-pshift (ap L Z) M
+
+extend-map-pshift SHere L = refl≃stm
+extend-map-pshift (SExt a) L = extend-map-pshift a (label₁ L)
+extend-map-pshift (SShift a) L = extend-map-pshift a (label₂ L)
+extend-map-pshift {U = U} (SCoh {B = B} S A M) L = begin
+  < SCoh S A (label-comp M (map-pshift L)) >stm
+    ≈⟨ ≃SCoh S refl≃ty (map-pshift-comp M L) lem ⟩
+  < SCoh S A (map-pshift (label-comp M L)) >stm
+    ≈⟨ SCoh-shift S A (label-comp M L) ⟩
+  < SShift (SCoh S A (label-comp M L)) >stm ∎
+  where
+    lem : (B [ label-to-sub (map-pshift {S = U} L) ]ty) ≃ty
+            ((B [ label-to-sub L ]ty) [ connect-susp-inc-right _ _ ]ty)
+    lem = begin
+      < B [ label-to-sub (map-pshift {S = U} L) ]ty >ty
+        ≈⟨ sub-action-≃-ty (refl≃ty {A = B}) (label-to-sub-map-pshift {U = U} L) ⟩
+      < B [ connect-susp-inc-right _ _ ∘ label-to-sub L ]ty >ty
+        ≈⟨ assoc-ty (connect-susp-inc-right _ _) (label-to-sub L) B ⟩
+      < (B [ label-to-sub L ]ty) [ connect-susp-inc-right _ _ ]ty >ty ∎
+      where
+        open Reasoning ty-setoid
+
+    open Reasoning stm-setoid
+
+extend-map-pext : (a : STm (someTree S)) → (L : Label (someTree T) S A) → (a >>= map-pext {T = U} L) ≃stm SExt {T = U} (a >>= L)
+map-pext-comp : (L : Label (someTree T) S A) → (M : Label (someTree U) T B)
+                → label-comp L (map-pext {T = U′} M) ≃l map-pext {T = U′} (label-comp L M)
+map-pext-comp L M .get Z = extend-map-pext (ap L Z) M
+
+extend-map-pext SHere L = refl≃stm
+extend-map-pext (SExt a) L = extend-map-pext a (label₁ L)
+extend-map-pext (SShift a) L = extend-map-pext a (label₂ L)
+extend-map-pext {U = U} (SCoh {B = B} S A M) L = begin
+  < SCoh S A (label-comp M (map-pext L)) >stm
+    ≈⟨ ≃SCoh S refl≃ty (map-pext-comp M L) lem ⟩
+  < SCoh S A (map-pext (label-comp M L)) >stm
+    ≈⟨ SCoh-ext S A (label-comp M L) ⟩
+  < SExt (SCoh S A (label-comp M L)) >stm ∎
+  where
+    lem : (B [ label-to-sub (map-pext {T = U} L) ]ty) ≃ty
+            (suspTy (B [ label-to-sub L ]ty) [ connect-susp-inc-left _ (tree-size U) ]ty)
+    lem = begin
+      < B [ label-to-sub (map-pext {T = U} L) ]ty >ty
+        ≈⟨ sub-action-≃-ty (refl≃ty {A = B}) (label-to-sub-map-pext {U = U} L) ⟩
+      < B [ connect-susp-inc-left _ (tree-size U) ∘ suspSubRes (label-to-sub L) ]ty >ty
+        ≈⟨ assoc-ty _ _ B ⟩
+      < B [ suspSubRes (label-to-sub L) ]ty
+          [ connect-susp-inc-left _ (tree-size U) ]ty >ty
+        ≈˘⟨ sub-action-≃-ty (susp-res-comp-ty B (label-to-sub L)) refl≃s ⟩
+      < suspTy (B [ label-to-sub L ]ty) [ connect-susp-inc-left _ (tree-size U) ]ty
+        >ty ∎
+      where
+        open Reasoning ty-setoid
+
+    open Reasoning stm-setoid

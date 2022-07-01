@@ -52,6 +52,11 @@ tree-dim : Tree n → ℕ
 tree-dim Sing = 0
 tree-dim (Join S T) = suc (pred (tree-dim T) ⊔ tree-dim S)
 
+anti-linear : Tree n → Set
+anti-linear Sing = ⊤
+anti-linear (Join S Sing) = ⊥
+anti-linear (Join S (Join T₁ T₂)) = ⊤
+
 is-linear : Tree n → Set
 is-linear Sing = ⊤
 is-linear (Join S Sing) = is-linear S

@@ -21,13 +21,19 @@ open import Catt.Globular.Properties
 open import Catt.Variables
 open import Catt.Variables.Properties
 
-tree-inc-label-phere : (d : ℕ) → (T : Tree n) → (b : Bool) → tree-inc-label (suc d) T b .ap PHere ≃stm SHere {S = T}
-tree-inc-label-phere d Sing b = refl≃stm
-tree-inc-label-phere d (Join S T) b = refl≃stm
+tree-inc-label-phere : (d : ℕ) → (T : Tree n) → (b : Bool) → tree-inc-label′ (suc d) T b PHere ≃p PHere {S = T}
+tree-inc-label-phere d Sing b = refl≃p
+tree-inc-label-phere d (Join S T) b = refl≃p
 
-tree-inc-label-last-path : (d : ℕ) → (T : Tree n) → (b : Bool) → tree-inc-label (suc d) T b .ap (last-path (tree-bd (suc d) T)) ≃stm path-to-stm (last-path T)
-tree-inc-label-last-path d Sing b = refl≃stm
-tree-inc-label-last-path d (Join S T) b = ≃SShift refl≃ (tree-inc-label-last-path d T b)
+tree-inc-label-last-path : (d : ℕ) → (T : Tree n) → (b : Bool) → tree-inc-label′ (suc d) T b (last-path (tree-bd (suc d) T)) ≃p (last-path T)
+tree-inc-label-last-path d Sing b = refl≃p
+tree-inc-label-last-path d (Join S T) b = ≃Shift refl≃ (tree-inc-label-last-path d T b)
+
+tree-inc-not-here : (d : ℕ) → (T : Tree n) → (b : Bool) → (Z : Path (tree-bd d T)) → .⦃ not-here Z ⦄ → not-here (tree-inc-label′ d T b Z)
+tree-inc-not-here zero T b PHere = ⊥-elim it
+tree-inc-not-here (suc d) Sing b PHere = ⊥-elim it
+tree-inc-not-here (suc d) (Join S T) b (PExt Z) = tt
+tree-inc-not-here (suc d) (Join S T) b (PShift Z) = tt
 
 is-linear-bd : (d : ℕ) → (S : Tree n) → .⦃ is-linear S ⦄ → is-linear (tree-bd d S)
 is-linear-bd zero S = tt
@@ -41,6 +47,31 @@ connect-tree-bd : (d : ℕ)
                 ≃ tree-bd (suc d) (connect-tree S T)
 connect-tree-bd d Sing T = refl≃
 connect-tree-bd d (Join S₁ S₂) T = Join≃ refl≃ (connect-tree-bd d S₂ T)
+
+tree-inc-inc-left : (d : ℕ) → (S : Tree n) → (T : Tree m) → (b : Bool)
+                  → (Z : Path (tree-bd (suc d) S))
+                  → connect-tree-inc-left′ S T (tree-inc-label′ (suc d) S b Z)
+                  ≃p tree-inc-label′ (suc d) (connect-tree S T) b (ppath-≃ (connect-tree-bd d S T) (connect-tree-inc-left′ (tree-bd (suc d) S) (tree-bd (suc d) T) Z))
+tree-inc-inc-left d Sing T b Z = sym≃p (tree-inc-label-phere d T b)
+tree-inc-inc-left d (Join S₁ S₂) T b PHere = refl≃p
+tree-inc-inc-left d (Join S₁ S₂) T b (PExt Z) = ≃Ext (ap′-≃ (tree-inc-label′ d S₁ b) (ppath-≃-≃p refl≃ Z)) refl≃
+tree-inc-inc-left d (Join S₁ S₂) T b (PShift Z) = ≃Shift refl≃ (tree-inc-inc-left d S₂ T b Z)
+
+tree-inc-inc-right : (d : ℕ) → (S : Tree n) → (T : Tree m) → (b : Bool)
+                   → (Z : Path (tree-bd (suc d) T))
+                   → connect-tree-inc-right′ S T (tree-inc-label′ (suc d) T b Z)
+                   ≃p tree-inc-label′ (suc d) (connect-tree S T) b (ppath-≃ (connect-tree-bd d S T) (connect-tree-inc-right′ (tree-bd (suc d) S) (tree-bd (suc d) T) Z))
+tree-inc-inc-right d Sing T b Z = ap′-≃ (tree-inc-label′ (suc d) T b) (ppath-≃-≃p refl≃ Z)
+tree-inc-inc-right d (Join S₁ S₂) T b Z = ≃Shift refl≃ (tree-inc-inc-right d S₂ T b Z)
+
+tree-bd-≃ : d ≡ d′ → S ≃ T → tree-bd d S ≃ tree-bd d′ T
+tree-bd-≃ {d = zero} refl p = Sing≃
+tree-bd-≃ {d = suc d} refl Sing≃ = Sing≃
+tree-bd-≃ {d = suc d} refl (Join≃ p q) = Join≃ (tree-bd-≃ refl p) (tree-bd-≃ refl q)
+
+anti-linear-bd : (d : ℕ) → (T : Tree n) → .⦃ anti-linear T ⦄ → anti-linear (tree-bd (suc d) T)
+anti-linear-bd d Sing = tt
+anti-linear-bd d (Join S (Join T₁ T₂)) = tt
 
 -- tree-inc-preserve-fst-var : (d : ℕ) → (T : Tree n) → (b : Bool) → Var (fromℕ _) [ tree-inc (suc d) T b ]tm ≃tm Var {suc (tree-size T)} (fromℕ _)
 -- tree-inc-preserve-fst-var d Sing b = refl≃tm
@@ -85,23 +116,20 @@ tree-bd-full (suc d) Sing p = Sing≃
 tree-bd-full (suc d) (Join S T) p = Join≃ (tree-bd-full d S (≤-trans (m≤n⊔m (pred (tree-dim T)) (tree-dim S)) (≤-pred p))) (tree-bd-full (suc d) T (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p))
 
 tree-inc-label-glob : (d₁ d₂ : ℕ) → (T : Tree n) → (b₁ b₂ : Bool) → (p : d₁ < d₂)
-                    → (P : Path (tree-bd d₁ (tree-bd d₂ T)))
-                    → tree-inc-label d₂ T b₂ .ap (tree-inc-label′ d₁ (tree-bd d₂ T) b₁ P) ≃stm tree-inc-label d₁ T b₁ .ap (ppath-≃ (tree-bd-glob d₁ d₂ T p) P)
-tree-inc-label-glob zero (suc d₂) T false b₂ p P = tree-inc-label-phere d₂ T b₂
-tree-inc-label-glob zero (suc d₂) T true b₂ p P = tree-inc-label-last-path d₂ T b₂
-tree-inc-label-glob (suc d₁) (suc d₂) Sing b₁ b₂ p PHere = refl≃stm
-tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p PHere = refl≃stm
-tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ (s≤s p) (PExt P) = ≃SExt (tree-inc-label-glob d₁ d₂ S b₁ b₂ p P) refl≃
-tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p (PShift P) = ≃SShift refl≃ (tree-inc-label-glob (suc d₁) (suc d₂) T b₁ b₂ p P)
+                    → (tree-inc-label′ d₂ T b₂ ∘ (tree-inc-label′ d₁ (tree-bd d₂ T) b₁)) ≃lp (tree-inc-label′ d₁ T b₁ ∘ ppath-≃ (tree-bd-glob d₁ d₂ T p))
+tree-inc-label-glob zero (suc d₂) T false b₂ p .get P = tree-inc-label-phere d₂ T b₂
+tree-inc-label-glob zero (suc d₂) T true b₂ p .get P = tree-inc-label-last-path d₂ T b₂
+tree-inc-label-glob (suc d₁) (suc d₂) Sing b₁ b₂ p .get PHere = refl≃p
+tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p .get PHere = refl≃p
+tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ (s≤s p) .get (PExt P) = ≃Ext (tree-inc-label-glob d₁ d₂ S b₁ b₂ p .get P) refl≃ -- ≃SExt (≃SPath (tree-inc-label-glob d₁ d₂ S b₁ b₂ p .get P)) refl≃
+tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p .get (PShift P) = ≃Shift refl≃ (tree-inc-label-glob (suc d₁) (suc d₂) T b₁ b₂ p .get P)
 
-tree-inc-glob : (d₁ d₂ : ℕ) → (T : Tree n) → (b₁ b₂ : Bool) → d₁ < d₂ → tree-inc d₂ T b₂ ∘ tree-inc d₁ (tree-bd d₂ T) b₁ ≃s tree-inc d₁ T b₁
+tree-inc-glob : (d₁ d₂ : ℕ) → (T : Tree n) → (b₁ b₂ : Bool) → d₁ < d₂ → tree-inc d₂ T b₂ ● tree-inc d₁ (tree-bd d₂ T) b₁ ≃s tree-inc d₁ T b₁
 tree-inc-glob d₁ d₂ T b₁ b₂ p = begin
-  < tree-inc d₂ T b₂ ∘ tree-inc d₁ (tree-bd d₂ T) b₁ >s
+  < tree-inc d₂ T b₂ ● tree-inc d₁ (tree-bd d₂ T) b₁ >s
     ≈⟨ label-comp-to-sub (tree-inc-label d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂) ⟩
-  < label-to-sub (label-comp (tree-inc-label d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂)) >s
-    ≈⟨ label-to-sub-≃ (label-comp (tree-inc-label d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂)) (prepend (tree-inc-label′ d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂)) [ (λ P → extend-path-to-stm (tree-inc-label′ d₁ (tree-bd d₂ T) b₁ P) (tree-inc-label d₂ T b₂)) ] refl≃ty ⟩
-  < label-to-sub (prepend (tree-inc-label′ d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂)) >s
-    ≈⟨ label-to-sub-≃′ (prepend (tree-inc-label′ d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂)) (tree-inc-label d₁ T b₁) ((tree-bd-glob d₁ d₂ T p) ,, [ tree-inc-label-glob d₁ d₂ T b₁ b₂ p ]) refl≃ty ⟩
+  < label-to-sub (label-wt-comp (tree-inc-label d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂)) >s
+    ≈⟨ label-to-sub-≃′ (label-wt-comp (tree-inc-label d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂)) (tree-inc-label d₁ T b₁) ((tree-bd-glob d₁ d₂ T p) ,, [ (λ P → ≃SPath (tree-inc-label-glob d₁ d₂ T b₁ b₂ p .get P)) ]) refl≃ty ⟩
   < tree-inc d₁ T b₁ >s ∎
   where
     open Reasoning sub-setoid
@@ -145,31 +173,31 @@ tree-inc-glob d₁ d₂ T b₁ b₂ p = begin
 --   where
 --     open Reasoning sub-setoid
 
-tree-inc-label-full : (d : ℕ) → (T : Tree n) → (b : Bool) → (p : tree-dim T ≤ d) → (Z : Path (tree-bd d T)) → tree-inc-label d T b .ap Z ≃stm path-to-stm (ppath-≃ (tree-bd-full d T p) Z)
-tree-inc-label-full zero T false p PHere = refl≃stm
-tree-inc-label-full zero Sing true p PHere = refl≃stm
-tree-inc-label-full (suc d) Sing b p PHere = refl≃stm
-tree-inc-label-full (suc d) (Join S T) b p PHere = refl≃stm
-tree-inc-label-full (suc d) (Join S T) b p (PExt Z) = ≃SExt (tree-inc-label-full d S b (m⊔n≤o⇒n≤o (pred (tree-dim T)) (tree-dim S) (≤-pred p)) Z) refl≃
-tree-inc-label-full (suc d) (Join S T) b p (PShift Z) = ≃SShift refl≃ (tree-inc-label-full (suc d) T b (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p) Z)
+tree-inc-label-full : (d : ℕ) → (T : Tree n) → (b : Bool) → (p : tree-dim T ≤ d) → tree-inc-label′ d T b ≃lp ppath-≃ (tree-bd-full d T p)
+tree-inc-label-full zero T false p .get PHere = refl≃p
+tree-inc-label-full zero Sing true p .get PHere = refl≃p
+tree-inc-label-full (suc d) Sing b p .get PHere = refl≃p
+tree-inc-label-full (suc d) (Join S T) b p .get PHere = refl≃p
+tree-inc-label-full (suc d) (Join S T) b p .get (PExt Z) = ≃Ext (tree-inc-label-full d S b (m⊔n≤o⇒n≤o (pred (tree-dim T)) (tree-dim S) (≤-pred p)) .get Z) refl≃
+tree-inc-label-full (suc d) (Join S T) b p .get (PShift Z) = ≃Shift refl≃ (tree-inc-label-full (suc d) T b (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p) .get Z)
 
 tree-inc-full : (d : ℕ) → (T : Tree n) → (b : Bool) → (p : tree-dim T ≤ d) → tree-inc d T b ≃s idSub {suc (tree-size T)}
 tree-inc-full d T b p = begin
   < tree-inc d T b >s
-    ≈⟨ label-to-sub-≃′ (tree-inc-label d T b) (id-label T) ((tree-bd-full d T p) ,, [ tree-inc-label-full d T b p ]) refl≃ty ⟩
-  < label-to-sub (id-label T) >s
+    ≈⟨ label-to-sub-≃′ (tree-inc-label d T b) (id-label-wt T) ((tree-bd-full d T p) ,, [ (λ P → ≃SPath (tree-inc-label-full d T b p .get P)) ]) refl≃ty ⟩
+  < label-to-sub (id-label-wt T) >s
     ≈⟨ id-label-to-sub T ⟩
   < idSub >s ∎
   where
     open Reasoning sub-setoid
 
-tree-inc-glob-step : (d : ℕ) → (T : Tree n) (b₁ b₂ : Bool) → tree-inc (suc d) T b₁ ∘ tree-inc d (tree-bd (suc d) T) b₂ ≃s tree-inc (suc d) T (not b₁) ∘ tree-inc d (tree-bd (suc d) T) b₂
+tree-inc-glob-step : (d : ℕ) → (T : Tree n) (b₁ b₂ : Bool) → tree-inc (suc d) T b₁ ● tree-inc d (tree-bd (suc d) T) b₂ ≃s tree-inc (suc d) T (not b₁) ● tree-inc d (tree-bd (suc d) T) b₂
 tree-inc-glob-step d T b₁ b₂ = begin
-  < tree-inc (suc d) T b₁ ∘ tree-inc d (tree-bd (suc d) T) b₂ >s
+  < tree-inc (suc d) T b₁ ● tree-inc d (tree-bd (suc d) T) b₂ >s
     ≈⟨ tree-inc-glob d (suc d) T b₂ b₁ (s≤s ≤-refl) ⟩
   < tree-inc d T b₂ >s
     ≈˘⟨ tree-inc-glob d (suc d) T b₂ (not b₁) (s≤s ≤-refl)  ⟩
-  < tree-inc (suc d) T (not b₁) ∘ tree-inc d (tree-bd (suc d) T) b₂
+  < tree-inc (suc d) T (not b₁) ● tree-inc d (tree-bd (suc d) T) b₂
     >s ∎
   where
     open Reasoning sub-setoid

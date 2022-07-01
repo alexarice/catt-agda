@@ -11,6 +11,7 @@ open import Data.Unit using (⊤; tt) public
 open import Relation.Nullary public
 open import Data.Fin.Patterns public
 open import Data.Wrap public
+open import Function using (it; _∘_) public
 
 variable
   -- X Y Z : Set
@@ -36,8 +37,8 @@ instance
   isZero : IsZero zero
   isZero = _
 
-it : ∀ {a} {A : Set a} → {{A}} → A
-it {{x}} = x
+-- it : ∀ {a} {A : Set a} → {{A}} → A
+-- it {{x}} = x
 
 tri-cases : {X : Set} → {x y : ℕ} → Tri (x < y) (x ≡ y) (x > y) → X → X → X → X
 tri-cases (tri< _ _ _) X Y Z = X

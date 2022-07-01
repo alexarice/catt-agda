@@ -39,7 +39,7 @@ sub-res-unrestrict-comm ⟨ σ , t ⟩ = Ext≃ (sub-res-unrestrict-comm σ) ref
 
 susp-res-comp-ty : (B : Ty n) → (σ : Sub n m A) → suspTy (B [ σ ]ty) ≃ty B [ suspSubRes σ ]ty
 susp-res-comp-tm : (t : Tm n) → (σ : Sub n m A) → suspTm (t [ σ ]tm) ≃tm t [ suspSubRes σ ]tm
-susp-res-comp-sub : (σ : Sub n m A) → (τ : Sub l n B) → suspSubRes (σ ∘ τ) ≃s suspSubRes σ ∘ τ
+susp-res-comp-sub : (σ : Sub n m A) → (τ : Sub l n B) → suspSubRes (σ ● τ) ≃s suspSubRes σ ● τ
 
 susp-res-comp-ty ⋆ σ = refl≃ty
 susp-res-comp-ty (s ─⟨ B ⟩⟶ t) σ = Arr≃ (susp-res-comp-tm s σ) (susp-res-comp-ty B σ) (susp-res-comp-tm t σ)
@@ -59,7 +59,7 @@ susp-res-restrict ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = Ext≃ (susp-
 restrict-comp-sub : (τ : Sub n m A)
                   → (σ : Sub (2 + l) n B)
                   → (s t : Tm n)
-                  → τ ∘ restrict σ s t ≃s restrict (τ ∘ σ) (s [ τ ]tm) (t [ τ ]tm)
+                  → τ ● restrict σ s t ≃s restrict (τ ● σ) (s [ τ ]tm) (t [ τ ]tm)
 restrict-comp-sub τ ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ s t = refl≃s
 restrict-comp-sub τ ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = Ext≃ (restrict-comp-sub τ σ s t) refl≃tm
 

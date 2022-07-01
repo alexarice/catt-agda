@@ -31,7 +31,7 @@ sub-from-connect σ ⟨ ⟨⟩ , t ⟩ = σ
 sub-from-connect σ ⟨ ⟨ τ , u ⟩ , t ⟩ = ⟨ sub-from-connect σ ⟨ τ , u ⟩ , t ⟩
 
 sub-between-connects : Sub (suc n) (suc l) ⋆ → Sub (suc m) (suc l′) ⋆ → (s : Tm (suc l)) → Sub (suc (m + n)) (suc (l′ + l)) ⋆
-sub-between-connects {l′ = l′} σ τ s = sub-from-connect (connect-inc-left s l′ ∘ σ) (connect-inc-right s l′ ∘ τ)
+sub-between-connects {l′ = l′} σ τ s = sub-from-connect (connect-inc-left s l′ ● σ) (connect-inc-right s l′ ● τ)
 
 sub-between-connect-susps : Sub (suc n) (suc l) ⋆ → Sub (suc m) (suc l′) ⋆ → Sub (suc (m + (2 + n))) (suc (l′ + (2 + l))) ⋆
 sub-between-connect-susps σ τ = sub-between-connects (suspSub σ) τ getSnd

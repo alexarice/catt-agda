@@ -15,81 +15,63 @@ open import Data.Sum
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
 
--- data _≃p_ : Path X → Path Y → Set where
---   ≃Here : S ≃ S′ → PHere {S = S} ≃p PHere {S = S′}
---   ≃Ext : ∀ {P : Path (someTree S)} {Q : Path (someTree S′)} → P ≃p Q → T ≃ T′ → PExt {T = T} P ≃p PExt {T = T′} Q
---   ≃Shift : ∀ {P : Path (someTree T)} {Q : Path (someTree T′)} → S ≃ S′ → P ≃p Q → PShift {S = S} P ≃p PShift {S = S′} Q
---   ≃Other : path-to-term P ≃tm path-to-term Q → P ≃p Q
+data _≃p_ : Path S → Path T → Set where
+  ≃Here : S ≃ S′ → PHere {S = S} ≃p PHere {S = S′}
+  ≃Ext : ∀ {P : Path S} {Q : Path S′} → P ≃p Q → T ≃ T′ → PExt {T = T} P ≃p PExt {T = T′} Q
+  ≃Shift : ∀ {P : Path T} {Q : Path T′} → S ≃ S′ → P ≃p Q → PShift {S = S} P ≃p PShift {S = S′} Q
 
--- ≃p-to-same-n : {X : MaybeTree n} → {Y : MaybeTree m} → {P : Path X} → {Q : Path Y} → P ≃p Q → n ≡ m
--- ≃p-to-same-n (≃Here x) = cong suc (≃-to-same-n x)
--- ≃p-to-same-n (≃Ext p x) = cong₂ (λ a b → suc a + suc b) (≃-to-same-n x) (≃p-to-same-n p)
--- ≃p-to-same-n (≃Shift x p) = cong₂ (λ a b → a + suc (suc b)) (≃p-to-same-n p) (≃-to-same-n x)
--- ≃p-to-same-n (≃Other x) = ≃tm-to-same-length x
+≃p-to-same-n : {S : Tree n} → {T : Tree m} → {P : Path S} → {Q : Path T} → P ≃p Q → n ≡ m
+≃p-to-same-n (≃Here x) = ≃-to-same-n x
+≃p-to-same-n (≃Ext p x) = cong₂ (λ a b → a + (2 + b)) (≃-to-same-n x) (≃p-to-same-n p)
+≃p-to-same-n (≃Shift x p) = cong₂ (λ a b → a + suc (suc b)) (≃p-to-same-n p) (≃-to-same-n x)
 
--- path-to-term-≃ : P ≃p Q → path-to-term P ≃tm path-to-term Q
--- path-to-term-≃ (≃Here x) = Var≃ (cong suc (≃-to-same-n x)) (cong (λ - → toℕ (fromℕ -)) (≃-to-same-n x))
--- path-to-term-≃ (≃Ext p x) = sub-action-≃-tm (susp-tm-≃ (path-to-term-≃ p)) (connect-susp-inc-left-≃ (cong pred (≃p-to-same-n p)) (≃-to-same-n x))
--- path-to-term-≃ (≃Shift x p) = sub-action-≃-tm (path-to-term-≃ p) (connect-susp-inc-right-≃ (≃-to-same-n x) (cong pred (≃p-to-same-n p)))
--- path-to-term-≃ (≃Other x) = x
+path-to-term-≃ : P ≃p Q → path-to-term P ≃tm path-to-term Q
+path-to-term-≃ (≃Here x) = Var≃ (cong suc (≃-to-same-n x)) (cong (λ - → toℕ (fromℕ -)) (≃-to-same-n x))
+path-to-term-≃ (≃Ext p x) = sub-action-≃-tm (susp-tm-≃ (path-to-term-≃ p)) (connect-susp-inc-left-≃ (≃p-to-same-n p) (≃-to-same-n x))
+path-to-term-≃ (≃Shift x p) = sub-action-≃-tm (path-to-term-≃ p) (connect-susp-inc-right-≃ (≃-to-same-n x) (≃p-to-same-n p))
 
--- refl≃p : P ≃p P
--- refl≃p {P = PHere} = ≃Here refl≃
--- refl≃p {P = PExt P} = ≃Ext refl≃p refl≃
--- refl≃p {P = PShift P} = ≃Shift refl≃ refl≃p
--- refl≃p {P = POther x} = ≃Other refl≃tm
+refl≃p : P ≃p P
+refl≃p {P = PHere} = ≃Here refl≃
+refl≃p {P = PExt P} = ≃Ext refl≃p refl≃
+refl≃p {P = PShift P} = ≃Shift refl≃ refl≃p
 
--- sym≃p : P ≃p Q → Q ≃p P
--- sym≃p (≃Here x) = ≃Here (sym≃ x)
--- sym≃p (≃Ext p x) = ≃Ext (sym≃p p) (sym≃ x)
--- sym≃p (≃Shift x p) = ≃Shift (sym≃ x) (sym≃p p)
--- sym≃p (≃Other x) = ≃Other (sym≃tm x)
+sym≃p : P ≃p Q → Q ≃p P
+sym≃p (≃Here x) = ≃Here (sym≃ x)
+sym≃p (≃Ext p x) = ≃Ext (sym≃p p) (sym≃ x)
+sym≃p (≃Shift x p) = ≃Shift (sym≃ x) (sym≃p p)
 
--- trans≃p : P ≃p Q → Q ≃p Q′ → P ≃p Q′
--- trans≃p (≃Here x) (≃Here y) = ≃Here (trans≃ x y)
--- trans≃p (≃Here x) (≃Other y) = ≃Other (trans≃tm (path-to-term-≃ (≃Here x)) y)
--- trans≃p (≃Ext p x) (≃Ext q y) = ≃Ext (trans≃p p q) (trans≃ x y)
--- trans≃p (≃Ext p x) (≃Other y) = ≃Other (trans≃tm (path-to-term-≃ (≃Ext p x)) y)
--- trans≃p (≃Shift x p) (≃Shift y q) = ≃Shift (trans≃ x y) (trans≃p p q)
--- trans≃p (≃Shift x p) (≃Other y) = ≃Other (trans≃tm (path-to-term-≃ (≃Shift x p)) y)
--- trans≃p (≃Other x) p = ≃Other (trans≃tm x (path-to-term-≃ p))
+trans≃p : P ≃p Q → Q ≃p Q′ → P ≃p Q′
+trans≃p (≃Here x) (≃Here y) = ≃Here (trans≃ x y)
+trans≃p (≃Ext p x) (≃Ext q y) = ≃Ext (trans≃p p q) (trans≃ x y)
+trans≃p (≃Shift x p) (≃Shift y q) = ≃Shift (trans≃ x y) (trans≃p p q)
 
--- record PATH : Set where
---   constructor <_>p
---   field
---     {path-n} : ℕ
---     {path-X} : MaybeTree path-n
---     path : Path path-X
+record PATH : Set where
+  constructor <_>p
+  field
+    {path-n} : ℕ
+    {path-S} : Tree path-n
+    path : Path path-S
 
--- open PATH public
+open PATH public
 
--- path-setoid : Setoid _ _
--- path-setoid = record { Carrier = PATH
---                         ; _≈_ = λ x y → path x ≃p path y
---                         ; isEquivalence = record { refl = refl≃p
---                                                  ; sym = sym≃p
---                                                  ; trans = trans≃p
---                                                  }
---                         }
+path-setoid : Setoid _ _
+path-setoid = record { Carrier = PATH
+                        ; _≈_ = λ x y → path x ≃p path y
+                        ; isEquivalence = record { refl = refl≃p
+                                                 ; sym = sym≃p
+                                                 ; trans = trans≃p
+                                                 }
+                        }
 
-≃Here : S ≃ T → Var (fromℕ (tree-size S)) ≃tm Var (fromℕ (tree-size T))
-≃Here p = Var≃ (cong suc (≃-to-same-n p)) (cong (λ - → toℕ (fromℕ -)) (≃-to-same-n p))
+-- ppath-≃-≃tm : (p : S ≃ T) → (P : Path S) → ppath-≃ p P ≃p P
+-- ppath-≃-≃tm p PHere = ≃Here (sym≃ p)
+-- ppath-≃-≃tm (Join≃ p q) (PExt P) = ≃Ext (ppath-≃-≃tm p P) (sym≃ q)
+-- ppath-≃-≃tm (Join≃ p q) (PShift P) = ≃Shift (sym≃ p) (ppath-≃-≃tm q P)
 
-≃Ext : s ≃tm t → S ≃ T → suspTm s [ connect-susp-inc-left _ (tree-size S) ]tm ≃tm suspTm t [ connect-susp-inc-left _ (tree-size T) ]tm
-≃Ext p q = sub-action-≃-tm (susp-tm-≃ p) (connect-susp-inc-left-≃ (cong pred (≃tm-to-same-length p)) (≃-to-same-n q))
-
-≃Shift : S ≃ T → s ≃tm t → s [ connect-susp-inc-right (tree-size S) _ ]tm ≃tm t [ connect-susp-inc-right (tree-size T) _ ]tm
-≃Shift p q = sub-action-≃-tm q (connect-susp-inc-right-≃ (≃-to-same-n p) (cong pred (≃tm-to-same-length q)))
-
-ppath-≃-≃tm : (p : S ≃ T) → (P : Path S) → path-to-term (ppath-≃ p P) ≃tm path-to-term P
-ppath-≃-≃tm p PHere = ≃Here (sym≃ p)
-ppath-≃-≃tm (Join≃ p q) (PExt P) = ≃Ext (ppath-≃-≃tm p P) (sym≃ q)
-ppath-≃-≃tm (Join≃ p q) (PShift P) = ≃Shift (sym≃ p) (ppath-≃-≃tm q P)
-
-ppath-refl : (P : Path S) → ppath-≃ refl≃ P ≡ P
-ppath-refl PHere = refl
-ppath-refl (PExt P) = cong PExt (ppath-refl P)
-ppath-refl (PShift P) = cong PShift (ppath-refl P)
+ppath-≃-≃p : (p : S ≃ T) → (P : Path S) → P ≃p ppath-≃ p P
+ppath-≃-≃p p PHere = ≃Here p
+ppath-≃-≃p (Join≃ p q) (PExt P) = ≃Ext (ppath-≃-≃p p P) q
+ppath-≃-≃p (Join≃ p q) (PShift P) = ≃Shift p (ppath-≃-≃p q P)
 
 -- -- maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-Maximal P ⦄ → not-here P
 -- -- maximal-join-not-here {T = Join S T} (PExt P) = tt

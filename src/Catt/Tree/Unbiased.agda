@@ -23,12 +23,17 @@ unbiased-type (suc d) T = (stm-to-term (unbiased-stm d (tree-bd d T) >>= tree-in
 
 unbiased-term d T = stm-to-term (unbiased-stm d T)
 
-unbiased-stm d Sing = SHere
-unbiased-stm d (Join S (Join T T′)) = unbiased-comp d (Join S (Join T T′))
-unbiased-stm zero (Join S Sing) = SExt (unbiased-stm zero S)
-unbiased-stm (suc d) (Join S Sing) = SExt (unbiased-stm d S)
+unbiased-stm zero Sing = SHere
+unbiased-stm zero (Join S T) = unbiased-comp zero (Join S T)
+unbiased-stm (suc d) Sing = unbiased-comp (suc d) Sing
+unbiased-stm (suc d) (Join T Sing) = SExt (unbiased-stm d T)
+unbiased-stm (suc d) (Join T (Join T₁ T₂)) = unbiased-comp (suc d) (Join T (Join T₁ T₂))
+-- unbiased-stm d Sing = SHere
+-- unbiased-stm d (Join S (Join T T′)) = unbiased-comp d (Join S (Join T T′))
+-- unbiased-stm zero (Join S Sing) = SExt (unbiased-stm zero S)
+-- unbiased-stm (suc d) (Join S Sing) = SExt (unbiased-stm d S)
 
-unbiased-comp d T = SCoh T (unbiased-type d T) (id-label T)
+unbiased-comp d T = SCoh T (unbiased-type d T) (id-label-wt T)
 
 unbiased-comp′ zero T = unbiased-comp zero T
 unbiased-comp′ (suc d) Sing = unbiased-comp (suc d) Sing
@@ -48,11 +53,11 @@ unbiased-comp′ (suc d) T@(Join _ (Join _ _)) = unbiased-comp (suc d) T
 -- sub-from-linear-tree-unbiased Sing T d = ⟨ ⟨⟩ , (unbiased-comp d T) ⟩
 -- sub-from-linear-tree-unbiased (Join S Sing) T d = unrestrict (sub-from-linear-tree-unbiased S T (suc d))
 
-label-from-linear-tree-unbiased : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → Label (someTree T) S (unbiased-type d T)
-label-from-linear-tree-unbiased Sing T d .ap P = unbiased-comp′ d T
-label-from-linear-tree-unbiased (Join S Sing) T d .ap PHere = unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false
-label-from-linear-tree-unbiased (Join S Sing) T d .ap (PExt P) = label-from-linear-tree-unbiased S T (suc d) .ap P
-label-from-linear-tree-unbiased (Join S Sing) T d .ap (PShift PHere) = unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true
+label-from-linear-tree-unbiased : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → Label (someTree T) S
+label-from-linear-tree-unbiased Sing T d P = unbiased-comp′ d T
+label-from-linear-tree-unbiased (Join S Sing) T d PHere = unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false
+label-from-linear-tree-unbiased (Join S Sing) T d (PExt P) = label-from-linear-tree-unbiased S T (suc d) P
+label-from-linear-tree-unbiased (Join S Sing) T d (PShift PHere) = unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true
 
 -- sub-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) → (A : Ty m) → .(ty-dim A ≡ tree-dim S) → Sub (suc n) m ⋆
 -- sub-from-linear-tree Sing t A p = ⟨ ⟨⟩ , t ⟩

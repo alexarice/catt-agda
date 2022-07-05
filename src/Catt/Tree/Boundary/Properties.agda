@@ -109,7 +109,7 @@ tree-bd-glob zero d₂ T p = Sing≃
 tree-bd-glob (suc d₁) (suc d₂) Sing p = Sing≃
 tree-bd-glob (suc d₁) (suc d₂) (Join S T) p = Join≃ (tree-bd-glob d₁ d₂ S (≤-pred p)) (tree-bd-glob (suc d₁) (suc d₂) T p)
 
-tree-bd-full : (d : ℕ) → (T : Tree n) → (tree-dim T ≤ d) → tree-bd d T ≃ T
+tree-bd-full : (d : ℕ) → (T : Tree n) → .(tree-dim T ≤ d) → tree-bd d T ≃ T
 tree-bd-full zero Sing p = Sing≃
 tree-bd-full zero (Join S T) ()
 tree-bd-full (suc d) Sing p = Sing≃
@@ -173,7 +173,7 @@ tree-inc-glob d₁ d₂ T b₁ b₂ p = begin
 --   where
 --     open Reasoning sub-setoid
 
-tree-inc-label-full : (d : ℕ) → (T : Tree n) → (b : Bool) → (p : tree-dim T ≤ d) → tree-inc-label′ d T b ≃lp ppath-≃ (tree-bd-full d T p)
+tree-inc-label-full : (d : ℕ) → (T : Tree n) → (b : Bool) → .(p : tree-dim T ≤ d) → tree-inc-label′ d T b ≃lp ppath-≃ (tree-bd-full d T p)
 tree-inc-label-full zero T false p .get PHere = refl≃p
 tree-inc-label-full zero Sing true p .get PHere = refl≃p
 tree-inc-label-full (suc d) Sing b p .get PHere = refl≃p
@@ -225,3 +225,7 @@ tree-dim-bd′ d T p = trans (tree-dim-bd d T) (m≤n⇒m⊓n≡m p)
 -- tree-inc-susp-lem zero T true = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩ , suspTm (tree-last-var T) ⟩)
 -- tree-inc-susp-lem (suc d) Sing b = refl≃s
 -- tree-inc-susp-lem (suc d) (Join S T) b = sym≃s (id-left-unit _)
+
+bd-linear-height : (d : ℕ) → (T : Tree n) → .(d ≤ linear-height T) → is-linear (tree-bd d T)
+bd-linear-height zero T p = tt
+bd-linear-height (suc d) (Join T Sing) p = bd-linear-height d T (≤-pred p)

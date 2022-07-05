@@ -37,6 +37,11 @@ tree-fst-var T = Var (fromℕ _)
 tree-last-var Sing = 0V
 tree-last-var (Join S T) = tree-last-var T [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm
 
+linear-height : Tree n → ℕ
+linear-height Sing = 0
+linear-height (Join T Sing) = suc (linear-height T)
+linear-height (Join T (Join T₁ T₂)) = 0
+
 connect-tree-length : (S : Tree n) → (T : Tree m) → ℕ
 connect-tree-length {m = m} Sing T = m
 connect-tree-length (Join {x} S S′) T = connect-tree-length S′ T + (2 + x)

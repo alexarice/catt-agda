@@ -20,6 +20,11 @@ has-linear-height (suc n) Sing = ⊥
 has-linear-height (suc n) (Join T Sing) = has-linear-height n T
 has-linear-height (suc n) (Join T (Join _ _)) = ⊥
 
+has-linear-height-lem : (T : Tree n) → (has-linear-height (linear-height T) T)
+has-linear-height-lem Sing = tt
+has-linear-height-lem (Join T Sing) = has-linear-height-lem T
+has-linear-height-lem (Join T (Join T₁ T₂)) = tt
+
 data BranchingPoint : Tree n → Set where
   BPHere : .⦃ is-linear S ⦄ → BranchingPoint (Join S T)
   BPExt : BranchingPoint S → BranchingPoint (Join S T)

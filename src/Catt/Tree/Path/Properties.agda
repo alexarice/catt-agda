@@ -82,10 +82,10 @@ path-to-term-is-var PHere = tt
 path-to-term-is-var (PExt P) = var-to-var-comp-tm (suspTm (path-to-term P)) ⦃ suspTm-var (path-to-term P) ⦃ path-to-term-is-var P ⦄ ⦄ (connect-susp-inc-left _ _) ⦃ connect-susp-inc-left-var-to-var _ _ ⦄
 path-to-term-is-var (PShift P) = var-to-var-comp-tm (path-to-term P) ⦃ path-to-term-is-var P ⦄ (connect-susp-inc-right _ _) ⦃ connect-susp-inc-right-var-to-var _ _ ⦄
 
-max-path-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (Z : Path S) → .⦃ is-Maximal Z ⦄ → is-linear-max-path S ≡ Z
-max-path-lin-tree Sing PHere = refl
-max-path-lin-tree (Join S Sing) (PExt Z) = cong PExt (max-path-lin-tree S Z)
-max-path-lin-tree (Join S Sing) (PShift PHere) = ⊥-elim (proj₁ it)
+max-path-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (Z : Path T) → .⦃ is-Maximal Z ⦄ → S ≃ T → is-linear-max-path S ≃p Z
+max-path-lin-tree Sing PHere Sing≃ = ≃Here Sing≃
+max-path-lin-tree (Join S Sing) (PExt Z) (Join≃ p Sing≃) = ≃Ext (max-path-lin-tree S Z p) Sing≃
+max-path-lin-tree (Join S Sing) (PShift PHere) (Join≃ p Sing≃) = ⊥-elim (proj₁ it)
 
 -- susp-path-to-term : (P : Path X) → path-to-term (susp-path P) ≃tm suspTm (path-to-term P)
 -- susp-path-to-term {X = someTree x} P = id-on-tm (suspTm (path-to-term P))

@@ -251,3 +251,19 @@ tree-dim-≃ : S ≃ T → tree-dim S ≡ tree-dim T
 tree-dim-≃ p with ≃-to-same-n p
 ... | refl with ≃-to-≡ p
 ... | refl = refl
+
+linear-linear-height : (T : Tree n) → .⦃ is-linear T ⦄ → linear-height T ≡ tree-dim T
+linear-linear-height Sing = refl
+linear-linear-height (Join T Sing) = cong suc (linear-linear-height T)
+
+linear-height-dim : (T : Tree n) → linear-height T ≤ tree-dim T
+linear-height-dim Sing = z≤n
+linear-height-dim (Join T Sing) = s≤s (linear-height-dim T)
+linear-height-dim (Join T (Join T₁ T₂)) = z≤n
+
+linear-tree-unique : (S : Tree n) → .⦃ is-linear S ⦄
+                   → (T : Tree m) → .⦃ is-linear T ⦄
+                   → .(tree-dim S ≡ tree-dim T)
+                   → S ≃ T
+linear-tree-unique Sing Sing p = refl≃
+linear-tree-unique (Join S Sing) (Join T Sing) p = Join≃ (linear-tree-unique S T (cong pred p)) refl≃

@@ -75,10 +75,11 @@ is-Maximal {S = Join S T} PHere = ⊥
 is-Maximal (PExt P) = is-Maximal P
 is-Maximal (PShift P) = not-here P × is-Maximal P
 
-ppath-≃ : S ≃ T → Path S → Path T
-ppath-≃ p PHere = PHere
-ppath-≃ (Join≃ p q) (PExt Z) = PExt (ppath-≃ p Z)
-ppath-≃ (Join≃ p q) (PShift Z) = PShift (ppath-≃ q Z)
+ppath-≃ : S ≃′ T → Path S → Path T
+ppath-≃ Refl≃′ P = P
+ppath-≃ (Join≃′ p q) PHere = PHere
+ppath-≃ (Join≃′ p q) (PExt Z) = PExt (ppath-≃ p Z)
+ppath-≃ (Join≃′ p q) (PShift Z) = PShift (ppath-≃ q Z)
 
 is-linear-max-path : (T : Tree n) → .⦃ is-linear T ⦄ → Path T
 is-linear-max-path Sing = PHere

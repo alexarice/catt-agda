@@ -156,14 +156,14 @@ sub-from-connect-Transport σ ⟨ ⟨ τ , s ⟩ , t ⟩ xs (ewt (y ∷ ys)) u p
 sub-between-connect-supp : (σ : Sub (suc n) (suc l) ⋆)
                          → (τ : Sub (suc m) (suc l′) ⋆)
                          → (s : Tm (suc l))
-                         → FVSub (connect-inc-left s l′ ∘ σ) ≡ FVSub (connect-inc-left s l′ ∘ σ) ∪ FVTm (Var (fromℕ m) [ connect-inc-right s l′ ∘ τ ]tm)
+                         → FVSub (connect-inc-left s l′ ● σ) ≡ FVSub (connect-inc-left s l′ ● σ) ∪ FVTm (Var (fromℕ m) [ connect-inc-right s l′ ● τ ]tm)
                          → FVTm s ⊆ FVSub σ
                          → FVSub (sub-between-connects σ τ s) ≡ connect-supp (FVSub σ) (FVSub τ)
 sub-between-connect-supp σ τ s p q = begin
-  FVSub (sub-from-connect (connect-inc-left s _ ∘ σ) (connect-inc-right s _ ∘ τ))
-    ≡⟨ sub-from-connect-supp (connect-inc-left s _ ∘ σ) (connect-inc-right s _ ∘ τ) p ⟩
-  FVSub (connect-inc-left s _ ∘ σ) ∪
-    FVSub (connect-inc-right s _ ∘ τ)
+  FVSub (sub-from-connect (connect-inc-left s _ ● σ) (connect-inc-right s _ ● τ))
+    ≡⟨ sub-from-connect-supp (connect-inc-left s _ ● σ) (connect-inc-right s _ ● τ) p ⟩
+  FVSub (connect-inc-left s _ ● σ) ∪
+    FVSub (connect-inc-right s _ ● τ)
     ≡˘⟨ cong₂ _∪_ (TransportVarSet-sub σ (connect-inc-left s _)) (TransportVarSet-sub τ (connect-inc-right s _)) ⟩
   TransportVarSet (FVSub σ) (connect-inc-left s _) ∪
     TransportVarSet (FVSub τ) (connect-inc-right s _)
@@ -179,16 +179,16 @@ sub-between-connect-Transport : (σ : Sub (suc n) (suc l) ⋆)
                               → (ys : VarSet (suc m))
                               → (t : Tm (suc n))
                               → .⦃ _ : isVar t ⦄
-                              → Var (fromℕ _) [ connect-inc-right s l′ ∘ τ ]tm ≃tm t [ connect-inc-left s l′ ∘ σ ]tm
+                              → Var (fromℕ _) [ connect-inc-right s l′ ● τ ]tm ≃tm t [ connect-inc-left s l′ ● σ ]tm
                               → Truth (lookup-isVar xs t)
                               → FVTm s ⊆ TransportVarSet xs σ
                               → TransportVarSet (connect-supp xs ys) (sub-between-connects σ τ s)
                               ≡ connect-supp (TransportVarSet xs σ) (TransportVarSet ys τ)
 sub-between-connect-Transport {l = l} {l′ = l′} σ τ s xs ys t p q r = begin
   TransportVarSet (connect-supp xs ys) (sub-between-connects σ τ s)
-    ≡⟨ sub-from-connect-Transport (connect-inc-left s l′ ∘ σ) (connect-inc-right s l′ ∘ τ) xs ys t p q ⟩
-  TransportVarSet xs (connect-inc-left s l′ ∘ σ)
-  ∪ TransportVarSet ys (connect-inc-right s l′ ∘ τ)
+    ≡⟨ sub-from-connect-Transport (connect-inc-left s l′ ● σ) (connect-inc-right s l′ ● τ) xs ys t p q ⟩
+  TransportVarSet xs (connect-inc-left s l′ ● σ)
+  ∪ TransportVarSet ys (connect-inc-right s l′ ● τ)
     ≡⟨ cong₂ _∪_ (TransportVarSet-comp xs (connect-inc-left s l′) σ) (TransportVarSet-comp ys (connect-inc-right s l′) τ) ⟩
   TransportVarSet (TransportVarSet xs σ) (connect-inc-left s l′)
   ∪ TransportVarSet (TransportVarSet ys τ) (connect-inc-right s l′)
@@ -213,9 +213,9 @@ sub-between-connect-susps-supp {n = n} {l = l} {m = m} {l′ = l′} σ τ p = t
       where
         open PReasoning (⊆-poset _)
 
-    lem : Var (fromℕ m) [ connect-susp-inc-right l l′ ∘ τ ]tm ≃tm getSnd [ connect-susp-inc-left l l′ ]tm
+    lem : Var (fromℕ m) [ connect-susp-inc-right l l′ ● τ ]tm ≃tm getSnd [ connect-susp-inc-left l l′ ]tm
     lem = begin
-      < Var (fromℕ m) [ connect-susp-inc-right l l′ ∘ τ ]tm >tm
+      < Var (fromℕ m) [ connect-susp-inc-right l l′ ● τ ]tm >tm
         ≈⟨ assoc-tm (connect-susp-inc-right l l′) τ (Var (fromℕ m)) ⟩
       < (Var (fromℕ m) [ τ ]tm) [ connect-susp-inc-right l l′ ]tm >tm
         ≈⟨ sub-action-≃-tm p refl≃s ⟩
@@ -226,11 +226,11 @@ sub-between-connect-susps-supp {n = n} {l = l} {m = m} {l′ = l′} σ τ p = t
         open Reasoning tm-setoid
 
     open ≡-Reasoning
-    lem2 : FVSub (connect-susp-inc-left l l′ ∘ suspSub σ) ≡
-             FVSub (connect-susp-inc-left l l′ ∘ suspSub σ) ∪
-             FVTm (Var (fromℕ m) [ connect-inc-right getSnd l′ ∘ τ ]tm)
+    lem2 : FVSub (connect-susp-inc-left l l′ ● suspSub σ) ≡
+             FVSub (connect-susp-inc-left l l′ ● suspSub σ) ∪
+             FVTm (Var (fromℕ m) [ connect-inc-right getSnd l′ ● τ ]tm)
     lem2 = begin
-      FVSub (connect-susp-inc-left l l′ ∘ suspSub σ)
+      FVSub (connect-susp-inc-left l l′ ● suspSub σ)
         ≡˘⟨ TransportVarSet-sub (suspSub σ) (connect-susp-inc-left l l′) ⟩
       TransportVarSet (FVSub (suspSub σ)) (connect-susp-inc-left l l′)
         ≡⟨ cong (λ - → TransportVarSet - (connect-susp-inc-left l l′)) (trans (suspSuppSub σ) (sym (trans (cong (_∪ trueAt (inject₁ (fromℕ (suc l)))) (suspSuppSub σ)) (sym (suspSuppSnd (FVSub σ)))))) ⟩
@@ -240,18 +240,18 @@ sub-between-connect-susps-supp {n = n} {l = l} {m = m} {l′ = l′} σ τ p = t
       TransportVarSet (FVSub (suspSub σ)) (connect-susp-inc-left l l′) ∪
         TransportVarSet (FVTm getSnd) (connect-susp-inc-left l l′)
         ≡⟨ cong₂ _∪_ (TransportVarSet-sub (suspSub σ) (connect-susp-inc-left l l′)) (TransportVarSet-tm getSnd (connect-susp-inc-left l l′)) ⟩
-      FVSub (connect-susp-inc-left l l′ ∘ suspSub σ) ∪
+      FVSub (connect-susp-inc-left l l′ ● suspSub σ) ∪
         FVTm (getSnd [ connect-susp-inc-left l l′ ]tm)
-        ≡˘⟨ cong (FVSub (connect-susp-inc-left l l′ ∘ suspSub σ) ∪_) (cong FVTm (≃tm-to-≡ lem)) ⟩
-      FVSub (connect-susp-inc-left l l′ ∘ suspSub σ) ∪
-        FVTm (Var (fromℕ m) [ connect-inc-right getSnd l′ ∘ τ ]tm) ∎
+        ≡˘⟨ cong (FVSub (connect-susp-inc-left l l′ ● suspSub σ) ∪_) (cong FVTm (≃tm-to-≡ lem)) ⟩
+      FVSub (connect-susp-inc-left l l′ ● suspSub σ) ∪
+        FVTm (Var (fromℕ m) [ connect-inc-right getSnd l′ ● τ ]tm) ∎
 
 sub-between-connect-susps-Transport : (σ : Sub (suc n) (suc l) ⋆)
                                     → (τ : Sub (suc m) (suc l′) ⋆)
                                     → (xs : VarSet (suc n))
                                     → (ys : VarSet (suc m))
                                     → Var (fromℕ _) [ τ ]tm ≃tm Var (fromℕ l′)
-                                    -- → Var (fromℕ _) [ connect-inc-right s l′ ∘ τ ]tm ≃tm getSnd [ connect-susp-inc-left s l′ ∘ σ ]tm
+                                    -- → Var (fromℕ _) [ connect-inc-right s l′ ● τ ]tm ≃tm getSnd [ connect-susp-inc-left s l′ ● σ ]tm
                                     -- → Truth (lookup-isVar xs t)
                                     -- → FVTm s ⊆ TransportVarSet xs σ
                                     → TransportVarSet (connect-supp (suspSupp xs) ys) (sub-between-connect-susps σ τ)
@@ -266,10 +266,10 @@ sub-between-connect-susps-Transport σ τ xs ys p = begin
   connect-supp (suspSupp (TransportVarSet xs σ))
     (TransportVarSet ys τ) ∎
   where
-    l1 : Var (fromℕ _) [ connect-inc-right getSnd _ ∘ τ ]tm
-     ≃tm getSnd [ connect-inc-left getSnd _ ∘ suspSub σ ]tm
+    l1 : Var (fromℕ _) [ connect-inc-right getSnd _ ● τ ]tm
+     ≃tm getSnd [ connect-inc-left getSnd _ ● suspSub σ ]tm
     l1 = begin
-      < Var (fromℕ _) [ connect-inc-right getSnd _ ∘ τ ]tm >tm
+      < Var (fromℕ _) [ connect-inc-right getSnd _ ● τ ]tm >tm
         ≈⟨ assoc-tm (connect-inc-right getSnd _) τ (Var (fromℕ _)) ⟩
       < (Var (fromℕ _) [ τ ]tm) [ connect-inc-right getSnd _ ]tm >tm
         ≈⟨ sub-action-≃-tm p refl≃s ⟩
@@ -279,7 +279,7 @@ sub-between-connect-susps-Transport σ τ xs ys p = begin
         ≈⟨ sub-action-≃-tm (susp-sub-preserve-getSnd σ) refl≃s ⟩
       < getSnd [ suspSub σ ]tm [ connect-inc-left getSnd _ ]tm >tm
         ≈˘⟨ assoc-tm (connect-inc-left getSnd _) (suspSub σ) getSnd ⟩
-      < getSnd [ connect-inc-left getSnd _ ∘ suspSub σ ]tm >tm ∎
+      < getSnd [ connect-inc-left getSnd _ ● suspSub σ ]tm >tm ∎
       where
         open Reasoning tm-setoid
 

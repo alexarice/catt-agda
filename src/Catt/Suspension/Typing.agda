@@ -12,7 +12,6 @@ open import Catt.Typing index rule
 open import Catt.Syntax
 open import Catt.Support
 open import Catt.Support.Properties
-open import Catt.Tree.Support
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Suspension

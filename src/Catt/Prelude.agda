@@ -37,8 +37,10 @@ instance
   isZero : IsZero zero
   isZero = _
 
--- it : ∀ {a} {A : Set a} → {{A}} → A
--- it {{x}} = x
+-- _≤t_ : ℕ → ℕ → Set
+-- zero ≤t m = ⊤
+-- suc n ≤t zero = ⊥
+-- suc n ≤t suc m = n ≤t m
 
 tri-cases : {X : Set} → {x y : ℕ} → Tri (x < y) (x ≡ y) (x > y) → X → X → X → X
 tri-cases (tri< _ _ _) X Y Z = X

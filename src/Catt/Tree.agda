@@ -57,15 +57,14 @@ tree-dim : Tree n → ℕ
 tree-dim Sing = 0
 tree-dim (Join S T) = suc (pred (tree-dim T) ⊔ tree-dim S)
 
-anti-linear : Tree n → Set
-anti-linear Sing = ⊤
-anti-linear (Join S Sing) = ⊥
-anti-linear (Join S (Join T₁ T₂)) = ⊤
+has-linear-height : ℕ → Tree n → Set
+has-linear-height zero T = ⊤
+has-linear-height (suc n) Sing = ⊥
+has-linear-height (suc n) (Join T Sing) = has-linear-height n T
+has-linear-height (suc n) (Join T (Join _ _)) = ⊥
 
 is-linear : Tree n → Set
-is-linear Sing = ⊤
-is-linear (Join S Sing) = is-linear S
-is-linear (Join S (Join _ _)) = ⊥
+is-linear T = has-linear-height (tree-dim T) T
 
 is-linear-dec : (T : Tree n) → Dec (is-linear T)
 is-linear-dec Sing = yes tt

@@ -77,7 +77,7 @@ lty : {X : MaybeTree m} → Label-WT X S → Ty m
 lty = proj₂
 
 variable
-  L L′ M M′ : Label-WT X S
+  L L′ M M′ : Label X S
   a b c : STm X
 
 label₁ : (L : Label-WT X (Join S T)) → Label-WT X S

@@ -114,7 +114,31 @@ _≃lp_ : Label′ T S → Label′ U S → Set
 _≃lp_ {S = S} L M = Wrap (λ L M → (P : Path S) → L P ≃p M P) L M
 
 refl≃l : {L : Label X S} → L ≃l L
-refl≃l = [ (λ P → refl≃stm) ]
+refl≃l .get P = refl≃stm
+
+sym≃l : {L : Label X S} → {M : Label Y S} → L ≃l M → M ≃l L
+sym≃l [ p ] .get P = sym≃stm (p P)
+
+trans≃l : {L : Label X S} → {M : Label Y S} → {N : Label Z S} → L ≃l M → M ≃l N → L ≃l N
+trans≃l [ p ] [ q ] .get P = trans≃stm (p P) (q P)
+
+record LABEL (S : Tree n) : Set where
+  constructor <_>l
+  field
+    {label-n} : ℕ
+    {label-X} : MaybeTree label-n
+    label : Label label-X S
+
+open LABEL public
+
+label-setoid : (S : Tree n) → Setoid _ _
+label-setoid S = record { Carrier = LABEL S
+                        ; _≈_ = λ x y → label x ≃l label y
+                        ; isEquivalence = record { refl = refl≃l
+                                                 ; sym = sym≃l
+                                                 ; trans = trans≃l
+                                                 }
+                        }
 
 ≃SExt : a ≃stm b → S ≃ T → SExt {T = S} a ≃stm SExt {T = T} b
 ≃SExt [ p ] q = [ sub-action-≃-tm (susp-tm-≃ p) (connect-susp-inc-left-≃ (cong pred (≃tm-to-same-length p)) (≃-to-same-n q)) ]
@@ -132,6 +156,18 @@ compute-to-term (SPath PHere) = refl≃stm
 compute-to-term (SPath (PExt x)) = [ refl≃tm ]
 compute-to-term (SPath (PShift x)) = [ refl≃tm ]
 compute-to-term (SCoh S A L) = refl≃stm
+
+compute-stm-≃ : a ≃stm b → compute-stm a ≃stm compute-stm b
+compute-stm-≃ {a = a} {b = b} p = begin
+  < compute-stm a >stm
+    ≈⟨ compute-to-term a ⟩
+  < a >stm
+    ≈⟨ p ⟩
+  < b >stm
+    ≈˘⟨ compute-to-term b ⟩
+  < compute-stm b >stm ∎
+  where
+    open Reasoning stm-setoid
 
 compute-≃ : compute-stm a ≃stm compute-stm b → a ≃stm b
 compute-≃ {a = a} {b = b} p = begin
@@ -294,17 +330,30 @@ label-to-sub-lem L = begin
     where
       open Reasoning tm-setoid
 
-extend-≃ : (a ≃stm b) → ap L ≃l ap M → lty L ≃ty lty M → (a >>= L) ≃stm (b >>= M)
-extend-≃ {a = a} {b = b} {L = L} {M = M} [ p ] q r = [ begin
-  < stm-to-term (a >>= L) >tm
-    ≈˘⟨ label-to-sub-stm L a ⟩
-  < stm-to-term a [ label-to-sub L ]tm >tm
-    ≈⟨ sub-action-≃-tm p (label-to-sub-≃ L M q r) ⟩
-  < stm-to-term b [ label-to-sub M ]tm >tm
-    ≈⟨ label-to-sub-stm M b ⟩
-  < stm-to-term (b >>= M) >tm ∎ ]
+ap-≃ : {L : Label X S} → {M : Label Y S} → L ≃l M → P ≃p Q → L P ≃stm M Q
+ap-≃ p (≃Here x) = p .get PHere
+ap-≃ p (≃Ext q x) = ap-≃ [ (λ P → p .get (PExt P)) ] q
+ap-≃ p (≃Shift x q) = ap-≃ [ (λ P → p .get (PShift P)) ] q
+
+ap′-≃ : (L : Label′ T S) → P ≃p Q → L P ≃p L Q
+ap′-≃ L (≃Here x) = refl≃p
+ap′-≃ L (≃Ext q x) = ap′-≃ (L ∘ PExt) q
+ap′-≃ L (≃Shift x q) = ap′-≃ (L ∘ PShift) q
+
+extend-≃ : (a ≃stm b) → L ≃l M → A ≃ty B → (a >>= L ,, A) ≃stm (b >>= M ,, B)
+extend-≃ {a = a} {b = b} {L = L} {M = M} {A = A} {B = B} [ p ] q r = [ begin
+  < stm-to-term (a >>= L ,, A) >tm
+    ≈˘⟨ label-to-sub-stm (L ,, A) a ⟩
+  < stm-to-term a [ label-to-sub (L ,, A) ]tm >tm
+    ≈⟨ sub-action-≃-tm p (label-to-sub-≃ (L ,, A) (M ,, B) q r) ⟩
+  < stm-to-term b [ label-to-sub (M ,, B) ]tm >tm
+    ≈⟨ label-to-sub-stm (M ,, B) b ⟩
+  < stm-to-term (b >>= M ,, B) >tm ∎ ]
   where
     open Reasoning tm-setoid
+
+label-comp-≃ : {L L′ : Label (someTree T) S} → {M : Label-WT X T} → {M′ : Label-WT Y T} → L ≃l L′ → ap M ≃l ap M′ → lty M ≃ty lty M′ → label-comp L M ≃l label-comp L′ M′
+label-comp-≃ p q r .get Z = extend-≃ (ap-≃ p refl≃p) q r
 
 label-comp-assoc : (L : Label-WT (someTree S) U) → (M : Label-WT (someTree T) S) → (N : Label-WT X T) → ap (label-wt-comp (label-wt-comp L M) N) ≃l ap (label-wt-comp L (label-wt-comp M N))
 extend-assoc : (a : STm (someTree S)) → (L : Label-WT (someTree T) S) → (M : Label-WT X T) → (a >>= L >>= M) ≃stm (a >>= label-wt-comp L M)
@@ -528,9 +577,18 @@ extend-id {T = T} a = [ begin
 _≃lm_ : (L : Label X S) → (M : Label Y S) → Set
 _≃lm_ {S = S} L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-Maximal Q ⦄ → L Q ≃stm M Q) L M
 
+refl≃lm : L ≃lm L
+refl≃lm = [ (λ Q → refl≃stm ) ]
+
+≃l-to-≃lm : L ≃l M → L ≃lm M
+≃l-to-≃lm p .get Z = p .get Z
+
 replace-not-here : (L : Label X S) → (a : STm X) → (P : Path S) → .⦃ not-here P ⦄ → replace-label L a P ≃stm L P
 replace-not-here L a (PExt P) = refl≃stm
 replace-not-here L a (PShift P) = refl≃stm
+
+replace-join-≃lm : (L : Label X S) → .⦃ is-join S ⦄ → (a : STm X) → replace-label L a ≃lm L
+replace-join-≃lm L a .get Z = replace-not-here L a Z ⦃ maximal-join-not-here Z ⦄
 
 connect-label-phere : (L : Label X S)
                     → (M : Label X T)
@@ -579,13 +637,46 @@ connect-label-≃ {S = Join S₁ S₂} p q .get PHere = p .get PHere
 connect-label-≃ {S = Join S₁ S₂} p q .get (PExt Z) = p .get (PExt Z)
 connect-label-≃ {S = Join S₁ S₂} p q .get (PShift Z) = connect-label-≃ [ (λ P → p .get (PShift P)) ] q .get Z
 
-replace-label-prop : (L : Label X S) → replace-label L (L PHere) ≃l L
-replace-label-prop L .get PHere = refl≃stm
-replace-label-prop L .get (PExt Q) = refl≃stm
-replace-label-prop L .get (PShift Q) = refl≃stm
+replace-label-≃m : ∀ {L : Label X S} {M : Label Y S} → L ≃lm M → a ≃stm b → replace-label L a ≃lm replace-label M b
+replace-label-≃m p q .get PHere = q
+replace-label-≃m p q .get (PExt Z) = p .get (PExt Z)
+replace-label-≃m p q .get (PShift Z) = p .get (PShift Z)
+
+connect-label-≃m : ∀ {L : Label X S} {M : Label X T} {L′ : Label Y S} {M′ : Label Y T}
+                → L ≃lm L′
+                → M ≃lm M′
+                → connect-label L M ≃lm connect-label L′ M′
+connect-label-≃m {S = Sing} p q = replace-label-≃m q (p .get PHere)
+connect-label-≃m {S = Join S₁ S₂} p q .get PHere = p .get PHere
+connect-label-≃m {S = Join S₁ S₂} p q .get (PExt Z) = p .get (PExt Z)
+connect-label-≃m {S = Join S₁ Sing} {L = L} {M} {L′} {M′} p q .get (PShift Z) = let
+  instance .x : not-here Z
+  x = proj₁ it
+  in begin
+  < replace-label M (L (PShift PHere)) Z >stm
+    ≈⟨ replace-not-here M (L (PShift PHere)) Z ⟩
+  < M Z >stm
+    ≈⟨ q .get Z ⦃ proj₂ it ⦄ ⟩
+  < M′ Z >stm
+    ≈˘⟨ replace-not-here M′ (L′ (PShift PHere)) Z ⟩
+  < replace-label M′ (L′ (PShift PHere)) Z >stm ∎
+  where
+    open Reasoning stm-setoid
+connect-label-≃m {S = Join S₁ (Join S₂ S₃)} {L = L} {M} {L′} p q .get (PShift Z) = connect-label-≃m {L = L ∘ PShift} {L′ = L′ ∘ PShift} [ (λ Q → p .get (PShift Q) ⦃ maximal-join-not-here Q ,, it ⦄) ] q .get Z ⦃ proj₂ it ⦄
+
+connect-label-sing : (L : Label X S) → (M M′ : Label X Sing) → connect-label L M ≃l connect-label L M′
+connect-label-sing {S = Sing} L M M′ .get PHere = refl≃stm
+connect-label-sing {S = Join S₁ S₂} L M M′ .get PHere = refl≃stm
+connect-label-sing {S = Join S₁ S₂} L M M′ .get (PExt Z) = refl≃stm
+connect-label-sing {S = Join S₁ S₂} L M M′ .get (PShift Z) = connect-label-sing (L ∘ PShift) M M′ .get Z
+
+replace-label-prop : (L : Label X S) → (a : STm X) → a ≃stm L PHere → replace-label L a ≃l L
+replace-label-prop L a p .get PHere = p
+replace-label-prop L a p .get (PExt Q) = refl≃stm
+replace-label-prop L a p .get (PShift Q) = refl≃stm
 
 connect-label-prop : (S : Tree n) → (T : Tree m) → connect-label (ap (connect-tree-inc-left S T)) (ap (connect-tree-inc-right S T)) ≃l id-label (connect-tree S T)
-connect-label-prop Sing T = replace-label-prop (id-label T)
+connect-label-prop Sing T = replace-label-prop (id-label T) SHere refl≃stm
 connect-label-prop (Join S₁ S₂) T .get PHere = refl≃stm
 connect-label-prop (Join S₁ S₂) T .get (PExt Z) = refl≃stm
 connect-label-prop (Join S₁ S₂) T .get (PShift Z) = begin
@@ -605,28 +696,18 @@ connect-label-prop (Join S₁ S₂) T .get (PShift Z) = begin
   where
     open Reasoning stm-setoid
 
-ap-≃ : {L : Label X S} → {M : Label Y S} → L ≃l M → P ≃p Q → L P ≃stm M Q
-ap-≃ p (≃Here x) = p .get PHere
-ap-≃ p (≃Ext q x) = ap-≃ [ (λ P → p .get (PExt P)) ] q
-ap-≃ p (≃Shift x q) = ap-≃ [ (λ P → p .get (PShift P)) ] q
-
-ap′-≃ : (L : Label′ T S) → P ≃p Q → L P ≃p L Q
-ap′-≃ L (≃Here x) = refl≃p
-ap′-≃ L (≃Ext q x) = ap′-≃ (L ∘ PExt) q
-ap′-≃ L (≃Shift x q) = ap′-≃ (L ∘ PShift) q
-
-label-≃ : S ≃ T → Label X T → Label X S
+label-≃ : S ≃′ T → Label X T → Label X S
 label-≃ p L = L ∘ ppath-≃ p
 
-label-wt-≃ : S ≃ T → Label-WT X T → Label-WT X S
+label-wt-≃ : S ≃′ T → Label-WT X T → Label-WT X S
 label-wt-≃ p L = (label-≃ p (ap L)) ,, (lty L)
 
 _≃l′_ : Label X S → Label Y T → Set
-_≃l′_ {S = S} {T = T} L M = Σ[ p ∈ S ≃ T ] L ≃l label-≃ p M
+_≃l′_ {S = S} {T = T} L M = Σ[ p ∈ S ≃′ T ] L ≃l label-≃ p M
 
 label-to-sub-≃′ : (L : Label-WT X S) → (M : Label-WT Y T) → ap L ≃l′ ap M → lty L ≃ty lty M → label-to-sub L ≃s label-to-sub M
-label-to-sub-≃′ L M (p ,, [ q ]) r with ≃-to-same-n p
-... | refl with ≃-to-≡ p
+label-to-sub-≃′ L M (p ,, [ q ]) r with ≃-to-same-n (≃′-to-≃ p)
+... | refl with ≃-to-≡ (≃′-to-≃ p)
 ... | refl = label-to-sub-≃ L M [ (λ P → trans≃stm (q P) (ap-≃ (refl≃l {L = ap M}) (sym≃p (ppath-≃-≃p p P)))) ] r
 
 extend-susp-label : (a : STm (someTree S)) → (L : Label-WT X S) → susp-stm (a >>= L) ≃stm (a >>= susp-label L)

@@ -52,6 +52,35 @@ tree-setoid = record { Carrier = TREE
                                               }
                      }
 
+data _≃′_ : Tree n → Tree m → Set where
+  Refl≃′ : T ≃′ T
+  Join≃′ : {S : Tree n} → {S′ : Tree n′} → {T : Tree m} → {T′ : Tree m′} → S ≃′ S′ → T ≃′ T′ → Join S T ≃′ Join S′ T′
+
+refl≃′ : T ≃′ T
+refl≃′ = Refl≃′
+
+sym≃′ : S ≃′ T → T ≃′ S
+sym≃′ Refl≃′ = Refl≃′
+sym≃′ (Join≃′ p q) = Join≃′ (sym≃′ p) (sym≃′ q)
+
+trans≃′ : S ≃′ T → T ≃′ U → S ≃′ U
+trans≃′ Refl≃′ q = q
+trans≃′ (Join≃′ p p′) Refl≃′ = Join≃′ p p′
+trans≃′ (Join≃′ p p′) (Join≃′ q q′) = Join≃′ (trans≃′ p q) (trans≃′ p′ q′)
+
+tree′-setoid : Setoid _ _
+tree′-setoid = record { Carrier = TREE
+                     ; _≈_ = λ x y → tr x ≃′ tr y
+                     ; isEquivalence = record { refl = refl≃′
+                                              ; sym = sym≃′
+                                              ; trans = trans≃′
+                                              }
+                     }
+
+≃′-to-≃ : S ≃′ T → S ≃ T
+≃′-to-≃ Refl≃′ = refl≃
+≃′-to-≃ (Join≃′ p q) = Join≃ (≃′-to-≃ p) (≃′-to-≃ q)
+
 ≃-to-same-n : {S : Tree n} → {T : Tree m} → S ≃ T → n ≡ m
 ≃-to-same-n Sing≃ = refl
 ≃-to-same-n (Join≃ p q) = cong₂ (λ a b → (a + suc (suc b))) (≃-to-same-n q) (≃-to-same-n p)
@@ -252,6 +281,10 @@ tree-dim-≃ p with ≃-to-same-n p
 ... | refl with ≃-to-≡ p
 ... | refl = refl
 
+has-linear-height-prop : (d : ℕ) → (T : Tree n) → .⦃ has-linear-height d T ⦄ → d ≤ linear-height T
+has-linear-height-prop zero T = z≤n
+has-linear-height-prop (suc d) (Join T Sing) = s≤s (has-linear-height-prop d T)
+
 linear-linear-height : (T : Tree n) → .⦃ is-linear T ⦄ → linear-height T ≡ tree-dim T
 linear-linear-height Sing = refl
 linear-linear-height (Join T Sing) = cong suc (linear-linear-height T)
@@ -264,6 +297,6 @@ linear-height-dim (Join T (Join T₁ T₂)) = z≤n
 linear-tree-unique : (S : Tree n) → .⦃ is-linear S ⦄
                    → (T : Tree m) → .⦃ is-linear T ⦄
                    → .(tree-dim S ≡ tree-dim T)
-                   → S ≃ T
-linear-tree-unique Sing Sing p = refl≃
-linear-tree-unique (Join S Sing) (Join T Sing) p = Join≃ (linear-tree-unique S T (cong pred p)) refl≃
+                   → S ≃′ T
+linear-tree-unique Sing Sing p = refl≃′
+linear-tree-unique (Join S Sing) (Join T Sing) p = Join≃′ (linear-tree-unique S T (cong pred p)) refl≃′

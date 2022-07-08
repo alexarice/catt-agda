@@ -24,18 +24,18 @@ open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Globular
 
-branching-path-to-var-is-var : (S : Tree n) → (p : BranchingPoint S) → isVar (branching-path-to-var S p)
+branching-path-to-var-is-var : (S : Tree n) → (p : BranchingPoint S d) → isVar (branching-path-to-var S p)
 branching-path-to-var-is-var (Join S T) BPHere = var-to-var-comp-tm 0V (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
 branching-path-to-var-is-var (Join S T) (BPExt P) = var-to-var-comp-tm (suspTm (branching-path-to-var S P)) ⦃ suspTm-var (branching-path-to-var S P) ⦃ branching-path-to-var-is-var S P ⦄ ⦄ (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
 branching-path-to-var-is-var (Join S T) (BPShift P) = var-to-var-comp-tm (branching-path-to-var T P) ⦃ branching-path-to-var-is-var T P ⦄ (connect-susp-inc-right (tree-size S) (tree-size T)) ⦃ connect-susp-inc-right-var-to-var (tree-size S) (tree-size T) ⦄
 
-height-of-branching-non-zero : (S : Tree n) → (p : BranchingPoint S) → NonZero (height-of-branching p)
+height-of-branching-non-zero : (S : Tree n) → (p : BranchingPoint S d) → NonZero (height-of-branching p)
 height-of-branching-non-zero (Join S T) BPHere = it
 height-of-branching-non-zero (Join S T) (BPExt P) = it
 height-of-branching-non-zero (Join S T) (BPShift P) = height-of-branching-non-zero T P
 
 exterior-sub-label-phere : (S : Tree n)
-                         → (p : BranchingPoint S)
+                         → (p : BranchingPoint S d)
                          → (T : Tree m)
                          → .⦃ _ : has-linear-height (bp-height p) T ⦄
                          → exterior-sub-label S p T PHere ≃stm SHere {S = insertion-tree S p T}
@@ -47,7 +47,7 @@ module _ where
   open Reasoning stm-setoid
 
   exterior-sub-label-last-path : (S : Tree n)
-                               → (p : BranchingPoint S)
+                               → (p : BranchingPoint S d)
                                → (T : Tree m)
                                → .⦃ _ : has-linear-height (bp-height p) T ⦄
                                → exterior-sub-label S p T (last-path S) ≃stm SPath (last-path (insertion-tree S p T))
@@ -67,7 +67,7 @@ module _ where
   exterior-sub-label-last-path (Join S₁ S₂@(Join S₃ S₄)) BPHere T = ≃SPath (connect-tree-inc-right-last-path T S₂)
 
   interior-sub-label-comm : (S : Tree n)
-                          → (p : BranchingPoint S)
+                          → (p : BranchingPoint S d)
                           → (T : Tree m)
                           → .⦃ _ : has-linear-height (bp-height p) T ⦄
                           → (L : Label X S)
@@ -81,22 +81,22 @@ module _ where
   interior-sub-label-comm (Join S₁ S₂) (BPShift p) T L M = interior-sub-label-comm S₂ p T (L ∘ PShift) M
 
   exterior-sub-label-comm : (S : Tree n)
-                          → (p : BranchingPoint S)
+                          → (p : BranchingPoint S d)
                           → (T : Tree m)
                           → .⦃ _ : has-linear-height (bp-height p) T ⦄
                           → (L : Label X S)
                           → (M : Label X T)
                           → (A : Ty _)
-                          → L (branching-path-to-path S p) ≃stm (unbiased-comp′ (height-of-branching p) T >>= M ,, A)
+                          → L (branching-path-to-path p) ≃stm (unbiased-comp′ (height-of-branching p) T >>= M ,, A)
                           → label-comp (exterior-sub-label S p T) (sub-from-insertion-label S p T L M ,, A) ≃lm L
   exterior-sub-label-comm (Join S₁ S₂) BPHere T L M A q .get (PExt Z) = begin
     < label-from-linear-tree-unbiased S₁ T 1 Z >>= connect-tree-inc-left T S₂ >>= connect-label M (L ∘ PShift) ,, A >stm
       ≈⟨ extend-assoc (label-from-linear-tree-unbiased S₁ T 1 Z) (connect-tree-inc-left T S₂) (connect-label M (L ∘ PShift) ,, A) ⟩
     < label-from-linear-tree-unbiased S₁ T 1 Z >>= label-wt-comp (connect-tree-inc-left T S₂) (connect-label M (L ∘ PShift) ,, A) >stm
-      ≈⟨ extend-≃ (label-from-linear-tree-unbiased-maximal-path S₁ T 1 Z) (connect-label-inc-left M (L ∘ PShift) A) refl≃ty ⟩
+      ≈⟨ extend-≃ (lfltu-maximal-path S₁ T 1 Z) (connect-label-inc-left M (L ∘ PShift) A) refl≃ty ⟩
     < unbiased-comp′ (1 + tree-dim S₁) T >>= M ,, A >stm
       ≈˘⟨ q ⟩
-    < L (branching-path-to-path (Join S₁ S₂) BPHere) >stm
+    < L (branching-path-to-path BPHere) >stm
       ≈⟨ ap-≃ (refl≃l {L = L ∘ PExt}) (max-path-lin-tree S₁ Z refl≃) ⟩
     < L (PExt Z) >stm ∎
   exterior-sub-label-comm (Join S₁ S₂) BPHere T L M A q .get (PShift Z) = begin
@@ -111,55 +111,50 @@ module _ where
   exterior-sub-label-comm (Join S₁ S₂) (BPShift p) T L M A q .get (PShift Z) = exterior-sub-label-comm S₂ p T (L ∘ PShift) M A q .get Z ⦃ proj₂ it ⦄
 
 insertion-bd-1 : (S : Tree n)
-               → (p : BranchingPoint S)
+               → (p : BranchingPoint S l)
                → (T : Tree m)
                → .⦃ _ : has-linear-height (bp-height p) T ⦄
                → (d : ℕ)
                → .(d ≤ linear-height T)
                → .(height-of-branching p ≥ tree-dim T)
-               → tree-bd d S ≃ tree-bd d (insertion-tree S p T)
-insertion-bd-1 (Join S₁ S₂) p T zero q r = refl≃
+               → tree-bd d S ≃′ tree-bd d (insertion-tree S p T)
+insertion-bd-1 (Join S₁ S₂) p T zero q r = refl≃′
 insertion-bd-1 (Join S₁ S₂) BPHere (Join T Sing) (suc d) q r = let
   .lem : d ≤ tree-dim S₁
   lem = ≤-pred (≤-trans q (≤-trans (s≤s (linear-height-dim T)) r))
-  in Join≃ (linear-tree-unique (tree-bd d S₁)
+  in Join≃′ (linear-tree-unique (tree-bd d S₁)
                               ⦃ bd-linear-height d S₁ (≤-trans lem (≤-reflexive (sym (linear-linear-height S₁)))) ⦄
                               (tree-bd d T)
                               ⦃ bd-linear-height d T (≤-pred q) ⦄
                               (trans (tree-dim-bd′ d S₁ lem) (sym (tree-dim-bd′ d T (≤-trans (≤-pred q) (linear-height-dim T))))))
-          refl≃
-insertion-bd-1 (Join S₁ S₂) (BPExt p) (Join T Sing) (suc d) q r = Join≃ (insertion-bd-1 S₁ p T d (≤-pred q) (≤-pred r)) refl≃
-insertion-bd-1 (Join S₁ S₂) (BPShift p) T (suc d) q r = Join≃ refl≃ (insertion-bd-1 S₂ p T (suc d) q r)
+          refl≃′
+insertion-bd-1 (Join S₁ S₂) (BPExt p) (Join T Sing) (suc d) q r = Join≃′ (insertion-bd-1 S₁ p T d (≤-pred q) (≤-pred r)) refl≃′
+insertion-bd-1 (Join S₁ S₂) (BPShift p) T (suc d) q r = Join≃′ refl≃′ (insertion-bd-1 S₂ p T (suc d) q r)
 
-
-linear-height-has-linear-height : (d : ℕ) → (T : Tree n) → .⦃ has-linear-height d T ⦄ → d ≤ linear-height T
-linear-height-has-linear-height zero T = z≤n
-linear-height-has-linear-height (suc d) (Join T Sing) = s≤s (linear-height-has-linear-height d T)
-
-bd-bp-lem : (p : BranchingPoint S)
+bd-bp-lem : (p : BranchingPoint S l)
           → (T : Tree n)
           → .⦃ has-linear-height (bp-height p) T ⦄
           → d > linear-height T
           → d > bp-height p
-bd-bp-lem p T q = <-transʳ (linear-height-has-linear-height (bp-height p) T) q
+bd-bp-lem p T q = <-transʳ (has-linear-height-prop _ T) q
 
 bd-branching-point : (S : Tree n)
-                   → (p : BranchingPoint S)
+                   → (p : BranchingPoint S l)
                    → (d : ℕ)
                    → .(q : d > bp-height p)
-                   → BranchingPoint (tree-bd d S)
+                   → BranchingPoint (tree-bd d S) l
 bd-branching-point (Join S₁ S₂) BPHere (suc d) q = BPHere ⦃ is-linear-bd d S₁ ⦄
 bd-branching-point (Join S₁ S₂) (BPExt p) (suc d) q = BPExt (bd-branching-point S₁ p d (≤-pred q))
 bd-branching-point (Join S₁ S₂) (BPShift p) (suc d) q = BPShift (bd-branching-point S₂ p (suc d) q)
 
-bd-branching-point-height : (S : Tree n)
-                          → (p : BranchingPoint S)
-                          → (d : ℕ)
-                          → .(q : d > bp-height p)
-                          → bp-height (bd-branching-point S p d q) ≡ bp-height p
-bd-branching-point-height (Join S₁ S₂) BPHere (suc d) q = refl
-bd-branching-point-height (Join S₁ S₂) (BPExt p) (suc d) q = cong suc (bd-branching-point-height S₁ p d (≤-pred q))
-bd-branching-point-height (Join S₁ S₂) (BPShift p) (suc d) q = bd-branching-point-height S₂ p (suc d) q
+-- bd-branching-point-height : (S : Tree n)
+--                           → (p : BranchingPoint S)
+--                           → (d : ℕ)
+--                           → .(q : d > bp-height p)
+--                           → bp-height (bd-branching-point S p d q) ≡ bp-height p
+-- bd-branching-point-height (Join S₁ S₂) BPHere (suc d) q = refl
+-- bd-branching-point-height (Join S₁ S₂) (BPExt p) (suc d) q = cong suc (bd-branching-point-height S₁ p d (≤-pred q))
+-- bd-branching-point-height (Join S₁ S₂) (BPShift p) (suc d) q = bd-branching-point-height S₂ p (suc d) q
 
 bd-has-linear-height : (d : ℕ) → (m : ℕ)
                      → (T : Tree n) → .⦃ has-linear-height m T ⦄
@@ -168,19 +163,19 @@ bd-has-linear-height : (d : ℕ) → (m : ℕ)
 bd-has-linear-height d zero T q = tt
 bd-has-linear-height (suc d) (suc m) (Join T Sing) q = bd-has-linear-height d m T (≤-pred q)
 
-bd-bp-height : (S : Tree n)
-             → (p : BranchingPoint S)
-             → (T : Tree m)
-             → .⦃ _ : has-linear-height (bp-height p) T ⦄
-             → (d : ℕ)
-             → .(q : d > bp-height p)
-             → has-linear-height (bp-height (bd-branching-point S p d q)) (tree-bd d T)
-bd-bp-height S p T d q = subst (λ - → has-linear-height - (tree-bd d T))
-                               (sym (bd-branching-point-height S p d q))
-                               (bd-has-linear-height d (bp-height p) T q)
+-- bd-bp-height : (S : Tree n)
+--              → (p : BranchingPoint S)
+--              → (T : Tree m)
+--              → .⦃ _ : has-linear-height (bp-height p) T ⦄
+--              → (d : ℕ)
+--              → .(q : d > bp-height p)
+--              → has-linear-height (bp-height (bd-branching-point S p d q)) (tree-bd d T)
+-- bd-bp-height S p T d q = subst (λ - → has-linear-height - (tree-bd d T))
+--                                (sym (bd-branching-point-height S p d q))
+--                                (bd-has-linear-height d (bp-height p) T q)
 
 insertion-bd-2 : (S : Tree n)
-               → (p : BranchingPoint S)
+               → (p : BranchingPoint S l)
                → (T : Tree m)
                → .⦃ _ : has-linear-height (bp-height p) T ⦄
                → (d : ℕ)
@@ -188,16 +183,16 @@ insertion-bd-2 : (S : Tree n)
                → insertion-tree (tree-bd d S)
                                 (bd-branching-point S p d q)
                                 (tree-bd d T)
-                                ⦃ bd-bp-height S p T d q ⦄
-                 ≃ tree-bd d (insertion-tree S p T)
+                                ⦃ bd-has-linear-height d l T q ⦄
+                 ≃′ tree-bd d (insertion-tree S p T)
 insertion-bd-2 (Join S₁ S₂) BPHere T (suc d) q = connect-tree-bd d T S₂
 insertion-bd-2 (Join S₁ S₂) (BPExt p) (Join T Sing) (suc d) q
-  = Join≃ (insertion-bd-2 S₁ p T d (≤-pred q)) refl≃
+  = Join≃′ (insertion-bd-2 S₁ p T d (≤-pred q)) refl≃′
 insertion-bd-2 (Join S₁ S₂) (BPShift p) T (suc d) q
-  = Join≃ refl≃ (insertion-bd-2 S₂ p T (suc d) q)
+  = Join≃′ refl≃′ (insertion-bd-2 S₂ p T (suc d) q)
 
 unbiased-exterior-comm-1 : (S : Tree n)
-                         → (p : BranchingPoint S)
+                         → (p : BranchingPoint S l)
                          → (T : Tree m)
                          → .⦃ _ : has-linear-height (bp-height p) T ⦄
                          → (d : ℕ)
@@ -222,7 +217,7 @@ unbiased-exterior-comm-1 (Join S₁ S₂) (BPHere ⦃ l ⦄) (Join T Sing) (suc 
             ppath-≃ (linear-tree-unique (tree-bd d S₁) (tree-bd d T) _) Z
     lem = begin
       < is-linear-max-path (tree-bd d T) >p
-        ≈⟨ max-path-lin-tree (tree-bd d T) Z (sym≃ (linear-tree-unique (tree-bd d S₁) (tree-bd d T) (trans (tree-dim-bd′ d S₁ (≤-pred (≤-pred (≤-step p)))) (sym (tree-dim-bd′ d T (≤-trans (≤-pred q) (linear-height-dim T))))))) ⟩
+        ≈⟨ max-path-lin-tree (tree-bd d T) Z (≃′-to-≃ (sym≃′ (linear-tree-unique (tree-bd d S₁) (tree-bd d T) (trans (tree-dim-bd′ d S₁ (≤-pred (≤-pred (≤-step p)))) (sym (tree-dim-bd′ d T (≤-trans (≤-pred q) (linear-height-dim T)))))))) ⟩
       < Z >p
         ≈⟨ ppath-≃-≃p (linear-tree-unique (tree-bd d S₁) (tree-bd d T) _) Z ⟩
       < ppath-≃ (linear-tree-unique (tree-bd d S₁) (tree-bd d T) _) Z >p ∎
@@ -233,17 +228,15 @@ unbiased-exterior-comm-1 (Join S₁ S₂) BPHere (Join T Sing) (suc d) p q r b .
   < replace-label (λ P → SPath (PShift P)) (SPath (PShift PHere))
                   (tree-inc-label′ (suc d) S₂ b Z) >stm
     ≈⟨ replace-not-here (λ P → SPath (PShift P)) (SPath (PShift PHere)) (tree-inc-label′ (suc d) S₂ b Z) ⦃ tree-inc-not-here (suc d) S₂ b Z ⦃ proj₁ it ⦄ ⦄ ⟩
-  < SPath (PShift (tree-inc-label′ (suc d) S₂ b Z)) >stm
-    ≈⟨ ≃SPath (≃Shift refl≃ (ap′-≃ (tree-inc-label′ (suc d) S₂ b) (ppath-≃-≃p refl≃ Z))) ⟩
-  < SPath (PShift (tree-inc-label′ (suc d) S₂ b (ppath-≃ refl≃ Z))) >stm ∎
+  < SPath (PShift (tree-inc-label′ (suc d) S₂ b Z)) >stm ∎
   where
     open Reasoning stm-setoid
 unbiased-exterior-comm-1 (Join S₁ S₂) (BPExt P) (Join T Sing) (suc d) p q r b .get (PExt Z)
   = compute-≃ (≃SExt (unbiased-exterior-comm-1 S₁ P T d (≤-pred p) (≤-pred q) (≤-pred r) b .get Z) refl≃)
 unbiased-exterior-comm-1 (Join S₁ S₂) (BPExt P) (Join T Sing) (suc d) p q r b .get (PShift Z)
-  = compute-≃ (≃SShift refl≃ (ap-≃ (refl≃l {L = ap (tree-inc-label (suc d) S₂ b)}) (ppath-≃-≃p refl≃ Z)))
+  = compute-≃ refl≃stm
 unbiased-exterior-comm-1 (Join S₁ S₂) (BPShift P) T (suc d) p q r b .get (PExt Z)
-  = compute-≃ (≃SExt (ap-≃ (refl≃l {L = ap (tree-inc-label d S₁ b)}) (ppath-≃-≃p refl≃ Z)) refl≃)
+  = compute-≃ refl≃stm
 unbiased-exterior-comm-1 (Join S₁ S₂) (BPShift P) T (suc d) p q r b .get (PShift Z)
   = compute-≃ (≃SShift refl≃ (unbiased-exterior-comm-1 S₂ P T (suc d) p q r b .get Z ⦃ proj₂ it ⦄))
 
@@ -251,7 +244,7 @@ module _ where
   open Reasoning stm-setoid
 
   unbiased-exterior-comm-2 : (S : Tree n)
-                           → (p : BranchingPoint S)
+                           → (p : BranchingPoint S l)
                            → (T : Tree m)
                            → .⦃ _ : has-linear-height (bp-height p) T ⦄
                            → (d : ℕ)
@@ -263,7 +256,7 @@ module _ where
                            ≃lm label-comp (exterior-sub-label (tree-bd d S)
                                                               (bd-branching-point S p d (bd-bp-lem p T q))
                                                               (tree-bd d T)
-                                                              ⦃ bd-bp-height S p T d (bd-bp-lem p T q) ⦄)
+                                                              ⦃ bd-has-linear-height d l T (<-transʳ (has-linear-height-prop l T) q) ⦄)
                                           (label-wt-≃ (insertion-bd-2 S p T d (bd-bp-lem p T q)) (tree-inc-label d (insertion-tree S p T) b))
   unbiased-exterior-comm-2 (Join S₁ S₂) BPHere T (suc d) q b r r′ .get (PExt Z) = let
     instance _ = is-linear-bd d S₁
@@ -279,7 +272,7 @@ module _ where
       ≈⟨ extend-assoc (unbiased-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)) (tree-inc-label (suc d) T b) (connect-tree-inc-left T S₂) ⟩
     < unbiased-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)
       >>= label-wt-comp (tree-inc-label (suc d) T b) (connect-tree-inc-left T S₂) >stm
-      ≈⟨ extend-≃ (sym≃stm (label-from-linear-tree-unbiased-maximal-path (tree-bd d S₁) (tree-bd (suc d) T) 1 Z)) [ (λ P → ≃SPath (tree-inc-inc-left d T S₂ b P)) ] refl≃ty ⟩
+      ≈⟨ extend-≃ (sym≃stm (lfltu-maximal-path (tree-bd d S₁) (tree-bd (suc d) T) 1 Z)) [ (λ P → ≃SPath (tree-inc-inc-left d T S₂ b P)) ] refl≃ty ⟩
     < label-from-linear-tree-unbiased (tree-bd d S₁) (tree-bd (suc d) T) 1 Z
       >>= label-wt-comp (connect-tree-inc-left (tree-bd (suc d) T) (tree-bd (suc d) S₂))
                         (label-wt-≃ (connect-tree-bd d T S₂) (tree-inc-label (suc d) (connect-tree T S₂) b)) >stm
@@ -307,7 +300,7 @@ module _ where
         >>= label-wt-≃ (connect-tree-bd d T S₂) (tree-inc-label (suc d) (connect-tree T S₂) b)) >stm ∎
 
   unbiased-exterior-comm-2 (Join S₁ S₂) (BPExt p) (Join T Sing) (suc d) q b r r′ .get (PExt Z) = let
-    instance _ = bd-bp-height S₁ p T d (bd-bp-lem p T (≤-pred q))
+    instance _ = bd-has-linear-height d (bp-height p) T (<-transʳ (has-linear-height-prop (bp-height p) T) (≤-pred q))
     in begin
     < SExt (exterior-sub-label S₁ p T (tree-inc-label′ d S₁ b Z)) >stm
       ≈⟨ ≃SExt (unbiased-exterior-comm-2 S₁ p T d (≤-pred q) b (≤-pred r) (≤-pred r′) .get Z) refl≃ ⟩
@@ -321,13 +314,13 @@ module _ where
        >>= map-pext {T = S₂} (label-wt-≃ (insertion-bd-2 S₁ p T d (bd-bp-lem p T (≤-pred q))) (tree-inc-label d (insertion-tree S₁ p T) b)) >stm
        ≈⟨ extend-≃ (refl≃stm {a = exterior-sub-label (tree-bd d S₁) (bd-branching-point S₁ p d (bd-bp-lem p T (≤-pred q))) (tree-bd d T) Z}) [ (λ P → compute-≃ refl≃stm) ] (Arr≃ (connect-inc-left-fst-var getSnd _) refl≃ty (trans≃tm (connect-inc-fst-var getSnd (tree-size S₂)) (sub-action-≃-tm (sym≃tm (path-to-term-≃ (tree-inc-label-phere d S₂ b))) refl≃s))) ⟩
     < exterior-sub-label (tree-bd d S₁) (bd-branching-point S₁ p d (bd-bp-lem p T (≤-pred q))) (tree-bd d T) Z
-       >>= label₁ (label-wt-≃ (Join≃ (insertion-bd-2 S₁ p T d (bd-bp-lem p T (≤-pred q))) refl≃) (tree-inc-label (suc d) (Join (insertion-tree S₁ p T) S₂) b)) >stm ∎
+       >>= label₁ (label-wt-≃ (Join≃′ (insertion-bd-2 S₁ p T d (bd-bp-lem p T (≤-pred q))) refl≃′) (tree-inc-label (suc d) (Join (insertion-tree S₁ p T) S₂) b)) >stm ∎
   unbiased-exterior-comm-2 (Join S₁ S₂) (BPExt p) (Join T Sing) (suc d) q b r r′ .get (PShift Z)
-    = compute-≃ (≃SShift refl≃ (ap-≃ (refl≃l {L = ap (tree-inc-label (suc d) S₂ b)}) (ppath-≃-≃p refl≃ Z)))
+    = compute-≃ refl≃stm
   unbiased-exterior-comm-2 (Join S₁ S₂) (BPShift p) T (suc d) q b r r′ .get (PExt Z)
-    = compute-≃ (≃SExt (ap-≃ (refl≃l {L = ap (tree-inc-label d S₁ b)}) (ppath-≃-≃p refl≃ Z)) refl≃)
+    = compute-≃ refl≃stm
   unbiased-exterior-comm-2 (Join S₁ S₂) (BPShift p) T (suc d) q b r r′ .get (PShift Z) = let
-    instance _ = bd-bp-height S₂ p T (suc d) (bd-bp-lem p T q)
+    instance _ = bd-has-linear-height (suc d) (bp-height p) T (<-transʳ (has-linear-height-prop (bp-height p) T) q)
     in begin
     < SShift (exterior-sub-label S₂ p T (tree-inc-label′ (suc d) S₂ b Z)) >stm
       ≈⟨ ≃SShift refl≃ (unbiased-exterior-comm-2 S₂ p T (suc d) q b r r′ .get Z ⦃ proj₂ it ⦄) ⟩
@@ -338,8 +331,259 @@ module _ where
        >>= map-pshift (label-wt-≃ (insertion-bd-2 S₂ p T (suc d) (bd-bp-lem p T q)) (tree-inc-label (suc d) (insertion-tree S₂ p T) b)) >stm
       ≈⟨ extend-≃ (refl≃stm {a = exterior-sub-label (tree-bd (suc d) S₂) (bd-branching-point S₂ p (suc d) (bd-bp-lem p T q)) (tree-bd (suc d) T) Z}) [ (λ P → compute-≃ refl≃stm) ] refl≃ty ⟩
     < exterior-sub-label (tree-bd (suc d) S₂) (bd-branching-point S₂ p (suc d) (bd-bp-lem p T q)) (tree-bd (suc d) T) Z
-       >>= label₂ (label-wt-≃ (Join≃ refl≃ (insertion-bd-2 S₂ p T (suc d) (bd-bp-lem p T q)))
+       >>= label₂ (label-wt-≃ (Join≃′ refl≃′ (insertion-bd-2 S₂ p T (suc d) (bd-bp-lem p T q)))
                            (tree-inc-label (suc d) (Join S₁ (insertion-tree S₂ p T)) b)) >stm ∎
+
+insertion-disc : (S : Tree n)
+               → (p : BranchingPoint S l)
+               → (T : Tree m)
+               → .⦃ _ : is-linear T ⦄
+               → (q : height-of-branching p ≡ tree-dim T)
+               → insertion-tree S p T ⦃ is-linear-has-linear-height (bp-height p) T (≤-trans (<⇒≤ (bp-height-<-hob p)) (≤-reflexive q)) ⦄ ≃′ S
+insertion-disc (Join S₁ S₂) BPHere (Join T Sing) q = Join≃′ (linear-tree-unique T S₁ (sym (cong pred q))) refl≃′
+insertion-disc (Join S₁ S₂) (BPExt p) (Join T Sing) q = Join≃′ (insertion-disc S₁ p T (cong pred q)) refl≃′
+insertion-disc (Join S₁ S₂) (BPShift p) T q = Join≃′ refl≃′ (insertion-disc S₂ p T q)
+
+exterior-branching-path : (S : Tree n)
+                        → (p : BranchingPoint S l)
+                        → (T : Tree m)
+                        → .⦃ _ : has-linear-height (bp-height p) T ⦄
+                        → exterior-sub-label S p T (branching-path-to-path p) ≃stm (unbiased-comp′ (height-of-branching p) T >>= interior-sub-label S p T ,, ⋆)
+exterior-branching-path (Join S₁ S₂) BPHere T = extend-≃ (lfltu-maximal-path S₁ T 1 (is-linear-max-path S₁) ⦃ is-linear-max-path-max S₁ ⦄) refl≃l refl≃ty
+exterior-branching-path (Join S₁ S₂) (BPExt p) (Join T Sing) = begin
+  < SExt (exterior-sub-label S₁ p T (branching-path-to-path p)) >stm
+    ≈⟨ ≃SExt (exterior-branching-path S₁ p T) refl≃ ⟩
+  < SExt (unbiased-comp′ (height-of-branching p) T >>= interior-sub-label S₁ p T ,, ⋆) >stm
+    ≈˘⟨ extend-map-pext (unbiased-comp′ (height-of-branching p) T) (interior-sub-label S₁ p T ,, ⋆) ⟩
+  < unbiased-comp′ (height-of-branching p) T >>= map-pext (interior-sub-label S₁ p T ,, ⋆) >stm
+    ≈⟨ extend-≃ ((refl≃stm {a = unbiased-comp′ (height-of-branching p) T})) refl≃l (Arr≃ (connect-inc-left-fst-var getSnd _) refl≃ty (connect-inc-fst-var getSnd _)) ⟩
+  < unbiased-comp′ (height-of-branching p) T >>=
+       label₁ (interior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing) ,, ⋆) >stm ∎
+  where
+    open Reasoning stm-setoid
+exterior-branching-path (Join S₁ S₂) (BPShift p) T = begin
+  < SShift
+      (exterior-sub-label S₂ p T (branching-path-to-path p)) >stm
+    ≈⟨ ≃SShift refl≃ (exterior-branching-path S₂ p T) ⟩
+  < SShift (unbiased-comp′ (height-of-branching p) T >>= interior-sub-label S₂ p T ,, ⋆) >stm
+    ≈˘⟨ extend-map-pshift (unbiased-comp′ (height-of-branching p) T) (interior-sub-label S₂ p T ,, ⋆) ⟩
+  < unbiased-comp′ (height-of-branching p) T >>=
+       (map-pshift (interior-sub-label S₂ p T ,, ⋆)) >stm ∎
+  where
+    open Reasoning stm-setoid
+
+sub-from-insertion-label-map : (f : STm X → STm Y)
+                             → (S : Tree n)
+                             → (p : BranchingPoint S l)
+                             → (T : Tree m)
+                             → .⦃ lh : has-linear-height (bp-height p) T ⦄
+                             → (L : Label X S)
+                             → (M : Label X T)
+                             → (f ∘ sub-from-insertion-label S p T L M) ≃l sub-from-insertion-label S p T (f ∘ L) (f ∘ M)
+sub-from-insertion-label-map f (Join S₁ S₂) BPHere T L M = connect-label-map f M (L ∘ PShift)
+sub-from-insertion-label-map f (Join S₁ S₂) (BPExt p) (Join T Sing) L M .get PHere = refl≃stm
+sub-from-insertion-label-map f (Join S₁ S₂) (BPExt p) (Join T Sing) L M .get (PExt Z) = sub-from-insertion-label-map f S₁ p T (L ∘ PExt) (M ∘ PExt) .get Z
+sub-from-insertion-label-map f (Join S₁ S₂) (BPExt p) (Join T Sing) L M .get (PShift Z) = replace-label-map f (L ∘ PShift) (M (PShift PHere)) .get Z
+sub-from-insertion-label-map f (Join S₁ S₂) (BPShift p) T L M .get PHere = refl≃stm
+sub-from-insertion-label-map f (Join S₁ S₂) (BPShift p) T L M .get (PExt Z) = refl≃stm
+sub-from-insertion-label-map f (Join S₁ S₂) (BPShift p) T L M .get (PShift Z) = sub-from-insertion-label-map f S₂ p T (L ∘ PShift) M .get Z
+
+exterior-interior-prop : (S : Tree n)
+                       → (p : BranchingPoint S l)
+                       → (T : Tree m)
+                       → .⦃ _ : has-linear-height (bp-height p) T ⦄
+                       → sub-from-insertion-label S p T (exterior-sub-label S p T) (interior-sub-label S p T) ≃l id-label (insertion-tree S p T)
+exterior-interior-prop (Join S₁ S₂) BPHere T = begin
+  < connect-label (ap (connect-tree-inc-left T S₂))
+      (λ x → replace-label (ap (connect-tree-inc-right T S₂))
+                           (SPath (connect-tree-inc-left′ T S₂ (last-path T))) x) >l
+    ≈⟨ connect-label-≃ (refl≃l {L = ap (connect-tree-inc-left T S₂)}) (replace-label-prop (ap (connect-tree-inc-right T S₂)) (SPath (connect-tree-inc-left′ T S₂ (last-path T))) (≃SPath (connect-tree-inc-phere T S₂))) ⟩
+  < connect-label (ap (connect-tree-inc-left T S₂)) (ap (connect-tree-inc-right T S₂)) >l
+    ≈⟨ connect-label-prop T S₂ ⟩
+  < id-label (connect-tree T S₂) >l ∎
+  where
+    open Reasoning (label-setoid (connect-tree T S₂))
+exterior-interior-prop (Join S₁ S₂) (BPExt p) (Join T Sing) .get PHere = refl≃stm
+exterior-interior-prop (Join S₁ S₂) (BPExt p) (Join T Sing) .get (PExt Z) = begin
+  < sub-from-insertion-label S₁ p T
+      (SExt ∘ exterior-sub-label S₁ p T)
+      (SExt ∘ interior-sub-label S₁ p T) Z >stm
+    ≈˘⟨ sub-from-insertion-label-map SExt S₁ p T (exterior-sub-label S₁ p T) (interior-sub-label S₁ p T) .get Z ⟩
+  < (SExt ∘ sub-from-insertion-label S₁ p T (exterior-sub-label S₁ p T) (interior-sub-label S₁ p T)) Z >stm
+    ≈⟨ compute-≃ (≃SExt (exterior-interior-prop S₁ p T .get Z) refl≃) ⟩
+  < SPath (PExt Z) >stm ∎
+  where
+    open Reasoning stm-setoid
+exterior-interior-prop (Join S₁ S₂) (BPExt p) (Join T Sing) .get (PShift Z) = compute-≃ (compute-stm-≃ (replace-label-prop (SShift ∘ id-label S₂) (SShift SHere) refl≃stm .get Z))
+exterior-interior-prop (Join S₁ S₂) (BPShift p) T .get PHere = refl≃stm
+exterior-interior-prop (Join S₁ S₂) (BPShift p) T .get (PExt Z) = compute-≃ refl≃stm
+exterior-interior-prop (Join S₁ S₂) (BPShift p) T .get (PShift Z) = begin
+  < sub-from-insertion-label S₂ p T
+      (SShift ∘ exterior-sub-label S₂ p T)
+      (SShift ∘ interior-sub-label S₂ p T) Z >stm
+    ≈˘⟨ sub-from-insertion-label-map SShift S₂ p T (exterior-sub-label S₂ p T) (interior-sub-label S₂ p T) .get Z ⟩
+  < (SShift ∘ sub-from-insertion-label S₂ p T (exterior-sub-label S₂ p T) (interior-sub-label S₂ p T)) Z >stm
+    ≈⟨ compute-≃ (≃SShift refl≃ (exterior-interior-prop S₂ p T .get Z )) ⟩
+  < SPath (PShift Z) >stm ∎
+  where
+    open Reasoning stm-setoid
+
+pruned-bp : (S : Tree n)
+          → (p : BranchingPoint S l)
+          → .(bp-height p < pred (height-of-branching p))
+          → BranchingPoint (prune-tree S p) l
+pruned-bp (Join S T) (BPExt p) q = BPExt (pruned-bp S p (≤-pred q))
+pruned-bp (Join S T) (BPShift p) q = BPShift (pruned-bp T p q)
+pruned-bp (Join (Join S Sing) T) BPHere q = BPHere ⦃ n-disc-is-linear (tree-dim S) ⦄
+
+insertion-tree-pruned-bp : (S : Tree n)
+                         → (p : BranchingPoint S l)
+                         → (T : Tree m)
+                         → .⦃ _ : has-linear-height (bp-height p) T ⦄
+                         → .(q : bp-height p < pred (height-of-branching p))
+                         → insertion-tree (prune-tree S p) (pruned-bp S p q) T ≃′ insertion-tree S p T
+insertion-tree-pruned-bp (Join S₁ S₂) (BPExt p) (Join T Sing) q = Join≃′ (insertion-tree-pruned-bp S₁ p T (≤-pred q)) refl≃′
+insertion-tree-pruned-bp (Join S₁ S₂) (BPShift p) T q = Join≃′ refl≃′ (insertion-tree-pruned-bp S₂ p T q)
+insertion-tree-pruned-bp (Join (Join S₁ Sing) S₂) BPHere T q = refl≃′
+
+sub-from-insertion-label-≃ : (S : Tree n)
+                        → (p : BranchingPoint S d)
+                        → (T : Tree m)
+                        → .⦃ lh : has-linear-height d T ⦄
+                        → {L : Label X S}
+                        → {L′ : Label Y S}
+                        → {M : Label X T}
+                        → {M′ : Label Y T}
+                        → L ≃l L′
+                        → M ≃l M′
+                        → sub-from-insertion-label S p T L M ≃l sub-from-insertion-label S p T L′ M′
+sub-from-insertion-label-≃ (Join S₁ S₂) BPHere T q r = connect-label-≃ r [ (λ P → q .get (PShift P)) ]
+sub-from-insertion-label-≃ (Join S₁ S₂) (BPExt p) (Join T Sing) q r .get PHere = r .get PHere
+sub-from-insertion-label-≃ (Join S₁ S₂) (BPExt p) (Join T Sing) q r .get (PExt Z) = sub-from-insertion-label-≃ S₁ p T [ (λ P → q .get (PExt P)) ] [ (λ P → r .get (PExt P)) ] .get Z
+sub-from-insertion-label-≃ (Join S₁ S₂) (BPExt p) (Join T Sing) q r .get (PShift Z) = replace-label-≃ [ (λ P → q .get (PShift P)) ] (r .get (PShift PHere)) .get Z
+sub-from-insertion-label-≃ (Join S₁ S₂) (BPShift p) T q r .get PHere = q .get PHere
+sub-from-insertion-label-≃ (Join S₁ S₂) (BPShift p) T q r .get (PExt Z) = q .get (PExt Z)
+sub-from-insertion-label-≃ (Join S₁ S₂) (BPShift p) T q r .get (PShift Z) = sub-from-insertion-label-≃ S₂ p T [ (λ P → q .get (PShift P)) ] r .get Z
+
+pruned-bp-prop : (S : Tree n)
+               → (p : BranchingPoint S l)
+               → (T : Tree m)
+               → .⦃ _ : has-linear-height l T ⦄
+               → .(q : bp-height p < pred (height-of-branching p))
+               → (L : Label X S)
+               → (M : Label-WT X T)
+               → (sub-from-insertion-label S
+                                           p
+                                           (n-disc (pred (height-of-branching p)))
+                                           ⦃ is-linear-has-linear-height l (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-trans (<⇒≤ q) (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p)))))) ⦄
+                                           L
+                                           (label-comp (label-from-linear-tree-unbiased (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ T 0) M)
+                                           (branching-path-to-path (pruned-bp S p q)))
+               ≃stm (unbiased-comp′ (pred (height-of-branching p)) T >>= M)
+pruned-bp-prop (Join S₁ S₂) (BPExt p) (Join T Sing) q L M = let
+  instance .x : has-linear-height (bp-height p) (n-disc (height-of-branching′ p))
+  x = is-linear-has-linear-height (bp-height p) (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-trans (<⇒≤ (≤-pred q)) (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p))))))
+  instance _ = n-disc-is-linear (height-of-branching′ p)
+  in begin
+  < sub-from-insertion-label S₁ p (n-disc (height-of-branching′ p)) ⦃ x ⦄
+       (L ∘ PExt)
+       (label-comp (label-from-linear-tree-unbiased (n-disc (height-of-branching′ p)) (Join T Sing) 1) M)
+       (branching-path-to-path (pruned-bp S₁ p _)) >stm
+    ≈⟨ sub-from-insertion-label-≃ S₁ p (n-disc (height-of-branching′ p)) ⦃ x ⦄ refl≃l (label-comp-≃ (lfltu-susp (n-disc (height-of-branching′ p)) T 0) (refl≃l {L = ap M}) refl≃ty) .get (branching-path-to-path (pruned-bp S₁ p _)) ⟩
+  < sub-from-insertion-label S₁ p (n-disc (height-of-branching′ p)) ⦃ x ⦄
+       (L ∘ PExt)
+       (label-comp (label-from-linear-tree-unbiased (n-disc (height-of-branching′ p)) T 0) (label₁ M))
+       (branching-path-to-path (pruned-bp S₁ p _)) >stm
+    ≈⟨ pruned-bp-prop S₁ p T (≤-pred q) (L ∘ PExt) (label₁ M) ⟩
+  < unbiased-comp′ (pred (height-of-branching p)) T >>= label₁ M >stm ∎
+  where
+    open Reasoning stm-setoid
+pruned-bp-prop (Join S₁ S₂) (BPShift p) T q L M = pruned-bp-prop S₂ p T q (L ∘ PShift) M
+pruned-bp-prop (Join (Join S₁ Sing) S₂) BPHere T q L M = let
+  instance _ = n-disc-is-linear (suc (tree-dim S₁))
+  in begin
+  < label-from-linear-tree-unbiased (n-disc (suc (tree-dim S₁))) T 0
+       (is-linear-max-path (n-disc (suc (tree-dim S₁)))) >>= M >stm
+    ≈⟨ extend-≃ (lfltu-maximal-path (n-disc (suc (tree-dim S₁))) T 0 (is-linear-max-path (n-disc (suc (tree-dim S₁)))) ⦃ is-linear-max-path-max (n-disc (suc (tree-dim S₁))) ⦄) refl≃l refl≃ty ⟩
+  < unbiased-comp′ (suc (tree-dim (n-disc (tree-dim S₁)))) T >>= M >stm
+    ≈⟨ extend-≃ (unbiased-comp′-≃ {d = suc (tree-dim (n-disc (tree-dim S₁)))} {d′ = suc (tree-dim S₁)} (cong suc (tree-dim-n-disc (tree-dim S₁))) (refl≃ {T = T})) (refl≃l {L = ap M}) refl≃ty ⟩
+  < unbiased-comp′ (suc (tree-dim S₁)) T >>= M >stm ∎
+  where
+    open Reasoning stm-setoid
+
+pruned-bp-sub-from : (S : Tree n)
+                   → (p : BranchingPoint S l)
+                   → (T : Tree m)
+                   → .⦃ _ : has-linear-height l T ⦄
+                   → .(q : bp-height p < pred (height-of-branching p))
+                   → (L : Label X S)
+                   → (M : Label-WT X T)
+                   → sub-from-insertion-label (prune-tree S p) (pruned-bp S p q) T (sub-from-insertion-label S
+                                           p
+                                           (n-disc (pred (height-of-branching p)))
+                                           ⦃ is-linear-has-linear-height l (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-trans (<⇒≤ q) (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p)))))) ⦄
+                                           L
+                                           (label-comp (label-from-linear-tree-unbiased (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ T 0) M)) (ap M)
+                   ≃lm label-≃ (insertion-tree-pruned-bp S p T q) (sub-from-insertion-label S p T L (ap M))
+pruned-bp-sub-from (Join S₁ S₂) (BPExt p) (Join T Sing) q L M .get (PExt Z) = let
+  instance .x : has-linear-height (bp-height p) (n-disc (height-of-branching′ p))
+  x = is-linear-has-linear-height (bp-height p) (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-trans (<⇒≤ (≤-pred q)) (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p))))))
+  instance _ = n-disc-is-linear (height-of-branching′ p)
+  in begin
+  < sub-from-insertion-label
+       (prune-tree S₁ p)
+       (pruned-bp S₁ p _) T
+       (sub-from-insertion-label S₁ p (n-disc (height-of-branching′ p)) ⦃ x ⦄
+          (L ∘ PExt)
+          (label-comp (label-from-linear-tree-unbiased (n-disc (height-of-branching′ p)) (Join T Sing) 1) M))
+       (ap M ∘ PExt) Z >stm
+    ≈⟨ sub-from-insertion-label-≃ (prune-tree S₁ p) (pruned-bp S₁ p _) T (sub-from-insertion-label-≃ S₁ p (n-disc (pred (height-of-branching p))) ⦃ x ⦄ refl≃l (label-comp-≃ (lfltu-susp (n-disc (height-of-branching′ p)) T 0) refl≃l refl≃ty)) refl≃l .get Z ⟩
+  < sub-from-insertion-label
+      (prune-tree S₁ p)
+      (pruned-bp S₁ p _) T
+      (sub-from-insertion-label S₁ p (n-disc (height-of-branching′ p)) ⦃ x ⦄
+        (L ∘ PExt)
+        (label-comp (label-from-linear-tree-unbiased (n-disc (pred (height-of-branching p))) T 0)
+                    (label₁ M)))
+      (ap M ∘ PExt) Z >stm
+    ≈⟨ pruned-bp-sub-from S₁ p T (≤-pred q) (L ∘ PExt) (label₁ M) .get Z ⟩
+  < label-≃ (insertion-tree-pruned-bp S₁ p T _) (sub-from-insertion-label S₁ p T (L ∘ PExt) (ap M ∘ PExt)) Z >stm ∎
+  where
+    open Reasoning stm-setoid
+pruned-bp-sub-from (Join S₁ S₂) (BPExt p) (Join T Sing) q L M .get (PShift Z) = replace-not-here (replace-label (L ∘ PShift) (ap M (PShift PHere))) (ap M (PShift PHere)) Z ⦃ proj₁ it ⦄
+pruned-bp-sub-from (Join S₁ S₂) (BPShift p) T q L M .get (PExt Z) = refl≃stm
+pruned-bp-sub-from (Join S₁ S₂) (BPShift p) T q L M .get (PShift Z) = pruned-bp-sub-from S₂ p T q (L ∘ PShift) M .get Z ⦃ proj₂ it ⦄
+pruned-bp-sub-from (Join (Join S₁ Sing) Sing) BPHere T q L M = ≃l-to-≃lm (connect-label-sing (ap M) _ _)
+pruned-bp-sub-from (Join (Join S₁ Sing) (Join S₂ S₃)) BPHere T q L M
+  = connect-label-≃m (refl≃lm {L = ap M}) (replace-join-≃lm (L ∘ PShift) _)
+
+module _ (S : Tree n)
+         (A : Ty (suc n))
+         (p : BranchingPoint S l)
+         (T : Tree m)
+         .⦃ lh : has-linear-height (bp-height p) T ⦄
+         (q : height-of-branching p > tree-dim T)
+         (r : linear-height T < tree-dim T)
+         (L : Label X S)
+         (M : Label X T) where
+
+ term-1 : STm X
+ term-1 = SCoh S A (L ,, ⋆)
+
+ inner-term : STm X
+ inner-term = unbiased-comp′ (height-of-branching p) T >>= M ,, ⋆
+
+ inner-term-2 : STm X
+ inner-term-2 = SCoh (n-disc (pred (height-of-branching p))) (unbiased-type (height-of-branching p) (n-disc (pred (height-of-branching p)))) (label-wt-comp (label-from-linear-tree-unbiased (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ T 0 ,, ⋆) (M ,, ⋆))
+
+ instance _ = is-linear-has-linear-height (bp-height p) (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-trans (≤-trans (has-linear-height-prop (bp-height p) T ⦃ lh ⦄) (linear-height-dim T)) (≤-trans (≤-pred q) (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p)))))))
+
+ term-2 : STm X
+ term-2 = SCoh (insertion-tree S p (n-disc (pred (height-of-branching p)))) (A [ exterior-sub S p (n-disc (pred (height-of-branching p))) ]ty) ((sub-from-insertion-label S p (n-disc (pred (height-of-branching p))) L (label-comp (label-from-linear-tree-unbiased (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ T 0) (M ,, ⋆))) ,, ⋆)
+
+ new-bp : BranchingPoint (insertion-tree S p (n-disc (pred (height-of-branching p)))) l
+ new-bp = pruned-bp S p (<-transʳ (has-linear-height-prop (bp-height p) T) (<-transˡ r (≤-pred q)))
+
 
 
 

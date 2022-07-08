@@ -68,14 +68,15 @@ path-setoid = record { Carrier = PATH
 -- ppath-≃-≃tm (Join≃ p q) (PExt P) = ≃Ext (ppath-≃-≃tm p P) (sym≃ q)
 -- ppath-≃-≃tm (Join≃ p q) (PShift P) = ≃Shift (sym≃ p) (ppath-≃-≃tm q P)
 
-ppath-≃-≃p : (p : S ≃ T) → (P : Path S) → P ≃p ppath-≃ p P
-ppath-≃-≃p p PHere = ≃Here p
-ppath-≃-≃p (Join≃ p q) (PExt P) = ≃Ext (ppath-≃-≃p p P) q
-ppath-≃-≃p (Join≃ p q) (PShift P) = ≃Shift p (ppath-≃-≃p q P)
+ppath-≃-≃p : (p : S ≃′ T) → (P : Path S) → P ≃p ppath-≃ p P
+ppath-≃-≃p Refl≃′ P = refl≃p
+ppath-≃-≃p (Join≃′ p q) PHere = ≃Here (≃′-to-≃ (Join≃′ p q))
+ppath-≃-≃p (Join≃′ p q) (PExt P) = ≃Ext (ppath-≃-≃p p P) (≃′-to-≃ q)
+ppath-≃-≃p (Join≃′ p q) (PShift P) = ≃Shift (≃′-to-≃ p) (ppath-≃-≃p q P)
 
--- -- maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-Maximal P ⦄ → not-here P
--- -- maximal-join-not-here {T = Join S T} (PExt P) = tt
--- -- maximal-join-not-here {T = Join S T} (PShift P) = tt
+maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-Maximal P ⦄ → not-here P
+maximal-join-not-here {T = Join S T} (PExt P) = tt
+maximal-join-not-here {T = Join S T} (PShift P) = tt
 
 path-to-term-is-var : (P : Path T) → isVar (path-to-term P)
 path-to-term-is-var PHere = tt
@@ -556,3 +557,7 @@ var-to-path-to-term T (Var i) = begin
 last-path-to-term : (T : Tree n) → path-to-term (last-path T) ≃tm tree-last-var T
 last-path-to-term Sing = refl≃tm
 last-path-to-term (Join S T) = sub-action-≃-tm (last-path-to-term T) refl≃s
+
+is-linear-max-path-max : (S : Tree n) .⦃ _ : is-linear S ⦄ → is-Maximal (is-linear-max-path S)
+is-linear-max-path-max Sing = tt
+is-linear-max-path-max (Join S Sing) = is-linear-max-path-max S

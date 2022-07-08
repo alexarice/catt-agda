@@ -146,7 +146,7 @@ TransportVarSet-∪ {n} {m} (ewt xs) (ewt ys) ⟨ σ , t ⟩ = begin
 
 TransportVarSet-ty : (A : Ty n) → (σ : Sub n m ⋆) → TransportVarSet (FVTy A) σ ≡ FVTy (A [ σ ]ty)
 TransportVarSet-tm : (t : Tm n) → (σ : Sub n m ⋆) → TransportVarSet (FVTm t) σ ≡ FVTm (t [ σ ]tm)
-TransportVarSet-sub : (τ : Sub l n A) → (σ : Sub n m ⋆) → TransportVarSet (FVSub τ) σ ≡ FVSub (σ ∘ τ)
+TransportVarSet-sub : (τ : Sub l n A) → (σ : Sub n m ⋆) → TransportVarSet (FVSub τ) σ ≡ FVSub (σ ● τ)
 
 TransportVarSet-ty ⋆ σ = TransportVarSet-empty σ
 TransportVarSet-ty (s ─⟨ A ⟩⟶ t) σ = begin
@@ -266,11 +266,11 @@ lookup-isVar-⊆ (ewt xs) (Var zero) p = cong ewt (sym (∪-right-unit xs))
 lookup-isVar-⊆ (ewf xs) (Var (suc i)) p = cong ewf (lookup-isVar-⊆ xs (Var i) p)
 lookup-isVar-⊆ (ewt xs) (Var (suc i)) p = cong ewt (lookup-isVar-⊆ xs (Var i) p)
 
-TransportVarSet-comp : (xs : VarSet l) → (σ : Sub n m ⋆) → (τ : Sub l n ⋆) → TransportVarSet xs (σ ∘ τ) ≡ TransportVarSet (TransportVarSet xs τ) σ
+TransportVarSet-comp : (xs : VarSet l) → (σ : Sub n m ⋆) → (τ : Sub l n ⋆) → TransportVarSet xs (σ ● τ) ≡ TransportVarSet (TransportVarSet xs τ) σ
 TransportVarSet-comp emp σ ⟨⟩ = sym (TransportVarSet-empty σ)
 TransportVarSet-comp (ewf xs) σ ⟨ τ , t ⟩ = TransportVarSet-comp xs σ τ
 TransportVarSet-comp (ewt xs) σ ⟨ τ , t ⟩ = begin
-  TransportVarSet xs (σ ∘ τ) ∪ FVTm (t [ σ ]tm)
+  TransportVarSet xs (σ ● τ) ∪ FVTm (t [ σ ]tm)
     ≡⟨ cong₂ _∪_ (TransportVarSet-comp xs σ τ) (sym (TransportVarSet-tm t σ)) ⟩
   TransportVarSet (TransportVarSet xs τ) σ ∪ TransportVarSet (FVTm t) σ
     ≡˘⟨ TransportVarSet-∪ (TransportVarSet xs τ) (FVTm t) σ ⟩
@@ -423,7 +423,7 @@ debuild-⊆-2 p = cong tail p
 
 FVTy-comp-⊆ : (A : Ty n) → (σ : Sub n m B) → FVTy (A [ σ ]ty) ⊆ FVSub σ
 FVTm-comp-⊆ : (t : Tm n) → (σ : Sub n m A) → FVTm (t [ σ ]tm) ⊆ FVSub σ
-FVSub-comp-⊆ : (σ : Sub n m A) → (τ : Sub l n ⋆) → FVSub (σ ∘ τ) ⊆ FVSub σ
+FVSub-comp-⊆ : (σ : Sub n m A) → (τ : Sub l n ⋆) → FVSub (σ ● τ) ⊆ FVSub σ
 
 FVTy-comp-⊆ ⋆ σ = sub-type-⊆ σ
 FVTy-comp-⊆ (s ─⟨ A ⟩⟶ t) σ = ∪-⊆ (∪-⊆ (FVTy-comp-⊆ A σ) (FVTm-comp-⊆ s σ)) (FVTm-comp-⊆ t σ)
@@ -443,9 +443,9 @@ FVTm-comp-⊆ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = begin
 
 FVSub-comp-⊆ σ ⟨⟩ = sub-type-⊆ σ
 FVSub-comp-⊆ σ ⟨ τ , t ⟩ = begin
-  FVSub (σ ∘ τ) ∪ FVTm (t [ σ ]tm)
+  FVSub (σ ● τ) ∪ FVTm (t [ σ ]tm)
     ≤⟨ ⊆-cong-∪-1 (FVTm-comp-⊆ t σ) ⟩
-  FVSub (σ ∘ τ) ∪ FVSub σ
+  FVSub (σ ● τ) ∪ FVSub σ
     ≤⟨ ∪-⊆ (FVSub-comp-⊆ σ τ) ⊆-refl ⟩
   FVSub σ ∎
   where

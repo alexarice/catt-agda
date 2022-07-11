@@ -27,7 +27,7 @@ tree-inc-label′ (suc d) (Join S T) b (PExt Z) = PExt (tree-inc-label′ d S b 
 tree-inc-label′ (suc d) (Join S T) b (PShift Z) = PShift (tree-inc-label′ (suc d) T b Z)
 
 tree-inc-label  : (d : ℕ) → (T : Tree n) → (b : Bool) → Label-WT (someTree T) (tree-bd d T)
-tree-inc-label d T b = SPath ∘ tree-inc-label′ d T b ,, ⋆
+tree-inc-label d T b = SPath ∘ tree-inc-label′ d T b ,, S⋆
 
 tree-inc : (d : ℕ) → (T : Tree n) → (b : Bool) → Sub (suc (tree-bd-len d T)) (suc n) ⋆
 tree-inc d T b = label-to-sub (tree-inc-label d T b)

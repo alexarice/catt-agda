@@ -12,14 +12,14 @@ open import Catt.Tree.Label
 open import Catt.Globular
 open import Relation.Nullary
 
-unbiased-type : (d : ℕ) → (T : Tree n) → Ty (suc n)
+unbiased-type : (d : ℕ) → (T : Tree n) → STy (someTree T)
 unbiased-term : (d : ℕ) → (T : Tree n) → Tm (suc n)
 unbiased-stm : (d : ℕ) → (T : Tree n) → STm (someTree T)
 unbiased-comp : (d : ℕ) → (T : Tree n) → STm (someTree T)
 unbiased-comp′ : (d : ℕ) → (T : Tree n) → STm (someTree T)
 
-unbiased-type zero T = ⋆
-unbiased-type (suc d) T = (stm-to-term (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false)) ─⟨ unbiased-type d T ⟩⟶ (stm-to-term (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true))
+unbiased-type zero T = S⋆
+unbiased-type (suc d) T = SArr (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false) (unbiased-type d T) (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true)
 
 unbiased-term d T = stm-to-term (unbiased-stm d T)
 

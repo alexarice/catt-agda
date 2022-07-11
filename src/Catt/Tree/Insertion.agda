@@ -58,7 +58,7 @@ interior-sub : (S : Tree n)
              → (T : Tree m)
              → .⦃ _ : has-linear-height d T ⦄
              → Sub (suc m) (suc (insertion-tree-size S p T)) ⋆
-interior-sub S p T = label-to-sub (interior-sub-label S p T ,, ⋆)
+interior-sub S p T = label-to-sub (interior-sub-label S p T ,, S⋆)
 
 branching-path-to-path : (p : BranchingPoint T d) → Path T
 branching-path-to-path {T = Join S T} BPHere = PExt (is-linear-max-path S)
@@ -70,10 +70,10 @@ branching-path-to-var (Join S T) (BPHere) = 0V [ connect-susp-inc-left (tree-siz
 branching-path-to-var (Join S T) (BPExt P) = suspTm (branching-path-to-var S P) [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm
 branching-path-to-var (Join S T) (BPShift P) = branching-path-to-var T P [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm
 
-branching-path-to-type : (T : Tree n) → (P : BranchingPoint T d) → Ty (suc n)
-branching-path-to-type (Join S T) (BPHere) = suspTy (unbiased-type (tree-dim S) S) [ connect-susp-inc-left (tree-size S) (tree-size T) ]ty
-branching-path-to-type (Join S T) (BPExt P) = suspTy (branching-path-to-type S P) [ connect-susp-inc-left (tree-size S) (tree-size T) ]ty
-branching-path-to-type (Join S T) (BPShift P) = branching-path-to-type T P [ connect-susp-inc-right (tree-size S) (tree-size T) ]ty
+branching-path-to-type : (T : Tree n) → (P : BranchingPoint T d) → STy (someTree T)
+branching-path-to-type (Join S T) (BPHere) = map-sty-pext (unbiased-type (tree-dim S) S)
+branching-path-to-type (Join S T) (BPExt P) = map-sty-pext (branching-path-to-type S P)
+branching-path-to-type (Join S T) (BPShift P) = map-sty-pshift (branching-path-to-type T P)
 
 exterior-sub-label : (S : Tree n)
                   → (p : BranchingPoint S d)
@@ -92,7 +92,7 @@ exterior-sub : (S : Tree n)
              → (T : Tree m)
              → .⦃ _ : has-linear-height d T ⦄
              → Sub (suc (tree-size S)) (suc (insertion-tree-size S p T)) ⋆
-exterior-sub S p T = label-to-sub (exterior-sub-label S p T ,, ⋆)
+exterior-sub S p T = label-to-sub (exterior-sub-label S p T ,, S⋆)
 
 sub-from-insertion-label : (S : Tree n)
                         → (p : BranchingPoint S d)
@@ -110,14 +110,14 @@ sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M (PExt Z) = L (PExt Z
 sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M (PShift Z) = sub-from-insertion-label S₂ p T (L ∘ PShift) M Z
 
 sub-from-insertion : (S : Tree n)
-                         → (p : BranchingPoint S d)
-                         → (T : Tree m)
-                         → .⦃ lh : has-linear-height d T ⦄
-                         → (σ : Sub (suc n) l A)
-                         → (τ : Sub (suc m) l A)
-                         → Sub (suc (insertion-tree-size S p T)) l A
-sub-from-insertion {l = l} {A = A} S P T σ τ
-  = label-to-sub (sub-from-insertion-label S P T (to-label S σ) (to-label T τ) ,, A)
+                   → (p : BranchingPoint S d)
+                   → (T : Tree m)
+                   → .⦃ lh : has-linear-height d T ⦄
+                   → (σ : Sub (suc n) l ⋆)
+                   → (τ : Sub (suc m) l ⋆)
+                   → Sub (suc (insertion-tree-size S p T)) l ⋆
+sub-from-insertion {l = l} S P T σ τ
+  = label-to-sub (sub-from-insertion-label S P T (to-label S σ) (to-label T τ) ,, S⋆)
 
 is-linear-has-linear-height : (d : ℕ) → (T : Tree n) → .⦃ is-linear T ⦄ → d ≤ tree-dim T → has-linear-height d T
 is-linear-has-linear-height zero T p = tt

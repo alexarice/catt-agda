@@ -43,7 +43,7 @@ connect-susp-inc-left-Ty Δ = connect-inc-left-Ty getSndTy Δ
 connect-susp-inc-right-Ty : (Γ : Ctx (suc n)) → Typing-Sub Δ (connect-susp Γ Δ) (connect-susp-inc-right n m)
 connect-susp-inc-right-Ty Γ = connect-inc-right-Ty getSndTy
 
-sub-from-connect-inc-right-≈ : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → {Γ : Ctx l} → (t [ σ ]tm ≈[ Γ ]tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ τ ∘ connect-inc-right t m ≈[ Γ ]s τ
+sub-from-connect-inc-right-≈ : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → {Γ : Ctx l} → (t [ σ ]tm ≈[ Γ ]tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ τ ● connect-inc-right t m ≈[ Γ ]s τ
 sub-from-connect-inc-right-≈ σ t ⟨ ⟨⟩ , s ⟩ p = Ext≈ (Null≈ refl≈ty) p
 sub-from-connect-inc-right-≈ σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≈ (trans≈s (reflexive≈s (lift-sub-comp-lem-sub (sub-from-connect σ ⟨ τ , s ⟩) (connect-inc-right t _))) (sub-from-connect-inc-right-≈ σ t ⟨ τ , s ⟩ p)) refl≈tm
 
@@ -57,7 +57,7 @@ sub-from-connect-Ty {Υ = Υ} {σ = σ} {t = t} σty tty (TyExt {A = A} (TyExt {
              sub-from-connect σ ⟨ τ , s ⟩ ]ty)
     lem = begin
       A [ ⟨ τ , s ⟩ ]ty ≈˘⟨ apply-sub-eq-ty A (sub-from-connect-inc-right-≈ σ t ⟨ τ , s ⟩ p) ⟩
-      A [ sub-from-connect σ ⟨ τ , s ⟩ ∘ connect-inc-right t _ ]ty
+      A [ sub-from-connect σ ⟨ τ , s ⟩ ● connect-inc-right t _ ]ty
         ≈⟨ reflexive≈ty (assoc-ty _ _ A) ⟩
       ((A [ connect-inc-right t _ ]ty) [ sub-from-connect σ ⟨ τ , s ⟩ ]ty) ∎
 
@@ -70,7 +70,7 @@ sub-between-connects-Ty : Typing-Sub Γ Δ σ
                         → Typing-Sub (connect Γ t Υ) (connect Δ s Θ) (sub-between-connects σ τ s)
 sub-between-connects-Ty {Δ = Δ} {σ = σ} {t = t} {Θ = Θ} {τ = τ} {s = s} σty tty τty sty p q
   = sub-from-connect-Ty (apply-sub-sub-typing σty (connect-inc-left-Ty sty Θ)) tty (apply-sub-sub-typing τty (connect-inc-right-Ty sty)) (begin
-  t [ connect-inc-left s _ ∘ σ ]tm
+  t [ connect-inc-left s _ ● σ ]tm
     ≈⟨ reflexive≈tm (assoc-tm (connect-inc-left s _) σ t) ⟩
   t [ σ ]tm [ connect-inc-left s _ ]tm
     ≈⟨ apply-sub-tm-eq (connect-inc-left-Ty sty Θ) p ⟩
@@ -80,7 +80,7 @@ sub-between-connects-Ty {Δ = Δ} {σ = σ} {t = t} {Θ = Θ} {τ = τ} {s = s} 
     ≈˘⟨ apply-sub-tm-eq (connect-inc-right-Ty sty) q ⟩
   Var (fromℕ _) [ τ ]tm [ connect-inc-right s _ ]tm
     ≈˘⟨ reflexive≈tm (assoc-tm (connect-inc-right s _) τ (Var (fromℕ _))) ⟩
-  Var (fromℕ _) [ connect-inc-right s _ ∘ τ ]tm ∎)
+  Var (fromℕ _) [ connect-inc-right s _ ● τ ]tm ∎)
   where
     open Reasoning (tm-setoid-≈ (connect Δ s Θ))
 
@@ -96,13 +96,13 @@ between-connect-from-connect-≈ : (σ : Sub (suc n) (suc l) ⋆)
                                → (σ′ : Sub (suc l) o A)
                                → (τ′ : Sub (suc l′) o A)
                                → s [ σ′ ]tm ≈[ Γ ]tm Var (fromℕ _) [ τ′ ]tm
-                               → sub-from-connect σ′ τ′ ∘ sub-between-connects σ τ s ≈[ Γ ]s sub-from-connect (σ′ ∘ σ) (τ′ ∘ τ)
+                               → sub-from-connect σ′ τ′ ● sub-between-connects σ τ s ≈[ Γ ]s sub-from-connect (σ′ ● σ) (τ′ ● τ)
 between-connect-from-connect-≈ {Γ = Γ} σ ⟨ ⟨⟩ , t ⟩ s σ′ τ′ p = reflexive≈s (begin
-  < sub-from-connect σ′ τ′ ∘ (connect-inc-left s _ ∘ σ) >s
-    ≈˘⟨ ∘-assoc (sub-from-connect σ′ τ′) (connect-inc-left s _) σ ⟩
-  < sub-from-connect σ′ τ′ ∘ connect-inc-left s _ ∘ σ >s
+  < sub-from-connect σ′ τ′ ● (connect-inc-left s _ ● σ) >s
+    ≈˘⟨ ●-assoc (sub-from-connect σ′ τ′) (connect-inc-left s _) σ ⟩
+  < sub-from-connect σ′ τ′ ● connect-inc-left s _ ● σ >s
     ≈⟨ sub-action-≃-sub refl≃s (sub-from-connect-inc-left σ′ s τ′) ⟩
-  < σ′ ∘ σ >s ∎)
+  < σ′ ● σ >s ∎)
   where
     open Reasoning sub-setoid
 between-connect-from-connect-≈ {Γ = Γ} σ ⟨ ⟨ τ , u ⟩ , t ⟩ s σ′ τ′ p = Ext≈ (between-connect-from-connect-≈ σ ⟨ τ , u ⟩ s σ′ τ′ p) tm-lem
@@ -112,7 +112,7 @@ between-connect-from-connect-≈ {Γ = Γ} σ ⟨ ⟨ τ , u ⟩ , t ⟩ s σ′
     tm-lem = begin
       t [ connect-inc-right s _ ]tm [ sub-from-connect σ′ τ′ ]tm
         ≈˘⟨ reflexive≈tm (assoc-tm (sub-from-connect σ′ τ′) (connect-inc-right s _) t) ⟩
-      t [ sub-from-connect σ′ τ′ ∘ connect-inc-right s _ ]tm
+      t [ sub-from-connect σ′ τ′ ● connect-inc-right s _ ]tm
         ≈⟨ apply-sub-eq-tm t (sub-from-connect-inc-right-≈ σ′ s τ′ p) ⟩
       t [ τ′ ]tm ∎
       where

@@ -125,7 +125,7 @@ tree-inc-glob d₁ d₂ T b₁ b₂ p = begin
   < tree-inc d₂ T b₂ ● tree-inc d₁ (tree-bd d₂ T) b₁ >s
     ≈⟨ label-comp-to-sub (tree-inc-label d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂) ⟩
   < label-to-sub (label-wt-comp (tree-inc-label d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂)) >s
-    ≈⟨ label-to-sub-≃′ (label-wt-comp (tree-inc-label d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂)) (tree-inc-label d₁ T b₁) ((tree-bd-glob d₁ d₂ T p) ,, [ (λ P → ≃SPath (tree-inc-label-glob d₁ d₂ T b₁ b₂ p .get P)) ]) refl≃ty ⟩
+    ≈⟨ label-to-sub-≃′ (label-wt-comp (tree-inc-label d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂)) (tree-inc-label d₁ T b₁) ((tree-bd-glob d₁ d₂ T p) ,, [ (λ P → ≃SPath (tree-inc-label-glob d₁ d₂ T b₁ b₂ p .get P)) ]) refl≃sty ⟩
   < tree-inc d₁ T b₁ >s ∎
   where
     open Reasoning sub-setoid
@@ -180,7 +180,7 @@ tree-inc-label-full (suc d) (Join S T) b p .get (PShift Z) = ≃Shift refl≃ (t
 tree-inc-full : (d : ℕ) → (T : Tree n) → (b : Bool) → (p : tree-dim T ≤ d) → tree-inc d T b ≃s idSub {suc (tree-size T)}
 tree-inc-full d T b p = begin
   < tree-inc d T b >s
-    ≈⟨ label-to-sub-≃′ (tree-inc-label d T b) (id-label-wt T) ((tree-bd-full d T p) ,, [ (λ P → ≃SPath (tree-inc-label-full d T b p .get P)) ]) refl≃ty ⟩
+    ≈⟨ label-to-sub-≃′ (tree-inc-label d T b) (id-label-wt T) ((tree-bd-full d T p) ,, [ (λ P → ≃SPath (tree-inc-label-full d T b p .get P)) ]) refl≃sty ⟩
   < label-to-sub (id-label-wt T) >s
     ≈⟨ id-label-to-sub T ⟩
   < idSub >s ∎

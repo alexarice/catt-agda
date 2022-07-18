@@ -18,6 +18,10 @@ open import Catt.Suspension.Pasting
 open import Relation.Binary.Definitions
 open import Relation.Nullary
 
+suspSupp : VarSet n → VarSet (2 + n)
+suspSupp [] = full
+suspSupp (x ∷ vs) = x ∷ suspSupp vs
+
 VarSet-NonEmpty : (xs : VarSet n) → Set
 VarSet-NonEmpty emp = ⊥
 VarSet-NonEmpty (ewf xs) = VarSet-NonEmpty xs

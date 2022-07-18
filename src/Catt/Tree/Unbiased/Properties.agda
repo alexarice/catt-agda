@@ -227,7 +227,7 @@ unbiased-type-susp-lem (suc d) T = ≃SArr (lem false) (unbiased-type-susp-lem d
       < SExt (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b) >stm
         ≈˘⟨ extend-map-pext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T b) ⟩
       < unbiased-stm d (tree-bd d T) >>= map-pext (tree-inc-label d T b) >stm
-        ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] refl≃sty ⟩
+        ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
       < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) b) >stm ∎
 
 unbiased-comp-susp-lem d T = begin
@@ -258,7 +258,7 @@ lfltu-susp : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d :
 lfltu-susp Sing T d .get PHere = refl≃stm
 lfltu-susp (Join S Sing) T d .get PHere = begin
   < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) false) >stm
-    ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] refl≃sty ⟩
+    ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
   < unbiased-stm d (tree-bd d T) >>= map-pext (tree-inc-label d T false) >stm
     ≈⟨ extend-map-pext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T false) ⟩
   < SExt (unbiased-stm d (tree-bd d T) >>= (tree-inc-label d T false)) >stm ∎
@@ -267,7 +267,7 @@ lfltu-susp (Join S Sing) T d .get PHere = begin
 lfltu-susp (Join S Sing) T d .get (PExt Z) = lfltu-susp S T (suc d) .get Z
 lfltu-susp (Join S Sing) T d .get (PShift PHere) = begin
   < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) true) >stm
-    ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] refl≃sty ⟩
+    ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
   < unbiased-stm d (tree-bd d T) >>= map-pext (tree-inc-label d T true) >stm
     ≈⟨ extend-map-pext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T true) ⟩
   < SExt (unbiased-stm d (tree-bd d T) >>= (tree-inc-label d T true)) >stm ∎

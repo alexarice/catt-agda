@@ -256,6 +256,11 @@ connect-tree-last-var (Join S₁ S₂) T = begin
 
     open Reasoning tm-setoid
 
+connect-tree-right-unit : (S : Tree n)
+                        → connect-tree S Sing ≃′ S
+connect-tree-right-unit Sing = Refl≃′
+connect-tree-right-unit (Join S T) = Join≃′ Refl≃′ (connect-tree-right-unit T)
+
 tree-to-ctx-glob : (S : Tree n) → ctx-is-globular (tree-to-ctx S)
 tree-to-ctx-glob Sing = tt ,, tt
 tree-to-ctx-glob (Join S T) = connect-susp-glob (tree-to-ctx S) ⦃ tree-to-ctx-glob S ⦄ (tree-to-ctx T) ⦃ tree-to-ctx-glob T ⦄

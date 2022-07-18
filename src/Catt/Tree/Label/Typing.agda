@@ -16,7 +16,7 @@ open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
-open import Catt.Tree.Path.Typing index rule lift-rule susp-rule sub-rule
+-- open import Catt.Tree.Path.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Properties
 open import Catt.Tree.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Suspension
@@ -29,13 +29,32 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing index rule lift-rule
 
-data Typing-Label : (ΓS : CtxOrTree m) → Label (COT-to-MT ΓS) S A → Set where
-  TySing : {L : Label (COT-to-MT ΓS) Sing A} → Typing-Path ΓS (ap L PPHere) A → Typing-Label ΓS L
-  TyJoin : Typing-Path ΓS (ap L PPHere) (lty L)
+getPathType : (P : Path S) → STy (someTree S)
+getPathType PHere = S⋆
+getPathType (PExt P) = map-sty-pext (getPathType P)
+getPathType (PShift P) = map-sty-pshift (getPathType P)
+
+data Typing-STm : (ΓS : CtxOrTree m) → STm (COT-to-MT ΓS) → STy (COT-to-MT ΓS) → Set
+data Typing-Label : (ΓS : CtxOrTree m) → Label-WT (COT-to-MT ΓS) S → Set
+data Typing-STy : (ΓS : CtxOrTree m) → STy (COT-to-MT ΓS) → Set
+
+data Typing-STm where
+  TySPath : (P : Path S) → Typing-STm (incTree S) (SPath P) (getPathType P)
+  TySExt : Typing-STm (incTree S) a As → Typing-STm (incTree (Join S T)) (SExt a) (map-sty-pext As)
+  TySShift : Typing-STm (incTree T) a As → Typing-STm (incTree (Join S T)) (SShift a) (map-sty-pshift As)
+  TySCoh : (S : Tree n) →
+
+data Typing-Label where
+  TySing : {L : Label-WT (COT-to-MT ΓS) Sing} → Typing-STm ΓS (ap L PHere) (lty L) → Typing-Label ΓS L
+  TyJoin : {L : Label-WT (COT-to-MT ΓS) (Join S T)}
+         → Typing-STm ΓS (ap L PHere) (lty L)
          → Typing-Label ΓS (label₁ L)
          → Typing-Label ΓS (label₂ L)
          → Typing-Label ΓS L
 
+data Typing-STy where
+
+{-
 ap-pphere-Ty : Typing-Label ΓS L → Typing-Path ΓS (ap L PPHere) (lty L)
 ap-pphere-Ty (TySing xty) = xty
 ap-pphere-Ty (TyJoin xty Lty Mty) = xty
@@ -342,4 +361,5 @@ max-eq-to-eq {A = A} {B = B} (MlJoin q q′@(MlJoin a b)) (TyJoin {P = P} {L = L
 --                        → label-comp (connect-tree-inc-left S T) (connect-label L M) ≃Ml< true > L
 -- connect-label-inc-left (LSing P) M = MlSingt (replace-first-label M P)
 -- connect-label-inc-left (LJoin P L L′) M = {!!}
+-}
 -}

@@ -59,6 +59,9 @@ label-from-linear-tree-unbiased (Join S Sing) T d PHere = unbiased-stm d (tree-b
 label-from-linear-tree-unbiased (Join S Sing) T d (PExt P) = label-from-linear-tree-unbiased S T (suc d) P
 label-from-linear-tree-unbiased (Join S Sing) T d (PShift PHere) = unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true
 
+identity-stm : (n : ℕ) → STm (someTree (n-disc n))
+identity-stm n = unbiased-comp′ (suc n) (n-disc n)
+
 -- label-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) → (A : Ty m) → .(ty-dim A ≡ tree-dim S) → Label
 -- label-from-linear-tree Sing t A p = ⟨ ⟨⟩ , t ⟩
 -- label-from-linear-tree (Join S Sing) t (s ─⟨ A ⟩⟶ s′) p = ⟨ ⟨ (label-from-linear-tree S s A (cong pred p)) , s′ ⟩ , t ⟩

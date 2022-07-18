@@ -8,6 +8,7 @@ open import Catt.Tree
 open import Catt.Tree.Boundary
 open import Catt.Tree.Properties
 open import Catt.Tree.Boundary.Properties
+open import Catt.Tree.Path
 open import Catt.Connection.Support
 open import Catt.Suspension.Support
 open import Catt.Support
@@ -25,6 +26,49 @@ open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Connection.Support
 open import Catt.Connection.Pasting
+
+data TVarSet : (T : Tree n) → Set where
+  VSSing : (b : Bool) → TVarSet Sing
+  VSJoin : (b : Bool) → TVarSet S → TVarSet T → TVarSet (Join S T)
+
+tEmp : TVarSet S
+tEmp {S = Sing} = VSSing false
+tEmp {S = Join S T} = VSJoin false tEmp tEmp
+
+tFull : TVarSet S
+tFull {S = Sing} = VSSing true
+tFull {S = Join S T} = VSJoin true tFull tFull
+
+toVarSet : TVarSet S → VarSet (suc (tree-size S))
+toVarSet (VSSing b) = b ∷ emp
+toVarSet (VSJoin b vs xs) = connect-supp (suspSupp vs) xs
+
+fromPath : (P : Path S) → TVarSet S
+fromPath {S = Sing} PHere = VSSing true
+fromPath {S = Join S T} PHere = VSJoin true tEmp tEmp
+fromPath (PExt P) = VSJoin false (fromPath P) tEmp
+fromPath (PShift P) = VSJoin false tEmp (fromPath P)
+
+fromPath-prop : (P : Path S) → toVarSet (fromPath P) ≡ FVTm (path-to-term P)
+fromPath-prop P = {!!}
+
+supp-tree-bd′ : (d : ℕ) → (T : Tree n) → (b : Bool) → TVarSet T
+supp-tree-bd′ zero T false = fromPath PHere
+supp-tree-bd′ zero T true = fromPath (last-path T)
+supp-tree-bd′ (suc d) Sing b = tFull
+supp-tree-bd′ (suc d) (Join S T) b = VSJoin true (supp-tree-bd′ d S b) (supp-tree-bd′ (suc d) T b)
+
+supp-compat′ : (d : ℕ) → (T : Tree n) → (b : Bool) → toVarSet (supp-tree-bd′ d T b) ≡ pd-bd-supp n (tree-to-ctx T) ⦃ tree-to-pd T ⦄ b
+supp-compat′ zero T false = {!!}
+supp-compat′ zero T true = {!!}
+supp-compat′ (suc d) T b = {!!}
+
+
+supp-tree-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → VarSet (suc n)
+supp-tree-bd zero T false = trueAt (fromℕ _)
+supp-tree-bd zero T true = FVTm (tree-last-var T)
+supp-tree-bd (suc d) Sing b = full
+supp-tree-bd (suc d) (Join S T) b = connect-supp (suspSupp (supp-tree-bd d S b)) (supp-tree-bd (suc d) T b)
 
 drop-var : (t : Tm n) → .⦃ isVar t ⦄ → drop (FVTm t) ≡ empty
 drop-var (Var zero) = refl
@@ -121,11 +165,11 @@ supp-tree-bd-full (suc d) (Join S T) b p = begin
   where
     open ≡-Reasoning
 
-supp-tree-bd-compat : (d : ℕ) → (T : Tree n) → (b : Bool) → FVSub (tree-inc d T b) ≡ supp-tree-bd d T b
-supp-tree-bd-compat zero T false = ∪-left-unit (trueAt (fromℕ _))
-supp-tree-bd-compat zero T true = ∪-left-unit (FVTm (tree-last-var T))
-supp-tree-bd-compat (suc d) Sing b = refl
-supp-tree-bd-compat (suc d) (Join S T) b = trans (sub-between-connect-susps-supp (tree-inc d S b) (tree-inc (suc d) T b) (tree-inc-preserve-fst-var d T b)) (cong₂ (λ a b → connect-supp (suspSupp a) b) (supp-tree-bd-compat d S b) (supp-tree-bd-compat (suc d) T b))
+-- supp-tree-bd-compat : (d : ℕ) → (T : Tree n) → (b : Bool) → FVSub (tree-inc d T b) ≡ supp-tree-bd d T b
+-- supp-tree-bd-compat zero T false = ∪-left-unit (trueAt (fromℕ _))
+-- supp-tree-bd-compat zero T true = ∪-left-unit (FVTm (tree-last-var T))
+-- supp-tree-bd-compat (suc d) Sing b = refl
+-- supp-tree-bd-compat (suc d) (Join S T) b = trans (sub-between-connect-susps-supp (tree-inc d S b) (tree-inc (suc d) T b) (tree-inc-preserve-fst-var d T b)) (cong₂ (λ a b → connect-supp (suspSupp a) b) (supp-tree-bd-compat d S b) (supp-tree-bd-compat (suc d) T b))
 
 linear-tree-supp-lem : (d : ℕ) → (T : Tree n) → .⦃ is-linear T ⦄ → .(tree-dim T ≡ suc d) → supp-tree-bd d T false ∪ supp-tree-bd d T true ∪ ewt empty ≡ full
 linear-tree-supp-lem zero Sing p = refl

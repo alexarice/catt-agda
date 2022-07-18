@@ -79,25 +79,11 @@ TransportVarSet xs ⟨⟩ = empty
 TransportVarSet (ewf xs) ⟨ σ , t ⟩ = TransportVarSet xs σ
 TransportVarSet (ewt xs) ⟨ σ , t ⟩ = TransportVarSet xs σ ∪ FVTm t
 
-connect-supp : VarSet (suc n) → VarSet (suc m) → VarSet (suc (m + n))
-connect-supp {m = zero} xs ys = xs
-connect-supp {m = suc m} xs (x ∷ ys) = x ∷ connect-supp xs ys
-
-suspSupp : VarSet n → VarSet (2 + n)
-suspSupp [] = full
-suspSupp (x ∷ vs) = x ∷ suspSupp vs
-
-supp-tree-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → VarSet (suc n)
-supp-tree-bd zero T false = trueAt (fromℕ _)
-supp-tree-bd zero T true = FVTm (tree-last-var T)
-supp-tree-bd (suc d) Sing b = full
-supp-tree-bd (suc d) (Join S T) b = connect-supp (suspSupp (supp-tree-bd d S b)) (supp-tree-bd (suc d) T b)
-
-susp-supp-tree-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSupp (supp-tree-bd d T b) ≡ supp-tree-bd (suc d) (suspTree T) b
-susp-supp-tree-bd zero T false = refl
-susp-supp-tree-bd zero T true = refl
-susp-supp-tree-bd (suc d) Sing b = refl
-susp-supp-tree-bd (suc d) (Join S T) b = refl
+-- susp-supp-tree-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSupp (supp-tree-bd d T b) ≡ supp-tree-bd (suc d) (suspTree T) b
+-- susp-supp-tree-bd zero T false = refl
+-- susp-supp-tree-bd zero T true = refl
+-- susp-supp-tree-bd (suc d) Sing b = refl
+-- susp-supp-tree-bd (suc d) (Join S T) b = refl
 
 lookup-isVar : (xs : VarSet n) → (t : Tm n) → .⦃ isVar t ⦄ → Bool
 lookup-isVar (x ∷ xs) (Var zero) = x

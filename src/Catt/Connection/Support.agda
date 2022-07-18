@@ -22,6 +22,10 @@ open import Relation.Binary.Definitions
 open import Catt.Globular
 open import Catt.Globular.Properties
 
+connect-supp : VarSet (suc n) → VarSet (suc m) → VarSet (suc (m + n))
+connect-supp {m = zero} (x ∷ xs) (y ∷ ys) = (x ∨ y) ∷ xs
+connect-supp {m = suc m} xs (x ∷ ys) = x ∷ connect-supp xs ys
+{-
 VarSet-NonEmpty-Special : (xs : VarSet n) → Set
 VarSet-NonEmpty-Special {zero} xs = ⊥
 VarSet-NonEmpty-Special {suc zero} xs = ⊥
@@ -315,3 +319,4 @@ connect-supp-assoc xs (x′ ∷ ys) (x ∷ y ∷ z ∷ zs) = refl P.∷ connect-
 connect-supp-≡ᵖ : {xs : VarSet (suc n)} → {xs′ : VarSet (suc n′)} → {ys : VarSet (suc m)} → {ys′ : VarSet (suc m′)} → xs ≡ᵖ xs′ → ys ≡ᵖ ys′ → connect-supp xs ys ≡ᵖ connect-supp xs′ ys′
 connect-supp-≡ᵖ p (x∼y P.∷ P.[]) = p
 connect-supp-≡ᵖ p (x∼y P.∷ z P.∷ q) = x∼y Pointwise.∷ (connect-supp-≡ᵖ p (z P.∷ q))
+-}

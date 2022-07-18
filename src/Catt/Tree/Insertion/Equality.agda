@@ -71,6 +71,18 @@ syntax label-max-equality ΓS L M = L ≈[ ΓS ]lm M
 refl≈lm : L ≈[ ΓS ]lm L
 refl≈lm .get Z = refl≈stm
 
+compute-≈ : compute-stm a ≈[ incTree S ]stm compute-stm b → a ≈[ incTree S ]stm b
+compute-≈ {a = a} {b = b} p = begin
+  a
+    ≈˘⟨ reflexive≈stm (compute-to-term a) ⟩
+  compute-stm a
+    ≈⟨ p ⟩
+  compute-stm b
+    ≈⟨ reflexive≈stm (compute-to-term b) ⟩
+  b ∎
+  where
+    open Reasoning (stm-setoid-≈ _)
+
 pruned-bp-exterior-sub : (S : Tree n)
                        → (p : BranchingPoint S l)
                        → (T : Tree m)
@@ -160,3 +172,31 @@ pruned-bp-exterior-sub (Join (Join S₁ Sing) S₂) BPHere T q .get (PExt Z) = l
   where
     open Reasoning (stm-setoid-≈ _)
 pruned-bp-exterior-sub (Join (Join S₁ Sing) S₂) BPHere T q .get (PShift Z) = reflexive≈stm (extend-≃ (replace-not-here (SPath ∘ PShift) (SPath (PShift PHere)) Z ⦃ proj₁ it ⦄) refl≃l refl≃sty)
+
+exterior-disc : (S : Tree n)
+              → (p : BranchingPoint S l)
+              → exterior-sub-label S p (n-disc (height-of-branching p)) ⦃ is-linear-has-linear-height l (n-disc (height-of-branching p)) ⦃ n-disc-is-linear (height-of-branching p) ⦄ (≤-trans (<⇒≤ (bp-height-<-hob p)) (≤-reflexive (sym (tree-dim-n-disc (height-of-branching p))))) ⦄
+              ≈[ incTree (insertion-tree S p (n-disc (height-of-branching p)) ⦃ _ ⦄) ]lm ≃-label (sym≃′ (insertion-disc S p)) (id-label S)
+exterior-disc (Join S T) BPHere .get (PExt Z) = let
+  instance _ = n-disc-is-linear (tree-dim S)
+  in begin
+  (label-from-linear-tree-unbiased S (n-disc (suc (tree-dim S))) 1 Z >>= (connect-tree-inc-left (Join (n-disc (tree-dim S)) Sing) T))
+    ≈⟨ reflexive≈stm (extend-≃ (lfltu-maximal-path S (n-disc (suc (tree-dim S))) 1 Z) refl≃l refl≃sty) ⟩
+  (unbiased-comp′ (tree-dim S) (n-disc (tree-dim S)) >>=
+        (λ x → SPath (PExt x)) ,,
+        SArr (SPath PHere) S⋆ (SPath (PShift PHere)))
+    ≈⟨ {!!} ⟩
+  (unbiased-stm (tree-dim S) (n-disc (tree-dim S)) >>=
+        (λ x → SPath (PExt x)) ,,
+        SArr (SPath PHere) S⋆ (SPath (PShift PHere)))
+    ≈⟨ reflexive≈stm (extend-≃ (unbiased-stm-linear (tree-dim S) (n-disc (tree-dim S)) (sym (tree-dim-n-disc (tree-dim S)))) refl≃l refl≃sty) ⟩
+  SPath (PExt (is-linear-max-path (n-disc (tree-dim S))))
+    ≈⟨ reflexive≈stm (≃SPath (≃Ext (trans≃p (max-path-lin-tree (n-disc (tree-dim S)) Z (≃′-to-≃ (linear-tree-unique (n-disc (tree-dim S)) S (tree-dim-n-disc (tree-dim S))))) (ppath-≃-≃p (sym≃′ (linear-tree-unique (n-disc (tree-dim S)) S _)) Z)) refl≃)) ⟩
+  SPath (PExt (ppath-≃ (sym≃′ (linear-tree-unique (n-disc (tree-dim S)) S _)) Z)) ∎
+  where
+    open Reasoning (stm-setoid-≈ _)
+exterior-disc (Join S T) BPHere .get (PShift Z) = reflexive≈stm (replace-not-here (SPath ∘ PShift) (SPath (PShift PHere)) Z ⦃ proj₁ it ⦄)
+exterior-disc (Join S T) (BPExt p) .get (PExt Z) = compute-≈ (≈SExt (trans≈stm (exterior-disc S p .get Z) (reflexive≈stm (stm-≃-spath (sym≃′ (insertion-disc S p)) Z))))
+exterior-disc (Join S T) (BPExt p) .get (PShift Z) = compute-≈ refl≈stm
+exterior-disc (Join S T) (BPShift p) .get (PExt Z) = compute-≈ refl≈stm
+exterior-disc (Join S T) (BPShift p) .get (PShift Z) = compute-≈ (≈SShift (trans≈stm (exterior-disc T p .get Z ⦃ proj₂ it ⦄) (reflexive≈stm (stm-≃-spath (sym≃′ (insertion-disc T p)) Z))))

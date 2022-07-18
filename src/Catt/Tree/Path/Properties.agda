@@ -88,6 +88,18 @@ max-path-lin-tree Sing PHere Sing≃ = ≃Here Sing≃
 max-path-lin-tree (Join S Sing) (PExt Z) (Join≃ p Sing≃) = ≃Ext (max-path-lin-tree S Z p) Sing≃
 max-path-lin-tree (Join S Sing) (PShift PHere) (Join≃ p Sing≃) = ⊥-elim (proj₁ it)
 
+max-path-unique : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (P : Path S) → .⦃ is-Maximal P ⦄ → (Q : Path S) → .⦃ is-Maximal Q ⦄ → P ≃p Q
+max-path-unique Sing PHere PHere = refl≃p
+max-path-unique (Join S Sing) (PExt P) (PExt Q) = ≃Ext (max-path-unique S P Q) refl≃
+max-path-unique (Join S Sing) (PExt P) (PShift PHere) = ⊥-elim (proj₁ it)
+max-path-unique (Join S Sing) (PShift PHere) Q = ⊥-elim (proj₁ it)
+
+proj-ext : PExt {T = S} P ≃p PExt {T = T} Q → P ≃p Q
+proj-ext (≃Ext p _) = p
+
+proj-shift : PShift {S = S} P ≃p PShift {S = T} Q → P ≃p Q
+proj-shift (≃Shift _ p) = p
+
 -- susp-path-to-term : (P : Path X) → path-to-term (susp-path P) ≃tm suspTm (path-to-term P)
 -- susp-path-to-term {X = someTree x} P = id-on-tm (suspTm (path-to-term P))
 -- susp-path-to-term {X = Other _} (POther x) = refl≃tm
@@ -561,3 +573,12 @@ last-path-to-term (Join S T) = sub-action-≃-tm (last-path-to-term T) refl≃s
 is-linear-max-path-max : (S : Tree n) .⦃ _ : is-linear S ⦄ → is-Maximal (is-linear-max-path S)
 is-linear-max-path-max Sing = tt
 is-linear-max-path-max (Join S Sing) = is-linear-max-path-max S
+
+not-here-≃ : (P ≃p Q) → .⦃ not-here P ⦄ → not-here Q
+not-here-≃ (≃Ext p x) = tt
+not-here-≃ (≃Shift x p) = tt
+
+maximal-≃ : (P ≃p Q) → .⦃ is-Maximal P ⦄ → is-Maximal Q
+maximal-≃ (≃Here Sing≃) = tt
+maximal-≃ (≃Ext p x) = maximal-≃ p
+maximal-≃ (≃Shift x p) = (not-here-≃ p ⦃ proj₁ it ⦄) ,, (maximal-≃ p ⦃ proj₂ it ⦄)

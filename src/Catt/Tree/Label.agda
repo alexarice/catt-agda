@@ -92,7 +92,9 @@ lty = proj₂
 
 variable
   L L′ M M′ : Label X S
+  Lt : Label-WT X S
   a b c a′ b′ c′ : STm X
+  As Bs Cs : STy X
 
 label₁ : (L : Label-WT X (Join S T)) → Label-WT X S
 label₁ L = ap L ∘ PExt ,, SArr (ap L PHere) (lty L) (ap L (PShift PHere))
@@ -116,7 +118,7 @@ label-to-sub′ {S = Join S₁ S₂} f A = sub-from-connect (unrestrict (label-t
 label-to-sub (L ,, A) = label-to-sub′ (λ P → stm-to-term (L P)) (sty-to-type A)
 
 map-sty-pext : STy (someTree S) → STy (someTree (Join S T))
-map-sty-pext S⋆ = SArr SHere S⋆ (SPath (PShift PHere))
+map-sty-pext S⋆ = SArr SHere S⋆ (SShift (SPath PHere))
 map-sty-pext (SArr s A t) = SArr (SExt s) (map-sty-pext A) (SExt t)
 
 map-pext : Label-WT (someTree S) U → Label-WT (someTree (Join S T)) U

@@ -15,65 +15,6 @@ open import Catt.Syntax.Bundles
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
 
--- data _≃stm_ : STm X → STm Y → Set where
---   ≃Here : S ≃ S′ → SHere {S = S} ≃stm SHere {S = S′}
---   ≃Ext : ∀ {a : STm (someTree S)} {b : STm (someTree S′)} → a ≃stm b → T ≃ T′ → SExt {T = T} a ≃stm SExt {T = T′} b
---   ≃Shift : ∀ {a : STm (someTree T)} {b : STm (someTree T′)} → S ≃ S′ → a ≃stm b → SShift {S = S} a ≃stm SShift {S = S′} b
---   ≃SCoh : S ≃ T →
---   ≃Other : stm-to-term a ≃tm stm-to-term b → a ≃stm b
-
--- ≃stm-to-same-n : {X : MaybeTree n} → {Y : MaybeTree m} → {a : STm X} → {b : STm Y} → a ≃stm b → n ≡ m
--- ≃stm-to-same-n (≃Here x) = cong suc (≃-to-same-n x)
--- ≃stm-to-same-n (≃Ext p x) = cong₂ (λ a b → suc a + suc b) (≃-to-same-n x) (≃stm-to-same-n p)
--- ≃stm-to-same-n (≃Shift x p) = cong₂ (λ a b → a + suc (suc b)) (≃stm-to-same-n p) (≃-to-same-n x)
--- ≃stm-to-same-n (≃Other x) = ≃tm-to-same-length x
-
--- stm-to-term-≃ : a ≃stm b → stm-to-term a ≃tm stm-to-term b
--- stm-to-term-≃ (≃Here x) = Var≃ (cong suc (≃-to-same-n x)) (cong (λ - → toℕ (fromℕ -)) (≃-to-same-n x))
--- stm-to-term-≃ (≃Ext p x) = sub-action-≃-tm (susp-tm-≃ (stm-to-term-≃ p)) (connect-susp-inc-left-≃ (cong pred (≃stm-to-same-n p)) (≃-to-same-n x))
--- stm-to-term-≃ (≃Shift x p) = sub-action-≃-tm (stm-to-term-≃ p) (connect-susp-inc-right-≃ (≃-to-same-n x) (cong pred (≃stm-to-same-n p)))
--- stm-to-term-≃ (≃Other x) = x
-
--- refl≃stm : a ≃stm a
--- refl≃stm {a = SHere} = ≃Here refl≃
--- refl≃stm {a = SExt a} = ≃Ext refl≃stm refl≃
--- refl≃stm {a = SShift a} = ≃Shift refl≃ refl≃stm
--- refl≃stm {a = SCoh S A L} = {!!}
--- refl≃stm {a = SOther x} = ≃Other refl≃tm
-
--- sym≃stm : P ≃stm Q → Q ≃stm P
--- sym≃stm (≃Here x) = ≃Here (sym≃ x)
--- sym≃stm (≃Ext p x) = ≃Ext (sym≃stm p) (sym≃ x)
--- sym≃stm (≃Shift x p) = ≃Shift (sym≃ x) (sym≃stm p)
--- sym≃stm (≃Other x) = ≃Other (sym≃tm x)
-
--- trans≃stm : P ≃stm Q → Q ≃stm Q′ → P ≃stm Q′
--- trans≃stm (≃Here x) (≃Here y) = ≃Here (trans≃ x y)
--- trans≃stm (≃Here x) (≃Other y) = ≃Other (trans≃tm (stm-to-term-≃ (≃Here x)) y)
--- trans≃stm (≃Ext p x) (≃Ext q y) = ≃Ext (trans≃stm p q) (trans≃ x y)
--- trans≃stm (≃Ext p x) (≃Other y) = ≃Other (trans≃tm (stm-to-term-≃ (≃Ext p x)) y)
--- trans≃stm (≃Shift x p) (≃Shift y q) = ≃Shift (trans≃ x y) (trans≃stm p q)
--- trans≃stm (≃Shift x p) (≃Other y) = ≃Other (trans≃tm (stm-to-term-≃ (≃Shift x p)) y)
--- trans≃stm (≃Other x) p = ≃Other (trans≃tm x (stm-to-term-≃ p))
-
--- record PATH : Set where
---   constructor <_>p
---   field
---     {path-n} : ℕ
---     {path-X} : MaybeTree path-n
---     path : Path path-X
-
--- open PATH public
-
--- path-setoid : Setoid _ _
--- path-setoid = record { Carrier = PATH
---                         ; _≈_ = λ x y → path x ≃stm path y
---                         ; isEquivalence = record { refl = refl≃stm
---                                                  ; sym = sym≃stm
---                                                  ; trans = trans≃stm
---                                                  }
---                         }
-
 _≃stm_ : (a : STm X) → (b : STm Y) → Set
 a ≃stm b = Wrap (λ a b → stm-to-term a ≃tm stm-to-term b) a b
 
@@ -744,6 +685,16 @@ label-≃ p L = L ∘ ppath-≃ p
 label-wt-≃ : S ≃′ T → Label-WT X T → Label-WT X S
 label-wt-≃ p L = (label-≃ p (ap L)) ,, (lty L)
 
+label-≃-sym : (p : S ≃′ T) → L ≃l label-≃ p M → label-≃ (sym≃′ p) L ≃l M
+label-≃-sym {L = L} {M = M} p q .get Z = begin
+  < L (ppath-≃ (sym≃′ p) Z) >stm
+    ≈⟨ q .get (ppath-≃ (sym≃′ p) Z) ⟩
+  < M (ppath-≃ p (ppath-≃ (sym≃′ p) Z)) >stm
+    ≈˘⟨ ap-≃ (refl≃l {L = M}) (trans≃p (ppath-≃-≃p (sym≃′ p) Z) (ppath-≃-≃p p (ppath-≃ (sym≃′ p) Z))) ⟩
+  < M Z >stm ∎
+  where
+    open Reasoning stm-setoid
+
 _≃l′_ : Label X S → Label Y T → Set
 _≃l′_ {S = S} {T = T} L M = Σ[ p ∈ S ≃′ T ] L ≃l label-≃ p M
 
@@ -850,3 +801,24 @@ extend-map-pext {U = U} (SCoh S A M) L = begin
 
 label-on-sty-pext S⋆ L = refl≃sty
 label-on-sty-pext (SArr s A t) L = ≃SArr (extend-map-pext s L) (label-on-sty-pext A L) (extend-map-pext t L)
+
+connect-tree-inc-left-unit : (T : Tree n)
+                           → connect-tree-inc-left′ T Sing ≃lp (λ Z → Z)
+connect-tree-inc-left-unit Sing .get PHere = refl≃p
+connect-tree-inc-left-unit (Join S T) .get PHere = ≃Here (≃′-to-≃ (Join≃′ Refl≃′ (connect-tree-right-unit T)))
+connect-tree-inc-left-unit (Join S T) .get (PExt Z) = ≃Ext refl≃p (≃′-to-≃ (connect-tree-right-unit T))
+connect-tree-inc-left-unit (Join S T) .get (PShift Z) = ≃Shift refl≃ (connect-tree-inc-left-unit T .get Z)
+
+connect-label-right-unit : (L : Label X S)
+                         → (M : Label X Sing)
+                         → connect-label L M ≃l label-≃ (connect-tree-right-unit S) L
+connect-label-right-unit {S = Sing} L M .get PHere = refl≃stm
+connect-label-right-unit {S = Join S T} L M .get PHere = refl≃stm
+connect-label-right-unit {S = Join S T} L M .get (PExt Z) = refl≃stm
+connect-label-right-unit {S = Join S T} L M .get (PShift Z) = connect-label-right-unit (L ∘ PShift) M .get Z
+
+stm-≃-spath : (p : S ≃′ T)
+            → (P : Path S)
+            → stm-≃ p (SPath P) ≃stm SPath (ppath-≃ p P)
+stm-≃-spath Refl≃′ P = refl≃stm
+stm-≃-spath (Join≃′ p q) P = refl≃stm

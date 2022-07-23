@@ -109,6 +109,21 @@ sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M PHere = L PHere
 sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M (PExt Z) = L (PExt Z)
 sub-from-insertion-label (Join S₁ S₂) (BPShift p) T L M (PShift Z) = sub-from-insertion-label S₂ p T (L ∘ PShift) M Z
 
+sub-from-insertion-label′ : (S : Tree n)
+                        → (p : BranchingPoint S d)
+                        → (T : Tree m)
+                        → .⦃ lh : has-linear-height d T ⦄
+                        → (L : Label X S)
+                        → (M : Label X T)
+                        → Label X (insertion-tree S p T)
+sub-from-insertion-label′ (Join S₁ S₂) BPHere T L M = connect-label′ M (L ∘ PShift)
+sub-from-insertion-label′ (Join S₁ S₂) (BPExt p) (Join T Sing) L M PHere = L PHere
+sub-from-insertion-label′ (Join S₁ S₂) (BPExt p) (Join T Sing) L M (PExt Z) = sub-from-insertion-label′ S₁ p T (L ∘ PExt) (M ∘ PExt) Z
+sub-from-insertion-label′ (Join S₁ S₂) (BPExt p) (Join T Sing) L M (PShift Z) = L (PShift Z)
+sub-from-insertion-label′ (Join S₁ S₂) (BPShift p) T L M PHere = L PHere
+sub-from-insertion-label′ (Join S₁ S₂) (BPShift p) T L M (PExt Z) = L (PExt Z)
+sub-from-insertion-label′ (Join S₁ S₂) (BPShift p) T L M (PShift Z) = sub-from-insertion-label′ S₂ p T (L ∘ PShift) M Z
+
 sub-from-insertion : (S : Tree n)
                    → (p : BranchingPoint S d)
                    → (T : Tree m)

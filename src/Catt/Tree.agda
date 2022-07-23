@@ -66,6 +66,11 @@ has-linear-height (suc n) (Join T (Join _ _)) = ⊥
 is-linear : Tree n → Set
 is-linear T = has-linear-height (tree-dim T) T
 
+non-linear : Tree n → Set
+non-linear Sing = ⊥
+non-linear (Join T Sing) = non-linear T
+non-linear (Join T (Join T₁ T₂)) = ⊤
+
 is-linear-dec : (T : Tree n) → Dec (is-linear T)
 is-linear-dec Sing = yes tt
 is-linear-dec (Join S Sing) = is-linear-dec S

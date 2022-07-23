@@ -221,6 +221,14 @@ connect-label {S = Join S₁ S₂} L M PHere = L PHere
 connect-label {S = Join S₁ S₂} L M (PExt Z) = L (PExt Z)
 connect-label {S = Join S₁ S₂} L M (PShift Z) = connect-label (λ x → L (PShift x)) M Z
 
+connect-label′ : Label X S
+               → Label X T
+               → Label X (connect-tree S T)
+connect-label′ {S = Sing} L M = M
+connect-label′ {S = Join S₁ S₂} L M PHere = L PHere
+connect-label′ {S = Join S₁ S₂} L M (PExt Z) = L (PExt Z)
+connect-label′ {S = Join S₁ S₂} L M (PShift Z) = connect-label′ (L ∘ PShift) M Z
+
 connect-tree-inc-left′ : (S : Tree n) → (T : Tree m) → Label′ (connect-tree S T) S
 connect-tree-inc-left′ Sing T P = PHere
 connect-tree-inc-left′ (Join S₁ S₂) T PHere = PHere

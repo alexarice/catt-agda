@@ -15,6 +15,12 @@ open import Catt.Globular.Properties
 open import Catt.Variables
 open import Catt.Variables.Properties
 
+linear-non-linear : (T : Tree n)
+                  → .⦃ non-linear T ⦄
+                  → .⦃ is-linear T ⦄
+                  → ⊥
+linear-non-linear (Join T Sing) = linear-non-linear T
+
 tree-dim-n-disc : (n : ℕ) → tree-dim (n-disc n) ≡ n
 tree-dim-n-disc zero = refl
 tree-dim-n-disc (suc n) = cong suc (tree-dim-n-disc n)
@@ -305,3 +311,10 @@ linear-tree-unique : (S : Tree n) → .⦃ is-linear S ⦄
                    → S ≃′ T
 linear-tree-unique Sing Sing p = refl≃′
 linear-tree-unique (Join S Sing) (Join T Sing) p = Join≃′ (linear-tree-unique S T (cong pred p)) refl≃′
+
+connect-tree-assoc : (S : Tree n)
+                   → (T : Tree m)
+                   → (U : Tree l)
+                   → connect-tree S (connect-tree T U) ≃′ connect-tree (connect-tree S T) U
+connect-tree-assoc Sing T U = refl≃′
+connect-tree-assoc (Join S₁ S₂) T U = Join≃′ refl≃′ (connect-tree-assoc S₂ T U)

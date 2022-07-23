@@ -84,6 +84,9 @@ sty-setoid = record { Carrier = STY
 ≃SArr : {A : STy X} → {B : STy Y} → (a ≃stm a′) → A ≃sty B → b ≃stm b′ → SArr a A b ≃sty SArr a′ B b′
 ≃SArr [ p ] [ q ] [ r ] = [ Arr≃ p q r ]
 
+≃S⋆ : S ≃ T → S⋆ {X = someTree S} ≃sty S⋆ {X = someTree T}
+≃S⋆ p = [ (Star≃ (cong suc (≃-to-same-n p))) ]
+
 _≃l_ : Label X S → Label Y S → Set
 _≃l_ {S = S} L M = Wrap (λ L M → (P : Path S) → L P ≃stm M P) L M
 
@@ -164,7 +167,7 @@ label-to-sub-≃ {S = Join S T} L M [ p ] q
   = sub-from-connect-≃ (unrestrict-≃ (label-to-sub-≃ (label₁ L) (label₁ M) ([ (λ P → p (PExt P)) ]) (≃SArr (p PHere) q (p (PShift PHere)))))
                        (label-to-sub-≃ (label₂ L) (label₂ M) ([ (λ P → p (PShift P)) ]) q)
 
-≃SCoh : (S : Tree n) → {A A′ : STy (someTree S)} → A ≃sty A′ → ∀ {L : Label-WT X S} {M : Label-WT X S} → ap L ≃l ap M → lty L ≃sty lty M → SCoh S A L ≃stm SCoh S A′ M
+≃SCoh : (S : Tree n) → {A A′ : STy (someTree S)} → A ≃sty A′ → ∀ {L : Label-WT X S} {M : Label-WT Y S} → ap L ≃l ap M → lty L ≃sty lty M → SCoh S A L ≃stm SCoh S A′ M
 ≃SCoh S p q r = [ sub-action-≃-tm (Coh≃ refl≃c (p .get) refl≃s) (label-to-sub-≃ _ _ q r) ]
 
 to-sty-to-type : (A : Ty n) → sty-to-type (to-sty A) ≃ty A
@@ -557,6 +560,9 @@ extend-id {T = T} a = [ begin
   where
     open Reasoning tm-setoid
 
+comp-right-unit : (L : Label (someTree T) S) → label-comp L (id-label-wt T) ≃l L
+comp-right-unit L .get Z = extend-id (L Z)
+
 _≃lm_ : (L : Label X S) → (M : Label Y S) → Set
 _≃lm_ {S = S} L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-Maximal Q ⦄ → L Q ≃stm M Q) L M
 
@@ -632,20 +638,17 @@ connect-label-≃m : ∀ {L : Label X S} {M : Label X T} {L′ : Label Y S} {M�
 connect-label-≃m {S = Sing} p q = replace-label-≃m q (p .get PHere)
 connect-label-≃m {S = Join S₁ S₂} p q .get PHere = p .get PHere
 connect-label-≃m {S = Join S₁ S₂} p q .get (PExt Z) = p .get (PExt Z)
-connect-label-≃m {S = Join S₁ Sing} {L = L} {M} {L′} {M′} p q .get (PShift Z) = let
-  instance .x : not-here Z
-  x = proj₁ it
-  in begin
+connect-label-≃m {S = Join S₁ Sing} {L = L} {M} {L′} {M′} p q .get (PShift Z) = begin
   < replace-label M (L (PShift PHere)) Z >stm
     ≈⟨ replace-not-here M (L (PShift PHere)) Z ⟩
   < M Z >stm
-    ≈⟨ q .get Z ⦃ proj₂ it ⦄ ⟩
+    ≈⟨ q .get Z ⟩
   < M′ Z >stm
     ≈˘⟨ replace-not-here M′ (L′ (PShift PHere)) Z ⟩
   < replace-label M′ (L′ (PShift PHere)) Z >stm ∎
   where
     open Reasoning stm-setoid
-connect-label-≃m {S = Join S₁ (Join S₂ S₃)} {L = L} {M} {L′} p q .get (PShift Z) = connect-label-≃m {L = L ∘ PShift} {L′ = L′ ∘ PShift} [ (λ Q → p .get (PShift Q) ⦃ maximal-join-not-here Q ,, it ⦄) ] q .get Z ⦃ proj₂ it ⦄
+connect-label-≃m {S = Join S₁ (Join S₂ S₃)} {L = L} {M} {L′} p q .get (PShift Z) = connect-label-≃m {L = L ∘ PShift} {L′ = L′ ∘ PShift} [ (λ Q → p .get (PShift Q) ⦃ build ⦃ maximal-join-not-here Q ⦄ ⦄) ] q .get Z
 
 connect-label-sing : (L : Label X S) → (M M′ : Label X Sing) → connect-label L M ≃l connect-label L M′
 connect-label-sing {S = Sing} L M M′ .get PHere = refl≃stm
@@ -689,6 +692,16 @@ label-≃-sym : (p : S ≃′ T) → L ≃l label-≃ p M → label-≃ (sym≃�
 label-≃-sym {L = L} {M = M} p q .get Z = begin
   < L (ppath-≃ (sym≃′ p) Z) >stm
     ≈⟨ q .get (ppath-≃ (sym≃′ p) Z) ⟩
+  < M (ppath-≃ p (ppath-≃ (sym≃′ p) Z)) >stm
+    ≈˘⟨ ap-≃ (refl≃l {L = M}) (trans≃p (ppath-≃-≃p (sym≃′ p) Z) (ppath-≃-≃p p (ppath-≃ (sym≃′ p) Z))) ⟩
+  < M Z >stm ∎
+  where
+    open Reasoning stm-setoid
+
+label-≃-sym-max : (p : S ≃′ T) → L ≃lm label-≃ p M → label-≃ (sym≃′ p) L ≃lm M
+label-≃-sym-max {L = L} {M = M} p q .get Z = begin
+  < L (ppath-≃ (sym≃′ p) Z) >stm
+    ≈⟨ q .get (ppath-≃ (sym≃′ p) Z) ⦃ maximal-≃ (ppath-≃-≃p (sym≃′ p) Z) ⦄ ⟩
   < M (ppath-≃ p (ppath-≃ (sym≃′ p) Z)) >stm
     ≈˘⟨ ap-≃ (refl≃l {L = M}) (trans≃p (ppath-≃-≃p (sym≃′ p) Z) (ppath-≃-≃p p (ppath-≃ (sym≃′ p) Z))) ⟩
   < M Z >stm ∎
@@ -822,3 +835,77 @@ stm-≃-spath : (p : S ≃′ T)
             → stm-≃ p (SPath P) ≃stm SPath (ppath-≃ p P)
 stm-≃-spath Refl≃′ P = refl≃stm
 stm-≃-spath (Join≃′ p q) P = refl≃stm
+
+connect-tree-inc-left-assoc : (S : Tree n)
+                            → (T : Tree m)
+                            → (U : Tree l)
+                            → (connect-tree-inc-left′ (connect-tree S T) U ∘ connect-tree-inc-left′ S T)
+                            ≃lp connect-tree-inc-left′ S (connect-tree T U)
+connect-tree-inc-left-assoc Sing T U .get Z = connect-tree-inc-left-phere T U
+connect-tree-inc-left-assoc (Join S₁ S₂) T U .get PHere = ≃Here (≃′-to-≃ (sym≃′ (connect-tree-assoc (Join S₁ S₂) T U)))
+connect-tree-inc-left-assoc (Join S₁ S₂) T U .get (PExt Z) = ≃Ext refl≃p (sym≃ (≃′-to-≃ (connect-tree-assoc S₂ T U)))
+connect-tree-inc-left-assoc (Join S₁ S₂) T U .get (PShift Z) = ≃Shift refl≃ (connect-tree-inc-left-assoc S₂ T U .get Z)
+
+connect-tree-inc-right-assoc : (S : Tree n)
+                             → (T : Tree m)
+                             → (U : Tree l)
+                             → (connect-tree-inc-right′ S (connect-tree T U) ∘ connect-tree-inc-right′ T U)
+                             ≃lp connect-tree-inc-right′ (connect-tree S T) U
+connect-tree-inc-right-assoc Sing T U .get Z = refl≃p
+connect-tree-inc-right-assoc (Join S₁ S₂) T U .get Z = ≃Shift refl≃ (connect-tree-inc-right-assoc S₂ T U .get Z)
+
+connect-tree-inc-assoc : (S : Tree n)
+                       → (T : Tree m)
+                       → (U : Tree l)
+                       → (connect-tree-inc-right′ S (connect-tree T U) ∘ connect-tree-inc-left′ T U)
+                       ≃lp (connect-tree-inc-left′ (connect-tree S T) U ∘ connect-tree-inc-right′ S T)
+connect-tree-inc-assoc Sing T U .get Z = refl≃p
+connect-tree-inc-assoc (Join S₁ S₂) T U .get Z = ≃Shift refl≃ (connect-tree-inc-assoc S₂ T U .get Z)
+
+replace-connect-label : (L : Label X S)
+                      → (M : Label X T)
+                      → (a : STm X)
+                      → replace-label (connect-label L M) a ≃l connect-label (replace-label L a) M
+replace-connect-label {S = Sing} L M a .get PHere = refl≃stm
+replace-connect-label {S = Sing} L M a .get (PExt Z) = refl≃stm
+replace-connect-label {S = Sing} L M a .get (PShift Z) = refl≃stm
+replace-connect-label {S = Join S₁ S₂} L M a .get PHere = refl≃stm
+replace-connect-label {S = Join S₁ S₂} L M a .get (PExt Z) = refl≃stm
+replace-connect-label {S = Join S₁ S₂} L M a .get (PShift Z) = refl≃stm
+
+connect-label-assoc : (L : Label X S)
+                    → (M : Label X T)
+                    → (N : Label X U)
+                    → connect-label L (connect-label M N)
+                    ≃l label-≃ (connect-tree-assoc S T U) (connect-label (connect-label L M) N)
+connect-label-assoc {S = Sing} L M N = replace-connect-label M N (L PHere)
+connect-label-assoc {S = Join S₁ S₂} L M N .get PHere = refl≃stm
+connect-label-assoc {S = Join S₁ S₂} L M N .get (PExt Z) = refl≃stm
+connect-label-assoc {S = Join S₁ S₂} L M N .get (PShift Z) = connect-label-assoc (L ∘ PShift) M N .get Z
+
+stm-≃-≃stm : (p : S ≃′ T) → (a : STm (someTree S)) → a ≃stm stm-≃ p a
+sty-≃-≃sty : (p : S ≃′ T) → (A : STy (someTree S)) → A ≃sty sty-≃ p A
+≃-label-≃l : (p : S ≃′ T) → (L : Label (someTree S) U) → L ≃l ≃-label p L
+
+stm-≃-≃stm Refl≃′ a = refl≃stm
+stm-≃-≃stm (Join≃′ p q) (SExt a) = ≃SExt (stm-≃-≃stm p a) (≃′-to-≃ q)
+stm-≃-≃stm (Join≃′ p q) (SShift a) = ≃SShift (≃′-to-≃ p) (stm-≃-≃stm q a)
+stm-≃-≃stm (Join≃′ p q) (SPath P) = ≃SPath (ppath-≃-≃p (Join≃′ p q) P)
+stm-≃-≃stm (Join≃′ p q) (SCoh S A L) = ≃SCoh S refl≃sty (≃-label-≃l (Join≃′ p q) (ap L)) (sty-≃-≃sty (Join≃′ p q) (lty L))
+
+sty-≃-≃sty p S⋆ = ≃S⋆ (≃′-to-≃ p)
+sty-≃-≃sty p (SArr s A t) = ≃SArr (stm-≃-≃stm p s) (sty-≃-≃sty p A) (stm-≃-≃stm p t)
+
+≃-label-≃l p L .get Z = stm-≃-≃stm p (L Z)
+
+stm-≃-≃ : (p : S ≃′ T) → a ≃stm b → stm-≃ p a ≃stm stm-≃ p b
+stm-≃-≃ {a = a} {b = b} p q = begin
+  < stm-≃ p a >stm
+    ≈˘⟨ stm-≃-≃stm p a ⟩
+  < a >stm
+    ≈⟨ q ⟩
+  < b >stm
+    ≈⟨ stm-≃-≃stm p b ⟩
+  < stm-≃ p b >stm ∎
+  where
+    open Reasoning stm-setoid

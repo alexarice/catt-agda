@@ -13,6 +13,14 @@ open import Data.Fin.Patterns public
 open import Data.Wrap public
 open import Function using (it; _∘_) public
 
+record _×′_ (A : Set) (B : Set) : Set where
+  constructor build
+  field
+    ⦃ p₁ ⦄ : A
+    ⦃ p₂ ⦄ : B
+
+open _×′_ public
+
 variable
   -- X Y Z : Set
   n n′ m m′ l l′ o d d′ d″ : ℕ

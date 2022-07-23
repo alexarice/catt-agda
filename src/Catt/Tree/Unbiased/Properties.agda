@@ -116,7 +116,7 @@ lfltu-maximal-path : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) 
                                              → label-from-linear-tree-unbiased S T d Z ≃stm unbiased-comp′ (d + tree-dim S) T
 lfltu-maximal-path Sing T d Z = unbiased-comp′-≃ (sym (+-identityʳ d)) refl≃
 lfltu-maximal-path (Join S Sing) T d (PExt Z) = trans≃stm (lfltu-maximal-path S T (suc d) Z) (unbiased-comp′-≃ (sym (+-suc d (tree-dim S))) refl≃)
-lfltu-maximal-path (Join S Sing) T d (PShift PHere) = ⊥-elim (proj₁ it)
+lfltu-maximal-path (Join S Sing) T d (PShift PHere) = ⊥-elim it
 
 lfltu-≤-linear-height-lem : {x y : ℕ}
                           → (p : x ≡ y)
@@ -174,7 +174,7 @@ module _ where
     < SPath (tree-inc-label′ (suc d₁ + d₂) T b (is-linear-max-path (tree-bd (suc d₁ + d₂) T))) >stm
       ≈˘⟨ lfltu-≤-linear-height-lem (+-suc d₁ d₂) T b p ⟩
     < SPath (tree-inc-label′ (d₁ + suc d₂) T b (is-linear-max-path (tree-bd (d₁ + suc d₂) T))) >stm ∎
-  lfltu-≤-linear-height (Join S Sing) T d₁ (suc d₂) p q r b (PShift PHere) = ⊥-elim (proj₁ it)
+  lfltu-≤-linear-height (Join S Sing) T d₁ (suc d₂) p q r b (PShift PHere) = ⊥-elim it
 
   lfltu->-linear-height : (S : Tree n) → .⦃ _ : is-linear S ⦄
                         → (T : Tree m)
@@ -209,7 +209,7 @@ module _ where
       ≈⟨ reflexive≃stm (cong (λ - → unbiased-comp′ - (tree-bd - T) >>= tree-inc-label - T b) (+-suc d₂ d₁)) ⟩
     < unbiased-comp′ (suc d₂ + d₁) (tree-bd (suc d₂ + d₁) T)
       >>= tree-inc-label (suc d₂ + d₁) T b >stm ∎
-  lfltu->-linear-height (Join S Sing) T d₁ (suc d₂) p q r b (PShift PHere) = ⊥-elim (proj₁ it)
+  lfltu->-linear-height (Join S Sing) T d₁ (suc d₂) p q r b (PShift PHere) = ⊥-elim it
   lfltu->-linear-height (Join S Sing) T (suc d₁) zero p q r false PHere
     = extend-≃ (unbiased-stm-bd-non-linear (suc d₁) T (<-transˡ q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
   lfltu->-linear-height (Join S Sing) T (suc d₁) zero p q r true PHere

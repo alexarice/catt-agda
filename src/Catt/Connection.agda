@@ -7,8 +7,8 @@ open import Catt.Suspension
 connect : (Γ : Ctx (suc n)) → (x : Tm (suc n)) → (Δ : Ctx (suc m)) → Ctx (suc (m + n))
 connect-inc-right : (x : Tm (suc n)) → (m : ℕ) → Sub (suc m) (suc (m + n)) ⋆
 
-connect Γ x (∅ , A) = Γ
-connect Γ x (Δ , A , B) = (connect Γ x (Δ , A)) , B [ connect-inc-right x (ctxLength Δ) ]ty
+connect {m = zero} Γ x (Δ , A) = Γ
+connect {m = suc m} Γ x (Δ , A) = (connect Γ x Δ) , A [ connect-inc-right x m ]ty
 
 connect-inc-right x zero = ⟨ ⟨⟩ , x ⟩
 connect-inc-right x (suc m) = ⟨ liftSub (connect-inc-right x m) , 0V ⟩

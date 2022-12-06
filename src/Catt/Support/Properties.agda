@@ -20,6 +20,7 @@ open import Catt.Pasting.Properties
 open import Catt.Connection
 open import Catt.Connection.Pasting
 open import Catt.Suspension
+open import Catt.Suspension.Properties
 open import Catt.Suspension.Pasting
 open import Catt.Globular
 open import Catt.Globular.Properties
@@ -99,9 +100,26 @@ module _ {n : ℕ} where
     ; identity = ∪-left-unit ,, ∪-right-unit
     }
 
+  ∪-isCommutativeMonoid : IsCommutativeMonoid _∪_ empty
+  ∪-isCommutativeMonoid = record
+    { isMonoid = ∪-isMonoid
+    ; comm = ∪-comm
+    }
+
+  ∪-isIdempotentCommutativeMonoid : IsIdempotentCommutativeMonoid _∪_ empty
+  ∪-isIdempotentCommutativeMonoid = record
+    { isCommutativeMonoid = ∪-isCommutativeMonoid
+    ; idem = ∪-idem
+    }
+
   ∪-monoid : Monoid _ _
   ∪-monoid = record
     { isMonoid = ∪-isMonoid }
+
+  ∪-idempotentCommutativeMonoid : IdempotentCommutativeMonoid _ _
+  ∪-idempotentCommutativeMonoid = record
+    { isIdempotentCommutativeMonoid = ∪-isIdempotentCommutativeMonoid
+    }
 
 TransportVarSet-empty : (σ : Sub n m ⋆) → TransportVarSet empty σ ≡ empty
 TransportVarSet-empty ⟨⟩ = refl
@@ -284,6 +302,19 @@ isVar-supp (Var i) = refl
 unrestrict-supp : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → FVSub (unrestrict σ) ≡ FVSub σ
 unrestrict-supp ⟨⟩ = refl
 unrestrict-supp ⟨ σ , t ⟩ = cong (_∪ FVTm t) (unrestrict-supp σ)
+
+coh-sub-fv : (Γ : Ctx (suc n)) → (A : Ty (suc n)) → (σ : Sub (suc n) m B) → FVTm (Coh Γ A idSub [ σ ]tm) ≡ FVSub σ
+coh-sub-fv {B = ⋆} Γ A σ = FVSub-≃ (id-right-unit σ)
+coh-sub-fv {B = s ─⟨ B ⟩⟶ t} Γ A σ = begin
+  FVTm (Coh (suspCtx Γ) (suspTy A) (suspSub idSub) [ unrestrict σ ]tm)
+    ≡⟨ FVTm-≃ (sub-action-≃-tm (Coh≃ (refl≃c {Γ = suspCtx Γ}) refl≃ty susp-functorial-id) (refl≃s {σ = unrestrict σ})) ⟩
+  FVTm (Coh (suspCtx Γ) (suspTy A) idSub [ unrestrict σ ]tm)
+    ≡⟨ coh-sub-fv (suspCtx Γ) (suspTy A) (unrestrict σ) ⟩
+  FVSub (unrestrict σ)
+    ≡⟨ unrestrict-supp σ ⟩
+  FVSub σ ∎
+  where
+    open ≡-Reasoning
 
 ∪-⊆-2 : (xs ys : VarSet n) → ys ⊆ xs ∪ ys
 ∪-⊆-2 xs ys = begin
@@ -485,3 +516,21 @@ DC-is-DC : (Γ : Ctx n) → (xs : VarSet n) → is-DC Γ (DC Γ xs)
 DC-is-DC ∅ emp = tt
 DC-is-DC (Γ , A) (ewf xs) = DC-is-DC Γ xs
 DC-is-DC (Γ , A) (ewt xs) = (DC-is-DC Γ (xs ∪ FVTy A)) ,, ⊆-trans (∪-⊆-2 xs (FVTy A)) (DC-⊆ Γ (xs ∪ FVTy A))
+
+drop-var : (t : Tm n) → .⦃ isVar t ⦄ → drop (FVTm t) ≡ empty
+drop-var (Var 0F) = refl
+drop-var (Var (suc i)) = cong ewf (drop-var (Var i))
+
+DC-fromℕ : (Γ : Ctx (suc n)) → SuppTm Γ (Var (fromℕ n)) ≡ trueAt (fromℕ n)
+DC-fromℕ {n = zero} (∅ , A) = refl
+DC-fromℕ {n = suc n} (Γ , A) = cong ewf (DC-fromℕ Γ)
+
+DC-cong-⊆ : (Γ : Ctx n) → {xs ys : VarSet n} → xs ⊆ ys → DC Γ xs ⊆ DC Γ ys
+DC-cong-⊆ Γ {xs} {ys} p = begin
+  DC Γ ys
+    ≡⟨ cong (DC Γ) p ⟩
+  DC Γ (ys ∪ xs)
+    ≡⟨ DC-cup Γ ys xs ⟩
+  DC Γ ys ∪ DC Γ xs ∎
+  where
+    open ≡-Reasoning

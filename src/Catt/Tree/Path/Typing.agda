@@ -25,24 +25,31 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing index rule lift-rule
+open import Catt.Tree.Label
+open import Catt.Tree.Label.Properties
 
-data Typing-Path : (Γ : CtxOrTree n) → Path (COT-to-MT Γ) → (A : Ty n) → Set where
-  TyPConv : Typing-Path ΓS P A → A ≈[ COT-to-Ctx ΓS ]ty B → Typing-Path ΓS P B
-  TyHere : Typing-Path (incTree S) PHere ⋆
-  TyExt : Typing-Path (incTree S) P A → Typing-Path (incTree (Join S T)) (PExt P) (suspTy A [ connect-susp-inc-left (tree-size S) (tree-size T) ]ty)
-  TyShift : Typing-Path (incTree T) P A → Typing-Path (incTree (Join S T)) (PShift P) (A [ connect-susp-inc-right (tree-size S) (tree-size T) ]ty)
-  TyOther : Typing-Tm (COT-to-Ctx ΓS) t A → Typing-Path ΓS (POther t) A
+getPathType : (P : Path S) → STy (someTree S)
+getPathType PHere = S⋆
+getPathType (PExt P) = map-sty-pext (getPathType P)
+getPathType (PShift P) = map-sty-pshift (getPathType P)
 
-transport-path-typing : Typing-Path ΓS P A → P ≃p Q → A ≈[ COT-to-Ctx ΓS ]ty B → Typing-Path ΓS Q B
-transport-path-typing (TyPConv Pty x) p q = transport-path-typing Pty p (trans≈ty x q)
-transport-path-typing TyHere (≃Here x) Star≈ = TyHere
-transport-path-typing (TyExt Pty) (≃Ext p x) q = TyPConv (TyExt (transport-path-typing Pty p refl≈ty)) q
-transport-path-typing (TyShift Pty) (≃Shift x p) q = TyPConv (TyShift (transport-path-typing Pty p refl≈ty)) q
-transport-path-typing (TyOther x) (≃Other y) q = TyOther (TyConv (transport-typing x y) q)
-
-path-to-term-Ty : Typing-Path ΓS P A → Typing-Tm (COT-to-Ctx ΓS) (path-to-term P) A
-path-to-term-Ty (TyPConv Pty p) = TyConv (path-to-term-Ty Pty) p
-path-to-term-Ty {ΓS = incTree S} TyHere = fst-var-Ty (tree-to-ctx S)
-path-to-term-Ty {ΓS = incTree (Join S T)} (TyExt p) = apply-sub-tm-typing (suspTmTy (path-to-term-Ty p)) (connect-susp-inc-left-Ty (tree-to-ctx T))
-path-to-term-Ty {ΓS = incTree (Join S T)} (TyShift p) = apply-sub-tm-typing (path-to-term-Ty p) (connect-susp-inc-right-Ty (tree-to-ctx S))
-path-to-term-Ty (TyOther x) = x
+path-to-term-Ty : (P : Path S) → Typing-Tm (tree-to-ctx S) (path-to-term P) (sty-to-type (getPathType P))
+path-to-term-Ty {S = S} PHere = fromℕ-Ty (tree-to-ctx S)
+path-to-term-Ty (PExt {T = T} P) = TyConv (apply-sub-tm-typing (suspTmTy (path-to-term-Ty P)) (connect-susp-inc-left-Ty (tree-to-ctx T))) (reflexive≈ty (begin
+  < suspTy (sty-to-type (getPathType P)) [ connect-susp-inc-left _ _ ]ty >ty
+    ≈˘⟨ sub-action-≃-ty (susp-sty-to-type (getPathType P)) refl≃s ⟩
+  < sty-to-type (susp-sty (getPathType P)) [ connect-susp-inc-left _ (tree-size T) ]ty >ty
+    ≈˘⟨ sty-sub-prop (susp-sty (getPathType P)) (connect-susp-inc-left _ (tree-size T)) ⟩
+  < sty-to-type (sty-sub (susp-sty (getPathType P)) (connect-susp-inc-left _ (tree-size T))) >ty
+    ≈⟨ map-sty-pext-prop (getPathType P) .get  ⟩
+  < sty-to-type (map-sty-pext (getPathType P)) >ty ∎))
+  where
+    open Reasoning ty-setoid
+path-to-term-Ty (PShift {S = S} P) = TyConv (apply-sub-tm-typing (path-to-term-Ty P) (connect-susp-inc-right-Ty (tree-to-ctx S))) (reflexive≈ty (begin
+  < sty-to-type (getPathType P) [ connect-susp-inc-right _ _ ]ty >ty
+    ≈˘⟨ sty-sub-prop (getPathType P) (connect-susp-inc-right _ _) ⟩
+  < sty-to-type (sty-sub (getPathType P) (connect-susp-inc-right (tree-size S) _)) >ty
+    ≈˘⟨ map-sty-pshift-prop (getPathType P) .get ⟩
+  < sty-to-type (map-sty-pshift (getPathType P)) >ty ∎))
+  where
+    open Reasoning ty-setoid

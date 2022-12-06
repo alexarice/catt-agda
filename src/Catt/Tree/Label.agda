@@ -71,13 +71,14 @@ stm-to-term : {X : MaybeTree n} → STm X → Tm n
 sty-to-type : {X : MaybeTree n} → STy X → Ty n
 label-to-sub : {X : MaybeTree n} → (L : Label-WT X S) → Sub (suc (tree-size S)) n (sty-to-type (proj₂ L))
 
-compute-stm : STm (someTree S) → STm (someTree S)
+compute-stm : STm X → STm X
 compute-stm (SExt a) = SExt a
 compute-stm (SShift a) = SShift a
 compute-stm (SPath PHere) = SPath PHere
 compute-stm (SPath (PExt x)) = SExt (SPath x)
 compute-stm (SPath (PShift x)) = SShift (SPath x)
 compute-stm (SCoh S A L) = SCoh S A L
+compute-stm (SOther t) = SOther t
 
 ap : Label-WT X S → Path S → STm X
 ap = proj₁

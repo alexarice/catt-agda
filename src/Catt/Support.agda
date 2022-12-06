@@ -69,11 +69,6 @@ pdb-bd-supp n (Γ , B , A) b = tri-cases (<-cmp n (ty-dim B))
 pd-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pd : Γ ⊢pd ⦄ → (b : Bool) → VarSet m
 pd-bd-supp n Γ b = pdb-bd-supp n Γ ⦃ pd-to-pdb it ⦄ b
 
-supp-condition : (b : Bool) → (A : Ty (suc n)) → (Γ : Ctx (suc n)) → .⦃ pd : Γ ⊢pd ⦄ → Set
-supp-condition false A Γ = FVTy A ≡ full
-supp-condition true ⋆ Γ = ⊥
-supp-condition true (s ─⟨ A ⟩⟶ t) Γ = NonZero (ctx-dim Γ) × FVTy A ∪ FVTm s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false × FVTy A ∪ FVTm t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true
-
 TransportVarSet : VarSet n → Sub n m A → VarSet m
 TransportVarSet xs ⟨⟩ = empty
 TransportVarSet (ewf xs) ⟨ σ , t ⟩ = TransportVarSet xs σ
@@ -117,3 +112,8 @@ SuppTy Γ A = DC Γ (FVTy A)
 
 SuppSub : (Γ : Ctx n) → (σ : Sub m n A) → VarSet n
 SuppSub Γ σ = DC Γ (FVSub σ)
+
+supp-condition : (b : Bool) → (A : Ty (suc n)) → (Γ : Ctx (suc n)) → .⦃ pd : Γ ⊢pd ⦄ → Set
+supp-condition false A Γ = SuppTy Γ A ≡ full
+supp-condition true ⋆ Γ = ⊥
+supp-condition true (s ─⟨ A ⟩⟶ t) Γ = NonZero (ctx-dim Γ) × SuppTm Γ s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false × SuppTm Γ t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true

@@ -145,6 +145,9 @@ coh-ty-ty (TyCoh Aty τty b a) = Aty
 isVar-Ty : (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
 isVar-Ty (Var i) = TyVar i
 
+fromℕ-Ty : (Γ : Ctx (suc n)) → Typing-Tm Γ (Var (fromℕ _)) ⋆
+fromℕ-Ty Γ = TyConv (TyVar (fromℕ _)) (reflexive≈ty (fromℕ-‼ Γ))
+
 replaceSub-Ty : {Γ : Ctx (suc n)} → Typing-Sub Γ Δ σ → Typing-Tm Δ t (Γ ‼ zero [ σ ]ty) → Typing-Sub Γ Δ (replaceSub σ t)
 replaceSub-Ty (TyExt {σ = σ} {A = A} σty sty) tty = TyExt σty (TyConv tty (reflexive≈ty (lift-sub-comp-lem-ty σ A)))
 

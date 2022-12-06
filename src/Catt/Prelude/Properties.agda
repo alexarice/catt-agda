@@ -4,13 +4,14 @@ open import Catt.Prelude
 
 open import Data.Nat.Properties public
 open import Data.Fin.Properties using (toℕ-injective; toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁;inject₁-injective; toℕ-cast) public
-open import Data.Bool.Properties using (∨-identityʳ;∨-assoc;∨-comm;∨-idem;∨-zeroʳ) public
+open import Data.Bool.Properties using (∨-identityʳ;∨-assoc;∨-comm;∨-idem;∨-zeroʳ;∨-commutativeMonoid;∨-idempotentCommutativeMonoid) public
 open import Relation.Binary using (Setoid) public
 import Relation.Binary.Reasoning.Setoid
 import Relation.Binary.Reasoning.PartialOrder
 import Relation.Binary.Reasoning.StrictPartialOrder
 open import Algebra.Construct.NaturalChoice.Base
 import Algebra.Construct.NaturalChoice.MinMaxOp as MinMaxOp
+open import Algebra.Bundles
 
 module Reasoning = Relation.Binary.Reasoning.Setoid
 module PReasoning = Relation.Binary.Reasoning.PartialOrder
@@ -45,6 +46,34 @@ proof-≡ {P = P} (case _ proof) refl = proof
 
 cases-≡ : {I A : Set} → {P : I → Set} → (c : Cases P) → (f : ∀ i (p : P i) → A) → {i : I} → (p : doesC c ≡ i) → cases c f ≡ f i (proof-≡ c p)
 cases-≡ (case doesC₁ proofC₁) f refl = refl
+
+Truth-left : (b b′ : Bool) → Truth b → Truth (b ∨ b′)
+Truth-left true b′ p = tt
+
+Truth-right : (b b′ : Bool) → Truth b′ → Truth (b ∨ b′)
+Truth-right false true p = tt
+Truth-right true true p = tt
+
+Truth-not-left : (b b′ : Bool) → Truth (not (b ∨ b′)) → Truth (not b)
+Truth-not-left false b′ p = tt
+
+Truth-not-right : (b b′ : Bool) → Truth (not (b ∨ b′)) → Truth (not b′)
+Truth-not-right false false p = tt
+
+Truth-prop : {b : Bool} → Truth b → b ≡ true
+Truth-prop {b = true} p = refl
+
+Truth-prop′ : {b : Bool} → b ≡ true → Truth b
+Truth-prop′ refl = tt
+
+Truth-not-prop : {b : Bool} → Truth (not b) → b ≡ false
+Truth-not-prop {b = false} p = refl
+
+∨-monoid : Monoid _ _
+∨-monoid = CommutativeMonoid.monoid ∨-commutativeMonoid
+
+cong₃ : ∀ {A B C D : Set} {x x′ y y′ z z′} → (f : A → B → C → D) → x ≡ x′ → y ≡ y′ → z ≡ z′ → f x y z ≡ f x′ y′ z′
+cong₃ f refl refl refl = refl
 
 -- ≤t-refl : n ≤t n
 -- ≤t-refl {zero} = tt

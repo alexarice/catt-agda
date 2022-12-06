@@ -14,9 +14,11 @@ open import Catt.Syntax
 open import Catt.Tree
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
+open import Catt.Tree.Label.Support
+open import Catt.Tree.Pasting
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
--- open import Catt.Tree.Path.Typing index rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Path.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Properties
 open import Catt.Tree.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Suspension
@@ -29,20 +31,127 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing index rule lift-rule
 
-getPathType : (P : Path S) → STy (someTree S)
-getPathType PHere = S⋆
-getPathType (PExt P) = map-sty-pext (getPathType P)
-getPathType (PShift P) = map-sty-pshift (getPathType P)
+stm-eq : (ΓS : CtxOrTree n) → STm (COT-to-MT ΓS) → STm (COT-to-MT ΓS) → Set
+stm-eq ΓS = Wrap (λ a b → stm-to-term a ≈[ COT-to-Ctx ΓS ]tm stm-to-term b)
 
+sty-eq : (ΓS : CtxOrTree n) → STy (COT-to-MT ΓS) → STy (COT-to-MT ΓS) → Set
+sty-eq ΓS = Wrap (λ A B → sty-to-type A ≈[ COT-to-Ctx ΓS ]ty sty-to-type B)
+
+syntax stm-eq ΓS a b = a ≈[ ΓS ]stm b
+syntax sty-eq ΓS A B = A ≈[ ΓS ]sty B
+
+refl≈stm : a ≈[ ΓS ]stm a
+refl≈stm = [ refl≈tm ]
+
+sym≈stm : a ≈[ ΓS ]stm b → b ≈[ ΓS ]stm a
+sym≈stm [ p ] = [ sym≈tm p ]
+
+trans≈stm : a ≈[ ΓS ]stm b → b ≈[ ΓS ]stm c → a ≈[ ΓS ]stm c
+trans≈stm [ p ] [ q ] = [ trans≈tm p q ]
+
+reflexive≈stm : a ≃stm b → a ≈[ ΓS ]stm b
+reflexive≈stm [ p ] = [ reflexive≈tm p ]
+
+stm-setoid-≈ : CtxOrTree n → Setoid _ _
+stm-setoid-≈ ΓS = record { Carrier = STm (COT-to-MT ΓS)
+                         ; _≈_ = λ x y → x ≈[ ΓS ]stm y
+                         ; isEquivalence = record { refl = refl≈stm
+                                                  ; sym = sym≈stm
+                                                  ; trans = trans≈stm
+                                                  }
+                         }
+
+≈SExt : a ≈[ incTree S ]stm b → SExt a ≈[ incTree (Join S T) ]stm SExt b
+≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (connect-susp-inc-left-Ty (tree-to-ctx T)) (suspTmEq p)) ]
+
+≈SShift : a ≈[ incTree T ]stm b → SShift a ≈[ incTree (Join S T) ]stm SShift b
+≈SShift {S = S} [ q ] = [ (apply-sub-tm-eq (connect-susp-inc-right-Ty (tree-to-ctx S)) q) ]
+
+≈SPath : P ≃p Q → SPath P ≃stm SPath Q
+≈SPath p = [ path-to-term-≃ p ]
+
+refl≈sty : As ≈[ ΓS ]sty As
+refl≈sty = [ refl≈ty ]
+
+sym≈sty : As ≈[ ΓS ]sty Bs → Bs ≈[ ΓS ]sty As
+sym≈sty [ p ] = [ sym≈ty p ]
+
+trans≈sty : As ≈[ ΓS ]sty Bs → Bs ≈[ ΓS ]sty Cs → As ≈[ ΓS ]sty Cs
+trans≈sty [ p ] [ q ] = [ trans≈ty p q ]
+
+reflexive≈sty : As ≃sty Bs → As ≈[ ΓS ]sty Bs
+reflexive≈sty [ p ] = [ reflexive≈ty p ]
+
+sty-setoid-≈ : CtxOrTree n → Setoid _ _
+sty-setoid-≈ ΓS = record { Carrier = STy (COT-to-MT ΓS)
+                         ; _≈_ = λ x y → x ≈[ ΓS ]sty y
+                         ; isEquivalence = record { refl = refl≈sty
+                                                  ; sym = sym≈sty
+                                                  ; trans = trans≈sty
+                                                  }
+                         }
+
+label-max-equality : (ΓS : CtxOrTree n) → (L M : Label (COT-to-MT ΓS) S) → Set
+label-max-equality {S = S} ΓS L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-Maximal Q ⦄ → L Q ≈[ ΓS ]stm M Q) L M
+
+syntax label-max-equality ΓS L M = L ≈[ ΓS ]lm M
+
+refl≈lm : L ≈[ ΓS ]lm L
+refl≈lm .get Z = refl≈stm
+
+compute-≈ : compute-stm a ≈[ incTree S ]stm compute-stm b → a ≈[ incTree S ]stm b
+compute-≈ {a = a} {b = b} p = begin
+  a
+    ≈˘⟨ reflexive≈stm (compute-to-term a) ⟩
+  compute-stm a
+    ≈⟨ p ⟩
+  compute-stm b
+    ≈⟨ reflexive≈stm (compute-to-term b) ⟩
+  b ∎
+  where
+    open Reasoning (stm-setoid-≈ _)
+
+fixup-reflexive≈stm : {a : STm (someTree S)} → {b : STm (someTree T)} → a ≃stm b → (p : S ≃′ T) → a ≈[ incTree S ]stm stm-≃ (sym≃′ p) b
+fixup-reflexive≈stm {a = a} {b} q p = reflexive≈stm (begin
+  < a >stm
+    ≈⟨ q ⟩
+  < b >stm
+    ≈⟨ stm-≃-≃stm (sym≃′ p) b ⟩
+  < stm-≃ (sym≃′ p) b >stm ∎)
+  where
+    open Reasoning stm-setoid
+
+stm-≃-≈ : (p : S ≃′ T) → a ≈[ incTree S ]stm b → stm-≃ p a ≈[ incTree T ]stm stm-≃ p b
+stm-≃-≈ {a = a} {b = b} p q with ≃-to-same-n (≃′-to-≃ p)
+... | refl with ≃-to-≡ (≃′-to-≃ p)
+... | refl = begin
+  stm-≃ p a
+    ≈˘⟨ reflexive≈stm (stm-≃-≃stm p a) ⟩
+  a
+    ≈⟨ q ⟩
+  b
+    ≈⟨ reflexive≈stm (stm-≃-≃stm p b) ⟩
+  stm-≃ p b ∎
+  where
+    open Reasoning (stm-setoid-≈ _)
+{-
 data Typing-STm : (ΓS : CtxOrTree m) → STm (COT-to-MT ΓS) → STy (COT-to-MT ΓS) → Set
 data Typing-Label : (ΓS : CtxOrTree m) → Label-WT (COT-to-MT ΓS) S → Set
 data Typing-STy : (ΓS : CtxOrTree m) → STy (COT-to-MT ΓS) → Set
 
 data Typing-STm where
+  TySConv : Typing-STm ΓS a As → (As ≈[ ΓS ]sty Bs) → Typing-STm ΓS a Bs
   TySPath : (P : Path S) → Typing-STm (incTree S) (SPath P) (getPathType P)
   TySExt : Typing-STm (incTree S) a As → Typing-STm (incTree (Join S T)) (SExt a) (map-sty-pext As)
   TySShift : Typing-STm (incTree T) a As → Typing-STm (incTree (Join S T)) (SShift a) (map-sty-pshift As)
-  TySCoh : (S : Tree n) →
+  TySCoh : (S : Tree n) → {As : STy (someTree S)} → {L : Label-WT (COT-to-MT ΓS) S}
+         → Typing-STy (incTree S) As
+         → Typing-Label ΓS L
+         → Typing-STy ΓS (lty L)
+         → (b : Bool)
+         → supp-condition-s b S As
+         → Typing-STm ΓS (SCoh S As L) (label-on-sty As L)
+  TySOther : Typing-Tm Γ s (sty-to-type As) → Typing-STm (incCtx Γ) (SOther s) As
 
 data Typing-Label where
   TySing : {L : Label-WT (COT-to-MT ΓS) Sing} → Typing-STm ΓS (ap L PHere) (lty L) → Typing-Label ΓS L
@@ -53,6 +162,172 @@ data Typing-Label where
          → Typing-Label ΓS L
 
 data Typing-STy where
+  TySStar : Typing-STy ΓS S⋆
+  TySArr : Typing-STm ΓS a As → Typing-STy ΓS As → Typing-STm ΓS b As → Typing-STy ΓS (SArr a As b)
+
+
+ap-phere-Ty : {L : Label-WT (COT-to-MT ΓS) S} → Typing-Label ΓS L → Typing-Tm (COT-to-Ctx ΓS) (apt L PHere) (sty-to-type (lty L))
+stm-to-term-Ty : Typing-STm ΓS a As → Typing-Tm (COT-to-Ctx ΓS) (stm-to-term a) (sty-to-type As)
+sty-to-type-Ty : Typing-STy ΓS As → Typing-Ty (COT-to-Ctx ΓS) (sty-to-type As)
+label-to-sub-Ty′ : {L : Label-WT (COT-to-MT ΓS) S} → Typing-Label ΓS L → Typing-Ty (COT-to-Ctx ΓS) (sty-to-type (lty L)) → Typing-Sub (tree-to-ctx S) (COT-to-Ctx ΓS) (label-to-sub L)
+label-to-sub-Ty : {L : Label-WT (COT-to-MT ΓS) S} → Typing-Label ΓS L → Typing-STy ΓS (lty L) → Typing-Sub (tree-to-ctx S) (COT-to-Ctx ΓS) (label-to-sub L)
+
+ap-phere-Ty (TySing x) = stm-to-term-Ty x
+ap-phere-Ty (TyJoin x Lty Mty) = stm-to-term-Ty x
+
+stm-to-term-Ty (TySConv aTy [ x ]) = TyConv (stm-to-term-Ty aTy) x
+stm-to-term-Ty (TySPath P) = path-to-term-Ty P
+stm-to-term-Ty (TySExt {As = As} {T = T} aTy) = TyConv (apply-sub-tm-typing (suspTmTy (stm-to-term-Ty aTy)) (connect-susp-inc-left-Ty (tree-to-ctx T))) (reflexive≈ty (begin
+  < suspTy (sty-to-type As) [ connect-susp-inc-left _ _ ]ty >ty
+    ≈˘⟨ sub-action-≃-ty (susp-sty-to-type As) refl≃s ⟩
+  < sty-to-type (susp-sty As) [ connect-susp-inc-left _ (tree-size T) ]ty >ty
+    ≈˘⟨ sty-sub-prop (susp-sty As) (connect-susp-inc-left _ (tree-size T)) ⟩
+  < sty-to-type (sty-sub (susp-sty As) (connect-susp-inc-left _ (tree-size T))) >ty
+    ≈⟨ map-sty-pext-prop As .get  ⟩
+  < sty-to-type (map-sty-pext As) >ty ∎))
+  where
+    open Reasoning ty-setoid
+stm-to-term-Ty (TySShift {As = As} {S = S} aTy) = TyConv (apply-sub-tm-typing (stm-to-term-Ty aTy) (connect-susp-inc-right-Ty (tree-to-ctx S))) (reflexive≈ty (begin
+  < sty-to-type As [ connect-susp-inc-right _ _ ]ty >ty
+    ≈˘⟨ sty-sub-prop As (connect-susp-inc-right (tree-size S) _) ⟩
+  < sty-to-type (sty-sub As (connect-susp-inc-right (tree-size S) _)) >ty
+    ≈˘⟨ map-sty-pshift-prop As .get ⟩
+  < sty-to-type (map-sty-pshift As) >ty ∎))
+  where
+    open Reasoning ty-setoid
+stm-to-term-Ty (TySCoh S {As = As} {L = L} AsTy LTy LTyTy b sc) = TyConv (apply-sub-tm-typing (TyCoh ⦃ tree-to-pd S ⦄ (sty-to-type-Ty AsTy) id-Ty b (supp-condition-compat b S As sc)) (label-to-sub-Ty LTy LTyTy)) (reflexive≈ty (begin
+  < sty-to-type As [ idSub ]ty [ label-to-sub L ]ty >ty
+    ≈⟨ sub-action-≃-ty (id-on-ty (sty-to-type As)) refl≃s ⟩
+  < sty-to-type As [ label-to-sub L ]ty >ty
+    ≈⟨ label-to-sub-sty L As ⟩
+  < sty-to-type (label-on-sty As L) >ty ∎))
+  where
+    open Reasoning ty-setoid
+stm-to-term-Ty (TySOther tty) = tty
+
+sty-to-type-Ty TySStar = TyStar
+sty-to-type-Ty (TySArr aTy AsTy bTy) = TyArr (stm-to-term-Ty aTy) (sty-to-type-Ty AsTy) (stm-to-term-Ty bTy)
+
+label-to-sub-Ty′ (TySing x) LTyTy = TyExt (TyNull LTyTy) (stm-to-term-Ty x)
+label-to-sub-Ty′ (TyJoin {L = L} x LTy MTy) LTyTy = sub-from-connect-Ty (unrestrictTy (label-to-sub-Ty′ LTy (TyArr (stm-to-term-Ty x) LTyTy (ap-phere-Ty MTy)))) getSndTy (label-to-sub-Ty′ MTy LTyTy) (reflexive≈tm (label-to-sub-lem L))
+
+label-to-sub-Ty LTy LTyTy = label-to-sub-Ty′ LTy (sty-to-type-Ty LTyTy)
+
+map-sty-pext-Ty : Typing-STy (incTree S) As → Typing-STy (incTree (Join S T)) (map-sty-pext As)
+map-sty-pext-Ty TySStar = TySArr (TySPath PHere) TySStar (TySShift (TySPath PHere))
+map-sty-pext-Ty (TySArr aty AsTy bty) = TySArr (TySExt aty) (map-sty-pext-Ty AsTy) (TySExt bty)
+
+map-pext-Ty : Typing-Label (incTree S) Lt → Typing-Label (incTree (Join S T)) (map-pext Lt)
+map-pext-Ty (TySing x) = TySing (TySExt x)
+map-pext-Ty (TyJoin x Lty Mty) = TyJoin (TySExt x) (map-pext-Ty Lty) (map-pext-Ty Mty)
+
+map-sty-pshift-Ty : Typing-STy (incTree T) As → Typing-STy (incTree (Join S T)) (map-sty-pshift As)
+map-sty-pshift-Ty TySStar = TySStar
+map-sty-pshift-Ty (TySArr aty AsTy bty) = TySArr (TySShift aty) (map-sty-pshift-Ty AsTy) (TySShift bty)
+
+map-pshift-Ty : Typing-Label (incTree T) Lt → Typing-Label (incTree (Join S T)) (map-pshift Lt)
+map-pshift-Ty (TySing x) = TySing (TySShift x)
+map-pshift-Ty (TyJoin x Lty Mty) = TyJoin (TySShift x) (map-pshift-Ty Lty) (map-pshift-Ty Mty)
+
+lift-stm-Ty : Typing-STm (incCtx Γ) a As → Typing-STm (incCtx (Γ , A)) (lift-stm a) (lift-sty As)
+lift-sty-Ty : Typing-STy (incCtx Γ) As → Typing-STy (incCtx (Γ , A)) (lift-sty As)
+lift-label-Ty : Typing-Label (incCtx Γ) Lt → Typing-Label (incCtx (Γ , A)) (lift-label Lt)
+
+lift-sty-equality : As ≈[ incCtx Γ ]sty Bs → lift-sty As ≈[ incCtx (Γ , A) ]sty lift-sty Bs
+lift-sty-equality {As = As} {Bs = Bs} [ x ] .get = begin
+  sty-to-type (lift-sty As)
+    ≈⟨ reflexive≈ty (lift-sty-to-type As) ⟩
+  liftType (sty-to-type As)
+    ≈⟨ lift-ty-equality x ⟩
+  liftType (sty-to-type Bs)
+    ≈˘⟨ reflexive≈ty (lift-sty-to-type Bs) ⟩
+  sty-to-type (lift-sty Bs) ∎
+  where
+    open Reasoning (ty-setoid-≈ _)
+
+lift-stm-Ty (TySConv aty x) = TySConv (lift-stm-Ty aty) (lift-sty-equality x)
+lift-stm-Ty (TySCoh S {As} {L} Asty Lty LTyty b sc) = TySConv (TySCoh S Asty (lift-label-Ty Lty) (lift-sty-Ty LTyty) b sc) (reflexive≈sty (label-on-sty-lift As L))
+lift-stm-Ty (TySOther {As = As} x) = TySOther (TyConv (lift-tm-typing x) (reflexive≈ty (sym≃ty (lift-sty-to-type As))))
+
+lift-sty-Ty TySStar = TySStar
+lift-sty-Ty (TySArr aty Asty bty) = TySArr (lift-stm-Ty aty) (lift-sty-Ty Asty) (lift-stm-Ty bty)
+
+lift-label-Ty (TySing x) = TySing (lift-stm-Ty x)
+lift-label-Ty (TyJoin x Lty Mty) = TyJoin (lift-stm-Ty x) (lift-label-Ty Lty) (lift-label-Ty Mty)
+-}
+Typing-STm : (ΓS : CtxOrTree m) → STm (COT-to-MT ΓS) → STy (COT-to-MT ΓS) → Set
+Typing-STy : (ΓS : CtxOrTree m) → STy (COT-to-MT ΓS) → Set
+data Typing-Label : (ΓS : CtxOrTree m) → Label-WT (COT-to-MT ΓS) S → Set
+
+Typing-STm ΓS = Wrap (λ a As → Typing-Tm (COT-to-Ctx ΓS) (stm-to-term a) (sty-to-type As))
+
+Typing-STy ΓS = Wrap (λ As → Typing-Ty (COT-to-Ctx ΓS) (sty-to-type As))
+
+data Typing-Label where
+  TySing : {L : Label-WT (COT-to-MT ΓS) Sing} → Typing-STm ΓS (ap L PHere) (lty L) → Typing-Label ΓS L
+  TyJoin : {L : Label-WT (COT-to-MT ΓS) (Join S T)}
+         → Typing-STm ΓS (ap L PHere) (lty L)
+         → Typing-Label ΓS (label₁ L)
+         → Typing-Label ΓS (label₂ L)
+         → Typing-Label ΓS L
+
+TySStar : Typing-STy ΓS S⋆
+TySStar .get = TyStar
+
+TySArr : Typing-STm ΓS a As → Typing-STy ΓS As → Typing-STm ΓS b As → Typing-STy ΓS (SArr a As b)
+TySArr [ aty ] [ Asty ] [ bty ] .get = TyArr aty Asty bty
+
+ap-phere-Ty : {L : Label-WT (COT-to-MT ΓS) S} → Typing-Label ΓS L → Typing-STm ΓS (ap L PHere) (lty L)
+ap-phere-Ty (TySing x) = x
+ap-phere-Ty (TyJoin x Lty Mty) = x
+
+label-to-sub-Ty : {L : Label-WT (COT-to-MT ΓS) S} → Typing-Label ΓS L → Typing-STy ΓS (lty L) → Typing-Sub (tree-to-ctx S) (COT-to-Ctx ΓS) (label-to-sub L)
+label-to-sub-Ty (TySing [ x ]) [ Aty ] = TyExt (TyNull Aty) x
+label-to-sub-Ty {L = L} (TyJoin x Lty Mty) Aty = sub-from-connect-Ty (unrestrictTy (label-to-sub-Ty Lty (TySArr x Aty (ap-phere-Ty Mty)))) getSndTy (label-to-sub-Ty Mty Aty) (reflexive≈tm (label-to-sub-lem L) )
+
+TySPath : (P : Path S) → Typing-STm (incTree S) (SPath P) (getPathType P)
+TySPath P .get = path-to-term-Ty P
+
+TySExt : Typing-STm (incTree S) a As → Typing-STm (incTree (Join S T)) (SExt a) (map-sty-pext As)
+TySExt {As = As} {T = T} [ aty ] .get = TyConv (apply-sub-tm-typing (suspTmTy aty) (connect-susp-inc-left-Ty (tree-to-ctx T))) (reflexive≈ty (begin
+  < suspTy (sty-to-type As) [ connect-susp-inc-left _ _ ]ty >ty
+    ≈˘⟨ sub-action-≃-ty (susp-sty-to-type As) refl≃s ⟩
+  < sty-to-type (susp-sty As) [ connect-susp-inc-left _ (tree-size T) ]ty >ty
+    ≈˘⟨ sty-sub-prop (susp-sty As) (connect-susp-inc-left _ (tree-size T)) ⟩
+  < sty-to-type (sty-sub (susp-sty As) (connect-susp-inc-left _ (tree-size T))) >ty
+    ≈⟨ map-sty-pext-prop As .get  ⟩
+  < sty-to-type (map-sty-pext As) >ty ∎))
+  where
+    open Reasoning ty-setoid
+
+TySShift : Typing-STm (incTree T) a As → Typing-STm (incTree (Join S T)) (SShift a) (map-sty-pshift As)
+TySShift {As = As} {S = S} [ aty ] .get = TyConv (apply-sub-tm-typing aty (connect-susp-inc-right-Ty (tree-to-ctx S))) (reflexive≈ty (begin
+  < sty-to-type As [ connect-susp-inc-right _ _ ]ty >ty
+    ≈˘⟨ sty-sub-prop As (connect-susp-inc-right (tree-size S) _) ⟩
+  < sty-to-type (sty-sub As (connect-susp-inc-right (tree-size S) _)) >ty
+    ≈˘⟨ map-sty-pshift-prop As .get ⟩
+  < sty-to-type (map-sty-pshift As) >ty ∎))
+  where
+    open Reasoning ty-setoid
+
+TySCoh : (S : Tree n) → {As : STy (someTree S)} → {L : Label-WT (COT-to-MT ΓS) S}
+         → Typing-STy (incTree S) As
+         → Typing-Label ΓS L
+         → Typing-STy ΓS (lty L)
+         → (b : Bool)
+         → supp-condition-s b S As
+         → Typing-STm ΓS (SCoh S As L) (label-on-sty As L)
+TySCoh S {As} {L} [ Aty ] Lty Ltyty b sc .get = TyConv (apply-sub-tm-typing (TyCoh ⦃ tree-to-pd S ⦄ Aty id-Ty b (supp-condition-compat b S _ sc)) (label-to-sub-Ty Lty Ltyty)) (reflexive≈ty (begin
+  < sty-to-type As [ idSub ]ty [ label-to-sub L ]ty >ty
+    ≈⟨ sub-action-≃-ty (id-on-ty (sty-to-type As)) refl≃s ⟩
+  < sty-to-type As [ label-to-sub L ]ty >ty
+    ≈⟨ label-to-sub-sty L As ⟩
+  < sty-to-type (label-on-sty As L) >ty ∎))
+  where
+    open Reasoning ty-setoid
+
+extend-Ty : {L : Label-WT (COT-to-MT ΓS) S} → Typing-STm (incTree S) a As → Typing-Label ΓS L → Typing-STy ΓS (lty L) → Typing-STm ΓS (a >>= L) (label-on-sty As L)
+extend-Ty {a = a} {As = As} {L = L} [ aty ] Lty Ltyty .get = transport-typing-full (apply-sub-tm-typing aty (label-to-sub-Ty Lty Ltyty)) (label-to-sub-stm L a) (label-to-sub-sty L As)
 
 {-
 ap-pphere-Ty : Typing-Label ΓS L → Typing-Path ΓS (ap L PPHere) (lty L)

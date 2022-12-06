@@ -590,6 +590,10 @@ idSub-id (Add≃ p x) = Ext≃ (lift-sub-≃ (idSub-id p)) refl≃tm
 ⋆-is-only-ty-in-empty-context ⋆ = refl≃ty
 ⋆-is-only-ty-in-empty-context (s ─⟨ A ⟩⟶ t) = ⊥-elim (no-term-in-empty-context s)
 
+fromℕ-‼ : (Γ : Ctx (suc n)) → Γ ‼ fromℕ _ ≃ty ⋆ {n = suc n}
+fromℕ-‼ {n = zero} (Γ , A) = lift-ty-≃ (⋆-is-only-ty-in-empty-context A)
+fromℕ-‼ {n = suc n} (Γ , A) = lift-ty-≃ (fromℕ-‼ Γ)
+
 liftType-inj : liftType A ≃ty liftType B → A ≃ty B
 liftTerm-inj : liftTerm s ≃tm liftTerm t → s ≃tm t
 liftSub-inj : liftSub σ ≃s liftSub τ → σ ≃s τ

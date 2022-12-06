@@ -129,13 +129,14 @@ label-setoid S = record { Carrier = LABEL S
 ≃SPath : P ≃p Q → SPath P ≃stm SPath Q
 ≃SPath p = [ path-to-term-≃ p ]
 
-compute-to-term : (a : STm (someTree T)) → compute-stm a ≃stm a
+compute-to-term : (a : STm X) → compute-stm a ≃stm a
 compute-to-term (SExt a) = refl≃stm
 compute-to-term (SShift a) = refl≃stm
 compute-to-term (SPath PHere) = refl≃stm
 compute-to-term (SPath (PExt x)) = [ refl≃tm ]
 compute-to-term (SPath (PShift x)) = [ refl≃tm ]
 compute-to-term (SCoh S A L) = refl≃stm
+compute-to-term (SOther t) = refl≃stm
 
 compute-stm-≃ : a ≃stm b → compute-stm a ≃stm compute-stm b
 compute-stm-≃ {a = a} {b = b} p = begin
@@ -814,6 +815,20 @@ extend-map-pext {U = U} (SCoh S A M) L = begin
 
 label-on-sty-pext S⋆ L = refl≃sty
 label-on-sty-pext (SArr s A t) L = ≃SArr (extend-map-pext s L) (label-on-sty-pext A L) (extend-map-pext t L)
+
+extend-lift : (a : STm (someTree S)) → (L : Label-WT (Other n) S) → (a >>= lift-label L) ≃stm lift-stm (a >>= L)
+label-on-sty-lift : (As : STy (someTree S)) → (L : Label-WT (Other n) S) → label-on-sty As (lift-label L) ≃sty lift-sty (label-on-sty As L)
+label-comp-lift : (L : Label (someTree S) U) → (M : Label-WT (Other n) S) → label-comp L (lift-label M) ≃l (lift-stm ∘ (label-comp L M))
+
+extend-lift (SExt a) L = extend-lift a (label₁ L)
+extend-lift (SShift a) L = extend-lift a (label₂ L)
+extend-lift (SPath x) L = refl≃stm
+extend-lift (SCoh S A M) L = ≃SCoh S refl≃sty (label-comp-lift (ap M) L) (label-on-sty-lift (lty M) L)
+
+label-on-sty-lift S⋆ L = refl≃sty
+label-on-sty-lift (SArr s As t) L = ≃SArr (extend-lift s L) (label-on-sty-lift As L) (extend-lift t L)
+
+label-comp-lift L M .get Z = extend-lift (L Z) M
 
 connect-tree-inc-left-unit : (T : Tree n)
                            → connect-tree-inc-left′ T Sing ≃lp (λ Z → Z)

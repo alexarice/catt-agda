@@ -47,7 +47,7 @@ susp-pdb-bd-compat : (n : ℕ)
                    → suspSupp (pdb-bd-supp n Γ b) ≡ pdb-bd-supp (suc n) (suspCtx Γ) ⦃ susp-pdb pdb ⦄ b
 susp-pdb-bd-compat n ∅ b = ⊥-elim (pdb-odd-length it)
 susp-pdb-bd-compat n (∅ , A) b = refl
-susp-pdb-bd-compat n (Γ , B , A) b with <-cmp n (ty-dim B) | <-cmp (suc n) (ty-dim (suspTy B)) | b
+susp-pdb-bd-compat n (Γ , B , A) b with  <-cmp n (ty-dim B) | <-cmp (suc n) (ty-dim (suspTy B)) | b
 ... | tri< a ¬b ¬c | tri< a₁ ¬b₁ ¬c₁ | b = cong ewf (cong ewf (susp-pdb-bd-compat n Γ ⦃ pdb-prefix it ⦄ b))
 ... | tri< a ¬b ¬c | tri≈ ¬a b₁ ¬c₁ | b = ⊥-elim (¬a (<-transʳ a (<-transˡ (n<1+n (ty-dim B)) (≤-reflexive (sym (susp-dim B))))))
 ... | tri< a ¬b ¬c | tri> ¬a ¬b₁ c | b = ⊥-elim (¬a (<-transʳ a (<-transˡ (n<1+n (ty-dim B)) (≤-reflexive (sym (susp-dim B))))))
@@ -141,57 +141,6 @@ suspSuppFull : suspSupp (full {n}) ≡ full
 suspSuppFull {zero} = refl
 suspSuppFull {suc n} = cong ewt suspSuppFull
 
-suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {Γ : Ctx (suc n)} → .⦃ pd : Γ ⊢pd ⦄ → supp-condition b A Γ → supp-condition b (suspTy A) (suspCtx Γ) ⦃ susp-pd it ⦄
-suspSuppCondition {b = false} {A} {Γ} sc = begin
-  FVTy (suspTy A)
-    ≡⟨ suspSuppTy A ⟩
-  suspSupp (FVTy A)
-    ≡⟨ cong suspSupp sc ⟩
-  suspSupp full
-    ≡⟨ suspSuppFull ⟩
-  full ∎
-  where
-    open ≡-Reasoning
-suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {Γ} ⦃ pd ⦄ (nz ,, sc1 ,, sc2) = NonZero-subst (sym (susp-ctx-dim Γ)) it ,, l1 ,, l2
-  where
-    instance _ = nz
-    instance _ = susp-pd {Γ = Γ} (recompute (pd-dec Γ) it)
-    open ≡-Reasoning
-
-    l3 : suc (pred (ctx-dim Γ)) ≡ pred (ctx-dim (suspCtx Γ))
-    l3 = begin
-      suc (pred (ctx-dim Γ))
-        ≡⟨ suc-pred (ctx-dim Γ) ⟩
-      ctx-dim Γ
-        ≡˘⟨ cong pred (susp-ctx-dim Γ) ⟩
-      pred (ctx-dim (suspCtx Γ)) ∎
-
-    l1 : FVTy (suspTy A) ∪ FVTm (suspTm s) ≡
-           pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) false
-    l1 = begin
-      FVTy (suspTy A) ∪ FVTm (suspTm s)
-        ≡⟨ suspSuppTyTm A s ⟩
-      suspSupp (FVTy A ∪ FVTm s)
-        ≡⟨ cong suspSupp sc1 ⟩
-      suspSupp (pd-bd-supp (pred (ctx-dim Γ)) Γ false)
-        ≡⟨ susp-pd-bd-compat (pred (ctx-dim Γ)) Γ false ⟩
-      pd-bd-supp (suc (pred (ctx-dim Γ))) (suspCtx Γ) false
-        ≡⟨ cong (λ x → pd-bd-supp x (suspCtx Γ) false) l3 ⟩
-      pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) false ∎
-
-    l2 : FVTy (suspTy A) ∪ FVTm (suspTm t) ≡
-           pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) true
-    l2 = begin
-      FVTy (suspTy A) ∪ FVTm (suspTm t)
-        ≡⟨ suspSuppTyTm A t ⟩
-      suspSupp (FVTy A ∪ FVTm t)
-        ≡⟨ cong suspSupp sc2 ⟩
-      suspSupp (pd-bd-supp (pred (ctx-dim Γ)) Γ true)
-        ≡⟨ susp-pd-bd-compat (pred (ctx-dim Γ)) Γ true ⟩
-      pd-bd-supp (suc (pred (ctx-dim Γ))) (suspCtx Γ) true
-        ≡⟨ cong (λ x → pd-bd-supp x (suspCtx Γ) true) l3 ⟩
-      pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) true ∎
-
 TransportVarSet-susp : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet (suspSupp xs) (suspSub σ) ≡ suspSupp (TransportVarSet xs σ)
 TransportVarSet-susp emp ⟨⟩ = suspSuppLem _
 TransportVarSet-susp (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-susp xs σ
@@ -272,6 +221,16 @@ suspSuppTm′ Γ t = begin
   where
     open ≡-Reasoning
 
+suspSuppTy′ : (Γ : Ctx n) → (A : Ty n) → SuppTy (suspCtx Γ) (suspTy A) ≡ suspSupp (SuppTy Γ A)
+suspSuppTy′ Γ A = begin
+  SuppTy (suspCtx Γ) (suspTy A)
+    ≡⟨ cong (DC (suspCtx Γ)) (suspSuppTy A) ⟩
+  DC (suspCtx Γ) (suspSupp (FVTy A))
+    ≡⟨ DC-suspSupp Γ (FVTy A) ⟩
+  suspSupp (SuppTy Γ A) ∎
+  where
+    open ≡-Reasoning
+
 SuspSuppTmProp : (s t : Tm n) → SuppTm Γ s ≡ SuppTm Γ t → SuppTm (suspCtx Γ) (suspTm s) ≡ SuppTm (suspCtx Γ) (suspTm t)
 SuspSuppTmProp {Γ = Γ} s t p = begin
   SuppTm (suspCtx Γ) (suspTm s)
@@ -283,3 +242,52 @@ SuspSuppTmProp {Γ = Γ} s t p = begin
   SuppTm (suspCtx Γ) (suspTm t) ∎
   where
     open ≡-Reasoning
+
+suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {Γ : Ctx (suc n)} → .⦃ pd : Γ ⊢pd ⦄ → supp-condition b A Γ → supp-condition b (suspTy A) (suspCtx Γ) ⦃ susp-pd it ⦄
+suspSuppCondition {b = false} {A} {Γ} sc = begin
+  SuppTy (suspCtx Γ) (suspTy A)
+    ≡⟨ suspSuppTy′ Γ A ⟩
+  suspSupp (SuppTy Γ A)
+    ≡⟨ cong suspSupp sc ⟩
+  suspSupp full
+    ≡⟨ suspSuppFull ⟩
+  full ∎
+  where
+    open ≡-Reasoning
+suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {Γ} ⦃ pd ⦄ (nz ,, sc1 ,, sc2) = NonZero-subst (sym (susp-ctx-dim Γ)) it ,, l1 ,, l2
+  where
+    instance _ = nz
+    instance _ = susp-pd {Γ = Γ} (recompute (pd-dec Γ) it)
+    open ≡-Reasoning
+
+    l3 : suc (pred (ctx-dim Γ)) ≡ pred (ctx-dim (suspCtx Γ))
+    l3 = begin
+      suc (pred (ctx-dim Γ))
+        ≡⟨ suc-pred (ctx-dim Γ) ⟩
+      ctx-dim Γ
+        ≡˘⟨ cong pred (susp-ctx-dim Γ) ⟩
+      pred (ctx-dim (suspCtx Γ)) ∎
+
+    l1 : SuppTm (suspCtx Γ) (suspTm s) ≡ pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) false
+    l1 = begin
+      SuppTm (suspCtx Γ) (suspTm s)
+        ≡⟨ suspSuppTm′ Γ s ⟩
+      suspSupp (SuppTm Γ s)
+        ≡⟨ cong suspSupp sc1 ⟩
+      suspSupp (pd-bd-supp (pred (ctx-dim Γ)) Γ false)
+        ≡⟨ susp-pd-bd-compat (pred (ctx-dim Γ)) Γ false ⟩
+      pd-bd-supp (suc (pred (ctx-dim Γ))) (suspCtx Γ) false
+        ≡⟨ cong (λ x → pd-bd-supp x (suspCtx Γ) false) l3 ⟩
+      pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) false ∎
+
+    l2 : SuppTm (suspCtx Γ) (suspTm t) ≡ pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) true
+    l2 = begin
+      SuppTm (suspCtx Γ) (suspTm t)
+        ≡⟨ suspSuppTm′ Γ t ⟩
+      suspSupp (SuppTm Γ t)
+        ≡⟨ cong suspSupp sc2 ⟩
+      suspSupp (pd-bd-supp (pred (ctx-dim Γ)) Γ true)
+        ≡⟨ susp-pd-bd-compat (pred (ctx-dim Γ)) Γ true ⟩
+      pd-bd-supp (suc (pred (ctx-dim Γ))) (suspCtx Γ) true
+        ≡⟨ cong (λ x → pd-bd-supp x (suspCtx Γ) true) l3 ⟩
+      pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) true ∎

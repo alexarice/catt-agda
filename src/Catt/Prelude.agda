@@ -13,6 +13,8 @@ open import Data.Fin.Patterns public
 open import Data.Wrap public
 open import Function using (it; _∘_) public
 
+open Reveal_·_is_ public
+
 record _×′_ (A : Set) (B : Set) : Set where
   constructor build
   field

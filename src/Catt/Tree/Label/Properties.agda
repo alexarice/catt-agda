@@ -454,6 +454,14 @@ label-to-sub-map-pext {U = U} L = begin
   where
     open Reasoning sub-setoid
 
+map-sty-pext-≃ : {As Bs : STy (someTree S)} → As ≃sty Bs → map-sty-pext {T = T} As ≃sty map-sty-pext {T = T} Bs
+map-sty-pext-≃ {As = S⋆} {Bs = S⋆} [ p ] = refl≃sty
+map-sty-pext-≃ {As = SArr s As t} {Bs = SArr s₁ Bs t₁} [ Arr≃ p q r ] = ≃SArr (≃SExt [ p ] refl≃) (map-sty-pext-≃ [ q ]) (≃SExt [ r ] refl≃)
+
+map-sty-pshift-≃ : {As Bs : STy (someTree T)} → As ≃sty Bs → map-sty-pshift {S = S} As ≃sty map-sty-pshift {S = S} Bs
+map-sty-pshift-≃ {As = S⋆} {Bs = S⋆} [ p ] = refl≃sty
+map-sty-pshift-≃ {As = SArr s As t} {Bs = SArr s₁ Bs t₁} [ Arr≃ p q r ] = ≃SArr (≃SShift refl≃ [ p ]) (map-sty-pshift-≃ [ q ]) (≃SShift refl≃ [ r ])
+
 lift-stm-to-term : (a : STm (Other n)) → stm-to-term (lift-stm a) ≃tm liftTerm (stm-to-term a)
 lift-sty-to-type : (A : STy (Other n)) → sty-to-type (lift-sty A) ≃ty liftType (sty-to-type A)
 lift-label-to-sub′ : (L : Label-WT (Other n) S) → ((P : Path S) → apt (lift-label L) P ≃tm liftTerm (apt L P)) → sty-to-type (lift-sty (lty L)) ≃ty liftType (sty-to-type (lty L)) → label-to-sub (lift-label L) ≃s liftSub (label-to-sub L)
@@ -560,6 +568,18 @@ extend-id {T = T} a = [ begin
   < stm-to-term a >tm ∎ ]
   where
     open Reasoning tm-setoid
+
+id-label-on-sty : (As : STy (someTree T)) → label-on-sty As (id-label-wt T) ≃sty As
+id-label-on-sty {T = T} As = [ begin
+  < sty-to-type (label-on-sty As (id-label-wt T)) >ty
+    ≈˘⟨ label-to-sub-sty (id-label-wt T) As ⟩
+  < sty-to-type As [ label-to-sub (id-label-wt T) ]ty >ty
+    ≈⟨ sub-action-≃-ty (refl≃ty {A = sty-to-type As}) (id-label-to-sub T) ⟩
+  < sty-to-type As [ idSub ]ty >ty
+    ≈⟨ id-on-ty (sty-to-type As) ⟩
+  < sty-to-type As >ty ∎ ]
+  where
+    open Reasoning ty-setoid
 
 comp-right-unit : (L : Label (someTree T) S) → label-comp L (id-label-wt T) ≃l L
 comp-right-unit L .get Z = extend-id (L Z)
@@ -924,3 +944,7 @@ stm-≃-≃ {a = a} {b = b} p q = begin
   < stm-≃ p b >stm ∎
   where
     open Reasoning stm-setoid
+
+map-sty-pext-susp-compat : (As : STy (someTree S)) → map-sty-pext {T = Sing} As ≃sty susp-sty As
+map-sty-pext-susp-compat S⋆ = ≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)
+map-sty-pext-susp-compat (SArr s As t) = ≃SArr refl≃stm (map-sty-pext-susp-compat As) refl≃stm

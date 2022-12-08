@@ -19,7 +19,30 @@ open import Catt.Variables
 open import Catt.Connection
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Catt.Tree.Label
+open import Catt.Tree.Boundary
+open import Catt.Tree.Label.Support
 
+
+supp-unbiased-lem : (d : ℕ) → (T : Tree n) → .(d ≤ tree-dim T) → (b : Bool) → FVSTy (unbiased-type d T) ∪m FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b) ≡ supp-tree-bd d T b
+supp-unbiased : (d : ℕ) → (T : Tree n) → .(tree-dim T ≡ d) → FVSTy (unbiased-type d T) ∪m FVSTm (unbiased-stm d T) ≡ tFull
+
+
+supp-unbiased-lem d T p b = begin
+  FVSTy (unbiased-type d T) ∪m FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b)
+    ≡⟨ {!!} ⟩
+  {!!}
+    ≡⟨ {!!} ⟩
+  {!!}
+    ≡⟨ {!!} ⟩
+  {!!}
+    ≡⟨ {!!} ⟩
+  {!!} ∎
+  where
+    open ≡-Reasoning
+
+supp-unbiased d T p = {!!}
+{-
 supp-unbiased-lem : (d : ℕ) → (T : Tree n) → .(d ≤ tree-dim T) → (b : Bool)
                   → FVTy (unbiased-type d T)
                   ∪ FVTm (unbiased-term d (tree-bd d T) [ tree-inc d T b ]tm) ≡ supp-tree-bd d T b
@@ -200,3 +223,4 @@ sub-from-linear-tree-supp d S b T p = begin
   supp-tree-bd d T b ∎
   where
     open ≡-Reasoning
+-}

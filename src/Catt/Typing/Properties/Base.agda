@@ -191,3 +191,6 @@ module _ {i : Index} (a : rule i .Rule.Args) where
   ConvRule = {A : Ty (len a)}
            → Typing-Tm (tgtCtx a) (lhs a) A
            → Typing-Tm (tgtCtx a) (rhs a) A
+
+-- HasDiscRemoval : Set
+-- HasDiscRemoval =

@@ -390,3 +390,96 @@ supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = NonZero-subst le
       toVarSet (supp-tree-bd (pred (ctx-dim (tree-to-ctx S))) S true)
         ≡⟨ supp-compat′ (pred (ctx-dim (tree-to-ctx S))) S true ⟩
       pd-bd-supp (pred (ctx-dim (tree-to-ctx S))) (tree-to-ctx S) true ∎
+
+TransportMVarSet : TVarSet S → Label X S → MVarSet X
+TransportMVarSet (VSSing false) L = mEmp
+TransportMVarSet (VSSing true) L = FVSTm (L PHere)
+TransportMVarSet (VSJoin b xs ys) L = (if b then FVSTm (L PHere) else mEmp) ∪m TransportMVarSet xs (L ∘ PExt) ∪m TransportMVarSet ys (L ∘ PShift)
+
+TransportMVarSet-Emp : {X : MaybeTree n} → (L : Label X S) → TransportMVarSet tEmp L ≡ mEmp
+TransportMVarSet-Emp {S = Sing} L = refl
+TransportMVarSet-Emp {S = Join S T} {X = X} L = begin
+  mEmp ∪m TransportMVarSet tEmp (L ∘ PExt) ∪m TransportMVarSet tEmp (L ∘ PShift)
+    ≡⟨ cong₂ (λ a b → mEmp ∪m a ∪m b) (TransportMVarSet-Emp (L ∘ PExt)) (TransportMVarSet-Emp (L ∘ PShift)) ⟩
+  mEmp ∪m mEmp ∪m mEmp
+    ≡⟨ solve (∪m-monoid {X = X}) ⟩
+  mEmp ∎
+
+TransportMVarSet-∪m : {X : MaybeTree n} → (xs ys : TVarSet S) → (L : Label X S)
+                    → TransportMVarSet (xs ∪t ys) L ≡ TransportMVarSet xs L ∪m TransportMVarSet ys L
+TransportMVarSet-∪m (VSSing false) (VSSing b′) L = sym (∪m-left-unit (TransportMVarSet (VSSing b′) L))
+TransportMVarSet-∪m (VSSing true) (VSSing false) L = sym (∪m-right-unit (TransportMVarSet (VSSing true) L))
+TransportMVarSet-∪m (VSSing true) (VSSing true) L = sym (∪m-idem (TransportMVarSet (VSSing true) L))
+TransportMVarSet-∪m {X = X} (VSJoin b xs xs′) (VSJoin b′ ys ys′) L = begin
+  (if b ∨ b′ then FVSTm (L PHere) else mEmp)
+    ∪m TransportMVarSet (xs ∪t ys) (L ∘ PExt)
+    ∪m TransportMVarSet (xs′ ∪t ys′) (L ∘ PShift)
+    ≡⟨ cong₃ (λ a b c → a ∪m b ∪m c) (l1 b b′) (TransportMVarSet-∪m xs ys (L ∘ PExt)) (TransportMVarSet-∪m xs′ ys′ (L ∘ PShift)) ⟩
+  (if b then FVSTm (L PHere) else mEmp) ∪m
+    (if b′ then FVSTm (L PHere) else mEmp)
+    ∪m
+    (TransportMVarSet xs (λ x → L (PExt x)) ∪m
+     TransportMVarSet ys (λ x → L (PExt x)))
+    ∪m
+    (TransportMVarSet xs′ (λ x → L (PShift x)) ∪m
+     TransportMVarSet ys′ (λ x → L (PShift x)))
+    ≡⟨ {!prove 6 (var 0F)!} ⟩
+  (if b then FVSTm (L PHere) else mEmp) ∪m
+      TransportMVarSet xs (λ x → L (PExt x))
+      ∪m TransportMVarSet xs′ (λ x → L (PShift x))
+      ∪m
+      ((if b′ then FVSTm (L PHere) else mEmp) ∪m
+       TransportMVarSet ys (λ x → L (PExt x))
+       ∪m TransportMVarSet ys′ (λ x → L (PShift x))) ∎
+  where
+    l1 : ∀ b b′ → (if b ∨ b′ then FVSTm (L PHere) else mEmp) ≡
+           (if b then FVSTm (L PHere) else mEmp) ∪m (if b′ then FVSTm (L PHere) else mEmp)
+    l1 false b′ = sym (∪m-left-unit (if b′ then FVSTm (L PHere) else mEmp))
+    l1 true false = sym (∪m-right-unit (if true then FVSTm (L PHere) else mEmp))
+    l1 true true = sym (∪m-idem (if true then FVSTm (L PHere) else mEmp))
+
+    import Algebra.Solver.IdempotentCommutativeMonoid as Solver
+    open Solver (∪m-idempotentCommutativeMonoid {X = X})
+
+TransportMVarSet-path : (P : Path S) → (L : Label X S) → TransportMVarSet (fromPath P) L ≡ FVSTm (L P)
+TransportMVarSet-path {S = Sing} PHere L = refl
+TransportMVarSet-path {S = Join S T} PHere L = {!!}
+TransportMVarSet-path (PExt P) L = {!!}
+TransportMVarSet-path (PShift P) L = {!!}
+
+TransportMVarSet-term-comp : (a : STm (someTree S)) → (L : Label-WT X S)
+                        → TransportMVarSet (FVSTm a) (ap L) ≡ FVSTm (a >>= L)
+TransportMVarSet-type-comp : {X : MaybeTree n} → (As : STy (someTree S)) → (L : Label-WT X S)
+                           → TransportMVarSet (FVSTy As) (ap L) ∪m FVSTy (lty L) ≡ FVSTy (label-on-sty As L)
+TransportMVarSet-label-comp : (M : Label (someTree S) T) → (L : Label-WT X S)
+                            → TransportMVarSet (FVLabel M) (ap L) ≡ FVLabel (label-comp M L)
+TransportMVarSet-label-wt-comp : (M : Label-WT (someTree S) T) → (L : Label-WT X S)
+                            → TransportMVarSet (FVLabel-WT M) (ap L) ≡ FVLabel-WT (label-wt-comp M L)
+
+TransportMVarSet-term-comp {X = X} (SExt a) L = begin
+  mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PExt) ∪m
+      TransportMVarSet tEmp (λ x → ap L (PShift x))
+    ≡⟨ cong (mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PExt) ∪m_) (TransportMVarSet-Emp (ap L ∘ PShift)) ⟩
+  mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PExt) ∪m mEmp
+    ≡⟨ solve (∪m-monoid {X = X}) ⟩
+  TransportMVarSet (FVSTm a) (ap L ∘ PExt)
+    ≡⟨ TransportMVarSet-term-comp a (label₁ L) ⟩
+  FVSTm (a >>= label₁ L) ∎
+TransportMVarSet-term-comp {X = X} (SShift a) L = begin
+  mEmp ∪m TransportMVarSet tEmp (ap L ∘ PExt) ∪m TransportMVarSet (FVSTm a) (ap L ∘ PShift)
+    ≡⟨ cong (λ x → mEmp ∪m x ∪m TransportMVarSet (FVSTm a) (ap L ∘ PShift)) (TransportMVarSet-Emp (ap L ∘ PExt)) ⟩
+  mEmp ∪m mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PShift)
+    ≡⟨ solve (∪m-monoid {X = X}) ⟩
+  TransportMVarSet (FVSTm a) (ap L ∘ PShift)
+    ≡⟨ TransportMVarSet-term-comp a (label₂ L) ⟩
+  FVSTm (a >>= label₂ L) ∎
+TransportMVarSet-term-comp (SPath x) L = TransportMVarSet-path x (ap L)
+TransportMVarSet-term-comp (SCoh S A M) L = TransportMVarSet-label-wt-comp M L
+
+TransportMVarSet-type-comp S⋆ L = {!!}
+TransportMVarSet-type-comp (SArr s As t) L = {!!}
+
+TransportMVarSet-label-comp {T = Sing} M L = TransportMVarSet-term-comp (M PHere) L
+TransportMVarSet-label-comp {T = Join T T′} M L = {!!}
+
+TransportMVarSet-label-wt-comp = {!!}

@@ -20,14 +20,37 @@ open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Pasting
+open import Catt.Tree.Path
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Tree.Unbiased.Support
 open import Catt.Tree.Support
+open import Catt.Tree.Boundary
+open import Catt.Tree.Boundary.Properties
+open import Catt.Tree.Boundary.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Suspension
 open import Catt.Suspension.Typing index rule lift-rule susp-rule
 open import Catt.Globular
+open import Catt.Tree.Label
+open import Catt.Tree.Label.Properties
+open import Catt.Tree.Label.Typing index rule lift-rule susp-rule sub-rule
 
+unbiased-type-Ty : (d : ℕ) → (T : Tree n) → (d ≤ suc (tree-dim T)) → Typing-STy (incTree T) (unbiased-type d T)
+unbiased-stm-Ty : (d : ℕ) → (T : Tree n) → (tree-dim T ≡ d) → Typing-STm (incTree T) (unbiased-stm d T) (unbiased-type d T)
+unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≡ d) → Typing-STm (incTree T) (unbiased-comp d T) (unbiased-type d T)
+
+unbiased-type-Ty zero T q = TySStar
+unbiased-type-Ty (suc d) T q
+  = TySArr (TySConv (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-pred q))) (tree-inc-Ty d T false) TySStar) (reflexive≈sty (sym≃sty (unbiased-type-prop d T d ≤-refl false))))
+           (unbiased-type-Ty d T (≤-trans (n≤1+n d) q))
+           (TySConv (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-pred q))) (tree-inc-Ty d T true) TySStar) (reflexive≈sty (sym≃sty (unbiased-type-prop d T d ≤-refl true))))
+
+unbiased-stm-Ty zero Sing p = TySPath PHere
+unbiased-stm-Ty (suc d) (Join T Sing) p = TySConv (TySExt (unbiased-stm-Ty d T (cong pred p))) (reflexive≈sty (trans≃sty (map-sty-pext-susp-compat (unbiased-type d T)) (unbiased-type-susp-lem d T)))
+unbiased-stm-Ty (suc d) (Join T (Join T₁ T₂)) p = unbiased-comp-Ty (suc d) (Join T (Join T₁ T₂)) p
+
+unbiased-comp-Ty d T p = TySConv (TySCoh T (unbiased-type-Ty d T (≤-trans (≤-reflexive (sym p)) (n≤1+n (tree-dim T)))) (id-label-Ty T) TySStar true {!!}) (reflexive≈sty (id-label-on-sty (unbiased-type d T)))
+{-
 unbiased-type-Ty : (d : ℕ) → (T : Tree n) → (d ≤ suc (tree-dim T)) → Typing-Ty (tree-to-ctx T) (unbiased-type d T)
 unbiased-term-Ty : (d : ℕ) → (T : Tree n) → (tree-dim T ≡ d) → Typing-Tm (tree-to-ctx T) (unbiased-term d T) (unbiased-type d T)
 unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≡ d)
@@ -173,3 +196,4 @@ unbiased-comp-lemma zero T (TyConv tty x) = unbiased-comp-lemma zero T tty
 unbiased-comp-lemma zero T (TyCoh x x₁ false ())
 unbiased-comp-lemma zero T (TyCoh x x₁ true ())
 unbiased-comp-lemma (suc d) T tty = it
+-}

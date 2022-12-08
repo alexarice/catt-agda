@@ -2,7 +2,7 @@ module Catt.Support where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Data.Vec hiding (drop ; [_]) public
+open import Data.Vec hiding (drop ; [_]; _>>=_) public
 open import Data.Vec.Relation.Binary.Pointwise.Inductive using (Pointwise)
 open import Catt.Syntax
 open import Catt.Tree

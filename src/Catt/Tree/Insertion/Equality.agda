@@ -22,6 +22,7 @@ open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
+open import Catt.Tree.Label.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
 open import Catt.Tree.Typing index rule lift-rule susp-rule sub-rule
@@ -62,6 +63,18 @@ stm-setoid-≈ ΓS = record { Carrier = STm (COT-to-MT ΓS)
 
 ≈SPath : P ≃p Q → SPath P ≃stm SPath Q
 ≈SPath p = [ path-to-term-≃ p ]
+
+extend-≈ : a ≈[ incTree S ]stm b → {L : Label-WT (COT-to-MT ΓS) S} → (Lty : Typing-Label L) → (a >>= L) ≈[ ΓS ]stm (b >>= L)
+extend-≈ {a = a} {b = b} [ p ] L .get = begin
+  stm-to-term (a >>= L)
+    ≈˘⟨ reflexive≈tm (label-to-sub-stm L a) ⟩
+  stm-to-term a [ label-to-sub L ]tm
+    ≈⟨ apply-sub-tm-eq {!!} {!!} ⟩
+  stm-to-term b [ label-to-sub L ]tm
+    ≈⟨ reflexive≈tm (label-to-sub-stm L b) ⟩
+  stm-to-term (b >>= L) ∎
+  where
+    open Reasoning (tm-setoid-≈ _)
 
 label-max-equality : (ΓS : CtxOrTree n) → (L M : Label (COT-to-MT ΓS) S) → Set
 label-max-equality {S = S} ΓS L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-Maximal Q ⦄ → L Q ≈[ ΓS ]stm M Q) L M

@@ -25,7 +25,7 @@ MVarSet : (X : MaybeTree n) → Set
 MVarSet (someTree x) = TVarSet x
 MVarSet (Other n) = VarSet n
 
-infixl 60 _∪m_
+infixr 60 _∪m_
 _∪m_ : MVarSet X → MVarSet X → MVarSet X
 _∪m_ {X = someTree x} xs ys = xs ∪t ys
 _∪m_ {X = Other _} xs ys = xs ∪ ys
@@ -84,6 +84,22 @@ module _ {X : MaybeTree n} where
   ∪m-monoid : Monoid _ _
   ∪m-monoid = record
     { isMonoid = ∪m-isMonoid }
+
+  ∪m-isCommutativeMonoid : IsCommutativeMonoid _∪m_ mEmp
+  ∪m-isCommutativeMonoid = record
+    { isMonoid = ∪m-isMonoid
+    ; comm = ∪m-comm
+    }
+
+  ∪m-isIdempotentCommutativeMonoid : IsIdempotentCommutativeMonoid _∪m_ mEmp
+  ∪m-isIdempotentCommutativeMonoid = record
+    { isCommutativeMonoid = ∪m-isCommutativeMonoid
+    ; idem = ∪m-idem
+    }
+
+  ∪m-idempotentCommutativeMonoid : IdempotentCommutativeMonoid _ _
+  ∪m-idempotentCommutativeMonoid = record
+    { isIdempotentCommutativeMonoid = ∪m-isIdempotentCommutativeMonoid }
 
 DCM : (ΓS : CtxOrTree n) → (xs : MVarSet (COT-to-MT ΓS)) → MVarSet (COT-to-MT ΓS)
 DCM (incTree S) xs = DCT xs
@@ -423,7 +439,17 @@ TransportMVarSet-∪m {X = X} (VSJoin b xs xs′) (VSJoin b′ ys ys′) L = beg
     ∪m
     (TransportMVarSet xs′ (λ x → L (PShift x)) ∪m
      TransportMVarSet ys′ (λ x → L (PShift x)))
-    ≡⟨ {!prove 6 (var 0F)!} ⟩
+    ≡⟨ prove 6 ((var 0F ⊕ var 1F ⊕ (var 2F ⊕ var 3F) ⊕ (var 4F ⊕ var 5F))) {!(var 0F ⊕ var 2F ⊕ var 4F) ⊕ (var 1F ⊕ var 3F ⊕ var 5F)!} {!!} ⟩
+    -- prove 6
+    (var 0F ⊕ var 1F ⊕ (var 2F ⊕ var 3F) ⊕ (var 4F ⊕ var 5F))
+    --            (var 0F ⊕ var 2F ⊕ var 4F) ⊕ (var 1F ⊕ var 3F ⊕ var 5F)
+               -- ((if b then FVSTm (L PHere) else mEmp)
+               -- ∷ (if b′ then FVSTm (L PHere) else mEmp)
+               -- ∷ TransportMVarSet xs (λ x → L (PExt x))
+               -- ∷ TransportMVarSet ys (λ x → L (PExt x))
+               -- ∷ TransportMVarSet xs′ (λ x → L (PShift x))
+               -- ∷ TransportMVarSet ys′ (λ x → L (PShift x))
+               -- ∷ emp)
   (if b then FVSTm (L PHere) else mEmp) ∪m
       TransportMVarSet xs (λ x → L (PExt x))
       ∪m TransportMVarSet xs′ (λ x → L (PShift x))

@@ -268,3 +268,15 @@ sty-≃ p S⋆ = S⋆
 sty-≃ p (SArr s A t) = SArr (stm-≃ p s) (sty-≃ p A) (stm-≃ p t)
 
 ≃-label p L = stm-≃ p ∘ L
+
+unrestrict-label : (L : Label-WT X S) → .⦃ NonZero (sty-dim (lty L)) ⦄ → Label X (suspTree S)
+unrestrict-label {X = X} {S = S} (L ,, SArr s As t) = label
+  where
+    label : Label X (suspTree S)
+    label PHere = s
+    label (PExt P) = L P
+    label (PShift P) = t
+
+sty-base : STy X → STy X
+sty-base S⋆ = S⋆
+sty-base (SArr s As t) = As

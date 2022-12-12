@@ -37,6 +37,9 @@ NonZero-⊥ : n ≤ 0 → .⦃ NonZero n ⦄ → ⊥
 NonZero-⊥ {zero} p ⦃ () ⦄
 NonZero-⊥ {suc n} ()
 
+NonZero-≤ : .(n ≤ m) → .(NonZero n) → NonZero m
+NonZero-≤ {suc n} {suc m} p x = it
+
 ⊔-lem : (n m : ℕ) → suc n ⊔ m ≡ suc (pred m ⊔ n)
 ⊔-lem n zero = refl
 ⊔-lem n (suc m) = cong suc (⊔-comm n m)

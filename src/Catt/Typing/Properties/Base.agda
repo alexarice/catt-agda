@@ -192,5 +192,7 @@ module _ {i : Index} (a : rule i .Rule.Args) where
            → Typing-Tm (tgtCtx a) (lhs a) A
            → Typing-Tm (tgtCtx a) (rhs a) A
 
+
+
 -- HasDiscRemoval : Set
 -- HasDiscRemoval =

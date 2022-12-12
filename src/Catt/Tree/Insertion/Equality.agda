@@ -22,12 +22,14 @@ open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
-open import Catt.Tree.Label.Typing index rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Label.Typing index rule
+open import Catt.Tree.Label.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
 open import Catt.Tree.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
+open import Catt.Typing.DiscRemoval index rule
 
 pruned-bp-exterior-sub : (S : Tree n)
                        → (p : BranchingPoint S l)
@@ -119,33 +121,38 @@ pruned-bp-exterior-sub (Join (Join S₁ Sing) S₂) BPHere T q .get (PExt Z) = l
     open Reasoning (stm-setoid-≈ _)
 pruned-bp-exterior-sub (Join (Join S₁ Sing) S₂) BPHere T q .get (PShift Z) = reflexive≈stm (extend-≃ (replace-not-here (SPath ∘ PShift) (SPath (PShift PHere)) Z) refl≃l refl≃sty)
 
-exterior-disc : (S : Tree n)
-              → (p : BranchingPoint S l)
-              → exterior-sub-label S p (n-disc (height-of-branching p)) ⦃ is-linear-has-linear-height l (n-disc (height-of-branching p)) ⦃ n-disc-is-linear (height-of-branching p) ⦄ (≤-trans (<⇒≤ (bp-height-<-hob p)) (≤-reflexive (sym (tree-dim-n-disc (height-of-branching p))))) ⦄
-              ≈[ incTree (insertion-tree S p (n-disc (height-of-branching p)) ⦃ _ ⦄) ]lm ≃-label (sym≃′ (insertion-disc S p)) (id-label S)
-exterior-disc (Join S T) BPHere .get (PExt Z) = let
-  instance _ = n-disc-is-linear (tree-dim S)
-  in begin
-  (label-from-linear-tree-unbiased S (n-disc (suc (tree-dim S))) 1 Z >>= (connect-tree-inc-left (Join (n-disc (tree-dim S)) Sing) T))
-    ≈⟨ reflexive≈stm (extend-≃ (lfltu-maximal-path S (n-disc (suc (tree-dim S))) 1 Z) refl≃l refl≃sty) ⟩
-  (unbiased-comp′ (tree-dim S) (n-disc (tree-dim S)) >>=
-        (λ x → SPath (PExt x)) ,,
-        SArr (SPath PHere) S⋆ (SPath (PShift PHere)))
-    ≈⟨ extend-≈ {!!} {!transport-label-typing!} {!!} ⟩
-  (unbiased-stm (tree-dim S) (n-disc (tree-dim S)) >>=
-        (λ x → SPath (PExt x)) ,,
-        SArr (SPath PHere) S⋆ (SPath (PShift PHere)))
-    ≈⟨ reflexive≈stm (extend-≃ (unbiased-stm-linear (tree-dim S) (n-disc (tree-dim S)) (sym (tree-dim-n-disc (tree-dim S)))) refl≃l refl≃sty) ⟩
-  SPath (PExt (is-linear-max-path (n-disc (tree-dim S))))
-    ≈⟨ reflexive≈stm (≃SPath (≃Ext (trans≃p (max-path-lin-tree (n-disc (tree-dim S)) Z (≃′-to-≃ (linear-tree-unique (n-disc (tree-dim S)) S (tree-dim-n-disc (tree-dim S))))) (ppath-≃-≃p (sym≃′ (linear-tree-unique (n-disc (tree-dim S)) S _)) Z)) refl≃)) ⟩
-  SPath (PExt (ppath-≃ (sym≃′ (linear-tree-unique (n-disc (tree-dim S)) S _)) Z)) ∎
-  where
-    open Reasoning (stm-setoid-≈ _)
-exterior-disc (Join S T) BPHere .get (PShift Z) = reflexive≈stm (replace-not-here (SPath ∘ PShift) (SPath (PShift PHere)) Z)
-exterior-disc (Join S T) (BPExt p) .get (PExt Z) = compute-≈ (≈SExt (trans≈stm (exterior-disc S p .get Z) (reflexive≈stm (stm-≃-spath (sym≃′ (insertion-disc S p)) Z))))
-exterior-disc (Join S T) (BPExt p) .get (PShift Z) = compute-≈ refl≈stm
-exterior-disc (Join S T) (BPShift p) .get (PExt Z) = compute-≈ refl≈stm
-exterior-disc (Join S T) (BPShift p) .get (PShift Z) = compute-≈ (≈SShift (trans≈stm (exterior-disc T p .get Z) (reflexive≈stm (stm-≃-spath (sym≃′ (insertion-disc T p)) Z))))
+module _ (disc-rem : HasDiscRemoval) where
+  open import Catt.Typing.DiscRemoval.Properties index rule lift-rule susp-rule sub-rule disc-rem
+
+  exterior-disc : (S : Tree n)
+                → (p : BranchingPoint S l)
+                → exterior-sub-label S p (n-disc (height-of-branching p)) ⦃ is-linear-has-linear-height l (n-disc (height-of-branching p)) ⦃ n-disc-is-linear (height-of-branching p) ⦄ (≤-trans (<⇒≤ (bp-height-<-hob p)) (≤-reflexive (sym (tree-dim-n-disc (height-of-branching p))))) ⦄
+                ≈[ incTree (insertion-tree S p (n-disc (height-of-branching p)) ⦃ _ ⦄) ]lm ≃-label (sym≃′ (insertion-disc S p)) (id-label S)
+  exterior-disc (Join S T) BPHere .get (PExt Z) = let
+    instance _ = n-disc-is-linear (tree-dim S)
+    in begin
+    (label-from-linear-tree-unbiased (suspTree S) (n-disc (suc (tree-dim S))) 0 (PExt Z) >>= (connect-tree-inc-left (Join (n-disc (tree-dim S)) Sing) T))
+      ≈⟨ reflexive≈stm (extend-≃ (lfltu-maximal-path (suspTree S) (n-disc (suc (tree-dim S))) 0 (PExt Z)) refl≃l refl≃sty) ⟩
+    (unbiased-comp′ (tree-dim (suspTree S)) (n-disc (suc (tree-dim S)))
+      >>= connect-tree-inc-left (Join (n-disc (tree-dim S)) Sing) T)
+      ≈˘⟨ extend-≈ (unbiased-stm-is-comp (suc (tree-dim S)) (n-disc (suc (tree-dim S)))) (connect-tree-inc-left-Ty (n-disc (suc (tree-dim S))) T) TySStar ⟩
+    (unbiased-stm (suc (tree-dim S)) (n-disc (suc (tree-dim S))) >>=
+      connect-tree-inc-left (n-disc (suc (tree-dim S))) T)
+      ≡⟨⟩
+    (unbiased-stm (tree-dim S) (n-disc (tree-dim S)) >>=
+          (λ x → SPath (PExt x)) ,,
+          SArr (SPath PHere) S⋆ (SPath (PShift PHere)))
+      ≈⟨ reflexive≈stm (extend-≃ (unbiased-stm-linear (tree-dim S) (n-disc (tree-dim S)) (sym (tree-dim-n-disc (tree-dim S)))) refl≃l refl≃sty) ⟩
+    SPath (PExt (is-linear-max-path (n-disc (tree-dim S))))
+      ≈⟨ reflexive≈stm (≃SPath (≃Ext (trans≃p (max-path-lin-tree (n-disc (tree-dim S)) Z (≃′-to-≃ (linear-tree-unique (n-disc (tree-dim S)) S (tree-dim-n-disc (tree-dim S))))) (ppath-≃-≃p (sym≃′ (linear-tree-unique (n-disc (tree-dim S)) S _)) Z)) refl≃)) ⟩
+    SPath (PExt (ppath-≃ (sym≃′ (linear-tree-unique (n-disc (tree-dim S)) S _)) Z)) ∎
+    where
+      open Reasoning (stm-setoid-≈ _)
+  exterior-disc (Join S T) BPHere .get (PShift Z) = reflexive≈stm (replace-not-here (SPath ∘ PShift) (SPath (PShift PHere)) Z)
+  exterior-disc (Join S T) (BPExt p) .get (PExt Z) = compute-≈ (≈SExt (trans≈stm (exterior-disc S p .get Z) (reflexive≈stm (stm-≃-spath (sym≃′ (insertion-disc S p)) Z))))
+  exterior-disc (Join S T) (BPExt p) .get (PShift Z) = compute-≈ refl≈stm
+  exterior-disc (Join S T) (BPShift p) .get (PExt Z) = compute-≈ refl≈stm
+  exterior-disc (Join S T) (BPShift p) .get (PShift Z) = compute-≈ (≈SShift (trans≈stm (exterior-disc T p .get Z) (reflexive≈stm (stm-≃-spath (sym≃′ (insertion-disc T p)) Z))))
 
 exterior-inserted-bp : (S : Tree n)
                      → (P : BranchingPoint S l)

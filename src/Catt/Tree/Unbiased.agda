@@ -62,9 +62,39 @@ label-from-linear-tree-unbiased (Join S Sing) T d (PShift PHere) = unbiased-stm 
 identity-stm : (n : ℕ) → STm (someTree (n-disc n))
 identity-stm n = unbiased-comp′ (suc n) (n-disc n)
 
+sty-base-dim : (As : STy X) → sty-dim (sty-base As) ≡ pred (sty-dim As)
+sty-base-dim S⋆ = refl
+sty-base-dim (SArr s As t) = refl
+
+label-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(tree-dim S ≤ sty-dim As) → Label X S
+label-from-linear-tree-type : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → STy X
+label-from-linear-tree-dim : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → sty-dim (label-from-linear-tree-type S As) ≡ sty-dim As ∸ tree-dim S
+
+label-from-linear-tree Sing a As p P = a
+label-from-linear-tree (Join S Sing) a As p = unrestrict-label (label-from-linear-tree S a As (≤-trans (n≤1+n (tree-dim S)) p) ,, label-from-linear-tree-type S As) ⦃ nz ⦄
+  where
+    nz : NonZero (sty-dim (label-from-linear-tree-type S As))
+    nz = NonZero-≤ (≤-trans (≤-reflexive (sym (+-∸-assoc 1 {n = tree-dim S} ≤-refl))) (≤-trans (∸-monoˡ-≤ (tree-dim S) p) (≤-reflexive (sym (label-from-linear-tree-dim S As))))) it
+
+label-from-linear-tree-type Sing As = As
+label-from-linear-tree-type (Join S Sing) As = sty-base (label-from-linear-tree-type S As)
+
+label-from-linear-tree-dim Sing As = refl
+label-from-linear-tree-dim (Join S Sing) As = begin
+  sty-dim
+      (sty-base (label-from-linear-tree-type S As))
+    ≡⟨ sty-base-dim (label-from-linear-tree-type S As) ⟩
+  pred (sty-dim (label-from-linear-tree-type S As))
+    ≡⟨ cong pred (label-from-linear-tree-dim S As) ⟩
+  pred (sty-dim As ∸ tree-dim S)
+    ≡⟨ pred[m∸n]≡m∸[1+n] (sty-dim As) (tree-dim S) ⟩
+  sty-dim As ∸ suc (tree-dim S) ∎
+  where
+    open ≡-Reasoning
+
 -- label-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) → (A : Ty m) → .(ty-dim A ≡ tree-dim S) → Label
 -- label-from-linear-tree Sing t A p = ⟨ ⟨⟩ , t ⟩
 -- label-from-linear-tree (Join S Sing) t (s ─⟨ A ⟩⟶ s′) p = ⟨ ⟨ (label-from-linear-tree S s A (cong pred p)) , s′ ⟩ , t ⟩
 
 -- identity-tree : (t : Tm n) → (A : Ty n) → Tm n
--- identity-tree t A = Coh (tree-to-ctx (n-disc (ty-dim A))) (unbiased-type (suc (ty-dim A)) (n-disc (ty-dim A))) (sub-from-linear-tree (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ t A (sym (tree-dim-n-disc (ty-dim A))))
+-- identity-tree t A = Coh (tree-to-ctx (n-disc (ty-dim A))) (unbiased-type (suc (ty-dim A)) (n-disc (ty-dim A))) (sub-from-linear-tree (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ t A (sym (tree-dim-n-disc (ty-dim

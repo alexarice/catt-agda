@@ -15,6 +15,7 @@ open import Catt.Connection.Support
 open import Catt.Tree.Support
 open import Catt.Tree
 open import Catt.Syntax
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Suspension
 open import Catt.Connection
 open import Algebra.Definitions
@@ -25,7 +26,7 @@ MVarSet : (X : MaybeTree n) → Set
 MVarSet (someTree x) = TVarSet x
 MVarSet (Other n) = VarSet n
 
-infixr 60 _∪m_
+infixl 60 _∪m_
 _∪m_ : MVarSet X → MVarSet X → MVarSet X
 _∪m_ {X = someTree x} xs ys = xs ∪t ys
 _∪m_ {X = Other _} xs ys = xs ∪ ys
@@ -127,6 +128,24 @@ FVLabel-WT L = FVSTy (lty L) ∪m FVLabel (ap L)
 FVSTy S⋆ = mEmp
 FVSTy (SArr s A t) = FVSTy A ∪m FVSTm s ∪m FVSTm t
 
+FVLabel′-map : {X : MaybeTree n}
+             → {Y : MaybeTree m}
+             → (f : (P : Path S) → MVarSet X)
+             → (g : MVarSet X → MVarSet Y)
+             → (∀ xs ys → g (xs ∪m ys) ≡ g xs ∪m g ys)
+             → FVLabel′ (g ∘ f) ≡ g (FVLabel′ f)
+FVLabel′-map {S = Sing} f g p = refl
+FVLabel′-map {S = Join S T} f g p = begin
+  g (f PHere) ∪m FVLabel′ (g ∘ f ∘ PExt) ∪m FVLabel′ (g ∘ f ∘ PShift)
+    ≡⟨ cong₂ (λ a b → g (f PHere) ∪m a ∪m b) (FVLabel′-map (f ∘ PExt) g p) (FVLabel′-map (f ∘ PShift) g p) ⟩
+  g (f PHere) ∪m g (FVLabel′ (f ∘ PExt)) ∪m g (FVLabel′ (f ∘ PShift))
+    ≡˘⟨ cong (_∪m g (FVLabel′ (f ∘ PShift))) (p (f PHere) (FVLabel′ (f ∘ PExt))) ⟩
+  g (f PHere ∪m FVLabel′ (f ∘ PExt)) ∪m g (FVLabel′ (f ∘ PShift))
+    ≡˘⟨ p (f PHere ∪m FVLabel′ (f ∘ PExt)) (FVLabel′ (f ∘ PShift)) ⟩
+  g (f PHere ∪m FVLabel′ (f ∘ PExt) ∪m FVLabel′ (f ∘ PShift)) ∎
+  where
+    open ≡-Reasoning
+
 supp-condition-s : (b : Bool) → (S : Tree n) → (As : STy (someTree S)) → Set
 supp-condition-s false S As = FVSTy As ≡ mFull
 supp-condition-s true S S⋆ = ⊥
@@ -186,7 +205,7 @@ FVSTm-non-empty (SPath P) = fromPath-non-empty P
 
 MtoVarSet-∪m : {ΓS : CtxOrTree n} (xs ys : MVarSet (COT-to-MT ΓS)) → MtoVarSet ΓS (xs ∪m ys) ≡ MtoVarSet ΓS xs ∪ MtoVarSet ΓS ys
 MtoVarSet-∪m {ΓS = incTree x} xs ys = toVarSet-∪t xs ys
-MtoVarSet-∪m {ΓS = incCtx Γ} xs ys = DC-cup Γ xs ys
+MtoVarSet-∪m {ΓS = incCtx Γ} xs ys = DC-∪ Γ xs ys
 
 MtoVarSet-emp : (ΓS : CtxOrTree n) → MtoVarSet ΓS mEmp ≡ empty
 MtoVarSet-emp (incTree S) = toVarSet-emp S
@@ -260,9 +279,9 @@ FVSTy-to-type {ΓS = ΓS} (SArr s A t) = begin
   MtoVarSet ΓS (FVSTy A) ∪ MtoVarSet ΓS (FVSTm s) ∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term t)
     ≡⟨ cong₂ (λ x y → x ∪ y ∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term t)) (FVSTy-to-type A) (FVSTm-to-term s) ⟩
   SuppTy (COT-to-Ctx ΓS) (sty-to-type A) ∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term s) ∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term t)
-    ≡˘⟨ cong (_∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term t)) (DC-cup (COT-to-Ctx ΓS) (FVTy (sty-to-type A)) (FVTm (stm-to-term s))) ⟩
+    ≡˘⟨ cong (_∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term t)) (DC-∪ (COT-to-Ctx ΓS) (FVTy (sty-to-type A)) (FVTm (stm-to-term s))) ⟩
   DC (COT-to-Ctx ΓS) (FVTy (sty-to-type A) ∪ FVTm (stm-to-term s)) ∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term t)
-    ≡˘⟨ DC-cup (COT-to-Ctx ΓS) (FVTy (sty-to-type A) ∪ FVTm (stm-to-term s)) (FVTm (stm-to-term t)) ⟩
+    ≡˘⟨ DC-∪ (COT-to-Ctx ΓS) (FVTy (sty-to-type A) ∪ FVTm (stm-to-term s)) (FVTm (stm-to-term t)) ⟩
   DC (COT-to-Ctx ΓS) (FVTy (sty-to-type A) ∪ FVTm (stm-to-term s) ∪ FVTm (stm-to-term t)) ∎
 
 FVLabel-to-sub L = FVLabel-to-sub′ L (λ P → FVSTm-to-term (ap L P)) (FVSTy-to-type (lty L))
@@ -273,7 +292,7 @@ FVLabel-to-sub′ {S = Sing} {ΓS = ΓS} L f g = begin
   MtoVarSet ΓS (FVSTy (lty L)) ∪ MtoVarSet ΓS (FVSTm (ap L PHere))
     ≡⟨ cong₂ _∪_ g (f PHere) ⟩
   DC (COT-to-Ctx ΓS) (FVTy (sty-to-type (proj₂ L))) ∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term (proj₁ L PHere))
-    ≡˘⟨ DC-cup (COT-to-Ctx ΓS) (FVTy (sty-to-type (lty L))) (FVTm (stm-to-term (ap L PHere))) ⟩
+    ≡˘⟨ DC-∪ (COT-to-Ctx ΓS) (FVTy (sty-to-type (lty L))) (FVTm (stm-to-term (ap L PHere))) ⟩
   DC (COT-to-Ctx ΓS) (FVTy (sty-to-type (lty L)) ∪ FVTm (stm-to-term (ap L PHere))) ∎
 FVLabel-to-sub′ {S = Join S T} {ΓS = ΓS} L f g = begin
   MtoVarSet ΓS (FVSTy (lty L) ∪m ((FVSTm (ap L PHere) ∪m FVLabel (ap L ∘ PExt)) ∪m FVLabel (ap L ∘ PShift)))
@@ -344,9 +363,9 @@ FVLabel-to-sub′ {S = Join S T} {ΓS = ΓS} L f g = begin
       ∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term (ap L PHere))
       ∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term (ap L (PShift PHere)))
         ≡˘⟨ cong (_∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term (proj₁ L (PShift PHere))))
-              (DC-cup (COT-to-Ctx ΓS) _ _) ⟩
+              (DC-∪ (COT-to-Ctx ΓS) _ _) ⟩
       DC (COT-to-Ctx ΓS) (FVTy (sty-to-type (proj₂ L)) ∪ FVTm (stm-to-term (proj₁ L PHere))) ∪ SuppTm (COT-to-Ctx ΓS) (stm-to-term (proj₁ L (PShift PHere)))
-        ≡˘⟨ DC-cup (COT-to-Ctx ΓS) _ _ ⟩
+        ≡˘⟨ DC-∪ (COT-to-Ctx ΓS) _ _ ⟩
       SuppTy (COT-to-Ctx ΓS)
       (stm-to-term (ap L PHere) ─⟨ sty-to-type (lty L) ⟩⟶
        stm-to-term (ap L (PShift PHere))) ∎
@@ -407,6 +426,60 @@ supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = NonZero-subst le
         ≡⟨ supp-compat′ (pred (ctx-dim (tree-to-ctx S))) S true ⟩
       pd-bd-supp (pred (ctx-dim (tree-to-ctx S))) (tree-to-ctx S) true ∎
 
+DCM-reflect : {xs ys : MVarSet (COT-to-MT ΓS)} → MtoVarSet ΓS xs ≡ MtoVarSet ΓS ys → DCM ΓS xs ≡ DCM ΓS ys
+DCM-reflect {ΓS = incTree x} p = DCT-reflect p
+DCM-reflect {ΓS = incCtx x} p = p
+
+DCM-∪ : (ΓS : CtxOrTree n) → (xs ys : MVarSet (COT-to-MT ΓS)) → DCM ΓS (xs ∪m ys) ≡ DCM ΓS xs ∪m DCM ΓS ys
+DCM-∪ (incTree x) xs ys = DCT-∪ xs ys
+DCM-∪ (incCtx x) xs ys = DC-∪ x xs ys
+
+FVSTm-≃ : {a b : STm (COT-to-MT ΓS)} → a ≃stm b → DCM ΓS (FVSTm a) ≡ DCM ΓS (FVSTm b)
+FVSTm-≃ {ΓS = ΓS} {a = a} {b = b} [ p ] = DCM-reflect (begin
+  MtoVarSet ΓS (FVSTm a)
+    ≡⟨ FVSTm-to-term a ⟩
+  SuppTm (COT-to-Ctx ΓS) (stm-to-term a)
+    ≡⟨ cong (SuppTm (COT-to-Ctx ΓS)) (≃tm-to-≡ p) ⟩
+  SuppTm (COT-to-Ctx ΓS) (stm-to-term b)
+    ≡˘⟨ FVSTm-to-term b ⟩
+  MtoVarSet ΓS (FVSTm b) ∎)
+
+FVSTy-≃ : {As Bs : STy (COT-to-MT ΓS)} → As ≃sty Bs → DCM ΓS (FVSTy As) ≡ DCM ΓS (FVSTy Bs)
+FVSTy-≃ {ΓS = ΓS} {As = As} {Bs = Bs} [ p ] = DCM-reflect (begin
+  MtoVarSet ΓS (FVSTy As)
+    ≡⟨ FVSTy-to-type As ⟩
+  SuppTy (COT-to-Ctx ΓS) (sty-to-type As)
+    ≡⟨ cong (SuppTy (COT-to-Ctx ΓS)) (≃ty-to-≡ p) ⟩
+  SuppTy (COT-to-Ctx ΓS) (sty-to-type Bs)
+    ≡˘⟨ FVSTy-to-type Bs ⟩
+  MtoVarSet ΓS (FVSTy Bs) ∎)
+
+FVLabel-≃ : {L M : Label (COT-to-MT ΓS) S} → L ≃l M → DCM ΓS (FVLabel L) ≡ DCM ΓS (FVLabel M)
+FVLabel-≃ {S = Sing} {L = L} {M = M} [ p ] = FVSTm-≃ (p PHere)
+FVLabel-≃ {ΓS = ΓS} {S = Join S T} {L = L} {M = M} [ p ] = begin
+  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (L ∘ PExt) ∪m FVLabel (L ∘ PShift))
+    ≡⟨ DCM-∪ ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) (FVLabel (λ x → L (PShift x))) ⟩
+  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (L ∘ PExt)) ∪m DCM ΓS (FVLabel (L ∘ PShift))
+    ≡⟨ cong₂ _∪m_ (DCM-∪ ΓS (FVSTm (L PHere)) (FVLabel (L ∘ PExt))) (FVLabel-≃ [ p ∘ PShift ]) ⟩
+  DCM ΓS (FVSTm (L PHere)) ∪m DCM ΓS (FVLabel (L ∘ PExt)) ∪m DCM ΓS (FVLabel (M ∘ PShift))
+    ≡⟨ cong₂ (λ a b → a ∪m b ∪m DCM ΓS (FVLabel (M ∘ PShift))) (FVSTm-≃ (p PHere)) (FVLabel-≃ [ p ∘ PExt ]) ⟩
+  DCM ΓS (FVSTm (M PHere)) ∪m DCM ΓS (FVLabel (M ∘ PExt)) ∪m DCM ΓS (FVLabel (M ∘ PShift))
+    ≡˘⟨ cong (_∪m DCM ΓS (FVLabel (M ∘ PShift))) (DCM-∪ ΓS (FVSTm (M PHere)) (FVLabel (M ∘ PExt))) ⟩
+  DCM ΓS (FVSTm (M PHere) ∪m FVLabel (M ∘ PExt)) ∪m DCM ΓS (FVLabel (M ∘ PShift))
+    ≡˘⟨ DCM-∪ ΓS (FVSTm (M PHere) ∪m FVLabel (M ∘ PExt)) (FVLabel (M ∘ PShift)) ⟩
+  DCM ΓS (FVSTm (M PHere) ∪m FVLabel (M ∘ PExt) ∪m FVLabel (M ∘ PShift)) ∎
+
+FVLabel-WT-≃ : {L M : Label-WT (COT-to-MT ΓS) S} → ap L ≃l ap M → lty L ≃sty lty M → DCM ΓS (FVLabel-WT L) ≡ DCM ΓS (FVLabel-WT M)
+FVLabel-WT-≃ {ΓS = ΓS} {L = L} {M = M} p q = begin
+  DCM ΓS (FVSTy (lty L) ∪m FVLabel (ap L))
+    ≡⟨ DCM-∪ ΓS (FVSTy (lty L)) (FVLabel (ap L)) ⟩
+  DCM ΓS (FVSTy (lty L)) ∪m DCM ΓS (FVLabel (ap L))
+    ≡⟨ cong₂ _∪m_ (FVSTy-≃ q) (FVLabel-≃ p) ⟩
+  DCM ΓS (FVSTy (lty M)) ∪m DCM ΓS (FVLabel (ap M))
+    ≡˘⟨ DCM-∪ ΓS (FVSTy (lty M)) (FVLabel (ap M)) ⟩
+  DCM ΓS (FVSTy (lty M) ∪m FVLabel (ap M)) ∎
+
+{-
 TransportMVarSet : TVarSet S → Label X S → MVarSet X
 TransportMVarSet (VSSing false) L = mEmp
 TransportMVarSet (VSSing true) L = FVSTm (L PHere)
@@ -439,17 +512,9 @@ TransportMVarSet-∪m {X = X} (VSJoin b xs xs′) (VSJoin b′ ys ys′) L = beg
     ∪m
     (TransportMVarSet xs′ (λ x → L (PShift x)) ∪m
      TransportMVarSet ys′ (λ x → L (PShift x)))
-    ≡⟨ prove 6 ((var 0F ⊕ var 1F ⊕ (var 2F ⊕ var 3F) ⊕ (var 4F ⊕ var 5F))) {!(var 0F ⊕ var 2F ⊕ var 4F) ⊕ (var 1F ⊕ var 3F ⊕ var 5F)!} {!!} ⟩
-    -- prove 6
-    (var 0F ⊕ var 1F ⊕ (var 2F ⊕ var 3F) ⊕ (var 4F ⊕ var 5F))
-    --            (var 0F ⊕ var 2F ⊕ var 4F) ⊕ (var 1F ⊕ var 3F ⊕ var 5F)
-               -- ((if b then FVSTm (L PHere) else mEmp)
-               -- ∷ (if b′ then FVSTm (L PHere) else mEmp)
-               -- ∷ TransportMVarSet xs (λ x → L (PExt x))
-               -- ∷ TransportMVarSet ys (λ x → L (PExt x))
-               -- ∷ TransportMVarSet xs′ (λ x → L (PShift x))
-               -- ∷ TransportMVarSet ys′ (λ x → L (PShift x))
-               -- ∷ emp)
+    ≡⟨ prove 6 ((((var 0F ⊕ var 1F) ⊕ (var 2F ⊕ var 3F)) ⊕ (var 4F ⊕ var 5F)))
+               (((var 0F ⊕ var 2F) ⊕ var 4F) ⊕ ((var 1F ⊕ var 3F) ⊕ var 5F))
+               (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ emp) ⟩
   (if b then FVSTm (L PHere) else mEmp) ∪m
       TransportMVarSet xs (λ x → L (PExt x))
       ∪m TransportMVarSet xs′ (λ x → L (PShift x))
@@ -467,45 +532,83 @@ TransportMVarSet-∪m {X = X} (VSJoin b xs xs′) (VSJoin b′ ys ys′) L = beg
     import Algebra.Solver.IdempotentCommutativeMonoid as Solver
     open Solver (∪m-idempotentCommutativeMonoid {X = X})
 
+_≡in[_]_ : MVarSet X → MVarSet X → MVarSet X → Set
+xs ≡in[ ys ] zs = xs ∪m ys ≡ zs ∪m ys
+
 TransportMVarSet-path : (P : Path S) → (L : Label X S) → TransportMVarSet (fromPath P) L ≡ FVSTm (L P)
 TransportMVarSet-path {S = Sing} PHere L = refl
 TransportMVarSet-path {S = Join S T} PHere L = {!!}
 TransportMVarSet-path (PExt P) L = {!!}
 TransportMVarSet-path (PShift P) L = {!!}
 
-TransportMVarSet-term-comp : (a : STm (someTree S)) → (L : Label-WT X S)
-                        → TransportMVarSet (FVSTm a) (ap L) ≡ FVSTm (a >>= L)
+TransportMVarSet-term-comp : {X : MaybeTree n} → (a : STm (someTree S)) → (L : Label-WT X S)
+                        → TransportMVarSet (FVSTm a) (ap L) ≡in[ FVSTy (lty L) ] FVSTm (a >>= L)
 TransportMVarSet-type-comp : {X : MaybeTree n} → (As : STy (someTree S)) → (L : Label-WT X S)
-                           → TransportMVarSet (FVSTy As) (ap L) ∪m FVSTy (lty L) ≡ FVSTy (label-on-sty As L)
-TransportMVarSet-label-comp : (M : Label (someTree S) T) → (L : Label-WT X S)
-                            → TransportMVarSet (FVLabel M) (ap L) ≡ FVLabel (label-comp M L)
-TransportMVarSet-label-wt-comp : (M : Label-WT (someTree S) T) → (L : Label-WT X S)
-                            → TransportMVarSet (FVLabel-WT M) (ap L) ≡ FVLabel-WT (label-wt-comp M L)
+                           → TransportMVarSet (FVSTy As) (ap L) ≡in[ FVSTy (lty L) ] FVSTy (label-on-sty As L)
+TransportMVarSet-label-comp : {X : MaybeTree n} → (M : Label (someTree S) T) → (L : Label-WT X S)
+                            → TransportMVarSet (FVLabel M) (ap L) ≡in[ FVSTy (lty L) ] FVLabel (label-comp M L)
+TransportMVarSet-label-wt-comp : {X : MaybeTree n} → (M : Label-WT (someTree S) T) → (L : Label-WT X S)
+                            → TransportMVarSet (FVLabel-WT M) (ap L) ≡in[ FVSTy (lty L) ] FVLabel-WT (label-wt-comp M L)
 
 TransportMVarSet-term-comp {X = X} (SExt a) L = begin
   mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PExt) ∪m
-      TransportMVarSet tEmp (λ x → ap L (PShift x))
-    ≡⟨ cong (mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PExt) ∪m_) (TransportMVarSet-Emp (ap L ∘ PShift)) ⟩
-  mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PExt) ∪m mEmp
+      TransportMVarSet tEmp (λ x → ap L (PShift x)) ∪m (FVSTy (lty L))
+    ≡⟨ cong (λ x → mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PExt) ∪m x ∪m (FVSTy (lty L))) (TransportMVarSet-Emp (ap L ∘ PShift)) ⟩
+  mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PExt) ∪m mEmp ∪m (FVSTy (lty L))
     ≡⟨ solve (∪m-monoid {X = X}) ⟩
-  TransportMVarSet (FVSTm a) (ap L ∘ PExt)
+  TransportMVarSet (FVSTm a) (ap L ∘ PExt) ∪m (FVSTy (lty L))
+    ≡⟨ {!!} ⟩
+  TransportMVarSet (FVSTm a) (ap (label₁ L)) ∪m FVSTy (lty (label₁ L))
     ≡⟨ TransportMVarSet-term-comp a (label₁ L) ⟩
-  FVSTm (a >>= label₁ L) ∎
+  FVSTm (a >>= label₁ L) ∪m FVSTy (lty (label₁ L))
+    ≡⟨ {!!} ⟩
+  FVSTm (a >>= label₁ L) ∪m (FVSTy (lty L)) ∎
 TransportMVarSet-term-comp {X = X} (SShift a) L = begin
-  mEmp ∪m TransportMVarSet tEmp (ap L ∘ PExt) ∪m TransportMVarSet (FVSTm a) (ap L ∘ PShift)
-    ≡⟨ cong (λ x → mEmp ∪m x ∪m TransportMVarSet (FVSTm a) (ap L ∘ PShift)) (TransportMVarSet-Emp (ap L ∘ PExt)) ⟩
-  mEmp ∪m mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PShift)
+  mEmp ∪m TransportMVarSet tEmp (ap L ∘ PExt) ∪m TransportMVarSet (FVSTm a) (ap L ∘ PShift) ∪m (FVSTy (lty L))
+    ≡⟨ cong (λ x → mEmp ∪m x ∪m TransportMVarSet (FVSTm a) (ap L ∘ PShift) ∪m (FVSTy (lty L))) (TransportMVarSet-Emp (ap L ∘ PExt)) ⟩
+  mEmp ∪m mEmp ∪m TransportMVarSet (FVSTm a) (ap L ∘ PShift) ∪m (FVSTy (lty L))
     ≡⟨ solve (∪m-monoid {X = X}) ⟩
-  TransportMVarSet (FVSTm a) (ap L ∘ PShift)
+  TransportMVarSet (FVSTm a) (ap L ∘ PShift) ∪m (FVSTy (lty L))
+    ≡⟨ {!!} ⟩
+  {!!}
     ≡⟨ TransportMVarSet-term-comp a (label₂ L) ⟩
-  FVSTm (a >>= label₂ L) ∎
-TransportMVarSet-term-comp (SPath x) L = TransportMVarSet-path x (ap L)
-TransportMVarSet-term-comp (SCoh S A M) L = TransportMVarSet-label-wt-comp M L
+  {!!}
+    ≡⟨ {!!} ⟩
+  FVSTm (a >>= label₂ L) ∪m (FVSTy (lty L)) ∎
+TransportMVarSet-term-comp (SPath x) L = {!!} -- TransportMVarSet-path x (ap L)
+TransportMVarSet-term-comp (SCoh S A M) L = {!!} -- TransportMVarSet-label-wt-comp M L
 
 TransportMVarSet-type-comp S⋆ L = {!!}
 TransportMVarSet-type-comp (SArr s As t) L = {!!}
 
-TransportMVarSet-label-comp {T = Sing} M L = TransportMVarSet-term-comp (M PHere) L
-TransportMVarSet-label-comp {T = Join T T′} M L = {!!}
+TransportMVarSet-label-comp {T = Sing} M L = {!!} -- TransportMVarSet-term-comp (M PHere) L
+TransportMVarSet-label-comp {T = Join T T′} M L = {!!} -- begin
+  -- TransportMVarSet
+  --     (FVSTm (M PHere) ∪t FVLabel (M ∘ PExt) ∪t FVLabel (M ∘ PShift))
+  --     (ap L)
+  --   ≡⟨ TransportMVarSet-∪m (FVSTm (M PHere) ∪t FVLabel (M ∘ PExt)) (FVLabel (λ x → M (PShift x))) (ap L) ⟩
+  -- TransportMVarSet (FVSTm (M PHere) ∪t FVLabel (λ x → M (PExt x)))
+  --   (proj₁ L)
+  --   ∪m TransportMVarSet (FVLabel (M ∘ PShift)) (ap L)
+  --   ≡⟨ {!!} ⟩
+  -- {!!}
+  --   ≡⟨ {!!} ⟩
+  -- {!!}
+  --   ≡⟨ {!!} ⟩
+  -- FVSTm (M PHere >>= L) ∪m FVLabel (label-comp (M ∘ PExt) L)
+  --     ∪m FVLabel (label-comp (M ∘ PShift) L) ∎
 
-TransportMVarSet-label-wt-comp = {!!}
+TransportMVarSet-label-wt-comp {X = X} M L = {!!} -- begin
+  -- TransportMVarSet (FVSTy (lty M) ∪t FVLabel (ap M)) (ap L) ∪m FVSTy (lty L)
+  --   ≡⟨ cong (_∪m FVSTy (lty L)) (TransportMVarSet-∪m (FVSTy (lty M)) (FVLabel (ap M)) (ap L)) ⟩
+  -- TransportMVarSet (FVSTy (lty M)) (ap L) ∪m TransportMVarSet (FVLabel (ap M)) (ap L) ∪m FVSTy (lty L)
+  --   ≡⟨ {!solve (∪m-monoid {X = X})!} ⟩
+  -- TransportMVarSet (FVSTy (lty M)) (ap L) ∪m FVSTy (lty L) ∪m
+  --   TransportMVarSet (FVLabel (proj₁ M)) (ap L)
+  --   ≡⟨ cong₂ _∪m_ (TransportMVarSet-type-comp (lty M) L) (TransportMVarSet-label-comp (ap M) L) ⟩
+  -- FVSTy (label-on-sty (lty M) L) ∪m
+  --     FVLabel (label-comp (ap M) L) ∎
+-}
+
+FVSTm-susp : (a : STm (someTree S)) → supp-tvarset (DCT (FVSTm a)) ≡ DCT (FVSTm (susp-stm a))
+FVSTm-susp {S = S} a rewrite Truth-prop (FVSTm-non-empty a) = refl

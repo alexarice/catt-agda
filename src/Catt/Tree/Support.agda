@@ -91,9 +91,25 @@ module _ {S : Tree n} where
     ; identity = ∪t-left-unit ,, ∪t-right-unit
     }
 
+  ∪t-isCommutativeMonoid : IsCommutativeMonoid _∪t_ tEmp
+  ∪t-isCommutativeMonoid = record
+    { isMonoid = ∪t-isMonoid
+    ; comm = ∪t-comm
+    }
+
+  ∪t-isIdempotentCommutativeMonoid : IsIdempotentCommutativeMonoid _∪t_ tEmp
+  ∪t-isIdempotentCommutativeMonoid = record
+    { isCommutativeMonoid = ∪t-isCommutativeMonoid
+    ; idem = ∪t-idem
+    }
+
   ∪t-monoid : Monoid _ _
   ∪t-monoid = record
     { isMonoid = ∪t-isMonoid }
+
+  ∪t-idempotentCommutativeMonoid : IdempotentCommutativeMonoid _ _
+  ∪t-idempotentCommutativeMonoid = record
+    { isIdempotentCommutativeMonoid = ∪t-isIdempotentCommutativeMonoid }
 
 tvarset-non-empty : TVarSet S → Bool
 tvarset-non-empty (VSSing b) = b
@@ -165,6 +181,25 @@ tvarset-maybe-empty : (xs : TVarSet S) → if (tvarset-non-empty xs) then ⊤ el
 tvarset-maybe-empty xs with tvarset-non-empty xs | inspect tvarset-non-empty xs
 ... | true | y = tt
 ... | false | y = tvarset-truth-empty xs (Truth-prop′ (cong not (y .eq)))
+
+tvarset-compat-1 : (xs : TVarSet S) → Truth (tvarset-non-empty xs) → Truth (varset-non-empty (toVarSet xs))
+tvarset-compat-1 (VSSing true) t = tt
+tvarset-compat-1 (VSJoin {n} b xs xs′) t with tvarset-non-empty xs | tvarset-maybe-empty xs | b
+... | false | p | false = connect-susp-supp-non-empty-right empty (toVarSet xs′) (tvarset-compat-1 xs′ t)
+... | false | p | true = connect-susp-supp-non-empty-left (FVTm getFst) (toVarSet xs′) (trueAt-non-empty (fromℕ n))
+... | true | p | b = connect-susp-supp-non-empty-left (suspSupp (toVarSet xs)) (toVarSet xs′) (suspSupp-non-empty (toVarSet xs))
+
+tvarset-non-empty-compat : (xs : TVarSet S) → tvarset-non-empty xs ≡ varset-non-empty (toVarSet xs)
+tvarset-non-empty-compat {n} {S = S} xs with tvarset-non-empty xs | tvarset-maybe-empty xs | tvarset-compat-1 xs
+... | false | refl | x = begin
+  false
+    ≡˘⟨ empty-is-empty {n = suc n} ⟩
+  varset-non-empty (empty {n = suc n})
+    ≡˘⟨ cong varset-non-empty (toVarSet-emp S) ⟩
+  varset-non-empty (toVarSet (tEmp {S = S})) ∎
+  where open ≡-Reasoning
+... | true | p | x with varset-non-empty (toVarSet xs) | x tt
+... | true | x = refl
 
 toVarSet-∪t : (xs ys : TVarSet S) → toVarSet (xs ∪t ys) ≡ toVarSet xs ∪ toVarSet ys
 toVarSet-∪t (VSSing b) (VSSing b′) = refl
@@ -347,6 +382,10 @@ set-fst-true : TVarSet S → TVarSet S
 set-fst-true (VSSing b) = VSSing true
 set-fst-true (VSJoin b xs ys) = VSJoin true xs ys
 
+set-fst-true-prop : (xs : TVarSet S) → set-fst-true xs ≡ set-fst-true tEmp ∪t xs
+set-fst-true-prop (VSSing b) = refl
+set-fst-true-prop (VSJoin b xs ys) = sym (cong₂ (VSJoin true) (∪t-left-unit xs) (∪t-left-unit ys))
+
 DCT : TVarSet S → TVarSet S
 DCT (VSSing b) = VSSing b
 DCT (VSJoin b xs ys) = VSJoin (b ∨ tvarset-non-empty xs) (DCT xs) (if tvarset-non-empty xs then set-fst-true (DCT ys) else DCT ys)
@@ -356,6 +395,46 @@ DCT-non-empty (VSSing b) = refl
 DCT-non-empty (VSJoin b xs ys) rewrite DCT-non-empty xs with tvarset-non-empty xs
 ... | false = cong₂ _∨_ (∨-identityʳ b) (DCT-non-empty ys)
 ... | true = trans (∨-zeroʳ (b ∨ true)) (sym (∨-zeroʳ b))
+
+DCT-set-fst-true : (xs : TVarSet S) → set-fst-true (DCT xs) ≡ DCT (set-fst-true xs)
+DCT-set-fst-true (VSSing b) = refl
+DCT-set-fst-true (VSJoin b xs ys) = refl
+
+DCT-∪ : (xs ys : TVarSet S) → DCT (xs ∪t ys) ≡ DCT xs ∪t DCT ys
+DCT-∪ (VSSing b) (VSSing b′) = refl
+DCT-∪ (VSJoin b xs xs′) (VSJoin b′ ys ys′) = cong₃ VSJoin l1 (DCT-∪ xs ys) l2
+  where
+    open ≡-Reasoning
+
+    l1 : (b ∨ b′) ∨ tvarset-non-empty (xs ∪t ys) ≡
+           (b ∨ tvarset-non-empty xs) ∨ b′ ∨ tvarset-non-empty ys
+    l1 = begin
+      (b ∨ b′) ∨ tvarset-non-empty (xs ∪t ys)
+        ≡⟨ cong ((b ∨ b′) ∨_) (tvarset-non-empty-∪t xs ys) ⟩
+      (b ∨ b′) ∨ tvarset-non-empty xs ∨ tvarset-non-empty ys
+        ≡⟨ prove 4 ((var 0F ⊕ var 1F) ⊕ var 2F ⊕ var 3F) ((var 0F ⊕ var 2F) ⊕ var 1F ⊕ var 3F) (b ∷ b′ ∷ tvarset-non-empty xs ∷ tvarset-non-empty ys ∷ emp) ⟩
+      (b ∨ tvarset-non-empty xs) ∨ b′ ∨ tvarset-non-empty ys ∎
+      where
+        open Solver ∨-idempotentCommutativeMonoid
+
+    open Solver ∪t-idempotentCommutativeMonoid
+
+    l2 : (if tvarset-non-empty (xs ∪t ys) then
+            set-fst-true (DCT (xs′ ∪t ys′)) else DCT (xs′ ∪t ys′))
+           ≡
+           (if tvarset-non-empty xs then set-fst-true (DCT xs′) else DCT xs′)
+           ∪t
+           (if tvarset-non-empty ys then set-fst-true (DCT ys′) else DCT ys′)
+    l2 rewrite DCT-∪ xs′ ys′
+       rewrite tvarset-non-empty-∪t xs ys
+       rewrite set-fst-true-prop (DCT xs′ ∪t DCT ys′)
+       rewrite set-fst-true-prop (DCT xs′)
+       rewrite set-fst-true-prop (DCT ys′)
+       with tvarset-non-empty xs | tvarset-non-empty ys
+    ... | false | false = refl
+    ... | false | true = prove 3 (var 0F ⊕ (var 1F ⊕ var 2F)) (var 1F ⊕ (var 0F ⊕ var 2F)) (set-fst-true tEmp ∷ DCT xs′ ∷ DCT ys′ ∷ emp)
+    ... | true | false = sym (∪t-assoc (set-fst-true tEmp) (DCT xs′) (if false then set-fst-true tEmp ∪t DCT ys′ else DCT ys′))
+    ... | true | true = prove 3 (var 0F ⊕ (var 1F ⊕ var 2F)) ((var 0F ⊕ var 1F) ⊕ (var 0F ⊕ var 2F)) (set-fst-true tEmp ∷ DCT xs′ ∷ DCT ys′ ∷ emp)
 
 set-fst-true-toVarSet : (xs : TVarSet S) → toVarSet (set-fst-true xs) ≡ trueAt (fromℕ _) ∪ toVarSet xs
 set-fst-true-toVarSet (VSSing b) = refl
@@ -405,3 +484,323 @@ DCT-toVarSet (VSJoin b xs ys) rewrite DCT-non-empty xs with tvarset-non-empty xs
   connect-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys) ∎
   where
     open ≡-Reasoning
+
+DCT-emp : {S : Tree n} → DCT (tEmp {S = S}) ≡ tEmp {S = S}
+DCT-emp {S = Sing} = refl
+DCT-emp {S = Join S T} rewrite tEmp-empty S
+  = cong₂ (VSJoin false) DCT-emp DCT-emp
+
+DCT-fst : (S : Tree n) → DCT (fromPath (PHere {S = S})) ≡ fromPath (PHere {S = S})
+DCT-fst Sing = refl
+DCT-fst (Join S T) rewrite tEmp-empty S = cong₂ (VSJoin true) DCT-emp DCT-emp
+
+DCT-last-path : (T : Tree n) → DCT (fromPath (last-path T)) ≡ fromPath (last-path T)
+DCT-last-path Sing = refl
+DCT-last-path (Join S T) rewrite tEmp-empty S = cong₂ (VSJoin false) DCT-emp (DCT-last-path T)
+
+tvarset-fst : TVarSet S → Bool
+tvarset-fst (VSSing b) = b
+tvarset-fst (VSJoin b _ _) = b
+
+tvarset-fst-prop : (xs ys : TVarSet S) → set-fst-true xs ≡ set-fst-true ys → tvarset-fst xs ≡ tvarset-fst ys → xs ≡ ys
+tvarset-fst-prop (VSSing b) (VSSing .(tvarset-fst (VSSing b))) p refl = refl
+tvarset-fst-prop (VSJoin b xs xs′) (VSJoin .(tvarset-fst (VSJoin b xs xs′)) .xs .xs′) refl refl = refl
+
+tvarset-fst-set-fst : (xs : TVarSet S) → Truth (tvarset-fst xs) → set-fst-true xs ≡ xs
+tvarset-fst-set-fst (VSSing true) p = refl
+tvarset-fst-set-fst (VSJoin true _ _) p = refl
+
+tvarset-fst-toVarSet : (xs : TVarSet S) → tvarset-fst (DCT xs) ≡ lookup (toVarSet xs) (fromℕ _)
+tvarset-fst-toVarSet (VSSing b) = refl
+tvarset-fst-toVarSet (VSJoin {n} b xs ys) = begin
+  b ∨ tvarset-non-empty xs
+    ≡⟨ lem (tvarset-non-empty xs) b ⟩
+  (if tvarset-non-empty xs then
+    lookup (suspSupp (toVarSet xs)) (fromℕ (suc (suc _))) else
+    lookup (if b then ewf (ewf (trueAt (fromℕ _))) else empty) (fromℕ (suc (suc _))))
+    ≡˘⟨ push-function-into-if (λ a → lookup a (fromℕ _)) (tvarset-non-empty xs) ⟩
+  lookup
+    (if tvarset-non-empty xs then suspSupp (toVarSet xs) else
+     (if b then ewf (ewf (trueAt (fromℕ _))) else empty))
+    (fromℕ _)
+    ≡˘⟨ connect-susp-supp-fst-var (if tvarset-non-empty xs then suspSupp (toVarSet xs) else
+        (if b then ewf (ewf (trueAt (fromℕ _))) else empty)) (toVarSet ys) ⟩
+  lookup
+      (connect-susp-supp
+       (if tvarset-non-empty xs then suspSupp (toVarSet xs) else
+        (if b then ewf (ewf (trueAt (fromℕ _))) else empty))
+       (toVarSet ys))
+      (fromℕ _) ∎
+  where
+    open ≡-Reasoning
+    lem : (b′ b : Bool) → b ∨ b′ ≡
+      (if b′ then
+       lookup (suspSupp (toVarSet xs)) (suc (suc (fromℕ _))) else
+       lookup (if b then ewf (ewf (trueAt (fromℕ _))) else empty)
+       (suc (suc (fromℕ _))))
+    lem false false = sym (lookup-empty (fromℕ n))
+    lem false true = sym (lookup-trueAt (fromℕ n))
+    lem true b = begin
+      b ∨ true
+        ≡⟨ ∨-zeroʳ b ⟩
+      true
+        ≡˘⟨ suspSupp-fst-var (toVarSet xs) ⟩
+      lookup (suspSupp (toVarSet xs)) (fromℕ _) ∎
+
+DCT-reflect : {xs ys : TVarSet S} → toVarSet xs ≡ toVarSet ys → DCT xs ≡ DCT ys
+DCT-reflect {xs = VSSing b} {ys = VSSing .b} refl = refl
+DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
+  where
+    open ≡-Reasoning
+    import Algebra.Solver.IdempotentCommutativeMonoid as Solver
+    connect-prop : ∀ (xs xs′ : VarSet (3 + n)) (ys ys′ : VarSet 1) → connect-susp-supp xs ys ≡ connect-susp-supp xs′ ys′ → xs ∪ FVTm getSnd ≡ xs′ ∪ FVTm getSnd
+    connect-prop xs xs′ (ewf emp) (ewf emp) p = cong (_∪ trueAt (inject₁ (fromℕ _))) p
+    connect-prop xs xs′ (ewf emp) (ewt emp) p = begin
+      xs ∪ FVTm getSnd
+        ≡⟨ cong (_∪ FVTm getSnd) p ⟩
+      xs′ ∪ FVTm getSnd ∪ FVTm getSnd
+        ≡⟨ prove 2 ((var 0F ⊕ var 1F) ⊕ var 1F) (var 0F ⊕ var 1F) (_ ∷ _ ∷ emp) ⟩
+      xs′ ∪ FVTm getSnd ∎
+      where
+        open Solver (∪-idempotentCommutativeMonoid)
+    connect-prop xs xs′ (ewt emp) (ewf emp) p = begin
+      xs ∪ FVTm getSnd
+        ≡⟨ prove 2 (var 0F ⊕ var 1F) ((var 0F ⊕ var 1F) ⊕ var 1F) (_ ∷ _ ∷ emp) ⟩
+      xs ∪ FVTm getSnd ∪ FVTm getSnd
+        ≡⟨ cong (_∪ FVTm getSnd) p ⟩
+      xs′ ∪ FVTm getSnd ∎
+      where
+        open Solver (∪-idempotentCommutativeMonoid)
+    connect-prop xs xs′ (ewt emp) (ewt emp) p = p
+
+    absurd : {A : Set} → (true ≡ false) → A
+    absurd ()
+
+    suspSupp-reflect : (xs ys : VarSet n) → suspSupp xs ∪ FVTm getSnd ≡ suspSupp ys ∪ FVTm getSnd → xs ≡ ys
+    suspSupp-reflect emp emp p = refl
+    suspSupp-reflect (x ∷ xs) (y ∷ ys) p = cong₂ _∷_ lem (suspSupp-reflect xs ys (cong tail p))
+      where
+        lem : x ≡ y
+        lem = begin
+          x
+            ≡˘⟨ ∨-identityʳ x ⟩
+          x ∨ false
+            ≡⟨ cong head p ⟩
+          y ∨ false
+            ≡⟨ ∨-identityʳ y ⟩
+          y ∎
+
+    susp-prop : ∀ (xs ys : VarSet n) (b b′ : Bool) → (if varset-non-empty xs then suspSupp xs else (if b then FVTm getFst else empty)) ∪ FVTm getSnd ≡ (if varset-non-empty ys then suspSupp ys else (if b′ then FVTm getFst else empty)) ∪ FVTm getSnd → xs ≡ ys
+    susp-prop emp emp b b′ p = refl
+    susp-prop (ewf xs) (ewf ys) b b′ p = cong ewf (susp-prop xs ys b b′ lem)
+      where
+        lem : (if varset-non-empty xs then suspSupp xs else
+                 (if b then FVTm getFst else empty)) ∪ FVTm getSnd
+                ≡
+                (if varset-non-empty ys then suspSupp ys else
+                 (if b′ then FVTm getFst else empty)) ∪ FVTm getSnd
+        lem = cong tail (begin
+          ewf ((if varset-non-empty xs then suspSupp xs else (if b then trueAt (fromℕ (suc _)) else replicate false)) ∪ FVTm getSnd)
+            ≡⟨ cong (_∪ FVTm getSnd) (push-function-into-if ewf (varset-non-empty xs)) ⟩
+          (if varset-non-empty xs then ewf (suspSupp xs) else ewf (if b then trueAt (fromℕ (suc _)) else replicate false)) ∪ FVTm getSnd
+            ≡⟨ cong (λ a → (if varset-non-empty xs then ewf (suspSupp xs) else a) ∪ FVTm getSnd) (push-function-into-if ewf b) ⟩
+          (if varset-non-empty xs then ewf (suspSupp xs) else (if b then FVTm getFst else empty)) ∪ FVTm getSnd
+            ≡⟨ p ⟩
+          (if varset-non-empty ys then ewf (suspSupp ys) else (if b′ then FVTm getFst else empty)) ∪ FVTm getSnd
+            ≡˘⟨ cong (λ a → (if varset-non-empty ys then ewf (suspSupp ys) else a) ∪ FVTm getSnd) (push-function-into-if ewf b′) ⟩
+          (if varset-non-empty ys then ewf (suspSupp ys) else ewf (if b′ then trueAt (fromℕ (suc _)) else replicate false)) ∪ FVTm getSnd
+            ≡˘⟨ cong (_∪ FVTm getSnd) (push-function-into-if ewf (varset-non-empty ys)) ⟩
+          ewf ((if varset-non-empty ys then suspSupp ys else (if b′ then FVTm getFst else empty)) ∪ (FVTm getSnd)) ∎)
+    susp-prop (ewf xs) (ewt ys) b b′ p = absurd (sym lem)
+      where
+        lem : false ≡ true
+        lem = begin
+          false
+            ≡˘⟨ if-lem-const (varset-non-empty (ewf xs)) false ⟩
+          (if varset-non-empty (ewf xs) then false else false)
+            ≡˘⟨ cong (if varset-non-empty (ewf xs) then false else_) (if-lem-const b false) ⟩
+          (if varset-non-empty (ewf xs) then false else
+            (if b then false else false))
+            ≡˘⟨ cong (if varset-non-empty (ewf xs) then false else_) (push-function-into-if (λ a → lookup a 0F) b) ⟩
+          (if varset-non-empty (ewf xs) then false else lookup (if b then FVTm getFst else empty) 0F)
+            ≡˘⟨ push-function-into-if (λ a → lookup a 0F) (varset-non-empty (ewf xs)) ⟩
+          lookup (if varset-non-empty (ewf xs) then suspSupp (ewf xs) else (if b then FVTm getFst else empty)) 0F
+            ≡˘⟨ ∨-identityʳ _ ⟩
+          lookup
+            (if varset-non-empty (ewf xs) then suspSupp (ewf xs) else
+             (if b then FVTm getFst else empty))
+            0F
+            ∨ false
+            ≡˘⟨ lookup-∪ (if varset-non-empty (ewf xs) then suspSupp (ewf xs) else (if b then FVTm getFst else empty)) (FVTm getSnd) 0F ⟩
+          lookup ((if varset-non-empty (ewf xs) then suspSupp (ewf xs) else (if b then FVTm getFst else empty)) ∪ FVTm getSnd) 0F
+            ≡⟨ cong (λ a → lookup a 0F) p ⟩
+          true ∎
+    susp-prop (ewt xs) (ewf ys) b b′ p = absurd lem
+      where
+        lem : true ≡ false
+        lem = begin
+          true
+            ≡⟨ cong (λ a → lookup a 0F) p ⟩
+          lookup
+            ((if varset-non-empty (ewf ys) then suspSupp (ewf ys) else
+              (if b′ then FVTm getFst else empty))
+             ∪ FVTm getSnd)
+            0F
+            ≡⟨ lookup-∪ (if varset-non-empty (ewf ys) then suspSupp (ewf ys) else
+              (if b′ then FVTm getFst else empty)) (FVTm getSnd) 0F ⟩
+          lookup
+            (if varset-non-empty (ewf ys) then suspSupp (ewf ys) else
+             (if b′ then FVTm getFst else empty))
+            0F
+            ∨ false
+            ≡⟨ ∨-identityʳ _ ⟩
+          lookup (if varset-non-empty (ewf ys) then suspSupp (ewf ys) else (if b′ then FVTm getFst else empty)) 0F
+            ≡⟨ push-function-into-if (λ a → lookup a 0F) (varset-non-empty ys) ⟩
+          (if varset-non-empty ys then false else lookup (if b′ then FVTm getFst else empty) 0F)
+            ≡⟨ cong (if varset-non-empty ys then false else_) (push-function-into-if (λ a → lookup a 0F) b′) ⟩
+          (if varset-non-empty ys then false else (if b′ then false else false))
+            ≡⟨ cong (if varset-non-empty ys then false else_) (if-lem-const b′ false) ⟩
+          (if varset-non-empty ys then false else false)
+            ≡⟨ if-lem-const (varset-non-empty ys) false ⟩
+          false ∎
+    susp-prop (ewt xs) (ewt ys) b b′ p = suspSupp-reflect (ewt xs) (ewt ys) p
+
+    lem : ∀ b (xs ys : VarSet (suc n)) b′ (xs′ ys′ : VarSet (suc m))
+        → connect-susp-supp (if varset-non-empty xs then suspSupp xs else (if b then ewf (ewf (trueAt (fromℕ _))) else empty)) xs′
+        ≡ connect-susp-supp (if varset-non-empty ys then suspSupp ys else (if b′ then ewf (ewf (trueAt (fromℕ _))) else empty)) ys′
+        → xs ≡ ys
+    lem {m = zero} b xs ys b′ xs′ ys′ p = susp-prop xs ys b b′ (connect-prop (if varset-non-empty xs then suspSupp xs else
+                                                                                           (if b then FVTm getFst else empty)) (if varset-non-empty ys then suspSupp ys else
+                                                                                                                                 (if b′ then FVTm getFst else empty)) xs′ ys′ p)
+    lem {m = suc m} b xs ys b′ (x ∷ xs′) (y ∷ ys′) p = lem b xs ys b′ xs′ ys′ (cong tail p)
+
+    lem2 : DCT xs ≡ DCT ys
+    lem2 = DCT-reflect (lem b (toVarSet xs) (toVarSet ys) b′ (toVarSet xs′) (toVarSet ys′) (begin
+      connect-susp-supp
+        (if varset-non-empty (toVarSet xs) then suspSupp (toVarSet xs) else
+         (if b then ewf (ewf (trueAt (fromℕ _))) else empty))
+        (toVarSet xs′)
+        ≡˘⟨ cong
+             (λ a →
+                connect-susp-supp
+                (if a then suspSupp (toVarSet xs) else
+                 (if b then ewf (ewf (trueAt (fromℕ _))) else empty))
+                (toVarSet xs′))
+             (tvarset-non-empty-compat xs) ⟩
+      toVarSet (VSJoin b xs xs′)
+        ≡⟨ p ⟩
+      toVarSet (VSJoin b′ ys ys′)
+        ≡⟨ cong
+             (λ a →
+                connect-susp-supp
+                (if a then suspSupp (toVarSet ys) else
+                 (if b′ then ewf (ewf (trueAt (fromℕ _))) else empty))
+                (toVarSet ys′))
+             (tvarset-non-empty-compat ys) ⟩
+      connect-susp-supp
+        (if varset-non-empty (toVarSet ys) then suspSupp (toVarSet ys) else
+         (if b′ then ewf (ewf (trueAt (fromℕ _))) else empty))
+        (toVarSet ys′) ∎))
+
+    lem3 : (xs ys : TVarSet S) → xs ≡ ys → (xs′ ys′ : TVarSet T) → (b b′ : Bool)
+         → toVarSet (VSJoin b xs xs′) ≡ toVarSet (VSJoin b′ ys ys′)
+         → VSJoin (b ∨ tvarset-non-empty xs) xs (if tvarset-non-empty xs then set-fst-true (DCT xs′) else DCT xs′)
+         ≡ VSJoin (b′ ∨ tvarset-non-empty ys) ys (if tvarset-non-empty ys then set-fst-true (DCT ys′) else DCT ys′)
+    lem3 {n} {_} {m} xs .xs refl xs′ ys′ b b′ p = final
+      where
+        lem4 : set-fst-true (DCT xs′) ≡ set-fst-true (DCT ys′)
+        lem4 = begin
+          set-fst-true (DCT xs′)
+            ≡⟨ DCT-set-fst-true xs′ ⟩
+          DCT (set-fst-true xs′)
+            ≡⟨ DCT-reflect l1 ⟩
+          DCT (set-fst-true ys′)
+            ≡˘⟨ DCT-set-fst-true ys′ ⟩
+          set-fst-true (DCT ys′) ∎
+          where
+            l1 : toVarSet (set-fst-true xs′) ≡ toVarSet (set-fst-true ys′)
+            l1 = begin
+              toVarSet (set-fst-true xs′)
+                ≡⟨ set-fst-true-toVarSet xs′ ⟩
+              trueAt (fromℕ _) ∪ toVarSet xs′
+                ≡⟨ connect-susp-supp-proj-right _ _ _ _ p ⟩
+              trueAt (fromℕ _) ∪ toVarSet ys′
+                ≡˘⟨ set-fst-true-toVarSet ys′ ⟩
+              toVarSet (set-fst-true ys′) ∎
+        final : VSJoin (b ∨ tvarset-non-empty xs) xs (if tvarset-non-empty xs then set-fst-true (DCT xs′) else DCT xs′)
+              ≡ VSJoin (b′ ∨ tvarset-non-empty xs) xs (if tvarset-non-empty xs then set-fst-true (DCT ys′) else DCT ys′)
+        final with tvarset-non-empty xs
+        ... | false = cong₂ (λ a → VSJoin a xs) l2 (tvarset-fst-prop (DCT xs′) (DCT ys′) lem4 l4)
+          where
+            l1 : b ≡ b′
+            l1 = begin
+              b
+                ≡˘⟨ if-lem b ⟩
+              (if b then true else false)
+                ≡˘⟨ cong₂ (if b then_else_) (lookup-trueAt (fromℕ (2 + n))) (lookup-empty (fromℕ (3 + n))) ⟩
+              (if b then lookup (trueAt (fromℕ (suc (suc n)))) (fromℕ (2 + n)) else lookup empty (fromℕ (2 + n)))
+                ≡˘⟨ push-function-into-if (λ a → lookup a (fromℕ (suc (suc n)))) b {y = trueAt (fromℕ (suc (suc n)))} {z = empty {n = 3 + n}} ⟩
+              lookup (if b then trueAt (fromℕ (suc (suc n))) else empty) (fromℕ (suc (suc n)))
+                ≡˘⟨ connect-susp-supp-fst-var (if b then trueAt (fromℕ _) else empty) (toVarSet xs′) ⟩
+              lookup (connect-susp-supp (if b then trueAt (fromℕ _) else empty) (toVarSet xs′)) (fromℕ _)
+                ≡⟨ cong (λ a → lookup a (fromℕ _)) p ⟩
+              lookup (connect-susp-supp (if b′ then trueAt (fromℕ _) else empty) (toVarSet ys′)) (fromℕ _)
+                ≡⟨ connect-susp-supp-fst-var (if b′ then trueAt (fromℕ _) else empty) (toVarSet ys′) ⟩
+              lookup (if b′ then trueAt (fromℕ (suc (suc n))) else empty) (fromℕ (suc (suc n)))
+                ≡⟨ push-function-into-if (λ a → lookup a (fromℕ (2 + n))) b′ ⟩
+              (if b′ then lookup (trueAt (fromℕ (suc (suc n)))) (fromℕ (2 + n)) else lookup empty (fromℕ (2 + n)))
+                ≡⟨ cong₂ (if b′ then_else_) (lookup-trueAt (fromℕ (2 + n))) (lookup-empty (fromℕ (2 + n))) ⟩
+              (if b′ then true else false)
+                ≡⟨ if-lem b′ ⟩
+              b′ ∎
+            l2 : b ∨ false ≡ b′ ∨ false
+            l2 = begin
+              b ∨ false
+                ≡⟨ ∨-identityʳ b ⟩
+              b
+                ≡⟨ l1 ⟩
+              b′
+                ≡˘⟨ ∨-identityʳ b′ ⟩
+              b′ ∨ false ∎
+
+            l3 : (b : Bool) → (n : ℕ) → lookup (if b then trueAt (fromℕ (suc n)) else empty) (inject₁ (fromℕ n)) ≡ false
+            l3 false n = lookup-empty (inject₁ (fromℕ n))
+            l3 true zero = refl
+            l3 true (suc n) = l3 true n
+
+            l4 : tvarset-fst (DCT xs′) ≡ tvarset-fst (DCT ys′)
+            l4 = begin
+              tvarset-fst (DCT xs′)
+                ≡⟨ cong₂ _∨_ (sym (l3 b (suc n))) (tvarset-fst-toVarSet xs′) ⟩
+              lookup (if b then ewf (ewf (trueAt (fromℕ n))) else empty) (inject₁ (fromℕ (suc n)))
+                ∨ lookup (toVarSet xs′) (fromℕ _)
+                ≡˘⟨ connect-susp-supp-snd-var (if b then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet xs′) ⟩
+              lookup (connect-susp-supp (if b then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet xs′))
+                (raise (suc m) (inject₁ (fromℕ n)))
+                ≡⟨ cong (λ a → lookup a (raise (suc m) (inject₁ (fromℕ n)))) p ⟩
+              lookup (connect-susp-supp (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet ys′))
+                (raise (suc m) (inject₁ (fromℕ n)))
+                ≡⟨ connect-susp-supp-snd-var (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet ys′) ⟩
+              lookup (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty)
+                (inject₁ (fromℕ (suc n)))
+                ∨ lookup (toVarSet ys′) (fromℕ _)
+                ≡⟨ cong₂ _∨_ (l3 b′ (suc n)) (sym (tvarset-fst-toVarSet ys′)) ⟩
+              tvarset-fst (DCT ys′) ∎
+
+        ... | true = cong₂ (λ a → VSJoin a xs) (trans (∨-zeroʳ b) (sym (∨-zeroʳ b′))) lem4
+
+    final : VSJoin (b ∨ tvarset-non-empty xs) (DCT xs) (if tvarset-non-empty xs then set-fst-true (DCT xs′) else DCT xs′)
+          ≡ VSJoin (b′ ∨ tvarset-non-empty ys) (DCT ys) (if tvarset-non-empty ys then set-fst-true (DCT ys′) else DCT ys′)
+    final rewrite sym (DCT-non-empty xs)
+          rewrite sym (DCT-non-empty ys) = lem3 (DCT xs) (DCT ys) lem2 xs′ ys′ b b′ last-lem
+          where
+            last-lem : toVarSet (VSJoin b (DCT xs) xs′) ≡
+                         toVarSet (VSJoin b′ (DCT ys) ys′)
+            last-lem rewrite DCT-toVarSet xs
+                     rewrite DCT-toVarSet ys = p
+
+supp-tvarset : TVarSet S → TVarSet (suspTree S)
+supp-tvarset xs = VSJoin true xs (VSSing true)
+
+supp-tvarset-DCT : (xs : TVarSet S) → DCT (supp-tvarset xs) ≡ supp-tvarset (DCT xs)
+supp-tvarset-DCT xs = cong (VSJoin true (DCT xs)) (if-lem-const (tvarset-non-empty xs) (set-fst-true (DCT (VSSing true))))

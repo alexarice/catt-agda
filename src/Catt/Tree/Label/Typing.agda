@@ -99,18 +99,6 @@ syntax label-max-equality ΓS L M = L ≈[ ΓS ]lm M
 refl≈lm : L ≈[ ΓS ]lm L
 refl≈lm .get Z = refl≈stm
 
--- extend-≈ : a ≈[ incTree S ]stm b → {L : Label-WT (COT-to-MT ΓS) S} → (Lty :  L) → (a >>= L) ≈[ ΓS ]stm (b >>= L)
--- extend-≈ {a = a} {b = b} [ p ] L .get = begin
---   stm-to-term (a >>= L)
---     ≈˘⟨ reflexive≈tm (label-to-sub-stm L a) ⟩
---   stm-to-term a [ label-to-sub L ]tm
---     ≈⟨ apply-sub-tm-eq {!!} {!!} ⟩
---   stm-to-term b [ label-to-sub L ]tm
---     ≈⟨ reflexive≈tm (label-to-sub-stm L b) ⟩
---   stm-to-term (b >>= L) ∎
---   where
---     open Reasoning (tm-setoid-≈ _)
-
 compute-≈ : compute-stm a ≈[ incTree S ]stm compute-stm b → a ≈[ incTree S ]stm b
 compute-≈ {a = a} {b = b} p = begin
   a
@@ -350,6 +338,18 @@ TySCoh S {As} {L} [ Aty ] Lty Ltyty b sc .get = TyConv (apply-sub-tm-typing (TyC
   where
     open Reasoning ty-setoid
 
+extend-≈ : a ≈[ incTree S ]stm b → {L : Label-WT (COT-to-MT ΓS) S} → (Lty : Typing-Label ΓS L) → Typing-STy ΓS (lty L) → (a >>= L) ≈[ ΓS ]stm (b >>= L)
+extend-≈ {a = a} {b = b} [ p ] {L} Lty AsTy .get = begin
+  stm-to-term (a >>= L)
+    ≈˘⟨ reflexive≈tm (label-to-sub-stm L a) ⟩
+  stm-to-term a [ label-to-sub L ]tm
+    ≈⟨ apply-sub-tm-eq (label-to-sub-Ty Lty AsTy) p ⟩
+  stm-to-term b [ label-to-sub L ]tm
+    ≈⟨ reflexive≈tm (label-to-sub-stm L b) ⟩
+  stm-to-term (b >>= L) ∎
+  where
+    open Reasoning (tm-setoid-≈ _)
+
 extend-Ty : {L : Label-WT (COT-to-MT ΓS) S} → Typing-STm (incTree S) a As → Typing-Label ΓS L → Typing-STy ΓS (lty L) → Typing-STm ΓS (a >>= L) (label-on-sty As L)
 extend-Ty {a = a} {As = As} {L = L} [ aty ] Lty Ltyty .get = transport-typing-full (apply-sub-tm-typing aty (label-to-sub-Ty Lty Ltyty)) (label-to-sub-stm L a) (label-to-sub-sty L As)
 
@@ -385,6 +385,27 @@ transport-label-typing (TyJoin x Lty Lty′) [ p ] q
 id-label-Ty : (S : Tree n) → Typing-Label (incTree S) (id-label-wt S)
 id-label-Ty Sing = TySing (TySPath PHere)
 id-label-Ty (Join S T) = TyJoin (TySPath PHere) (transport-label-typing (map-pext-Ty (id-label-Ty S)) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm))) (transport-label-typing (map-pshift-Ty (id-label-Ty T)) [ (λ P → compute-≃ refl≃stm) ] refl≃sty)
+
+connect-tree-inc-left-Ty : (S : Tree n)
+                         → (T : Tree m)
+                         → Typing-Label (incTree (connect-tree S T)) (connect-tree-inc-left S T)
+connect-tree-inc-left-Ty Sing T = TySing (TySPath PHere)
+connect-tree-inc-left-Ty (Join S₁ S₂) T
+  = TyJoin (TySPath PHere)
+           (transport-label-typing (map-pext-Ty (id-label-Ty S₁))
+                                   [ (λ P → compute-≃ refl≃stm) ]
+                                   (≃SArr refl≃stm
+                                          refl≃sty
+                                          (compute-≃ (≃SShift refl≃ (≃SPath (sym≃p (connect-tree-inc-left-phere S₂ T)))))))
+           (transport-label-typing (map-pshift-Ty (connect-tree-inc-left-Ty S₂ T))
+                                   [ (λ P → compute-≃ refl≃stm) ]
+                                   refl≃sty)
+
+connect-tree-inc-right-Ty : (S : Tree n)
+                          → (T : Tree m)
+                          → Typing-Label (incTree (connect-tree S T)) (connect-tree-inc-right S T)
+connect-tree-inc-right-Ty Sing T = id-label-Ty T
+connect-tree-inc-right-Ty (Join S₁ S₂) T = transport-label-typing (map-pshift-Ty (connect-tree-inc-right-Ty S₂ T)) [ (λ P → compute-≃ refl≃stm) ] refl≃sty
 
 {-
 ap-pphere-Ty : Typing-Label ΓS L → Typing-Path ΓS (ap L PPHere) (lty L)

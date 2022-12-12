@@ -4,7 +4,7 @@ open import Catt.Prelude
 
 open import Data.Nat.Properties public
 open import Data.Fin.Properties using (toℕ-injective; toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁;inject₁-injective; toℕ-cast) public
-open import Data.Bool.Properties using (∨-identityʳ;∨-assoc;∨-comm;∨-idem;∨-zeroʳ;∨-commutativeMonoid;∨-idempotentCommutativeMonoid) public
+open import Data.Bool.Properties using (∨-identityʳ;∨-assoc;∨-comm;∨-idem;∨-zeroʳ;∨-commutativeMonoid;∨-idempotentCommutativeMonoid;push-function-into-if) public
 open import Relation.Binary using (Setoid) public
 import Relation.Binary.Reasoning.Setoid
 import Relation.Binary.Reasoning.PartialOrder
@@ -74,6 +74,14 @@ Truth-not-prop {b = false} p = refl
 
 cong₃ : ∀ {A B C D : Set} {x x′ y y′ z z′} → (f : A → B → C → D) → x ≡ x′ → y ≡ y′ → z ≡ z′ → f x y z ≡ f x′ y′ z′
 cong₃ f refl refl refl = refl
+
+if-lem : (b : Bool) → (if b then true else false) ≡ b
+if-lem false = refl
+if-lem true = refl
+
+if-lem-const : {A : Set} → (b : Bool) → (x : A) → (if b then x else x) ≡ x
+if-lem-const false x = refl
+if-lem-const true x = refl
 
 -- ≤t-refl : n ≤t n
 -- ≤t-refl {zero} = tt

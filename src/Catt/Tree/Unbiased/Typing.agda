@@ -49,7 +49,7 @@ unbiased-stm-Ty zero Sing p = TySPath PHere
 unbiased-stm-Ty (suc d) (Join T Sing) p = TySConv (TySExt (unbiased-stm-Ty d T (cong pred p))) (reflexive≈sty (trans≃sty (map-sty-pext-susp-compat (unbiased-type d T)) (unbiased-type-susp-lem d T)))
 unbiased-stm-Ty (suc d) (Join T (Join T₁ T₂)) p = unbiased-comp-Ty (suc d) (Join T (Join T₁ T₂)) p
 
-unbiased-comp-Ty d T p = TySConv (TySCoh T (unbiased-type-Ty d T (≤-trans (≤-reflexive (sym p)) (n≤1+n (tree-dim T)))) (id-label-Ty T) TySStar true {!!}) (reflexive≈sty (id-label-on-sty (unbiased-type d T)))
+unbiased-comp-Ty d T p = TySConv (TySCoh T (unbiased-type-Ty d T (≤-trans (≤-reflexive (sym p)) (n≤1+n (tree-dim T)))) (id-label-Ty T) TySStar true (unbiased-supp-condition d T p)) (reflexive≈sty (id-label-on-sty (unbiased-type d T)))
 {-
 unbiased-type-Ty : (d : ℕ) → (T : Tree n) → (d ≤ suc (tree-dim T)) → Typing-Ty (tree-to-ctx T) (unbiased-type d T)
 unbiased-term-Ty : (d : ℕ) → (T : Tree n) → (tree-dim T ≡ d) → Typing-Tm (tree-to-ctx T) (unbiased-term d T) (unbiased-type d T)

@@ -29,97 +29,6 @@ open import Catt.Tree.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 
-stm-eq : (ΓS : CtxOrTree n) → STm (COT-to-MT ΓS) → STm (COT-to-MT ΓS) → Set
-stm-eq ΓS a b = Wrap (λ a b → stm-to-term a ≈[ COT-to-Ctx ΓS ]tm stm-to-term b) a b
-
-syntax stm-eq ΓS a b = a ≈[ ΓS ]stm b
-
-refl≈stm : a ≈[ ΓS ]stm a
-refl≈stm = [ refl≈tm ]
-
-sym≈stm : a ≈[ ΓS ]stm b → b ≈[ ΓS ]stm a
-sym≈stm [ p ] = [ sym≈tm p ]
-
-trans≈stm : a ≈[ ΓS ]stm b → b ≈[ ΓS ]stm c → a ≈[ ΓS ]stm c
-trans≈stm [ p ] [ q ] = [ trans≈tm p q ]
-
-reflexive≈stm : a ≃stm b → a ≈[ ΓS ]stm b
-reflexive≈stm [ p ] = [ reflexive≈tm p ]
-
-stm-setoid-≈ : CtxOrTree n → Setoid _ _
-stm-setoid-≈ ΓS = record { Carrier = STm (COT-to-MT ΓS)
-                         ; _≈_ = λ x y → x ≈[ ΓS ]stm y
-                         ; isEquivalence = record { refl = refl≈stm
-                                                  ; sym = sym≈stm
-                                                  ; trans = trans≈stm
-                                                  }
-                         }
-
-≈SExt : a ≈[ incTree S ]stm b → SExt a ≈[ incTree (Join S T) ]stm SExt b
-≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (connect-susp-inc-left-Ty (tree-to-ctx T)) (suspTmEq p)) ]
-
-≈SShift : a ≈[ incTree T ]stm b → SShift a ≈[ incTree (Join S T) ]stm SShift b
-≈SShift {S = S} [ q ] = [ (apply-sub-tm-eq (connect-susp-inc-right-Ty (tree-to-ctx S)) q) ]
-
-≈SPath : P ≃p Q → SPath P ≃stm SPath Q
-≈SPath p = [ path-to-term-≃ p ]
-
-extend-≈ : a ≈[ incTree S ]stm b → {L : Label-WT (COT-to-MT ΓS) S} → (Lty : Typing-Label L) → (a >>= L) ≈[ ΓS ]stm (b >>= L)
-extend-≈ {a = a} {b = b} [ p ] L .get = begin
-  stm-to-term (a >>= L)
-    ≈˘⟨ reflexive≈tm (label-to-sub-stm L a) ⟩
-  stm-to-term a [ label-to-sub L ]tm
-    ≈⟨ apply-sub-tm-eq {!!} {!!} ⟩
-  stm-to-term b [ label-to-sub L ]tm
-    ≈⟨ reflexive≈tm (label-to-sub-stm L b) ⟩
-  stm-to-term (b >>= L) ∎
-  where
-    open Reasoning (tm-setoid-≈ _)
-
-label-max-equality : (ΓS : CtxOrTree n) → (L M : Label (COT-to-MT ΓS) S) → Set
-label-max-equality {S = S} ΓS L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-Maximal Q ⦄ → L Q ≈[ ΓS ]stm M Q) L M
-
-syntax label-max-equality ΓS L M = L ≈[ ΓS ]lm M
-
-refl≈lm : L ≈[ ΓS ]lm L
-refl≈lm .get Z = refl≈stm
-
-compute-≈ : compute-stm a ≈[ incTree S ]stm compute-stm b → a ≈[ incTree S ]stm b
-compute-≈ {a = a} {b = b} p = begin
-  a
-    ≈˘⟨ reflexive≈stm (compute-to-term a) ⟩
-  compute-stm a
-    ≈⟨ p ⟩
-  compute-stm b
-    ≈⟨ reflexive≈stm (compute-to-term b) ⟩
-  b ∎
-  where
-    open Reasoning (stm-setoid-≈ _)
-
-fixup-reflexive≈stm : {a : STm (someTree S)} → {b : STm (someTree T)} → a ≃stm b → (p : S ≃′ T) → a ≈[ incTree S ]stm stm-≃ (sym≃′ p) b
-fixup-reflexive≈stm {a = a} {b} q p = reflexive≈stm (begin
-  < a >stm
-    ≈⟨ q ⟩
-  < b >stm
-    ≈⟨ stm-≃-≃stm (sym≃′ p) b ⟩
-  < stm-≃ (sym≃′ p) b >stm ∎)
-  where
-    open Reasoning stm-setoid
-
-stm-≃-≈ : (p : S ≃′ T) → a ≈[ incTree S ]stm b → stm-≃ p a ≈[ incTree T ]stm stm-≃ p b
-stm-≃-≈ {a = a} {b = b} p q with ≃-to-same-n (≃′-to-≃ p)
-... | refl with ≃-to-≡ (≃′-to-≃ p)
-... | refl = begin
-  stm-≃ p a
-    ≈˘⟨ reflexive≈stm (stm-≃-≃stm p a) ⟩
-  a
-    ≈⟨ q ⟩
-  b
-    ≈⟨ reflexive≈stm (stm-≃-≃stm p b) ⟩
-  stm-≃ p b ∎
-  where
-    open Reasoning (stm-setoid-≈ _)
-
 pruned-bp-exterior-sub : (S : Tree n)
                        → (p : BranchingPoint S l)
                        → (T : Tree m)
@@ -200,7 +109,7 @@ pruned-bp-exterior-sub (Join (Join S₁ Sing) S₂) BPHere T q .get (PExt Z) = l
   (unbiased-comp′ (suc (suc (tree-dim S₁))) (n-disc (suc (tree-dim S₁)))
     >>= label-from-linear-tree-unbiased (n-disc (suc (tree-dim S₁))) T 0 ,, S⋆
     >>= connect-tree-inc-left T S₂)
-    ≈⟨ {!!} ⟩
+    ≈⟨ extend-≈ {!!} (connect-tree-inc-left-Ty T S₂) TySStar ⟩
   (unbiased-comp′ (suc (suc (tree-dim S₁))) T >>=
         (connect-tree-inc-left T S₂))
     ≈˘⟨ reflexive≈stm (extend-≃ (lfltu-maximal-path (Join S₁ Sing) T 1 Z) refl≃l refl≃sty) ⟩
@@ -222,7 +131,7 @@ exterior-disc (Join S T) BPHere .get (PExt Z) = let
   (unbiased-comp′ (tree-dim S) (n-disc (tree-dim S)) >>=
         (λ x → SPath (PExt x)) ,,
         SArr (SPath PHere) S⋆ (SPath (PShift PHere)))
-    ≈⟨ {!!} ⟩
+    ≈⟨ extend-≈ {!!} {!transport-label-typing!} {!!} ⟩
   (unbiased-stm (tree-dim S) (n-disc (tree-dim S)) >>=
         (λ x → SPath (PExt x)) ,,
         SArr (SPath PHere) S⋆ (SPath (PShift PHere)))
@@ -266,7 +175,7 @@ exterior-inserted-bp (Join S₁ S₂) BPHere T Q U .get (PExt Z) = begin
     (unbiased-comp′ (1 + tree-dim S₁) T >>=
      exterior-sub-label T Q U ,, S⋆
      >>= connect-tree-inc-left (insertion-tree T Q U) S₂)
-    ≈⟨ stm-≃-≈ ((sym≃′ (insertion-bp-left T S₂ Q U))) {!!} ⟩
+    ≈⟨ stm-≃-≈ ((sym≃′ (insertion-bp-left T S₂ Q U))) (extend-≈ {!!} (connect-tree-inc-left-Ty (insertion-tree T Q U) S₂) TySStar) ⟩
   stm-≃ (sym≃′ (insertion-bp-left T S₂ Q U))
     (unbiased-comp′ (1 + tree-dim S₁) (insertion-tree T Q U)
       >>= connect-tree-inc-left (insertion-tree T Q U) S₂)

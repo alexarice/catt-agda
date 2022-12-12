@@ -212,7 +212,7 @@ suspSuppTm′ Γ t = begin
   suspSupp empty ∪ SuppTm (suspCtx Γ) (suspTm t)
     ≡˘⟨ cong (_∪ SuppTm (suspCtx Γ) (suspTm t)) (trans (DC-suspSupp Γ empty) (cong suspSupp (DC-empty Γ))) ⟩
   DC (suspCtx Γ) (suspSupp empty) ∪ DC (suspCtx Γ) (FVTm (suspTm t))
-    ≡˘⟨ DC-cup (suspCtx Γ) (suspSupp empty) (FVTm (suspTm t)) ⟩
+    ≡˘⟨ DC-∪ (suspCtx Γ) (suspSupp empty) (FVTm (suspTm t)) ⟩
   DC (suspCtx Γ) (suspSupp empty ∪ FVTm (suspTm t))
     ≡⟨ cong (DC (suspCtx Γ)) (suspSuppTm t) ⟩
   DC (suspCtx Γ) (suspSupp (FVTm t))
@@ -291,3 +291,16 @@ suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {Γ} ⦃ pd ⦄ (nz ,, sc1 ,,
       pd-bd-supp (suc (pred (ctx-dim Γ))) (suspCtx Γ) true
         ≡⟨ cong (λ x → pd-bd-supp x (suspCtx Γ) true) l3 ⟩
       pd-bd-supp (pred (ctx-dim (suspCtx Γ))) (suspCtx Γ) true ∎
+
+lookup-fst-var-snd : (n : ℕ) → lookup (trueAt (inject₁ (fromℕ n))) (fromℕ (suc n)) ≡ false
+lookup-fst-var-snd zero = refl
+lookup-fst-var-snd (suc n) = lookup-fst-var-snd n
+
+suspSupp-non-empty : (xs : VarSet n) → Truth (varset-non-empty (suspSupp xs))
+suspSupp-non-empty emp = tt
+suspSupp-non-empty (ewf xs) = suspSupp-non-empty xs
+suspSupp-non-empty (ewt xs) = tt
+
+suspSupp-fst-var : (xs : VarSet n) → lookup (suspSupp xs) (fromℕ _) ≡ true
+suspSupp-fst-var emp = refl
+suspSupp-fst-var (x ∷ xs) = suspSupp-fst-var xs

@@ -117,3 +117,8 @@ supp-condition : (b : Bool) → (A : Ty (suc n)) → (Γ : Ctx (suc n)) → .⦃
 supp-condition false A Γ = SuppTy Γ A ≡ full
 supp-condition true ⋆ Γ = ⊥
 supp-condition true (s ─⟨ A ⟩⟶ t) Γ = NonZero (ctx-dim Γ) × SuppTm Γ s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false × SuppTm Γ t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true
+
+varset-non-empty : VarSet n → Bool
+varset-non-empty emp = false
+varset-non-empty (ewf xs) = varset-non-empty xs
+varset-non-empty (ewt xs) = true

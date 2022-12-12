@@ -387,16 +387,16 @@ DC-⊆ (Γ , A) (ewt xs) = cong ewt (begin
 module _ where
   open ≡-Reasoning
 
-  DC-cup : (Γ : Ctx n) → (xs ys : VarSet n) → DC Γ (xs ∪ ys) ≡ DC Γ xs ∪ DC Γ ys
-  DC-cup ∅ xs ys = refl
-  DC-cup (Γ , A) (ewf xs) (ewf ys) = cong ewf (DC-cup Γ xs ys)
-  DC-cup (Γ , A) (ewf xs) (ewt ys) = cong ewt (begin
+  DC-∪ : (Γ : Ctx n) → (xs ys : VarSet n) → DC Γ (xs ∪ ys) ≡ DC Γ xs ∪ DC Γ ys
+  DC-∪ ∅ xs ys = refl
+  DC-∪ (Γ , A) (ewf xs) (ewf ys) = cong ewf (DC-∪ Γ xs ys)
+  DC-∪ (Γ , A) (ewf xs) (ewt ys) = cong ewt (begin
     DC Γ (xs ∪ ys ∪ FVTy A)
       ≡⟨ cong (DC Γ) (∪-assoc xs ys (FVTy A)) ⟩
     DC Γ (xs ∪ (ys ∪ FVTy A))
-      ≡⟨ DC-cup Γ xs (ys ∪ FVTy A) ⟩
+      ≡⟨ DC-∪ Γ xs (ys ∪ FVTy A) ⟩
     (DC Γ xs) ∪ (DC Γ (ys ∪ FVTy A)) ∎)
-  DC-cup (Γ , A) (ewt xs) (ewf ys) = cong ewt (begin
+  DC-∪ (Γ , A) (ewt xs) (ewf ys) = cong ewt (begin
     DC Γ (xs ∪ ys ∪ FVTy A)
       ≡⟨ cong (DC Γ) (∪-assoc xs ys (FVTy A)) ⟩
     DC Γ (xs ∪ (ys ∪ FVTy A))
@@ -404,9 +404,9 @@ module _ where
     DC Γ (xs ∪ (FVTy A ∪ ys))
       ≡˘⟨ cong (DC Γ) (∪-assoc xs (FVTy A) ys) ⟩
     DC Γ (xs ∪ FVTy A ∪ ys)
-      ≡⟨ DC-cup Γ (xs ∪ FVTy A) ys ⟩
+      ≡⟨ DC-∪ Γ (xs ∪ FVTy A) ys ⟩
     (DC Γ (xs ∪ FVTy A)) ∪ (DC Γ ys) ∎)
-  DC-cup {suc n} (Γ , A) (ewt xs) (ewt ys) = cong ewt (begin
+  DC-∪ {suc n} (Γ , A) (ewt xs) (ewt ys) = cong ewt (begin
     DC Γ (xs ∪ ys ∪ FVTy A)
       ≡˘⟨ cong (λ - → DC Γ (xs ∪ ys ∪ -)) (∪-idem (FVTy A)) ⟩
     DC Γ (xs ∪ ys ∪ (FVTy A ∪ FVTy A))
@@ -416,7 +416,7 @@ module _ where
     DC Γ (xs ∪ (FVTy A ∪ ys) ∪ FVTy A)
       ≡⟨ cong (DC Γ) (solve (∪-monoid {n})) ⟩
     DC Γ ((xs ∪ FVTy A) ∪ (ys ∪ FVTy A))
-      ≡⟨ DC-cup Γ (xs ∪ FVTy A) (ys ∪ FVTy A) ⟩
+      ≡⟨ DC-∪ Γ (xs ∪ FVTy A) (ys ∪ FVTy A) ⟩
     DC Γ (xs ∪ FVTy A) ∪ DC Γ (ys ∪ FVTy A) ∎)
 
   DC-idem : (Γ : Ctx n) → (xs : VarSet n) → DC Γ (DC Γ xs) ≡ DC Γ xs
@@ -424,13 +424,13 @@ module _ where
   DC-idem (Γ , A) (ewf xs) = cong ewf (DC-idem Γ xs)
   DC-idem (Γ , A) (ewt xs) = cong ewt (begin
     DC Γ (DC Γ (xs ∪ FVTy A) ∪ FVTy A)
-      ≡⟨ cong (λ - → DC Γ (- ∪ FVTy A)) (DC-cup Γ xs (FVTy A)) ⟩
+      ≡⟨ cong (λ - → DC Γ (- ∪ FVTy A)) (DC-∪ Γ xs (FVTy A)) ⟩
     DC Γ (DC Γ xs ∪ DC Γ (FVTy A) ∪ FVTy A)
       ≡⟨ cong (DC Γ) (∪-assoc (DC Γ xs) (DC Γ (FVTy A)) (FVTy A)) ⟩
     DC Γ (DC Γ xs ∪ (DC Γ (FVTy A) ∪ FVTy A))
       ≡˘⟨ cong (λ - → DC Γ (DC Γ xs ∪ -)) (DC-⊆ Γ (FVTy A)) ⟩
     DC Γ (DC Γ xs ∪ DC Γ (FVTy A))
-      ≡˘⟨ cong (DC Γ) (DC-cup Γ xs (FVTy A)) ⟩
+      ≡˘⟨ cong (DC Γ) (DC-∪ Γ xs (FVTy A)) ⟩
     DC Γ (DC Γ (xs ∪ FVTy A))
       ≡⟨ DC-idem Γ (xs ∪ FVTy A) ⟩
     DC Γ (xs ∪ FVTy A) ∎)
@@ -507,7 +507,7 @@ SuppContainsType (Var (suc i)) (Γ , A) = begin
   where
     open PReasoning (⊆-poset _)
 
-SuppContainsType (Coh S A σ) Γ = trans (cong (DC Γ) (FVTy-comp-⊆ A σ)) (DC-cup Γ (FVTm (Coh S A σ)) (FVTy (A [ σ ]ty)))
+SuppContainsType (Coh S A σ) Γ = trans (cong (DC Γ) (FVTy-comp-⊆ A σ)) (DC-∪ Γ (FVTm (Coh S A σ)) (FVTy (A [ σ ]ty)))
 
 full-⊆ : {xs : VarSet n} → full ⊆ xs → xs ≡ full
 full-⊆ p = trans p (∪-right-zero _)
@@ -530,7 +530,32 @@ DC-cong-⊆ Γ {xs} {ys} p = begin
   DC Γ ys
     ≡⟨ cong (DC Γ) p ⟩
   DC Γ (ys ∪ xs)
-    ≡⟨ DC-cup Γ ys xs ⟩
+    ≡⟨ DC-∪ Γ ys xs ⟩
   DC Γ ys ∪ DC Γ xs ∎
   where
     open ≡-Reasoning
+
+lookup-empty : (i : Fin n) → lookup empty i ≡ false
+lookup-empty 0F = refl
+lookup-empty (suc i) = lookup-empty i
+
+lookup-trueAt : (i : Fin n) → lookup (trueAt i) i ≡ true
+lookup-trueAt 0F = refl
+lookup-trueAt (suc i) = lookup-trueAt i
+
+lookup-∪ : (xs ys : VarSet n) → (i : Fin n) → lookup (xs ∪ ys) i ≡ lookup xs i ∨ lookup ys i
+lookup-∪ (x ∷ xs) (y ∷ ys) 0F = refl
+lookup-∪ (x ∷ xs) (y ∷ ys) (suc i) = lookup-∪ xs ys i
+
+trueAt-non-empty : (i : Fin n) → Truth (varset-non-empty (trueAt i))
+trueAt-non-empty 0F = tt
+trueAt-non-empty (suc i) = trueAt-non-empty i
+
+∪-non-empty-right : (xs ys : VarSet n) → Truth (varset-non-empty ys) → Truth (varset-non-empty (xs ∪ ys))
+∪-non-empty-right (ewf xs) (ewf ys) t = ∪-non-empty-right xs ys t
+∪-non-empty-right (ewf xs) (ewt ys) t = tt
+∪-non-empty-right (ewt xs) (x ∷ ys) t = tt
+
+empty-is-empty : {n : ℕ} → varset-non-empty (empty {n = n}) ≡ false
+empty-is-empty {n = zero} = refl
+empty-is-empty {n = suc n} = empty-is-empty {n = n}

@@ -60,3 +60,12 @@ DCT-supp-tree-bd (suc d) (Join S T) b
       ≡⟨ tvarset-fst-set-fst (supp-tree-bd (suc d) T b) (supp-tree-bd-fst d T b) ⟩
     supp-tree-bd (suc d) T b ∎)
     where open ≡-Reasoning
+
+supp-tree-bd-full : (d : ℕ) → (S : Tree n) → (b : Bool) → (tree-dim S ≤ d) → supp-tree-bd d S b ≡ tFull
+supp-tree-bd-full zero Sing false p = refl
+supp-tree-bd-full zero Sing true p = refl
+supp-tree-bd-full (suc d) Sing b p = refl
+supp-tree-bd-full (suc d) (Join S T) b p
+  = cong₂ (VSJoin true)
+          (supp-tree-bd-full d S b (≤-trans (m≤n⊔m (pred (tree-dim T)) (tree-dim S)) (≤-pred p)))
+          (supp-tree-bd-full (suc d) T b (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p))

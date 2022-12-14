@@ -71,7 +71,7 @@ supp-unbiased-lem (suc d) (Join T Sing) b = begin
            susp-stm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b)
     l1 = begin
       < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) b) >stm
-        ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] refl≃sty ⟩
+        ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] [ refl≃ty ] ⟩
       < unbiased-stm d (tree-bd d T) >>= susp-label (tree-inc-label d T b) >stm
         ≈˘⟨ extend-susp-label (unbiased-stm d (tree-bd d T)) (tree-inc-label d T b) ⟩
       < susp-stm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b) >stm ∎
@@ -88,9 +88,40 @@ supp-unbiased-comp-lem d T b = begin
   supp-tree-bd d T b ∎
   where open ≡-Reasoning
 
-unbiased-supp-condition : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≡ d) → supp-condition-s true T (unbiased-type d T)
-unbiased-supp-condition (suc d) T p with cong pred p
+unbiased-supp-condition-1 : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≡ d) → supp-condition-s true T (unbiased-type d T)
+unbiased-supp-condition-1 (suc d) T p with cong pred p
 ... | refl = NonZero-subst (sym p) it ,, supp-unbiased-lem (pred (tree-dim T)) T false ,, supp-unbiased-lem (pred (tree-dim T)) T true
+
+unbiased-supp-condition-2 : (d : ℕ) → (T : Tree n) → (tree-dim T < d) → supp-condition-s false T (unbiased-type d T)
+unbiased-supp-condition-2 (suc d) T p = begin
+  DCT (FVSTy (unbiased-type d T) ∪t
+      FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false)
+      ∪t FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true))
+    ≡⟨ DCT-∪ _ _ ⟩
+  DCT
+    (FVSTy (unbiased-type d T) ∪t
+     FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false))
+    ∪t
+    DCT
+    (FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true))
+    ≡⟨ cong (DCT (FVSTy (unbiased-type d T) ∪t
+      FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false))
+      ∪t_) lem ⟩
+  DCT (FVSTy (unbiased-type d T) ∪t
+      FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false))
+      ∪t tFull
+    ≡⟨ ∪t-right-zero (DCT (FVSTy (unbiased-type d T)
+                     ∪t FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false))) ⟩
+  tFull ∎
+  where
+    open ≡-Reasoning
+    lem : DCT (FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true)) ≡ tFull
+    lem = begin
+      DCT (FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true))
+        ≡⟨ supp-unbiased-lem d T true ⟩
+      supp-tree-bd d T true
+        ≡⟨ supp-tree-bd-full d T true (≤-pred p) ⟩
+      tFull ∎
 
 {-
 supp-unbiased-lem : (d : ℕ) → (T : Tree n) → .(d ≤ tree-dim T) → (b : Bool)

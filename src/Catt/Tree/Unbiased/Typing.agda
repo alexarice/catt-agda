@@ -35,35 +35,39 @@ open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
 open import Catt.Tree.Label.Typing index rule
 open import Catt.Tree.Label.Typing.Properties index rule lift-rule susp-rule sub-rule
+open import Relation.Binary.Definitions
 
-unbiased-type-Ty : (d : ℕ) → (T : Tree n) → (d ≤ suc (tree-dim T)) → Typing-STy (incTree T) (unbiased-type d T)
-unbiased-stm-Ty : (d : ℕ) → (T : Tree n) → (tree-dim T ≡ d) → Typing-STm (incTree T) (unbiased-stm d T) (unbiased-type d T)
-unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≡ d) → Typing-STm (incTree T) (unbiased-comp d T) (unbiased-type d T)
+unbiased-type-Ty : (d : ℕ) → (T : Tree n) → Typing-STy (incTree T) (unbiased-type d T)
+unbiased-stm-Ty : (d : ℕ) → (T : Tree n) → (tree-dim T ≤ d) → Typing-STm (incTree T) (unbiased-stm d T) (unbiased-type d T)
+unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≤ d) → Typing-STm (incTree T) (unbiased-comp d T) (unbiased-type d T)
 
-unbiased-type-Ty zero T q = TySStar
-unbiased-type-Ty (suc d) T q
-  = TySArr (TySConv (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-pred q))) (tree-inc-Ty d T false) TySStar) (reflexive≈sty (sym≃sty (unbiased-type-prop d T d ≤-refl false))))
-           (unbiased-type-Ty d T (≤-trans (n≤1+n d) q))
-           (TySConv (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd′ d T (≤-pred q))) (tree-inc-Ty d T true) TySStar) (reflexive≈sty (sym≃sty (unbiased-type-prop d T d ≤-refl true))))
+unbiased-type-Ty zero T = TySStar
+unbiased-type-Ty (suc d) T
+  = TySArr (TySConv (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd″ d T)) (tree-inc-Ty d T false) TySStar) (reflexive≈sty (sym≃sty (unbiased-type-prop d T d ≤-refl false))))
+           (unbiased-type-Ty d T)
+           (TySConv (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd″ d T)) (tree-inc-Ty d T true) TySStar) (reflexive≈sty (sym≃sty (unbiased-type-prop d T d ≤-refl true))))
 
 unbiased-stm-Ty zero Sing p = TySPath PHere
-unbiased-stm-Ty (suc d) (Join T Sing) p = TySConv (TySExt (unbiased-stm-Ty d T (cong pred p))) (reflexive≈sty (trans≃sty (map-sty-pext-susp-compat (unbiased-type d T)) (unbiased-type-susp-lem d T)))
+unbiased-stm-Ty zero (Join T₁ T₂) ()
+unbiased-stm-Ty (suc d) Sing p = unbiased-comp-Ty (suc d) Sing p
+unbiased-stm-Ty (suc d) (Join T Sing) p = TySConv (TySExt (unbiased-stm-Ty d T (≤-pred p))) (reflexive≈sty (trans≃sty (map-sty-pext-susp-compat (unbiased-type d T)) (unbiased-type-susp-lem d T)))
 unbiased-stm-Ty (suc d) (Join T (Join T₁ T₂)) p = unbiased-comp-Ty (suc d) (Join T (Join T₁ T₂)) p
 
-unbiased-comp-Ty d T p = TySConv (TySCoh T (unbiased-type-Ty d T (≤-trans (≤-reflexive (sym p)) (n≤1+n (tree-dim T)))) (id-label-Ty T) TySStar true (unbiased-supp-condition d T p)) (reflexive≈sty (id-label-on-sty (unbiased-type d T)))
+open Relation.Binary.Definitions.Tri
+unbiased-comp-Ty d T p with <-cmp (tree-dim T) d
+... | tri< a ¬b ¬c = TySConv (TySCoh T (unbiased-type-Ty d T) (id-label-Ty T) TySStar false (unbiased-supp-condition-2 d T a)) (reflexive≈sty (id-label-on-sty (unbiased-type d T)))
+... | tri≈ ¬a b ¬c = TySConv (TySCoh T (unbiased-type-Ty d T) (id-label-Ty T) TySStar true (unbiased-supp-condition-1 d T b)) (reflexive≈sty (id-label-on-sty (unbiased-type d T)))
+... | tri> ¬a ¬b c = ⊥-elim (<⇒≱ c p)
 
-unbiased-comp′-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≡ d) → Typing-STm (incTree T) (unbiased-comp′ d T) (unbiased-type d T)
+unbiased-comp′-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≤ d) → Typing-STm (incTree T) (unbiased-comp′ d T) (unbiased-type d T)
 unbiased-comp′-Ty d T p = transport-stm-typing (unbiased-comp-Ty d T p) (sym≃stm (unbiased-comp′-compat d T)) refl≃sty
 
-label-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim T) ⦄ → (d : ℕ) → tree-dim T ≡ tree-dim S + d → Typing-Label (incTree T) (label-from-linear-tree-unbiased S T d ,, unbiased-type d T)
-label-from-linear-tree-unbiased-Ty Sing T d p = TySing (unbiased-comp′-Ty d ⦃ NonZero-subst p it ⦄ T p)
+label-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim T) ⦄ → (d : ℕ) → tree-dim T ≤ tree-dim S + d → Typing-Label (incTree T) (label-from-linear-tree-unbiased S T d ,, unbiased-type d T)
+label-from-linear-tree-unbiased-Ty Sing T d p = TySing (unbiased-comp′-Ty d ⦃ NonZero-≤ p it ⦄ T p)
 label-from-linear-tree-unbiased-Ty (Join S Sing) T d p
-  = TyJoin (transport-stm-typing (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd′ d T lem)) (tree-inc-Ty d T false) TySStar) refl≃stm (sym≃sty (unbiased-type-prop d T d ≤-refl false)))
-           (label-from-linear-tree-unbiased-Ty S T (suc d) (trans p (sym (+-suc (tree-dim S) d))))
-           (TySing (transport-stm-typing (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd′ d T lem)) (tree-inc-Ty d T true) TySStar) refl≃stm (sym≃sty (unbiased-type-prop d T d ≤-refl true))))
-  where
-    lem : d ≤ tree-dim T
-    lem = ≤-trans (m≤n+m d (suc (tree-dim S))) (≤-reflexive (sym p))
+  = TyJoin (transport-stm-typing (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd″ d T)) (tree-inc-Ty d T false) TySStar) refl≃stm (sym≃sty (unbiased-type-prop d T d ≤-refl false)))
+           (label-from-linear-tree-unbiased-Ty S T (suc d) (≤-trans p (≤-reflexive (sym (+-suc (tree-dim S) d)))))
+           (TySing (transport-stm-typing (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd″ d T)) (tree-inc-Ty d T true) TySStar) refl≃stm (sym≃sty (unbiased-type-prop d T d ≤-refl true))))
 
 -- label-from-linear-tree-unbiased-Ty-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim T) ⦄ → tree-dim T ≡ tree-dim S
 
@@ -71,10 +75,25 @@ label-from-linear-tree-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {a : S
 label-from-linear-tree-type-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {As : STy (COT-to-MT ΓS)} → Typing-STy ΓS As → Typing-STy ΓS (label-from-linear-tree-type S As)
 
 label-from-linear-tree-Ty Sing aTy AsTy p = TySing aTy
-label-from-linear-tree-Ty (Join S Sing) aTy AsTy p = unrestrict-label-Ty (label-from-linear-tree-Ty S aTy AsTy (≤-trans (n≤1+n (tree-dim S)) p)) (label-from-linear-tree-type-Ty S AsTy) ⦃ _ ⦄
+label-from-linear-tree-Ty (Join S Sing) aTy AsTy p = transport-label-typing (unrestrict-label-Ty (label-from-linear-tree-Ty S aTy AsTy (≤-trans (n≤1+n (tree-dim S)) p)) (label-from-linear-tree-type-Ty S AsTy) ⦃ label-from-linear-tree-nz S _ p ⦄) refl≃l (sym≃sty (label-from-linear-tree-type-prop S _))
 
 label-from-linear-tree-type-Ty Sing AsTy = AsTy
-label-from-linear-tree-type-Ty (Join S Sing) AsTy = TySArr-proj₂ (label-from-linear-tree-type-Ty S AsTy)
+label-from-linear-tree-type-Ty (Join S Sing) AsTy = label-from-linear-tree-type-Ty S (TySArr-proj₂ AsTy)
+
+label-from-linear-tree-type-≈ : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As ≈[ ΓS ]sty Bs) → label-from-linear-tree-type S As ≈[ ΓS ]sty label-from-linear-tree-type S Bs
+label-from-linear-tree-type-≈ Sing p = p
+label-from-linear-tree-type-≈ (Join S Sing) p = label-from-linear-tree-type-≈ S (sty-base-≈ p)
+
+label-from-linear-tree-≈ : {ΓS : CtxOrTree m}
+                         → (S : Tree n) → .⦃ _ : is-linear S ⦄
+                         → {a b : STm (COT-to-MT ΓS)} → (a ≈[ ΓS ]stm b)
+                         → {As Bs : STy (COT-to-MT ΓS)} → (q : As ≈[ ΓS ]sty Bs)
+                         → .(r : tree-dim S ≤ sty-dim As)
+                         → label-from-linear-tree S a As r ≈[ ΓS ]l label-from-linear-tree S b Bs (≤-trans r (≤-reflexive (sty-dim-≈ q)))
+label-from-linear-tree-≈ Sing p q r .get P = p
+label-from-linear-tree-≈ (Join S Sing) p q r .get PHere = sty-src-≈ (label-from-linear-tree-type-≈ S q) ⦃ _ ⦄
+label-from-linear-tree-≈ (Join S Sing) p q r .get (PExt P) = label-from-linear-tree-≈ S p q _ .get P
+label-from-linear-tree-≈ (Join S Sing) p q r .get (PShift PHere) = sty-tgt-≈ (label-from-linear-tree-type-≈ S q) ⦃ _ ⦄
 
 {-
 unbiased-type-Ty : (d : ℕ) → (T : Tree n) → (d ≤ suc (tree-dim T)) → Typing-Ty (tree-to-ctx T) (unbiased-type d T)

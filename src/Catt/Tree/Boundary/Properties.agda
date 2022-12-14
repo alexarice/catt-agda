@@ -219,6 +219,9 @@ tree-dim-bd (suc d) (Join S T) = cong suc (begin
 tree-dim-bd′ : (d : ℕ) → (T : Tree n) → d ≤ tree-dim T → tree-dim (tree-bd d T) ≡ d
 tree-dim-bd′ d T p = trans (tree-dim-bd d T) (m≤n⇒m⊓n≡m p)
 
+tree-dim-bd″ : (d : ℕ) → (T : Tree n) → tree-dim (tree-bd d T) ≤ d
+tree-dim-bd″ d T = ≤-trans (≤-reflexive (tree-dim-bd d T)) (m⊓n≤m d (tree-dim T))
+
 -- tree-inc-susp-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSub (tree-inc d T b) ≃s tree-inc (suc d) (suspTree T) b
 -- tree-inc-susp-lem zero T false = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩ , suspTm (Var (fromℕ _)) ⟩)
 -- tree-inc-susp-lem zero T true = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩ , suspTm (tree-last-var T) ⟩)

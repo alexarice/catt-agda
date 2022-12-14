@@ -82,6 +82,17 @@ syntax label-max-equality ΓS L M = L ≈[ ΓS ]lm M
 refl≈lm : L ≈[ ΓS ]lm L
 refl≈lm .get Z = refl≈stm
 
+label-equality : (ΓS : CtxOrTree n) → (L M : Label (COT-to-MT ΓS) S) → Set
+label-equality {S = S} ΓS L M = Wrap (λ L M → ∀ (Q : Path S) → L Q ≈[ ΓS ]stm M Q) L M
+
+syntax label-equality ΓS L M = L ≈[ ΓS ]l M
+
+refl≈l : L ≈[ ΓS ]l L
+refl≈l .get Z = refl≈stm
+
+reflexive≈l : L ≃l M → L ≈[ ΓS ]l M
+reflexive≈l [ p ] .get Z = reflexive≈stm (p Z)
+
 compute-≈ : compute-stm a ≈[ incTree S ]stm compute-stm b → a ≈[ incTree S ]stm b
 compute-≈ {a = a} {b = b} p = begin
   a
@@ -117,6 +128,21 @@ stm-≃-≈ {a = a} {b = b} p q with ≃-to-same-n (≃′-to-≃ p)
   stm-≃ p b ∎
   where
     open Reasoning (stm-setoid-≈ _)
+
+sty-dim-≈ : As ≈[ ΓS ]sty Bs → sty-dim As ≡ sty-dim Bs
+sty-dim-≈ {As = S⋆} {Bs = S⋆} [ p ] = refl
+sty-dim-≈ {As = SArr _ As _} {Bs = SArr _ Bs _} [ Arr≈ _ p _ ] = cong suc (sty-dim-≈ [ p ])
+
+sty-base-≈ : As ≈[ ΓS ]sty Bs → sty-base As ≈[ ΓS ]sty sty-base Bs
+sty-base-≈ {As = S⋆} {Bs = S⋆} [ p ] = [ Star≈ ]
+sty-base-≈ {As = SArr _ As _} {Bs = SArr _ Bs _} [ Arr≈ _ p _ ] = [ p ]
+
+sty-src-≈ : {ΓS : CtxOrTree m} → {As Bs : STy (COT-to-MT ΓS)} → (p : As ≈[ ΓS ]sty Bs) → .⦃ _ : NonZero (sty-dim As) ⦄ → sty-src As ≈[ ΓS ]stm sty-src Bs ⦃ NonZero-subst (sty-dim-≈ p) it ⦄
+sty-src-≈ {As = SArr _ _ _} {Bs = SArr _ _ _} [ Arr≈ p _ _ ] = [ p ]
+
+sty-tgt-≈ : {ΓS : CtxOrTree m} → {As Bs : STy (COT-to-MT ΓS)} → (p : As ≈[ ΓS ]sty Bs) → .⦃ _ : NonZero (sty-dim As) ⦄ → sty-tgt As ≈[ ΓS ]stm sty-tgt Bs ⦃ NonZero-subst (sty-dim-≈ p) it ⦄
+sty-tgt-≈ {As = SArr _ _ _} {Bs = SArr _ _ _} [ Arr≈ _ _ p ] = [ p ]
+
 {-
 data Typing-STm : (ΓS : CtxOrTree m) → STm (COT-to-MT ΓS) → STy (COT-to-MT ΓS) → Set
 data Typing-Label : (ΓS : CtxOrTree m) → Label-WT (COT-to-MT ΓS) S → Set

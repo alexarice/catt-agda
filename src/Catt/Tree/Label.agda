@@ -144,6 +144,21 @@ lift-sty (SArr s A t) = SArr (lift-stm s) (lift-sty A) (lift-stm t)
 
 lift-label L = lift-stm ∘ (ap L) ,, lift-sty (lty L)
 
+sty-base : STy X → STy X
+sty-base S⋆ = S⋆
+sty-base (SArr s As t) = As
+
+sty-src : (As : STy X) → .⦃ NonZero (sty-dim As) ⦄ → STm X
+sty-src (SArr s As t) = s
+
+sty-tgt : (As : STy X) → .⦃ NonZero (sty-dim As) ⦄ → STm X
+sty-tgt (SArr s As t) = t
+
+unrestrict-label : (L : Label-WT X S) → .⦃ NonZero (sty-dim (lty L)) ⦄ → Label X (suspTree S)
+unrestrict-label {X = X} {S = S} (L ,, As) PHere = sty-src As
+unrestrict-label {X = X} {S = S} (L ,, As) (PExt P) = L P
+unrestrict-label {X = X} {S = S} (L ,, As) (PShift P) = sty-tgt As
+
 susp-stm : STm X → STm (suspMaybeTree X)
 susp-sty : STy X → STy (suspMaybeTree X)
 susp-label : Label-WT X S → Label-WT (suspMaybeTree X) S
@@ -155,7 +170,7 @@ stm-snd : STm (suspMaybeTree X)
 stm-fst {X = someTree x} = SHere
 stm-fst {X = Other _} = SOther getFst
 
-stm-snd {X = someTree x} = SPath (PShift PHere)
+stm-snd {X = someTree x} = SShift (SPath PHere)
 stm-snd {X = Other _} = SOther getSnd
 
 susp-stm {X = someTree x} s = SExt s
@@ -167,9 +182,7 @@ susp-sty (SArr s A t) = SArr (susp-stm s) (susp-sty A) (susp-stm t)
 
 susp-label L = susp-stm ∘ (ap L) ,, susp-sty (lty L)
 
-susp-label-full L PHere = stm-fst
-susp-label-full L (PShift PHere) = stm-snd
-susp-label-full L (PExt P) = susp-stm (L P)
+susp-label-full L = unrestrict-label (susp-label (L ,, S⋆))
 
 to-sty : Ty n → STy (Other n)
 to-sty ⋆ = S⋆
@@ -268,15 +281,3 @@ sty-≃ p S⋆ = S⋆
 sty-≃ p (SArr s A t) = SArr (stm-≃ p s) (sty-≃ p A) (stm-≃ p t)
 
 ≃-label p L = stm-≃ p ∘ L
-
-unrestrict-label : (L : Label-WT X S) → .⦃ NonZero (sty-dim (lty L)) ⦄ → Label X (suspTree S)
-unrestrict-label {X = X} {S = S} (L ,, SArr s As t) = label
-  where
-    label : Label X (suspTree S)
-    label PHere = s
-    label (PExt P) = L P
-    label (PShift P) = t
-
-sty-base : STy X → STy X
-sty-base S⋆ = S⋆
-sty-base (SArr s As t) = As

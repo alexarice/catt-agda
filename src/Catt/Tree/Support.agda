@@ -56,6 +56,14 @@ VSJoin b xs xs′ ∪t VSJoin b′ ys ys′ = VSJoin (b ∨ b′) (xs ∪t ys) (
 ∪t-right-unit (VSSing b) = cong VSSing (∨-identityʳ b)
 ∪t-right-unit (VSJoin b xs ys) = cong₃ VSJoin (∨-identityʳ b) (∪t-right-unit xs) (∪t-right-unit ys)
 
+∪t-left-zero : LeftZero _≡_ tFull (_∪t_ {S = S})
+∪t-left-zero (VSSing b) = refl
+∪t-left-zero (VSJoin b xs ys) = cong₂ (VSJoin true) (∪t-left-zero xs) (∪t-left-zero ys)
+
+∪t-right-zero : RightZero _≡_ tFull (_∪t_ {S = S})
+∪t-right-zero (VSSing b) = cong VSSing (∨-zeroʳ b)
+∪t-right-zero (VSJoin b xs ys) = cong₃ VSJoin (∨-zeroʳ b) (∪t-right-zero xs) (∪t-right-zero ys)
+
 ∪t-assoc : Associative _≡_ (_∪t_ {S = S})
 ∪t-assoc (VSSing b) (VSSing b′) (VSSing b″) = cong VSSing (∨-assoc b b′ b″)
 ∪t-assoc (VSJoin b xs xs′) (VSJoin b′ ys ys′) (VSJoin b″ zs zs′) = cong₃ VSJoin (∨-assoc b b′ b″) (∪t-assoc xs ys zs) (∪t-assoc xs′ ys′ zs′)

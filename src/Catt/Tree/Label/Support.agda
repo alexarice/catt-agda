@@ -147,7 +147,7 @@ FVLabel′-map {S = Join S T} f g p = begin
     open ≡-Reasoning
 
 supp-condition-s : (b : Bool) → (S : Tree n) → (As : STy (someTree S)) → Set
-supp-condition-s false S As = FVSTy As ≡ mFull
+supp-condition-s false S As = DCT (FVSTy As) ≡ mFull
 supp-condition-s true S S⋆ = ⊥
 supp-condition-s true S (SArr s As t) = NonZero (tree-dim S)
                                       × DCT (FVSTm s) ≡ supp-tree-bd (pred (tree-dim S)) S false
@@ -386,6 +386,8 @@ supp-condition-compat false S As sc = begin
   SuppTy (tree-to-ctx S) (sty-to-type As)
     ≡˘⟨ FVSTy-to-type As ⟩
   toVarSet (FVSTy As)
+    ≡˘⟨ DCT-toVarSet (FVSTy As) ⟩
+  toVarSet (DCT (FVSTy As))
     ≡⟨ cong toVarSet sc ⟩
   toVarSet (tFull {S = S})
     ≡⟨ toVarSet-full S ⟩

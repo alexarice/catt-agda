@@ -786,8 +786,14 @@ SCoh-ext {U = U} S A L .get = begin
 susp-label-full-to-sub : (L : Label X S) → label-to-sub (susp-label-full L ,, S⋆) ≃s suspSub (label-to-sub (L ,, S⋆))
 susp-label-full-to-sub L = unrestrict-≃ (susp-label-to-sub (L ,, S⋆))
 
-SCoh-unrestrict : (S : Tree n) → (A : STy (someTree S)) → (L : Label (someTree T) S) → SCoh S A (map-pext {T = Sing} (L ,, S⋆)) ≃stm SCoh (suspTree S) (susp-sty A) (susp-label-full L ,, S⋆)
-SCoh-unrestrict S A L = [ sym≃tm (Coh≃ refl≃c (susp-sty-to-type A) (sub-action-≃-sub (sym≃s susp-functorial-id) (trans≃s (susp-label-full-to-sub L) (unrestrict-≃ (sym≃s (susp-label-to-sub (L ,, S⋆))))))) ]
+SCoh-unrestrict : (S : Tree n) → (As : STy (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → SCoh S As L ≃stm SCoh (suspTree S) (susp-sty As) (unrestrict-label L ,, sty-base (lty L))
+SCoh-unrestrict S As (L ,, SArr s Bs t) .get
+  = sub-action-≃-tm (Coh≃ refl≃c (sym≃ty (susp-sty-to-type As)) susp-functorial-id)
+                    (refl≃s {σ = unrestrict (label-to-sub′ (λ P → stm-to-term (L P))
+                                                           (stm-to-term s ─⟨ sty-to-type Bs ⟩⟶ stm-to-term t))})
+
+-- SCoh-unrestrict : (S : Tree n) → (A : STy (someTree S)) → (L : Label (someTree T) S) → SCoh S A (map-pext {T = Sing} (L ,, S⋆)) ≃stm SCoh (suspTree S) (susp-sty A) (susp-label-full L ,, S⋆)
+-- SCoh-unrestrict S A L = [ sym≃tm (Coh≃ refl≃c (susp-sty-to-type A) (sub-action-≃-sub (sym≃s susp-functorial-id) (trans≃s (susp-label-full-to-sub L) (unrestrict-≃ (sym≃s (susp-label-to-sub (L ,, S⋆))))))) ]
 
 id-label-susp-full : (T : Tree n) → susp-label-full (id-label T) ≃l id-label (suspTree T)
 id-label-susp-full T .get PHere = refl≃stm
@@ -948,3 +954,17 @@ stm-≃-≃ {a = a} {b = b} p q = begin
 map-sty-pext-susp-compat : (As : STy (someTree S)) → map-sty-pext {T = Sing} As ≃sty susp-sty As
 map-sty-pext-susp-compat S⋆ = ≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)
 map-sty-pext-susp-compat (SArr s As t) = ≃SArr refl≃stm (map-sty-pext-susp-compat As) refl≃stm
+
+sty-dim-≃ : As ≃sty Bs → sty-dim As ≡ sty-dim Bs
+sty-dim-≃ {As = S⋆} {Bs = S⋆} p = refl
+sty-dim-≃ {As = SArr _ As _} {Bs = SArr _ Bs _} [ Arr≃ _ p _ ] = cong suc (sty-dim-≃ [ p ])
+
+sty-src-≃ : (p : As ≃sty Bs) → .⦃ _ : NonZero (sty-dim As) ⦄ → sty-src As ≃stm sty-src Bs ⦃ NonZero-subst (sty-dim-≃ p) it ⦄
+sty-src-≃ {As = SArr _ _ _} {Bs = SArr _ _ _} [ Arr≃ p _ _ ] = [ p ]
+
+sty-tgt-≃ : (p : As ≃sty Bs) → .⦃ _ : NonZero (sty-dim As) ⦄ → sty-tgt As ≃stm sty-tgt Bs ⦃ NonZero-subst (sty-dim-≃ p) it ⦄
+sty-tgt-≃ {As = SArr _ _ _} {Bs = SArr _ _ _} [ Arr≃ _ _ p ] = [ p ]
+
+sty-base-≃ : (p : As ≃sty Bs) → sty-base As ≃sty sty-base Bs
+sty-base-≃ {As = S⋆} {Bs = S⋆} [ Star≃ x ] = [ Star≃ x ]
+sty-base-≃ {As = SArr _ _ _} {Bs = SArr _ _ _} [ Arr≃ _ p _ ] = [ p ]

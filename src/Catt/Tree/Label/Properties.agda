@@ -729,6 +729,9 @@ label-≃-sym-max {L = L} {M = M} p q .get Z = begin
   where
     open Reasoning stm-setoid
 
+ppath-≃l : (p : S ≃′ T) → (SPath ∘ ppath-≃ p) ≃l id-label S
+ppath-≃l p .get P = ≃SPath (sym≃p (ppath-≃-≃p p P))
+
 _≃l′_ : Label X S → Label Y T → Set
 _≃l′_ {S = S} {T = T} L M = Σ[ p ∈ S ≃′ T ] L ≃l label-≃ p M
 

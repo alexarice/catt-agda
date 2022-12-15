@@ -74,6 +74,9 @@ sty-setoid-≈ ΓS = record { Carrier = STy (COT-to-MT ΓS)
                                                   }
                          }
 
+≈SArr : a ≈[ ΓS ]stm a′ → As ≈[ ΓS ]sty Bs → b ≈[ ΓS ]stm b′ → SArr a As b ≈[ ΓS ]sty SArr a′ Bs b′
+≈SArr [ p ] [ q ] [ r ] = [ Arr≈ p q r ]
+
 label-max-equality : (ΓS : CtxOrTree n) → (L M : Label (COT-to-MT ΓS) S) → Set
 label-max-equality {S = S} ΓS L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-Maximal Q ⦄ → L Q ≈[ ΓS ]stm M Q) L M
 
@@ -312,6 +315,10 @@ transport-label-typing (TyJoin x Lty Lty′) [ p ] q
   = TyJoin (transport-stm-typing x (p PHere) q)
            (transport-label-typing Lty [ p ∘ PExt ] (≃SArr (p PHere) q (p (PShift PHere))))
            (transport-label-typing Lty′ [ p ∘ PShift ] q)
+
+label-typing-conv : Typing-Label ΓS (L ,, As) → As ≈[ ΓS ]sty Bs → Typing-Label ΓS (L ,, Bs)
+label-typing-conv (TySing x) p = TySing (TySConv x p)
+label-typing-conv (TyJoin x LTy LTy′) p = TyJoin (TySConv x p) (label-typing-conv LTy (≈SArr refl≈stm p refl≈stm)) (label-typing-conv LTy′ p)
 
 {-
 ap-pphere-Ty : Typing-Label ΓS L → Typing-Path ΓS (ap L PPHere) (lty L)

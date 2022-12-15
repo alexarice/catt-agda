@@ -19,8 +19,10 @@ open import Catt.Connection.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Boundary
+open import Catt.Tree.Boundary.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
+open import Catt.Tree.Insertion.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
 open import Catt.Tree.Label.Typing index rule
@@ -249,11 +251,38 @@ exterior-unbiased-type S P T (suc d) p q = ≈SArr (lem false) (exterior-unbiase
          (unbiased-stm d (tree-bd d (insertion-tree S P T)) >>= tree-inc-label d (insertion-tree S P T) b)
     lem2 b (Bd-Cond1 x y) = begin
       (unbiased-stm d (tree-bd d S) >>= label-wt-comp (tree-inc-label d S b) (exterior-sub-label S P T ,, S⋆))
+        ≈⟨ ≈-extend (unbiased-stm d (tree-bd d S))
+                    (label-max-equality-to-equality (unbiased-exterior-comm-1 S P T d x y q b)
+                                                    (label-comp-Ty (tree-inc-Ty d S b) (exterior-sub-label-Ty S P T q) TySStar)
+                                                    (label-≃-Ty (insertion-bd-1 S P T d y q) (tree-inc-Ty d (insertion-tree S P T) b)))
+                    refl≈sty ⟩
+      (unbiased-stm d (tree-bd d S) >>=
+        label-wt-≃ (insertion-bd-1 S P T d y q) (tree-inc-label d (insertion-tree S P T) b))
+        ≈˘⟨ reflexive≈stm (extend-assoc (unbiased-stm d (tree-bd d S)) _ _) ⟩
+      (unbiased-stm d (tree-bd d S) >>= SPath ∘ ppath-≃ (insertion-bd-1 S P T d y q) ,, S⋆ >>= tree-inc-label d (insertion-tree S P T) b)
+        ≈⟨ reflexive≈stm (extend-≃ (unbiased-stm-≃-prop d (insertion-bd-1 S P T d y q)) refl≃l refl≃sty) ⟩
+      (unbiased-stm d (tree-bd d (insertion-tree S P T)) >>=
+        tree-inc-label d (insertion-tree S P T) b) ∎
+    lem2 b (Bd-Cond2 x) = begin
+      (unbiased-stm d (tree-bd d S) >>= label-wt-comp (tree-inc-label d S b) (exterior-sub-label S P T ,, S⋆))
+        ≈⟨ ≈-extend (unbiased-stm d (tree-bd d S))
+                    (label-max-equality-to-equality (unbiased-exterior-comm-2 S P T d b q x)
+                                                    (label-comp-Ty (tree-inc-Ty d S b) (exterior-sub-label-Ty S P T q) TySStar)
+                                                    (label-comp-Ty (exterior-sub-label-Ty (tree-bd d S) (bd-branching-point S P d _) (tree-bd d T) ⦃ _ ⦄ (≤-trans {!!} ?)) {!!} {!!}))
+                    refl≈sty ⟩
+      (unbiased-stm d (tree-bd d S) >>=
+        (label-wt-comp (exterior-sub-label (tree-bd d S)
+                                           (bd-branching-point S P d _)
+                                           (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
+                       (label-wt-≃ (insertion-bd-2 S P T d _)
+                                   (tree-inc-label d (insertion-tree S P T) b))))
         ≈⟨ {!!} ⟩
       {!!}
         ≈⟨ {!!} ⟩
-      {!!} ∎
-    lem2 b (Bd-Cond2 x) = {!!}
+      {!!}
+        ≈⟨ {!!} ⟩
+      (unbiased-stm d (tree-bd d (insertion-tree S P T)) >>=
+        tree-inc-label d (insertion-tree S P T) b) ∎
 
     lem : (b : Bool) → (unbiased-stm d (tree-bd d S) >>= tree-inc-label d S b >>= exterior-sub-label S P T ,, S⋆)
         ≈[ incTree (insertion-tree S P T) ]stm

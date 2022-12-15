@@ -34,12 +34,61 @@ open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Unbiased.Typing index rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
-open import Catt.Tree.Label.Typing index rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Label.Typing index rule
+open import Catt.Tree.Label.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Typing index rule
 open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
 open import Catt.Variables
 open import Catt.Variables.Properties
 
+interior-sub-label-Ty : (S : Tree n)
+                      → (p : BranchingPoint S d)
+                      → (T : Tree m)
+                      → .⦃ _ : has-linear-height (bp-height p) T ⦄
+                      → Typing-Label (incTree (insertion-tree S p T)) (interior-sub-label S p T ,, S⋆)
+interior-sub-label-Ty (Join S₁ S₂) BPHere T = connect-tree-inc-left-Ty T S₂
+interior-sub-label-Ty (Join S₁ S₂) (BPExt p) (Join T Sing)
+  = TyJoin (TySPath PHere)
+           (map-pext-Ty (interior-sub-label-Ty S₁ p T))
+           (TySing (TySShift (TySPath PHere)))
+interior-sub-label-Ty (Join S₁ S₂) (BPShift p) T = map-pshift-Ty (interior-sub-label-Ty S₂ p T)
+
+interior-sub-Ty : (S : Tree n)
+                → (p : BranchingPoint S d)
+                → (T : Tree m)
+                → .⦃ _ : has-linear-height (bp-height p) T ⦄
+                → Typing-Sub (tree-to-ctx T) (tree-to-ctx (insertion-tree S p T)) (interior-sub S p T)
+interior-sub-Ty S p T = label-to-sub-Ty (interior-sub-label-Ty S p T) TySStar
+
+exterior-sub-label-Ty : (S : Tree n)
+                      → (p : BranchingPoint S d)
+                      → (T : Tree m)
+                      → .⦃ _ : has-linear-height (bp-height p) T ⦄
+                      → (q : height-of-branching p ≥ tree-dim T)
+                      → Typing-Label (incTree (insertion-tree S p T)) (exterior-sub-label S p T ,, S⋆)
+exterior-sub-label-Ty (Join S₁ S₂) BPHere T q
+  = label-between-connect-trees-Ty (label-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T q)
+                                   (id-label-Ty S₂)
+                                   refl≈stm
+                                   refl≈stm
+exterior-sub-label-Ty (Join S₁ S₂) (BPExt p) (Join T Sing) q
+  = label-between-joins-Ty (exterior-sub-label-Ty S₁ p T (≤-pred q))
+                           (id-label-Ty S₂)
+                           refl≈stm
+exterior-sub-label-Ty (Join S₁ S₂) (BPShift p) T q
+  = label-between-joins-Ty (id-label-Ty S₁)
+                           (exterior-sub-label-Ty S₂ p T q)
+                           (reflexive≈stm (exterior-sub-label-phere S₂ p T) )
+
+exterior-sub-Ty : (S : Tree n)
+                → (p : BranchingPoint S d)
+                → (T : Tree m)
+                → .⦃ _ : has-linear-height (bp-height p) T ⦄
+                → (height-of-branching p ≥ tree-dim T)
+                → Typing-Sub (tree-to-ctx S) (tree-to-ctx (insertion-tree S p T)) (exterior-sub S p T)
+exterior-sub-Ty S p T q = label-to-sub-Ty (exterior-sub-label-Ty S p T q) TySStar
+
+{-
 branching-path-to-var-height : (S : Tree n)
                              → (p : BranchingPoint S)
                              → tm-height (tree-to-ctx S) (branching-path-to-var S p) ≡ height-of-branching p
@@ -1338,5 +1387,6 @@ exterior-sub-label-Ty (Join S₁ S₂) (PShift P) T
 --       where
 --         open Reasoning tm-setoid
 --     open Reasoning (sub-setoid-≈ _ _)
+-}
 -}
 -}

@@ -48,6 +48,17 @@ unbiased-stm-≃ {S = S} refl q with ≃-to-same-n q
 ... | refl with ≃-to-≡ q
 ... | refl = refl≃stm
 
+unbiased-stm-≃-prop : (d : ℕ) → (p : S ≃′ T) → (unbiased-stm d S >>= SPath ∘ ppath-≃ p ,, S⋆) ≃stm unbiased-stm d T
+unbiased-stm-≃-prop {S = S} {T = T} d p = begin
+  < unbiased-stm d S >>= SPath ∘ ppath-≃ p ,, S⋆ >stm
+    ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d S}) (ppath-≃l p) (≃S⋆ (sym≃ (≃′-to-≃ p))) ⟩
+  < unbiased-stm d S >>= id-label-wt S >stm
+    ≈⟨ extend-id (unbiased-stm d S) ⟩
+  < unbiased-stm d S >stm
+    ≈⟨ unbiased-stm-≃ refl (≃′-to-≃ p) ⟩
+  < unbiased-stm d T >stm ∎
+  where open Reasoning stm-setoid
+
 unbiased-stm-linear : (d : ℕ) → (T : Tree n) → .⦃ _ : is-linear T ⦄ → .(d ≡ tree-dim T) → unbiased-stm d T ≃stm SPath (is-linear-max-path T)
 unbiased-stm-linear zero Sing p = [ refl≃tm ]
 unbiased-stm-linear (suc d) (Join T Sing) p = compute-≃ (≃SExt (unbiased-stm-linear d T (cong pred p)) refl≃)

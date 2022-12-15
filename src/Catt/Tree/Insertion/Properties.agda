@@ -810,14 +810,14 @@ bd-branching-point (Join S₁ S₂) BPHere (suc d) q = BPHere ⦃ is-linear-bd d
 bd-branching-point (Join S₁ S₂) (BPExt p) (suc d) q = BPExt (bd-branching-point S₁ p d (≤-pred q))
 bd-branching-point (Join S₁ S₂) (BPShift p) (suc d) q = BPShift (bd-branching-point S₂ p (suc d) q)
 
--- bd-branching-point-height : (S : Tree n)
---                           → (p : BranchingPoint S)
---                           → (d : ℕ)
---                           → .(q : d > bp-height p)
---                           → bp-height (bd-branching-point S p d q) ≡ bp-height p
--- bd-branching-point-height (Join S₁ S₂) BPHere (suc d) q = refl
--- bd-branching-point-height (Join S₁ S₂) (BPExt p) (suc d) q = cong suc (bd-branching-point-height S₁ p d (≤-pred q))
--- bd-branching-point-height (Join S₁ S₂) (BPShift p) (suc d) q = bd-branching-point-height S₂ p (suc d) q
+bd-branching-point-height : (S : Tree n)
+                          → (p : BranchingPoint S l)
+                          → (d : ℕ)
+                          → .(q : d > bp-height p)
+                          → height-of-branching (bd-branching-point S p d q) ≤ d
+bd-branching-point-height (Join S₁ S₂) BPHere (suc d) q = s≤s (tree-dim-bd″ d S₁)
+bd-branching-point-height (Join S₁ S₂) (BPExt p) (suc d) q = s≤s (bd-branching-point-height S₁ p d (≤-pred q))
+bd-branching-point-height (Join S₁ S₂) (BPShift p) (suc d) q = bd-branching-point-height S₂ p (suc d) q
 
 bd-has-linear-height : (d : ℕ) → (m : ℕ)
                      → (T : Tree n) → .⦃ has-linear-height m T ⦄

@@ -1,8 +1,8 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 
-module Catt.Typing (index : ℕ) (rule : Fin index → Rule) where
+module Catt.Typing {index : Set} (rule : index → Rule) where
 
+open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Relation.Binary.PropositionalEquality
@@ -10,10 +10,6 @@ open import Catt.Support
 open import Catt.Pasting
 
 open Rule
-
-private
-  Index : Set
-  Index = Fin index
 
 data _≈[_]tm_ : Tm n → Ctx n → Tm n → Set
 data _≈[_]ty_ : Ty n → Ctx n → Ty n → Set
@@ -28,11 +24,10 @@ data _≈[_]tm_ where
   Sym≈ : s ≈[ Γ ]tm t → t ≈[ Γ ]tm s
   Trans≈ : s ≈[ Γ ]tm t → t ≈[ Γ ]tm u → s ≈[ Γ ]tm u
   Coh≈ : A ≈[ Δ ]ty B → σ ≈[ Γ ]s τ → (Coh Δ A σ) ≈[ Γ ]tm (Coh Δ B τ)
-  Rule≈ : (i : Index)
-        → (a : rule i .Args)
-        → {C : Ty (rule i .len a)}
-        → Typing-Tm (rule i .tgtCtx a) (rule i .lhs a) C
-        → (rule i .lhs a) ≈[ rule i .tgtCtx a ]tm (rule i .rhs a)
+  Rule≈ : (i : index)
+        → {C : Ty (rule i .len)}
+        → Typing-Tm (rule i .tgtCtx) (rule i .lhs) C
+        → (rule i .lhs) ≈[ rule i .tgtCtx ]tm (rule i .rhs)
 
 data _≈[_]ty_ where
   Star≈ : (⋆ {n = n}) ≈[ Γ ]ty ⋆

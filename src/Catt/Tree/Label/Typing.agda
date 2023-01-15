@@ -2,11 +2,11 @@ open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Tree.Label.Typing (index : ℕ)
-                              (rule : Fin index → Rule) where
+module Catt.Tree.Label.Typing {index : Set}
+                              (rule : index → Rule) where
 
 open import Catt.Prelude.Properties
-open import Catt.Typing index rule
+open import Catt.Typing rule
 open import Catt.Syntax
 open import Catt.Tree
 open import Catt.Tree.Label
@@ -21,7 +21,7 @@ open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing.Properties.Base index rule
+open import Catt.Typing.Properties.Base rule
 
 stm-eq : (ΓS : CtxOrTree n) → STm (COT-to-MT ΓS) → STm (COT-to-MT ΓS) → Set
 stm-eq ΓS = Wrap (λ a b → stm-to-term a ≈[ COT-to-Ctx ΓS ]tm stm-to-term b)

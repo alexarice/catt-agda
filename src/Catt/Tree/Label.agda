@@ -204,6 +204,9 @@ id-label-wt S = id-label S ,, S⋆
 to-label : (S : Tree n) → (σ : Sub (suc n) m A) → Label (Other m) S
 to-label S σ Z = SOther (path-to-term Z [ σ ]tm)
 
+to-label-wt : (S : Tree n) → (σ : Sub (suc n) m A) → Label-WT (Other m) S
+to-label-wt {A = A} S σ = to-label S σ ,, to-sty A
+
 infixl 1 _>>=_
 _>>=_ : STm (someTree S) → Label-WT X S → STm X
 label-on-sty : STy (someTree S) → Label-WT X S → STy X

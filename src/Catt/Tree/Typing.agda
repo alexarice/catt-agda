@@ -1,19 +1,19 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Tree.Typing (index : ℕ)
-                              (rule : Fin index → Rule)
-                              (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
-                              (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
-                              (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
+module Catt.Tree.Typing {index : Set}
+                        (rule : index → Rule)
+                        (lift-rule : ∀ i → P.LiftRule rule i)
+                        (susp-rule : ∀ i → P.SuspRule rule i)
+                        (sub-rule : ∀ i → P.SubRule rule i) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing index rule
-open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
-open import Catt.Connection.Typing index rule lift-rule susp-rule sub-rule
-open import Catt.Globular.Typing index rule lift-rule
-open import Catt.Suspension.Typing index rule lift-rule susp-rule
+open import Catt.Typing rule
+open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Globular.Typing rule lift-rule
+open import Catt.Suspension.Typing rule lift-rule susp-rule
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Syntax

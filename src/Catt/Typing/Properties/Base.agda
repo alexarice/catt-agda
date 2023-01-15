@@ -1,22 +1,18 @@
 open import Catt.Prelude
 open import Catt.Typing.Base
 
-module Catt.Typing.Properties.Base (index : ℕ) (rule : Fin index → Rule) where
+module Catt.Typing.Properties.Base {index : Set} (rule : index → Rule) where
 
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing index rule
+open import Catt.Typing rule
 open import Catt.Suspension
 open import Catt.Tree
 open import Catt.Globular
 open import Catt.Support
 open import Catt.Variables
-
-private
-  Index : Set
-  Index = Fin index
 
 refl≈ty : A ≈[ Γ ]ty A
 refl≈tm : t ≈[ Γ ]tm t
@@ -159,40 +155,35 @@ unrestrictEq : σ ≈[ Δ ]s τ → unrestrict σ ≈[ Δ ]s unrestrict τ
 unrestrictEq (Null≈ (Arr≈ p q r)) = Ext≈ (Ext≈ (Null≈ q) p) r
 unrestrictEq (Ext≈ eq x) = Ext≈ (unrestrictEq eq) x
 
-module _ {i : Index} (a : rule i .Rule.Args) where
+module _ (i : index) where
   open Rule (rule i)
 
   LiftRule : Set
-  LiftRule = {A : Ty (len a)}
-           → {C : Ty (len a)}
-           → Typing-Tm (tgtCtx a , A) (liftTerm (lhs a)) (liftType C)
-           → (liftTerm (lhs a)) ≈[ tgtCtx a , A ]tm (liftTerm (rhs a))
+  LiftRule = {A : Ty len}
+           → {C : Ty len}
+           → Typing-Tm (tgtCtx , A) (liftTerm lhs) (liftType C)
+           → (liftTerm lhs) ≈[ tgtCtx , A ]tm (liftTerm rhs)
 
   SuspRule : Set
-  SuspRule = {C : Ty (len a)}
-           → Typing-Tm (suspCtx (tgtCtx a)) (suspTm (lhs a)) (suspTy C)
-           → suspTm (lhs a) ≈[ suspCtx (tgtCtx a) ]tm suspTm (rhs a)
+  SuspRule = {C : Ty len}
+           → Typing-Tm (suspCtx tgtCtx) (suspTm lhs) (suspTy C)
+           → suspTm lhs ≈[ suspCtx tgtCtx ]tm suspTm rhs
 
   SubRule : Set
   SubRule = ∀ {n}
-          → {σ : Sub (len a) n ⋆}
+          → {σ : Sub len n ⋆}
           → {Δ : Ctx n}
-          → {C : Ty (len a)}
-          → Typing-Sub (tgtCtx a) Δ σ
-          → Typing-Tm Δ (lhs a [ σ ]tm) (C [ σ ]ty)
-          → lhs a [ σ ]tm ≈[ Δ ]tm rhs a [ σ ]tm
+          → {C : Ty len}
+          → Typing-Sub tgtCtx Δ σ
+          → Typing-Tm Δ (lhs [ σ ]tm) (C [ σ ]ty)
+          → lhs [ σ ]tm ≈[ Δ ]tm rhs [ σ ]tm
 
   SupportRule : Set
-  SupportRule = {A : Ty (len a)}
-              → (tty : Typing-Tm (tgtCtx a) (lhs a) A)
-              → SuppTm (tgtCtx a) (lhs a) ≡ SuppTm (tgtCtx a) (rhs a)
+  SupportRule = {A : Ty len}
+              → (tty : Typing-Tm tgtCtx lhs A)
+              → SuppTm tgtCtx lhs ≡ SuppTm tgtCtx rhs
 
   ConvRule : Set
-  ConvRule = {A : Ty (len a)}
-           → Typing-Tm (tgtCtx a) (lhs a) A
-           → Typing-Tm (tgtCtx a) (rhs a) A
-
-
-
--- HasDiscRemoval : Set
--- HasDiscRemoval =
+  ConvRule = {A : Ty len}
+           → Typing-Tm tgtCtx lhs A
+           → Typing-Tm tgtCtx rhs A

@@ -1,15 +1,15 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Globular.Typing (index : ℕ)
-                            (rule : Fin index → Rule)
-                            (lift-rule : ∀ i a → P.LiftRule index rule {i} a) where
+module Catt.Globular.Typing {index : Set}
+                            (rule : index → Rule)
+                            (lift-rule : ∀ i → P.LiftRule rule i) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing index rule
-open import Catt.Typing.Properties.Lifting index rule lift-rule
-open P index rule
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Lifting rule lift-rule
+open P rule
 open import Catt.Syntax
 open import Catt.Globular
 open import Catt.Globular.Properties

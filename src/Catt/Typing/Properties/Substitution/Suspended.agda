@@ -2,20 +2,20 @@ open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Typing.Properties.Substitution.Suspended (index : ℕ)
-                              (rule : Fin index → Rule)
-                              (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
-                              (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
-                              (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
+module Catt.Typing.Properties.Substitution.Suspended {index : Set}
+                              (rule : index → Rule)
+                              (lift-rule : ∀ i → P.LiftRule rule i)
+                              (susp-rule : ∀ i → P.SuspRule rule i)
+                              (sub-rule : ∀ i → P.SubRule rule i) where
 
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing index rule
+open import Catt.Typing rule
 open import Catt.Prelude.Properties
 open import Catt.Suspension
-open import Catt.Suspension.Typing index rule lift-rule susp-rule
-open P index rule
-open import Catt.Typing.Properties.Substitution index rule lift-rule sub-rule as S hiding (apply-sub-ty-typing;apply-sub-tm-typing;apply-sub-sub-typing;apply-sub-ty-eq;apply-sub-tm-eq;apply-sub-sub-eq) public
+open import Catt.Suspension.Typing rule lift-rule susp-rule
+open P rule
+open import Catt.Typing.Properties.Substitution rule lift-rule sub-rule as S hiding (apply-sub-ty-typing;apply-sub-tm-typing;apply-sub-sub-typing;apply-sub-ty-eq;apply-sub-tm-eq;apply-sub-sub-eq) public
 
 
 apply-sub-ty-typing : {σ : Sub n m B} → Typing-Ty Γ A → Typing-Sub Γ Δ σ → Typing-Ty Δ (A [ σ ]ty)

@@ -538,9 +538,9 @@ id-label-to-sub (Join S T) = begin
         ≈⟨ id-right-unit (connect-susp-inc-right (tree-size S) (tree-size T)) ⟩
       < connect-susp-inc-right (tree-size S) (tree-size T) >s ∎
 
-sub-to-label-to-sub : (S : Tree n) → (σ : Sub (suc n) m A) → label-to-sub (to-label S σ ,, to-sty A) ≃s σ
+sub-to-label-to-sub : (S : Tree n) → (σ : Sub (suc n) m A) → label-to-sub (to-label-wt S σ) ≃s σ
 sub-to-label-to-sub {A = A} S σ = begin
-  < label-to-sub (to-label S σ ,, to-sty A) >s
+  < label-to-sub (to-label-wt S σ) >s
     ≡⟨⟩
   < label-to-sub (label-sub (id-label-wt S) σ) >s
     ≈⟨ label-sub-to-sub (id-label-wt S) σ ⟩
@@ -551,6 +551,9 @@ sub-to-label-to-sub {A = A} S σ = begin
   < σ >s ∎
   where
     open Reasoning sub-setoid
+
+label-to-sub-to-label : (L : Label-WT X S) → ap (to-label-wt S (label-to-sub L)) ≃l ap L
+label-to-sub-to-label L .get Z .get = label-to-sub-stm L (SPath Z)
 
 -- sub-path-equality : {S : Tree n} → (σ : Sub (suc n) m A) → (τ : Sub (suc n) m′ B) → ((P : PPath S) → path-to-term (carrier P) [ σ ]tm ≃tm path-to-term (carrier P) [ τ ]tm) → A ≃ty B → σ ≃s τ
 -- sub-path-equality {S = S} σ τ f p = begin

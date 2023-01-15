@@ -1,22 +1,22 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Typing.Properties (index : ℕ)
-                              (rule : Fin index → Rule)
-                              (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
-                              (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
-                              (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
+module Catt.Typing.Properties {index : Set}
+                              (rule : index → Rule)
+                              (lift-rule : ∀ i → P.LiftRule rule i)
+                              (susp-rule : ∀ i → P.SuspRule rule i)
+                              (sub-rule : ∀ i → P.SubRule rule i) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Suspension
 open import Catt.Globular
-open import Catt.Typing index rule
-open import Catt.Typing.Properties.Base index rule public
-open import Catt.Typing.Properties.Lifting index rule lift-rule public
-open import Catt.Typing.Properties.Substitution.Suspended index rule lift-rule susp-rule sub-rule public
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Base rule public
+open import Catt.Typing.Properties.Lifting rule lift-rule public
+open import Catt.Typing.Properties.Substitution.Suspended rule lift-rule susp-rule sub-rule public
 open import Catt.Variables
 
 unrestrict-restrict-≈ : (σ : Sub (2 + n) m A) → s ≈[ Δ ]tm getFst [ σ ]tm → t ≈[ Δ ]tm getSnd [ σ ]tm → unrestrict (restrict σ s t) ≈[ Δ ]s σ

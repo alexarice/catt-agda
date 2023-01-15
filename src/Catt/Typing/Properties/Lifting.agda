@@ -2,15 +2,15 @@ open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Typing.Properties.Lifting (index : ℕ)
-                                      (rule : Fin index → Rule)
-                                      (lift-rule : ∀ i a → P.LiftRule index rule {i} a) where
+module Catt.Typing.Properties.Lifting {index : Set}
+                                      (rule : index → Rule)
+                                      (lift-rule : ∀ i → P.LiftRule rule i) where
 
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing index rule
-open P index rule
+open import Catt.Typing rule
+open P rule
 open import Catt.Prelude.Properties
 
 lift-ty-typing : Typing-Ty Γ A → Typing-Ty (Γ , B) (liftType A)
@@ -39,7 +39,7 @@ lift-tm-equality (Sym≈ eq) = Sym≈ (lift-tm-equality eq)
 lift-tm-equality (Trans≈ eq eq′) = Trans≈ (lift-tm-equality eq) (lift-tm-equality eq′)
 
 lift-tm-equality (Coh≈ r s) = Coh≈ r (lift-sub-equality s)
-lift-tm-equality {A = A} (Rule≈ i a tc) = lift-rule i a (lift-tm-typing tc)
+lift-tm-equality {A = A} (Rule≈ i tc) = lift-rule i (lift-tm-typing tc)
 
 lift-sub-equality (Null≈ x) = Null≈ (lift-ty-equality x)
 lift-sub-equality (Ext≈ eq x) = Ext≈ (lift-sub-equality eq) (lift-tm-equality x)

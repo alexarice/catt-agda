@@ -1,15 +1,15 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Connection.Typing (index : ℕ)
-                              (rule : Fin index → Rule)
-                              (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
-                              (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
-                              (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
+module Catt.Connection.Typing {index : Set}
+                              (rule : index → Rule)
+                              (lift-rule : ∀ i → P.LiftRule rule i)
+                              (susp-rule : ∀ i → P.SuspRule rule i)
+                              (sub-rule : ∀ i → P.SubRule rule i) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing index rule
+open import Catt.Typing rule
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Syntax
@@ -17,8 +17,8 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Connection
 open import Catt.Connection.Properties
-open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
-open import Catt.Suspension.Typing index rule lift-rule susp-rule
+open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Suspension.Typing rule lift-rule susp-rule
 
 connect-Ty : {Γ : Ctx (suc n)} → Typing-Ctx Γ → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → {Δ : Ctx (suc m)} → Typing-Ctx Δ → Typing-Ctx (connect Γ t Δ)
 connect-inc-right-Ty : {Γ : Ctx (suc n)} → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → Typing-Sub Δ (connect Γ t Δ) (connect-inc-right t m)

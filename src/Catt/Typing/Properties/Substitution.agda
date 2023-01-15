@@ -2,17 +2,17 @@ open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Typing.Properties.Substitution (index : ℕ)
-                              (rule : Fin index → Rule)
-                              (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
-                              (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
+module Catt.Typing.Properties.Substitution {index : Set}
+                              (rule : index → Rule)
+                              (lift-rule : ∀ i → P.LiftRule rule i)
+                              (sub-rule : ∀ i → P.SubRule rule i) where
 
 open import Catt.Prelude.Properties
-open import Catt.Typing index rule
+open import Catt.Typing rule
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
-open P index rule
-open import Catt.Typing.Properties.Lifting index rule lift-rule
+open P rule
+open import Catt.Typing.Properties.Lifting rule lift-rule
 open import Catt.Suspension
 
 sub-typing-implies-ty-typing : {σ : Sub n m A} → Typing-Sub Γ Δ σ → Typing-Ty Δ A
@@ -49,7 +49,7 @@ apply-sub-tm-eq σty (Var≈ x) with toℕ-injective x
 apply-sub-tm-eq σty (Sym≈ p) = Sym≈ (apply-sub-tm-eq σty p)
 apply-sub-tm-eq σty (Trans≈ p q) = Trans≈ (apply-sub-tm-eq σty p) (apply-sub-tm-eq σty q)
 apply-sub-tm-eq σty (Coh≈ q r) = Coh≈ q (apply-sub-sub-eq σty r)
-apply-sub-tm-eq σty (Rule≈ i args tc) = sub-rule i args σty (apply-sub-tm-typing tc σty)
+apply-sub-tm-eq σty (Rule≈ i tc) = sub-rule i σty (apply-sub-tm-typing tc σty)
 
 apply-sub-sub-eq σty (Null≈ x) = Null≈ (apply-sub-ty-eq σty x)
 apply-sub-sub-eq σty (Ext≈ p x) = Ext≈ (apply-sub-sub-eq σty p) (apply-sub-tm-eq σty x)

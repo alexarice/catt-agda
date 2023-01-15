@@ -140,6 +140,10 @@ extend-≈ {a = a} {b = b} [ p ] {L} Lty AsTy .get = begin
   where
     open Reasoning (tm-setoid-≈ _)
 
+label-on-sty-≈ : (As : STy (someTree S)) → {L M : Label-WT (COT-to-MT ΓS) S} → ap L ≈[ ΓS ]l ap M → lty L ≈[ ΓS ]sty lty M → label-on-sty As L ≈[ ΓS ]sty label-on-sty As M
+label-on-sty-≈ S⋆ p q = q
+label-on-sty-≈ (SArr s As t) p q = ≈SArr (≈-extend s p q) (label-on-sty-≈ As p q) (≈-extend t p q)
+
 extend-Ty : {L : Label-WT (COT-to-MT ΓS) S} → Typing-STm (incTree S) a As → Typing-Label ΓS L → Typing-STy ΓS (lty L) → Typing-STm ΓS (a >>= L) (label-on-sty As L)
 extend-Ty {a = a} {As = As} {L = L} [ aty ] Lty Ltyty .get = transport-typing-full (apply-sub-tm-typing aty (label-to-sub-Ty Lty Ltyty)) (label-to-sub-stm L a) (label-to-sub-sty L As)
 
@@ -199,10 +203,10 @@ replace-label-Ty : {L : Label-WT (COT-to-MT ΓS) S}
 replace-label-Ty (TySing x) aTy p = TySing aTy
 replace-label-Ty (TyJoin x LTy LTy′) aTy p = TyJoin aTy (label-typing-conv LTy (≈SArr p refl≈sty refl≈stm)) LTy′
 
-connect-label-Ty : Typing-Label ΓS (L ,, S⋆)
-                 → Typing-Label ΓS (M ,, S⋆)
+connect-label-Ty : Typing-Label ΓS (L ,, As)
+                 → Typing-Label ΓS (M ,, As)
                  → L (last-path S) ≈[ ΓS ]stm M PHere
-                 → Typing-Label ΓS (connect-label L M ,, S⋆)
+                 → Typing-Label ΓS (connect-label L M ,, As)
 connect-label-Ty (TySing x) MTy p = replace-label-Ty MTy x (sym≈stm p)
 connect-label-Ty (TyJoin {L = L} x LTy LTy′) MTy p = TyJoin x (label-typing-conv LTy (≈SArr refl≈stm refl≈sty (reflexive≈stm (sym≃stm (connect-label-phere (ap L ∘ PShift) _))))) (connect-label-Ty LTy′ MTy p)
 
@@ -251,3 +255,10 @@ label-max-equality-to-type-equality {S = Join S T} [ p ] (TyJoin x Lty Lty′) (
 label-≃-Ty : (p : S ≃′ T) → {L : Label-WT (COT-to-MT ΓS) T} → Typing-Label ΓS L → Typing-Label ΓS (label-wt-≃ p L)
 label-≃-Ty Refl≃′ LTy = LTy
 label-≃-Ty (Join≃′ p q) (TyJoin {L = L} x LTy LTy′) = TyJoin x (label-typing-conv (label-≃-Ty p LTy) (reflexive≈sty (≃SArr refl≃stm refl≃sty (ap-≃ (refl≃l {L = ap L}) (≃Shift refl≃ (trans≃p (≃Here (sym≃ (≃′-to-≃ q))) (ppath-≃-≃p q PHere))))))) (label-≃-Ty q LTy′)
+
+truncate-sty′-≈ : d ≡ d′ → As ≈[ ΓS ]sty Bs → truncate-sty′ d As ≈[ ΓS ]sty truncate-sty′ d′ Bs
+truncate-sty′-≈ {d = zero} refl q = q
+truncate-sty′-≈ {d = suc d} refl q = truncate-sty′-≈ {d = d} refl (sty-base-≈ q)
+
+truncate-sty-≈ : d ≡ d′ → As ≈[ ΓS ]sty Bs → truncate-sty d As ≈[ ΓS ]sty truncate-sty d′ Bs
+truncate-sty-≈ {d = d} refl q = truncate-sty′-≈ (cong (_∸ d) (sty-dim-≈ q)) q

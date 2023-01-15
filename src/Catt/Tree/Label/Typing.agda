@@ -77,6 +77,12 @@ sty-setoid-≈ ΓS = record { Carrier = STy (COT-to-MT ΓS)
 ≈SArr : a ≈[ ΓS ]stm a′ → As ≈[ ΓS ]sty Bs → b ≈[ ΓS ]stm b′ → SArr a As b ≈[ ΓS ]sty SArr a′ Bs b′
 ≈SArr [ p ] [ q ] [ r ] = [ Arr≈ p q r ]
 
+≈SArr-proj₁ : SArr a As b ≈[ ΓS ]sty SArr a′ Bs b′ → a ≈[ ΓS ]stm a′
+≈SArr-proj₁ [ Arr≈ p _ _ ] = [ p ]
+
+≈SArr-proj₃ : SArr a As b ≈[ ΓS ]sty SArr a′ Bs b′ → b ≈[ ΓS ]stm b′
+≈SArr-proj₃ [ Arr≈ _ _ p ] = [ p ]
+
 label-max-equality : (ΓS : CtxOrTree n) → (L M : Label (COT-to-MT ΓS) S) → Set
 label-max-equality {S = S} ΓS L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-Maximal Q ⦄ → L Q ≈[ ΓS ]stm M Q) L M
 

@@ -95,7 +95,7 @@ variable
   L L′ M M′ : Label X S
   Lt : Label-WT X S
   a b c a′ b′ c′ : STm X
-  As Bs Cs : STy X
+  As Bs Cs As′ Bs′ Cs′ : STy X
 
 label₁ : (L : Label-WT X (Join S T)) → Label-WT X S
 label₁ L = ap L ∘ PExt ,, SArr (ap L PHere) (lty L) (ap L (PShift PHere))
@@ -281,3 +281,10 @@ sty-≃ p S⋆ = S⋆
 sty-≃ p (SArr s A t) = SArr (stm-≃ p s) (sty-≃ p A) (stm-≃ p t)
 
 ≃-label p L = stm-≃ p ∘ L
+
+truncate-sty′ : ℕ → STy X → STy X
+truncate-sty′ zero As = As
+truncate-sty′ (suc d) As = truncate-sty′ d (sty-base As)
+
+truncate-sty : ℕ → STy X → STy X
+truncate-sty d As = truncate-sty′ (sty-dim As ∸ d) As

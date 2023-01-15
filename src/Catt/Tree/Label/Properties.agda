@@ -352,6 +352,13 @@ extend-≃ {a = a} {b = b} {L = L} {M = M} {A = A} {B = B} [ p ] q r = [ begin
 label-comp-≃ : {L L′ : Label (someTree T) S} → {M : Label-WT X T} → {M′ : Label-WT Y T} → L ≃l L′ → ap M ≃l ap M′ → lty M ≃sty lty M′ → label-comp L M ≃l label-comp L′ M′
 label-comp-≃ p q r .get Z = extend-≃ (ap-≃ p refl≃p) q r
 
+label-on-sty-≃ : As ≃sty Bs → L ≃l M → As′ ≃sty Bs′ → label-on-sty As (L ,, As′) ≃sty label-on-sty Bs (M ,, Bs′)
+label-on-sty-≃ {As = S⋆} {S⋆} {L = L} {M} {As′ = As′} {Bs′} p q r = r
+label-on-sty-≃ {As = SArr s As t} {SArr s′ Bs t′} {L = L} {M} {As′ = As′} {Bs′} [ Arr≃ x y z ] q r
+  = ≃SArr (extend-≃ {a = s} {b = s′} [ x ] q r)
+          (label-on-sty-≃ [ y ] q r)
+          (extend-≃ {a = t} {b = t′} [ z ] q r)
+
 label-comp-assoc : (L : Label-WT (someTree S) U) → (M : Label-WT (someTree T) S) → (N : Label-WT X T) → ap (label-wt-comp (label-wt-comp L M) N) ≃l ap (label-wt-comp L (label-wt-comp M N))
 extend-assoc : (a : STm (someTree S)) → (L : Label-WT (someTree T) S) → (M : Label-WT X T) → (a >>= L >>= M) ≃stm (a >>= label-wt-comp L M)
 label-on-sty-assoc : (A : STy (someTree S)) → (L : Label-WT (someTree T) S) → (M : Label-WT X T) → (label-on-sty (label-on-sty A L) M) ≃sty (label-on-sty A (label-wt-comp L M))
@@ -971,3 +978,62 @@ sty-tgt-≃ {As = SArr _ _ _} {Bs = SArr _ _ _} [ Arr≃ _ _ p ] = [ p ]
 sty-base-≃ : (p : As ≃sty Bs) → sty-base As ≃sty sty-base Bs
 sty-base-≃ {As = S⋆} {Bs = S⋆} [ Star≃ x ] = [ Star≃ x ]
 sty-base-≃ {As = SArr _ _ _} {Bs = SArr _ _ _} [ Arr≃ _ p _ ] = [ p ]
+
+sty-dim-label : (As : STy (someTree S)) → (L : Label-WT X S) → sty-dim (label-on-sty As L) ≡ sty-dim As + sty-dim (lty L)
+sty-dim-label S⋆ L = refl
+sty-dim-label (SArr s As t) L = cong suc (sty-dim-label As L)
+
+truncate-sty′-≃ : d ≡ d′ → As ≃sty Bs → truncate-sty′ d As ≃sty truncate-sty′ d′ Bs
+truncate-sty′-≃ {d = zero} refl q = q
+truncate-sty′-≃ {d = suc d} refl q = truncate-sty′-≃ {d = d} refl (sty-base-≃ q)
+
+truncate-sty-≃ : d ≡ d′ → As ≃sty Bs → truncate-sty d As ≃sty truncate-sty d′ Bs
+truncate-sty-≃ {d = d} refl q = truncate-sty′-≃ (cong (_∸ d) (sty-dim-≃ q)) q
+
+truncate-sty-1-map-pext : (As : STy (someTree S)) → truncate-sty 1 (map-sty-pext {T = T} As) ≃sty SArr SHere S⋆ (SPath (PShift {T = T} {S = S} PHere))
+truncate-sty-1-map-pext S⋆ = ≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)
+truncate-sty-1-map-pext (SArr s S⋆ t) = ≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)
+truncate-sty-1-map-pext (SArr _ (SArr s As t) _) = truncate-sty-1-map-pext (SArr s As t)
+
+truncate-sty′-label : (d : ℕ) → (As : STy (someTree S)) → (L : Label-WT X S) → d ≤ sty-dim As → truncate-sty′ d (label-on-sty As L) ≃sty label-on-sty (truncate-sty′ d As) L
+truncate-sty′-label zero As L p = refl≃sty
+truncate-sty′-label (suc d) (SArr s As t) L p = truncate-sty′-label d As L (≤-pred p)
+
+truncate-sty-label : (d : ℕ) → (As : STy (someTree S)) → (L : Label-WT X S) → truncate-sty (d + sty-dim (lty L)) (label-on-sty As L) ≃sty label-on-sty (truncate-sty d As) L
+truncate-sty-label d As L = begin
+  < truncate-sty (d + sty-dim (lty L)) (label-on-sty As L) >sty
+    ≡⟨⟩
+  < truncate-sty′ (sty-dim (label-on-sty As L) ∸ (d + sty-dim (lty L))) (label-on-sty As L) >sty
+    ≈⟨ truncate-sty′-≃ lem refl≃sty ⟩
+  < truncate-sty′ (sty-dim As ∸ d) (label-on-sty As L) >sty
+    ≈⟨ truncate-sty′-label (sty-dim As ∸ d) As L (m∸n≤m (sty-dim As) d) ⟩
+  < label-on-sty (truncate-sty′ (sty-dim As ∸ d) As) L >sty
+    ≡⟨⟩
+  < label-on-sty (truncate-sty d As) L >sty ∎
+  where
+    lem : sty-dim (label-on-sty As L) ∸ (d + sty-dim (lty L)) ≡ sty-dim As ∸ d
+    lem = begin
+      sty-dim (label-on-sty As L) ∸ (d + sty-dim (lty L))
+        ≡⟨ cong (_∸ (d + sty-dim (lty L))) (sty-dim-label As L) ⟩
+      (sty-dim As + sty-dim (lty L)) ∸ (d + sty-dim (lty L))
+        ≡⟨ cong (sty-dim As + sty-dim (lty L) ∸_) (+-comm d (sty-dim (lty L))) ⟩
+      sty-dim As + sty-dim (lty L) ∸ (sty-dim (lty L) + d)
+        ≡˘⟨ ∸-+-assoc (sty-dim As + sty-dim (lty L)) (sty-dim (lty L)) d ⟩
+      sty-dim As + sty-dim (lty L) ∸ sty-dim (lty L) ∸ d
+        ≡⟨ cong (_∸ d) (m+n∸n≡m (sty-dim As) (sty-dim (lty L))) ⟩
+      sty-dim As ∸ d ∎
+      where
+        open ≡-Reasoning
+    open Reasoning sty-setoid
+
+truncate-sty-≤ : (d : ℕ) → (As : STy X) → (d < sty-dim As) → truncate-sty d As ≃sty truncate-sty d (sty-base As)
+truncate-sty-≤ d (SArr s As t) p
+  rewrite +-∸-assoc 1 p = refl≃sty
+
+map-sty-pext-label : (As : STy (someTree S)) → (L : Label-WT X (Join S T)) → label-on-sty (map-sty-pext As) L ≃sty label-on-sty As (label₁ L)
+map-sty-pext-label S⋆ L = refl≃sty
+map-sty-pext-label (SArr s As t) L = ≃SArr refl≃stm (map-sty-pext-label As L) refl≃stm
+
+map-sty-pshift-label : (As : STy (someTree T)) → (L : Label-WT X (Join S T)) → label-on-sty (map-sty-pshift As) L ≃sty label-on-sty As (label₂ L)
+map-sty-pshift-label S⋆ L = refl≃sty
+map-sty-pshift-label (SArr s As t) L = ≃SArr refl≃stm (map-sty-pshift-label As L) refl≃stm

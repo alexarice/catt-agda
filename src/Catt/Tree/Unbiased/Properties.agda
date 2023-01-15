@@ -494,3 +494,14 @@ label-from-linear-tree-unbiased-lem-0 S T d p = begin
 label-from-linear-tree-type-prop : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → label-from-linear-tree-type S (sty-base As) ≃sty sty-base (label-from-linear-tree-type S As)
 label-from-linear-tree-type-prop Sing As = refl≃sty
 label-from-linear-tree-type-prop (Join S Sing) As = label-from-linear-tree-type-prop S (sty-base As)
+
+truncate-unbiased-sty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → truncate-sty 1 (unbiased-type d T) ≃sty SArr SHere S⋆ (SPath (last-path T))
+truncate-unbiased-sty (suc zero) T = refl≃sty
+truncate-unbiased-sty (suc (suc d)) T = begin
+  < truncate-sty 1 (unbiased-type (suc (suc d)) T) >sty
+    ≈⟨ truncate-sty-≤ 1 (unbiased-type (2 + d) T) (s≤s (s≤s z≤n)) ⟩
+  < truncate-sty 1 (unbiased-type (1 + d) T) >sty
+    ≈⟨ truncate-unbiased-sty (suc d) T ⟩
+  < SArr SHere S⋆ (SPath (last-path T)) >sty ∎
+  where
+    open Reasoning sty-setoid

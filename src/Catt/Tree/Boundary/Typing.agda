@@ -31,7 +31,7 @@ open import Catt.Tree.Label.Properties
 open import Catt.Tree.Label.Typing rule
 open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
 
-tree-inc-Ty : (d : ℕ) → (T : Tree n) → (b : Bool) → Typing-Label (incTree T) (tree-inc-label d T b)
+tree-inc-Ty : (d : ℕ) → (T : Tree n) → (b : Bool) → Typing-Label (tree-to-ctx T) (tree-inc-label d T b)
 tree-inc-Ty zero T false = TySing (TySPath PHere)
 tree-inc-Ty zero T true = TySing (last-path-Ty T)
 tree-inc-Ty (suc d) Sing b = TySing (TySPath PHere)

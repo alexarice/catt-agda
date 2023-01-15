@@ -17,31 +17,32 @@ open import Catt.Typing.Properties rule
 
 HasDiscRemoval : Set
 HasDiscRemoval = ∀ {m n}
-               → {ΓS : CtxOrTree m}
+               → {Γ : Ctx m}
+               → {X : MaybeTree m}
                → (S : Tree n)
                → .⦃ _ : is-linear S ⦄
                → .⦃ NonZero (tree-dim S) ⦄
-               → (L : Label (COT-to-MT ΓS) S)
-               → Typing-Label ΓS (L ,, S⋆)
-               → (unbiased-comp (tree-dim S) S >>= L ,, S⋆) ≈[ ΓS ]stm L (is-linear-max-path S)
+               → (L : Label X S)
+               → Typing-Label Γ (L ,, S⋆)
+               → (unbiased-comp (tree-dim S) S >>= L ,, S⋆) ≈[ Γ ]stm L (is-linear-max-path S)
 
 module Conditions (dr : HasDiscRemoval) where
 
-  -- lift-rule : ∀ {m n}
-  --           → {Γ : Ctx m}
-  --           → (S : Tree n)
-  --           → .⦃ _ : is-linear S ⦄
-  --           → .⦃ NonZero (tree-dim S) ⦄
-  --           → (L : Label (Other m) S)
-  --           → {A : Ty m}
-  --           → Typing-Label (incCtx (Γ , A)) (lift-label (L ,, S⋆))
-  --           → lift-stm (unbiased-comp (tree-dim S) S >>= L ,, S⋆) ≈[ incCtx (Γ , A) ]stm lift-stm (L (is-linear-max-path S))
-  -- lift-rule S L Lty = dr S (lift-stm ∘ L) Lty
-
-  susp-rule : ∀ {m n}
-            → {ΓS : CtxOrTree m}
+  lift-rule : ∀ {m n}
+            → {Γ : Ctx m}
             → (S : Tree n)
             → .⦃ _ : is-linear S ⦄
             → .⦃ NonZero (tree-dim S) ⦄
-            → (L : Label (COT-to-MT ΓS) S)
-            → Typing-Label
+            → (L : Label (Other m) S)
+            → {A : Ty m}
+            → Typing-Label (Γ , A) (lift-label (L ,, S⋆))
+            → lift-stm (unbiased-comp (tree-dim S) S >>= L ,, S⋆) ≈[ Γ , A ]stm lift-stm (L (is-linear-max-path S))
+  lift-rule S L Lty = dr S (lift-stm ∘ L) Lty
+
+  -- susp-rule : ∀ {m n}
+  --           → {ΓS : CtxOrTree m}
+  --           → (S : Tree n)
+  --           → .⦃ _ : is-linear S ⦄
+  --           → .⦃ NonZero (tree-dim S) ⦄
+  --           → (L : Label (COT-to-MT ΓS) S)
+  --           → Typing-Label

@@ -37,9 +37,9 @@ open import Catt.Tree.Label.Typing rule
 open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Relation.Binary.Definitions
 
-unbiased-type-Ty : (d : ℕ) → (T : Tree n) → Typing-STy (incTree T) (unbiased-type d T)
-unbiased-stm-Ty : (d : ℕ) → (T : Tree n) → (tree-dim T ≤ d) → Typing-STm (incTree T) (unbiased-stm d T) (unbiased-type d T)
-unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≤ d) → Typing-STm (incTree T) (unbiased-comp d T) (unbiased-type d T)
+unbiased-type-Ty : (d : ℕ) → (T : Tree n) → Typing-STy (tree-to-ctx T) (unbiased-type d T)
+unbiased-stm-Ty : (d : ℕ) → (T : Tree n) → (tree-dim T ≤ d) → Typing-STm (tree-to-ctx T) (unbiased-stm d T) (unbiased-type d T)
+unbiased-comp-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≤ d) → Typing-STm (tree-to-ctx T) (unbiased-comp d T) (unbiased-type d T)
 
 unbiased-type-Ty zero T = TySStar
 unbiased-type-Ty (suc d) T
@@ -59,21 +59,21 @@ unbiased-comp-Ty d T p with <-cmp (tree-dim T) d
 ... | tri≈ ¬a b ¬c = TySConv (TySCoh T (unbiased-type-Ty d T) (id-label-Ty T) TySStar true (unbiased-supp-condition-1 d T b)) (reflexive≈sty (id-label-on-sty (unbiased-type d T)))
 ... | tri> ¬a ¬b c = ⊥-elim (<⇒≱ c p)
 
-unbiased-comp′-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≤ d) → Typing-STm (incTree T) (unbiased-comp′ d T) (unbiased-type d T)
+unbiased-comp′-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≤ d) → Typing-STm (tree-to-ctx T) (unbiased-comp′ d T) (unbiased-type d T)
 unbiased-comp′-Ty d T p = transport-stm-typing (unbiased-comp-Ty d T p) (sym≃stm (unbiased-comp′-compat d T)) refl≃sty
 
-label-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → .⦃ NonZero (tree-dim S + d) ⦄ → tree-dim T ≤ tree-dim S + d → Typing-Label (incTree T) (label-from-linear-tree-unbiased S T d ,, unbiased-type d T)
+label-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → .⦃ NonZero (tree-dim S + d) ⦄ → tree-dim T ≤ tree-dim S + d → Typing-Label (tree-to-ctx T) (label-from-linear-tree-unbiased S T d ,, unbiased-type d T)
 label-from-linear-tree-unbiased-Ty Sing T d p = TySing (unbiased-comp′-Ty d ⦃ it ⦄ T p)
 label-from-linear-tree-unbiased-Ty (Join S Sing) T d p
   = TyJoin (transport-stm-typing (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd″ d T)) (tree-inc-Ty d T false) TySStar) refl≃stm (sym≃sty (unbiased-type-prop d T d ≤-refl false)))
            (label-from-linear-tree-unbiased-Ty S T (suc d) ⦃ NonZero-subst (sym (+-suc (tree-dim S) d)) it ⦄ (≤-trans p (≤-reflexive (sym (+-suc (tree-dim S) d)))))
            (TySing (transport-stm-typing (extend-Ty (unbiased-stm-Ty d (tree-bd d T) (tree-dim-bd″ d T)) (tree-inc-Ty d T true) TySStar) refl≃stm (sym≃sty (unbiased-type-prop d T d ≤-refl true))))
 
-label-from-linear-tree-unbiased-Ty-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim S) ⦄ → tree-dim T ≤ tree-dim S → Typing-Label (incTree T) (label-from-linear-tree-unbiased S T 0 ,, S⋆)
+label-from-linear-tree-unbiased-Ty-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim S) ⦄ → tree-dim T ≤ tree-dim S → Typing-Label (tree-to-ctx T) (label-from-linear-tree-unbiased S T 0 ,, S⋆)
 label-from-linear-tree-unbiased-Ty-0 S T p = label-from-linear-tree-unbiased-Ty S T 0 ⦃ NonZero-subst (sym (+-identityʳ (tree-dim S))) it ⦄ (≤-trans p (≤-reflexive (sym (+-identityʳ (tree-dim S)))))
 
-label-from-linear-tree-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {a : STm (COT-to-MT ΓS)} → {As : STy (COT-to-MT ΓS)} → Typing-STm ΓS a As → Typing-STy ΓS As → .(p : tree-dim S ≤ sty-dim As) → Typing-Label ΓS (label-from-linear-tree S a As p ,, label-from-linear-tree-type S As)
-label-from-linear-tree-type-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {As : STy (COT-to-MT ΓS)} → Typing-STy ΓS As → Typing-STy ΓS (label-from-linear-tree-type S As)
+label-from-linear-tree-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {a : STm X} → {As : STy X} → Typing-STm Γ a As → Typing-STy Γ As → .(p : tree-dim S ≤ sty-dim As) → Typing-Label Γ (label-from-linear-tree S a As p ,, label-from-linear-tree-type S As)
+label-from-linear-tree-type-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {As : STy X} → Typing-STy Γ As → Typing-STy Γ (label-from-linear-tree-type S As)
 
 label-from-linear-tree-Ty Sing aTy AsTy p = TySing aTy
 label-from-linear-tree-Ty (Join S Sing) aTy AsTy p = transport-label-typing (unrestrict-label-Ty (label-from-linear-tree-Ty S aTy AsTy (≤-trans (n≤1+n (tree-dim S)) p)) (label-from-linear-tree-type-Ty S AsTy) ⦃ label-from-linear-tree-nz S _ p ⦄) refl≃l (sym≃sty (label-from-linear-tree-type-prop S _))
@@ -81,16 +81,15 @@ label-from-linear-tree-Ty (Join S Sing) aTy AsTy p = transport-label-typing (unr
 label-from-linear-tree-type-Ty Sing AsTy = AsTy
 label-from-linear-tree-type-Ty (Join S Sing) AsTy = label-from-linear-tree-type-Ty S (TySArr-proj₂ AsTy)
 
-label-from-linear-tree-type-≈ : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As ≈[ ΓS ]sty Bs) → label-from-linear-tree-type S As ≈[ ΓS ]sty label-from-linear-tree-type S Bs
+label-from-linear-tree-type-≈ : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As ≈[ Γ ]sty Bs) → label-from-linear-tree-type S As ≈[ Γ ]sty label-from-linear-tree-type S Bs
 label-from-linear-tree-type-≈ Sing p = p
 label-from-linear-tree-type-≈ (Join S Sing) p = label-from-linear-tree-type-≈ S (sty-base-≈ p)
 
-label-from-linear-tree-≈ : {ΓS : CtxOrTree m}
-                         → (S : Tree n) → .⦃ _ : is-linear S ⦄
-                         → {a b : STm (COT-to-MT ΓS)} → (a ≈[ ΓS ]stm b)
-                         → {As Bs : STy (COT-to-MT ΓS)} → (q : As ≈[ ΓS ]sty Bs)
+label-from-linear-tree-≈ : (S : Tree n) → .⦃ _ : is-linear S ⦄
+                         → {a b : STm X} → (a ≈[ Γ ]stm b)
+                         → {As Bs : STy X} → (q : As ≈[ Γ ]sty Bs)
                          → .(r : tree-dim S ≤ sty-dim As)
-                         → label-from-linear-tree S a As r ≈[ ΓS ]l label-from-linear-tree S b Bs (≤-trans r (≤-reflexive (sty-dim-≈ q)))
+                         → label-from-linear-tree S a As r ≈[ Γ ]l label-from-linear-tree S b Bs (≤-trans r (≤-reflexive (sty-dim-≈ q)))
 label-from-linear-tree-≈ Sing p q r .get P = p
 label-from-linear-tree-≈ (Join S Sing) p q r .get PHere = sty-src-≈ (label-from-linear-tree-type-≈ S q) ⦃ _ ⦄
 label-from-linear-tree-≈ (Join S Sing) p q r .get (PExt P) = label-from-linear-tree-≈ S p q _ .get P

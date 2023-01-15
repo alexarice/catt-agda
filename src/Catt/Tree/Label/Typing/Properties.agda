@@ -32,32 +32,32 @@ open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing rule lift-rule
 open import Catt.Tree.Label.Typing rule
 
-≈SExt : a ≈[ incTree S ]stm b → SExt a ≈[ incTree (Join S T) ]stm SExt b
+≈SExt : {a b : STm (someTree S)} → a ≈[ tree-to-ctx S ]stm b → SExt {T = T} a ≈[ tree-to-ctx (Join S T) ]stm SExt b
 ≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (connect-susp-inc-left-Ty (tree-to-ctx T)) (suspTmEq p)) ]
 
-≈SShift : a ≈[ incTree T ]stm b → SShift a ≈[ incTree (Join S T) ]stm SShift b
+≈SShift : {a b : STm (someTree T)} → a ≈[ tree-to-ctx T ]stm b → SShift {S = S} a ≈[ tree-to-ctx (Join S T) ]stm SShift b
 ≈SShift {S = S} [ q ] = [ (apply-sub-tm-eq (connect-susp-inc-right-Ty (tree-to-ctx S)) q) ]
 
 ≈SPath : P ≃p Q → SPath P ≃stm SPath Q
 ≈SPath p = [ path-to-term-≃ p ]
 
-susp-sty-tree-≈ : As ≈[ incTree S ]sty Bs → susp-sty As ≈[ incTree (suspTree S) ]sty susp-sty Bs
+susp-sty-tree-≈ : {As Bs : STy (someTree S)} → As ≈[ tree-to-ctx S ]sty Bs → susp-sty As ≈[ tree-to-ctx (suspTree S) ]sty susp-sty Bs
 susp-sty-tree-≈ {As = S⋆} {Bs = S⋆} p = refl≈sty
 susp-sty-tree-≈ {As = SArr s As t} {Bs = SArr s′ Bs t′} [ Arr≈ x p x′ ] = ≈SArr (≈SExt [ x ]) (susp-sty-tree-≈ [ p ]) (≈SExt [ x′ ])
 
-unrestrict-label-≈ : {ΓS : CtxOrTree n} → {L M : Label-WT (COT-to-MT ΓS) S} → ap L ≈[ ΓS ]l ap M → (q : lty L ≈[ ΓS ]sty lty M) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → unrestrict-label L ≈[ ΓS ]l unrestrict-label M ⦃ NonZero-subst (sty-dim-≈ q) it ⦄
+unrestrict-label-≈ : {L M : Label-WT X S} → ap L ≈[ Γ ]l ap M → (q : lty L ≈[ Γ ]sty lty M) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → unrestrict-label L ≈[ Γ ]l unrestrict-label M ⦃ NonZero-subst (sty-dim-≈ q) it ⦄
 unrestrict-label-≈ p q .get PHere = sty-src-≈ q
 unrestrict-label-≈ p q .get (PExt P) = p .get P
 unrestrict-label-≈ p q .get (PShift P) = sty-tgt-≈ q
 
-label-to-sub-Ty : {L : Label-WT (COT-to-MT ΓS) S} → Typing-Label ΓS L → Typing-STy ΓS (lty L) → Typing-Sub (tree-to-ctx S) (COT-to-Ctx ΓS) (label-to-sub L)
+label-to-sub-Ty : {L : Label-WT X S} → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-Sub (tree-to-ctx S) Γ (label-to-sub L)
 label-to-sub-Ty (TySing [ x ]) [ Aty ] = TyExt (TyNull Aty) x
 label-to-sub-Ty {L = L} (TyJoin x Lty Mty) Aty = sub-from-connect-Ty (unrestrictTy (label-to-sub-Ty Lty (TySArr x Aty (ap-phere-Ty Mty)))) getSndTy (label-to-sub-Ty Mty Aty) (reflexive≈tm (label-to-sub-lem L) )
 
-TySPath : (P : Path S) → Typing-STm (incTree S) (SPath P) (getPathType P)
+TySPath : (P : Path S) → Typing-STm (tree-to-ctx S) (SPath P) (getPathType P)
 TySPath P .get = path-to-term-Ty P
 
-TySExt : Typing-STm (incTree S) a As → Typing-STm (incTree (Join S T)) (SExt a) (map-sty-pext As)
+TySExt : {a : STm (someTree S)} → Typing-STm (tree-to-ctx S) a As → Typing-STm (tree-to-ctx (Join S T)) (SExt {T = T} a) (map-sty-pext As)
 TySExt {As = As} {T = T} [ aty ] .get = TyConv (apply-sub-tm-typing (suspTmTy aty) (connect-susp-inc-left-Ty (tree-to-ctx T))) (reflexive≈ty (begin
   < suspTy (sty-to-type As) [ connect-susp-inc-left _ _ ]ty >ty
     ≈˘⟨ sub-action-≃-ty (susp-sty-to-type As) refl≃s ⟩
@@ -69,7 +69,7 @@ TySExt {As = As} {T = T} [ aty ] .get = TyConv (apply-sub-tm-typing (suspTmTy at
   where
     open Reasoning ty-setoid
 
-TySShift : Typing-STm (incTree T) a As → Typing-STm (incTree (Join S T)) (SShift a) (map-sty-pshift As)
+TySShift : {a : STm (someTree T)} → Typing-STm (tree-to-ctx T) a As → Typing-STm (tree-to-ctx (Join S T)) (SShift {S = S} a) (map-sty-pshift As)
 TySShift {As = As} {S = S} [ aty ] .get = TyConv (apply-sub-tm-typing aty (connect-susp-inc-right-Ty (tree-to-ctx S))) (reflexive≈ty (begin
   < sty-to-type As [ connect-susp-inc-right _ _ ]ty >ty
     ≈˘⟨ sty-sub-prop As (connect-susp-inc-right (tree-size S) _) ⟩
@@ -79,13 +79,13 @@ TySShift {As = As} {S = S} [ aty ] .get = TyConv (apply-sub-tm-typing aty (conne
   where
     open Reasoning ty-setoid
 
-TySCoh : (S : Tree n) → {As : STy (someTree S)} → {L : Label-WT (COT-to-MT ΓS) S}
-         → Typing-STy (incTree S) As
-         → Typing-Label ΓS L
-         → Typing-STy ΓS (lty L)
+TySCoh : (S : Tree n) → {As : STy (someTree S)} → {L : Label-WT X S}
+         → Typing-STy (tree-to-ctx S) As
+         → Typing-Label Γ L
+         → Typing-STy Γ (lty L)
          → (b : Bool)
          → supp-condition-s b S As
-         → Typing-STm ΓS (SCoh S As L) (label-on-sty As L)
+         → Typing-STm Γ (SCoh S As L) (label-on-sty As L)
 TySCoh S {As} {L} [ Aty ] Lty Ltyty b sc .get = TyConv (apply-sub-tm-typing (TyCoh ⦃ tree-to-pd S ⦄ Aty id-Ty b (supp-condition-compat b S _ sc)) (label-to-sub-Ty Lty Ltyty)) (reflexive≈ty (begin
   < sty-to-type As [ idSub ]ty [ label-to-sub L ]ty >ty
     ≈⟨ sub-action-≃-ty (id-on-ty (sty-to-type As)) refl≃s ⟩
@@ -95,14 +95,14 @@ TySCoh S {As} {L} [ Aty ] Lty Ltyty b sc .get = TyConv (apply-sub-tm-typing (TyC
   where
     open Reasoning ty-setoid
 
-label-equality-to-sub : (L M : Label-WT (COT-to-MT ΓS) S) → ap L ≈[ ΓS ]l ap M → lty L ≈[ ΓS ]sty lty M → label-to-sub L ≈[ COT-to-Ctx ΓS ]s label-to-sub M
+label-equality-to-sub : (L M : Label-WT X S) → ap L ≈[ Γ ]l ap M → lty L ≈[ Γ ]sty lty M → label-to-sub L ≈[ Γ ]s label-to-sub M
 label-equality-to-sub {S = Sing} L M [ p ] [ q ] = Ext≈ (Null≈ q) (p PHere .get)
 label-equality-to-sub {S = Join S T} L M [ p ] q
   = sub-from-connect-≈
       (unrestrictEq (label-equality-to-sub (label₁ L) (label₁ M) [ p ∘ PExt ] (≈SArr (p PHere) q (p (PShift PHere)))))
       (label-equality-to-sub (label₂ L) (label₂ M) [ p ∘ PShift ] q)
 
-≈SCoh : (S : Tree n) → {As Bs : STy (someTree S)} → As ≈[ incTree S ]sty Bs → {L M : Label (COT-to-MT ΓS) S} → L ≈[ ΓS ]l M → {Cs Cs′ : STy (COT-to-MT ΓS)} → Cs ≈[ ΓS ]sty Cs′ → SCoh S As (L ,, Cs) ≈[ ΓS ]stm SCoh S Bs (M ,, Cs′)
+≈SCoh : (S : Tree n) → {As Bs : STy (someTree S)} → As ≈[ tree-to-ctx S ]sty Bs → {L M : Label X S} → L ≈[ Γ ]l M → {Cs Cs′ : STy X} → Cs ≈[ Γ ]sty Cs′ → SCoh S As (L ,, Cs) ≈[ Γ ]stm SCoh S Bs (M ,, Cs′)
 ≈SCoh S {As} {Bs} [ p ] {L} {M} q {S⋆} {S⋆} r = [ Coh≈ p (apply-sub-eq-sub idSub (label-equality-to-sub (L ,, S⋆) (M ,, S⋆) q r)) ]
 ≈SCoh S {As} {Bs} p {L} {M} q {SArr s Cs t} {SArr s′ Cs′ t′} r = begin
   SCoh S As (L ,, SArr s Cs t)
@@ -114,9 +114,9 @@ label-equality-to-sub {S = Join S T} L M [ p ] q
     ≈˘⟨ reflexive≈stm (SCoh-unrestrict S Bs (M ,, SArr s′ Cs′ t′)) ⟩
   SCoh S Bs (M ,, SArr s′ Cs′ t′) ∎
   where
-    open Reasoning (stm-setoid-≈ _)
+    open Reasoning stm-setoid-≈
 
-extend-≈ : a ≈[ incTree S ]stm b → {L : Label-WT (COT-to-MT ΓS) S} → (Lty : Typing-Label ΓS L) → Typing-STy ΓS (lty L) → (a >>= L) ≈[ ΓS ]stm (b >>= L)
+extend-≈ : a ≈[ tree-to-ctx S ]stm b → {L : Label-WT X S} → (Lty : Typing-Label Γ L) → Typing-STy Γ (lty L) → (a >>= L) ≈[ Γ ]stm (b >>= L)
 extend-≈ {a = a} {b = b} [ p ] {L} Lty AsTy .get = begin
   stm-to-term (a >>= L)
     ≈˘⟨ reflexive≈tm (label-to-sub-stm L a) ⟩
@@ -128,7 +128,7 @@ extend-≈ {a = a} {b = b} [ p ] {L} Lty AsTy .get = begin
   where
     open Reasoning (tm-setoid-≈ _)
 
-≈-extend : (a : STm (someTree S)) → {L M : Label-WT (COT-to-MT ΓS) S} → ap L ≈[ ΓS ]l ap M → lty L ≈[ ΓS ]sty lty M → (a >>= L) ≈[ ΓS ]stm (a >>= M)
+≈-extend : (a : STm (someTree S)) → {L M : Label-WT X S} → ap L ≈[ Γ ]l ap M → lty L ≈[ Γ ]sty lty M → (a >>= L) ≈[ Γ ]stm (a >>= M)
 ≈-extend a {L = L} {M = M} p q .get = begin
   stm-to-term (a >>= L)
     ≈˘⟨ reflexive≈tm (label-to-sub-stm L a) ⟩
@@ -140,43 +140,43 @@ extend-≈ {a = a} {b = b} [ p ] {L} Lty AsTy .get = begin
   where
     open Reasoning (tm-setoid-≈ _)
 
-label-on-sty-≈ : (As : STy (someTree S)) → {L M : Label-WT (COT-to-MT ΓS) S} → ap L ≈[ ΓS ]l ap M → lty L ≈[ ΓS ]sty lty M → label-on-sty As L ≈[ ΓS ]sty label-on-sty As M
+label-on-sty-≈ : (As : STy (someTree S)) → {L M : Label-WT X S} → ap L ≈[ Γ ]l ap M → lty L ≈[ Γ ]sty lty M → label-on-sty As L ≈[ Γ ]sty label-on-sty As M
 label-on-sty-≈ S⋆ p q = q
 label-on-sty-≈ (SArr s As t) p q = ≈SArr (≈-extend s p q) (label-on-sty-≈ As p q) (≈-extend t p q)
 
-extend-Ty : {L : Label-WT (COT-to-MT ΓS) S} → Typing-STm (incTree S) a As → Typing-Label ΓS L → Typing-STy ΓS (lty L) → Typing-STm ΓS (a >>= L) (label-on-sty As L)
+extend-Ty : {L : Label-WT X S} → Typing-STm (tree-to-ctx S) a As → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-STm Γ (a >>= L) (label-on-sty As L)
 extend-Ty {a = a} {As = As} {L = L} [ aty ] Lty Ltyty .get = transport-typing-full (apply-sub-tm-typing aty (label-to-sub-Ty Lty Ltyty)) (label-to-sub-stm L a) (label-to-sub-sty L As)
 
-label-comp-Ty : {L : Label-WT (someTree T) S} {M : Label-WT (COT-to-MT ΓS) T} → Typing-Label (incTree T) L → Typing-Label ΓS M → Typing-STy ΓS (lty M) → Typing-Label ΓS (label-wt-comp L M)
+label-comp-Ty : {L : Label-WT (someTree T) S} {M : Label-WT X T} → Typing-Label (tree-to-ctx T) L → Typing-Label Γ M → Typing-STy Γ (lty M) → Typing-Label Γ (label-wt-comp L M)
 label-comp-Ty (TySing x) MTy AsTy = TySing (extend-Ty x MTy AsTy)
 label-comp-Ty (TyJoin x LTy LTy′) MTy AsTy = TyJoin (extend-Ty x MTy AsTy) (label-comp-Ty LTy MTy AsTy) (label-comp-Ty LTy′ MTy AsTy)
 
-last-path-Ty : (T : Tree n) → Typing-STm (incTree T) (SPath (last-path T)) S⋆
+last-path-Ty : (T : Tree n) → Typing-STm (tree-to-ctx T) (SPath (last-path T)) S⋆
 last-path-Ty T = [ (transport-typing (tree-last-var-Ty T) (sym≃tm (last-path-to-term T))) ]
 
-map-sty-pext-Ty : Typing-STy (incTree S) As → Typing-STy (incTree (Join S T)) (map-sty-pext As)
+map-sty-pext-Ty : Typing-STy (tree-to-ctx S) As → Typing-STy (tree-to-ctx (Join S T)) (map-sty-pext {S = S} {T = T} As)
 map-sty-pext-Ty {As = S⋆} AsTy = TySArr (TySPath PHere) TySStar (TySShift (TySPath PHere))
 map-sty-pext-Ty {As = SArr s As t} [ TyArr sty AsTy tty ] = TySArr (TySExt [ sty ]) (map-sty-pext-Ty [ AsTy ]) (TySExt [ tty ])
 
-map-pext-Ty : {L : Label-WT (someTree S) U} → Typing-Label (incTree S) L → Typing-Label (incTree (Join S T)) (map-pext L)
+map-pext-Ty : {L : Label-WT (someTree S) U} → Typing-Label (tree-to-ctx S) L → Typing-Label (tree-to-ctx (Join S T)) (map-pext {T = T} L)
 map-pext-Ty (TySing x) = TySing (TySExt x)
 map-pext-Ty (TyJoin x Lty Mty) = TyJoin (TySExt x) (map-pext-Ty Lty) (map-pext-Ty Mty)
 
-map-sty-pshift-Ty : Typing-STy (incTree T) As → Typing-STy (incTree (Join S T)) (map-sty-pshift As)
+map-sty-pshift-Ty : Typing-STy (tree-to-ctx T) As → Typing-STy (tree-to-ctx (Join S T)) (map-sty-pshift {T = T} {S = S} As)
 map-sty-pshift-Ty {As = S⋆} AsTy = TySStar
 map-sty-pshift-Ty {As = SArr s As t} [ TyArr sty AsTy tty ] = TySArr (TySShift [ sty ]) (map-sty-pshift-Ty [ AsTy ]) (TySShift [ tty ])
 
-map-pshift-Ty : {L : Label-WT (someTree T) U} → Typing-Label (incTree T) L → Typing-Label (incTree (Join S T)) (map-pshift L)
+map-pshift-Ty : {L : Label-WT (someTree T) U} → Typing-Label (tree-to-ctx T) L → Typing-Label (tree-to-ctx (Join S T)) (map-pshift {S = S} L)
 map-pshift-Ty (TySing x) = TySing (TySShift x)
 map-pshift-Ty (TyJoin x Lty Mty) = TyJoin (TySShift x) (map-pshift-Ty Lty) (map-pshift-Ty Mty)
 
-id-label-Ty : (S : Tree n) → Typing-Label (incTree S) (id-label-wt S)
+id-label-Ty : (S : Tree n) → Typing-Label (tree-to-ctx S) (id-label-wt S)
 id-label-Ty Sing = TySing (TySPath PHere)
 id-label-Ty (Join S T) = TyJoin (TySPath PHere) (transport-label-typing (map-pext-Ty (id-label-Ty S)) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm))) (transport-label-typing (map-pshift-Ty (id-label-Ty T)) [ (λ P → compute-≃ refl≃stm) ] refl≃sty)
 
 connect-tree-inc-left-Ty : (S : Tree n)
                          → (T : Tree m)
-                         → Typing-Label (incTree (connect-tree S T)) (connect-tree-inc-left S T)
+                         → Typing-Label (tree-to-ctx (connect-tree S T)) (connect-tree-inc-left S T)
 connect-tree-inc-left-Ty Sing T = TySing (TySPath PHere)
 connect-tree-inc-left-Ty (Join S₁ S₂) T
   = TyJoin (TySPath PHere)
@@ -191,31 +191,33 @@ connect-tree-inc-left-Ty (Join S₁ S₂) T
 
 connect-tree-inc-right-Ty : (S : Tree n)
                           → (T : Tree m)
-                          → Typing-Label (incTree (connect-tree S T)) (connect-tree-inc-right S T)
+                          → Typing-Label (tree-to-ctx (connect-tree S T)) (connect-tree-inc-right S T)
 connect-tree-inc-right-Ty Sing T = id-label-Ty T
 connect-tree-inc-right-Ty (Join S₁ S₂) T = transport-label-typing (map-pshift-Ty (connect-tree-inc-right-Ty S₂ T)) [ (λ P → compute-≃ refl≃stm) ] refl≃sty
 
-replace-label-Ty : {L : Label-WT (COT-to-MT ΓS) S}
-                 → Typing-Label ΓS L
-                 → Typing-STm ΓS a (lty L)
-                 → ap L PHere ≈[ ΓS ]stm a
-                 → Typing-Label ΓS (replace-label (ap L) a ,, lty L)
+replace-label-Ty : {L : Label-WT X S}
+                 → Typing-Label Γ L
+                 → Typing-STm Γ a (lty L)
+                 → ap L PHere ≈[ Γ ]stm a
+                 → Typing-Label Γ (replace-label (ap L) a ,, lty L)
 replace-label-Ty (TySing x) aTy p = TySing aTy
 replace-label-Ty (TyJoin x LTy LTy′) aTy p = TyJoin aTy (label-typing-conv LTy (≈SArr p refl≈sty refl≈stm)) LTy′
 
-connect-label-Ty : Typing-Label ΓS (L ,, As)
-                 → Typing-Label ΓS (M ,, As)
-                 → L (last-path S) ≈[ ΓS ]stm M PHere
-                 → Typing-Label ΓS (connect-label L M ,, As)
+connect-label-Ty : Typing-Label Γ (L ,, As)
+                 → Typing-Label Γ (M ,, As)
+                 → L (last-path S) ≈[ Γ ]stm M PHere
+                 → Typing-Label Γ (connect-label L M ,, As)
 connect-label-Ty (TySing x) MTy p = replace-label-Ty MTy x (sym≈stm p)
 connect-label-Ty (TyJoin {L = L} x LTy LTy′) MTy p = TyJoin x (label-typing-conv LTy (≈SArr refl≈stm refl≈sty (reflexive≈stm (sym≃stm (connect-label-phere (ap L ∘ PShift) _))))) (connect-label-Ty LTy′ MTy p)
 
-label-between-connect-trees-Ty : Typing-Label (incTree S′) (L ,, S⋆)
-                               → Typing-Label (incTree T′) (M ,, S⋆)
-                               → L (last-path S) ≈[ incTree S′ ]stm SPath (last-path S′)
-                               → M PHere ≈[ incTree T′ ]stm SHere
-                               → Typing-Label (incTree (connect-tree S′ T′)) (label-between-connect-trees L M ,, S⋆)
-label-between-connect-trees-Ty {S′ = S′} {S = S} {L = L} {T′ = T′} {M = M} LTy MTy p q
+label-between-connect-trees-Ty : {L : Label (someTree S′) S}
+                               → {M : Label (someTree T′) T}
+                               → Typing-Label (tree-to-ctx S′) (L ,, S⋆)
+                               → Typing-Label (tree-to-ctx T′) (M ,, S⋆)
+                               → L (last-path S) ≈[ tree-to-ctx S′ ]stm SPath (last-path S′)
+                               → M PHere ≈[ tree-to-ctx T′ ]stm SHere
+                               → Typing-Label (tree-to-ctx (connect-tree S′ T′)) (label-between-connect-trees L M ,, S⋆)
+label-between-connect-trees-Ty {S′ = S′} {S = S} {T′ = T′} {L = L} {M = M} LTy MTy p q
   = connect-label-Ty (label-comp-Ty LTy (connect-tree-inc-left-Ty _ _) TySStar)
                      (label-comp-Ty MTy (connect-tree-inc-right-Ty _ _) TySStar)
                      (begin
@@ -230,16 +232,18 @@ label-between-connect-trees-Ty {S′ = S′} {S = S} {L = L} {T′ = T′} {M = 
                        (M PHere >>= connect-tree-inc-right S′ T′)
                          ≡⟨⟩
                        label-comp M (connect-tree-inc-right S′ T′) PHere ∎)
-                       where open Reasoning (stm-setoid-≈ (incTree (connect-tree S′ T′)))
+                       where open Reasoning stm-setoid-≈
 
-label-between-joins-Ty : Typing-Label (incTree S′) (L ,, S⋆)
-                       → Typing-Label (incTree T′) (M ,, S⋆)
-                       → M PHere ≈[ incTree T′ ]stm SHere
-                       → Typing-Label (incTree (Join S′ T′)) (label-between-joins L M ,, S⋆)
+label-between-joins-Ty : {L : Label (someTree S′) S}
+                       → {M : Label (someTree T′) T}
+                       → Typing-Label (tree-to-ctx S′) (L ,, S⋆)
+                       → Typing-Label (tree-to-ctx T′) (M ,, S⋆)
+                       → M PHere ≈[ tree-to-ctx T′ ]stm SHere
+                       → Typing-Label (tree-to-ctx (Join S′ T′)) (label-between-joins L M ,, S⋆)
 label-between-joins-Ty LTy MTy p = TyJoin (TySPath PHere) (label-typing-conv (map-pext-Ty LTy) (≈SArr refl≈stm refl≈sty (sym≈stm (≈SShift p)))) (map-pshift-Ty MTy)
 
-label-max-equality-to-equality : {L M : Label-WT (COT-to-MT ΓS) S} → ap L ≃lm ap M → Typing-Label ΓS L → Typing-Label ΓS M → ap L ≈[ ΓS ]l ap M
-label-max-equality-to-type-equality : {L M : Label-WT (COT-to-MT ΓS) S} → ap L ≃lm ap M → Typing-Label ΓS L → Typing-Label ΓS M → lty L ≈[ ΓS ]sty lty M
+label-max-equality-to-equality : {L M : Label-WT X S} → ap L ≃lm ap M → Typing-Label Γ L → Typing-Label Γ M → ap L ≈[ Γ ]l ap M
+label-max-equality-to-type-equality : {L M : Label-WT X S} → ap L ≃lm ap M → Typing-Label Γ L → Typing-Label Γ M → lty L ≈[ Γ ]sty lty M
 
 label-max-equality-to-equality {S = Sing} [ p ] Lty Mty .get PHere = reflexive≈stm (p PHere)
 label-max-equality-to-equality {S = Join S T} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) .get PHere with label-max-equality-to-type-equality [ p ∘ PExt ] Lty Mty
@@ -252,13 +256,13 @@ label-max-equality-to-equality {S = Join S T@(Join _ _)} [ p ] (TyJoin x Lty Lty
 label-max-equality-to-type-equality {S = Sing} [ p ] (TySing x) (TySing y) = [ (Ty-unique-≃ (p PHere .get) (x .get) (y .get)) ]
 label-max-equality-to-type-equality {S = Join S T} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) = sty-base-≈ (label-max-equality-to-type-equality [ p ∘ PExt ] Lty Mty)
 
-label-≃-Ty : (p : S ≃′ T) → {L : Label-WT (COT-to-MT ΓS) T} → Typing-Label ΓS L → Typing-Label ΓS (label-wt-≃ p L)
+label-≃-Ty : (p : S ≃′ T) → {L : Label-WT X T} → Typing-Label Γ L → Typing-Label Γ (label-wt-≃ p L)
 label-≃-Ty Refl≃′ LTy = LTy
 label-≃-Ty (Join≃′ p q) (TyJoin {L = L} x LTy LTy′) = TyJoin x (label-typing-conv (label-≃-Ty p LTy) (reflexive≈sty (≃SArr refl≃stm refl≃sty (ap-≃ (refl≃l {L = ap L}) (≃Shift refl≃ (trans≃p (≃Here (sym≃ (≃′-to-≃ q))) (ppath-≃-≃p q PHere))))))) (label-≃-Ty q LTy′)
 
-truncate-sty′-≈ : d ≡ d′ → As ≈[ ΓS ]sty Bs → truncate-sty′ d As ≈[ ΓS ]sty truncate-sty′ d′ Bs
+truncate-sty′-≈ : d ≡ d′ → As ≈[ Γ ]sty Bs → truncate-sty′ d As ≈[ Γ ]sty truncate-sty′ d′ Bs
 truncate-sty′-≈ {d = zero} refl q = q
 truncate-sty′-≈ {d = suc d} refl q = truncate-sty′-≈ {d = d} refl (sty-base-≈ q)
 
-truncate-sty-≈ : d ≡ d′ → As ≈[ ΓS ]sty Bs → truncate-sty d As ≈[ ΓS ]sty truncate-sty d′ Bs
+truncate-sty-≈ : d ≡ d′ → As ≈[ Γ ]sty Bs → truncate-sty d As ≈[ Γ ]sty truncate-sty d′ Bs
 truncate-sty-≈ {d = d} refl q = truncate-sty′-≈ (cong (_∸ d) (sty-dim-≈ q)) q

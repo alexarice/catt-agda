@@ -1,52 +1,52 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Tree.Insertion.Equality (index : ℕ)
-                                  (rule : Fin index → Rule)
-                                  (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
-                                  (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
-                                  (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
+module Catt.Tree.Insertion.Equality {index : Set}
+                                  (rule : index → Rule)
+                                  (lift-rule : ∀ i → P.LiftRule rule i)
+                                  (susp-rule : ∀ i → P.SuspRule rule i)
+                                  (sub-rule : ∀ i → P.SubRule rule i) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Typing index rule
-open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
+open import Catt.Typing rule
+open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Suspension
-open import Catt.Suspension.Typing index rule lift-rule susp-rule
+open import Catt.Suspension.Typing rule lift-rule susp-rule
 open import Catt.Connection
-open import Catt.Connection.Typing index rule lift-rule susp-rule sub-rule
+open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
-open import Catt.Tree.Boundary.Typing index rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
-open import Catt.Tree.Insertion.Typing index rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Insertion.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
-open import Catt.Tree.Label.Typing index rule
-open import Catt.Tree.Label.Typing.Properties index rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Label.Typing rule
+open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
-open import Catt.Tree.Typing index rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
-open import Catt.Tree.Unbiased.Typing index rule lift-rule susp-rule sub-rule
-open import Catt.Typing.DiscRemoval index rule
-open import Catt.Typing.EndoCoherenceRemoval index rule
-open import Catt.Typing.Insertion index rule
+open import Catt.Tree.Unbiased.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Typing.DiscRemoval rule
+open import Catt.Typing.EndoCoherenceRemoval rule
+open import Catt.Typing.Insertion rule
 open import Relation.Binary
 
 module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
-  open import Catt.Typing.DiscRemoval.Properties index rule lift-rule susp-rule sub-rule dr
+  open import Catt.Typing.DiscRemoval.Properties rule lift-rule susp-rule sub-rule dr
 
   unbiased-ecr : (d : ℕ)
                → (T : Tree n)
                → (tree-dim T < d)
                → (1 < d)
-               → unbiased-comp d T ≈[ incTree T ]stm (identity-stm (pred d) >>= label-from-linear-tree-unbiased (n-disc (pred d)) ⦃ n-disc-is-linear (pred d) ⦄ T 0 ,, S⋆)
+               → unbiased-comp d T ≈[ tree-to-ctx T ]stm (identity-stm (pred d) >>= label-from-linear-tree-unbiased (n-disc (pred d)) ⦃ n-disc-is-linear (pred d) ⦄ T 0 ,, S⋆)
   unbiased-ecr (suc d) T p q = let
     instance _ = n-disc-is-linear (sty-dim (unbiased-type d T))
     instance _ = n-disc-is-linear d
@@ -92,7 +92,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
                   label-from-linear-tree-unbiased (n-disc x) ⦃ n-disc-is-linear x ⦄ T 0 ,, S⋆)) (unbiased-type-dim d T))) ⟩
     (identity-stm d >>= label-from-linear-tree-unbiased (n-disc d) T 0 ,, S⋆) ∎
     where
-      open Reasoning (stm-setoid-≈ (incTree T))
+      open Reasoning stm-setoid-≈
 
   pruned-bp-exterior-sub : (S : Tree n)
                          → (p : BranchingPoint S l)
@@ -101,7 +101,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
                          → .(q : bp-height p < pred (height-of-branching p))
                          → (x : tree-dim T < height-of-branching p)
                          → label-max-equality
-                           (incTree (insertion-tree (prune-tree S p) (pruned-bp S p q) T))
+                           (tree-to-ctx (insertion-tree (prune-tree S p) (pruned-bp S p q) T))
                            (label-comp (exterior-sub-label S
                                                            p
                                                            (n-disc (pred (height-of-branching p)))
@@ -129,7 +129,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
       ≈⟨ ≈SExt (pruned-bp-exterior-sub S₁ p T (≤-pred q) (≤-pred x) .get Z) ⟩
     SExt (≃-label (sym≃′ (insertion-tree-pruned-bp S₁ p T _)) (exterior-sub-label S₁ p T) Z) ∎
     where
-      open Reasoning (stm-setoid-≈ _)
+      open Reasoning stm-setoid-≈
   pruned-bp-exterior-sub (Join S₁ S₂) (BPExt p) (Join T Sing) q x .get (PShift Z) = refl≈stm
   pruned-bp-exterior-sub (Join S₁ S₂) (BPShift p) T q x .get (PExt Z) = refl≈stm
   pruned-bp-exterior-sub (Join S₁ S₂) (BPShift p) T q x .get (PShift Z) = let
@@ -148,7 +148,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
     SShift (≃-label (sym≃′ (insertion-tree-pruned-bp S₂ p T _))
                     (exterior-sub-label S₂ p T) Z) ∎
     where
-      open Reasoning (stm-setoid-≈ _)
+      open Reasoning stm-setoid-≈
   pruned-bp-exterior-sub (Join (Join S₁ Sing) S₂) BPHere T q x .get (PExt Z) = let
     instance _ = n-disc-is-linear (tree-dim S₁)
     in begin
@@ -184,16 +184,16 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
     (label-from-linear-tree-unbiased (Join S₁ Sing) T 1 Z >>=
           (connect-tree-inc-left T S₂)) ∎
     where
-      open Reasoning (stm-setoid-≈ _)
+      open Reasoning stm-setoid-≈
   pruned-bp-exterior-sub (Join (Join S₁ Sing) S₂) BPHere T q x .get (PShift Z) = reflexive≈stm (extend-≃ (replace-not-here (SPath ∘ PShift) (SPath (PShift PHere)) Z) refl≃l refl≃sty)
 
 module _ (disc-rem : HasDiscRemoval) where
-  open import Catt.Typing.DiscRemoval.Properties index rule lift-rule susp-rule sub-rule disc-rem
+  open import Catt.Typing.DiscRemoval.Properties rule lift-rule susp-rule sub-rule disc-rem
 
   exterior-disc : (S : Tree n)
                 → (p : BranchingPoint S l)
                 → exterior-sub-label S p (n-disc (height-of-branching p)) ⦃ is-linear-has-linear-height l (n-disc (height-of-branching p)) ⦃ n-disc-is-linear (height-of-branching p) ⦄ (≤-trans (<⇒≤ (bp-height-<-hob p)) (≤-reflexive (sym (tree-dim-n-disc (height-of-branching p))))) ⦄
-                ≈[ incTree (insertion-tree S p (n-disc (height-of-branching p)) ⦃ _ ⦄) ]lm ≃-label (sym≃′ (insertion-disc S p)) (id-label S)
+                ≈[ tree-to-ctx (insertion-tree S p (n-disc (height-of-branching p)) ⦃ _ ⦄) ]lm ≃-label (sym≃′ (insertion-disc S p)) (id-label S)
   exterior-disc (Join S T) BPHere .get (PExt Z) = let
     instance _ = n-disc-is-linear (tree-dim S)
     in begin
@@ -213,7 +213,7 @@ module _ (disc-rem : HasDiscRemoval) where
       ≈⟨ reflexive≈stm (≃SPath (≃Ext (trans≃p (max-path-lin-tree (n-disc (tree-dim S)) Z (≃′-to-≃ (linear-tree-unique (n-disc (tree-dim S)) S (tree-dim-n-disc (tree-dim S))))) (ppath-≃-≃p (sym≃′ (linear-tree-unique (n-disc (tree-dim S)) S _)) Z)) refl≃)) ⟩
     SPath (PExt (ppath-≃ (sym≃′ (linear-tree-unique (n-disc (tree-dim S)) S _)) Z)) ∎
     where
-      open Reasoning (stm-setoid-≈ _)
+      open Reasoning stm-setoid-≈
   exterior-disc (Join S T) BPHere .get (PShift Z) = reflexive≈stm (replace-not-here (SPath ∘ PShift) (SPath (PShift PHere)) Z)
   exterior-disc (Join S T) (BPExt p) .get (PExt Z) = compute-≈ (≈SExt (trans≈stm (exterior-disc S p .get Z) (reflexive≈stm (stm-≃-spath (sym≃′ (insertion-disc S p)) Z))))
   exterior-disc (Join S T) (BPExt p) .get (PShift Z) = compute-≈ refl≈stm
@@ -234,7 +234,7 @@ Bd-Conditions-one-of d P T with <-cmp d (height-of-branching P)
 ... | tri> ¬a ¬b₁ c = Bd-Cond2 (Cond1 c (<⇒≤ a))
 
 module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
-  open import Catt.Typing.DiscRemoval.Properties index rule lift-rule susp-rule sub-rule dr
+  open import Catt.Typing.DiscRemoval.Properties rule lift-rule susp-rule sub-rule dr
 
   exterior-unbiased-type : (S : Tree n)
                     → (P : BranchingPoint S l)
@@ -244,7 +244,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                     → (d ≤ 1 + tree-dim S)
                     → (tree-dim T ≤ height-of-branching P)
                     → (label-on-sty (unbiased-type d S) (exterior-sub-label S P T ,, S⋆))
-                    ≈[ incTree (insertion-tree S P T) ]sty unbiased-type d (insertion-tree S P T)
+                    ≈[ tree-to-ctx (insertion-tree S P T) ]sty unbiased-type d (insertion-tree S P T)
   exterior-unbiased-comp : (S : Tree n)
                     → (P : BranchingPoint S l)
                     → (T : Tree m)
@@ -253,7 +253,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                     → d ≡ tree-dim S
                     → (tree-dim T ≤ height-of-branching P)
                     → (unbiased-comp d S >>= exterior-sub-label S P T ,, S⋆)
-                    ≈[ incTree (insertion-tree S P T) ]stm unbiased-comp d (insertion-tree S P T)
+                    ≈[ tree-to-ctx (insertion-tree S P T) ]stm unbiased-comp d (insertion-tree S P T)
   exterior-unbiased-comp′ : (S : Tree n)
                     → (P : BranchingPoint S l)
                     → (T : Tree m)
@@ -262,7 +262,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                     → d ≡ tree-dim S
                     → (tree-dim T ≤ height-of-branching P)
                     → (unbiased-comp′ d S >>= exterior-sub-label S P T ,, S⋆)
-                    ≈[ incTree (insertion-tree S P T) ]stm unbiased-comp′ d (insertion-tree S P T)
+                    ≈[ tree-to-ctx (insertion-tree S P T) ]stm unbiased-comp′ d (insertion-tree S P T)
   exterior-unbiased-stm : (S : Tree n)
                     → (P : BranchingPoint S l)
                     → (T : Tree m)
@@ -271,12 +271,12 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                     → d ≡ tree-dim S
                     → (tree-dim T ≤ height-of-branching P)
                     → (unbiased-stm d S >>= exterior-sub-label S P T ,, S⋆)
-                    ≈[ incTree (insertion-tree S P T) ]stm unbiased-stm d (insertion-tree S P T)
+                    ≈[ tree-to-ctx (insertion-tree S P T) ]stm unbiased-stm d (insertion-tree S P T)
 
   exterior-unbiased-type S P T zero p q = refl≈sty
   exterior-unbiased-type S P T (suc d) p q = ≈SArr (lem false) (exterior-unbiased-type S P T d (≤-trans (n≤1+n d) p) q) (lem true)
     where
-      open Reasoning (stm-setoid-≈ (incTree (insertion-tree S P T)))
+      open Reasoning stm-setoid-≈
 
       lem3 : (x : Condition d T (height-of-branching P)) → tree-dim (tree-bd d T) ≤
                height-of-branching (bd-branching-point S P d (bd-bp-lem P x))
@@ -286,7 +286,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
 
       lem2 : (b : Bool) → Bd-Conditions d P T
            → (unbiased-stm d (tree-bd d S) >>= label-wt-comp (tree-inc-label d S b) (exterior-sub-label S P T ,, S⋆))
-           ≈[ incTree (insertion-tree S P T) ]stm
+           ≈[ tree-to-ctx (insertion-tree S P T) ]stm
            (unbiased-stm d (tree-bd d (insertion-tree S P T)) >>= tree-inc-label d (insertion-tree S P T) b)
       lem2 b (Bd-Cond1 x y) = begin
         (unbiased-stm d (tree-bd d S) >>= label-wt-comp (tree-inc-label d S b) (exterior-sub-label S P T ,, S⋆))
@@ -340,7 +340,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
           tree-inc-label d (insertion-tree S P T) b) ∎
 
       lem : (b : Bool) → (unbiased-stm d (tree-bd d S) >>= tree-inc-label d S b >>= exterior-sub-label S P T ,, S⋆)
-          ≈[ incTree (insertion-tree S P T) ]stm
+          ≈[ tree-to-ctx (insertion-tree S P T) ]stm
           (unbiased-stm d (tree-bd d (insertion-tree S P T)) >>= tree-inc-label d (insertion-tree S P T) b)
       lem b = begin
         (unbiased-stm d (tree-bd d S) >>= tree-inc-label d S b >>= exterior-sub-label S P T ,, S⋆)
@@ -356,7 +356,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
       ≈⟨ ≈SCoh (insertion-tree S P T) (exterior-unbiased-type S P T d (≤-trans (≤-reflexive q) (n≤1+n (tree-dim S))) p) (reflexive≈l (exterior-interior-prop S P T)) refl≈sty ⟩
     SCoh (insertion-tree S P T) (unbiased-type d (insertion-tree S P T)) (id-label-wt _) ∎
     where
-      open Reasoning (stm-setoid-≈ (incTree (insertion-tree S P T)))
+      open Reasoning stm-setoid-≈
 
   exterior-unbiased-comp′ S P T d q p = begin
     (unbiased-comp′ d S >>= exterior-sub-label S P T ,, S⋆)
@@ -367,7 +367,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
       ≈˘⟨ reflexive≈stm (unbiased-comp′-compat d (insertion-tree S P T)) ⟩
     unbiased-comp′ d (insertion-tree S P T) ∎
     where
-      open Reasoning (stm-setoid-≈ (incTree (insertion-tree S P T)))
+      open Reasoning stm-setoid-≈
 
   exterior-unbiased-stm S@(Join _ _) P T d q p = begin
     (unbiased-stm d S >>= exterior-sub-label S P T ,, S⋆)
@@ -378,7 +378,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
       ≈˘⟨ unbiased-stm-is-comp d ⦃ NonZero-subst (sym q) it ⦄ (insertion-tree S P T) ⟩
     unbiased-stm d (insertion-tree S P T) ∎
     where
-      open Reasoning (stm-setoid-≈ (incTree (insertion-tree S P T)))
+      open Reasoning stm-setoid-≈
 
 
   exterior-inserted-bp : (S : Tree n)
@@ -392,7 +392,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                        → .⦃ _ : has-linear-height l′ U ⦄
                        → tree-dim U ≤ height-of-branching Q
                        → label-comp (exterior-sub-label S P T) (exterior-sub-label (insertion-tree S P T) (inserted-bp S P T Q) U ,, S⋆)
-                       ≈[ incTree (insertion-tree (insertion-tree S P T) (inserted-bp S P T Q) U) ]lm
+                       ≈[ tree-to-ctx (insertion-tree (insertion-tree S P T) (inserted-bp S P T Q) U) ]lm
                        ≃-label (sym≃′ (insertion-tree-inserted-bp S P T Q U)) (exterior-sub-label S P (insertion-tree T Q U) ⦃ insertion-linear-height T Q U l ⦄)
   exterior-inserted-bp (Join S₁ S₂) BPHere T p Q U q .get (PExt Z) = begin
     (label-from-linear-tree-unbiased S₁ T 1 Z
@@ -420,7 +420,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
          (label-from-linear-tree-unbiased S₁ (insertion-tree T Q U) 1 Z
            >>= connect-tree-inc-left (insertion-tree T Q U) S₂) ∎
     where
-      open Reasoning (stm-setoid-≈ _)
+      open Reasoning stm-setoid-≈
   exterior-inserted-bp (Join S₁ S₂) BPHere T p Q U q .get (PShift Z) = begin
     (replace-label (ap (connect-tree-inc-right T S₂)) (SPath (connect-tree-inc-left′ T S₂ (last-path T))) Z
         >>= exterior-sub-label (connect-tree T S₂) (connect-bp-left T S₂ Q) U ,, S⋆)
@@ -434,7 +434,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                      (SPath (connect-tree-inc-left′ (insertion-tree T Q U) S₂ (last-path (insertion-tree T Q U))))
                      Z) ∎
     where
-      open Reasoning (stm-setoid-≈ _)
+      open Reasoning stm-setoid-≈
   exterior-inserted-bp (Join S₁ S₂) (BPExt P) (Join T Sing) p BPHere U q = ⊥-elim (linear-non-linear T)
   exterior-inserted-bp (Join S₁ S₂) (BPExt P) (Join T Sing) p (BPExt Q) (Join U Sing) q .get (PExt Z) = begin
     (exterior-sub-label S₁ P T Z >>= map-pext (exterior-sub-label (insertion-tree S₁ P T) (inserted-bp S₁ P T Q) U ,, S⋆))
@@ -443,7 +443,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
       ≈⟨ ≈SExt (exterior-inserted-bp S₁ P T (cong pred p) Q U (≤-pred q) .get Z) ⟩
     SExt (stm-≃ (sym≃′ (insertion-tree-inserted-bp S₁ P T Q U)) (exterior-sub-label S₁ P (insertion-tree T Q U) ⦃ insertion-linear-height T Q U (bp-height P) ⦄ Z)) ∎
     where
-      open Reasoning (stm-setoid-≈ _)
+      open Reasoning stm-setoid-≈
   exterior-inserted-bp (Join S₁ S₂) (BPExt P) (Join T Sing) p (BPExt Q) (Join U Sing) q .get (PShift Z) = ≈SShift refl≈stm
   exterior-inserted-bp (Join S₁ S₂) (BPShift P) T p Q U q .get (PExt Z) = ≈SExt refl≈stm
   exterior-inserted-bp (Join S₁ S₂) (BPShift P) T p Q U q .get (PShift Z) = begin
@@ -454,4 +454,4 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
       ≈⟨ ≈SShift (exterior-inserted-bp S₂ P T p Q U q .get Z) ⟩
     SShift (stm-≃ (sym≃′ (insertion-tree-inserted-bp S₂ P T Q U)) (exterior-sub-label S₂ P (insertion-tree T Q U) ⦃ insertion-linear-height T Q U (bp-height P) ⦄ Z)) ∎
     where
-      open Reasoning (stm-setoid-≈ _)
+      open Reasoning stm-setoid-≈

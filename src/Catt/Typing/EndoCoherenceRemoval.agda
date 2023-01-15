@@ -17,12 +17,13 @@ open import Catt.Tree.Path
 
 HasEndoCoherenceRemoval : Set
 HasEndoCoherenceRemoval = ∀ {m n}
-                        → {ΓS : CtxOrTree m}
+                        → {Γ : Ctx m}
+                        → {X : MaybeTree m}
                         → (S : Tree n)
                         → (s : STm (someTree S))
                         → (As : STy (someTree S))
-                        → (L : Label (COT-to-MT ΓS) S)
-                        → Typing-STm (incTree S) s As
-                        → Typing-STy (incTree S) As
-                        → Typing-Label ΓS (L ,, S⋆)
-                        → SCoh S (SArr s As s) (L ,, S⋆) ≈[ ΓS ]stm (identity-stm (sty-dim As) >>= label-wt-comp (label-from-linear-tree (n-disc (sty-dim As)) ⦃ n-disc-is-linear (sty-dim As) ⦄ s As (≤-reflexive (tree-dim-n-disc (sty-dim As))) ,, S⋆) (L ,, S⋆))
+                        → (L : Label X S)
+                        → Typing-STm (tree-to-ctx S) s As
+                        → Typing-STy (tree-to-ctx S) As
+                        → Typing-Label Γ (L ,, S⋆)
+                        → SCoh S (SArr s As s) (L ,, S⋆) ≈[ Γ ]stm (identity-stm (sty-dim As) >>= label-wt-comp (label-from-linear-tree (n-disc (sty-dim As)) ⦃ n-disc-is-linear (sty-dim As) ⦄ s As (≤-reflexive (tree-dim-n-disc (sty-dim As))) ,, S⋆) (L ,, S⋆))

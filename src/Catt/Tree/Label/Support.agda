@@ -228,6 +228,10 @@ MtoVarSet-emp (incCtx Γ) = DC-empty Γ
 
 open ≡-Reasoning
 
+DCM-toVarSet : (xs : MVarSet (COT-to-MT ΓS)) → MtoVarSet ΓS (DCM ΓS xs) ≡ MtoVarSet ΓS xs
+DCM-toVarSet {ΓS = incTree S} xs = DCT-toVarSet xs
+DCM-toVarSet {ΓS = incCtx Γ} xs = DC-idem Γ xs
+
 fromPath-to-term : (P : Path S) → toVarSet (fromPath P) ≡ SuppTm (tree-to-ctx S) (path-to-term P)
 fromPath-to-term {S = S} PHere = begin
   toVarSet (fromPath (PHere {S = S}))

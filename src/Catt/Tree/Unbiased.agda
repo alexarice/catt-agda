@@ -28,10 +28,6 @@ unbiased-stm zero (Join S T) = unbiased-comp zero (Join S T)
 unbiased-stm (suc d) Sing = unbiased-comp (suc d) Sing
 unbiased-stm (suc d) (Join T Sing) = SExt (unbiased-stm d T)
 unbiased-stm (suc d) (Join T (Join T₁ T₂)) = unbiased-comp (suc d) (Join T (Join T₁ T₂))
--- unbiased-stm d Sing = SHere
--- unbiased-stm d (Join S (Join T T′)) = unbiased-comp d (Join S (Join T T′))
--- unbiased-stm zero (Join S Sing) = SExt (unbiased-stm zero S)
--- unbiased-stm (suc d) (Join S Sing) = SExt (unbiased-stm d S)
 
 unbiased-comp d T = SCoh T (unbiased-type d T) (id-label-wt T)
 

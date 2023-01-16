@@ -173,12 +173,15 @@ to-sty : Ty n → STy (Other n)
 to-sty ⋆ = S⋆
 to-sty (s ─⟨ A ⟩⟶ t) = SArr (SOther s) (to-sty A) (SOther t)
 
+stm-sub : {X : MaybeTree n} → STm X → (σ : Sub n m B) → STm (Other m)
+stm-sub a σ = SOther (stm-to-term a [ σ ]tm)
+
 sty-sub : {X : MaybeTree n} → STy X → (σ : Sub n m B) → STy (Other m)
 sty-sub {B = B} S⋆ σ = to-sty B
-sty-sub (SArr s A t) σ = SArr (SOther (stm-to-term s [ σ ]tm)) (sty-sub A σ) (SOther (stm-to-term t [ σ ]tm))
+sty-sub (SArr s A t) σ = SArr (stm-sub s σ) (sty-sub A σ) (stm-sub t σ)
 
 label-sub : {X : MaybeTree n} → Label-WT X S → (σ : Sub n m B) → Label-WT (Other m) S
-label-sub L σ = SOther ∘ _[ σ ]tm ∘ stm-to-term ∘ ap L ,, sty-sub (lty L) σ
+label-sub L σ = (λ a → stm-sub a σ) ∘ ap L ,, sty-sub (lty L) σ
 
 id-label : (S : Tree n) → Label (someTree S) S
 id-label S = SPath

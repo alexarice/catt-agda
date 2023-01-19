@@ -10,6 +10,7 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing rule
 open import Catt.Suspension
 open import Catt.Tree
+open import Catt.Tree.Label
 open import Catt.Globular
 open import Catt.Support
 open import Catt.Variables
@@ -155,8 +156,8 @@ unrestrictEq : σ ≈[ Δ ]s τ → unrestrict σ ≈[ Δ ]s unrestrict τ
 unrestrictEq (Null≈ (Arr≈ p q r)) = Ext≈ (Ext≈ (Null≈ q) p) r
 unrestrictEq (Ext≈ eq x) = Ext≈ (unrestrictEq eq) x
 
-module _ (i : index) where
-  open Rule (rule i)
+module _ (r : Rule) where
+  open Rule r
 
   LiftRule : Set
   LiftRule = {A : Ty len}
@@ -187,3 +188,14 @@ module _ (i : index) where
   ConvRule = {A : Ty len}
            → Typing-Tm tgtCtx lhs A
            → Typing-Tm tgtCtx rhs A
+
+srule-to-rule : SRule → Rule
+srule-to-rule r .Rule.len = r .SRule.len
+srule-to-rule r .Rule.tgtCtx = r .SRule.tgtCtx
+srule-to-rule r .Rule.lhs = stm-to-term (r .SRule.lhs)
+srule-to-rule r .Rule.rhs = stm-to-term (r .SRule.rhs)
+
+module _ (r : SRule) where
+  open SRule r
+  srule-lift : {A : STy (Other tgtCtx)}
+             →

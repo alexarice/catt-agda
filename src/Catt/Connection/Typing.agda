@@ -3,9 +3,9 @@ import Catt.Typing.Properties.Base as P
 
 module Catt.Connection.Typing {index : Set}
                               (rule : index → Rule)
-                              (lift-rule : ∀ i → P.LiftRule rule i)
-                              (susp-rule : ∀ i → P.SuspRule rule i)
-                              (sub-rule : ∀ i → P.SubRule rule i) where
+                              (lift-rule : ∀ i → P.LiftRule rule (rule i))
+                              (susp-rule : ∀ i → P.SuspRule rule (rule i))
+                              (sub-rule : ∀ i → P.SubRule rule (rule i)) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties

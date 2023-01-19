@@ -3,7 +3,7 @@ import Catt.Typing.Properties.Base as P
 
 module Catt.Globular.Typing {index : Set}
                             (rule : index → Rule)
-                            (lift-rule : ∀ i → P.LiftRule rule i) where
+                            (lift-rule : ∀ i → P.LiftRule rule (rule i)) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties

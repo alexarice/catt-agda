@@ -4,8 +4,8 @@ import Catt.Typing.Properties.Base as P
 
 module Catt.Typing.Properties.Substitution {index : Set}
                               (rule : index → Rule)
-                              (lift-rule : ∀ i → P.LiftRule rule i)
-                              (sub-rule : ∀ i → P.SubRule rule i) where
+                              (lift-rule : ∀ i → P.LiftRule rule (rule i))
+                              (sub-rule : ∀ i → P.SubRule rule (rule i)) where
 
 open import Catt.Prelude.Properties
 open import Catt.Typing rule

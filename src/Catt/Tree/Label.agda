@@ -22,6 +22,21 @@ suspMaybeTree : MaybeTree n → MaybeTree (2 + n)
 suspMaybeTree (someTree x) = someTree (suspTree x)
 suspMaybeTree (Other _) = Other (2 + _)
 
+data CtxOrTree : ℕ → Set where
+  incTree : Tree n → CtxOrTree (suc n)
+  incCtx : Ctx n → CtxOrTree n
+
+variable
+  ΓS ΔT : CtxOrTree n
+
+COT-to-MT : CtxOrTree n → MaybeTree n
+COT-to-MT (incTree x) = someTree x
+COT-to-MT (incCtx x) = Other _
+
+COT-to-Ctx : CtxOrTree n → Ctx n
+COT-to-Ctx (incTree x) = tree-to-ctx x
+COT-to-Ctx (incCtx x) = x
+
 Label′ : (T : Tree m) → (S : Tree n) → Set
 Label′ T S = Path S → Path T
 

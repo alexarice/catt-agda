@@ -26,21 +26,6 @@ MVarSet : (X : MaybeTree n) → Set
 MVarSet (someTree x) = TVarSet x
 MVarSet (Other n) = VarSet n
 
-data CtxOrTree : ℕ → Set where
-  incTree : Tree n → CtxOrTree (suc n)
-  incCtx : Ctx n → CtxOrTree n
-
-variable
-  ΓS ΔT : CtxOrTree n
-
-COT-to-MT : CtxOrTree n → MaybeTree n
-COT-to-MT (incTree x) = someTree x
-COT-to-MT (incCtx x) = Other _
-
-COT-to-Ctx : CtxOrTree n → Ctx n
-COT-to-Ctx (incTree x) = tree-to-ctx x
-COT-to-Ctx (incCtx x) = x
-
 infixl 60 _∪m_
 _∪m_ : MVarSet X → MVarSet X → MVarSet X
 _∪m_ {X = someTree x} xs ys = xs ∪t ys

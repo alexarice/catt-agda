@@ -4,8 +4,8 @@ import Catt.Typing.Properties.Base as P
 
 module Catt.Suspension.Typing {index : Set}
                               (rule : index → Rule)
-                              (lift-rule : ∀ i → P.LiftRule rule i)
-                              (susp-rule : ∀ i → P.SuspRule rule i) where
+                              (lift-rule : ∀ i → P.LiftRule rule (rule i))
+                              (susp-rule : ∀ i → P.SuspRule rule (rule i)) where
 
 open import Catt.Prelude.Properties
 open import Catt.Typing rule

@@ -795,6 +795,10 @@ extend-susp-label a L = [ begin
   where
     open Reasoning tm-setoid
 
+susp-label-on-sty : (As : STy (someTree S)) → (L : Label-WT X S) → susp-sty (label-on-sty As L) ≃sty label-on-sty As (susp-label L)
+susp-label-on-sty S⋆ L = refl≃sty
+susp-label-on-sty (SArr s As t) L = ≃SArr (extend-susp-label s L) (susp-label-on-sty As L) (extend-susp-label t L)
+
 SCoh-shift : (S : Tree n) → (A : STy (someTree S)) → (L : Label-WT (someTree T) S) → SCoh S A (map-pshift {S = U} L) ≃stm SShift {S = U} (SCoh S A L)
 SCoh-shift {U = U} S A L .get = begin
   < Coh (tree-to-ctx S) (sty-to-type A) idSub [ label-to-sub (map-pshift {S = U} L) ]tm >tm
@@ -832,6 +836,10 @@ SCoh-unrestrict S As (L ,, SArr s Bs t) .get
 extend-unrestrict : (a : STm (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → (susp-stm a >>= unrestrict-label L ,, sty-base (lty L)) ≃stm (a >>= L)
 extend-unrestrict a (L ,, SArr s As t) = refl≃stm
 
+label-on-sty-unrestrict : (As : STy (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → label-on-sty (susp-sty As) (unrestrict-label L ,, sty-base (lty L)) ≃sty label-on-sty As L
+label-on-sty-unrestrict S⋆ (L ,, SArr s Bs t) = refl≃sty
+label-on-sty-unrestrict (SArr s As t) L = ≃SArr (extend-unrestrict s L) (label-on-sty-unrestrict As L) (extend-unrestrict t L)
+
 extend-susp-label-full : (a : STm (someTree S)) → (L : Label X S) → susp-stm (a >>= L ,, S⋆) ≃stm (susp-stm a >>= susp-label-full L ,, S⋆)
 extend-susp-label-full a L = begin
   < susp-stm (a >>= L ,, S⋆) >stm
@@ -841,6 +849,16 @@ extend-susp-label-full a L = begin
   < susp-stm a >>= susp-label-full L ,, S⋆ >stm ∎
   where
     open Reasoning stm-setoid
+
+susp-label-full-on-sty : (As : STy (someTree S)) → (L : Label X S) → susp-sty (label-on-sty As (L ,, S⋆)) ≃sty label-on-sty (susp-sty As) (susp-label-full L ,, S⋆)
+susp-label-full-on-sty As L = begin
+  < susp-sty (label-on-sty As (L ,, S⋆)) >sty
+    ≈⟨ susp-label-on-sty As (L ,, S⋆) ⟩
+  < label-on-sty As (susp-label (L ,, S⋆)) >sty
+    ≈˘⟨ label-on-sty-unrestrict As (susp-label (L ,, S⋆)) ⟩
+  < label-on-sty (susp-sty As) (susp-label-full L ,, S⋆) >sty ∎
+  where
+    open Reasoning sty-setoid
 
 id-label-susp-full : (T : Tree n) → susp-label-full (id-label T) ≃l id-label (suspTree T)
 id-label-susp-full T .get PHere = refl≃stm
@@ -1104,7 +1122,7 @@ stm-sub-SCoh S As L σ .get = begin
   where
     open Reasoning tm-setoid
 
-stm-sub-extend : (a : STm (someTree S)) → (L : Label-WT (Other m) S) → (σ : Sub m n A) → stm-sub (a >>= L) σ ≃stm (a >>= label-sub L σ)
+stm-sub-extend : (a : STm (someTree S)) → (L : Label-WT X S) → (σ : Sub m n A) → stm-sub (a >>= L) σ ≃stm (a >>= label-sub L σ)
 stm-sub-extend a L σ .get = begin
   < stm-to-term (a >>= L) [ σ ]tm >tm
     ≈˘⟨ sub-action-≃-tm (label-to-sub-stm L a) refl≃s ⟩
@@ -1118,6 +1136,9 @@ stm-sub-extend a L σ .get = begin
   where
     open Reasoning tm-setoid
 
+stm-sub-≃ : a ≃stm b → (σ : Sub n m A) → stm-sub a σ ≃stm stm-sub b σ
+stm-sub-≃ {a = a} {b = b} [ p ] σ .get = sub-action-≃-tm p refl≃s
+
 label-sub-comp : (M : Label (someTree S) T) → (L : Label-WT (Other m) S) → (σ : Sub m n A) → ((λ a → stm-sub a σ) ∘ label-comp M L) ≃l label-comp M (label-sub L σ)
 label-sub-comp M L σ .get Z = stm-sub-extend (M Z) L σ
 
@@ -1125,3 +1146,15 @@ unrestrict-label-≃ : (L M : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get PHere = [ x ]
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get (PExt Z) = p .get Z
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get (PShift PHere) = [ y ]
+
+lift-stm-≃ : a ≃stm b → lift-stm a ≃stm lift-stm b
+lift-stm-≃ {a = a} {b = b} [ p ] .get = begin
+  < stm-to-term (lift-stm a) >tm
+    ≈⟨ lift-stm-to-term a ⟩
+  < liftTerm (stm-to-term a) >tm
+    ≈⟨ lift-tm-≃ p ⟩
+  < liftTerm (stm-to-term b) >tm
+    ≈˘⟨ lift-stm-to-term b ⟩
+  < stm-to-term (lift-stm b) >tm ∎
+  where
+    open Reasoning tm-setoid

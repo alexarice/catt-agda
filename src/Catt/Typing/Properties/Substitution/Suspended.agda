@@ -4,9 +4,9 @@ import Catt.Typing.Properties.Base as P
 
 module Catt.Typing.Properties.Substitution.Suspended {index : Set}
                               (rule : index → Rule)
-                              (lift-rule : ∀ i → P.LiftRule rule i)
-                              (susp-rule : ∀ i → P.SuspRule rule i)
-                              (sub-rule : ∀ i → P.SubRule rule i) where
+                              (lift-rule : ∀ i → P.LiftRule rule (rule i))
+                              (susp-rule : ∀ i → P.SuspRule rule (rule i))
+                              (sub-rule : ∀ i → P.SubRule rule (rule i)) where
 
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality

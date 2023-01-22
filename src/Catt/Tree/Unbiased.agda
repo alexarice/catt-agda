@@ -36,19 +36,6 @@ unbiased-comp′ (suc d) Sing = unbiased-comp (suc d) Sing
 unbiased-comp′ (suc d) (Join T Sing) = SExt (unbiased-comp′ d T)
 unbiased-comp′ (suc d) T@(Join _ (Join _ _)) = unbiased-comp (suc d) T
 
--- unbiased-term d T with is-linear-dec T
--- ... | yes p = 0V
--- ... | no p = unbiased-comp d T
-
--- unbiased-comp d T = Coh (tree-to-ctx T) (unbiased-type d T) idSub
-
--- unbiased-type zero T = ⋆
--- unbiased-type (suc d) T = (unbiased-term d (tree-bd d T) [ tree-inc d T false ]tm) ─⟨ unbiased-type d T ⟩⟶ (unbiased-term d (tree-bd d T) [ tree-inc d T true ]tm)
-
--- sub-from-linear-tree-unbiased : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → Sub (suc n) (suc m) (unbiased-type d T)
--- sub-from-linear-tree-unbiased Sing T d = ⟨ ⟨⟩ , (unbiased-comp d T) ⟩
--- sub-from-linear-tree-unbiased (Join S Sing) T d = unrestrict (sub-from-linear-tree-unbiased S T (suc d))
-
 label-from-linear-tree-unbiased : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → Label (someTree T) S
 label-from-linear-tree-unbiased Sing T d P = unbiased-comp′ d T
 label-from-linear-tree-unbiased (Join S Sing) T d PHere = unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false
@@ -88,9 +75,10 @@ label-from-linear-tree-dim (Join S Sing) As = begin
 
 label-from-linear-tree-nz S As p = NonZero-≤ (≤-trans (≤-reflexive (sym (+-∸-assoc 1 {n = tree-dim S} ≤-refl))) (≤-trans (∸-monoˡ-≤ (tree-dim S) p) (≤-reflexive (sym (label-from-linear-tree-dim S As))))) it
 
--- label-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (t : Tm m) → (A : Ty m) → .(ty-dim A ≡ tree-dim S) → Label
--- label-from-linear-tree Sing t A p = ⟨ ⟨⟩ , t ⟩
--- label-from-linear-tree (Join S Sing) t (s ─⟨ A ⟩⟶ s′) p = ⟨ ⟨ (label-from-linear-tree S s A (cong pred p)) , s′ ⟩ , t ⟩
+label-from-disc-type : Label-WT X S → .⦃ is-linear S ⦄ → STy X
+label-from-disc-type {S = Sing} L = lty L
+label-from-disc-type {S = Join S Sing} L = label-from-disc-type (label₁ L)
 
--- identity-tree : (t : Tm n) → (A : Ty n) → Tm n
--- identity-tree t A = Coh (tree-to-ctx (n-disc (ty-dim A))) (unbiased-type (suc (ty-dim A)) (n-disc (ty-dim A))) (sub-from-linear-tree (n-disc (ty-dim A)) ⦃ n-disc-is-linear (ty-dim A) ⦄ t A (sym (tree-dim-n-disc (ty-dim
+label-from-disc-term : Label-WT X S → .⦃ is-linear S ⦄ → STm X
+label-from-disc-term {S = Sing} L = ap L PHere
+label-from-disc-term {S = Join S Sing} L = label-from-disc-term (label₁ L)

@@ -45,11 +45,10 @@ module Conditions (dr : HasDiscRemoval) where
 
   susp-rule : ∀ {m n}
             → {Γ : Ctx m}
-            → {X : MaybeTree m}
             → (S : Tree n)
             → .⦃ _ : is-linear S ⦄
             → .⦃ NonZero (tree-dim S) ⦄
-            → (L : Label X S)
+            → (L : Label (Other m) S)
             → Typing-Label (suspCtx Γ) (susp-label-full L ,, S⋆)
             → susp-stm (unbiased-comp (tree-dim S) S >>= L ,, S⋆) ≈[ suspCtx Γ ]stm susp-stm (L (is-linear-max-path S))
   susp-rule S L Lty = begin
@@ -70,11 +69,10 @@ module Conditions (dr : HasDiscRemoval) where
   sub-rule : ∀ {m n l}
            → {Γ : Ctx l}
            → {Δ : Ctx m}
-           → {X : MaybeTree m}
            → (S : Tree n)
            → .⦃ _ : is-linear S ⦄
            → .⦃ NonZero (tree-dim S) ⦄
-           → (L : Label X S)
+           → (L : Label (Other m) S)
            → (σ : Sub m l ⋆)
            → Typing-Label Γ (label-sub (L ,, S⋆) σ)
            → stm-sub (unbiased-comp (tree-dim S) S >>= L ,, S⋆) σ ≈[ Γ ]stm stm-sub (L (is-linear-max-path S)) σ

@@ -29,6 +29,8 @@ open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Globular
+open import Catt.Globular.Properties
 open import Catt.Globular.Typing rule lift-rule
 open import Catt.Tree.Label.Typing rule
 
@@ -282,3 +284,17 @@ truncate-sty′-≈ {d = suc d} refl q = truncate-sty′-≈ {d = d} refl (sty-b
 
 truncate-sty-≈ : d ≡ d′ → As ≈[ Γ ]sty Bs → truncate-sty d As ≈[ Γ ]sty truncate-sty d′ Bs
 truncate-sty-≈ {d = d} refl q = truncate-sty′-≈ (cong (_∸ d) (sty-dim-≈ q)) q
+
+SCoh-typing-prop : {L : Label-WT X S} → Typing-STm Γ (SCoh S As L) Bs → label-on-sty As L ≈[ Γ ]sty Bs
+SCoh-typing-prop {S = S} {Γ = Γ} {As = As} {L = L} [ tty ] .get = begin
+  sty-to-type (label-on-sty As L)
+    ≈˘⟨ reflexive≈ty (label-to-sub-sty L As) ⟩
+  sty-to-type As [ label-to-sub L ]ty
+    ≈˘⟨ reflexive≈ty (sub-action-≃-ty (refl≃ty {A = sty-to-type As}) (id-right-unit (label-to-sub L))) ⟩
+  sty-to-type As [ label-to-sub L ● idSub ]ty
+    ≈˘⟨ reflexive≈ty (tm-to-ty-coh-sub (tree-to-ctx S) (sty-to-type As) idSub Γ (label-to-sub L)) ⟩
+  tm-to-ty Γ (stm-to-term (SCoh S As L))
+    ≈⟨ tm-to-ty-prop tty ⟩
+  sty-to-type _ ∎
+  where
+    open Reasoning (ty-setoid-≈ _)

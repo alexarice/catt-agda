@@ -51,3 +51,16 @@ unbiased-stm-is-comp d S = begin
   unbiased-comp d S ∎
   where
     open Reasoning stm-setoid-≈
+
+module Conditions where
+
+  conv-rule : ∀ {m n}
+            → {Γ : Ctx m}
+            → (S : Tree n)
+            → .⦃ _ : is-linear S ⦄
+            → .⦃ NonZero (tree-dim S) ⦄
+            → {C : STy (Other m)}
+            → (L : Label (Other m) S)
+            → Typing-STm Γ (unbiased-comp (tree-dim S) S >>= L ,, S⋆) C
+            → Typing-STm Γ (L (is-linear-max-path S)) C
+  conv-rule S L tty = TySConv (transport-stm-typing {!!} {!!} {!!}) {!!}

@@ -579,6 +579,9 @@ sub-to-label-to-sub {A = A} S σ = begin
 label-to-sub-to-label : (L : Label-WT X S) → ap (to-label-wt S (label-to-sub L)) ≃l ap L
 label-to-sub-to-label L .get Z .get = label-to-sub-stm L (SPath Z)
 
+sty-to-type-to-sty : (As : STy X) → to-sty (sty-to-type As) ≃sty As
+sty-to-type-to-sty As .get = to-sty-to-type (sty-to-type As)
+
 -- sub-path-equality : {S : Tree n} → (σ : Sub (suc n) m A) → (τ : Sub (suc n) m′ B) → ((P : PPath S) → path-to-term (carrier P) [ σ ]tm ≃tm path-to-term (carrier P) [ τ ]tm) → A ≃ty B → σ ≃s τ
 -- sub-path-equality {S = S} σ τ f p = begin
 --   < σ >s

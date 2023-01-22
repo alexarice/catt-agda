@@ -275,11 +275,14 @@ lift-label-Ty (TyJoin x Lty Mty) = TyJoin (lift-stm-Ty x) (lift-label-Ty Lty) (l
 -}
 Typing-STm : {X : MaybeTree m} → (Γ : Ctx m) → STm X → STy X → Set
 Typing-STy : {X : MaybeTree m} → (Γ : Ctx m) → STy X → Set
+Typing-Label′ : {X : MaybeTree m} → (Γ : Ctx m) → Label-WT X S → Set
 data Typing-Label : {X : MaybeTree m} → (Γ : Ctx m) → Label-WT X S → Set
 
 Typing-STm Γ = Wrap (λ a As → Typing-Tm Γ (stm-to-term a) (sty-to-type As))
 
 Typing-STy Γ = Wrap (λ As → Typing-Ty Γ (sty-to-type As))
+
+Typing-Label′ {S = S} Γ = Wrap (λ L → Typing-Sub (tree-to-ctx S) Γ (label-to-sub L))
 
 data Typing-Label where
   TySing : {L : Label-WT X Sing} → Typing-STm Γ (ap L PHere) (lty L) → Typing-Label Γ L
@@ -315,7 +318,7 @@ ap-phere-Ty (TyJoin x Lty Mty) = x
 transport-stm-typing : Typing-STm Γ a As → a ≃stm b → As ≃sty Bs → Typing-STm Γ b Bs
 transport-stm-typing [ aty ] [ p ] [ q ] = [ transport-typing-full aty p q ]
 
-transport-label-typing : {L M : Label-WT X S} → Typing-Label Γ L → proj₁ L ≃l proj₁ M → proj₂ L ≃sty proj₂ M → Typing-Label Γ M
+transport-label-typing : {L : Label-WT X S} → {M : Label-WT Y S} → Typing-Label Γ L → proj₁ L ≃l proj₁ M → proj₂ L ≃sty proj₂ M → Typing-Label Γ M
 transport-label-typing (TySing x) [ p ] q = TySing (transport-stm-typing x (p PHere) q)
 transport-label-typing (TyJoin x Lty Lty′) [ p ] q
   = TyJoin (transport-stm-typing x (p PHere) q)
@@ -638,3 +641,27 @@ max-eq-to-eq {A = A} {B = B} (MlJoin q q′@(MlJoin a b)) (TyJoin {P = P} {L = L
 
 unrestrict-label-Ty : {L : Label-WT X S } → Typing-Label Γ L → Typing-STy Γ (lty L) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → Typing-Label Γ (unrestrict-label L ,, sty-base (lty L))
 unrestrict-label-Ty {L = L ,, SArr s As t} LTy AsTy = TyJoin (TySArr-proj₁ AsTy) LTy (TySing (TySArr-proj₃ AsTy))
+
+srule-to-rule : SRule → Rule
+srule-to-rule r .Rule.len = r .SRule.len
+srule-to-rule r .Rule.tgtCtx = r .SRule.tgtCtx
+srule-to-rule r .Rule.lhs = stm-to-term (r .SRule.lhs)
+srule-to-rule r .Rule.rhs = stm-to-term (r .SRule.rhs)
+
+module _ (r : SRule) where
+  open SRule r
+  srule-lift : (∀ {A : Ty len}
+             → {C : STy (Other len)}
+             → Typing-STm (tgtCtx , A) (lift-stm lhs) (lift-sty C)
+             → lift-stm lhs ≈[ tgtCtx , A ]stm lift-stm rhs)
+             → LiftRule (srule-to-rule r)
+  srule-lift f tty = begin
+    {!!}
+      ≈⟨ {!!} ⟩
+    {!!}
+      ≈⟨ {!f ? .get!} ⟩
+    {!!}
+      ≈⟨ {!!} ⟩
+    {!!} ∎
+    where
+      open Reasoning (tm-setoid-≈ _)

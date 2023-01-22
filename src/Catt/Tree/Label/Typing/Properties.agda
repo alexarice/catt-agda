@@ -174,6 +174,22 @@ id-label-Ty : (S : Tree n) → Typing-Label (tree-to-ctx S) (id-label-wt S)
 id-label-Ty Sing = TySing (TySPath PHere)
 id-label-Ty (Join S T) = TyJoin (TySPath PHere) (transport-label-typing (map-pext-Ty (id-label-Ty S)) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm))) (transport-label-typing (map-pshift-Ty (id-label-Ty T)) [ (λ P → compute-≃ refl≃stm) ] refl≃sty)
 
+stm-sub-Ty : Typing-STm Δ a As → Typing-Sub Δ Γ σ → Typing-STm Γ (stm-sub a σ) (sty-sub As σ)
+stm-sub-Ty {As = As} [ aty ] σty = [ TyConv (apply-sub-tm-typing aty σty) (reflexive≈ty (sym≃ty (sty-sub-prop As _))) ]
+
+label-sub-Ty : {L : Label-WT X S} → Typing-Label Δ L → Typing-Sub Δ Γ σ → Typing-Label Γ (label-sub L σ)
+label-sub-Ty (TySing xty) σty = TySing (stm-sub-Ty xty σty)
+label-sub-Ty (TyJoin xty Lty Mty) σty = TyJoin (stm-sub-Ty xty σty) (label-sub-Ty Lty σty) (label-sub-Ty Mty σty)
+
+to-label-Ty : (S : Tree n) → (Γ : Ctx m) → Typing-Sub (tree-to-ctx S) Γ σ → Typing-Label Γ (to-label-wt S σ)
+to-label-Ty S Γ σty = label-sub-Ty (id-label-Ty S) σty
+
+Label′-Ty : {L : Label-WT X S} → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-Label′ Γ L
+Label′-Ty Lty Asty = [ label-to-sub-Ty Lty Asty ]
+
+Label-ty : {L : Label-WT X S} → Typing-Label′ Γ L → Typing-Label Γ L
+Label-ty {S = S} {Γ = Γ} {L = L} [ Lty ] = transport-label-typing (to-label-Ty S Γ Lty) (label-to-sub-to-label L) (sty-to-type-to-sty (lty L))
+
 connect-tree-inc-left-Ty : (S : Tree n)
                          → (T : Tree m)
                          → Typing-Label (tree-to-ctx (connect-tree S T)) (connect-tree-inc-left S T)

@@ -188,14 +188,3 @@ module _ (r : Rule) where
   ConvRule = {A : Ty len}
            → Typing-Tm tgtCtx lhs A
            → Typing-Tm tgtCtx rhs A
-
-srule-to-rule : SRule → Rule
-srule-to-rule r .Rule.len = r .SRule.len
-srule-to-rule r .Rule.tgtCtx = r .SRule.tgtCtx
-srule-to-rule r .Rule.lhs = stm-to-term (r .SRule.lhs)
-srule-to-rule r .Rule.rhs = stm-to-term (r .SRule.rhs)
-
-module _ (r : SRule) where
-  open SRule r
-  srule-lift : {A : STy (Other tgtCtx)}
-             →

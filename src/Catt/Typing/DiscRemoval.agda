@@ -86,13 +86,3 @@ module Conditions (dr : HasDiscRemoval) where
     stm-sub (L (is-linear-max-path S)) σ ∎
     where
       open Reasoning stm-setoid-≈
-
-  -- support-rule : ∀ {m n}
-  --              → {ΓS : CtxOrTree m}
-  --              → (S : Tree n)
-  --              → .⦃ _ : is-linear S ⦄
-  --              → .⦃ NonZero (tree-dim S) ⦄
-  --              → (L : Label (COT-to-MT ΓS) S)
-  --              → Typing-Label (COT-to-Ctx ΓS) (L ,, S⋆)
-  --              → DCM ΓS (FVSTm (unbiased-comp (tree-dim S) S >>= L ,, S⋆)) ≡ DCM ΓS (FVSTm (L (is-linear-max-path S)))
-  -- support-rule = {!!}

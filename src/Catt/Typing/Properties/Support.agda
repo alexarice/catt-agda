@@ -4,13 +4,13 @@ import Catt.Typing.Properties.Base as P
 
 module Catt.Typing.Properties.Support (index : ℕ)
                                       (rule : Fin index → Rule)
-                                      (supp-rule : ∀ i a → P.SupportRule index rule {i} a) where
+                                      (supp-rule : ∀ i → P.SupportRule rule (rule i)) where
 
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Support
 open import Catt.Support.Properties
-open import Catt.Typing index rule
+open import Catt.Typing rule
 open import Catt.Tree
 open import Catt.Pasting
 open import Tactic.MonoidSolver
@@ -25,15 +25,15 @@ EqSuppSub : σ ≈[ Γ ]s τ → SuppSub Γ σ ≡ SuppSub Γ τ
 EqSuppTy Star≈ = refl
 EqSuppTy (Arr≈ {s = s} {Γ = Γ} {s′} {A} {A′} {t} {t′} p q r) = begin
   DC Γ (FVTy A ∪ FVTm s ∪ FVTm t)
-    ≡⟨ DC-cup Γ (FVTy A ∪ FVTm s) (FVTm t) ⟩
+    ≡⟨ DC-∪ Γ (FVTy A ∪ FVTm s) (FVTm t) ⟩
   DC Γ (FVTy A ∪ FVTm s) ∪ DC Γ (FVTm t)
-    ≡⟨ cong (_∪ DC Γ (FVTm t)) (DC-cup Γ (FVTy A) (FVTm s)) ⟩
+    ≡⟨ cong (_∪ DC Γ (FVTm t)) (DC-∪ Γ (FVTy A) (FVTm s)) ⟩
   DC Γ (FVTy A) ∪ DC Γ (FVTm s) ∪ DC Γ (FVTm t)
     ≡⟨ cong₂ _∪_ (cong₂ _∪_ (EqSuppTy q) (EqSuppTm p)) (EqSuppTm r) ⟩
   DC Γ (FVTy A′) ∪ SuppTm Γ s′ ∪ SuppTm Γ t′
-    ≡˘⟨ cong (_∪ DC Γ (FVTm t′)) (DC-cup Γ (FVTy A′) (FVTm s′)) ⟩
+    ≡˘⟨ cong (_∪ DC Γ (FVTm t′)) (DC-∪ Γ (FVTy A′) (FVTm s′)) ⟩
   DC Γ (FVTy A′ ∪ FVTm s′) ∪ DC Γ (FVTm t′)
-    ≡˘⟨ DC-cup Γ (FVTy A′ ∪ FVTm s′) (FVTm t′) ⟩
+    ≡˘⟨ DC-∪ Γ (FVTy A′ ∪ FVTm s′) (FVTm t′) ⟩
   DC Γ (FVTy A′ ∪ FVTm s′ ∪ FVTm t′) ∎
 
 EqSuppTm (Var≈ x) with toℕ-injective x
@@ -41,16 +41,16 @@ EqSuppTm (Var≈ x) with toℕ-injective x
 EqSuppTm (Sym≈ p) = sym (EqSuppTm p)
 EqSuppTm (Trans≈ p q) = trans (EqSuppTm p) (EqSuppTm q)
 EqSuppTm (Coh≈ p q) = EqSuppSub q
-EqSuppTm (Rule≈ i a x) = supp-rule i a x
+EqSuppTm (Rule≈ i x) = supp-rule i x
 
 EqSuppSub (Null≈ x) = EqSuppTy x
 EqSuppSub (Ext≈ {σ = σ} {Δ = Δ} {τ = τ} {s} {t} p x) = begin
   DC Δ (FVSub σ ∪ FVTm s)
-    ≡⟨ DC-cup Δ (FVSub σ) (FVTm s) ⟩
+    ≡⟨ DC-∪ Δ (FVSub σ) (FVTm s) ⟩
   DC Δ (FVSub σ) ∪ DC Δ (FVTm s)
     ≡⟨ cong₂ _∪_ (EqSuppSub p) (EqSuppTm x) ⟩
   DC Δ (FVSub τ) ∪ DC Δ (FVTm t)
-    ≡˘⟨ DC-cup Δ (FVSub τ) (FVTm t) ⟩
+    ≡˘⟨ DC-∪ Δ (FVSub τ) (FVTm t) ⟩
   DC Δ (FVSub τ ∪ FVTm t) ∎
 
 SuppTyFV : Typing-Ty Γ A → SuppTy Γ A ≡ FVTy A
@@ -61,9 +61,9 @@ SuppTmChar′ : Typing-Tm Γ t A → Typing-Ty Γ A → SuppTm Γ t ≡ FVTy A �
 SuppTyFV TyStar = DC-empty _
 SuppTyFV (TyArr {n} {Γ = Γ} {s} {A} {t} sty Aty tty) = begin
   DC Γ (FVTy A ∪ FVTm s ∪ FVTm t)
-    ≡⟨ DC-cup Γ (FVTy A ∪ FVTm s) (FVTm t) ⟩
+    ≡⟨ DC-∪ Γ (FVTy A ∪ FVTm s) (FVTm t) ⟩
   DC Γ (FVTy A ∪ FVTm s) ∪ SuppTm Γ t
-    ≡⟨ cong (_∪ SuppTm Γ t) (DC-cup Γ (FVTy A) (FVTm s)) ⟩
+    ≡⟨ cong (_∪ SuppTm Γ t) (DC-∪ Γ (FVTy A) (FVTm s)) ⟩
   SuppTy Γ A ∪ SuppTm Γ s ∪ SuppTm Γ t
     ≡⟨ cong₂ _∪_ (cong₂ _∪_ (SuppTyFV Aty) (SuppTmChar′ sty Aty)) (SuppTmChar′ tty Aty) ⟩
   FVTy A ∪ (FVTy A ∪ FVTm s) ∪ (FVTy A ∪ FVTm t)
@@ -79,13 +79,13 @@ SuppTyFV (TyArr {n} {Γ = Γ} {s} {A} {t} sty Aty tty) = begin
 SuppSubFV (TyNull x) = SuppTyFV x
 SuppSubFV {Δ = Δ} (TyExt {σ = σ} {t = t} {A = A} σty tty) = begin
   DC Δ (FVSub σ ∪ FVTm t)
-    ≡⟨ DC-cup Δ (FVSub σ) (FVTm t) ⟩
+    ≡⟨ DC-∪ Δ (FVSub σ) (FVTm t) ⟩
   SuppSub Δ σ ∪ SuppTm Δ t
     ≡⟨ cong (SuppSub Δ σ ∪_) (SuppTmChar tty) ⟩
   SuppSub Δ σ ∪ (SuppTy Δ (A [ σ ]ty) ∪ FVTm t)
     ≡˘⟨ ∪-assoc (SuppSub Δ σ) (SuppTy Δ (A [ σ ]ty)) (FVTm t) ⟩
   SuppSub Δ σ ∪ SuppTy Δ (A [ σ ]ty) ∪ FVTm t
-    ≡˘⟨ cong (_∪ FVTm t) (DC-cup Δ (FVSub σ) (FVTy (A [ σ ]ty))) ⟩
+    ≡˘⟨ cong (_∪ FVTm t) (DC-∪ Δ (FVSub σ) (FVTy (A [ σ ]ty))) ⟩
   DC Δ (FVSub σ ∪ FVTy (A [ σ ]ty)) ∪ FVTm t
     ≡˘⟨ cong (λ - → DC Δ - ∪ FVTm t) (FVTy-comp-⊆ A σ) ⟩
   SuppSub Δ σ ∪ FVTm t
@@ -119,7 +119,7 @@ SuppTmChar {Γ = Γ} (TyCoh {Δ = Δ} {A = A} {σ = σ} Aty σty b s) = begin
   SuppSub Γ σ
     ≡⟨ cong (DC Γ) (trans (FVTy-comp-⊆ A σ) (∪-comm (FVSub σ) (FVTy (A [ σ ]ty)))) ⟩
   DC Γ (FVTy (A [ σ ]ty) ∪ FVSub σ)
-    ≡⟨ DC-cup Γ (FVTy (A [ σ ]ty)) (FVSub σ) ⟩
+    ≡⟨ DC-∪ Γ (FVTy (A [ σ ]ty)) (FVSub σ) ⟩
   SuppTy Γ (A [ σ ]ty) ∪ SuppSub Γ σ
     ≡⟨ cong (SuppTy Γ (A [ σ ]ty) ∪_) (SuppSubFV σty) ⟩
   SuppTy Γ (A [ σ ]ty) ∪ FVSub σ ∎
@@ -136,7 +136,7 @@ TransportVarSet-DC emp (TyNull x) = DC-empty _
 TransportVarSet-DC (ewf xs) (TyExt σty tty) = TransportVarSet-DC xs σty
 TransportVarSet-DC {Γ = Γ , A} {Δ = Δ} (ewt xs) (TyExt {σ = σ} {t = t} σty tty) = begin
   DC Δ (TransportVarSet xs σ ∪ FVTm t)
-    ≡⟨ DC-cup Δ (TransportVarSet xs σ) (FVTm t) ⟩
+    ≡⟨ DC-∪ Δ (TransportVarSet xs σ) (FVTm t) ⟩
   DC Δ (TransportVarSet xs σ) ∪ DC Δ (FVTm t)
     ≡⟨ cong₂ _∪_ (TransportVarSet-DC xs σty) (SuppTmChar tty) ⟩
   TransportVarSet (DC Γ xs) σ ∪ (SuppTy Δ (A [ σ ]ty) ∪ FVTm t)
@@ -148,7 +148,7 @@ TransportVarSet-DC {Γ = Γ , A} {Δ = Δ} (ewt xs) (TyExt {σ = σ} {t = t} σt
   TransportVarSet (DC Γ xs) σ ∪ TransportVarSet (DC Γ (FVTy A)) σ ∪ FVTm t
     ≡˘⟨ cong (_∪ FVTm t) (TransportVarSet-∪ (DC Γ xs) (DC Γ (FVTy A)) σ) ⟩
   TransportVarSet (DC Γ xs ∪ DC Γ (FVTy A)) σ ∪ FVTm t
-    ≡˘⟨ cong (λ - → TransportVarSet - σ ∪ FVTm t) (DC-cup Γ xs (FVTy A)) ⟩
+    ≡˘⟨ cong (λ - → TransportVarSet - σ ∪ FVTm t) (DC-∪ Γ xs (FVTy A)) ⟩
   TransportVarSet (DC Γ (xs ∪ FVTy A)) σ ∪ FVTm t ∎
 
 supp-condition-preserved : (b : Bool)
@@ -159,38 +159,26 @@ supp-condition-preserved : (b : Bool)
                          → supp-condition b A Γ
                          → supp-condition b B Γ
 supp-condition-preserved {A = A} {Γ = Γ} {B = B} false p Aty Bty sc = begin
-  FVTy B
-    ≡˘⟨ SuppTyFV Bty ⟩
   SuppTy Γ B
     ≡˘⟨ EqSuppTy p ⟩
   SuppTy Γ A
-    ≡⟨ SuppTyFV Aty ⟩
-  FVTy A
     ≡⟨ sc ⟩
   full ∎
 supp-condition-preserved {Γ = Γ} true (Arr≈ p q r) (TyArr {s = s} {A} {t} sty Aty tty) (TyArr {s = s′} {B} {t′} sty′ Bty tty′) (nz ,, sc1 ,, sc2)
   = nz ,, l1 ,, l2
   where
-    l1 : FVTy B ∪ FVTm s′ ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false
+    l1 : SuppTm Γ s′ ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false
     l1 = begin
-      FVTy B ∪ FVTm s′
-        ≡˘⟨ SuppTmChar′ sty′ Bty ⟩
       SuppTm Γ s′
         ≡˘⟨ EqSuppTm p ⟩
       SuppTm Γ s
-        ≡⟨ SuppTmChar′ sty Aty ⟩
-      FVTy A ∪ FVTm s
         ≡⟨ sc1 ⟩
       pd-bd-supp (pred (ctx-dim Γ)) Γ false ∎
 
-    l2 : FVTy B ∪ FVTm t′ ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true
+    l2 : SuppTm Γ t′ ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true
     l2 = begin
-      FVTy B ∪ FVTm t′
-        ≡˘⟨ SuppTmChar′ tty′ Bty ⟩
       SuppTm Γ t′
         ≡˘⟨ EqSuppTm r ⟩
       SuppTm Γ t
-        ≡⟨ SuppTmChar′ tty Aty ⟩
-      FVTy A ∪ FVTm t
         ≡⟨ sc2 ⟩
       pd-bd-supp (pred (ctx-dim Γ)) Γ true ∎

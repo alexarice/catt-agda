@@ -1,19 +1,19 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Discs.Typing (index : ℕ)
-                         (rule : Fin index → Rule)
-                         (lift-rule : ∀ i a → P.LiftRule index rule {i} a) where
+module Catt.Discs.Typing {index : Set}
+                         (rule : index → Rule)
+                         (lift-rule : ∀ i → P.LiftRule rule (rule i)) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing index rule
+open import Catt.Typing rule
 open import Catt.Syntax
 open import Catt.Discs
 open import Catt.Globular
-open import Catt.Globular.Typing index rule lift-rule
-open import Catt.Typing.Properties.Lifting index rule lift-rule
-open P index rule
+open import Catt.Globular.Typing rule lift-rule
+open import Catt.Typing.Properties.Lifting rule lift-rule
+open P rule
 open import Catt.Discs.Properties
 open import Catt.Discs.Pasting
 open import Catt.Discs.Support
@@ -81,33 +81,33 @@ sub-from-sphere-Eq {Γ = Γ} (suc d) (TyExt (TyExt {σ = σ} σty y) x) (TyExt (
 sub-from-disc-Eq : (d : ℕ) → {σ : Sub (disc-size d) n A} → {τ : Sub (disc-size d) n A} → Typing-Sub (Disc d) Γ σ → Typing-Sub (Disc d) Γ τ → 0V [ σ ]tm ≃tm 0V [ τ ]tm → σ ≈[ Γ ]s τ
 sub-from-disc-Eq d (TyExt σty x) (TyExt τty y) p = Ext≈ (sub-from-sphere-Eq d σty τty (Ty-unique-≃ p x y)) (reflexive≈tm p)
 
-identity-Ty : Typing-Tm Γ t A → Typing-Ty Γ A → Typing-Tm Γ (identity t A) (t ─⟨ A ⟩⟶ t)
-identity-Ty {t = t} {A = A} tty Aty
-  = TyConv (TyCoh ⦃ disc-pd (ty-dim A) ⦄
-          (TyArr (disc-tm-Ty (ty-dim A)) (lift-ty-typing (sphere-type-Ty (ty-dim A))) (disc-tm-Ty (ty-dim A)))
-          (sub-from-disc-Ty (ty-dim A) Aty refl tty)
-          false
-          lem)
-          (Arr≈ refl≈tm (reflexive≈ty (trans≃ty (lift-sub-comp-lem-ty (sub-from-sphere (ty-dim A) A refl) (sphere-type (ty-dim A))) (sub-from-sphere-prop (ty-dim A) A refl))) refl≈tm)
-  where
-    open ≡-Reasoning
+-- identity-Ty : Typing-Tm Γ t A → Typing-Ty Γ A → Typing-Tm Γ (identity t A) (t ─⟨ A ⟩⟶ t)
+-- identity-Ty {t = t} {A = A} tty Aty
+--   = TyConv (TyCoh ⦃ disc-pd (ty-dim A) ⦄
+--           (TyArr (disc-tm-Ty (ty-dim A)) (lift-ty-typing (sphere-type-Ty (ty-dim A))) (disc-tm-Ty (ty-dim A)))
+--           (sub-from-disc-Ty (ty-dim A) Aty refl tty)
+--           false
+--           lem)
+--           (Arr≈ refl≈tm (reflexive≈ty (trans≃ty (lift-sub-comp-lem-ty (sub-from-sphere (ty-dim A) A refl) (sphere-type (ty-dim A))) (sub-from-sphere-prop (ty-dim A) A refl))) refl≈tm)
+--   where
+--     open ≡-Reasoning
 
-    lem : FVTy (liftType (sphere-type (ty-dim A))) ∪ ewt empty ∪ ewt empty ≡ full
-    lem = begin
-      FVTy (liftType (sphere-type (ty-dim A))) ∪ ewt empty ∪ ewt empty
-        ≡⟨ cong (λ - → - ∪ ewt empty ∪ ewt empty) (supp-lift-ty (sphere-type (ty-dim A))) ⟩
-      ewf (FVTy (sphere-type (ty-dim A))) ∪ ewt empty ∪ ewt empty
-        ≡⟨ cong ewt (∪-right-unit (FVTy (sphere-type (ty-dim A)) ∪ empty)) ⟩
-      ewt (FVTy (sphere-type (ty-dim A)) ∪ empty)
-        ≡⟨ cong ewt (∪-right-unit (FVTy (sphere-type (ty-dim A)))) ⟩
-      ewt (FVTy (sphere-type (ty-dim A)))
-        ≡⟨ cong ewt (sphere-supp (ty-dim A)) ⟩
-      full ∎
+--     lem : FVTy (liftType (sphere-type (ty-dim A))) ∪ ewt empty ∪ ewt empty ≡ full
+--     lem = begin
+--       FVTy (liftType (sphere-type (ty-dim A))) ∪ ewt empty ∪ ewt empty
+--         ≡⟨ cong (λ - → - ∪ ewt empty ∪ ewt empty) (supp-lift-ty (sphere-type (ty-dim A))) ⟩
+--       ewf (FVTy (sphere-type (ty-dim A))) ∪ ewt empty ∪ ewt empty
+--         ≡⟨ cong ewt (∪-right-unit (FVTy (sphere-type (ty-dim A)) ∪ empty)) ⟩
+--       ewt (FVTy (sphere-type (ty-dim A)) ∪ empty)
+--         ≡⟨ cong ewt (∪-right-unit (FVTy (sphere-type (ty-dim A)))) ⟩
+--       ewt (FVTy (sphere-type (ty-dim A)))
+--         ≡⟨ cong ewt (sphere-supp (ty-dim A)) ⟩
+--       full ∎
 
-identity-≈ : s ≈[ Γ ]tm t → A ≈[ Γ ]ty B → identity s A ≈[ Γ ]tm identity t B
-identity-≈ {A = A} {B = B} p q
-  = trans≈tm (reflexive≈tm (identity-lem (ty-dim-≈ q) (sub-from-disc-≃ (ty-dim A) (ty-dim B) refl≃ty refl (ty-dim-≈ q) refl≃tm)))
-             (Coh≈ refl≈ty (sub-from-disc-≈ (ty-dim B) q (ty-dim-≈ q) p))
+-- identity-≈ : s ≈[ Γ ]tm t → A ≈[ Γ ]ty B → identity s A ≈[ Γ ]tm identity t B
+-- identity-≈ {A = A} {B = B} p q
+--   = trans≈tm (reflexive≈tm (identity-lem (ty-dim-≈ q) (sub-from-disc-≃ (ty-dim A) (ty-dim B) refl≃ty refl (ty-dim-≈ q) refl≃tm)))
+--              (Coh≈ refl≈ty (sub-from-disc-≈ (ty-dim B) q (ty-dim-≈ q) p))
 
 sub-from-disc-to-term-Ty : (d : ℕ) → (p : ty-dim A ≡ d) → Typing-Sub (Disc d) Γ (sub-from-disc d A p t) → Typing-Tm Γ t A
 sub-from-disc-to-term-Ty {A = A} d p (TyExt _ tty) = TyConv tty (reflexive≈ty (sub-from-sphere-prop d A p))
@@ -119,10 +119,10 @@ sub-from-sphere-to-ty-Ty {A = s ─⟨ A ⟩⟶ t} (suc d) p (TyExt (TyExt σty 
           (sub-from-sphere-to-ty-Ty d (cong pred p) σty)
           (TyConv tty (reflexive≈ty (trans≃ty (lift-sub-comp-lem-ty (sub-from-sphere d A _) (sphere-type d)) (sub-from-sphere-prop d A (cong pred p)))))
 
-identity-to-term-Ty : Typing-Tm Γ (identity t A) B → Typing-Tm Γ t A
-identity-to-term-Ty (TyConv tty p) = identity-to-term-Ty tty
-identity-to-term-Ty (TyCoh Aty σty _ _) = sub-from-disc-to-term-Ty (ty-dim _) refl σty
+-- identity-to-term-Ty : Typing-Tm Γ (identity t A) B → Typing-Tm Γ t A
+-- identity-to-term-Ty (TyConv tty p) = identity-to-term-Ty tty
+-- identity-to-term-Ty (TyCoh Aty σty _ _) = sub-from-disc-to-term-Ty (ty-dim _) refl σty
 
-identity-to-type-Ty : Typing-Tm Γ (identity t A) B → Typing-Ty Γ A
-identity-to-type-Ty (TyConv tty p) = identity-to-type-Ty tty
-identity-to-type-Ty (TyCoh Aty (TyExt σty _) _ _) = sub-from-sphere-to-ty-Ty (ty-dim _) refl σty
+-- identity-to-type-Ty : Typing-Tm Γ (identity t A) B → Typing-Ty Γ A
+-- identity-to-type-Ty (TyConv tty p) = identity-to-type-Ty tty
+-- identity-to-type-Ty (TyCoh Aty (TyExt σty _) _ _) = sub-from-sphere-to-ty-Ty (ty-dim _) refl σty

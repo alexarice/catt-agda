@@ -27,9 +27,6 @@ unbiased-type-dim : (d : ℕ) → (T : Tree n) → sty-dim (unbiased-type d T) �
 unbiased-type-dim zero T = refl
 unbiased-type-dim (suc d) T = cong suc (unbiased-type-dim d T)
 
--- unbiased-comp-dim : (d : ℕ) → (T : Tree n) → tm-height (tree-to-ctx T) (stm-to-term (unbiased-comp d T)) ≡ d
--- unbiased-comp-dim d T = trans (sym (sub-dim (label-to-sub (id-label-wt T) ● idSub) (unbiased-type d T))) (unbiased-type-dim d T)
-
 unbiased-type-≃ : d ≡ d′ → (S ≃ T) → unbiased-type d S ≃sty unbiased-type d′ T
 unbiased-type-≃ refl q with ≃-to-same-n q
 ... | refl with ≃-to-≡ q
@@ -84,24 +81,6 @@ unbiased-stm-full-lem d T b p = begin
   where
     open Reasoning stm-setoid
 
--- unbiased-type-truncate-1 : (d : ℕ) → (T : Tree n) → truncate 1 (unbiased-type (suc d) T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
--- unbiased-type-truncate-1 zero T = Arr≃ refl≃tm refl≃ty (last-path-to-term T)
--- unbiased-type-truncate-1 (suc d) T = begin
---   < truncate 1 (stm-to-term (unbiased-stm (suc d) (tree-bd (suc d) T) >>= tree-inc-label (suc d) T false)
---                ─⟨ unbiased-type (suc d) T ⟩⟶
---                stm-to-term (unbiased-stm (suc d) (tree-bd (suc d) T) >>= tree-inc-label (suc d) T true)) >ty
---     ≈⟨ truncate-≤ {s = stm-to-term (unbiased-stm (suc d) (tree-bd (suc d) T) >>= tree-inc-label (suc d) T false)}
---                   {t = stm-to-term (unbiased-stm (suc d) (tree-bd (suc d) T) >>= tree-inc-label (suc d) T true)}
---                   1 (unbiased-type (suc d) T) (s≤s z≤n) ⟩
---   < truncate 1 (unbiased-type (suc d) T) >ty
---     ≈⟨ unbiased-type-truncate-1 d T ⟩
---   < Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T >ty ∎
---   where
---     open Reasoning ty-setoid
-
--- unbiased-type-truncate-1′ : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → truncate 1 (unbiased-type d T) ≃ty Var (fromℕ _) ─⟨ ⋆ ⟩⟶ tree-last-var T
--- unbiased-type-truncate-1′ (suc d) = unbiased-type-truncate-1 d
-
 unbiased-term-≃ : (d ≡ d′) → S ≃ T → unbiased-term d S ≃tm unbiased-term d′ T
 unbiased-term-≃ refl p with ≃-to-same-n p
 ... | refl with ≃-to-≡ p
@@ -123,19 +102,6 @@ unbiased-type-prop (suc d) T d′ p b = ≃SArr (lem false) (unbiased-type-prop 
       < unbiased-stm d (tree-bd d (tree-bd d′ T))
         >>= tree-inc-label d (tree-bd d′ T) b′
         >>= tree-inc-label d′ T b >stm ∎
--- begin
-      -- < stm-to-term (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b′) >tm
-      --   ≈˘⟨ label-to-sub-stm (tree-inc-label d T b′) (unbiased-stm d (tree-bd d T)) ⟩
-      -- < unbiased-term d (tree-bd d T) [ tree-inc d T b′ ]tm >tm
-      --   ≈˘⟨ sub-action-≃-tm (unbiased-term-≃ (refl {x = d}) (≃′-to-≃ (tree-bd-glob d d′ T p))) (tree-inc-glob d d′ T b′ b p) ⟩
-      -- < unbiased-term d (tree-bd d (tree-bd d′ T))
-      --   [ tree-inc d′ T b ● tree-inc d (tree-bd d′ T) b′ ]tm >tm
-      --   ≈⟨ assoc-tm _ _ (unbiased-term d (tree-bd d (tree-bd d′ T))) ⟩
-      -- < unbiased-term d (tree-bd d (tree-bd d′ T))
-      --   [ tree-inc d (tree-bd d′ T) b′ ]tm
-      --   [ tree-inc d′ T b ]tm >tm
-      --   ≈⟨ sub-action-≃-tm (label-to-sub-stm (tree-inc-label d (tree-bd d′ T) b′) (unbiased-stm d (tree-bd d (tree-bd d′ T)))) refl≃s ⟩
-      -- < stm-to-term (unbiased-stm d (tree-bd d (tree-bd d′ T)) >>= tree-inc-label d (tree-bd d′ T) b′) [ tree-inc d′ T b ]tm >tm ∎
       where
         open Reasoning stm-setoid
 

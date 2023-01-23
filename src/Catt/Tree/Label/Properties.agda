@@ -583,18 +583,6 @@ label-to-sub-to-label L .get Z .get = label-to-sub-stm L (SPath Z)
 sty-to-type-to-sty : (As : STy X) → to-sty (sty-to-type As) ≃sty As
 sty-to-type-to-sty As .get = to-sty-to-type (sty-to-type As)
 
--- sub-path-equality : {S : Tree n} → (σ : Sub (suc n) m A) → (τ : Sub (suc n) m′ B) → ((P : PPath S) → path-to-term (carrier P) [ σ ]tm ≃tm path-to-term (carrier P) [ τ ]tm) → A ≃ty B → σ ≃s τ
--- sub-path-equality {S = S} σ τ f p = begin
---   < σ >s
---     ≈˘⟨ sub-to-label-to-sub S σ (Other _) ⟩
---   < label-to-sub (to-label S σ (Other _)) >s
---     ≈⟨ label-to-sub-≃ (to-label S σ (Other _)) (to-label S τ (Other _)) (λ P → ≃Other (f P)) p ⟩
---   < label-to-sub (to-label S τ (Other _)) >s
---     ≈⟨ sub-to-label-to-sub S τ (Other _) ⟩
---   < τ >s ∎
---   where
---     open Reasoning sub-setoid
-
 extend-id : (a : STm (someTree T)) → (a >>= id-label-wt T) ≃stm a
 extend-id {T = T} a = [ begin
   < stm-to-term (a >>= id-label-wt T) >tm

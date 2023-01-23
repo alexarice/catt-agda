@@ -9,8 +9,7 @@ sphere-size : ℕ → ℕ
 
 disc-size n = suc (sphere-size n)
 
-sphere-size zero = 0
-sphere-size (suc n) = suc (disc-size n)
+sphere-size n = double n
 
 Disc : (n : ℕ) → Ctx (disc-size n)
 Sphere : (n : ℕ) → Ctx (sphere-size n)
@@ -32,5 +31,18 @@ sub-from-disc d A p t = ⟨ sub-from-sphere d A p , t ⟩
 sub-from-sphere zero ⋆ p = ⟨⟩
 sub-from-sphere (suc d) (s ─⟨ A ⟩⟶ t) p = ⟨ ⟨ (sub-from-sphere d A (cong pred p)) , s ⟩ , t ⟩
 
-identity : (t : Tm n) → (A : Ty n) → Tm n
-identity t A = Coh (Disc (ty-dim A)) (0V ─⟨ liftType (sphere-type (ty-dim A)) ⟩⟶ 0V) (sub-from-disc (ty-dim A) A refl t)
+identity : (n : ℕ) → Sub (disc-size n) m ⋆ → Tm m
+identity n σ = Coh (Disc n) (0V ─⟨ liftType (sphere-type n) ⟩⟶ 0V) σ
+
+disc-term : (n : ℕ) → Sub (disc-size n) m ⋆ → Tm m
+disc-term n σ = Coh (Disc n) (liftType (sphere-type n)) σ
+
+sub-from-disc-term : Sub (disc-size d) n A → Tm n
+sub-from-disc-term ⟨ σ , t ⟩ = t
+
+sub-from-sphere-type : Sub (sphere-size d) n A → Ty n
+sub-from-sphere-type {d = zero} {A = A} σ = A
+sub-from-sphere-type {d = suc d} ⟨ ⟨ σ , s ⟩ , t ⟩ = s ─⟨ sub-from-sphere-type σ ⟩⟶ t
+
+sub-from-disc-type : Sub (disc-size d) n A → Ty n
+sub-from-disc-type ⟨ σ , t ⟩ = sub-from-sphere-type σ

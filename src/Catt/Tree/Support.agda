@@ -498,6 +498,15 @@ DCT-emp {S = Sing} = refl
 DCT-emp {S = Join S T} rewrite tEmp-empty S
   = cong₂ (VSJoin false) DCT-emp DCT-emp
 
+set-fst-true-full : {S : Tree n} → set-fst-true (tFull {S = S}) ≡ tFull {S = S}
+set-fst-true-full {S = Sing} = refl
+set-fst-true-full {S = Join S T} = refl
+
+DCT-full : {S : Tree n} → DCT (tFull {S = S}) ≡ tFull {S = S}
+DCT-full {S = Sing} = refl
+DCT-full {S = Join S T} rewrite tFull-non-empty S
+  = cong₂ (VSJoin true) DCT-full (trans (cong set-fst-true DCT-full) set-fst-true-full)
+
 DCT-fst : (S : Tree n) → DCT (fromPath (PHere {S = S})) ≡ fromPath (PHere {S = S})
 DCT-fst Sing = refl
 DCT-fst (Join S T) rewrite tEmp-empty S = cong₂ (VSJoin true) DCT-emp DCT-emp

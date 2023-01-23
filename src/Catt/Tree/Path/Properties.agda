@@ -583,3 +583,16 @@ maximal-≃ (≃Here Sing≃) = tt
 maximal-≃ (≃Ext p x) = maximal-≃ p
 maximal-≃ (≃Shift x p) .p₁ = not-here-≃ p
 maximal-≃ (≃Shift x p) .p₂ = maximal-≃ p
+
+is-linear-max-path-is-0V : (S : Tree n) → .⦃ _ : is-linear S ⦄ → path-to-term (is-linear-max-path S) ≃tm (0V {n = suc n})
+is-linear-max-path-is-0V Sing = refl≃tm
+is-linear-max-path-is-0V (Join S Sing) = begin
+  < suspTm (path-to-term (is-linear-max-path S)) [ idSub ]tm >tm
+    ≈⟨ id-on-tm (suspTm (path-to-term (is-linear-max-path S))) ⟩
+  < suspTm (path-to-term (is-linear-max-path S)) >tm
+    ≈⟨ susp-tm-≃ (is-linear-max-path-is-0V S) ⟩
+  < suspTm 0V >tm
+    ≡⟨⟩
+  < 0V >tm ∎
+  where
+    open Reasoning tm-setoid

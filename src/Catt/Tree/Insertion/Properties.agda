@@ -23,6 +23,7 @@ open import Catt.Connection.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Globular
+open import Relation.Binary
 
 branching-path-to-var-is-var : (S : Tree n) → (p : BranchingPoint S d) → isVar (branching-path-to-var S p)
 branching-path-to-var-is-var (Join S T) BPHere = var-to-var-comp-tm 0V (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
@@ -792,6 +793,19 @@ data Condition (d : ℕ) (T : Tree n) (m : ℕ) : Set where
 cond-pred : Condition (suc d) (suspTree T) (suc m) → Condition d T m
 cond-pred (Cond1 x y) = Cond1 (≤-pred x) (≤-pred y)
 cond-pred (Cond2 x) = Cond2 (≤-pred x)
+
+data Bd-Conditions (d : ℕ) {S : Tree n} (P : BranchingPoint S l) (T : Tree m) : Set where
+  Bd-Cond1 : d < height-of-branching P → d ≤ linear-height T → Bd-Conditions d P T
+  Bd-Cond2 : Condition d T (height-of-branching P) → Bd-Conditions d P T
+
+Bd-Conditions-one-of : (d : ℕ) → (P : BranchingPoint S l) → (T : Tree m) → Bd-Conditions d P T
+Bd-Conditions-one-of d P T with <-cmp d (height-of-branching P)
+... | tri≈ ¬a b ¬c = Bd-Cond2 (Cond2 (≤-reflexive (sym b)))
+... | tri> ¬a ¬b c = Bd-Cond2 (Cond2 (<⇒≤ c))
+... | tri< a ¬b ¬c with <-cmp d (linear-height T)
+... | tri< a₁ ¬b₁ ¬c₁ = Bd-Cond1 a (<⇒≤ a₁)
+... | tri≈ ¬a b ¬c₁ = Bd-Cond1 a (≤-reflexive b)
+... | tri> ¬a ¬b₁ c = Bd-Cond2 (Cond1 c (<⇒≤ a))
 
 bd-bp-lem : (p : BranchingPoint S l)
           → {T : Tree n}

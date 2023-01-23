@@ -20,6 +20,8 @@ open import Catt.Variables
 open import Catt.Variables.Properties
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Catt.Discs
+open import Catt.Discs.Properties
 
 unbiased-type-dim : (d : ℕ) → (T : Tree n) → sty-dim (unbiased-type d T) ≡ d
 unbiased-type-dim zero T = refl
@@ -492,3 +494,150 @@ label-from-disc-type-prop {S = Join S Sing} L = begin
 label-from-disc-term-prop : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → label-from-disc-term L ≃stm ap L (is-linear-max-path S)
 label-from-disc-term-prop {S = Sing} L = refl≃stm
 label-from-disc-term-prop {S = Join S Sing} L = label-from-disc-term-prop (label₁ L)
+
+unbiased-type-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → sty-to-type (unbiased-type d S) ≃ty liftType (sphere-type d)
+unbiased-type-linear zero Sing p = refl≃ty
+unbiased-type-linear (suc d) (Join S Sing) p = begin
+  < sty-to-type (unbiased-type (suc d) (suspTree S)) >ty
+    ≈˘⟨ unbiased-type-susp-lem d S .get ⟩
+  < sty-to-type (susp-sty (unbiased-type d S)) >ty
+    ≈⟨ susp-sty-to-type (unbiased-type d S) ⟩
+  < suspTy (sty-to-type (unbiased-type d S)) >ty
+    ≈⟨ susp-ty-≃ (unbiased-type-linear d S (cong pred p)) ⟩
+  < suspTy (liftType (sphere-type d)) >ty
+    ≈⟨ susp-ty-lift (sphere-type d) ⟩
+  < liftType (suspTy (sphere-type d)) >ty
+    ≈⟨ lift-ty-≃ (sphere-type-susp d) ⟩
+  < liftType (sphere-type (suc d)) >ty ∎
+  where
+    open Reasoning ty-setoid
+
+unbiased-term-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → stm-to-term (unbiased-stm d S) ≃tm (0V {n = suc n})
+unbiased-term-linear zero Sing p = refl≃tm
+unbiased-term-linear (suc d) (Join S Sing) p = begin
+  < suspTm (stm-to-term (unbiased-stm d S)) [ idSub ]tm >tm
+    ≈⟨ id-on-tm (suspTm (stm-to-term (unbiased-stm d S))) ⟩
+  < suspTm (stm-to-term (unbiased-stm d S)) >tm
+    ≈⟨ susp-tm-≃ (unbiased-term-linear d S (cong pred p)) ⟩
+  < 0V >tm ∎
+  where
+    open Reasoning tm-setoid
+
+identity-stm-to-term : (n : ℕ) → stm-to-term (identity-stm n) ≃tm identity n idSub
+identity-stm-to-term n = begin
+  < stm-to-term (identity-stm n) >tm
+    ≈⟨ unbiased-comp′-compat (suc n) (n-disc n) .get ⟩
+  < stm-to-term (unbiased-comp (suc n) (n-disc n)) >tm
+    ≈⟨ Coh≃ lem1 lem3 lem4 ⟩
+  < identity n idSub >tm ∎
+  where
+    lem1 : tree-to-ctx (n-disc n) ≃c Disc n
+    lem1 = begin
+      < tree-to-ctx (n-disc n) >c
+        ≈⟨ linear-tree-compat (n-disc n) ⦃ n-disc-is-linear n ⦄ ⟩
+      < Disc (tree-dim (n-disc n)) >c
+        ≈⟨ disc-≡ (tree-dim-n-disc n) ⟩
+      < Disc n >c ∎
+      where
+        open Reasoning ctx-setoid
+
+    lem2 : (b : Bool) → stm-to-term
+             (unbiased-stm n (tree-bd n (n-disc n)) >>=
+              tree-inc-label n (n-disc n) b)
+             ≃tm (0V {n = suc (double n)})
+    lem2 b = begin
+      < stm-to-term (unbiased-stm n (tree-bd n (n-disc n)) >>= tree-inc-label n (n-disc n) b) >tm
+        ≈˘⟨ label-to-sub-stm (tree-inc-label n (n-disc n) b) (unbiased-stm n (tree-bd n (n-disc n))) ⟩
+      < stm-to-term (unbiased-stm n (tree-bd n (n-disc n))) [ label-to-sub (tree-inc-label n (n-disc n) b) ]tm >tm
+        ≈⟨ sub-action-≃-tm {s = stm-to-term (unbiased-stm n (tree-bd n (n-disc n)))} {t = stm-to-term (unbiased-stm n (n-disc n))} (unbiased-stm-≃ (refl {x = n}) (≃′-to-≃ (tree-bd-full n (n-disc n) (≤-reflexive (tree-dim-n-disc n)))) .get) (tree-inc-full n (n-disc n) b (≤-reflexive (tree-dim-n-disc n))) ⟩
+      < stm-to-term (unbiased-stm n (n-disc n)) [ idSub ]tm >tm
+        ≈⟨ id-on-tm (stm-to-term (unbiased-stm n (n-disc n))) ⟩
+      < stm-to-term (unbiased-stm n (n-disc n)) >tm
+        ≈⟨ unbiased-term-linear n (n-disc n) ⦃ n-disc-is-linear n ⦄ (sym (tree-dim-n-disc n)) ⟩
+      < 0V >tm ∎
+      where
+        open Reasoning tm-setoid
+
+    lem3 : sty-to-type (unbiased-type (suc n) (n-disc n)) ≃ty
+             (Var 0F ─⟨ liftType (sphere-type n) ⟩⟶ Var 0F)
+    lem3 = Arr≃ (lem2 false) (unbiased-type-linear n (n-disc n) ⦃ n-disc-is-linear n ⦄ (sym (tree-dim-n-disc n))) (lem2 true)
+
+    lem4 : label-to-sub (id-label (n-disc n) ,, S⋆) ● idSub ≃s idSub
+    lem4 = begin
+      < label-to-sub (id-label (n-disc n) ,, S⋆) ● idSub >s
+        ≈⟨ id-right-unit (label-to-sub (id-label (n-disc n) ,, S⋆)) ⟩
+      < label-to-sub (id-label (n-disc n) ,, S⋆) >s
+        ≈⟨ id-label-to-sub (n-disc n) ⟩
+      < idSub >s ∎
+      where
+        open Reasoning sub-setoid
+    open Reasoning tm-setoid
+
+label-to-sub-from-disc-term : (L : Label-WT X (n-disc d)) → sub-from-disc-term (label-to-sub L) ≃tm stm-to-term (label-from-disc-term L ⦃ n-disc-is-linear d ⦄)
+label-to-sub-from-disc-term {d = zero} L = refl≃tm
+label-to-sub-from-disc-term {d = suc d} L = begin
+  < sub-from-disc-term (label-to-sub L) >tm
+    ≈⟨ sub-from-disc-term-unrestrict (label-to-sub (label₁ L)) ⟩
+  < sub-from-disc-term (label-to-sub (label₁ L)) >tm
+    ≈⟨ label-to-sub-from-disc-term (label₁ L) ⟩
+  < stm-to-term (label-from-disc-term (label₁ L) ⦃ _ ⦄) >tm ∎
+  where
+    open Reasoning tm-setoid
+
+label-to-sub-from-disc-type : (L : Label-WT X (n-disc d)) → sub-from-disc-type (label-to-sub L) ≃ty sty-to-type (label-from-disc-type L ⦃ n-disc-is-linear d ⦄)
+label-to-sub-from-disc-type {d = zero} L = refl≃ty
+label-to-sub-from-disc-type {d = suc d} L = begin
+  < sub-from-disc-type (label-to-sub L) >ty
+    ≈⟨ sub-from-disc-type-unrestrict (label-to-sub (label₁ L)) ⟩
+  < sub-from-disc-type (label-to-sub (label₁ L)) >ty
+    ≈⟨ label-to-sub-from-disc-type (label₁ L) ⟩
+  < sty-to-type (label-from-disc-type (label₁ L) ⦃ _ ⦄) >ty ∎
+  where
+    open Reasoning ty-setoid
+
+label-from-linear-tree-disc-type : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(p : tree-dim S ≤ sty-dim As) → (Bs : STy X) → (Bs ≃sty label-from-linear-tree-type S As) → label-from-disc-type (label-from-linear-tree S a As p ,, Bs) ≃sty As
+label-from-linear-tree-disc-type Sing a As p Bs q = q
+label-from-linear-tree-disc-type (Join S Sing) a As p Bs q = label-from-linear-tree-disc-type S a As _ _ (trans≃sty (≃SArr refl≃stm (trans≃sty q (label-from-linear-tree-type-prop S As)) refl≃stm) (sty-prop (label-from-linear-tree-type S As) ⦃ label-from-linear-tree-nz S As p ⦄))
+
+label-from-linear-tree-disc-term : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(p : tree-dim S ≤ sty-dim As) → (Bs : STy X) → label-from-disc-term (label-from-linear-tree S a As p ,, Bs) ≃stm a
+label-from-linear-tree-disc-term Sing a As p Bs = refl≃stm
+label-from-linear-tree-disc-term (Join S Sing) a As p Bs = label-from-linear-tree-disc-term S a As _ _
+
+label-from-linear-tree-to-sub : (d : ℕ) → (a : STm X) → (As : STy X) → .(p : d ≡ sty-dim As) → label-to-sub (label-from-linear-tree (n-disc d) ⦃ n-disc-is-linear d ⦄ a As (≤-reflexive (trans (tree-dim-n-disc d) p)) ,, S⋆) ≃s sub-from-disc d (sty-to-type As) (trans (sty-to-type-dim As) (sym p)) (stm-to-term a)
+label-from-linear-tree-to-sub d a As p = begin
+  < label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) >s
+    ≈⟨ prop-sub-from-disc (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)) ⟩
+  < sub-from-disc d
+    (sub-from-disc-type
+     (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)))
+    _
+    (sub-from-disc-term
+      (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)))
+    >s
+    ≈⟨ sub-from-disc-≃ d d lem1 (sub-from-disc-type-dim
+                                  (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆))) (trans (sty-to-type-dim As) (sym p)) lem2 ⟩
+  < sub-from-disc d (sty-to-type As) _ (stm-to-term a) >s ∎
+  where
+    lem1 : sub-from-disc-type (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆))
+         ≃ty sty-to-type As
+    lem1 = begin
+      < sub-from-disc-type (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)) >ty
+        ≈⟨ label-to-sub-from-disc-type (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⟩
+      < sty-to-type (label-from-disc-type (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⦃ _ ⦄) >ty
+        ≈⟨ label-from-linear-tree-disc-type (n-disc d) ⦃ _ ⦄ a As _ S⋆ (sym≃sty (label-from-linear-tree-type-0 (n-disc d) ⦃ _ ⦄ As (trans (tree-dim-n-disc d) p))) .get ⟩
+      < sty-to-type As >ty ∎
+      where
+        open Reasoning ty-setoid
+
+    lem2 : sub-from-disc-term (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As (≤-reflexive (trans (tree-dim-n-disc d) p)) ,, S⋆))
+         ≃tm stm-to-term a
+    lem2 = begin
+      < sub-from-disc-term (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)) >tm
+        ≈⟨ label-to-sub-from-disc-term (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⟩
+      < stm-to-term (label-from-disc-term (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⦃ _ ⦄) >tm
+        ≈⟨ label-from-linear-tree-disc-term (n-disc d) ⦃ _ ⦄ a As _ S⋆ .get ⟩
+      < stm-to-term a >tm ∎
+      where
+        open Reasoning tm-setoid
+
+    open Reasoning sub-setoid

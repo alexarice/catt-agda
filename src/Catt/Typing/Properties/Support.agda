@@ -1,11 +1,11 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Typing.Properties.Support (index : ℕ)
-                                      (rule : Fin index → Rule)
+module Catt.Typing.Properties.Support {index : Set}
+                                      (rule : index → Rule)
                                       (supp-rule : ∀ i → P.SupportRule rule (rule i)) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Support

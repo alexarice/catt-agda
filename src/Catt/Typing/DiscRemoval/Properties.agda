@@ -17,12 +17,29 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing rule
 open import Catt.Tree
 open import Catt.Tree.Label
+open import Catt.Tree.Label.Properties
 open import Catt.Tree.Label.Typing rule
 open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Path
-open import Catt.Typing.Properties.Base rule
+open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Discs
+open import Catt.Discs.Properties
+
+disc-rem-stm : DR.HasDiscRemoval-STm rule
+disc-rem-stm S L Lty .get = begin
+  stm-to-term (unbiased-comp (tree-dim S) S >>= L ,, S⋆)
+    ≈⟨ reflexive≈tm (Coh≃ (linear-tree-compat S) (unbiased-type-linear (tree-dim S) S refl) (trans≃s (id-right-unit (label-to-sub (L ,, S⋆))) (sym≃s (idSub≃-right-unit (sym≃c (linear-tree-compat S)) (label-to-sub (L ,, S⋆)))))) ⟩
+  disc-term (tree-dim S) (label-to-sub (L ,, S⋆) ● idSub≃ (sym≃c (linear-tree-compat S)))
+    ≈⟨ disc-rem (apply-sub-sub-typing (idSub≃-Ty (sym≃c (linear-tree-compat S))) (label-to-sub-Ty Lty TySStar)) ⟩
+  0V [ label-to-sub (L ,, S⋆) ● idSub≃ (sym≃c (linear-tree-compat S)) ]tm
+    ≈⟨ reflexive≈tm (sub-action-≃-tm {s = 0V} {t = 0V} (Var≃ (≃c-preserve-length (sym≃c (linear-tree-compat S))) refl) (idSub≃-right-unit (sym≃c (linear-tree-compat S)) (label-to-sub (L ,, S⋆)))) ⟩
+  0V [ label-to-sub (L ,, S⋆)]tm
+    ≈˘⟨ reflexive≈tm (label-linear-0V (L ,, S⋆)) ⟩
+  stm-to-term (L (is-linear-max-path S)) ∎
+  where
+    open Reasoning (tm-setoid-≈ _)
 
 unbiased-stm-is-comp′ : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → unbiased-stm d S ≈[ tree-to-ctx S ]stm unbiased-comp′ d S
 unbiased-stm-is-comp′ (suc zero) Sing = refl≈stm
@@ -31,7 +48,7 @@ unbiased-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
   SExt (SPath PHere)
     ≈⟨ compute-≈ refl≈stm ⟩
   SPath (is-linear-max-path (Join Sing Sing))
-    ≈˘⟨ disc-rem (Join Sing Sing) SPath (id-label-Ty (Join Sing Sing)) ⟩
+    ≈˘⟨ disc-rem-stm (Join Sing Sing) SPath (id-label-Ty (Join Sing Sing)) ⟩
   unbiased-comp 1 (Join Sing Sing)
     ≈⟨ [ refl≈tm ] ⟩
   SExt (SCoh Sing S⋆ (SPath ,, S⋆)) ∎
@@ -51,16 +68,3 @@ unbiased-stm-is-comp d S = begin
   unbiased-comp d S ∎
   where
     open Reasoning stm-setoid-≈
-
-module Conditions where
-
-  conv-rule : ∀ {m n}
-            → {Γ : Ctx m}
-            → (S : Tree n)
-            → .⦃ _ : is-linear S ⦄
-            → .⦃ NonZero (tree-dim S) ⦄
-            → {C : STy (Other m)}
-            → (L : Label (Other m) S)
-            → Typing-STm Γ (unbiased-comp (tree-dim S) S >>= L ,, S⋆) C
-            → Typing-STm Γ (L (is-linear-max-path S)) C
-  conv-rule S L tty = TySConv (transport-stm-typing {!!} {!!} {!!}) {!!}

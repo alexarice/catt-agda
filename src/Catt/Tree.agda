@@ -76,7 +76,7 @@ is-linear-dec Sing = yes tt
 is-linear-dec (Join S Sing) = is-linear-dec S
 is-linear-dec (Join S (Join T T₁)) = no (λ x → x)
 
-n-disc : (n : ℕ) → Tree (n * 2)
+n-disc : (n : ℕ) → Tree (double n)
 n-disc zero = Sing
 n-disc (suc n) = Join (n-disc n) Sing
 

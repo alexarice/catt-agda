@@ -95,3 +95,7 @@ IrrelΣ-syntax : ∀ {a} {b} (A : Set a) → (A → Set b) → Set (a Agda.Primi
 IrrelΣ-syntax = IrrelΣ
 
 syntax IrrelΣ-syntax A (λ x → B) = IΣ[ x ∈ A ] B
+
+double : ℕ → ℕ
+double zero = zero
+double (suc n) = suc (suc (double n))

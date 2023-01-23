@@ -46,18 +46,50 @@ sub-from-disc-≃ d₁ d₂ a b c d = Ext≃ (sub-from-sphere-≃ d₁ d₂ a b 
 sub-from-sphere-≃ zero zero (Star≃ x) p q = Null≃ (Star≃ x)
 sub-from-sphere-≃ (suc d₁) (suc d₂) (Arr≃ a b c) p q = Ext≃ (Ext≃ (sub-from-sphere-≃ d₁ d₂ b (cong pred p) (cong pred q)) a) c
 
-sub-from-sphere-sub : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (σ : Sub n m ⋆) → sub-from-sphere d (A [ σ ]ty) (trans (sym (sub-dim σ A)) p) ≃s σ ∘ sub-from-sphere d A p
+sub-from-sphere-sub : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (σ : Sub n m ⋆) → sub-from-sphere d (A [ σ ]ty) (trans (sym (sub-dim σ A)) p) ≃s (σ ● sub-from-sphere d A p)
 sub-from-sphere-sub zero ⋆ p σ = refl≃s
 sub-from-sphere-sub (suc d) (s ─⟨ A ⟩⟶ t) p σ = Ext≃ (Ext≃ (sub-from-sphere-sub d A (cong pred p) σ) refl≃tm) refl≃tm
 
-sub-from-disc-sub : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (s : Tm n) → (σ : Sub n m ⋆) → sub-from-disc d (A [ σ ]ty) (trans (sym (sub-dim σ A)) p) (s [ σ ]tm) ≃s σ ∘ sub-from-disc d A p s
+sub-from-disc-sub : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (s : Tm n) → (σ : Sub n m ⋆) → sub-from-disc d (A [ σ ]ty) (trans (sym (sub-dim σ A)) p) (s [ σ ]tm) ≃s σ ● sub-from-disc d A p s
 sub-from-disc-sub d A p s σ = Ext≃ (sub-from-sphere-sub d A p σ) refl≃tm
 
-identity-lem : n ≡ m → σ ≃s τ → Coh (Disc n) (0V ─⟨ liftType (sphere-type n) ⟩⟶ 0V) σ ≃tm Coh (Disc m) (0V ─⟨ liftType (sphere-type m) ⟩⟶ 0V) τ
-identity-lem refl p = Coh≃ refl≃c refl≃ty p
+identity-≃ : n ≡ m → σ ≃s τ → identity n σ ≃tm identity m τ
+identity-≃ refl p = Coh≃ refl≃c refl≃ty p
 
-identity-≃ : s ≃tm t → A ≃ty B → identity s A ≃tm identity t B
-identity-≃ p q = identity-lem (ty-dim-≃ q) (sub-from-disc-≃ (ty-dim _) (ty-dim _) q refl refl p)
+lift-sub-from-sphere : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → liftSub (sub-from-sphere d A p) ≃s sub-from-sphere d (liftType A) (trans (lift-ty-dim A) p)
+lift-sub-from-sphere zero ⋆ p = refl≃s
+lift-sub-from-sphere (suc d) (s ─⟨ A ⟩⟶ t) p = Ext≃ (Ext≃ (lift-sub-from-sphere d A (cong pred p)) refl≃tm) refl≃tm
 
-identity-sub : (t : Tm n) → (A : Ty n) → (σ : Sub n m ⋆) → identity t A [ σ ]tm ≃tm identity (t [ σ ]tm) (A [ σ ]ty)
-identity-sub t A σ = identity-lem (sub-dim σ A) (trans≃s (sym≃s (sub-from-disc-sub (ty-dim A) A refl t σ)) (sub-from-disc-≃ (ty-dim A) (ty-dim (A [ σ ]ty)) refl≃ty (trans (sym (sub-dim σ A)) refl) refl refl≃tm))
+lift-sub-from-disc : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (t : Tm n) → liftSub (sub-from-disc d A p t) ≃s sub-from-disc d (liftType A) (trans (lift-ty-dim A) p) (liftTerm t)
+lift-sub-from-disc d A p t = Ext≃ (lift-sub-from-sphere d A p) refl≃tm
+
+susp-sub-from-sphere : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → suspSub (sub-from-sphere d A p) ≃s sub-from-sphere (suc d) (suspTy A) (trans (susp-dim A) (cong suc p))
+susp-sub-from-sphere zero ⋆ p = refl≃s
+susp-sub-from-sphere (suc d) (s ─⟨ A ⟩⟶ t) p = Ext≃ (Ext≃ (susp-sub-from-sphere d A (cong pred p)) refl≃tm) refl≃tm
+
+susp-sub-from-disc : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (t : Tm n) → suspSub (sub-from-disc d A p t) ≃s sub-from-disc (suc d) (suspTy A) (trans (susp-dim A) (cong suc p)) (suspTm t)
+susp-sub-from-disc d A p t = Ext≃ (susp-sub-from-sphere d A p) refl≃tm
+
+sub-from-sphere-type-dim : (σ : Sub (sphere-size n) m ⋆) → ty-dim (sub-from-sphere-type σ) ≡ n
+sub-from-sphere-type-dim {n = zero} σ = refl
+sub-from-sphere-type-dim {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = cong suc (sub-from-sphere-type-dim σ)
+
+prop-sub-from-sphere : (σ : Sub (sphere-size n) m ⋆) → σ ≃s sub-from-sphere n (sub-from-sphere-type σ) (sub-from-sphere-type-dim σ)
+prop-sub-from-sphere {n = zero} ⟨⟩ = refl≃s
+prop-sub-from-sphere {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (prop-sub-from-sphere σ) refl≃tm) refl≃tm
+
+sub-from-disc-type-dim : (σ : Sub (disc-size n) m ⋆) → ty-dim (sub-from-disc-type σ) ≡ n
+sub-from-disc-type-dim ⟨ σ , t ⟩ = sub-from-sphere-type-dim σ
+
+prop-sub-from-disc : (σ : Sub (disc-size n) m ⋆) → σ ≃s sub-from-disc n (sub-from-disc-type σ) (sub-from-disc-type-dim σ) (sub-from-disc-term σ)
+prop-sub-from-disc ⟨ σ , t ⟩ = Ext≃ (prop-sub-from-sphere σ) refl≃tm
+
+sub-from-disc-term-unrestrict : (σ : Sub (disc-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-disc-term (unrestrict σ) ≃tm sub-from-disc-term σ
+sub-from-disc-term-unrestrict ⟨ σ , t ⟩ = refl≃tm
+
+sub-from-sphere-type-unrestrict : (σ : Sub (sphere-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-sphere-type (unrestrict σ) ≃ty sub-from-sphere-type σ
+sub-from-sphere-type-unrestrict {n = zero} ⟨⟩ = refl≃ty
+sub-from-sphere-type-unrestrict {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = Arr≃ refl≃tm (sub-from-sphere-type-unrestrict σ) refl≃tm
+
+sub-from-disc-type-unrestrict : (σ : Sub (disc-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-disc-type (unrestrict σ) ≃ty sub-from-disc-type σ
+sub-from-disc-type-unrestrict ⟨ σ , t ⟩ = sub-from-sphere-type-unrestrict σ

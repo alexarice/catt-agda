@@ -228,6 +228,27 @@ connect-label-Ty : Typing-Label Γ (L ,, As)
 connect-label-Ty (TySing x) MTy p = replace-label-Ty MTy x (sym≈stm p)
 connect-label-Ty (TyJoin {L = L} x LTy LTy′) MTy p = TyJoin x (label-typing-conv LTy (≈SArr refl≈stm refl≈sty (reflexive≈stm (sym≃stm (connect-label-phere (ap L ∘ PShift) _))))) (connect-label-Ty LTy′ MTy p)
 
+label-between-connect-trees-lem : (L : Label (someTree S′) S)
+                               → (M : Label (someTree T′) T)
+                               → L (last-path S) ≈[ tree-to-ctx S′ ]stm SPath (last-path S′)
+                               → M PHere ≈[ tree-to-ctx T′ ]stm SHere
+                               → (label-comp L (connect-tree-inc-left S′ T′) (last-path S) ≈[ tree-to-ctx (connect-tree S′ T′) ]stm
+                                    label-comp M (connect-tree-inc-right S′ T′) PHere)
+label-between-connect-trees-lem {S′ = S′} {S = S} {T′ = T′} L M p q = begin
+  label-comp L (connect-tree-inc-left S′ T′) (last-path S)
+    ≡⟨⟩
+  (L (last-path S) >>= connect-tree-inc-left S′ T′)
+    ≈⟨ extend-≈ p (connect-tree-inc-left-Ty S′ T′) TySStar ⟩
+  (SPath (last-path S′) >>= connect-tree-inc-left S′ T′)
+    ≈⟨ reflexive≈stm (≃SPath (connect-tree-inc-phere S′ T′)) ⟩
+  (SHere >>= connect-tree-inc-right S′ T′)
+    ≈˘⟨ extend-≈ q (connect-tree-inc-right-Ty S′ T′) TySStar ⟩
+  (M PHere >>= connect-tree-inc-right S′ T′)
+    ≡⟨⟩
+  label-comp M (connect-tree-inc-right S′ T′) PHere ∎
+  where
+    open Reasoning stm-setoid-≈
+
 label-between-connect-trees-Ty : {L : Label (someTree S′) S}
                                → {M : Label (someTree T′) T}
                                → Typing-Label (tree-to-ctx S′) (L ,, S⋆)
@@ -238,19 +259,7 @@ label-between-connect-trees-Ty : {L : Label (someTree S′) S}
 label-between-connect-trees-Ty {S′ = S′} {S = S} {T′ = T′} {L = L} {M = M} LTy MTy p q
   = connect-label-Ty (label-comp-Ty LTy (connect-tree-inc-left-Ty _ _) TySStar)
                      (label-comp-Ty MTy (connect-tree-inc-right-Ty _ _) TySStar)
-                     (begin
-                       label-comp L (connect-tree-inc-left S′ T′) (last-path S)
-                         ≡⟨⟩
-                       (L (last-path S) >>= connect-tree-inc-left S′ T′)
-                         ≈⟨ extend-≈ p (connect-tree-inc-left-Ty S′ T′) TySStar ⟩
-                       (SPath (last-path S′) >>= connect-tree-inc-left S′ T′)
-                         ≈⟨ reflexive≈stm (≃SPath (connect-tree-inc-phere S′ T′)) ⟩
-                       (SHere >>= connect-tree-inc-right S′ T′)
-                         ≈˘⟨ extend-≈ q (connect-tree-inc-right-Ty S′ T′) TySStar ⟩
-                       (M PHere >>= connect-tree-inc-right S′ T′)
-                         ≡⟨⟩
-                       label-comp M (connect-tree-inc-right S′ T′) PHere ∎)
-                       where open Reasoning stm-setoid-≈
+                     (label-between-connect-trees-lem L M p q)
 
 label-between-joins-Ty : {L : Label (someTree S′) S}
                        → {M : Label (someTree T′) T}

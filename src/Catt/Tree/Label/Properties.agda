@@ -14,6 +14,7 @@ open import Catt.Connection.Properties
 open import Catt.Syntax.Bundles
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
+open import Catt.Globular
 
 _≃stm_ : (a : STm X) → (b : STm Y) → Set
 a ≃stm b = Wrap (λ a b → stm-to-term a ≃tm stm-to-term b) a b
@@ -1037,6 +1038,9 @@ sty-base-≃ : (p : As ≃sty Bs) → sty-base As ≃sty sty-base Bs
 sty-base-≃ {As = S⋆} {Bs = S⋆} [ Star≃ x ] = [ Star≃ x ]
 sty-base-≃ {As = SArr _ _ _} {Bs = SArr _ _ _} [ Arr≃ _ p _ ] = [ p ]
 
+sty-prop : (As : STy X) → .⦃ _ : NonZero (sty-dim As) ⦄ → SArr (sty-src As) (sty-base As) (sty-tgt As) ≃sty As
+sty-prop (SArr s As t) = refl≃sty
+
 sty-dim-label : (As : STy (someTree S)) → (L : Label-WT X S) → sty-dim (label-on-sty As L) ≡ sty-dim As + sty-dim (lty L)
 sty-dim-label S⋆ L = refl
 sty-dim-label (SArr s As t) L = cong suc (sty-dim-label As L)
@@ -1044,6 +1048,10 @@ sty-dim-label (SArr s As t) L = cong suc (sty-dim-label As L)
 susp-sty-dim : (As : STy X) → sty-dim (susp-sty As) ≡ suc (sty-dim As)
 susp-sty-dim S⋆ = refl
 susp-sty-dim (SArr s As t) = cong suc (susp-sty-dim As)
+
+sty-to-type-dim : (As : STy X) → ty-dim (sty-to-type As) ≡ sty-dim As
+sty-to-type-dim S⋆ = refl
+sty-to-type-dim (SArr s As t) = cong suc (sty-to-type-dim As)
 
 susp-unrestrict-label : (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → (susp-stm ∘ unrestrict-label L) ≃l unrestrict-label (susp-label L) ⦃ NonZero-subst (sym (susp-sty-dim (lty L))) it ⦄
 susp-unrestrict-label (L ,, SArr s As t) .get PHere = refl≃stm
@@ -1159,5 +1167,15 @@ lift-stm-≃ {a = a} {b = b} [ p ] .get = begin
   < liftTerm (stm-to-term b) >tm
     ≈˘⟨ lift-stm-to-term b ⟩
   < stm-to-term (lift-stm b) >tm ∎
+  where
+    open Reasoning tm-setoid
+
+label-linear-0V : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → stm-to-term (ap L (is-linear-max-path S)) ≃tm 0V [ label-to-sub L ]tm
+label-linear-0V {S = S} L = begin
+  < stm-to-term (ap L (is-linear-max-path S)) >tm
+    ≈˘⟨ label-to-sub-stm L (SPath (is-linear-max-path S)) ⟩
+  < path-to-term (is-linear-max-path S) [ label-to-sub L ]tm >tm
+    ≈⟨ sub-action-≃-tm (is-linear-max-path-is-0V S) refl≃s ⟩
+  < 0V [ label-to-sub L ]tm >tm ∎
   where
     open Reasoning tm-setoid

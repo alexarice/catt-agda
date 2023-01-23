@@ -204,11 +204,11 @@ id-label S = SPath
 id-label-wt : (S : Tree n) → Label-WT (someTree S) S
 id-label-wt S = id-label S ,, S⋆
 
--- to-label : (S : Tree n) → (σ : Sub (suc n) m A) → Label (Other m) S
--- to-label S σ = label-sub (id-label S ,, S⋆) σ
-
 to-label-wt : (S : Tree n) → (σ : Sub (suc n) m A) → Label-WT (Other m) S
 to-label-wt {A = A} S σ = label-sub (id-label-wt S) σ
+
+to-label : (S : Tree n) → (σ : Sub (suc n) m A) → Label (Other m) S
+to-label S σ = ap (to-label-wt S σ)
 
 infixl 1 _>>=_
 _>>=_ : STm (someTree S) → Label-WT X S → STm X

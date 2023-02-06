@@ -34,6 +34,9 @@ sub-from-sphere (suc d) (s ─⟨ A ⟩⟶ t) p = ⟨ ⟨ (sub-from-sphere d A (
 identity : (n : ℕ) → Sub (disc-size n) m ⋆ → Tm m
 identity n σ = Coh (Disc n) (0V ─⟨ liftType (sphere-type n) ⟩⟶ 0V) σ
 
+identity-term : (A : Ty n) → (t : Tm n) → Tm n
+identity-term A t = identity (ty-dim A) (sub-from-disc (ty-dim A) A refl t)
+
 disc-term : (n : ℕ) → Sub (disc-size n) m ⋆ → Tm m
 disc-term n σ = Coh (Disc n) (liftType (sphere-type n)) σ
 

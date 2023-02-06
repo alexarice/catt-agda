@@ -1,25 +1,25 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Dyck.Typing (index : ℕ)
-                        (rule : Fin index → Rule)
-                        (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
-                        (sub-rule : ∀ i a → P.SubRule index rule {i} a) where
+module Catt.Dyck.Typing {index : Set}
+                        (rule : index → Rule)
+                        (lift-rule : ∀ i → P.LiftRule rule (rule i))
+                        (sub-rule : ∀ i → P.SubRule rule (rule i)) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing index rule
+open import Catt.Typing rule
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Dyck
-open import Catt.Typing.Properties.Lifting index rule lift-rule
+open import Catt.Typing.Properties.Lifting rule lift-rule
 open import Catt.Globular
-open import Catt.Globular.Typing index rule lift-rule
-open import Catt.Typing.Properties.Substitution index rule lift-rule sub-rule
+open import Catt.Globular.Typing rule lift-rule
+open import Catt.Typing.Properties.Substitution rule lift-rule sub-rule
 open import Catt.Globular.Properties
 open import Catt.Dyck.Properties
 open import Catt.Syntax.SyntacticEquality
-open P index rule
+open P rule
 
 dyck-to-ctx-Ty : (dy : Dyck n d) → Typing-Ctx (dyck-to-ctx dy)
 dyck-type-Ty : (dy : Dyck n d) → Typing-Ty (dyck-to-ctx dy) (dyck-type dy)

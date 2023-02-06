@@ -3,6 +3,7 @@ module Catt.Dyck.Pruning where
 open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Dyck
+open import Catt.Dyck.Properties
 open import Catt.Discs
 open import Catt.Globular
 
@@ -12,7 +13,7 @@ prune-peak (⇑pk p) = ⇑ (prune-peak p)
 prune-peak (⇓pk p) = ⇓ (prune-peak p)
 
 prune-project : {dy : Dyck (suc n) d} → Peak dy → Sub (3 + n * 2) (1 + n * 2) ⋆
-prune-project (⇕pk dy) = ⟨ ⟨ idSub , dyck-term dy ⟩ , identity (dyck-term dy) (dyck-type dy) ⟩
+prune-project (⇕pk {d = d} dy) = ⟨ ⟨ idSub , dyck-term dy ⟩ , identity-term (dyck-type dy) (dyck-term dy) ⟩
 prune-project (⇑pk p) = ⟨ ⟨ (liftSub (liftSub (prune-project p))) , 1V ⟩ , 0V ⟩
 prune-project (⇓pk p) = prune-project p
 

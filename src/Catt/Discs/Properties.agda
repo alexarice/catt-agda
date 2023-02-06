@@ -56,6 +56,9 @@ sub-from-disc-sub d A p s σ = Ext≃ (sub-from-sphere-sub d A p σ) refl≃tm
 identity-≃ : n ≡ m → σ ≃s τ → identity n σ ≃tm identity m τ
 identity-≃ refl p = Coh≃ refl≃c refl≃ty p
 
+identity-term-≃ : A ≃ty B → s ≃tm t → identity-term A s ≃tm identity-term B t
+identity-term-≃ p q = identity-≃ (ty-dim-≃ p) (sub-from-disc-≃ (ty-dim _) (ty-dim _) p refl refl q)
+
 lift-sub-from-sphere : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → liftSub (sub-from-sphere d A p) ≃s sub-from-sphere d (liftType A) (trans (lift-ty-dim A) p)
 lift-sub-from-sphere zero ⋆ p = refl≃s
 lift-sub-from-sphere (suc d) (s ─⟨ A ⟩⟶ t) p = Ext≃ (Ext≃ (lift-sub-from-sphere d A (cong pred p)) refl≃tm) refl≃tm
@@ -93,3 +96,12 @@ sub-from-sphere-type-unrestrict {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = Arr≃ 
 
 sub-from-disc-type-unrestrict : (σ : Sub (disc-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-disc-type (unrestrict σ) ≃ty sub-from-disc-type σ
 sub-from-disc-type-unrestrict ⟨ σ , t ⟩ = sub-from-sphere-type-unrestrict σ
+
+identity-term-sub : (A : Ty m) → (s : Tm m) → (σ : Sub m l ⋆) → identity-term A s [ σ ]tm ≃tm identity-term (A [ σ ]ty) (s [ σ ]tm)
+identity-term-sub A s σ = begin
+  < identity-term A s [ σ ]tm >tm
+    ≈⟨ sub-action-≃-tm (identity-≃ (sub-dim σ A) (sub-from-disc-≃ (ty-dim A) (ty-dim (A [ σ ]ty)) refl≃ty refl (sub-dim σ A) (refl≃tm {s = s}))) (refl≃s {σ = σ}) ⟩
+  < (identity (ty-dim (A [ σ ]ty)) (σ ● sub-from-disc (ty-dim (A [ σ ]ty)) A _ s)) >tm
+    ≈˘⟨ identity-≃ refl (sub-from-disc-sub (ty-dim (A [ σ ]ty)) A (sub-dim σ A) s σ) ⟩
+  < identity-term (A [ σ ]ty) (s [ σ ]tm) >tm ∎
+  where open Reasoning tm-setoid

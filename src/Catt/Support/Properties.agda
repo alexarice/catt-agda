@@ -439,6 +439,10 @@ module _ where
   DC-empty ∅ = refl
   DC-empty (Γ , A) = cong ewf (DC-empty Γ)
 
+  DC-full : (Γ : Ctx n) → DC Γ full ≡ full
+  DC-full ∅ = refl
+  DC-full (Γ , A) = cong ewt (trans (cong (DC Γ) (∪-left-zero (FVTy A))) (DC-full Γ))
+
 ⊆-cong-∪-1 : {xs ys zs : VarSet n} → ys ⊆ zs → xs ∪ ys ⊆ xs ∪ zs
 ⊆-cong-∪-1 p = ∪-⊆ (∪-⊆-1 _ _) (⊆-trans p (∪-⊆-2 _ _))
 
@@ -450,7 +454,6 @@ build-⊆-2 x p = cong ewt p
 
 debuild-⊆-2 : {x y : Bool} → {xs ys : VarSet n} → (x ∷ xs) ⊆ (y ∷ ys) → xs ⊆ ys
 debuild-⊆-2 p = cong tail p
-
 
 FVTy-comp-⊆ : (A : Ty n) → (σ : Sub n m B) → FVTy (A [ σ ]ty) ⊆ FVSub σ
 FVTm-comp-⊆ : (t : Tm n) → (σ : Sub n m A) → FVTm (t [ σ ]tm) ⊆ FVSub σ

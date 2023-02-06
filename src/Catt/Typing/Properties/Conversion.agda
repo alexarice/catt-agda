@@ -1,21 +1,21 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Typing.Properties.Conversion (index : ℕ)
-                                         (rule : Fin index → Rule)
-                                         (lift-rule : ∀ i a → P.LiftRule index rule {i} a)
-                                         (susp-rule : ∀ i a → P.SuspRule index rule {i} a)
-                                         (sub-rule : ∀ i a → P.SubRule index rule {i} a)
-                                         (supp-rule : ∀ i a → P.SupportRule index rule {i} a)
-                                         (conv-rule : ∀ i a → P.ConvRule index rule {i} a) where
+module Catt.Typing.Properties.Conversion {index : Set}
+                                         (rule : index → Rule)
+                                         (lift-rule : ∀ i → P.LiftRule rule (rule i))
+                                         (susp-rule : ∀ i → P.SuspRule rule (rule i))
+                                         (sub-rule : ∀ i → P.SubRule rule (rule i))
+                                         (supp-rule : ∀ i → P.SupportRule rule (rule i))
+                                         (conv-rule : ∀ i → P.ConvRule rule (rule i)) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Typing index rule
-open import Catt.Typing.Properties.Support index rule supp-rule
-open import Catt.Typing.Properties index rule lift-rule susp-rule sub-rule
-open import Catt.Globular.Typing index rule lift-rule
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Support rule supp-rule
+open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Globular.Typing rule lift-rule
 open import Function
 open import Function.Construct.Identity
 open import Function.Construct.Composition
@@ -68,15 +68,15 @@ term-conversion′ {A = C} (Coh≈ {A = A} {Δ = Δ} {B = B} {σ = σ} {Γ = Γ}
             ≈⟨ apply-sub-ty-eq τty p ⟩
           B [ τ ]ty ∎
 
-term-conversion′ (Rule≈ i a tty) = mk⇔ f g
+term-conversion′ (Rule≈ i tty) = mk⇔ f g
   where
-    f : Typing-Tm (rule i .Rule.tgtCtx a) (rule i .Rule.lhs a) _ →
-          Typing-Tm (rule i .Rule.tgtCtx a) (rule i .Rule.rhs a) _
-    f tty′ = conv-rule i a tty′
+    f : Typing-Tm (rule i .Rule.tgtCtx) (rule i .Rule.lhs) _ →
+          Typing-Tm (rule i .Rule.tgtCtx) (rule i .Rule.rhs) _
+    f tty′ = conv-rule i tty′
 
-    g : Typing-Tm (rule i .Rule.tgtCtx a) (rule i .Rule.rhs a) _ →
-          Typing-Tm (rule i .Rule.tgtCtx a) (rule i .Rule.lhs a) _
-    g tty′ = TyConv tty (Ty-unique (conv-rule i a tty) tty′)
+    g : Typing-Tm (rule i .Rule.tgtCtx) (rule i .Rule.rhs) _ →
+          Typing-Tm (rule i .Rule.tgtCtx) (rule i .Rule.lhs) _
+    g tty′ = TyConv tty (Ty-unique (conv-rule i tty) tty′)
 
 type-conversion′ Star≈ = id-⇔ (Typing-Ty _ ⋆)
 type-conversion′ (Arr≈ p q r) = mk⇔ f g

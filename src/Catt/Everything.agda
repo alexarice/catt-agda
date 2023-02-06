@@ -76,7 +76,7 @@ import Catt.Dyck.Pruning.Typing
 
 import Catt.Discs.Typing
 
-import Catt.Strict.Assoc
-import Catt.Typing.Weak
+-- import Catt.Strict.Assoc
+-- import Catt.Typing.Weak
 
-import Catt.Syntax.Complexity
+-- import Catt.Syntax.Complexity

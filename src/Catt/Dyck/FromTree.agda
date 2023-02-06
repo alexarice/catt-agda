@@ -19,14 +19,19 @@ n-extendable (suc n) (Join S T@(Join _ _)) = n-extendable (suc n) T
 
 extend-tree : (n : ℕ) → (T : Tree m) → .⦃ n-extendable n T ⦄ → Tree (2 + m)
 extend-tree zero Sing = Join Sing Sing
-extend-tree zero (Join S Sing) = Join S (Join Sing Sing)
-extend-tree zero (Join S T@(Join _ _)) = Join S (extend-tree zero T)
+extend-tree zero (Join S T) = Join S (extend-tree zero T)
 extend-tree (suc n) (Join S Sing) = Join (extend-tree n S) Sing
 extend-tree (suc n) (Join S T@(Join _ _)) = Join S (extend-tree (suc n) T)
 
 join-tree-preserves-extendable : (n : ℕ) → (S : Tree m) → (T : Tree m′) → ⦃ n-extendable n T ⦄ → n-extendable n (Join S T)
 join-tree-preserves-extendable zero S T = it
 join-tree-preserves-extendable (suc n) S (Join _ _) = it
+
+extend-tree-is-join : (n : ℕ) → (T : Tree m) → .⦃ _ : n-extendable n T ⦄ → is-join (extend-tree n T)
+extend-tree-is-join zero Sing = tt
+extend-tree-is-join zero (Join S T) = tt
+extend-tree-is-join (suc n) (Join S Sing) = tt
+extend-tree-is-join (suc n) (Join S (Join T₁ T₂)) = tt
 
 extended-tree-is-more-extendable : (n : ℕ) → (T : Tree m) → ⦃ _ : n-extendable n T ⦄ → n-extendable (suc n) (extend-tree n T)
 extended-tree-is-more-extendable zero Sing = it
@@ -39,7 +44,6 @@ pred-n-extendable : (n : ℕ) → (T : Tree m) → ⦃ n-extendable (suc n) T �
 pred-n-extendable zero T = tt
 pred-n-extendable (suc n) (Join S Sing) = pred-n-extendable n S
 pred-n-extendable (suc n) (Join S T@(Join _ _)) = pred-n-extendable (suc n) T
-
 
 dyck-to-tree : Dyck n d → Tree (n * 2)
 dyck-to-tree-is-n-extendable : (dy : Dyck n d) → n-extendable d (dyck-to-tree dy)
@@ -64,6 +68,9 @@ tree-to-dyck zero (Join S T) = connect-dyck (⇓ (susp-dyck (tree-to-dyck zero S
 tree-to-dyck (suc d) (Join S Sing) = susp-dyck (tree-to-dyck d S)
 tree-to-dyck (suc d) (Join S T@(Join _ _)) = connect-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck (suc d) T)
 
+tree-to-dyck-join : (d : ℕ) → (S : Tree m) → (T : Tree n) → .⦃ is-join T ⦄ → .⦃ _ : n-extendable d T ⦄ → tree-to-dyck d (Join S T) ⦃ join-tree-preserves-extendable d S T ⦄ ≃d connect-dyck (⇓ (susp-dyck (tree-to-dyck 0 S))) (tree-to-dyck d T)
+tree-to-dyck-join zero S T = refl≃d
+tree-to-dyck-join (suc d) S (Join T₁ T₂) = refl≃d
 
 -- tree to dyck to tree
 
@@ -75,8 +82,7 @@ subst-extendable-≃ (suc n) (Join≃ p q@(Join≃ _ _)) = subst-extendable-≃ 
 extend-tree-eq : {S : Tree n} → {T : Tree m} → (p : S ≃ T) → .⦃ ex : n-extendable d S ⦄
                → extend-tree d S ≃ extend-tree d T ⦃ subst-extendable-≃ d p ⦄
 extend-tree-eq {d = zero} Sing≃ = refl≃
-extend-tree-eq {d = zero} (Join≃ p Sing≃) = Join≃ p refl≃
-extend-tree-eq {d = zero} (Join≃ p q@(Join≃ _ _)) = Join≃ p (extend-tree-eq q)
+extend-tree-eq {d = zero} (Join≃ p q) = Join≃ p (extend-tree-eq q)
 extend-tree-eq {d = suc d} (Join≃ p Sing≃) = Join≃ (extend-tree-eq p) Sing≃
 extend-tree-eq {d = suc d} (Join≃ p q@(Join≃ _ _)) = Join≃ p (extend-tree-eq q)
 
@@ -141,12 +147,9 @@ tree-to-dyck-to-tree (Join S T) = begin
 tree-to-dyck-extend-tree : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄ → tree-to-dyck (suc d) (extend-tree d T) ⦃ extended-tree-is-more-extendable d T ⦄ ≃d ⇑ (tree-to-dyck d T)
 tree-to-dyck-extend-tree zero Sing = refl≃d
 tree-to-dyck-extend-tree zero (Join S Sing) = refl≃d
-tree-to-dyck-extend-tree zero (Join S (Join T₁ Sing)) = refl≃d
-tree-to-dyck-extend-tree zero (Join S (Join T₁ T₂@(Join _ _))) =
-  connect-dyck-≃ refl≃d (tree-to-dyck-extend-tree 0 (Join T₁ T₂))
+tree-to-dyck-extend-tree zero (Join S (Join T₁ T₂)) = connect-dyck-≃ refl≃d (tree-to-dyck-extend-tree 0 (Join T₁ T₂))
 tree-to-dyck-extend-tree (suc d) (Join S Sing) = susp-dyck-≃ (tree-to-dyck-extend-tree d S)
-tree-to-dyck-extend-tree (suc d) (Join S (Join T₁ Sing)) = connect-dyck-≃ refl≃d (susp-dyck-≃ (tree-to-dyck-extend-tree d T₁))
-tree-to-dyck-extend-tree (suc d) (Join S (Join T₁ T₂@(Join _ _))) = connect-dyck-≃ refl≃d (tree-to-dyck-extend-tree (suc d) (Join T₁ T₂))
+tree-to-dyck-extend-tree (suc d) (Join S (Join T₁ T₂)) = trans≃d (tree-to-dyck-join (2 + d) S (extend-tree (suc d) (Join T₁ T₂)) ⦃ extend-tree-is-join (suc d) (Join T₁ T₂) ⦄ ⦃ extended-tree-is-more-extendable (suc d) (Join T₁ T₂) ⦄) (connect-dyck-≃ refl≃d (tree-to-dyck-extend-tree (suc d) (Join T₁ T₂)))
 
 tree-to-dyck-restrict : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable (suc d) T ⦄ → tree-to-dyck d T ⦃ pred-n-extendable d T ⦄ ≃d ⇓ (tree-to-dyck (suc d) T)
 tree-to-dyck-restrict zero (Join S Sing) = refl≃d

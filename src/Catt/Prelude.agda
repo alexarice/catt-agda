@@ -24,7 +24,6 @@ record _×′_ (A : Set) (B : Set) : Set where
 open _×′_ public
 
 variable
-  -- X Y Z : Set
   n n′ m m′ l l′ o d d′ d″ : ℕ
 
 ⊥-elim : ∀ {w} {Whatever : Set w} → .⊥ → Whatever
@@ -47,11 +46,6 @@ instance
   isZero : IsZero zero
   isZero = _
 
--- _≤t_ : ℕ → ℕ → Set
--- zero ≤t m = ⊤
--- suc n ≤t zero = ⊥
--- suc n ≤t suc m = n ≤t m
-
 tri-cases : {X : Set} → {x y : ℕ} → Tri (x < y) (x ≡ y) (x > y) → X → X → X → X
 tri-cases (tri< _ _ _) X Y Z = X
 tri-cases (tri≈ _ _ _) X Y Z = Y
@@ -71,30 +65,6 @@ tri-case> : {X : Set} {x y : ℕ} → x > y → (t : Tri (x < y) (x ≡ y) (x > 
 tri-case> p (tri< a ¬b ¬c) A B C = ⊥-elim (¬c p)
 tri-case> p (tri≈ ¬a b ¬c) A B C = ⊥-elim (¬c p)
 tri-case> p (tri> ¬a ¬b c) A B C = refl
-
-record Cases {I : Set} (P : I → Set) : Set where
-  constructor case
-  field
-    doesC : I
-    proofC : P doesC
-
-open Cases public
-
-cases : {I A : Set} → {P : I → Set} → Cases P → (∀ i (p : P i) → A) → A
-cases (case d p) f = f d p
-
-record IrrelΣ {a b} (A : Set a) (B : A → Set b) : Set (a Agda.Primitive.⊔ b) where
-  constructor ⟦_⟧
-  field
-    carrier : A
-    .⦃ prop ⦄ : B carrier
-
-open IrrelΣ public
-
-IrrelΣ-syntax : ∀ {a} {b} (A : Set a) → (A → Set b) → Set (a Agda.Primitive.⊔ b)
-IrrelΣ-syntax = IrrelΣ
-
-syntax IrrelΣ-syntax A (λ x → B) = IΣ[ x ∈ A ] B
 
 double : ℕ → ℕ
 double zero = zero

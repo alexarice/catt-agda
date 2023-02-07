@@ -30,6 +30,8 @@ import Catt.Connection.Pasting
 import Catt.Tree
 import Catt.Tree.Properties
 import Catt.Tree.Pasting
+import Catt.Tree.Label
+import Catt.Tree.Label.Support
 import Catt.Tree.Unbiased
 import Catt.Tree.Unbiased.Properties
 import Catt.Tree.Insertion
@@ -70,6 +72,7 @@ import Catt.Connection.Typing
 import Catt.Tree.Typing
 import Catt.Tree.Unbiased.Typing
 import Catt.Tree.Insertion.Typing
+import Catt.Tree.Label.Typing
 
 import Catt.Dyck.Typing
 import Catt.Dyck.Pruning.Typing

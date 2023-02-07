@@ -44,11 +44,11 @@ NonZero-≤ {suc n} {suc m} p x = it
 ⊔-lem n zero = refl
 ⊔-lem n (suc m) = cong suc (⊔-comm n m)
 
-proof-≡ : {I : Set} → {P : I → Set} → (c : Cases P) → {i : I} → doesC c ≡ i → P i
-proof-≡ {P = P} (case _ proof) refl = proof
+-- proof-≡ : {I : Set} → {P : I → Set} → (c : Cases P) → {i : I} → doesC c ≡ i → P i
+-- proof-≡ {P = P} (case _ proof) refl = proof
 
-cases-≡ : {I A : Set} → {P : I → Set} → (c : Cases P) → (f : ∀ i (p : P i) → A) → {i : I} → (p : doesC c ≡ i) → cases c f ≡ f i (proof-≡ c p)
-cases-≡ (case doesC₁ proofC₁) f refl = refl
+-- cases-≡ : {I A : Set} → {P : I → Set} → (c : Cases P) → (f : ∀ i (p : P i) → A) → {i : I} → (p : doesC c ≡ i) → cases c f ≡ f i (proof-≡ c p)
+-- cases-≡ (case doesC₁ proofC₁) f refl = refl
 
 Truth-left : (b b′ : Bool) → Truth b → Truth (b ∨ b′)
 Truth-left true b′ p = tt

@@ -13,13 +13,13 @@ open import Catt.Typing rule
 open P rule
 open import Catt.Prelude.Properties
 
-lift-ty-typing : Typing-Ty Γ A → Typing-Ty (Γ , B) (liftType A)
-lift-tm-typing : Typing-Tm Γ t A → Typing-Tm (Γ , B) (liftTerm t) (liftType A)
-lift-sub-typing : Typing-Sub Γ Δ σ → Typing-Sub Γ (Δ , B) (liftSub σ)
+lift-ty-typing : Typing-Ty Γ A → Typing-Ty (Γ , B) (lift-ty A)
+lift-tm-typing : Typing-Tm Γ t A → Typing-Tm (Γ , B) (lift-tm t) (lift-ty A)
+lift-sub-typing : Typing-Sub Γ Δ σ → Typing-Sub Γ (Δ , B) (lift-sub σ)
 
-lift-ty-equality : B ≈[ Γ ]ty C → (liftType B) ≈[ Γ , A ]ty (liftType C)
-lift-tm-equality : s ≈[ Γ ]tm t → (liftTerm s) ≈[ Γ , A ]tm (liftTerm t)
-lift-sub-equality : σ ≈[ Γ ]s τ → (liftSub σ) ≈[ Γ , A ]s (liftSub τ)
+lift-ty-equality : B ≈[ Γ ]ty C → (lift-ty B) ≈[ Γ , A ]ty (lift-ty C)
+lift-tm-equality : s ≈[ Γ ]tm t → (lift-tm s) ≈[ Γ , A ]tm (lift-tm t)
+lift-sub-equality : σ ≈[ Γ ]s τ → (lift-sub σ) ≈[ Γ , A ]s (lift-sub τ)
 
 lift-ty-typing TyStar = TyStar
 lift-ty-typing (TyArr p q r) = TyArr (lift-tm-typing p) (lift-ty-typing q) (lift-tm-typing r)
@@ -54,12 +54,12 @@ idSub≃-Ty (Add≃ {A = A} {A′ = A′} p x) = TyExt (lift-sub-typing (idSub�
   where
     open Reasoning ty-setoid
 
-    lem : liftType A′ ≃ty (A [ liftSub (idSub≃ p) ]ty)
+    lem : lift-ty A′ ≃ty (A [ lift-sub (idSub≃ p) ]ty)
     lem = begin
-      < liftType A′ >ty ≈˘⟨ lift-ty-≃ x ⟩
-      < liftType A >ty ≈˘⟨ lift-ty-≃ (idSub≃-on-ty p A) ⟩
-      < liftType (A [ idSub≃ p ]ty) >ty ≈˘⟨ apply-lifted-sub-ty-≃ A (idSub≃ p) ⟩
-      < A [ liftSub (idSub≃ p) ]ty >ty ∎
+      < lift-ty A′ >ty ≈˘⟨ lift-ty-≃ x ⟩
+      < lift-ty A >ty ≈˘⟨ lift-ty-≃ (idSub≃-on-ty p A) ⟩
+      < lift-ty (A [ idSub≃ p ]ty) >ty ≈˘⟨ apply-lifted-sub-ty-≃ A (idSub≃ p) ⟩
+      < A [ lift-sub (idSub≃ p) ]ty >ty ∎
 
 ‼-Ty : Typing-Ctx Γ → (i : Fin n) → Typing-Ty Γ (Γ ‼ i)
 ‼-Ty (TyAdd Γty Aty) zero = lift-ty-typing Aty

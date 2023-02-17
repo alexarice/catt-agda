@@ -7,18 +7,18 @@ open import Relation.Nullary
 open import Data.Empty
 open import Relation.Binary.Definitions
 
-liftTerm : Tm n → Tm (suc n)
-liftType : Ty n → Ty (suc n)
-liftSub : Sub n m A → Sub n (suc m) (liftType A)
+lift-tm : Tm n → Tm (suc n)
+lift-ty : Ty n → Ty (suc n)
+lift-sub : Sub n m A → Sub n (suc m) (lift-ty A)
 
-liftType ⋆ = ⋆
-liftType (s ─⟨ A ⟩⟶ t) = liftTerm s ─⟨ liftType A ⟩⟶ liftTerm t
+lift-ty ⋆ = ⋆
+lift-ty (s ─⟨ A ⟩⟶ t) = lift-tm s ─⟨ lift-ty A ⟩⟶ lift-tm t
 
-liftTerm (Var i) = Var (suc i)
-liftTerm (Coh S A σ) = Coh S A (liftSub σ)
+lift-tm (Var i) = Var (suc i)
+lift-tm (Coh S A σ) = Coh S A (lift-sub σ)
 
-liftSub ⟨⟩ = ⟨⟩
-liftSub ⟨ σ , t ⟩ = ⟨ liftSub σ , liftTerm t ⟩
+lift-sub ⟨⟩ = ⟨⟩
+lift-sub ⟨ σ , t ⟩ = ⟨ lift-sub σ , lift-tm t ⟩
 
 sub-type : Sub n m A → Ty m
 sub-type {A = A} σ = A
@@ -36,18 +36,18 @@ _●_ : (σ : Sub n l A) → Sub m n B → Sub m l (B [ σ ]ty)
 Var zero [ ⟨ σ , t ⟩ ]tm = t
 Var (suc x) [ ⟨ σ , t ⟩ ]tm = Var x [ σ ]tm
 _[_]tm {A = ⋆} (Coh T B τ) σ = Coh T B (σ ● τ)
-_[_]tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = _[_]tm {A = A} (Coh (suspCtx Δ) (suspTy B) (suspSub τ)) (unrestrict σ)
+_[_]tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = _[_]tm {A = A} (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (unrestrict σ)
 σ ● ⟨⟩ = ⟨⟩
 σ ● ⟨ τ , t ⟩ = ⟨ (σ ● τ) , t [ σ ]tm ⟩
 
 idSub : {n : ℕ} → Sub n n ⋆
 idSub {zero} = ⟨⟩
-idSub {suc n} = ⟨ liftSub idSub , Var zero ⟩
+idSub {suc n} = ⟨ lift-sub idSub , Var zero ⟩
 
 infix 45 _‼_
 _‼_ : (Γ : Ctx n) → (i : Fin n) → Ty n
-(Γ , A) ‼ zero = liftType A
-(Γ , A) ‼ suc i = liftType (Γ ‼ i)
+(Γ , A) ‼ zero = lift-ty A
+(Γ , A) ‼ suc i = lift-ty (Γ ‼ i)
 
 ctx-proj₁ : Ctx (suc n) → Ctx n
 ctx-proj₁ (Γ , A) = Γ

@@ -80,7 +80,7 @@ maximal-join-not-here {T = Join S T} (PShift P) = tt
 
 path-to-term-is-var : (P : Path T) → isVar (path-to-term P)
 path-to-term-is-var PHere = tt
-path-to-term-is-var (PExt P) = var-to-var-comp-tm (suspTm (path-to-term P)) ⦃ suspTm-var (path-to-term P) ⦃ path-to-term-is-var P ⦄ ⦄ (connect-susp-inc-left _ _) ⦃ connect-susp-inc-left-var-to-var _ _ ⦄
+path-to-term-is-var (PExt P) = var-to-var-comp-tm (susp-tm (path-to-term P)) ⦃ susp-tm-var (path-to-term P) ⦃ path-to-term-is-var P ⦄ ⦄ (connect-susp-inc-left _ _) ⦃ connect-susp-inc-left-var-to-var _ _ ⦄
 path-to-term-is-var (PShift P) = var-to-var-comp-tm (path-to-term P) ⦃ path-to-term-is-var P ⦄ (connect-susp-inc-right _ _) ⦃ connect-susp-inc-right-var-to-var _ _ ⦄
 
 max-path-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (Z : Path T) → .⦃ is-Maximal Z ⦄ → S ≃ T → is-linear-max-path S ≃p Z
@@ -100,8 +100,8 @@ proj-ext (≃Ext p _) = p
 proj-shift : PShift {S = S} P ≃p PShift {S = T} Q → P ≃p Q
 proj-shift (≃Shift _ p) = p
 
--- susp-path-to-term : (P : Path X) → path-to-term (susp-path P) ≃tm suspTm (path-to-term P)
--- susp-path-to-term {X = someTree x} P = id-on-tm (suspTm (path-to-term P))
+-- susp-path-to-term : (P : Path X) → path-to-term (susp-path P) ≃tm susp-tm (path-to-term P)
+-- susp-path-to-term {X = someTree x} P = id-on-tm (susp-tm (path-to-term P))
 -- susp-path-to-term {X = Other _} (POther x) = refl≃tm
 
 -- var-to-path-is-path : (S : Tree n) → (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → is-Path (var-to-path S t)
@@ -132,7 +132,7 @@ var-connect-susp-inc-left i zero = id-on-tm (Var i)
 var-connect-susp-inc-left i (suc n) = begin
   < Var i [ connect-susp-inc-left _ (suc n) ]tm >tm
     ≈⟨ apply-lifted-sub-tm-≃ (Var i) (connect-susp-inc-left _ n) ⟩
-  < liftTerm (Var i [ connect-susp-inc-left _ n ]tm) >tm
+  < lift-tm (Var i [ connect-susp-inc-left _ n ]tm) >tm
     ≈⟨ lift-tm-≃ (var-connect-susp-inc-left i n) ⟩
   < Var (raise (suc n) i) >tm ∎
   where
@@ -142,11 +142,11 @@ var-connect-susp-inc-right : (i : Fin (suc m)) → (n : ℕ) → i ≢ fromℕ m
 var-connect-susp-inc-right {zero} 0F n p = ⊥-elim (p refl)
 var-connect-susp-inc-right {suc m} 0F n p = refl≃tm
 var-connect-susp-inc-right {suc m} (suc i) n p = begin
-  < Var i [ liftSub (connect-susp-inc-right n m) ]tm >tm
+  < Var i [ lift-sub (connect-susp-inc-right n m) ]tm >tm
     ≈⟨ apply-lifted-sub-tm-≃ (Var i) (connect-susp-inc-right n m) ⟩
-  < liftTerm (Var i [ connect-susp-inc-right n m ]tm) >tm
+  < lift-tm (Var i [ connect-susp-inc-right n m ]tm) >tm
     ≈⟨ lift-tm-≃ (var-connect-susp-inc-right i n (λ x → p (cong suc x))) ⟩
-  < liftTerm (Var (inject+ (2 + n) i)) >tm ∎
+  < lift-tm (Var (inject+ (2 + n) i)) >tm ∎
   where
     open Reasoning tm-setoid
 
@@ -209,7 +209,7 @@ path-to-fin-lem {T = Join {n} {m} S T} (PShift (PShift P)) p = ⊥-elim (fromℕ
 path-to-term-is-path-to-fin : (P : Path T) → path-to-term P ≃tm Var (path-to-fin P)
 path-to-term-is-path-to-fin PHere = refl≃tm
 path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PExt P) = begin
-  < suspTm (path-to-term P) [ connect-susp-inc-left n m ]tm >tm
+  < susp-tm (path-to-term P) [ connect-susp-inc-left n m ]tm >tm
     ≈⟨ sub-action-≃-tm (susp-tm-≃ (path-to-term-is-path-to-fin P)) refl≃s ⟩
   < Var (inject₁ (inject₁ (path-to-fin P))) [ connect-susp-inc-left n m ]tm >tm
     ≈⟨ var-connect-susp-inc-left (inject₁ (inject₁ (path-to-fin P))) m ⟩
@@ -219,8 +219,8 @@ path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PExt P) = begin
   where open Reasoning tm-setoid
 path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PShift PHere) = begin
   < Var (fromℕ m) [ connect-susp-inc-right n m ]tm >tm
-    ≈˘⟨ connect-inc-fst-var getSnd m ⟩
-  < getSnd [ connect-susp-inc-left n m ]tm >tm
+    ≈˘⟨ connect-inc-fst-var get-snd m ⟩
+  < get-snd [ connect-susp-inc-left n m ]tm >tm
     ≈⟨ var-connect-susp-inc-left (inject₁ (fromℕ _)) m ⟩
   < Var (raise m (inject₁ (fromℕ (suc n)))) >tm
     ≈˘⟨ Var≃ (sym (+-suc m (2 + n))) lem ⟩
@@ -587,11 +587,11 @@ maximal-≃ (≃Shift x p) .p₂ = maximal-≃ p
 is-linear-max-path-is-0V : (S : Tree n) → .⦃ _ : is-linear S ⦄ → path-to-term (is-linear-max-path S) ≃tm (0V {n = suc n})
 is-linear-max-path-is-0V Sing = refl≃tm
 is-linear-max-path-is-0V (Join S Sing) = begin
-  < suspTm (path-to-term (is-linear-max-path S)) [ idSub ]tm >tm
-    ≈⟨ id-on-tm (suspTm (path-to-term (is-linear-max-path S))) ⟩
-  < suspTm (path-to-term (is-linear-max-path S)) >tm
+  < susp-tm (path-to-term (is-linear-max-path S)) [ idSub ]tm >tm
+    ≈⟨ id-on-tm (susp-tm (path-to-term (is-linear-max-path S))) ⟩
+  < susp-tm (path-to-term (is-linear-max-path S)) >tm
     ≈⟨ susp-tm-≃ (is-linear-max-path-is-0V S) ⟩
-  < suspTm 0V >tm
+  < susp-tm 0V >tm
     ≡⟨⟩
   < 0V >tm ∎
   where

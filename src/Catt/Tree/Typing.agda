@@ -46,34 +46,34 @@ tree-last-var-Ty (Join S T) = apply-sub-tm-typing (tree-last-var-Ty T) (connect-
 -- sub-from-linear-Eq {σ = σ} {τ = τ} (Join T Sing) σty τty p = begin
 --   < σ >s′
 --     ≈˘⟨ unrestrict-restrict-≈ σ refl≈tm refl≈tm ⟩
---   < unrestrict (restrict σ (getFst [ σ ]tm) (getSnd [ σ ]tm)) >s′
+--   < unrestrict (restrict σ (get-fst [ σ ]tm) (get-snd [ σ ]tm)) >s′
 --     ≈⟨ unrestrictEq (sub-from-linear-Eq T (restrictTy σty
 --                                                       (tree-to-ctx-Ty T)
---                                                       (apply-sub-tm-typing getFstTy σty)
---                                                       (apply-sub-tm-typing getSndTy σty)
+--                                                       (apply-sub-tm-typing get-fstTy σty)
+--                                                       (apply-sub-tm-typing get-sndTy σty)
 --                                                       refl≈tm
 --                                                       refl≈tm)
 --                                           (restrictTy τty
 --                                                       (tree-to-ctx-Ty T)
---                                                       (apply-sub-tm-typing getFstTy τty)
---                                                       (apply-sub-tm-typing getSndTy τty)
+--                                                       (apply-sub-tm-typing get-fstTy τty)
+--                                                       (apply-sub-tm-typing get-sndTy τty)
 --                                                       refl≈tm
 --                                                       refl≈tm)
 --                                           lem) ⟩
---   < unrestrict (restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm)) >s′
+--   < unrestrict (restrict τ (get-fst [ τ ]tm) (get-snd [ τ ]tm)) >s′
 --     ≈⟨ unrestrict-restrict-≈ τ refl≈tm refl≈tm ⟩
 --   < τ >s′ ∎
 --   where
---     lem : (Var zero [ restrict σ (getFst [ σ ]tm) (getSnd [ σ ]tm) ]tm) ≃tm
---             (Var zero [ restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm) ]tm)
+--     lem : (Var zero [ restrict σ (get-fst [ σ ]tm) (get-snd [ σ ]tm) ]tm) ≃tm
+--             (Var zero [ restrict τ (get-fst [ τ ]tm) (get-snd [ τ ]tm) ]tm)
 --     lem = begin
---       < Var zero [ restrict σ (getFst [ σ ]tm) (getSnd [ σ ]tm) ]tm >tm
+--       < Var zero [ restrict σ (get-fst [ σ ]tm) (get-snd [ σ ]tm) ]tm >tm
 --         ≈˘⟨ restrict-susp 0V σ ⟩
 --       < 0V [ σ ]tm >tm
 --         ≈⟨ p ⟩
 --       < 0V [ τ ]tm >tm
 --         ≈⟨ restrict-susp 0V τ ⟩
---       < Var zero [ restrict τ (getFst [ τ ]tm) (getSnd [ τ ]tm) ]tm >tm ∎
+--       < Var zero [ restrict τ (get-fst [ τ ]tm) (get-snd [ τ ]tm) ]tm >tm ∎
 --       where
 --         open Reasoning tm-setoid
 --     open Reasoning (sub-setoid-≈ _)

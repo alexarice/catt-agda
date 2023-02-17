@@ -185,9 +185,9 @@ TransportVarSet-tm (Coh S A τ) σ = TransportVarSet-sub τ σ
 TransportVarSet-sub {A = A} ⟨⟩ σ = TransportVarSet-ty A σ -- TransportVarSet-empty σ
 TransportVarSet-sub ⟨ τ , t ⟩ σ = trans (TransportVarSet-∪ (FVSub τ) (FVTm t) σ) (cong₂ _∪_ (TransportVarSet-sub τ σ) (TransportVarSet-tm t σ))
 
-supp-lift-ty : (A : Ty n) → FVTy (liftType A) ≡ ewf (FVTy A)
-supp-lift-tm : (t : Tm n) → FVTm (liftTerm t) ≡ ewf (FVTm t)
-supp-lift-sub : (σ : Sub n m ⋆) → FVSub (liftSub σ) ≡ ewf (FVSub σ)
+supp-lift-ty : (A : Ty n) → FVTy (lift-ty A) ≡ ewf (FVTy A)
+supp-lift-tm : (t : Tm n) → FVTm (lift-tm t) ≡ ewf (FVTm t)
+supp-lift-sub : (σ : Sub n m ⋆) → FVSub (lift-sub σ) ≡ ewf (FVSub σ)
 
 supp-lift-ty ⋆ = refl
 supp-lift-ty (s ─⟨ A ⟩⟶ t) = cong₂ _∪_ (cong₂ _∪_ (supp-lift-ty A) (supp-lift-tm s)) (supp-lift-tm t)
@@ -206,7 +206,7 @@ idSub≃-supp : (p : Γ ≃c Δ) → FVSub (idSub≃ p) ≡ full
 idSub≃-supp Emp≃ = refl
 idSub≃-supp (Add≃ p x) = trans (cong (_∪ ewt empty) (supp-lift-sub (idSub≃ p))) (cong ewt (trans (∪-right-unit (FVSub (idSub≃ p))) (idSub≃-supp p)))
 
-TransportVarSet-lift : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet xs (liftSub σ) ≡ ewf (TransportVarSet xs σ)
+TransportVarSet-lift : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet xs (lift-sub σ) ≡ ewf (TransportVarSet xs σ)
 TransportVarSet-lift emp ⟨⟩ = refl
 TransportVarSet-lift (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-lift xs σ
 TransportVarSet-lift (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (TransportVarSet-lift xs σ) (supp-lift-tm t)
@@ -306,10 +306,10 @@ unrestrict-supp ⟨ σ , t ⟩ = cong (_∪ FVTm t) (unrestrict-supp σ)
 coh-sub-fv : (Γ : Ctx (suc n)) → (A : Ty (suc n)) → (σ : Sub (suc n) m B) → FVTm (Coh Γ A idSub [ σ ]tm) ≡ FVSub σ
 coh-sub-fv {B = ⋆} Γ A σ = FVSub-≃ (id-right-unit σ)
 coh-sub-fv {B = s ─⟨ B ⟩⟶ t} Γ A σ = begin
-  FVTm (Coh (suspCtx Γ) (suspTy A) (suspSub idSub) [ unrestrict σ ]tm)
-    ≡⟨ FVTm-≃ (sub-action-≃-tm (Coh≃ (refl≃c {Γ = suspCtx Γ}) refl≃ty susp-functorial-id) (refl≃s {σ = unrestrict σ})) ⟩
-  FVTm (Coh (suspCtx Γ) (suspTy A) idSub [ unrestrict σ ]tm)
-    ≡⟨ coh-sub-fv (suspCtx Γ) (suspTy A) (unrestrict σ) ⟩
+  FVTm (Coh (susp-ctx Γ) (susp-ty A) (susp-sub idSub) [ unrestrict σ ]tm)
+    ≡⟨ FVTm-≃ (sub-action-≃-tm (Coh≃ (refl≃c {Γ = susp-ctx Γ}) refl≃ty susp-functorial-id) (refl≃s {σ = unrestrict σ})) ⟩
+  FVTm (Coh (susp-ctx Γ) (susp-ty A) idSub [ unrestrict σ ]tm)
+    ≡⟨ coh-sub-fv (susp-ctx Γ) (susp-ty A) (unrestrict σ) ⟩
   FVSub (unrestrict σ)
     ≡⟨ unrestrict-supp σ ⟩
   FVSub σ ∎
@@ -467,8 +467,8 @@ FVTm-comp-⊆ (Var (suc i)) ⟨ σ , t ⟩ = ⊆-trans (FVTm-comp-⊆ (Var i) σ
 FVTm-comp-⊆ {A = ⋆} (Coh S B τ) σ = FVSub-comp-⊆ σ τ
 FVTm-comp-⊆ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = begin
   FVTm
-      (Coh (suspCtx Δ) (suspTy B) (suspSub τ) [ unrestrict σ ]tm)
-    ≤⟨ FVTm-comp-⊆ (Coh (suspCtx Δ) (suspTy B) (suspSub τ)) (unrestrict σ) ⟩
+      (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm)
+    ≤⟨ FVTm-comp-⊆ (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (unrestrict σ) ⟩
   FVSub (unrestrict σ)
     ≡⟨ unrestrict-supp σ ⟩
   FVSub σ ∎
@@ -487,7 +487,7 @@ FVSub-comp-⊆ σ ⟨ τ , t ⟩ = begin
 
 SuppContainsType : (t : Tm n) → (Γ : Ctx n) → SuppTy Γ (tm-to-ty Γ t) ⊆ SuppTm Γ t
 SuppContainsType (Var zero) (Γ , A) = begin
-  SuppTy (Γ , A) (liftType A)
+  SuppTy (Γ , A) (lift-ty A)
     ≡⟨ cong (DC (Γ , A)) (supp-lift-ty A) ⟩
   ewf (SuppTy Γ A)
     ≤⟨ cong ewt (sym (∪-idem (SuppTy Γ A))) ⟩
@@ -500,7 +500,7 @@ SuppContainsType (Var zero) (Γ , A) = begin
     open PReasoning (⊆-poset _)
 
 SuppContainsType (Var (suc i)) (Γ , A) = begin
-  SuppTy (Γ , A) (liftType (Γ ‼ i))
+  SuppTy (Γ , A) (lift-ty (Γ ‼ i))
     ≡⟨ cong (DC (Γ , A)) (supp-lift-ty (Γ ‼ i)) ⟩
   ewf (SuppTy Γ (Γ ‼ i))
     ≤⟨ cong ewf (SuppContainsType (Var i) Γ) ⟩

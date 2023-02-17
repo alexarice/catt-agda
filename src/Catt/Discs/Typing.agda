@@ -36,13 +36,13 @@ sub-from-sphere-Ty (suc d) (TyArr {A = A} sty Aty tty) p
   where
     open Reasoning ty-setoid
     lem : A ≃ty
-            (liftType (sphere-type d) [ ⟨ sub-from-sphere d A (cong pred p) , _ ⟩ ]ty)
+            (lift-ty (sphere-type d) [ ⟨ sub-from-sphere d A (cong pred p) , _ ⟩ ]ty)
     lem = begin
       < A >ty
         ≈˘⟨ sub-from-sphere-prop d A (cong pred p) ⟩
       < sphere-type d [ sub-from-sphere d A (cong pred p) ]ty >ty
         ≈˘⟨ lift-sub-comp-lem-ty (sub-from-sphere d A _) (sphere-type d) ⟩
-      < liftType (sphere-type d) [ ⟨ sub-from-sphere d A (cong pred p) , _ ⟩ ]ty >ty ∎
+      < lift-ty (sphere-type d) [ ⟨ sub-from-sphere d A (cong pred p) , _ ⟩ ]ty >ty ∎
 
 sub-from-disc-Ty : (d : ℕ) → Typing-Ty Γ A → .(p : ty-dim A ≡ d) → Typing-Tm Γ t A → Typing-Sub (Disc d) Γ (sub-from-disc d A p t)
 sub-from-disc-Ty {t = t} d Aty p tty
@@ -64,13 +64,13 @@ sub-from-sphere-Eq {Γ = Γ} (suc d) (TyExt (TyExt {σ = σ} σty y) x) (TyExt (
     lem = begin
       sphere-type d [ σ ]ty
         ≈˘⟨ reflexive≈ty (lift-sub-comp-lem-ty σ (sphere-type d)) ⟩
-      liftType (sphere-type d) [ ⟨ σ , _ ⟩ ]ty
-        ≈˘⟨ reflexive≈ty (lift-sub-comp-lem-ty ⟨ σ , _ ⟩ (liftType (sphere-type d))) ⟩
-      liftType (liftType (sphere-type d)) [ ⟨ ⟨ σ , _ ⟩ , _ ⟩ ]ty
+      lift-ty (sphere-type d) [ ⟨ σ , _ ⟩ ]ty
+        ≈˘⟨ reflexive≈ty (lift-sub-comp-lem-ty ⟨ σ , _ ⟩ (lift-ty (sphere-type d))) ⟩
+      lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ σ , _ ⟩ , _ ⟩ ]ty
         ≈⟨ q ⟩
-      liftType (liftType (sphere-type d)) [ ⟨ ⟨ τ , _ ⟩ , _ ⟩ ]ty
-        ≈⟨ reflexive≈ty (lift-sub-comp-lem-ty ⟨ τ , _ ⟩ (liftType (sphere-type d))) ⟩
-      liftType (sphere-type d) [ ⟨ τ , _ ⟩ ]ty
+      lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ τ , _ ⟩ , _ ⟩ ]ty
+        ≈⟨ reflexive≈ty (lift-sub-comp-lem-ty ⟨ τ , _ ⟩ (lift-ty (sphere-type d))) ⟩
+      lift-ty (sphere-type d) [ ⟨ τ , _ ⟩ ]ty
         ≈⟨ reflexive≈ty (lift-sub-comp-lem-ty τ (sphere-type d)) ⟩
       sphere-type d [ τ ]ty ∎
       where
@@ -79,7 +79,7 @@ sub-from-sphere-Eq {Γ = Γ} (suc d) (TyExt (TyExt {σ = σ} σty y) x) (TyExt (
 sub-from-disc-Eq : (d : ℕ) → {σ : Sub (disc-size d) n A} → {τ : Sub (disc-size d) n A} → Typing-Sub (Disc d) Γ σ → Typing-Sub (Disc d) Γ τ → 0V [ σ ]tm ≃tm 0V [ τ ]tm → σ ≈[ Γ ]s τ
 sub-from-disc-Eq d (TyExt σty x) (TyExt τty y) p = Ext≈ (sub-from-sphere-Eq d σty τty (Ty-unique-≃ p x y)) (reflexive≈tm p)
 
-identity-Ty : (n : ℕ) → ∀ {σ} → Typing-Sub (Disc n) Γ σ → Typing-Tm Γ (identity n σ) ((0V ─⟨ liftType (sphere-type n) ⟩⟶ 0V) [ σ ]ty)
+identity-Ty : (n : ℕ) → ∀ {σ} → Typing-Sub (Disc n) Γ σ → Typing-Tm Γ (identity n σ) ((0V ─⟨ lift-ty (sphere-type n) ⟩⟶ 0V) [ σ ]ty)
 identity-Ty n σty = TyCoh ⦃ disc-pd n ⦄
                           (TyArr (TyVar zero) (lift-ty-typing (sphere-type-Ty n)) (TyVar zero))
                           σty
@@ -88,9 +88,9 @@ identity-Ty n σty = TyCoh ⦃ disc-pd n ⦄
   where
     open ≡-Reasoning
 
-    lem : FVTy (liftType (sphere-type n)) ∪ ewt empty ∪ ewt empty ≡ full
+    lem : FVTy (lift-ty (sphere-type n)) ∪ ewt empty ∪ ewt empty ≡ full
     lem = begin
-      FVTy (liftType (sphere-type n)) ∪ ewt empty ∪ ewt empty
+      FVTy (lift-ty (sphere-type n)) ∪ ewt empty ∪ ewt empty
         ≡⟨ cong (λ - → - ∪ ewt empty ∪ ewt empty) (supp-lift-ty (sphere-type n)) ⟩
       ewt (FVTy (sphere-type n) ∪ empty ∪ empty)
         ≡⟨ cong ewt (solve (∪-monoid {n = sphere-size n})) ⟩
@@ -98,9 +98,9 @@ identity-Ty n σty = TyCoh ⦃ disc-pd n ⦄
         ≡⟨ cong ewt (sphere-supp n) ⟩
       full ∎
 
-    lem2 : SuppTy (Disc n) (Var 0F ─⟨ liftType (sphere-type n) ⟩⟶ Var 0F) ≡ full
+    lem2 : SuppTy (Disc n) (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F) ≡ full
     lem2 = begin
-      SuppTy (Disc n) (Var 0F ─⟨ liftType (sphere-type n) ⟩⟶ Var 0F)
+      SuppTy (Disc n) (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F)
         ≡⟨ cong (DC (Disc n)) lem ⟩
       DC (Disc n) full
         ≡⟨ DC-full (Disc n) ⟩

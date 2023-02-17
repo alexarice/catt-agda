@@ -461,29 +461,29 @@ label-from-disc-term-prop : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → 
 label-from-disc-term-prop {S = Sing} L = refl≃stm
 label-from-disc-term-prop {S = Join S Sing} L = label-from-disc-term-prop (label₁ L)
 
-unbiased-type-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → sty-to-type (unbiased-type d S) ≃ty liftType (sphere-type d)
+unbiased-type-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → sty-to-type (unbiased-type d S) ≃ty lift-ty (sphere-type d)
 unbiased-type-linear zero Sing p = refl≃ty
 unbiased-type-linear (suc d) (Join S Sing) p = begin
   < sty-to-type (unbiased-type (suc d) (suspTree S)) >ty
     ≈˘⟨ unbiased-type-susp-lem d S .get ⟩
   < sty-to-type (susp-sty (unbiased-type d S)) >ty
     ≈⟨ susp-sty-to-type (unbiased-type d S) ⟩
-  < suspTy (sty-to-type (unbiased-type d S)) >ty
+  < susp-ty (sty-to-type (unbiased-type d S)) >ty
     ≈⟨ susp-ty-≃ (unbiased-type-linear d S (cong pred p)) ⟩
-  < suspTy (liftType (sphere-type d)) >ty
+  < susp-ty (lift-ty (sphere-type d)) >ty
     ≈⟨ susp-ty-lift (sphere-type d) ⟩
-  < liftType (suspTy (sphere-type d)) >ty
+  < lift-ty (susp-ty (sphere-type d)) >ty
     ≈⟨ lift-ty-≃ (sphere-type-susp d) ⟩
-  < liftType (sphere-type (suc d)) >ty ∎
+  < lift-ty (sphere-type (suc d)) >ty ∎
   where
     open Reasoning ty-setoid
 
 unbiased-term-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → stm-to-term (unbiased-stm d S) ≃tm (0V {n = suc n})
 unbiased-term-linear zero Sing p = refl≃tm
 unbiased-term-linear (suc d) (Join S Sing) p = begin
-  < suspTm (stm-to-term (unbiased-stm d S)) [ idSub ]tm >tm
-    ≈⟨ id-on-tm (suspTm (stm-to-term (unbiased-stm d S))) ⟩
-  < suspTm (stm-to-term (unbiased-stm d S)) >tm
+  < susp-tm (stm-to-term (unbiased-stm d S)) [ idSub ]tm >tm
+    ≈⟨ id-on-tm (susp-tm (stm-to-term (unbiased-stm d S))) ⟩
+  < susp-tm (stm-to-term (unbiased-stm d S)) >tm
     ≈⟨ susp-tm-≃ (unbiased-term-linear d S (cong pred p)) ⟩
   < 0V >tm ∎
   where
@@ -525,7 +525,7 @@ identity-stm-to-term n = begin
         open Reasoning tm-setoid
 
     lem3 : sty-to-type (unbiased-type (suc n) (n-disc n)) ≃ty
-             (Var 0F ─⟨ liftType (sphere-type n) ⟩⟶ Var 0F)
+             (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F)
     lem3 = Arr≃ (lem2 false) (unbiased-type-linear n (n-disc n) ⦃ n-disc-is-linear n ⦄ (sym (tree-dim-n-disc n))) (lem2 true)
 
     lem4 : label-to-sub (id-label (n-disc n) ,, S⋆) ● idSub ≃s idSub

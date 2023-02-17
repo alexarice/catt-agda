@@ -150,7 +150,7 @@ tree-last-var-is-var (Join S T) = var-to-var-comp-tm (tree-last-var T) ⦃ tree-
 linear-tree-dim : (S : Tree n) → .⦃ is-linear S ⦄ → tm-height (tree-to-ctx S) 0V ≡ tree-dim S
 linear-tree-dim Sing = refl
 linear-tree-dim (Join S Sing) = begin
-  tm-height (suspCtx (tree-to-ctx S)) 0V
+  tm-height (susp-ctx (tree-to-ctx S)) 0V
     ≡⟨ susp-tm-height 0V (tree-to-ctx S) ⟩
   suc (tm-height (tree-to-ctx S) 0V)
     ≡⟨ cong suc (linear-tree-dim S) ⟩
@@ -213,7 +213,7 @@ connect-tree-last-var (Join S₁ S₂) T = begin
     l2 : (connect-susp-inc-right (tree-size S₁)
             (tree-size (connect-tree S₂ T))
             ● idSub≃ (sym≃c (connect-tree-to-ctx S₂ T)))
-           ≃s connect-inc-right getSnd (tree-size T + tree-size S₂)
+           ≃s connect-inc-right get-snd (tree-size T + tree-size S₂)
     l2 = begin
       < connect-susp-inc-right (tree-size S₁) (tree-size (connect-tree S₂ T))
         ● idSub≃ (sym≃c (connect-tree-to-ctx S₂ T)) >s
@@ -244,9 +244,9 @@ connect-tree-last-var (Join S₁ S₂) T = begin
         ● idSub≃ (sym≃c (connect-tree-to-ctx S₂ T))
         ● connect-inc-right (tree-last-var S₂) (tree-size T) >s
         ≈⟨ sub-action-≃-sub refl≃s l2 ⟩
-      < connect-inc-right getSnd (tree-size T + tree-size S₂)
+      < connect-inc-right get-snd (tree-size T + tree-size S₂)
         ● connect-inc-right (tree-last-var S₂) (tree-size T) >s
-        ≈˘⟨ connect-inc-right-assoc getSnd (tree-last-var S₂) (tree-size T) ⟩
+        ≈˘⟨ connect-inc-right-assoc get-snd (tree-last-var S₂) (tree-size T) ⟩
       < connect-inc-right (tree-last-var S₂ [ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
         (tree-size T) >s
         ≈˘⟨ idSub≃-on-sub (sym≃c (connect-tree-to-ctx (Join S₁ S₂) T)) _ ⟩
@@ -271,16 +271,16 @@ tree-to-ctx-glob : (S : Tree n) → ctx-is-globular (tree-to-ctx S)
 tree-to-ctx-glob Sing = tt ,, tt
 tree-to-ctx-glob (Join S T) = connect-susp-glob (tree-to-ctx S) ⦃ tree-to-ctx-glob S ⦄ (tree-to-ctx T) ⦃ tree-to-ctx-glob T ⦄
 
-susp-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → suspCtx (tree-to-ctx S) ≃c tree-to-ctx S , tree-to-ctx S ‼ zero , 1V ─⟨ (liftType (tree-to-ctx S ‼ zero)) ⟩⟶ 0V
+susp-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → susp-ctx (tree-to-ctx S) ≃c tree-to-ctx S , tree-to-ctx S ‼ zero , 1V ─⟨ (lift-ty (tree-to-ctx S ‼ zero)) ⟩⟶ 0V
 susp-lin-tree Sing = refl≃c
 susp-lin-tree (Join S Sing) = begin
-  < suspCtx (suspCtx (tree-to-ctx S)) >c
+  < susp-ctx (susp-ctx (tree-to-ctx S)) >c
     ≈⟨ susp-ctx-≃ (susp-lin-tree S) ⟩
-  < suspCtx (tree-to-ctx S) , suspTy (tree-to-ctx S ‼ zero) ,
-       1V ─⟨ suspTy (liftType (tree-to-ctx S ‼ zero)) ⟩⟶ 0V >c
+  < susp-ctx (tree-to-ctx S) , susp-ty (tree-to-ctx S ‼ zero) ,
+       1V ─⟨ susp-ty (lift-ty (tree-to-ctx S ‼ zero)) ⟩⟶ 0V >c
     ≈˘⟨ Add≃ (Add≃ refl≃c (susp-‼ (tree-to-ctx S) zero)) (Arr≃ refl≃tm (trans≃ty (lift-ty-≃ (susp-‼ (tree-to-ctx S) zero)) (sym≃ty (susp-ty-lift (tree-to-ctx S ‼ zero)))) refl≃tm) ⟩
-  < suspCtx (tree-to-ctx S) , suspCtx (tree-to-ctx S) ‼ zero ,
-       1V ─⟨ liftType (suspCtx (tree-to-ctx S) ‼ zero) ⟩⟶ 0V >c ∎
+  < susp-ctx (tree-to-ctx S) , susp-ctx (tree-to-ctx S) ‼ zero ,
+       1V ─⟨ lift-ty (susp-ctx (tree-to-ctx S) ‼ zero) ⟩⟶ 0V >c ∎
   where
     open Reasoning ctx-setoid
 

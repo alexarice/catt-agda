@@ -100,29 +100,29 @@ module _ where
 
   lift-rule : ∀ i a → LiftRule {i} a
   lift-rule i a tc = begin
-    liftTerm (insertionRule .lhs a) ≡⟨⟩
-    Coh (tree-to-ctx id-S) id-A (liftSub id-σ)
+    lift-tm (insertionRule .lhs a) ≡⟨⟩
+    Coh (tree-to-ctx id-S) id-A (lift-sub id-σ)
       ≈⟨ Ins≈ id-S tc id-P id-T lem ⟩
     Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
         (id-A [ exterior-sub id-S id-P id-T ]ty)
-        (sub-from-insertion id-S id-P id-T (liftSub id-σ) (liftSub id-τ))
+        (sub-from-insertion id-S id-P id-T (lift-sub id-σ) (lift-sub id-τ))
         ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (sym≃s (lift-sub-from-insertion id-S id-P id-T id-σ id-τ))) ⟩
-    liftTerm (insertionRule .rhs a) ∎
+    lift-tm (insertionRule .rhs a) ∎
 
     where
       open InsertionData a
       lem : branching-path-to-var id-S id-P
-                                  [ liftSub id-σ ]tm
+                                  [ lift-sub id-σ ]tm
             ≃tm
-            unbiased-comp (tree-dim id-T) id-T [ liftSub id-τ ]tm
+            unbiased-comp (tree-dim id-T) id-T [ lift-sub id-τ ]tm
       lem = begin
-        < branching-path-to-var id-S id-P [ liftSub id-σ ]tm >tm
+        < branching-path-to-var id-S id-P [ lift-sub id-σ ]tm >tm
           ≈⟨ apply-lifted-sub-tm-≃ (branching-path-to-var id-S id-P) id-σ ⟩
-        < liftTerm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
+        < lift-tm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
           ≈⟨ lift-tm-≃ id-eq ⟩
-        < liftTerm (unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm) >tm
+        < lift-tm (unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm) >tm
           ≈˘⟨ apply-lifted-sub-tm-≃ (unbiased-comp (tree-dim id-T) id-T) id-τ ⟩
-        < unbiased-comp (tree-dim id-T) id-T [ liftSub id-τ ]tm >tm ∎
+        < unbiased-comp (tree-dim id-T) id-T [ lift-sub id-τ ]tm >tm ∎
         where
           open Reasoning tm-setoid
 
@@ -130,54 +130,54 @@ module _ where
 
   susp-rule : ∀ i a → SuspRule {i} a
   susp-rule i a tc = begin
-    Coh (tree-to-ctx (suspTree id-S)) (suspTy id-A) (suspSub id-σ)
+    Coh (tree-to-ctx (suspTree id-S)) (susp-ty id-A) (susp-sub id-σ)
       ≈⟨ Ins≈ (suspTree id-S) tc (PExt id-P) (suspTree id-T) lem ⟩
     Coh (tree-to-ctx (insertion-tree (suspTree id-S) (PExt id-P) (suspTree id-T)))
-        (suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty)
-        (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (suspSub id-σ) (suspSub id-τ))
+        (susp-ty id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty)
+        (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (susp-sub id-σ) (susp-sub id-τ))
         ≈⟨ reflexive≈tm (Coh≃ refl≃c lem-ty (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
     Coh (tree-to-ctx (suspTree (insertion-tree id-S id-P id-T)))
-        (suspTy (id-A [ exterior-sub id-S id-P id-T ]ty))
-        (suspSub (sub-from-insertion id-S id-P id-T id-σ id-τ)) ∎
+        (susp-ty (id-A [ exterior-sub id-S id-P id-T ]ty))
+        (susp-sub (sub-from-insertion id-S id-P id-T id-σ id-τ)) ∎
     where
       open InsertionData a
 
-      lem-ty : suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty
+      lem-ty : susp-ty id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty
                ≃ty
-               suspTy (id-A [ exterior-sub id-S id-P id-T ]ty)
+               susp-ty (id-A [ exterior-sub id-S id-P id-T ]ty)
       lem-ty = begin
-        < suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty >ty
+        < susp-ty id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty >ty
           ≈⟨ sub-action-≃-ty refl≃ty (exterior-sub-susp id-S id-P id-T) ⟩
-        < suspTy id-A [ suspSub (exterior-sub id-S id-P id-T) ]ty >ty
+        < susp-ty id-A [ susp-sub (exterior-sub id-S id-P id-T) ]ty >ty
           ≈˘⟨ susp-functorial-ty (exterior-sub id-S id-P id-T) id-A ⟩
-        < suspTy (id-A [ exterior-sub id-S id-P id-T ]ty) >ty ∎
+        < susp-ty (id-A [ exterior-sub id-S id-P id-T ]ty) >ty ∎
         where
           open Reasoning ty-setoid
 
       lem : (branching-path-to-var (suspTree id-S) (PExt id-P)
-               [ suspSub id-σ ]tm)
+               [ susp-sub id-σ ]tm)
             ≃tm
-            unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) [ unrestrict (suspSubRes id-τ) ]tm
+            unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) [ unrestrict (susp-sub-res id-τ) ]tm
       lem = begin
-        < branching-path-to-var (suspTree id-S) (PExt id-P) [ suspSub id-σ ]tm >tm ≡⟨⟩
-        < suspTm (branching-path-to-var id-S id-P)
+        < branching-path-to-var (suspTree id-S) (PExt id-P) [ susp-sub id-σ ]tm >tm ≡⟨⟩
+        < susp-tm (branching-path-to-var id-S id-P)
             [ idSub ]tm
-            [ suspSub id-σ ]tm >tm
-          ≈⟨ sub-action-≃-tm (id-on-tm (suspTm (branching-path-to-var id-S id-P))) refl≃s ⟩
-        < suspTm (branching-path-to-var id-S id-P)
-            [ suspSub id-σ ]tm >tm
+            [ susp-sub id-σ ]tm >tm
+          ≈⟨ sub-action-≃-tm (id-on-tm (susp-tm (branching-path-to-var id-S id-P))) refl≃s ⟩
+        < susp-tm (branching-path-to-var id-S id-P)
+            [ susp-sub id-σ ]tm >tm
           ≈˘⟨ susp-functorial-tm id-σ (branching-path-to-var id-S id-P) ⟩
-        < suspTm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
+        < susp-tm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
           ≈⟨ susp-tm-≃ id-eq ⟩
-        < suspTm (unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm) >tm
+        < susp-tm (unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm) >tm
           ≈⟨ susp-functorial-tm id-τ (unbiased-comp (tree-dim id-T) id-T) ⟩
-        < suspTm (unbiased-comp (tree-dim id-T) id-T) [ suspSub id-τ ]tm >tm
-          ≈⟨ sub-action-≃-tm (unbiased-comp-susp-lem (tree-dim id-T) id-T) (refl≃s {σ = suspSub id-τ}) ⟩
-        < unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) [ suspSub id-τ ]tm >tm ∎
+        < susp-tm (unbiased-comp (tree-dim id-T) id-T) [ susp-sub id-τ ]tm >tm
+          ≈⟨ sub-action-≃-tm (unbiased-comp-susp-lem (tree-dim id-T) id-T) (refl≃s {σ = susp-sub id-τ}) ⟩
+        < unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) [ susp-sub id-τ ]tm >tm ∎
         where
           open Reasoning tm-setoid
 
-      open Reasoning (tm-setoid-≈ (suspCtx id-Γ))
+      open Reasoning (tm-setoid-≈ (susp-ctx id-Γ))
 
   sub-rule : ∀ i a → SubRule {i} a
   sub-rule i a {σ = σ} {Δ = Δ} σty tc = begin
@@ -241,46 +241,46 @@ module Support where
 
     lift-rule-supp : ∀ i a → LiftRule {i} a
     lift-rule-supp i (a ,, sc) tc = begin
-      liftTerm (insertionRule .lhs a) ≡⟨⟩
-      Coh (tree-to-ctx id-S) id-A (liftSub id-σ)
+      lift-tm (insertionRule .lhs a) ≡⟨⟩
+      Coh (tree-to-ctx id-S) id-A (lift-sub id-σ)
         ≈⟨ InsSupp≈ id-S tc id-P id-T lem lem2 ⟩
       Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
           (id-A [ exterior-sub id-S id-P id-T ]ty)
-          (sub-from-insertion id-S id-P id-T (liftSub id-σ) (liftSub id-τ))
+          (sub-from-insertion id-S id-P id-T (lift-sub id-σ) (lift-sub id-τ))
           ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (sym≃s (lift-sub-from-insertion id-S id-P id-T id-σ id-τ))) ⟩
-      liftTerm (insertionRule .rhs a) ∎
+      lift-tm (insertionRule .rhs a) ∎
 
       where
         open InsertionData a
         lem : branching-path-to-var id-S id-P
-                                    [ liftSub id-σ ]tm
+                                    [ lift-sub id-σ ]tm
               ≃tm
-              unbiased-comp (tree-dim id-T) id-T [ liftSub id-τ ]tm
+              unbiased-comp (tree-dim id-T) id-T [ lift-sub id-τ ]tm
         lem = begin
-          < branching-path-to-var id-S id-P [ liftSub id-σ ]tm >tm
+          < branching-path-to-var id-S id-P [ lift-sub id-σ ]tm >tm
             ≈⟨ apply-lifted-sub-tm-≃ (branching-path-to-var id-S id-P) id-σ ⟩
-          < liftTerm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
+          < lift-tm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
             ≈⟨ lift-tm-≃ id-eq ⟩
-          < liftTerm (unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm) >tm
+          < lift-tm (unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm) >tm
             ≈˘⟨ apply-lifted-sub-tm-≃ (unbiased-comp (tree-dim id-T) id-T) id-τ ⟩
-          < unbiased-comp (tree-dim id-T) id-T [ liftSub id-τ ]tm >tm ∎
+          < unbiased-comp (tree-dim id-T) id-T [ lift-sub id-τ ]tm >tm ∎
           where
             open Reasoning tm-setoid
 
-        lem2 : SuppTm (id-Γ , A) (Coh (tree-to-ctx id-S) id-A (liftSub id-σ))
+        lem2 : SuppTm (id-Γ , A) (Coh (tree-to-ctx id-S) id-A (lift-sub id-σ))
              ≡ SuppTm (id-Γ , A) (Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
                                    (id-A [ exterior-sub (id-S) (id-P) (id-T) ]ty)
-                                   (sub-from-insertion (id-S) (id-P) (id-T) (liftSub (id-σ)) (liftSub id-τ)))
+                                   (sub-from-insertion (id-S) (id-P) (id-T) (lift-sub (id-σ)) (lift-sub id-τ)))
         lem2 = begin
-          SuppSub (id-Γ , _) (liftSub id-σ)
+          SuppSub (id-Γ , _) (lift-sub id-σ)
             ≡⟨ cong (DC (id-Γ , _)) (supp-lift-sub id-σ) ⟩
           ewf (SuppSub id-Γ id-σ)
             ≡⟨ cong ewf sc ⟩
           ewf (SuppSub id-Γ (sub-from-insertion id-S id-P id-T id-σ id-τ))
             ≡˘⟨ cong (DC (id-Γ , _)) (supp-lift-sub (sub-from-insertion id-S id-P id-T id-σ id-τ)) ⟩
-          SuppSub (id-Γ , _) (liftSub (sub-from-insertion id-S id-P id-T id-σ id-τ))
+          SuppSub (id-Γ , _) (lift-sub (sub-from-insertion id-S id-P id-T id-σ id-τ))
             ≡⟨ cong (SuppSub (id-Γ , _)) (≃s-to-≡ (lift-sub-from-insertion id-S id-P id-T id-σ id-τ)) ⟩
-          SuppSub (id-Γ , _) (sub-from-insertion id-S id-P id-T (liftSub id-σ) (liftSub id-τ)) ∎
+          SuppSub (id-Γ , _) (sub-from-insertion id-S id-P id-T (lift-sub id-σ) (lift-sub id-τ)) ∎
           where
             open ≡-Reasoning
 
@@ -288,72 +288,72 @@ module Support where
 
     susp-rule-supp : ∀ i a → SuspRule {i} a
     susp-rule-supp i (a ,, sc) tc = begin
-      Coh (tree-to-ctx (suspTree id-S)) (suspTy id-A) (suspSub id-σ)
+      Coh (tree-to-ctx (suspTree id-S)) (susp-ty id-A) (susp-sub id-σ)
         ≈⟨ InsSupp≈ (suspTree id-S) tc (PExt id-P) (suspTree id-T) lem lem2 ⟩
       Coh (tree-to-ctx (insertion-tree (suspTree id-S) (PExt id-P) (suspTree id-T)))
-          (suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty)
-          (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (suspSub id-σ) (suspSub id-τ))
+          (susp-ty id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty)
+          (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (susp-sub id-σ) (susp-sub id-τ))
           ≈⟨ reflexive≈tm (Coh≃ refl≃c lem-ty (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
       Coh (tree-to-ctx (suspTree (insertion-tree id-S id-P id-T)))
-          (suspTy (id-A [ exterior-sub id-S id-P id-T ]ty))
-          (suspSub (sub-from-insertion id-S id-P id-T id-σ id-τ)) ∎
+          (susp-ty (id-A [ exterior-sub id-S id-P id-T ]ty))
+          (susp-sub (sub-from-insertion id-S id-P id-T id-σ id-τ)) ∎
       where
         open InsertionData a
 
-        lem-ty : suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty
+        lem-ty : susp-ty id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty
                  ≃ty
-                 suspTy (id-A [ exterior-sub id-S id-P id-T ]ty)
+                 susp-ty (id-A [ exterior-sub id-S id-P id-T ]ty)
         lem-ty = begin
-          < suspTy id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty >ty
+          < susp-ty id-A [ exterior-sub (suspTree id-S) (PExt id-P) (suspTree id-T) ]ty >ty
             ≈⟨ sub-action-≃-ty refl≃ty (exterior-sub-susp id-S id-P id-T) ⟩
-          < suspTy id-A [ suspSub (exterior-sub id-S id-P id-T) ]ty >ty
+          < susp-ty id-A [ susp-sub (exterior-sub id-S id-P id-T) ]ty >ty
             ≈˘⟨ susp-functorial-ty (exterior-sub id-S id-P id-T) id-A ⟩
-          < suspTy (id-A [ exterior-sub id-S id-P id-T ]ty) >ty ∎
+          < susp-ty (id-A [ exterior-sub id-S id-P id-T ]ty) >ty ∎
           where
             open Reasoning ty-setoid
 
         lem : (branching-path-to-var (suspTree id-S) (PExt id-P)
-                 [ suspSub id-σ ]tm)
+                 [ susp-sub id-σ ]tm)
               ≃tm
-              unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) [ unrestrict (suspSubRes id-τ) ]tm
+              unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) [ unrestrict (susp-sub-res id-τ) ]tm
         lem = begin
-          < branching-path-to-var (suspTree id-S) (PExt id-P) [ suspSub id-σ ]tm >tm ≡⟨⟩
-          < suspTm (branching-path-to-var id-S id-P)
+          < branching-path-to-var (suspTree id-S) (PExt id-P) [ susp-sub id-σ ]tm >tm ≡⟨⟩
+          < susp-tm (branching-path-to-var id-S id-P)
               [ idSub ]tm
-              [ suspSub id-σ ]tm >tm
-            ≈⟨ sub-action-≃-tm (id-on-tm (suspTm (branching-path-to-var id-S id-P))) refl≃s ⟩
-          < suspTm (branching-path-to-var id-S id-P)
-              [ suspSub id-σ ]tm >tm
+              [ susp-sub id-σ ]tm >tm
+            ≈⟨ sub-action-≃-tm (id-on-tm (susp-tm (branching-path-to-var id-S id-P))) refl≃s ⟩
+          < susp-tm (branching-path-to-var id-S id-P)
+              [ susp-sub id-σ ]tm >tm
             ≈˘⟨ susp-functorial-tm id-σ (branching-path-to-var id-S id-P) ⟩
-          < suspTm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
+          < susp-tm (branching-path-to-var id-S id-P [ id-σ ]tm) >tm
             ≈⟨ susp-tm-≃ id-eq ⟩
-          < suspTm (unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm) >tm
+          < susp-tm (unbiased-comp (tree-dim id-T) id-T [ id-τ ]tm) >tm
             ≈⟨ susp-functorial-tm id-τ (unbiased-comp (tree-dim id-T) id-T) ⟩
-          < suspTm (unbiased-comp (tree-dim id-T) id-T) [ suspSub id-τ ]tm >tm
-            ≈⟨ sub-action-≃-tm (unbiased-comp-susp-lem (tree-dim id-T) id-T) (refl≃s {σ = suspSub id-τ}) ⟩
-          < unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) [ suspSub id-τ ]tm >tm ∎
+          < susp-tm (unbiased-comp (tree-dim id-T) id-T) [ susp-sub id-τ ]tm >tm
+            ≈⟨ sub-action-≃-tm (unbiased-comp-susp-lem (tree-dim id-T) id-T) (refl≃s {σ = susp-sub id-τ}) ⟩
+          < unbiased-comp (tree-dim (suspTree id-T)) (suspTree id-T) [ susp-sub id-τ ]tm >tm ∎
           where
             open Reasoning tm-setoid
 
-        lem2 : SuppSub (suspCtx id-Γ) (suspSub id-σ)
-             ≡ SuppSub (suspCtx id-Γ)
-                       (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (suspSub id-σ) (suspSub id-τ))
+        lem2 : SuppSub (susp-ctx id-Γ) (susp-sub id-σ)
+             ≡ SuppSub (susp-ctx id-Γ)
+                       (sub-from-insertion (suspTree id-S) (PExt id-P) (suspTree id-T) (susp-sub id-σ) (susp-sub id-τ))
         lem2 = begin
-          SuppSub (suspCtx id-Γ) (suspSub id-σ)
+          SuppSub (susp-ctx id-Γ) (susp-sub id-σ)
             ≡⟨ SuspSuppTmProp (Coh (tree-to-ctx id-S) id-A id-σ) (Coh (tree-to-ctx (insertion-tree id-S id-P id-T))
                                                         (id-A [ exterior-sub id-S id-P id-T ]ty)
                                                         (sub-from-insertion id-S id-P id-T id-σ id-τ)) sc ⟩
-          SuppSub (suspCtx id-Γ) (suspSub (sub-from-insertion id-S id-P id-T id-σ id-τ))
-            ≡˘⟨ cong (SuppSub (suspCtx id-Γ)) (≃s-to-≡ (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
-          SuppSub (suspCtx id-Γ) (sub-from-insertion (suspTree id-S)
+          SuppSub (susp-ctx id-Γ) (susp-sub (sub-from-insertion id-S id-P id-T id-σ id-τ))
+            ≡˘⟨ cong (SuppSub (susp-ctx id-Γ)) (≃s-to-≡ (sub-from-insertion-susp id-S id-P id-T id-σ id-τ)) ⟩
+          SuppSub (susp-ctx id-Γ) (sub-from-insertion (suspTree id-S)
                                                      (PExt id-P)
                                                      (suspTree id-T)
-                                                     (suspSub id-σ)
-                                                     (suspSub id-τ)) ∎
+                                                     (susp-sub id-σ)
+                                                     (susp-sub id-τ)) ∎
           where
             open ≡-Reasoning
 
-        open Reasoning (tm-setoid-≈ (suspCtx id-Γ))
+        open Reasoning (tm-setoid-≈ (susp-ctx id-Γ))
 
     supp-rule-supp : ∀ i a → SupportRule {i} a
     supp-rule-supp i (a ,, sc) tty = sc

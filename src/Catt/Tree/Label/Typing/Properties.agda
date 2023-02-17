@@ -35,7 +35,7 @@ open import Catt.Globular.Typing rule lift-rule
 open import Catt.Tree.Label.Typing rule
 
 ≈SExt : {a b : STm (someTree S)} → a ≈[ tree-to-ctx S ]stm b → SExt {T = T} a ≈[ tree-to-ctx (Join S T) ]stm SExt b
-≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (connect-susp-inc-left-Ty (tree-to-ctx T)) (suspTmEq p)) ]
+≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (connect-susp-inc-left-Ty (tree-to-ctx T)) (susp-tmEq p)) ]
 
 ≈SShift : {a b : STm (someTree T)} → a ≈[ tree-to-ctx T ]stm b → SShift {S = S} a ≈[ tree-to-ctx (Join S T) ]stm SShift b
 ≈SShift {S = S} [ q ] = [ (apply-sub-tm-eq (connect-susp-inc-right-Ty (tree-to-ctx S)) q) ]
@@ -54,14 +54,14 @@ unrestrict-label-≈ p q .get (PShift P) = sty-tgt-≈ q
 
 label-to-sub-Ty : {L : Label-WT X S} → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-Sub (tree-to-ctx S) Γ (label-to-sub L)
 label-to-sub-Ty (TySing [ x ]) [ Aty ] = TyExt (TyNull Aty) x
-label-to-sub-Ty {L = L} (TyJoin x Lty Mty) Aty = sub-from-connect-Ty (unrestrictTy (label-to-sub-Ty Lty (TySArr x Aty (ap-phere-Ty Mty)))) getSndTy (label-to-sub-Ty Mty Aty) (reflexive≈tm (label-to-sub-lem L) )
+label-to-sub-Ty {L = L} (TyJoin x Lty Mty) Aty = sub-from-connect-Ty (unrestrictTy (label-to-sub-Ty Lty (TySArr x Aty (ap-phere-Ty Mty)))) get-sndTy (label-to-sub-Ty Mty Aty) (reflexive≈tm (label-to-sub-lem L) )
 
 TySPath : (P : Path S) → Typing-STm (tree-to-ctx S) (SPath P) (getPathType P)
 TySPath P .get = path-to-term-Ty P
 
 TySExt : {a : STm (someTree S)} → Typing-STm (tree-to-ctx S) a As → Typing-STm (tree-to-ctx (Join S T)) (SExt {T = T} a) (map-sty-pext As)
-TySExt {As = As} {T = T} [ aty ] .get = TyConv (apply-sub-tm-typing (suspTmTy aty) (connect-susp-inc-left-Ty (tree-to-ctx T))) (reflexive≈ty (begin
-  < suspTy (sty-to-type As) [ connect-susp-inc-left _ _ ]ty >ty
+TySExt {As = As} {T = T} [ aty ] .get = TyConv (apply-sub-tm-typing (susp-tmTy aty) (connect-susp-inc-left-Ty (tree-to-ctx T))) (reflexive≈ty (begin
+  < susp-ty (sty-to-type As) [ connect-susp-inc-left _ _ ]ty >ty
     ≈˘⟨ sub-action-≃-ty (susp-sty-to-type As) refl≃s ⟩
   < sty-to-type (susp-sty As) [ connect-susp-inc-left _ (tree-size T) ]ty >ty
     ≈˘⟨ sty-sub-prop (susp-sty As) (connect-susp-inc-left _ (tree-size T)) ⟩

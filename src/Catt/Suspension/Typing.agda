@@ -23,39 +23,39 @@ open import Catt.Typing.Properties.Lifting rule lift-rule
 open import Catt.Pasting
 open import Catt.Suspension.Pasting
 
-suspCtxTy : Typing-Ctx Γ → Typing-Ctx (suspCtx Γ)
-suspTyTy : Typing-Ty Γ A → Typing-Ty (suspCtx Γ) (suspTy A)
-suspTmTy : Typing-Tm Γ t A → Typing-Tm (suspCtx Γ) (suspTm t) (suspTy A)
-suspSubTy : Typing-Sub Γ Δ σ → Typing-Sub (suspCtx Γ) (suspCtx Δ) (suspSub σ)
-getFstTy : {Γ : Ctx n} → Typing-Tm (suspCtx Γ) (getFst) ⋆
-getSndTy : {Γ : Ctx n} → Typing-Tm (suspCtx Γ) (getSnd) ⋆
+susp-ctxTy : Typing-Ctx Γ → Typing-Ctx (susp-ctx Γ)
+susp-tyTy : Typing-Ty Γ A → Typing-Ty (susp-ctx Γ) (susp-ty A)
+susp-tmTy : Typing-Tm Γ t A → Typing-Tm (susp-ctx Γ) (susp-tm t) (susp-ty A)
+susp-subTy : Typing-Sub Γ Δ σ → Typing-Sub (susp-ctx Γ) (susp-ctx Δ) (susp-sub σ)
+get-fstTy : {Γ : Ctx n} → Typing-Tm (susp-ctx Γ) (get-fst) ⋆
+get-sndTy : {Γ : Ctx n} → Typing-Tm (susp-ctx Γ) (get-snd) ⋆
 
-suspTyEq : A ≈[ Γ ]ty B → suspTy A ≈[ suspCtx Γ ]ty suspTy B
-suspTmEq : s ≈[ Γ ]tm t → suspTm s ≈[ suspCtx Γ ]tm suspTm t
-suspSubEq : σ ≈[ Γ ]s τ → suspSub σ ≈[ suspCtx Γ ]s suspSub τ
+susp-tyEq : A ≈[ Γ ]ty B → susp-ty A ≈[ susp-ctx Γ ]ty susp-ty B
+susp-tmEq : s ≈[ Γ ]tm t → susp-tm s ≈[ susp-ctx Γ ]tm susp-tm t
+susp-subEq : σ ≈[ Γ ]s τ → susp-sub σ ≈[ susp-ctx Γ ]s susp-sub τ
 
-suspCtxTy TyEmp = TyAdd (TyAdd TyEmp TyStar) TyStar
-suspCtxTy (TyAdd ty x) = TyAdd (suspCtxTy ty) (suspTyTy x)
+susp-ctxTy TyEmp = TyAdd (TyAdd TyEmp TyStar) TyStar
+susp-ctxTy (TyAdd ty x) = TyAdd (susp-ctxTy ty) (susp-tyTy x)
 
-suspTyTy TyStar = TyArr getFstTy TyStar getSndTy
-suspTyTy (TyArr p q r) = TyArr (suspTmTy p) (suspTyTy q) (suspTmTy r)
+susp-tyTy TyStar = TyArr get-fstTy TyStar get-sndTy
+susp-tyTy (TyArr p q r) = TyArr (susp-tmTy p) (susp-tyTy q) (susp-tmTy r)
 
-suspTmTy (TyConv tty p) = TyConv (suspTmTy tty) (suspTyEq p)
-suspTmTy {Γ = Γ} (TyVar i) = TyConv (TyVar (inject₁ (inject₁ i))) (reflexive≈ty (susp-‼ Γ i))
-suspTmTy (TyCoh Aty σty b sc) = TyConv (TyCoh ⦃ susp-pd it ⦄ (suspTyTy Aty) (suspSubTy σty) b (suspSuppCondition sc)) (reflexive≈ty (sym≃ty (susp-functorial-ty _ _)))
+susp-tmTy (TyConv tty p) = TyConv (susp-tmTy tty) (susp-tyEq p)
+susp-tmTy {Γ = Γ} (TyVar i) = TyConv (TyVar (inject₁ (inject₁ i))) (reflexive≈ty (susp-‼ Γ i))
+susp-tmTy (TyCoh Aty σty b sc) = TyConv (TyCoh ⦃ susp-pd it ⦄ (susp-tyTy Aty) (susp-subTy σty) b (suspSuppCondition sc)) (reflexive≈ty (sym≃ty (susp-functorial-ty _ _)))
 
-suspSubTy (TyNull x) = TyExt (TyExt (TyNull TyStar) getFstTy) getSndTy
-suspSubTy (TyExt p r) = TyExt (suspSubTy p) (TyConv (suspTmTy r) (reflexive≈ty (susp-functorial-ty _ _)))
+susp-subTy (TyNull x) = TyExt (TyExt (TyNull TyStar) get-fstTy) get-sndTy
+susp-subTy (TyExt p r) = TyExt (susp-subTy p) (TyConv (susp-tmTy r) (reflexive≈ty (susp-functorial-ty _ _)))
 
-getFstTy {Γ = ∅} = TyVar (suc zero)
-getFstTy {Γ = Γ , A} = lift-tm-typing getFstTy
+get-fstTy {Γ = ∅} = TyVar (suc zero)
+get-fstTy {Γ = Γ , A} = lift-tm-typing get-fstTy
 
-getSndTy {Γ = ∅} = TyVar zero
-getSndTy {Γ = Γ , A} = lift-tm-typing getSndTy
+get-sndTy {Γ = ∅} = TyVar zero
+get-sndTy {Γ = Γ , A} = lift-tm-typing get-sndTy
 
-suspTyEq Star≈ = refl≈ty
-suspTyEq (Arr≈ q r s) = Arr≈ (suspTmEq q) (suspTyEq r) (suspTmEq s)
-suspTmEq (Var≈ x) = Var≈ (begin
+susp-tyEq Star≈ = refl≈ty
+susp-tyEq (Arr≈ q r s) = Arr≈ (susp-tmEq q) (susp-tyEq r) (susp-tmEq s)
+susp-tmEq (Var≈ x) = Var≈ (begin
   toℕ (inject₁ (inject₁ _)) ≡⟨ toℕ-inject₁ (inject₁ _) ⟩
   toℕ (inject₁ _) ≡⟨ toℕ-inject₁ _ ⟩
   toℕ _ ≡⟨ x ⟩
@@ -65,14 +65,14 @@ suspTmEq (Var≈ x) = Var≈ (begin
   where
     open ≡-Reasoning
 
-suspTmEq (Sym≈ eq) = Sym≈ (suspTmEq eq)
-suspTmEq (Trans≈ eq eq′) = Trans≈ (suspTmEq eq) (suspTmEq eq′)
-suspTmEq (Coh≈ q r) = Coh≈ (suspTyEq q) (suspSubEq r)
-suspTmEq (Rule≈ i tc) = susp-rule i (suspTmTy tc)
+susp-tmEq (Sym≈ eq) = Sym≈ (susp-tmEq eq)
+susp-tmEq (Trans≈ eq eq′) = Trans≈ (susp-tmEq eq) (susp-tmEq eq′)
+susp-tmEq (Coh≈ q r) = Coh≈ (susp-tyEq q) (susp-subEq r)
+susp-tmEq (Rule≈ i tc) = susp-rule i (susp-tmTy tc)
 
-suspSubEq (Null≈ x) = refl≈s
-suspSubEq (Ext≈ p x) = Ext≈ (suspSubEq p) (suspTmEq x)
+susp-subEq (Null≈ x) = refl≈s
+susp-subEq (Ext≈ p x) = Ext≈ (susp-subEq p) (susp-tmEq x)
 
-unrestrictTy : Typing-Sub Γ Δ σ → Typing-Sub (suspCtx Γ) Δ (unrestrict σ)
+unrestrictTy : Typing-Sub Γ Δ σ → Typing-Sub (susp-ctx Γ) Δ (unrestrict σ)
 unrestrictTy (TyNull (TyArr p q r)) = TyExt (TyExt (TyNull q) p) r
 unrestrictTy (TyExt σty x) = TyExt (unrestrictTy σty) (TyConv x (reflexive≈ty (sym≃ty (unrestrict-comp-ty _ _))))

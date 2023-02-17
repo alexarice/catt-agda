@@ -45,27 +45,27 @@ HasDiscRemoval-STm = ∀ {m n}
 module Conditions (dr : HasDiscRemoval) where
 
   lift-rule : .⦃ NonZero n ⦄
-            → Typing-Sub (Disc n) (Γ , A) (liftSub σ)
-            → liftTerm (disc-term n σ) ≈[ Γ , A ]tm liftTerm (0V [ σ ]tm)
+            → Typing-Sub (Disc n) (Γ , A) (lift-sub σ)
+            → lift-tm (disc-term n σ) ≈[ Γ , A ]tm lift-tm (0V [ σ ]tm)
   lift-rule {n = n} {σ = σ} σty = begin
-    disc-term n (liftSub σ)
+    disc-term n (lift-sub σ)
       ≈⟨ dr σty ⟩
-    0V [ liftSub σ ]tm
+    0V [ lift-sub σ ]tm
       ≈⟨ reflexive≈tm (apply-lifted-sub-tm-≃ 0V σ) ⟩
-    liftTerm (0V [ σ ]tm) ∎
+    lift-tm (0V [ σ ]tm) ∎
     where
       open Reasoning (tm-setoid-≈ _)
 
-  susp-rule : Typing-Sub (Disc (suc n)) (suspCtx Γ) (suspSub σ)
-            → suspTm (disc-term n σ) ≈[ suspCtx Γ ]tm suspTm (0V [ σ ]tm)
+  susp-rule : Typing-Sub (Disc (suc n)) (susp-ctx Γ) (susp-sub σ)
+            → susp-tm (disc-term n σ) ≈[ susp-ctx Γ ]tm susp-tm (0V [ σ ]tm)
   susp-rule {n = n} {σ = σ} σty = begin
-    suspTm (disc-term n σ)
+    susp-tm (disc-term n σ)
       ≈⟨ reflexive≈tm (Coh≃ (disc-susp n) (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n))) refl≃s) ⟩
-    disc-term (suc n) (suspSub σ)
+    disc-term (suc n) (susp-sub σ)
       ≈⟨ dr σty ⟩
-    0V [ suspSub σ ]tm
+    0V [ susp-sub σ ]tm
       ≈˘⟨ reflexive≈tm (susp-functorial-tm σ 0V) ⟩
-    suspTm (0V [ σ ]tm) ∎
+    susp-tm (0V [ σ ]tm) ∎
     where
       open Reasoning (tm-setoid-≈ _)
 

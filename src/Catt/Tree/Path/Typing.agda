@@ -35,8 +35,8 @@ getPathType (PShift P) = map-sty-pshift (getPathType P)
 
 path-to-term-Ty : (P : Path S) → Typing-Tm (tree-to-ctx S) (path-to-term P) (sty-to-type (getPathType P))
 path-to-term-Ty {S = S} PHere = fromℕ-Ty (tree-to-ctx S)
-path-to-term-Ty (PExt {T = T} P) = TyConv (apply-sub-tm-typing (suspTmTy (path-to-term-Ty P)) (connect-susp-inc-left-Ty (tree-to-ctx T))) (reflexive≈ty (begin
-  < suspTy (sty-to-type (getPathType P)) [ connect-susp-inc-left _ _ ]ty >ty
+path-to-term-Ty (PExt {T = T} P) = TyConv (apply-sub-tm-typing (susp-tmTy (path-to-term-Ty P)) (connect-susp-inc-left-Ty (tree-to-ctx T))) (reflexive≈ty (begin
+  < susp-ty (sty-to-type (getPathType P)) [ connect-susp-inc-left _ _ ]ty >ty
     ≈˘⟨ sub-action-≃-ty (susp-sty-to-type (getPathType P)) refl≃s ⟩
   < sty-to-type (susp-sty (getPathType P)) [ connect-susp-inc-left _ (tree-size T) ]ty >ty
     ≈˘⟨ sty-sub-prop (susp-sty (getPathType P)) (connect-susp-inc-left _ (tree-size T)) ⟩

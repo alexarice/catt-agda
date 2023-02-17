@@ -70,7 +70,7 @@ susp-dyck-≃ (⇓≃ p) = ⇓≃ (susp-dyck-≃ p)
 
 dyck-type-dim : (dy : Dyck n d) → ty-dim (dyck-type dy) ≡ d
 dyck-type-dim End = refl
-dyck-type-dim (⇑ dy) = cong suc (trans (lift-ty-dim (liftType (dyck-type dy))) (trans (lift-ty-dim (dyck-type dy)) (dyck-type-dim dy)))
+dyck-type-dim (⇑ dy) = cong suc (trans (lift-ty-dim (lift-ty (dyck-type dy))) (trans (lift-ty-dim (dyck-type dy)) (dyck-type-dim dy)))
 dyck-type-dim (⇓ dy) = trans (cong ty-dim (sym (≃ty-to-≡ (ty-base-lift (dyck-pre-type dy))))) (trans (ty-dim-ty-base (dyck-type dy)) (cong pred (dyck-type-dim dy)))
 
 dyck-zero-lem : ¬ (Dyck zero (suc d))

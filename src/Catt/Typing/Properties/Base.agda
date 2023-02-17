@@ -162,13 +162,13 @@ module _ (r : Rule) where
   LiftRule : Set
   LiftRule = {A : Ty len}
            → {C : Ty len}
-           → Typing-Tm (tgtCtx , A) (liftTerm lhs) (liftType C)
-           → (liftTerm lhs) ≈[ tgtCtx , A ]tm (liftTerm rhs)
+           → Typing-Tm (tgtCtx , A) (lift-tm lhs) (lift-ty C)
+           → (lift-tm lhs) ≈[ tgtCtx , A ]tm (lift-tm rhs)
 
   SuspRule : Set
   SuspRule = {C : Ty len}
-           → Typing-Tm (suspCtx tgtCtx) (suspTm lhs) (suspTy C)
-           → suspTm lhs ≈[ suspCtx tgtCtx ]tm suspTm rhs
+           → Typing-Tm (susp-ctx tgtCtx) (susp-tm lhs) (susp-ty C)
+           → susp-tm lhs ≈[ susp-ctx tgtCtx ]tm susp-tm rhs
 
   SubRule : Set
   SubRule = ∀ {n}

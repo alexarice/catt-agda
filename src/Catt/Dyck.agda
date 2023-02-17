@@ -25,10 +25,10 @@ dyck-to-ctx (⇑ d) = dyck-to-ctx d , dyck-type d , dyck-pre-type (⇑ d)
 dyck-to-ctx (⇓ d) = dyck-to-ctx d
 
 dyck-pre-type End = ⋆
-dyck-pre-type (⇑ d) = (liftTerm (dyck-term d)) ─⟨ (liftType (dyck-type d)) ⟩⟶ 0V
+dyck-pre-type (⇑ d) = (lift-tm (dyck-term d)) ─⟨ (lift-ty (dyck-type d)) ⟩⟶ 0V
 dyck-pre-type (⇓ d) = ty-base (dyck-pre-type d)
 
-dyck-type dy = liftType (dyck-pre-type dy)
+dyck-type dy = lift-ty (dyck-pre-type dy)
 
 dyck-term End = 0V
 dyck-term (⇑ d) = 0V
@@ -41,7 +41,7 @@ data Peak : ∀ {n} → Dyck (suc n) d → Set where
 
 peak-term : {dy : Dyck (suc n) d} → Peak dy → Tm (3 + (n * 2))
 peak-term (⇕pk dy) = 0V
-peak-term (⇑pk p) = liftTerm (liftTerm (peak-term p))
+peak-term (⇑pk p) = lift-tm (lift-tm (peak-term p))
 peak-term (⇓pk p) = peak-term p
 
 susp-dyck : Dyck n d → Dyck (suc n) (suc d)

@@ -55,7 +55,7 @@ sub-between-connect-susps-≃ : (σ : Sub (suc n) (suc l) ⋆)
                             → (τ′ : Sub (suc m′) (suc l′) ⋆)
                             → n ≡ n′ → m ≡ m′ → σ ≃s σ′ → τ ≃s τ′
                             → sub-between-connect-susps σ τ ≃s sub-between-connect-susps σ′ τ′
-sub-between-connect-susps-≃ σ σ′ τ τ′ refl refl p q = sub-between-connects-≃ (suspSub σ) (suspSub σ′) τ getSnd τ′ getSnd refl refl (susp-sub-≃ p) q refl≃tm
+sub-between-connect-susps-≃ σ σ′ τ τ′ refl refl p q = sub-between-connects-≃ (susp-sub σ) (susp-sub σ′) τ get-snd τ′ get-snd refl refl (susp-sub-≃ p) q refl≃tm
 
 -- connect left unit
 
@@ -76,16 +76,16 @@ connect-inc-right-assoc t s zero = refl≃s
 connect-inc-right-assoc t s (suc n) = Ext≃ lem (Var≃ (cong suc (cong suc (sym (+-assoc n _ _)))) refl)
   where
     open Reasoning sub-setoid
-    lem : liftSub (connect-inc-right (s [ connect-inc-right t _ ]tm) n) ≃s
-          (connect-inc-right t (suc n + _) ● liftSub (connect-inc-right s n))
+    lem : lift-sub (connect-inc-right (s [ connect-inc-right t _ ]tm) n) ≃s
+          (connect-inc-right t (suc n + _) ● lift-sub (connect-inc-right s n))
     lem = begin
-      < liftSub (connect-inc-right (s [ connect-inc-right t _ ]tm) n) >s
+      < lift-sub (connect-inc-right (s [ connect-inc-right t _ ]tm) n) >s
         ≈⟨ lift-sub-≃ (connect-inc-right-assoc t s n) ⟩
-      < liftSub (connect-inc-right t (n + _) ● connect-inc-right s n) >s
+      < lift-sub (connect-inc-right t (n + _) ● connect-inc-right s n) >s
         ≈˘⟨ apply-lifted-sub-sub-≃ (connect-inc-right s n) (connect-inc-right t (n + _)) ⟩
-      < liftSub (connect-inc-right t (n + _)) ● connect-inc-right s n >s
-        ≈˘⟨ lift-sub-comp-lem-sub (liftSub (connect-inc-right t (n + _))) (connect-inc-right s n) ⟩
-      < ⟨ liftSub (connect-inc-right t (n + _)) , Var zero ⟩ ● liftSub (connect-inc-right s n) >s ∎
+      < lift-sub (connect-inc-right t (n + _)) ● connect-inc-right s n >s
+        ≈˘⟨ lift-sub-comp-lem-sub (lift-sub (connect-inc-right t (n + _))) (connect-inc-right s n) ⟩
+      < ⟨ lift-sub (connect-inc-right t (n + _)) , Var zero ⟩ ● lift-sub (connect-inc-right s n) >s ∎
 
 connect-assoc : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → (s : Tm (suc m)) → (Υ : Ctx (suc l))
               → connect (connect Γ t Δ) (s [ connect-inc-right t m ]tm) Υ ≃c connect Γ t (connect Δ s Υ)
@@ -104,7 +104,7 @@ connect-assoc Γ t (Δ , A′) s (Υ , C , B , A) = Add≃ (connect-assoc Γ t (
 
 connect-susp-assoc : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → (s : Tm (suc m)) → (Υ : Ctx (suc l))
               → connect (connect-susp Γ Δ) (s [ connect-susp-inc-right n m ]tm) Υ ≃c connect-susp Γ (connect Δ s Υ)
-connect-susp-assoc Γ Δ s Υ = connect-assoc (suspCtx Γ) getSnd Δ s Υ
+connect-susp-assoc Γ Δ s Υ = connect-assoc (susp-ctx Γ) get-snd Δ s Υ
 
 sub-from-connect-inc-left : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → sub-from-connect σ τ ● connect-inc-left t m ≃s σ
 sub-from-connect-inc-left σ t τ@(⟨ ⟨⟩ , s ⟩) = id-right-unit (sub-from-connect σ τ)
@@ -125,15 +125,15 @@ sub-between-connects-inc-left {l′ = l′} σ t τ s = sub-from-connect-inc-lef
 sub-between-connect-susps-inc-left : (σ : Sub (suc n) (suc l) ⋆)
                                    → (τ : Sub (suc m) (suc l′) ⋆)
                                    → sub-between-connect-susps σ τ ● connect-susp-inc-left n m
-                                     ≃s connect-susp-inc-left l l′ ● suspSub σ
-sub-between-connect-susps-inc-left σ τ = sub-between-connects-inc-left (suspSub σ) getSnd τ getSnd
+                                     ≃s connect-susp-inc-left l l′ ● susp-sub σ
+sub-between-connect-susps-inc-left σ τ = sub-between-connects-inc-left (susp-sub σ) get-snd τ get-snd
 
 connect-inc-fst-var : (t : Tm (suc n)) → (m : ℕ) → t [ connect-inc-left t m ]tm ≃tm Var (fromℕ _) [ connect-inc-right t m ]tm
 connect-inc-fst-var t zero = id-on-tm t
 connect-inc-fst-var t (suc m) = begin
   < t [ connect-inc-left t (suc m) ]tm >tm ≈⟨ apply-lifted-sub-tm-≃ t (connect-inc-left t m) ⟩
-  < liftTerm (t [ connect-inc-left t m ]tm) >tm ≈⟨ lift-tm-≃ (connect-inc-fst-var t m) ⟩
-  < liftTerm (Var (fromℕ _) [ connect-inc-right t m ]tm) >tm ≈˘⟨ apply-lifted-sub-tm-≃ (Var (fromℕ _)) (connect-inc-right t m) ⟩
+  < lift-tm (t [ connect-inc-left t m ]tm) >tm ≈⟨ lift-tm-≃ (connect-inc-fst-var t m) ⟩
+  < lift-tm (Var (fromℕ _) [ connect-inc-right t m ]tm) >tm ≈˘⟨ apply-lifted-sub-tm-≃ (Var (fromℕ _)) (connect-inc-right t m) ⟩
   < Var (fromℕ (suc _)) [ connect-inc-right t (suc m) ]tm >tm ∎
   where
     open Reasoning tm-setoid
@@ -166,7 +166,7 @@ sub-between-connect-susps-inc-right : (σ : Sub (suc n) (suc l) ⋆)
                                     → Var (fromℕ _) [ τ ]tm ≃tm Var (fromℕ l′)
                                     → sub-between-connect-susps σ τ ● connect-susp-inc-right n m
                                     ≃s connect-susp-inc-right l l′ ● τ
-sub-between-connect-susps-inc-right σ τ p = sub-between-connects-inc-right (suspSub σ) getSnd τ getSnd (sym≃tm (susp-sub-preserve-getSnd σ)) p
+sub-between-connect-susps-inc-right σ τ p = sub-between-connects-inc-right (susp-sub σ) get-snd τ get-snd (sym≃tm (susp-sub-preserve-get-snd σ)) p
 
 connect-inc-left-fst-var : (t : Tm (suc n)) → (m : ℕ) → Var (fromℕ _) [ connect-inc-left t m ]tm ≃tm Var {suc (m + n)} (fromℕ _)
 connect-inc-left-fst-var t zero = id-on-tm (Var (fromℕ _))
@@ -198,7 +198,7 @@ sub-between-connects-fst-var {l′ = l′} σ τ s p = begin
 sub-between-connect-susps-fst-var : (σ : Sub (suc n) (suc l) ⋆)
                                   → (τ : Sub (suc m) (suc l′) ⋆)
                                   → Var (fromℕ _) [ sub-between-connect-susps σ τ ]tm ≃tm Var (fromℕ (l′ + (2 + l)))
-sub-between-connect-susps-fst-var σ τ = sub-between-connects-fst-var (suspSub σ) τ getSnd (sym≃tm (susp-sub-preserve-getFst σ))
+sub-between-connect-susps-fst-var σ τ = sub-between-connects-fst-var (susp-sub σ) τ get-snd (sym≃tm (susp-sub-preserve-get-fst σ))
 
 between-connect-from-connect : (σ : Sub (suc n) (suc l) ⋆)
                              → (τ : Sub (suc m) (suc l′) ⋆)
@@ -271,13 +271,13 @@ sub-between-connect-susps-comp : (σ : Sub (suc n) (suc l) ⋆)
                                → Var (fromℕ l′) [ τ′ ]tm ≃tm Var (fromℕ m′)
                                → sub-between-connect-susps σ′ τ′ ● sub-between-connect-susps σ τ
                                ≃s sub-between-connect-susps (σ′ ● σ) (τ′ ● τ)
-sub-between-connect-susps-comp σ τ σ′ τ′ p = trans≃s (sub-between-connects-comp (suspSub σ) τ getSnd (suspSub σ′) getSnd τ′ (sym≃tm (susp-sub-preserve-getSnd σ′)) p) (sub-between-connects-≃ (suspSub σ′ ● suspSub σ) (suspSub (σ′ ● σ)) (τ′ ● τ) getSnd (τ′ ● τ) getSnd refl refl (sym≃s (susp-functorial σ′ σ)) refl≃s refl≃tm)
+sub-between-connect-susps-comp σ τ σ′ τ′ p = trans≃s (sub-between-connects-comp (susp-sub σ) τ get-snd (susp-sub σ′) get-snd τ′ (sym≃tm (susp-sub-preserve-get-snd σ′)) p) (sub-between-connects-≃ (susp-sub σ′ ● susp-sub σ) (susp-sub (σ′ ● σ)) (τ′ ● τ) get-snd (τ′ ● τ) get-snd refl refl (sym≃s (susp-functorial σ′ σ)) refl≃s refl≃tm)
 
-sub-from-connect-lift : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → liftSub (sub-from-connect σ τ) ≃s sub-from-connect (liftSub σ) (liftSub τ)
+sub-from-connect-lift : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → lift-sub (sub-from-connect σ τ) ≃s sub-from-connect (lift-sub σ) (lift-sub τ)
 sub-from-connect-lift σ ⟨ ⟨⟩ , t ⟩ = refl≃s
 sub-from-connect-lift σ ⟨ ⟨ τ , s ⟩ , t ⟩ = Ext≃ (sub-from-connect-lift σ ⟨ τ , s ⟩) refl≃tm
 
-sub-from-connect-susp-res : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → suspSubRes (sub-from-connect σ τ) ≃s sub-from-connect (suspSubRes σ) (suspSubRes τ)
+sub-from-connect-susp-res : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → susp-sub-res (sub-from-connect σ τ) ≃s sub-from-connect (susp-sub-res σ) (susp-sub-res τ)
 sub-from-connect-susp-res σ ⟨ ⟨⟩ , t ⟩ = refl≃s
 sub-from-connect-susp-res σ ⟨ ⟨ τ , s ⟩ , t ⟩ = Ext≃ (sub-from-connect-susp-res σ ⟨ τ , s ⟩) refl≃tm
 
@@ -314,24 +314,24 @@ sub-from-connect-prop′ t m σ = begin
 
 connect-inc-left-var-to-var : (t : Tm (suc n)) → (m : ℕ) → varToVar (connect-inc-left t m)
 connect-inc-left-var-to-var {n = n} t zero = id-is-var-to-var
-connect-inc-left-var-to-var t (suc m) = liftSub-preserve-var-to-var (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄
+connect-inc-left-var-to-var t (suc m) = lift-sub-preserve-var-to-var (connect-inc-left t m) ⦃ connect-inc-left-var-to-var t m ⦄
 
 connect-inc-right-var-to-var : (t : Tm (suc n)) → (m : ℕ) → .⦃ isVar t ⦄ → varToVar (connect-inc-right t m)
 connect-inc-right-var-to-var t zero = extend-var-to-var ⟨⟩ t
-connect-inc-right-var-to-var t (suc m) = liftSub-preserve-var-to-var (connect-inc-right t m) ⦃ connect-inc-right-var-to-var t m ⦄ ,, tt
+connect-inc-right-var-to-var t (suc m) = lift-sub-preserve-var-to-var (connect-inc-right t m) ⦃ connect-inc-right-var-to-var t m ⦄ ,, tt
 
 connect-glob : (Γ : Ctx (suc n)) → ⦃ ctx-is-globular Γ ⦄ → (t : Tm (suc n)) → .⦃ isVar t ⦄ → (Δ : Ctx (suc m)) → ⦃ ctx-is-globular Δ ⦄ → ctx-is-globular (connect Γ t Δ)
 connect-glob Γ t (∅ , A) = it
 connect-glob Γ t (Δ , B , A) ⦃ p ⦄ = (connect-glob Γ t (Δ , B) ⦃ proj₁ p ⦄) ,, var-to-var-comp-ty A ⦃ proj₂ p ⦄ (connect-inc-right t (ctxLength Δ)) ⦃ connect-inc-right-var-to-var t _ ⦄
 
 connect-susp-glob : (Γ : Ctx (suc n)) → ⦃ ctx-is-globular Γ ⦄ → (Δ : Ctx (suc m)) → ⦃ ctx-is-globular Δ ⦄ → ctx-is-globular (connect-susp Γ Δ)
-connect-susp-glob Γ Δ = connect-glob (suspCtx Γ) ⦃ susp-ctx-glob Γ ⦄ getSnd Δ
+connect-susp-glob Γ Δ = connect-glob (susp-ctx Γ) ⦃ susp-ctx-glob Γ ⦄ get-snd Δ
 
 connect-susp-inc-left-var-to-var : (n m : ℕ) → varToVar (connect-susp-inc-left n m)
-connect-susp-inc-left-var-to-var n m = connect-inc-left-var-to-var getSnd m
+connect-susp-inc-left-var-to-var n m = connect-inc-left-var-to-var get-snd m
 
 connect-susp-inc-right-var-to-var : (n m : ℕ) → varToVar (connect-susp-inc-right n m)
-connect-susp-inc-right-var-to-var n m = connect-inc-right-var-to-var getSnd m
+connect-susp-inc-right-var-to-var n m = connect-inc-right-var-to-var get-snd m
 
 sub-between-connects-id : (t : Tm (suc n)) → {m : ℕ} → sub-between-connects idSub (idSub {suc m}) t ≃s idSub {suc (m + n)}
 sub-between-connects-id t {m} = begin
@@ -345,10 +345,10 @@ sub-between-connects-id t {m} = begin
 
 sub-between-connect-susps-id : (n m : ℕ) → sub-between-connect-susps (idSub {suc n}) (idSub {suc m}) ≃s idSub {suc (m + (2 + n))}
 sub-between-connect-susps-id n m = begin
-  < sub-between-connects (suspSub idSub) idSub getSnd >s
-    ≈⟨ sub-between-connects-≃ (suspSub idSub) idSub idSub getSnd idSub getSnd refl refl susp-functorial-id refl≃s refl≃tm ⟩
-  < sub-between-connects idSub idSub getSnd >s
-    ≈⟨ sub-between-connects-id getSnd ⟩
+  < sub-between-connects (susp-sub idSub) idSub get-snd >s
+    ≈⟨ sub-between-connects-≃ (susp-sub idSub) idSub idSub get-snd idSub get-snd refl refl susp-functorial-id refl≃s refl≃tm ⟩
+  < sub-between-connects idSub idSub get-snd >s
+    ≈⟨ sub-between-connects-id get-snd ⟩
   < idSub >s ∎
   where
     open Reasoning sub-setoid

@@ -118,8 +118,8 @@ module Conditions (ins : HasSUAInsertion) where
              → L (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆)
              → IsCompOrIdent (height-of-branching P) T
              → Typing-STy (tree-to-ctx (suspTree S)) (susp-sty As)
-             → Typing-Label (suspCtx Γ) (susp-label-full L ,, S⋆)
-             → susp-stm (SCoh S As (L ,, S⋆)) ≈[ suspCtx Γ ]stm susp-stm (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆))
+             → Typing-Label (susp-ctx Γ) (susp-label-full L ,, S⋆)
+             → susp-stm (SCoh S As (L ,, S⋆)) ≈[ susp-ctx Γ ]stm susp-stm (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆))
   susp-rule S As L P T M p q Asty Lty = begin
     susp-stm (SCoh S As (L ,, S⋆))
       ≈⟨ reflexive≈stm (susp-stm-SCoh S As (L ,, S⋆)) ⟩

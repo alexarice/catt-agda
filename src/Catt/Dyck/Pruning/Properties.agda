@@ -19,44 +19,44 @@ dyck-type-prune (⇕pk dy) = begin
     ≈˘⟨ id-on-ty (dyck-type dy) ⟩
   < dyck-type dy [ idSub ]ty >ty
     ≈˘⟨ lift-sub-comp-lem-ty idSub (dyck-type dy) ⟩
-  < liftType (dyck-type dy) [ ⟨ idSub , dyck-term dy ⟩ ]ty >ty
-    ≈˘⟨ lift-sub-comp-lem-ty ⟨ idSub , dyck-term dy ⟩ (liftType (dyck-type dy)) ⟩
+  < lift-ty (dyck-type dy) [ ⟨ idSub , dyck-term dy ⟩ ]ty >ty
+    ≈˘⟨ lift-sub-comp-lem-ty ⟨ idSub , dyck-term dy ⟩ (lift-ty (dyck-type dy)) ⟩
   < dyck-type (⇓ (⇑ dy)) [ prune-project (⇕pk dy) ]ty >ty ∎
   where
     open Reasoning ty-setoid
 dyck-type-prune (⇑pk {dy = dy} p) = Arr≃ l1 l2 refl≃tm
   where
-    l1 : liftTerm (liftTerm (dyck-term (prune-peak p))) ≃tm
-           (liftTerm (liftTerm (dyck-term dy)) [ prune-project (⇑pk p) ]tm)
+    l1 : lift-tm (lift-tm (dyck-term (prune-peak p))) ≃tm
+           (lift-tm (lift-tm (dyck-term dy)) [ prune-project (⇑pk p) ]tm)
     l1 = begin
-      < liftTerm (liftTerm (dyck-term (prune-peak p))) >tm
+      < lift-tm (lift-tm (dyck-term (prune-peak p))) >tm
         ≈⟨ lift-tm-≃ (lift-tm-≃ (dyck-term-prune p)) ⟩
-      < liftTerm (liftTerm (dyck-term dy [ prune-project p ]tm)) >tm
+      < lift-tm (lift-tm (dyck-term dy [ prune-project p ]tm)) >tm
         ≈˘⟨ lift-tm-≃ (apply-lifted-sub-tm-≃ (dyck-term dy) (prune-project p)) ⟩
-      < liftTerm (dyck-term dy [ liftSub (prune-project p) ]tm) >tm
-        ≈˘⟨ apply-lifted-sub-tm-≃ (dyck-term dy) (liftSub (prune-project p)) ⟩
-      < dyck-term dy [ liftSub (liftSub (prune-project p)) ]tm >tm
-        ≈˘⟨ lift-sub-comp-lem-tm (liftSub (liftSub (prune-project p))) (dyck-term dy) ⟩
-      < liftTerm (dyck-term dy) [ ⟨ liftSub (liftSub (prune-project p)) , 1V ⟩ ]tm >tm
-        ≈˘⟨ lift-sub-comp-lem-tm ⟨ liftSub (liftSub (prune-project p)) , 1V ⟩ (liftTerm (dyck-term dy)) ⟩
-      < liftTerm (liftTerm (dyck-term dy)) [ ⟨ ⟨ (liftSub (liftSub (prune-project p))) , 1V ⟩ , 0V ⟩ ]tm >tm ∎
+      < lift-tm (dyck-term dy [ lift-sub (prune-project p) ]tm) >tm
+        ≈˘⟨ apply-lifted-sub-tm-≃ (dyck-term dy) (lift-sub (prune-project p)) ⟩
+      < dyck-term dy [ lift-sub (lift-sub (prune-project p)) ]tm >tm
+        ≈˘⟨ lift-sub-comp-lem-tm (lift-sub (lift-sub (prune-project p))) (dyck-term dy) ⟩
+      < lift-tm (dyck-term dy) [ ⟨ lift-sub (lift-sub (prune-project p)) , 1V ⟩ ]tm >tm
+        ≈˘⟨ lift-sub-comp-lem-tm ⟨ lift-sub (lift-sub (prune-project p)) , 1V ⟩ (lift-tm (dyck-term dy)) ⟩
+      < lift-tm (lift-tm (dyck-term dy)) [ ⟨ ⟨ (lift-sub (lift-sub (prune-project p))) , 1V ⟩ , 0V ⟩ ]tm >tm ∎
       where
         open Reasoning tm-setoid
 
-    l2 : liftType (liftType (dyck-type (prune-peak p))) ≃ty
-           (liftType (liftType (dyck-type dy)) [ prune-project (⇑pk p) ]ty)
+    l2 : lift-ty (lift-ty (dyck-type (prune-peak p))) ≃ty
+           (lift-ty (lift-ty (dyck-type dy)) [ prune-project (⇑pk p) ]ty)
     l2 = begin
-      < liftType (liftType (dyck-type (prune-peak p))) >ty
+      < lift-ty (lift-ty (dyck-type (prune-peak p))) >ty
         ≈⟨ lift-ty-≃ (lift-ty-≃ (dyck-type-prune p)) ⟩
-      < liftType (liftType (dyck-type dy [ prune-project p ]ty)) >ty
+      < lift-ty (lift-ty (dyck-type dy [ prune-project p ]ty)) >ty
         ≈˘⟨ lift-ty-≃ (apply-lifted-sub-ty-≃ (dyck-type dy) (prune-project p)) ⟩
-      < liftType (dyck-type dy [ liftSub (prune-project p) ]ty) >ty
-        ≈˘⟨ apply-lifted-sub-ty-≃ (dyck-type dy) (liftSub (prune-project p)) ⟩
-      < dyck-type dy [ liftSub (liftSub (prune-project p)) ]ty >ty
-        ≈˘⟨ lift-sub-comp-lem-ty (liftSub (liftSub (prune-project p))) (dyck-type dy) ⟩
-      < liftType (dyck-type dy) [ ⟨ liftSub (liftSub (prune-project p)) , 1V ⟩ ]ty >ty
-        ≈˘⟨ lift-sub-comp-lem-ty ⟨ liftSub (liftSub (prune-project p)) , 1V ⟩ (liftType (dyck-type dy)) ⟩
-      < liftType (liftType (dyck-type dy)) [ ⟨ ⟨ (liftSub (liftSub (prune-project p))) , 1V ⟩ , 0V ⟩ ]ty >ty ∎
+      < lift-ty (dyck-type dy [ lift-sub (prune-project p) ]ty) >ty
+        ≈˘⟨ apply-lifted-sub-ty-≃ (dyck-type dy) (lift-sub (prune-project p)) ⟩
+      < dyck-type dy [ lift-sub (lift-sub (prune-project p)) ]ty >ty
+        ≈˘⟨ lift-sub-comp-lem-ty (lift-sub (lift-sub (prune-project p))) (dyck-type dy) ⟩
+      < lift-ty (dyck-type dy) [ ⟨ lift-sub (lift-sub (prune-project p)) , 1V ⟩ ]ty >ty
+        ≈˘⟨ lift-sub-comp-lem-ty ⟨ lift-sub (lift-sub (prune-project p)) , 1V ⟩ (lift-ty (dyck-type dy)) ⟩
+      < lift-ty (lift-ty (dyck-type dy)) [ ⟨ ⟨ (lift-sub (lift-sub (prune-project p))) , 1V ⟩ , 0V ⟩ ]ty >ty ∎
       where
         open Reasoning ty-setoid
 dyck-type-prune (⇓pk {dy = dy} p) = begin

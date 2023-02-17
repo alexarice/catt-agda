@@ -222,9 +222,9 @@ tree-dim-bd′ d T p = trans (tree-dim-bd d T) (m≤n⇒m⊓n≡m p)
 tree-dim-bd″ : (d : ℕ) → (T : Tree n) → tree-dim (tree-bd d T) ≤ d
 tree-dim-bd″ d T = ≤-trans (≤-reflexive (tree-dim-bd d T)) (m⊓n≤m d (tree-dim T))
 
--- tree-inc-susp-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSub (tree-inc d T b) ≃s tree-inc (suc d) (suspTree T) b
--- tree-inc-susp-lem zero T false = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩ , suspTm (Var (fromℕ _)) ⟩)
--- tree-inc-susp-lem zero T true = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , getFst ⟩ , getSnd ⟩ , suspTm (tree-last-var T) ⟩)
+-- tree-inc-susp-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → susp-sub (tree-inc d T b) ≃s tree-inc (suc d) (suspTree T) b
+-- tree-inc-susp-lem zero T false = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , get-fst ⟩ , get-snd ⟩ , susp-tm (Var (fromℕ _)) ⟩)
+-- tree-inc-susp-lem zero T true = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , get-fst ⟩ , get-snd ⟩ , susp-tm (tree-last-var T) ⟩)
 -- tree-inc-susp-lem (suc d) Sing b = refl≃s
 -- tree-inc-susp-lem (suc d) (Join S T) b = sym≃s (id-left-unit _)
 

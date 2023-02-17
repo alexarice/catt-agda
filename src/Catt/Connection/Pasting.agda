@@ -22,17 +22,17 @@ connect-pdb pd Base = pd-to-pdb pd
 connect-pdb pd (Extend {Γ = ∅} pdb p q) = ⊥-elim (pdb-odd-length pdb)
 connect-pdb pd (Extend {Γ = Δ , _} {A = A} {B = B} pdb p q) = Extend (connect-pdb pd pdb) lem1 lem2
   where
-    lem3 : liftTerm (focus-tm pdb) [
+    lem3 : lift-tm (focus-tm pdb) [
               connect-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]tm
-             ≃tm liftTerm (focus-tm (connect-pdb pd pdb))
+             ≃tm lift-tm (focus-tm (connect-pdb pd pdb))
     lem3 = begin
-      < liftTerm (focus-tm pdb) [ ⟨ liftSub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]tm >tm
-        ≈⟨ lift-sub-comp-lem-tm (liftSub (connect-inc-right (pd-focus-tm pd) _)) (focus-tm pdb) ⟩
-      < focus-tm pdb [ liftSub (connect-inc-right (pd-focus-tm pd) _) ]tm >tm
+      < lift-tm (focus-tm pdb) [ ⟨ lift-sub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]tm >tm
+        ≈⟨ lift-sub-comp-lem-tm (lift-sub (connect-inc-right (pd-focus-tm pd) _)) (focus-tm pdb) ⟩
+      < focus-tm pdb [ lift-sub (connect-inc-right (pd-focus-tm pd) _) ]tm >tm
         ≈⟨ apply-lifted-sub-tm-≃ (focus-tm pdb) (connect-inc-right (pd-focus-tm pd) _) ⟩
-      < liftTerm (focus-tm pdb [ connect-inc-right (pd-focus-tm pd) _ ]tm) >tm
+      < lift-tm (focus-tm pdb [ connect-inc-right (pd-focus-tm pd) _ ]tm) >tm
         ≈˘⟨ lift-tm-≃ (connect-focus-tm pd pdb) ⟩
-      < liftTerm (focus-tm (connect-pdb pd pdb)) >tm ∎
+      < lift-tm (focus-tm (connect-pdb pd pdb)) >tm ∎
       where
         open Reasoning tm-setoid
 
@@ -46,39 +46,39 @@ connect-pdb pd (Extend {Γ = Δ , _} {A = A} {B = B} pdb p q) = Extend (connect-
         ≈˘⟨ connect-focus-ty pd pdb ⟩
       < focus-ty (connect-pdb pd pdb) >ty ∎
 
-    lem4 : liftType (focus-ty pdb) [ connect-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]ty
-             ≃ty liftType (focus-ty (connect-pdb pd pdb))
+    lem4 : lift-ty (focus-ty pdb) [ connect-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]ty
+             ≃ty lift-ty (focus-ty (connect-pdb pd pdb))
     lem4 = begin
-      < liftType (focus-ty pdb) [ ⟨ liftSub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]ty >ty
-        ≈⟨ lift-sub-comp-lem-ty (liftSub (connect-inc-right (pd-focus-tm pd) _)) (focus-ty pdb) ⟩
-      < focus-ty pdb [ liftSub (connect-inc-right (pd-focus-tm pd) _) ]ty >ty
+      < lift-ty (focus-ty pdb) [ ⟨ lift-sub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]ty >ty
+        ≈⟨ lift-sub-comp-lem-ty (lift-sub (connect-inc-right (pd-focus-tm pd) _)) (focus-ty pdb) ⟩
+      < focus-ty pdb [ lift-sub (connect-inc-right (pd-focus-tm pd) _) ]ty >ty
         ≈⟨ apply-lifted-sub-ty-≃ (focus-ty pdb) (connect-inc-right (pd-focus-tm pd) _) ⟩
-      < liftType (focus-ty pdb [ connect-inc-right (pd-focus-tm pd) _ ]ty) >ty
+      < lift-ty (focus-ty pdb [ connect-inc-right (pd-focus-tm pd) _ ]ty) >ty
         ≈˘⟨ lift-ty-≃ (connect-focus-ty pd pdb) ⟩
-      < liftType (focus-ty (connect-pdb pd pdb)) >ty ∎
+      < lift-ty (focus-ty (connect-pdb pd pdb)) >ty ∎
 
     lem2 : (B [ connect-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]ty) ≃ty
-             (liftTerm (focus-tm (connect-pdb pd pdb)) ─⟨
-              liftType (focus-ty (connect-pdb pd pdb)) ⟩⟶
+             (lift-tm (focus-tm (connect-pdb pd pdb)) ─⟨
+              lift-ty (focus-ty (connect-pdb pd pdb)) ⟩⟶
               0V)
     lem2 = begin
       < B [ connect-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]ty >ty
         ≈⟨ sub-action-≃-ty q refl≃s ⟩
-      < (liftTerm (focus-tm pdb) ─⟨ liftType (focus-ty pdb) ⟩⟶ 0V)
+      < (lift-tm (focus-tm pdb) ─⟨ lift-ty (focus-ty pdb) ⟩⟶ 0V)
         [ connect-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]ty >ty
         ≈⟨ Arr≃ lem3 lem4 refl≃tm ⟩
-      < liftTerm (focus-tm (connect-pdb pd pdb)) ─⟨ liftType (focus-ty (connect-pdb pd pdb)) ⟩⟶ 0V >ty ∎
+      < lift-tm (focus-tm (connect-pdb pd pdb)) ─⟨ lift-ty (focus-ty (connect-pdb pd pdb)) ⟩⟶ 0V >ty ∎
 
 connect-pdb pd (Restr pdb) = Restr (connect-pdb pd pdb) ⦃ NonZero-subst (sym (trans (ty-dim-≃ (connect-focus-ty pd pdb)) (sym (sub-dim (connect-inc-right (pd-focus-tm pd) _) (focus-ty pdb))))) it ⦄
 
 connect-focus-ty pd Base = ⋆-is-only-0-d-ty ⦃ pd-to-pdb-0-d pd ⦄
 connect-focus-ty pd (Extend {Γ = ∅} pdb p q) = ⊥-elim (pdb-odd-length pdb)
 connect-focus-ty pd (Extend {Γ = Δ , A} {B = B} pdb p q) = begin
-  < liftType (B [ ⟨ liftSub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]ty) >ty
+  < lift-ty (B [ ⟨ lift-sub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]ty) >ty
     ≈˘⟨ apply-lifted-sub-ty-≃ B _ ⟩
-  < B [ ⟨ liftSub (liftSub (connect-inc-right (pd-focus-tm pd) _)) , 1V ⟩ ]ty >ty
+  < B [ ⟨ lift-sub (lift-sub (connect-inc-right (pd-focus-tm pd) _)) , 1V ⟩ ]ty >ty
     ≈˘⟨ lift-sub-comp-lem-ty _ B ⟩
-  < liftType B [ ⟨ ⟨ liftSub (liftSub (connect-inc-right (pd-focus-tm pd) _)) , 1V ⟩ , 0V ⟩ ]ty >ty ∎
+  < lift-ty B [ ⟨ ⟨ lift-sub (lift-sub (connect-inc-right (pd-focus-tm pd) _)) , 1V ⟩ , 0V ⟩ ]ty >ty ∎
   where
     open Reasoning ty-setoid
 
@@ -109,12 +109,12 @@ connect-focus-tm pd (Restr pdb) = let
     open Reasoning tm-setoid
 
 connect-susp-pdb : (pd : Γ ⊢pd) → (pdb : Δ ⊢pdb) → connect-susp Γ Δ ⊢pdb
-connect-susp-pdb {Γ = Γ} {Δ = Δ} pd pdb = pdb-≃ (connect-≃ (refl≃c {Γ = suspCtx Γ}) (susp-pd-focus pd) (refl≃c {Γ = Δ})) (connect-pdb (susp-pd pd) pdb)
+connect-susp-pdb {Γ = Γ} {Δ = Δ} pd pdb = pdb-≃ (connect-≃ (refl≃c {Γ = susp-ctx Γ}) (susp-pd-focus pd) (refl≃c {Γ = Δ})) (connect-pdb (susp-pd pd) pdb)
 
 connect-susp-focus-ty : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (pd : Γ ⊢pd) → (pdb : Δ ⊢pdb) → focus-ty (connect-susp-pdb pd pdb) ≃ty focus-ty pdb [ connect-susp-inc-right n m ]ty
 connect-susp-focus-ty {Γ = Γ} {Δ = Δ} pd pdb = begin
   < focus-ty (connect-susp-pdb pd pdb) >ty
-    ≈⟨ pdb-≃-focus-ty (connect-≃ (refl≃c {Γ = suspCtx Γ}) (susp-pd-focus pd) (refl≃c {Γ = Δ})) (connect-pdb (susp-pd pd) pdb) ⟩
+    ≈⟨ pdb-≃-focus-ty (connect-≃ (refl≃c {Γ = susp-ctx Γ}) (susp-pd-focus pd) (refl≃c {Γ = Δ})) (connect-pdb (susp-pd pd) pdb) ⟩
   < focus-ty (connect-pdb (susp-pd pd) pdb) >ty
     ≈⟨ connect-focus-ty (susp-pd pd) pdb ⟩
   < focus-ty pdb [ connect-inc-right (pd-focus-tm (susp-pd pd)) _ ]ty >ty
@@ -126,7 +126,7 @@ connect-susp-focus-ty {Γ = Γ} {Δ = Δ} pd pdb = begin
 connect-susp-focus-tm : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (pd : Γ ⊢pd) → (pdb : Δ ⊢pdb) → focus-tm (connect-susp-pdb pd pdb) ≃tm focus-tm pdb [ connect-susp-inc-right n m ]tm
 connect-susp-focus-tm {Γ = Γ} {Δ = Δ} pd pdb = begin
   < focus-tm (connect-susp-pdb pd pdb) >tm
-    ≈⟨ pdb-≃-focus-tm (connect-≃ (refl≃c {Γ = suspCtx Γ}) (susp-pd-focus pd) (refl≃c {Γ = Δ})) (connect-pdb (susp-pd pd) pdb) ⟩
+    ≈⟨ pdb-≃-focus-tm (connect-≃ (refl≃c {Γ = susp-ctx Γ}) (susp-pd-focus pd) (refl≃c {Γ = Δ})) (connect-pdb (susp-pd pd) pdb) ⟩
   < focus-tm (connect-pdb (susp-pd pd) pdb) >tm
     ≈⟨ connect-focus-tm (susp-pd pd) pdb ⟩
   < focus-tm pdb [ connect-inc-right (pd-focus-tm (susp-pd pd)) _ ]tm >tm

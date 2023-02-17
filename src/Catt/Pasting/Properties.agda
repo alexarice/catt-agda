@@ -34,7 +34,7 @@ pdb-proj₁ : (pdb : (Γ , B , A) ⊢pdb) → B ≃ty focus-ty (pdb-prefix pdb)
 pdb-proj₁ (Extend pdb p q) = p
 pdb-proj₁ (Restr pdb) = pdb-proj₁ pdb
 
-pdb-proj₂ : (pdb : Γ , B , A ⊢pdb) → A ≃ty liftTerm (focus-tm (pdb-prefix pdb)) ─⟨ liftType (focus-ty (pdb-prefix pdb)) ⟩⟶ 0V
+pdb-proj₂ : (pdb : Γ , B , A ⊢pdb) → A ≃ty lift-tm (focus-tm (pdb-prefix pdb)) ─⟨ lift-ty (focus-ty (pdb-prefix pdb)) ⟩⟶ 0V
 pdb-proj₂ (Extend pdb p q) = q
 pdb-proj₂ (Restr pdb) = pdb-proj₂ pdb
 
@@ -61,11 +61,11 @@ pdb-irrel (Extend {B = B} pdb p q) (Extend pdb2 p′ q′) x with pdb-irrel pdb 
     lem = cong pred (begin
       suc (ty-dim (focus-ty pdb))
         ≡˘⟨ cong suc (lift-ty-dim (focus-ty pdb)) ⟩
-      suc (ty-dim (liftType (focus-ty pdb)))
+      suc (ty-dim (lift-ty (focus-ty pdb)))
         ≡˘⟨ ty-dim-≃ q ⟩
       ty-dim B
         ≡⟨ ty-dim-≃ q′ ⟩
-      suc (ty-dim (liftType (focus-ty pdb2)))
+      suc (ty-dim (lift-ty (focus-ty pdb2)))
         ≡⟨ cong suc (lift-ty-dim (focus-ty pdb2)) ⟩
       suc (ty-dim (focus-ty pdb2)) ∎)
 ... | refl = cong₂ (Extend pdb) (≃ty-irrel p p′) (≃ty-irrel q q′)
@@ -79,7 +79,7 @@ pdb-irrel (Extend {A = A} {B = B} pdb p q) (Restr pdb2) x = ⊥-elim (1+n≰n le
         ≤⟨ s≤s (pdb-dim-lem pdb2) ⟩
       suc (ty-dim B)
         ≡˘⟨ cong suc (lift-ty-dim B) ⟩
-      suc (ty-dim (liftType B))
+      suc (ty-dim (lift-ty B))
         ≡⟨ cong suc x ⟩
       suc (ty-dim (ty-base (focus-ty pdb2)))
         ≡⟨ cong suc (ty-dim-ty-base (focus-ty pdb2)) ⟩
@@ -179,10 +179,10 @@ pdb-dec (Γ , B , A) with (pdb-dec Γ)
 ... | no d = no (λ x → d (pdb-prefix x))
 ... | yes d with (ty-dim B ≤? pdb-max-dim d)
 ... | no q = no (λ x → q (≤-trans (≤-reflexive (ty-dim-≃ (pdb-proj₁ x))) (≤-trans (pdb-max-dim-is-max (pdb-prefix x)) (≤-reflexive (pdb-max-dim-irrel (pdb-prefix x) d)))))
-... | yes q with ≃ty-dec B (focus-ty new-pdb) | ≃ty-dec A (liftTerm (focus-tm new-pdb) ─⟨ liftType (focus-ty new-pdb) ⟩⟶ 0V)
+... | yes q with ≃ty-dec B (focus-ty new-pdb) | ≃ty-dec A (lift-tm (focus-tm new-pdb) ─⟨ lift-ty (focus-ty new-pdb) ⟩⟶ 0V)
   where new-pdb = pdb-to-dim d (ty-dim B) q
 ... | yes p | yes r = yes (Extend (pdb-to-dim d (ty-dim B) q) p r)
-... | yes p | no r = no (λ x → r (trans≃ty (pdb-proj₂ x) (reflexive≃ty (cong (λ y → liftTerm (focus-tm y) ─⟨ liftType (focus-ty y) ⟩⟶ 0V) (pdb-irrel (pdb-prefix x) (pdb-to-dim d (ty-dim B) q) (trans (sym (ty-dim-≃ (pdb-proj₁ x))) (pdb-to-dim-dim d (ty-dim B) q)))))))
+... | yes p | no r = no (λ x → r (trans≃ty (pdb-proj₂ x) (reflexive≃ty (cong (λ y → lift-tm (focus-tm y) ─⟨ lift-ty (focus-ty y) ⟩⟶ 0V) (pdb-irrel (pdb-prefix x) (pdb-to-dim d (ty-dim B) q) (trans (sym (ty-dim-≃ (pdb-proj₁ x))) (pdb-to-dim-dim d (ty-dim B) q)))))))
 ... | no p | r = no (λ x → p (trans≃ty (pdb-proj₁ x) (reflexive≃ty (cong focus-ty (pdb-irrel (pdb-prefix x) (pdb-to-dim d (ty-dim B) q) (trans (sym (ty-dim-≃ (pdb-proj₁ x))) (pdb-to-dim-dim d (ty-dim B) q)))))))
 
 pdb-to-pd : (Γ : Ctx n) → Γ ⊢pdb → Γ ⊢pd
@@ -203,21 +203,21 @@ right-base-< {A = s ─⟨ A ⟩⟶ t} p = refl≃tm
 right-base-base : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → right-base A s ≃tm right-base (ty-base A) (ty-tgt A)
 right-base-base (s ─⟨ A ⟩⟶ t) = refl≃tm
 
-right-base-lift : (A : Ty n) → (t : Tm n) → right-base (liftType A) (liftTerm t) ≃tm liftTerm (right-base A t)
+right-base-lift : (A : Ty n) → (t : Tm n) → right-base (lift-ty A) (lift-tm t) ≃tm lift-tm (right-base A t)
 right-base-lift ⋆ t = refl≃tm
 right-base-lift (s ─⟨ A ⟩⟶ t) _ = right-base-lift A t
 
-pdb-right-base-prefix : (pdb : Γ , B , A ⊢pdb) → 0 < ty-dim B → pdb-right-base pdb ≃tm liftTerm (liftTerm (pdb-right-base (pdb-prefix pdb)))
+pdb-right-base-prefix : (pdb : Γ , B , A ⊢pdb) → 0 < ty-dim B → pdb-right-base pdb ≃tm lift-tm (lift-tm (pdb-right-base (pdb-prefix pdb)))
 pdb-right-base-prefix (Extend pdb p q) x = begin
   < pdb-right-base (Extend pdb p q) >tm
     ≈⟨ right-base-≃ (lift-ty-≃ q) refl≃tm ⟩
-  < right-base (liftType (liftType (focus-ty pdb))) (liftTerm (Var zero)) >tm
-    ≈⟨ right-base-< (<-transˡ x (≤-reflexive (trans (ty-dim-≃ p) (sym (trans (lift-ty-dim (liftType (focus-ty pdb))) (lift-ty-dim (focus-ty pdb))))))) ⟩
-  < right-base (liftType (liftType (focus-ty pdb))) (liftTerm (liftTerm (focus-tm pdb))) >tm
-    ≈⟨ right-base-lift (liftType (focus-ty pdb)) (liftTerm (focus-tm pdb)) ⟩
-  < liftTerm (right-base (liftType (focus-ty pdb)) (liftTerm (focus-tm pdb))) >tm
+  < right-base (lift-ty (lift-ty (focus-ty pdb))) (lift-tm (Var zero)) >tm
+    ≈⟨ right-base-< (<-transˡ x (≤-reflexive (trans (ty-dim-≃ p) (sym (trans (lift-ty-dim (lift-ty (focus-ty pdb))) (lift-ty-dim (focus-ty pdb))))))) ⟩
+  < right-base (lift-ty (lift-ty (focus-ty pdb))) (lift-tm (lift-tm (focus-tm pdb))) >tm
+    ≈⟨ right-base-lift (lift-ty (focus-ty pdb)) (lift-tm (focus-tm pdb)) ⟩
+  < lift-tm (right-base (lift-ty (focus-ty pdb)) (lift-tm (focus-tm pdb))) >tm
     ≈⟨ lift-tm-≃ (right-base-lift (focus-ty pdb) (focus-tm pdb)) ⟩
-  < liftTerm (liftTerm (right-base (focus-ty pdb) (focus-tm pdb))) >tm ∎
+  < lift-tm (lift-tm (right-base (focus-ty pdb) (focus-tm pdb))) >tm ∎
   where
     open Reasoning tm-setoid
 pdb-right-base-prefix (Restr pdb) x = begin
@@ -225,7 +225,7 @@ pdb-right-base-prefix (Restr pdb) x = begin
     ≈˘⟨ right-base-base (focus-ty pdb) ⟩
   < pdb-right-base pdb >tm
     ≈⟨ pdb-right-base-prefix pdb x ⟩
-  < liftTerm (liftTerm (pdb-right-base (pdb-prefix (Restr pdb)))) >tm ∎
+  < lift-tm (lift-tm (pdb-right-base (pdb-prefix (Restr pdb)))) >tm ∎
   where
     open Reasoning tm-setoid
 
@@ -239,7 +239,7 @@ pdb-dim-proj (Restr pdb) = pdb-dim-proj pdb
 
 pdb-right-base-0-dim : (pdb : Γ , B , A ⊢pdb) → ty-dim B ≡ 0 → pdb-right-base pdb ≃tm 1V {n = 2 + ctxLength Γ}
 pdb-right-base-0-dim (Extend pdb p q) x = trans≃tm (right-base-≃ (lift-ty-≃ q) refl≃tm) (right-base-≃ (lift-ty-≃ (lift-ty-≃ (⋆-is-only-0-d-ty {A = focus-ty pdb} ⦃ IsZero-subst (trans (sym x) (ty-dim-≃ p)) it ⦄))) refl≃tm)
-pdb-right-base-0-dim (Restr (Extend pdb p q)) x = trans≃tm (sym≃tm (right-base-base (liftType _))) (pdb-right-base-0-dim (Extend pdb p q) x)
+pdb-right-base-0-dim (Restr (Extend pdb p q)) x = trans≃tm (sym≃tm (right-base-base (lift-ty _))) (pdb-right-base-0-dim (Extend pdb p q) x)
 pdb-right-base-0-dim {B = B} {A = A} (Restr (Restr pdb)) x = ⊥-elim (NonZero-⊥ lem)
   where
     lem : ty-dim (ty-base (focus-ty pdb)) ≤ 0
@@ -260,7 +260,7 @@ focus-ty-is-globular : (pdb : Γ ⊢pdb) → ty-is-globular (focus-ty pdb)
 focus-tm-is-globular : (pdb : Γ ⊢pdb) → isVar (focus-tm pdb)
 
 focus-ty-is-globular Base = tt
-focus-ty-is-globular (Extend pdb p q) = liftType-preserve-is-globular _ (≃ty-preserve-globular (sym≃ty q) ((liftTerm-preserve-isVar (focus-tm pdb) (focus-tm-is-globular pdb)) ,, ((liftType-preserve-is-globular (focus-ty pdb) (focus-ty-is-globular pdb)) ,, tt)))
+focus-ty-is-globular (Extend pdb p q) = lift-ty-preserve-is-globular _ (≃ty-preserve-globular (sym≃ty q) ((lift-tm-preserve-isVar (focus-tm pdb) (focus-tm-is-globular pdb)) ,, ((lift-ty-preserve-is-globular (focus-ty pdb) (focus-ty-is-globular pdb)) ,, tt)))
 focus-ty-is-globular (Restr pdb) = ty-base-globular (focus-ty pdb) (focus-ty-is-globular pdb)
 
 focus-tm-is-globular Base = tt

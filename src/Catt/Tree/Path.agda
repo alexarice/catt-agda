@@ -25,7 +25,7 @@ path-length (PShift P) = path-length P
 
 path-to-term : {T : Tree n} → (P : Path T) → Tm (suc n)
 path-to-term PHere = Var (fromℕ _)
-path-to-term (PExt P) = suspTm (path-to-term P) [ connect-susp-inc-left _ _ ]tm
+path-to-term (PExt P) = susp-tm (path-to-term P) [ connect-susp-inc-left _ _ ]tm
 path-to-term (PShift P) = path-to-term P [ connect-susp-inc-right _ _ ]tm
 
 path-to-fin : {T : Tree n} → (P : Path T) → Fin (suc n)
@@ -106,4 +106,4 @@ ppath-≃ (Join≃′ p q) (PShift Z) = PShift (ppath-≃ q Z)
 
 -- susp-path : Path X → Path (suspMaybeTree X)
 -- susp-path {X = someTree x} P = PExt P
--- susp-path {X = Other _} (POther x) = POther (suspTm x)
+-- susp-path {X = Other _} (POther x) = POther (susp-tm x)

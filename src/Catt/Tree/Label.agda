@@ -103,7 +103,7 @@ label₁ L = ap L ∘ PExt ,, SArr (ap L PHere) (lty L) (ap L (PShift PHere))
 label₂ : (L : Label-WT X (Join S T)) → Label-WT X T
 label₂ L = proj₁ L ∘ PShift ,, proj₂ L
 
-stm-to-term (SExt s) = suspTm (stm-to-term s) [ connect-susp-inc-left _ _ ]tm
+stm-to-term (SExt s) = susp-tm (stm-to-term s) [ connect-susp-inc-left _ _ ]tm
 stm-to-term (SShift s) = stm-to-term s [ connect-susp-inc-right _ _ ]tm
 stm-to-term (SPath P) = path-to-term P
 stm-to-term (SCoh S A L) = Coh (tree-to-ctx S) (sty-to-type A) idSub [ label-to-sub L ]tm
@@ -137,7 +137,7 @@ lift-sty : STy (Other n) → STy (Other (suc n))
 lift-label : Label-WT (Other n) S → Label-WT (Other (suc n)) S
 
 lift-stm (SCoh S A L) = SCoh S A (lift-label L)
-lift-stm (SOther t) = SOther (liftTerm t)
+lift-stm (SOther t) = SOther (lift-tm t)
 
 lift-sty S⋆ = S⋆
 lift-sty (SArr s A t) = SArr (lift-stm s) (lift-sty A) (lift-stm t)
@@ -168,14 +168,14 @@ stm-fst : STm (suspMaybeTree X)
 stm-snd : STm (suspMaybeTree X)
 
 stm-fst {X = someTree x} = SHere
-stm-fst {X = Other _} = SOther getFst
+stm-fst {X = Other _} = SOther get-fst
 
 stm-snd {X = someTree x} = SShift (SPath PHere)
-stm-snd {X = Other _} = SOther getSnd
+stm-snd {X = Other _} = SOther get-snd
 
 susp-stm {X = someTree x} s = SExt s
 susp-stm {X = Other _} (SCoh S A L) = SCoh S A (susp-label L)
-susp-stm {X = Other _} (SOther t) = SOther (suspTm t)
+susp-stm {X = Other _} (SOther t) = SOther (susp-tm t)
 
 susp-sty S⋆ = SArr stm-fst S⋆ stm-snd
 susp-sty (SArr s A t) = SArr (susp-stm s) (susp-sty A) (susp-stm t)

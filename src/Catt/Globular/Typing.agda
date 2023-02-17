@@ -39,7 +39,7 @@ tm-height-is-ty-dim tty = ≈ty-preserve-height (tm-to-ty-prop tty)
 
 sub-tm-height : (t : Tm n) → (Γ : Ctx n) → {σ : Sub n m A} → Typing-Sub Γ Δ σ → tm-height Γ t + ty-dim A ≡ tm-height Δ (t [ σ ]tm)
 sub-tm-height {A = A} {Δ = Δ} (Var zero) (Γ , B) (TyExt {σ = σ} {t = t} σty x) = begin
-  ty-dim (liftType B) + ty-dim A
+  ty-dim (lift-ty B) + ty-dim A
     ≡⟨ cong (_+ ty-dim A) (lift-ty-dim B) ⟩
   ty-dim B + ty-dim A
     ≡⟨ sub-dim′ σ B ⟩
@@ -49,7 +49,7 @@ sub-tm-height {A = A} {Δ = Δ} (Var zero) (Γ , B) (TyExt {σ = σ} {t = t} σt
   where
     open ≡-Reasoning
 sub-tm-height {A = A} (Var (suc i)) (Γ , B) (TyExt {σ = σ} {t = t} σty x) = begin
-  ty-dim (liftType (Γ ‼ i)) + ty-dim A
+  ty-dim (lift-ty (Γ ‼ i)) + ty-dim A
     ≡⟨ cong (_+ ty-dim A) (lift-ty-dim (Γ ‼ i)) ⟩
   ty-dim (Γ ‼ i) + ty-dim A
     ≡⟨ sub-tm-height (Var i) Γ σty ⟩

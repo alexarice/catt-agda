@@ -22,7 +22,7 @@ subctx-inc-tm (Var i) ⟨⟩ p = ⊥-elim (lem i p)
     lem (suc i) p = lem i (debuild-⊆-2 p)
 subctx-inc-tm (Var i) ⟨ σ , Var j ⟩ ⦃ q ⦄ p with i f≟ j
 ... | yes x = 0V
-... | no x = liftTerm (subctx-inc-tm (Var i) σ ⦃ proj₁ q ⦄ (lem i j x (FVSub σ) p))
+... | no x = lift-tm (subctx-inc-tm (Var i) σ ⦃ proj₁ q ⦄ (lem i j x (FVSub σ) p))
   where
     lem : (i j : Fin n) → ¬ i ≡ j → (xs : VarSet n) → trueAt i ⊆ xs ∪ trueAt j → trueAt i ⊆ xs
     lem zero zero p xs q = ⊥-elim (p refl)
@@ -42,13 +42,13 @@ VarSet-size (ewt xs) = suc (VarSet-size xs)
 
 supp-ctx-inc : (xs : VarSet n) → Sub (VarSet-size xs) n ⋆
 supp-ctx-inc emp = ⟨⟩
-supp-ctx-inc (ewf xs) = liftSub (supp-ctx-inc xs)
-supp-ctx-inc (ewt xs) = ⟨ (liftSub (supp-ctx-inc xs)) , 0V ⟩
+supp-ctx-inc (ewf xs) = lift-sub (supp-ctx-inc xs)
+supp-ctx-inc (ewt xs) = ⟨ (lift-sub (supp-ctx-inc xs)) , 0V ⟩
 
 supp-ctx-inc-v2v : (xs : VarSet n) → varToVar (supp-ctx-inc xs)
 supp-ctx-inc-v2v emp = tt
-supp-ctx-inc-v2v (ewf xs) = liftSub-preserve-var-to-var (supp-ctx-inc xs) ⦃ supp-ctx-inc-v2v xs ⦄
-supp-ctx-inc-v2v (ewt xs) = (liftSub-preserve-var-to-var (supp-ctx-inc xs) ⦃ supp-ctx-inc-v2v xs ⦄) ,, tt
+supp-ctx-inc-v2v (ewf xs) = lift-sub-preserve-var-to-var (supp-ctx-inc xs) ⦃ supp-ctx-inc-v2v xs ⦄
+supp-ctx-inc-v2v (ewt xs) = (lift-sub-preserve-var-to-var (supp-ctx-inc xs) ⦃ supp-ctx-inc-v2v xs ⦄) ,, tt
 
 supp-ctx-inc-FV : (xs : VarSet n) → FVSub (supp-ctx-inc xs) ≡ xs
 supp-ctx-inc-FV emp = refl

@@ -25,7 +25,7 @@ dyck-to-ctx-Ty : (dy : Dyck n d) → Typing-Ctx (dyck-to-ctx dy)
 dyck-type-Ty : (dy : Dyck n d) → Typing-Ty (dyck-to-ctx dy) (dyck-type dy)
 dyck-term-Ty : (dy : Dyck n d) → Typing-Tm (dyck-to-ctx dy) (dyck-term dy) (dyck-type dy)
 dyck-pre-type-Ty : (dy : Dyck n d) → Typing-Ty (dyck-to-ctx dy , dyck-type dy)
-      (liftTerm (dyck-term dy) ─⟨ liftType (dyck-type dy) ⟩⟶ 0V)
+      (lift-tm (dyck-term dy) ─⟨ lift-ty (dyck-type dy) ⟩⟶ 0V)
 dyck-pre-type-Ty dy = TyArr (lift-tm-typing (dyck-term-Ty dy)) (lift-ty-typing (dyck-type-Ty dy)) (TyVar zero)
 
 dyck-to-ctx-Ty End = TyAdd TyEmp TyStar

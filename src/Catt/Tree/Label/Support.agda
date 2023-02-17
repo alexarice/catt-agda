@@ -233,7 +233,7 @@ fromPath-to-term {S = Join S T} (PExt P) rewrite Truth-prop (fromPath-non-empty 
     ≡⟨ cong₂ (λ x y → connect-susp-supp (suspSupp x) y) (fromPath-to-term P) (toVarSet-emp T) ⟩
   connect-susp-supp (suspSupp (SuppTm (tree-to-ctx S) (path-to-term P))) empty
     ≡⟨ connect-susp-supp-ext (tree-to-ctx S) (path-to-term P) (tree-to-ctx T) ⟩
-  SuppTm (tree-to-ctx (Join S T)) (suspTm (path-to-term P) [ connect-susp-inc-left _ _ ]tm) ∎
+  SuppTm (tree-to-ctx (Join S T)) (susp-tm (path-to-term P) [ connect-susp-inc-left _ _ ]tm) ∎
 fromPath-to-term {S = Join S T} (PShift P) rewrite Truth-not-prop (tvarset-empty S) = begin
   connect-susp-supp empty (toVarSet (fromPath P))
     ≡⟨ cong (connect-susp-supp empty) (fromPath-to-term P) ⟩
@@ -270,7 +270,7 @@ FVSTm-to-term {ΓS = incTree (Join S T)} (SExt a) rewrite Truth-prop (FVSTm-non-
     ≡⟨ cong₂ (λ x y → connect-susp-supp (suspSupp x) y) (FVSTm-to-term a) (toVarSet-emp T) ⟩
   connect-susp-supp (suspSupp (SuppTm (tree-to-ctx S) (stm-to-term a))) empty
     ≡⟨ connect-susp-supp-ext (tree-to-ctx S) (stm-to-term a) (tree-to-ctx T) ⟩
-  SuppTm (tree-to-ctx (Join S T)) (suspTm (stm-to-term a) [ connect-susp-inc-left _ _ ]tm) ∎
+  SuppTm (tree-to-ctx (Join S T)) (susp-tm (stm-to-term a) [ connect-susp-inc-left _ _ ]tm) ∎
 FVSTm-to-term {ΓS = incTree (Join S T)} (SShift a) rewrite Truth-not-prop (tvarset-empty S) = begin
   connect-susp-supp empty (toVarSet (FVSTm a))
     ≡⟨ cong (connect-susp-supp empty) (FVSTm-to-term a) ⟩
@@ -382,8 +382,8 @@ FVLabel-to-sub′ {S = Join S T} {ΓS = ΓS} L f g = begin
     l3 = PR.begin
       SuppTm (COT-to-Ctx ΓS) (Var (fromℕ _) [ label-to-sub (label₂ L) ]tm)
         ≈˘⟨ cong (DC (COT-to-Ctx ΓS)) (FVTm-≃ (label-to-sub-lem L)) ⟩
-      SuppTm (COT-to-Ctx ΓS) (getSnd [ unrestrict (label-to-sub (label₁ L)) ]tm)
-        ≤⟨ DC-cong-⊆ (COT-to-Ctx ΓS) (FVTm-comp-⊆ getSnd (unrestrict (label-to-sub (label₁ L)))) ⟩
+      SuppTm (COT-to-Ctx ΓS) (get-snd [ unrestrict (label-to-sub (label₁ L)) ]tm)
+        ≤⟨ DC-cong-⊆ (COT-to-Ctx ΓS) (FVTm-comp-⊆ get-snd (unrestrict (label-to-sub (label₁ L)))) ⟩
       SuppSub (COT-to-Ctx ΓS) (unrestrict (label-to-sub (label₁ L))) PR.∎
       where
         module PR = PReasoning (⊆-poset _)

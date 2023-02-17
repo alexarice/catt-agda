@@ -35,13 +35,13 @@ connect-inc-left-Ty tty (∅ , A) = id-Ty
 connect-inc-left-Ty tty (Δ , A , B) = lift-sub-typing (connect-inc-left-Ty tty (Δ , A))
 
 connect-susp-Ty : Typing-Ctx Γ → Typing-Ctx Δ → Typing-Ctx (connect-susp Γ Δ)
-connect-susp-Ty Γty Δty = connect-Ty (suspCtxTy Γty) getSndTy Δty
+connect-susp-Ty Γty Δty = connect-Ty (susp-ctxTy Γty) get-sndTy Δty
 
-connect-susp-inc-left-Ty : (Δ : Ctx (suc m)) → Typing-Sub (suspCtx Γ) (connect-susp Γ Δ) (connect-susp-inc-left n m)
-connect-susp-inc-left-Ty Δ = connect-inc-left-Ty getSndTy Δ
+connect-susp-inc-left-Ty : (Δ : Ctx (suc m)) → Typing-Sub (susp-ctx Γ) (connect-susp Γ Δ) (connect-susp-inc-left n m)
+connect-susp-inc-left-Ty Δ = connect-inc-left-Ty get-sndTy Δ
 
 connect-susp-inc-right-Ty : (Γ : Ctx (suc n)) → Typing-Sub Δ (connect-susp Γ Δ) (connect-susp-inc-right n m)
-connect-susp-inc-right-Ty Γ = connect-inc-right-Ty getSndTy
+connect-susp-inc-right-Ty Γ = connect-inc-right-Ty get-sndTy
 
 sub-from-connect-inc-right-≈ : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → {Γ : Ctx l} → (t [ σ ]tm ≈[ Γ ]tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ τ ● connect-inc-right t m ≈[ Γ ]s τ
 sub-from-connect-inc-right-≈ σ t ⟨ ⟨⟩ , s ⟩ p = Ext≈ (Null≈ refl≈ty) p
@@ -88,7 +88,7 @@ sub-between-connect-susps-Ty : Typing-Sub Γ Δ σ
                              → Typing-Sub Υ Θ τ
                              → Var (fromℕ _) [ τ ]tm ≈[ Θ ]tm Var (fromℕ _)
                              → Typing-Sub (connect-susp Γ Υ) (connect-susp Δ Θ) (sub-between-connect-susps σ τ)
-sub-between-connect-susps-Ty {σ = σ} σty τty p = sub-between-connects-Ty (suspSubTy σty) getSndTy τty getSndTy (reflexive≈tm (sym≃tm (susp-sub-preserve-getSnd σ))) p
+sub-between-connect-susps-Ty {σ = σ} σty τty p = sub-between-connects-Ty (susp-subTy σty) get-sndTy τty get-sndTy (reflexive≈tm (sym≃tm (susp-sub-preserve-get-snd σ))) p
 
 between-connect-from-connect-≈ : (σ : Sub (suc n) (suc l) ⋆)
                                → (τ : Sub (suc m) (suc l′) ⋆)

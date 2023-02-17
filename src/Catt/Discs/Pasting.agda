@@ -8,7 +8,7 @@ open import Catt.Pasting.Properties
 open import Catt.Syntax.SyntacticEquality
 
 disc-pdb : (d : ℕ) → Disc d ⊢pdb
-disc-pdb-focus-ty : (d : ℕ) → focus-ty (disc-pdb d) ≃ty liftType (sphere-type d)
+disc-pdb-focus-ty : (d : ℕ) → focus-ty (disc-pdb d) ≃ty lift-ty (sphere-type d)
 disc-pdb-focus-tm : (d : ℕ) → focus-tm (disc-pdb d) ≃tm 0V {n = disc-size d}
 
 disc-pdb zero = Base

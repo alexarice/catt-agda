@@ -106,14 +106,14 @@ SuppTmChar (TyVar {Γ = Γ , A} zero) = begin
     ≡˘⟨ cong ewt (∪-right-unit (SuppTy Γ A)) ⟩
   ewt (SuppTy Γ A ∪ empty)
     ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewt empty) (supp-lift-ty A) ⟩
-  SuppTy (Γ , A) (liftType A) ∪ ewt empty ∎
+  SuppTy (Γ , A) (lift-ty A) ∪ ewt empty ∎
 
 SuppTmChar (TyVar {Γ = Γ , A} (suc i)) = begin
   ewf (SuppTm Γ (Var i))
     ≡⟨ cong ewf (SuppTmChar (TyVar i)) ⟩
   ewf (SuppTy Γ (Γ ‼ i) ∪ FVTm (Var i))
     ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewf (FVTm (Var i))) (supp-lift-ty (Γ ‼ i)) ⟩
-  SuppTy (Γ , A) (liftType (Γ ‼ i)) ∪ ewf (FVTm (Var i)) ∎
+  SuppTy (Γ , A) (lift-ty (Γ ‼ i)) ∪ ewf (FVTm (Var i)) ∎
 
 SuppTmChar {Γ = Γ} (TyCoh {Δ = Δ} {A = A} {σ = σ} Aty σty b s) = begin
   SuppSub Γ σ

@@ -55,45 +55,45 @@ module Conditions (ecr : HasEndoCoherenceRemoval) where
   lift-rule : .⦃ pd : Δ ⊢pd ⦄
             → Typing-Ty Δ A
             → Typing-Tm Δ s A
-            → Typing-Sub Δ (Γ , B) (liftSub σ)
-            → liftTerm (Coh Δ (s ─⟨ A ⟩⟶ s) σ) ≈[ Γ , B ]tm liftTerm (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm)))
+            → Typing-Sub Δ (Γ , B) (lift-sub σ)
+            → lift-tm (Coh Δ (s ─⟨ A ⟩⟶ s) σ) ≈[ Γ , B ]tm lift-tm (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm)))
   lift-rule {Δ = Δ} {A = A} {s = s} {σ = σ} Aty sty σty = begin
-    Coh Δ (s ─⟨ A ⟩⟶ s) (liftSub σ)
+    Coh Δ (s ─⟨ A ⟩⟶ s) (lift-sub σ)
       ≈⟨ ecr Aty sty σty ⟩
-    identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ liftSub σ ]ty) _ (s [ liftSub σ ]tm))
+    identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ lift-sub σ ]ty) _ (s [ lift-sub σ ]tm))
       ≈⟨ reflexive≈tm (identity-≃ refl (sub-from-disc-≃ (ty-dim A) (ty-dim A) (apply-lifted-sub-ty-≃ A σ) _ _ (apply-lifted-sub-tm-≃ s σ))) ⟩
-    identity (ty-dim A) (sub-from-disc (ty-dim A) (liftType (A [ σ ]ty)) _ (liftTerm (s [ σ ]tm)))
+    identity (ty-dim A) (sub-from-disc (ty-dim A) (lift-ty (A [ σ ]ty)) _ (lift-tm (s [ σ ]tm)))
       ≈˘⟨ reflexive≈tm (identity-≃ refl (lift-sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))) ⟩
-    identity (ty-dim A) (liftSub (sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm))) ∎
+    identity (ty-dim A) (lift-sub (sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm))) ∎
     where
       open Reasoning (tm-setoid-≈ _)
 
-  susp-rule : .⦃ pd : suspCtx Δ ⊢pd ⦄
-            → Typing-Ty (suspCtx Δ) (suspTy A)
-            → Typing-Tm (suspCtx Δ) (suspTm s) (suspTy A)
-            → Typing-Sub (suspCtx Δ) (suspCtx Γ) (suspSub σ)
-            → suspTm (Coh Δ (s ─⟨ A ⟩⟶ s) σ) ≈[ suspCtx Γ ]tm suspTm (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm)))
+  susp-rule : .⦃ pd : susp-ctx Δ ⊢pd ⦄
+            → Typing-Ty (susp-ctx Δ) (susp-ty A)
+            → Typing-Tm (susp-ctx Δ) (susp-tm s) (susp-ty A)
+            → Typing-Sub (susp-ctx Δ) (susp-ctx Γ) (susp-sub σ)
+            → susp-tm (Coh Δ (s ─⟨ A ⟩⟶ s) σ) ≈[ susp-ctx Γ ]tm susp-tm (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm)))
   susp-rule {Δ = Δ} {A = A} {s = s} {σ = σ} Aty sty σty = begin
-    Coh (suspCtx Δ) (suspTm s ─⟨ suspTy A ⟩⟶ suspTm s) (suspSub σ)
+    Coh (susp-ctx Δ) (susp-tm s ─⟨ susp-ty A ⟩⟶ susp-tm s) (susp-sub σ)
       ≈⟨ ecr Aty sty σty ⟩
-    identity (ty-dim (suspTy A)) (sub-from-disc (ty-dim (suspTy A)) (suspTy A [ suspSub σ ]ty) _
-       (suspTm s [ suspSub σ ]tm))
-      ≈˘⟨ reflexive≈tm (identity-≃ (sym (susp-dim A)) (sub-from-disc-≃ (suc (ty-dim A)) (ty-dim (suspTy A)) (susp-functorial-ty σ A) (trans (susp-dim (A [ σ ]ty)) (cong suc (sym (sub-dim σ A)))) (sym (sub-dim (suspSub σ) (suspTy A))) (susp-functorial-tm σ s))) ⟩
-    identity (suc (ty-dim A)) (sub-from-disc (suc (ty-dim A)) (suspTy (A [ σ ]ty)) _ (suspTm (s [ σ ]tm)))
+    identity (ty-dim (susp-ty A)) (sub-from-disc (ty-dim (susp-ty A)) (susp-ty A [ susp-sub σ ]ty) _
+       (susp-tm s [ susp-sub σ ]tm))
+      ≈˘⟨ reflexive≈tm (identity-≃ (sym (susp-dim A)) (sub-from-disc-≃ (suc (ty-dim A)) (ty-dim (susp-ty A)) (susp-functorial-ty σ A) (trans (susp-dim (A [ σ ]ty)) (cong suc (sym (sub-dim σ A)))) (sym (sub-dim (susp-sub σ) (susp-ty A))) (susp-functorial-tm σ s))) ⟩
+    identity (suc (ty-dim A)) (sub-from-disc (suc (ty-dim A)) (susp-ty (A [ σ ]ty)) _ (susp-tm (s [ σ ]tm)))
       ≈˘⟨ reflexive≈tm (Coh≃ lem (Arr≃ (Var≃ (≃c-preserve-length lem) refl) lem2 (Var≃ (≃c-preserve-length lem) refl)) (susp-sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))) ⟩
-    suspTm (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm))) ∎
+    susp-tm (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm))) ∎
     where
-      lem : suspCtx (Disc (ty-dim A)) ≃c Disc (suc (ty-dim A))
+      lem : susp-ctx (Disc (ty-dim A)) ≃c Disc (suc (ty-dim A))
       lem = disc-susp (ty-dim A)
 
-      lem2 : suspTy (liftType (sphere-type (ty-dim A))) ≃ty
-               liftType (sphere-type (suc (ty-dim A)))
+      lem2 : susp-ty (lift-ty (sphere-type (ty-dim A))) ≃ty
+               lift-ty (sphere-type (suc (ty-dim A)))
       lem2 = begin
-        < suspTy (liftType (sphere-type (ty-dim A))) >ty
+        < susp-ty (lift-ty (sphere-type (ty-dim A))) >ty
           ≈⟨ susp-ty-lift (sphere-type (ty-dim A)) ⟩
-        < liftType (suspTy (sphere-type (ty-dim A))) >ty
+        < lift-ty (susp-ty (sphere-type (ty-dim A))) >ty
           ≈⟨ lift-ty-≃ (sphere-type-susp (ty-dim A)) ⟩
-        < liftType (sphere-type (suc (ty-dim A))) >ty ∎
+        < lift-ty (sphere-type (suc (ty-dim A))) >ty ∎
         where
           open Reasoning ty-setoid
       open Reasoning (tm-setoid-≈ _)

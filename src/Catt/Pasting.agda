@@ -20,12 +20,12 @@ data _⊢pdb where
   Base : ∅ , ⋆ ⊢pdb
   Extend : (pdb : Γ ⊢pdb)
          → (p : A ≃ty focus-ty pdb)
-         → (q : B ≃ty liftTerm (focus-tm pdb) ─⟨ liftType (focus-ty pdb) ⟩⟶ 0V)
+         → (q : B ≃ty lift-tm (focus-tm pdb) ─⟨ lift-ty (focus-ty pdb) ⟩⟶ 0V)
          → Γ , A , B ⊢pdb
   Restr : (pdb : Γ ⊢pdb) → .⦃ NonZero (ty-dim (focus-ty pdb)) ⦄ → Γ ⊢pdb
 
 focus-ty Base = ⋆
-focus-ty (Extend {B = B} pdb p q) = liftType B
+focus-ty (Extend {B = B} pdb p q) = lift-ty B
 focus-ty (Restr pdb) = ty-base (focus-ty pdb)
 
 focus-tm Base = 0V

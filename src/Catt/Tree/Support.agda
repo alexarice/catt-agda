@@ -33,48 +33,67 @@ import Algebra.Solver.IdempotentCommutativeMonoid as Solver
 
 data TVarSet : (T : Tree n) → Set where
   VSSing : (b : Bool) → TVarSet Sing
-  VSJoin : (b : Bool) → TVarSet S → TVarSet T → TVarSet (Join S T)
+  VSJoin : TVarSet S → TVarSet T → TVarSet (Join S T)
+  VSJoinEmp : TVarSet T → TVarSet (Join S T)
 
 tEmp : TVarSet S
 tEmp {S = Sing} = VSSing false
-tEmp {S = Join S T} = VSJoin false tEmp tEmp
+tEmp {S = Join S T} = VSJoinEmp tEmp
 
 tFull : TVarSet S
 tFull {S = Sing} = VSSing true
-tFull {S = Join S T} = VSJoin true tFull tFull
+tFull {S = Join S T} = VSJoin tFull tFull
 
 infixl 60 _∪t_
 _∪t_ : TVarSet S → TVarSet S → TVarSet S
 VSSing b ∪t VSSing b′ = VSSing (b ∨ b′)
-VSJoin b xs xs′ ∪t VSJoin b′ ys ys′ = VSJoin (b ∨ b′) (xs ∪t ys) (xs′ ∪t ys′)
+VSJoin xs xs′ ∪t VSJoin ys ys′ = VSJoin (xs ∪t ys) (xs′ ∪t ys′)
+VSJoin xs xs′ ∪t VSJoinEmp ys = VSJoin xs (xs′ ∪t ys)
+VSJoinEmp xs ∪t VSJoin ys ys′ = VSJoin ys (xs ∪t ys′)
+VSJoinEmp xs ∪t VSJoinEmp ys = VSJoinEmp (xs ∪t ys)
 
 ∪t-left-unit : LeftIdentity _≡_ tEmp (_∪t_ {S = S})
 ∪t-left-unit (VSSing b) = refl
-∪t-left-unit (VSJoin b xs ys) = cong₂ (VSJoin b) (∪t-left-unit xs) (∪t-left-unit ys)
+∪t-left-unit (VSJoin xs ys) = cong (VSJoin xs) (∪t-left-unit ys)
+∪t-left-unit (VSJoinEmp xs) = cong VSJoinEmp (∪t-left-unit xs)
 
 ∪t-right-unit : RightIdentity _≡_ tEmp (_∪t_ {S = S})
 ∪t-right-unit (VSSing b) = cong VSSing (∨-identityʳ b)
-∪t-right-unit (VSJoin b xs ys) = cong₃ VSJoin (∨-identityʳ b) (∪t-right-unit xs) (∪t-right-unit ys)
+∪t-right-unit (VSJoin xs ys) = cong (VSJoin xs) (∪t-right-unit ys)
+∪t-right-unit (VSJoinEmp xs) = cong VSJoinEmp (∪t-right-unit xs)
 
 ∪t-left-zero : LeftZero _≡_ tFull (_∪t_ {S = S})
 ∪t-left-zero (VSSing b) = refl
-∪t-left-zero (VSJoin b xs ys) = cong₂ (VSJoin true) (∪t-left-zero xs) (∪t-left-zero ys)
+∪t-left-zero (VSJoin xs ys) = cong₂ VSJoin (∪t-left-zero xs) (∪t-left-zero ys)
+∪t-left-zero (VSJoinEmp xs) = cong (VSJoin tFull) (∪t-left-zero xs)
 
 ∪t-right-zero : RightZero _≡_ tFull (_∪t_ {S = S})
 ∪t-right-zero (VSSing b) = cong VSSing (∨-zeroʳ b)
-∪t-right-zero (VSJoin b xs ys) = cong₃ VSJoin (∨-zeroʳ b) (∪t-right-zero xs) (∪t-right-zero ys)
+∪t-right-zero (VSJoin xs ys) = cong₂ VSJoin (∪t-right-zero xs) (∪t-right-zero ys)
+∪t-right-zero (VSJoinEmp xs) = cong (VSJoin tFull) (∪t-right-zero xs)
 
 ∪t-assoc : Associative _≡_ (_∪t_ {S = S})
 ∪t-assoc (VSSing b) (VSSing b′) (VSSing b″) = cong VSSing (∨-assoc b b′ b″)
-∪t-assoc (VSJoin b xs xs′) (VSJoin b′ ys ys′) (VSJoin b″ zs zs′) = cong₃ VSJoin (∨-assoc b b′ b″) (∪t-assoc xs ys zs) (∪t-assoc xs′ ys′ zs′)
+∪t-assoc (VSJoin xs xs′) (VSJoin ys ys′) (VSJoin zs zs′) = cong₂ VSJoin (∪t-assoc xs ys zs) (∪t-assoc xs′ ys′ zs′)
+∪t-assoc (VSJoin xs xs′) (VSJoin ys ys′) (VSJoinEmp zs) = cong (VSJoin (xs ∪t ys)) (∪t-assoc xs′ ys′ zs)
+∪t-assoc (VSJoin xs xs′) (VSJoinEmp ys) (VSJoin zs zs′) = cong (VSJoin (xs ∪t zs)) (∪t-assoc xs′ ys zs′)
+∪t-assoc (VSJoin xs xs′) (VSJoinEmp ys) (VSJoinEmp zs) = cong (VSJoin xs) (∪t-assoc xs′ ys zs)
+∪t-assoc (VSJoinEmp xs) (VSJoin ys ys′) (VSJoin zs zs′) = cong (VSJoin (ys ∪t zs)) (∪t-assoc xs ys′ zs′)
+∪t-assoc (VSJoinEmp xs) (VSJoin ys ys′) (VSJoinEmp zs) = cong (VSJoin ys) (∪t-assoc xs ys′ zs)
+∪t-assoc (VSJoinEmp xs) (VSJoinEmp ys) (VSJoin zs zs′) = cong (VSJoin zs) (∪t-assoc xs ys zs′)
+∪t-assoc (VSJoinEmp xs) (VSJoinEmp ys) (VSJoinEmp zs) = cong VSJoinEmp (∪t-assoc xs ys zs)
 
 ∪t-comm : Commutative _≡_ (_∪t_ {S = S})
 ∪t-comm (VSSing b) (VSSing b′) = cong VSSing (∨-comm b b′)
-∪t-comm (VSJoin b xs xs′) (VSJoin b′ ys ys′) = cong₃ VSJoin (∨-comm b b′) (∪t-comm xs ys) (∪t-comm xs′ ys′)
+∪t-comm (VSJoin xs xs′) (VSJoin ys ys′) = cong₂ VSJoin (∪t-comm xs ys) (∪t-comm xs′ ys′)
+∪t-comm (VSJoin xs xs′) (VSJoinEmp ys) = cong (VSJoin xs) (∪t-comm xs′ ys)
+∪t-comm (VSJoinEmp xs) (VSJoin ys ys′) = cong (VSJoin ys) (∪t-comm xs ys′)
+∪t-comm (VSJoinEmp xs) (VSJoinEmp ys) = cong VSJoinEmp (∪t-comm xs ys)
 
 ∪t-idem : Idempotent _≡_ (_∪t_ {S = S})
 ∪t-idem (VSSing b) = cong VSSing (∨-idem b)
-∪t-idem (VSJoin b xs xs′) = cong₃ VSJoin (∨-idem b) (∪t-idem xs) (∪t-idem xs′)
+∪t-idem (VSJoin xs ys) = cong₂ VSJoin (∪t-idem xs) (∪t-idem ys)
+∪t-idem (VSJoinEmp xs) = cong VSJoinEmp (∪t-idem xs)
 
 module _ {S : Tree n} where
 
@@ -119,6 +138,7 @@ module _ {S : Tree n} where
   ∪t-idempotentCommutativeMonoid = record
     { isIdempotentCommutativeMonoid = ∪t-isIdempotentCommutativeMonoid }
 
+{-
 tvarset-non-empty : TVarSet S → Bool
 tvarset-non-empty (VSSing b) = b
 tvarset-non-empty (VSJoin b xs ys) = b ∨ tvarset-non-empty xs ∨ tvarset-non-empty ys
@@ -144,43 +164,55 @@ tvarset-empty : (S : Tree n) → Truth (not (tvarset-non-empty (tEmp {S = S})))
 tvarset-empty Sing = tt
 tvarset-empty (Join S T) with tvarset-non-empty (tEmp {S = S}) | tvarset-empty S
 ... | false | p = tvarset-empty T
+-}
 
 fromPath : (P : Path S) → TVarSet S
 fromPath {S = Sing} PHere = VSSing true
-fromPath {S = Join S T} PHere = VSJoin true tEmp tEmp
-fromPath (PExt P) = VSJoin false (fromPath P) tEmp
-fromPath (PShift P) = VSJoin false tEmp (fromPath P)
+fromPath {S = Join S T} PHere = VSJoin tEmp tEmp
+fromPath (PExt P) = VSJoin (fromPath P) tEmp
+fromPath (PShift P) = VSJoinEmp (fromPath P)
 
 toVarSet : TVarSet S → VarSet (suc (tree-size S))
 toVarSet (VSSing b) = b ∷ emp
-toVarSet (VSJoin b vs xs) = connect-susp-supp (if tvarset-non-empty vs then suspSupp (toVarSet vs) else if b then trueAt (fromℕ _) else empty ) (toVarSet xs)
+toVarSet (VSJoin xs ys) = connect-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys)
+toVarSet (VSJoinEmp xs) = connect-susp-supp empty (toVarSet xs)
 
-tEmp-empty : (S : Tree n) → tvarset-non-empty (tEmp {S = S}) ≡ false
-tEmp-empty Sing = refl
-tEmp-empty (Join S T) = cong₂ _∨_ (tEmp-empty S) (tEmp-empty T)
+
+-- tEmp-empty : (S : Tree n) → tvarset-non-empty (tEmp {S = S}) ≡ false
+-- tEmp-empty Sing = refl
+-- tEmp-empty (Join S T) = cong₂ _∨_ (tEmp-empty S) (tEmp-empty T)
 
 toVarSet-emp : (S : Tree n) → toVarSet (tEmp {S = S}) ≡ empty {n = suc n}
 toVarSet-emp Sing = refl
-toVarSet-emp (Join S T) rewrite tEmp-empty S = trans (cong (connect-susp-supp empty) (toVarSet-emp T)) (connect-supp-empty (suc (suc _)) get-snd _)
-
-tFull-non-empty : (S : Tree n) → tvarset-non-empty (tFull {S = S}) ≡ true
-tFull-non-empty Sing = refl
-tFull-non-empty (Join S T) = refl
-
-toVarSet-full : (S : Tree n) → toVarSet (tFull {S = S}) ≡ full {n = suc n}
-toVarSet-full Sing = refl
-toVarSet-full (Join S T)
-  rewrite tFull-non-empty S = begin
-  connect-susp-supp (suspSupp (toVarSet (tFull {S = S}))) (toVarSet (tFull {S = T}))
-    ≡⟨ cong₂ connect-susp-supp (cong suspSupp (toVarSet-full S)) (toVarSet-full T) ⟩
-  connect-susp-supp (suspSupp full) full
-    ≡⟨ cong (λ - → connect-susp-supp - full) suspSuppFull ⟩
-  connect-susp-supp full full
-    ≡⟨ connect-supp-full (2 + tree-size S) get-snd (tree-size T) ⟩
-  full ∎
+toVarSet-emp (Join S T) = begin
+  connect-susp-supp empty (toVarSet (tEmp {S = T}))
+    ≡⟨ cong (connect-susp-supp empty) (toVarSet-emp T) ⟩
+  connect-susp-supp empty empty
+    ≡⟨ connect-supp-empty _ get-snd (tree-size T) ⟩
+  empty ∎
   where
     open ≡-Reasoning
 
+-- tFull-non-empty : (S : Tree n) → tvarset-non-empty (tFull {S = S}) ≡ true
+-- tFull-non-empty Sing = refl
+-- tFull-non-empty (Join S T) = refl
+
+toVarSet-full : (S : Tree n) → toVarSet (tFull {S = S}) ≡ full {n = suc n}
+toVarSet-full S = {!!}
+
+-- toVarSet-full Sing = refl
+-- toVarSet-full (Join S T)
+--   rewrite tFull-non-empty S = begin
+--   connect-susp-supp (suspSupp (toVarSet (tFull {S = S}))) (toVarSet (tFull {S = T}))
+--     ≡⟨ cong₂ connect-susp-supp (cong suspSupp (toVarSet-full S)) (toVarSet-full T) ⟩
+--   connect-susp-supp (suspSupp full) full
+--     ≡⟨ cong (λ - → connect-susp-supp - full) suspSuppFull ⟩
+--   connect-susp-supp full full
+--     ≡⟨ connect-supp-full (2 + tree-size S) get-snd (tree-size T) ⟩
+--   full ∎
+--   where
+--     open ≡-Reasoning
+{-
 tvarset-truth-empty : (xs : TVarSet S) → Truth (not (tvarset-non-empty xs)) → xs ≡ tEmp
 tvarset-truth-empty (VSSing false) p = refl
 tvarset-truth-empty (VSJoin false xs xs′) p = cong₂ (VSJoin false) (tvarset-truth-empty xs (Truth-not-left _ _ p)) (tvarset-truth-empty xs′ (Truth-not-right _ _ p))
@@ -821,3 +853,4 @@ supp-tvarset xs = VSJoin true xs (VSSing true)
 
 supp-tvarset-DCT : (xs : TVarSet S) → DCT (supp-tvarset xs) ≡ supp-tvarset (DCT xs)
 supp-tvarset-DCT xs = cong (VSJoin true (DCT xs)) (if-lem-const (tvarset-non-empty xs) (set-fst-true (DCT (VSSing true))))
+-}

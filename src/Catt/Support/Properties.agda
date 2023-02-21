@@ -559,6 +559,11 @@ trueAt-non-empty (suc i) = trueAt-non-empty i
 ∪-non-empty-right (ewf xs) (ewt ys) t = tt
 ∪-non-empty-right (ewt xs) (x ∷ ys) t = tt
 
+∪-non-empty-left : (xs ys : VarSet n) → Truth (varset-non-empty xs) → Truth (varset-non-empty (xs ∪ ys))
+∪-non-empty-left (ewf xs) (ewf ys) t = ∪-non-empty-left xs ys t
+∪-non-empty-left (ewf xs) (ewt ys) t = tt
+∪-non-empty-left (ewt xs) (x ∷ ys) t = tt
+
 empty-is-empty : {n : ℕ} → varset-non-empty (empty {n = n}) ≡ false
 empty-is-empty {n = zero} = refl
 empty-is-empty {n = suc n} = empty-is-empty {n = n}

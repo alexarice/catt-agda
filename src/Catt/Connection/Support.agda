@@ -35,8 +35,9 @@ connect-supp-empty : (n : ℕ) → (t : Tm (suc n)) → (m : ℕ) → connect-su
 connect-supp-empty n t zero = refl
 connect-supp-empty n t (suc m) = cong ewf (connect-supp-empty n t m)
 
-connect-susp-supp-base : (xs : VarSet (suc n)) → connect-susp-supp (suspSupp xs) (ewt emp) ≡ suspSupp xs
-connect-susp-supp-base xs = sym (lookup-isVar-⊆ (suspSupp xs) get-snd (suspSuppSndTruth xs))
+connect-susp-supp-base : (xs : VarSet (suc n)) → (b : Bool) → connect-susp-supp (suspSupp xs) (b ∷ emp) ≡ suspSupp xs
+connect-susp-supp-base xs true = sym (lookup-isVar-⊆ (suspSupp xs) get-snd (suspSuppSndTruth xs))
+connect-susp-supp-base xs false = refl
 
 VarSet-NonEmpty-Special : (xs : VarSet n) → Set
 VarSet-NonEmpty-Special {zero} xs = ⊥
@@ -65,7 +66,7 @@ connect-susp-pdb-bd-compat : (n : ℕ)
                       → connect-susp-supp (suspSupp (pd-bd-supp n Γ b)) (pdb-bd-supp (suc n) Δ b) ≡ pdb-bd-supp (suc n) (connect-susp Γ Δ) ⦃ connect-susp-pdb pd pdb ⦄ b
 connect-susp-pdb-bd-compat n Γ ⦃ pd ⦄ (∅ , A) b = begin
   connect-susp-supp (suspSupp (pd-bd-supp n Γ b)) (ewt emp)
-    ≡⟨ connect-susp-supp-base (pd-bd-supp n Γ b) ⟩
+    ≡⟨ connect-susp-supp-base (pd-bd-supp n Γ b) true ⟩
   suspSupp (pd-bd-supp n Γ b)
     ≡⟨ susp-pd-bd-compat n Γ b ⟩
   pd-bd-supp (suc n) (susp-ctx Γ) ⦃ susp-pd it ⦄ b ∎
@@ -130,31 +131,17 @@ connect-supp-fst : (t : Tm (suc n)) → (m : ℕ) → connect-supp (trueAt (from
 connect-supp-fst t zero = refl
 connect-supp-fst t (suc m) = cong ewf (connect-supp-fst t m)
 
-connect-supp-∪ : (xs xs′ : VarSet (suc n)) → (ys ys′ : VarSet (suc m)) → (t : Tm (suc n)) → connect-supp xs t ys ∪ connect-supp xs′ t ys′ ≡ connect-supp (xs ∪ xs′) t (ys ∪ ys′)
+connect-supp-∪ : (xs xs′ : VarSet (suc n)) → (ys ys′ : VarSet (suc m)) → (t : Tm (suc n)) → connect-supp (xs ∪ xs′) t (ys ∪ ys′) ≡ connect-supp xs t ys ∪ connect-supp xs′ t ys′
 connect-supp-∪ {m = zero} xs xs′ (ewf ys) (ewf ys′) t = refl
 connect-supp-∪ {n = n} {m = zero} xs xs′ (ewf ys) (ewt ys′) t = solve (∪-monoid {n = suc n})
-connect-supp-∪ {n = n} {m = zero} xs xs′ (ewt ys) (ewf ys′) t = begin
-  xs ∪ FVTm t ∪ xs′
-    ≡⟨ solve (∪-monoid {n = suc n}) ⟩
-  xs ∪ (FVTm t ∪ xs′)
-    ≡⟨ cong (xs ∪_) (∪-comm (FVTm t) xs′) ⟩
-  xs ∪ (xs′ ∪ FVTm t)
-    ≡⟨ solve (∪-monoid {n = suc n}) ⟩
-  xs ∪ xs′ ∪ FVTm t ∎
+connect-supp-∪ {n = n} {m = zero} xs xs′ (ewt ys) (ewf ys′) t
+  = prove 3 ((var 0F ⊕ var 1F) ⊕ var 2F) ((var 0F ⊕ var 2F) ⊕ var 1F) (_ ∷ _ ∷ _ ∷ emp)
   where
-    open ≡-Reasoning
-connect-supp-∪ {n = n} {m = zero} xs xs′ (ewt ys) (ewt ys′) t = begin
-  xs ∪ FVTm t ∪ (xs′ ∪ FVTm t)
-    ≡⟨ solve (∪-monoid {n = suc n}) ⟩
-  xs ∪ (FVTm t ∪ xs′) ∪ FVTm t
-    ≡⟨ cong (λ - → xs ∪ - ∪ FVTm t) (∪-comm (FVTm t) xs′) ⟩
-  xs ∪ (xs′ ∪ FVTm t) ∪ FVTm t
-    ≡⟨ solve (∪-monoid {n = suc n}) ⟩
-  xs ∪ xs′ ∪ (FVTm t ∪ FVTm t)
-    ≡⟨ cong (xs ∪ xs′ ∪_) (∪-idem (FVTm t)) ⟩
-  xs ∪ xs′ ∪ FVTm t ∎
+    open Solver ∪-idempotentCommutativeMonoid
+connect-supp-∪ {n = n} {m = zero} xs xs′ (ewt ys) (ewt ys′) t
+  = prove 3 ((var 0F ⊕ var 1F) ⊕ var 2F) ((var 0F ⊕ var 2F) ⊕ (var 1F ⊕ var 2F)) (_ ∷ _ ∷ _ ∷ emp)
   where
-    open ≡-Reasoning
+    open Solver ∪-idempotentCommutativeMonoid
 connect-supp-∪ {m = suc m} xs xs′ (y ∷ ys) (y′ ∷ ys′) t = cong ((y ∨ y′) ∷_) (connect-supp-∪ xs xs′ ys ys′ t)
 
 connect-susp-supp-lem : (xs : VarSet (suc n)) → (ys : VarSet (suc m)) → connect-susp-supp (suspSupp xs) ys ≡ connect-susp-supp (suspSupp xs) (trueAt (fromℕ _) ∪ ys)
@@ -174,7 +161,7 @@ connect-supp-DC {m = suc m} Γ t (Δ , A) xs (ewt ys) p = cong ewt (begin
   DC (connect Γ t Δ) (connect-supp xs t ys ∪ TransportVarSet (FVTy A) (connect-inc-right t m))
     ≡⟨ cong (λ - → DC (connect Γ t Δ) (connect-supp xs t ys ∪ -)) (connect-supp-inc-right t (FVTy A)) ⟩
   DC (connect Γ t Δ) (connect-supp xs t ys ∪ connect-supp empty t (FVTy A))
-    ≡⟨ cong (DC (connect Γ t Δ)) (connect-supp-∪ xs empty ys (FVTy A) t) ⟩
+    ≡˘⟨ cong (DC (connect Γ t Δ)) (connect-supp-∪ xs empty ys (FVTy A) t) ⟩
   DC (connect Γ t Δ) (connect-supp (xs ∪ empty) t (ys ∪ FVTy A))
     ≡⟨ cong (λ - → DC (connect Γ t Δ) (connect-supp - t (ys ∪ FVTy A))) (∪-right-unit xs) ⟩
   DC (connect Γ t Δ) (connect-supp xs t (ys ∪ FVTy A))
@@ -496,3 +483,69 @@ connect-susp-supp-non-empty-right {m = suc m} xs (ewt ys) t = tt
 connect-susp-supp-proj-right : (xs xs′ : VarSet (3 + n)) → (ys ys′ : VarSet (suc m)) → connect-susp-supp xs ys ≡ connect-susp-supp xs′ ys′ → trueAt (fromℕ _) ∪ ys ≡ trueAt (fromℕ _) ∪ ys′
 connect-susp-supp-proj-right {m = zero} xs xs′ (y ∷ emp) (y′ ∷ emp) p = refl
 connect-susp-supp-proj-right {m = suc m} xs xs′ (y ∷ ys) (y′ ∷ ys′) p = cong₂ _∷_ (cong head p) (connect-susp-supp-proj-right xs xs′ ys ys′ (cong tail p))
+
+connect-susp-supp-proj-left : (xs xs′ : VarSet (suc n)) → (ys ys′ : VarSet (suc m)) → connect-susp-supp (suspSupp xs) ys ≡ connect-susp-supp (suspSupp xs′) ys′ → xs ≡ xs′
+connect-susp-supp-proj-left {m = zero} xs xs′ (y ∷ emp) (y′ ∷ emp) p = suspSupp-reflect (begin
+  suspSupp xs
+    ≡˘⟨ connect-susp-supp-base xs y ⟩
+  connect-susp-supp (suspSupp xs) (y ∷ emp)
+    ≡⟨ p ⟩
+  connect-susp-supp (suspSupp xs′) (y′ ∷ emp)
+    ≡⟨ connect-susp-supp-base xs′ y′ ⟩
+  suspSupp xs′ ∎)
+  where
+    open ≡-Reasoning
+connect-susp-supp-proj-left {m = suc m} xs xs′ (y ∷ ys) (y′ ∷ ys′) p = connect-susp-supp-proj-left xs xs′ ys ys′ (cong tail p)
+
+connect-susp-supp-⊥ : (n : ℕ) → (xs ys : VarSet (3 + n)) → Truth (not (lookup-isVar xs get-snd)) → Truth (not (lookup-isVar ys get-snd)) → connect-susp-supp xs (ewf emp) ≡ connect-susp-supp ys (ewt emp) → ⊥
+connect-susp-supp-⊥ n xs ys a b p = absurd (begin
+  true
+    ≡˘⟨ ∨-zeroʳ (lookup-isVar ys get-snd) ⟩
+  lookup-isVar ys get-snd ∨ true
+    ≡˘⟨ cong (lookup-isVar ys get-snd ∨_) (lookup-trueAt (inject₁ (fromℕ (suc n)))) ⟩
+  lookup-isVar ys get-snd ∨ lookup (trueAt (inject₁ (fromℕ (suc n)))) (inject₁ (fromℕ (suc n)))
+    ≡˘⟨ lookup-∪ ys (FVTm get-snd) (inject₁ (fromℕ (suc n))) ⟩
+  lookup (connect-susp-supp ys (ewt emp)) (inject₁ (fromℕ (suc n)))
+    ≡˘⟨ cong (λ - → lookup - (inject₁ (fromℕ _))) p ⟩
+  lookup (connect-susp-supp xs (ewf emp)) (inject₁ (fromℕ (suc n)))
+    ≡⟨ Truth-not-prop a ⟩
+  false ∎)
+  where
+    open ≡-Reasoning
+
+connect-supp-proj-right-emp : (n : ℕ) → (xs xs′ : VarSet (3 + n)) → Truth (not (lookup-isVar xs get-snd)) → Truth (not (lookup-isVar xs′ get-snd)) → (ys ys′ : VarSet (suc m)) → connect-susp-supp xs ys ≡ connect-susp-supp xs′ ys′ → ys ≡ ys′
+connect-supp-proj-right-emp {m = zero} n xs xs′ a b (ewf emp) (ewf emp) p = refl
+connect-supp-proj-right-emp {m = zero} n xs xs′ a b (ewf emp) (ewt emp) p = ⊥-elim (connect-susp-supp-⊥ n xs xs′ a b p)
+connect-supp-proj-right-emp {m = zero} n xs xs′ a b (ewt emp) (ewf emp) p = ⊥-elim (connect-susp-supp-⊥ n xs′ xs b a (sym p))
+connect-supp-proj-right-emp {m = zero} n xs xs′ a b (ewt emp) (ewt emp) p = refl
+connect-supp-proj-right-emp {m = suc m} n xs xs′ a b (y ∷ ys) (y′ ∷ ys′) p = cong₂ _∷_ (cong head p) (connect-supp-proj-right-emp n xs xs′ a b ys ys′ (cong tail p))
+
+connect-susp-supp-trueAt-lem : (xs : VarSet (suc n)) → (ys : VarSet (suc m)) → trueAt (fromℕ _) ∪ (connect-susp-supp (suspSupp xs) ys) ≡ connect-susp-supp (suspSupp xs) ys
+connect-susp-supp-trueAt-lem {m = m} xs ys = begin
+  trueAt (fromℕ _) ∪ connect-susp-supp (suspSupp xs) ys
+    ≡⟨ ∪-comm (trueAt (fromℕ _)) (connect-susp-supp (suspSupp xs) ys) ⟩
+  connect-susp-supp (suspSupp xs) ys ∪ trueAt (fromℕ (m + (2 + _)))
+    ≡˘⟨ lookup-isVar-⊆ (connect-susp-supp (suspSupp xs) ys) (Var (fromℕ _)) (subst Truth (sym (connect-susp-supp-fst-var (suspSupp xs) ys)) (suspSuppFstTruth xs)) ⟩
+  connect-susp-supp (suspSupp xs) ys ∎
+  where
+    open ≡-Reasoning
+
+connect-susp-supp-trueAt-lem′ : (n : ℕ) → (ys : VarSet (suc m)) → trueAt (fromℕ _) ∪ (connect-susp-supp (empty {n = 3 + n}) ys) ≡ connect-susp-supp (trueAt (fromℕ _)) ys
+connect-susp-supp-trueAt-lem′ {m = m} n ys = begin
+  trueAt (fromℕ _) ∪ connect-susp-supp empty ys
+    ≡˘⟨ cong (_∪ connect-susp-supp empty ys) (connect-supp-fst get-snd m) ⟩
+  connect-susp-supp (trueAt (fromℕ _)) empty ∪
+    connect-susp-supp empty ys
+    ≡˘⟨ connect-supp-∪ (trueAt (fromℕ _)) empty empty ys get-snd ⟩
+  connect-susp-supp (trueAt (fromℕ (suc (suc n))) ∪ empty) (empty ∪ ys)
+    ≡⟨ cong₂ connect-susp-supp (∪-right-unit (trueAt (fromℕ _))) (∪-left-unit ys) ⟩
+  connect-susp-supp (trueAt (fromℕ (suc (suc n)))) ys ∎
+  where
+    open ≡-Reasoning
+
+connect-susp-supp-susp-lem : (ys : VarSet (suc m)) → (xs : VarSet (3 + n)) → trueAt (raise (suc m) (inject₁ (fromℕ _))) ∪ (trueAt (fromℕ _) ∪ (connect-susp-supp xs ys)) ≡ connect-susp-supp (xs ∪ suspSupp empty) ys
+connect-susp-supp-susp-lem {m = zero} {n = zero} (ewf emp) (x ∷ y ∷ z ∷ emp) = sym (cong₃ (λ a b c → a ∷ b ∷ c ∷ emp) (∨-identityʳ x) (∨-zeroʳ y) (∨-zeroʳ z))
+connect-susp-supp-susp-lem {m = zero} {n = suc n} (ewf emp) (x ∷ xs) = cong₂ _∷_ (sym (∨-identityʳ x)) (connect-susp-supp-susp-lem (ewf emp) xs)
+connect-susp-supp-susp-lem {m = zero} {n = zero} (ewt emp) (x ∷ y ∷ z ∷ emp) = sym (cong₃ (λ a b c → a ∷ b ∷ c ∷ emp) (∨-identityʳ (x ∨ false)) (∨-zeroʳ (y ∨ true)) (cong (_∨ false) (∨-zeroʳ z)))
+connect-susp-supp-susp-lem {m = zero} {n = suc n} (ewt emp) (x ∷ xs) = cong₂ _∷_ (sym (∨-identityʳ (x ∨ false))) (connect-susp-supp-susp-lem (ewt emp) xs)
+connect-susp-supp-susp-lem {m = suc m} {n = n} (y ∷ ys) xs = cong (y ∷_) (connect-susp-supp-susp-lem ys xs)

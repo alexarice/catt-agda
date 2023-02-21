@@ -66,9 +66,9 @@ susp-pd-bd-compat : (n : ℕ)
                   → suspSupp (pd-bd-supp n Γ b) ≡ pd-bd-supp (suc n) (susp-ctx Γ) ⦃ susp-pd pd ⦄ b
 susp-pd-bd-compat n Γ b = susp-pdb-bd-compat n Γ ⦃ pd-to-pdb it ⦄ b
 
-suspSupp∪ : (vs vs′ : VarSet n) → suspSupp vs ∪ suspSupp vs′ ≡ suspSupp (vs ∪ vs′)
-suspSupp∪ emp emp = refl
-suspSupp∪ (x ∷ xs) (y ∷ ys) = cong₂ _∷_ refl (suspSupp∪ xs ys)
+suspSupp-∪ : (vs vs′ : VarSet n) → suspSupp (vs ∪ vs′) ≡ suspSupp vs ∪ suspSupp vs′
+suspSupp-∪ emp emp = refl
+suspSupp-∪ (x ∷ xs) (y ∷ ys) = cong₂ _∷_ refl (suspSupp-∪ xs ys)
 
 suspSuppLem : (n : ℕ) → empty ∪ ewf (trueAt (fromℕ n)) ∪ trueAt (inject₁ (fromℕ n)) ≡ suspSupp empty
 suspSuppLem zero = refl
@@ -87,7 +87,7 @@ suspSuppSnd emp = refl
 suspSuppSnd (x ∷ xs) = cong₂ _∷_ (sym (∨-identityʳ x)) (suspSuppSnd xs)
 
 suspSuppEmpRight : (xs : VarSet n) → suspSupp xs ≡ suspSupp xs ∪ suspSupp empty
-suspSuppEmpRight xs = sym (trans (suspSupp∪ xs empty) (cong suspSupp (∪-right-unit xs)))
+suspSuppEmpRight xs = trans (sym (cong suspSupp (∪-right-unit xs))) (suspSupp-∪ xs empty)
 
 suspSuppTy : (A : Ty n) → FVTy (susp-ty A) ≡ suspSupp (FVTy A)
 suspSuppTm : (t : Tm n) → (suspSupp empty) ∪ FVTm (susp-tm t) ≡ suspSupp (FVTm t)
@@ -102,7 +102,7 @@ suspSuppTy (s ─⟨ A ⟩⟶ t) = begin
   suspSupp (FVTy A ∪ FVTm s) ∪ suspSupp empty ∪ FVTm (susp-tm t) ≡⟨ ∪-assoc (suspSupp (FVTy A ∪ FVTm s)) (suspSupp empty) (FVTm (susp-tm t)) ⟩
   suspSupp (FVTy A ∪ FVTm s) ∪
     (suspSupp empty ∪ FVTm (susp-tm t)) ≡⟨ cong (suspSupp (FVTy A ∪ FVTm s) ∪_) (suspSuppTm t) ⟩
-  suspSupp (FVTy A ∪ FVTm s) ∪ suspSupp (FVTm t) ≡⟨ suspSupp∪ (FVTy A ∪ FVTm s) (FVTm t) ⟩
+  suspSupp (FVTy A ∪ FVTm s) ∪ suspSupp (FVTm t) ≡˘⟨ suspSupp-∪ (FVTy A ∪ FVTm s) (FVTm t) ⟩
   suspSupp (FVTy (s ─⟨ A ⟩⟶ t)) ∎
   where
     open ≡-Reasoning
@@ -112,7 +112,7 @@ suspSuppTyTm A t = begin
   suspSupp (FVTy A) ∪ FVTm (susp-tm t) ≡⟨ cong (_∪ FVTm (susp-tm t)) (suspSuppEmpRight (FVTy A)) ⟩
   suspSupp (FVTy A) ∪ suspSupp empty ∪ FVTm (susp-tm t) ≡⟨ ∪-assoc (suspSupp (FVTy A)) (suspSupp empty) (FVTm (susp-tm t)) ⟩
   suspSupp (FVTy A) ∪ (suspSupp empty ∪ FVTm (susp-tm t)) ≡⟨ cong (suspSupp (FVTy A) ∪_) (suspSuppTm t) ⟩
-  suspSupp (FVTy A) ∪ suspSupp (FVTm t) ≡⟨ suspSupp∪ (FVTy A) (FVTm t) ⟩
+  suspSupp (FVTy A) ∪ suspSupp (FVTm t) ≡˘⟨ suspSupp-∪ (FVTy A) (FVTm t) ⟩
   suspSupp (FVTy A ∪ FVTm t) ∎
   where
     open ≡-Reasoning
@@ -132,7 +132,7 @@ suspSuppSub ⟨ σ , t ⟩ = begin
   suspSupp (FVSub σ) ∪ FVTm (susp-tm t) ≡⟨ cong (_∪ FVTm (susp-tm t)) (suspSuppEmpRight (FVSub σ)) ⟩
   suspSupp (FVSub σ) ∪ suspSupp empty ∪ FVTm (susp-tm t) ≡⟨ ∪-assoc (suspSupp (FVSub σ)) (suspSupp empty) (FVTm (susp-tm t)) ⟩
   suspSupp (FVSub σ) ∪ (suspSupp empty ∪ FVTm (susp-tm t)) ≡⟨ cong (suspSupp (FVSub σ) ∪_) (suspSuppTm t) ⟩
-  suspSupp (FVSub σ) ∪ suspSupp (FVTm t) ≡⟨ suspSupp∪ (FVSub σ) (FVTm t) ⟩
+  suspSupp (FVSub σ) ∪ suspSupp (FVTm t) ≡˘⟨ suspSupp-∪ (FVSub σ) (FVTm t) ⟩
   suspSupp (FVSub ⟨ σ , t ⟩) ∎
   where
     open ≡-Reasoning
@@ -152,7 +152,7 @@ TransportVarSet-susp (ewt xs) ⟨ σ , t ⟩ = begin
   suspSupp (TransportVarSet xs σ) ∪ (suspSupp empty ∪ FVTm (susp-tm t))
     ≡⟨ cong (suspSupp (TransportVarSet xs σ) ∪_) (suspSuppTm t) ⟩
   suspSupp (TransportVarSet xs σ) ∪ suspSupp (FVTm t)
-    ≡⟨ suspSupp∪ (TransportVarSet xs σ) (FVTm t) ⟩
+    ≡˘⟨ suspSupp-∪ (TransportVarSet xs σ) (FVTm t) ⟩
   suspSupp (TransportVarSet xs σ ∪ FVTm t) ∎
   where
     open ≡-Reasoning
@@ -200,7 +200,7 @@ DC-suspSupp (Γ , A) (ewt xs) = cong ewt (begin
       suspSupp xs ∪ FVTy (susp-ty A)
         ≡⟨ cong (suspSupp xs ∪_) (suspSuppTy A) ⟩
       suspSupp xs ∪ suspSupp (FVTy A)
-        ≡⟨ suspSupp∪ xs (FVTy A) ⟩
+        ≡˘⟨ suspSupp-∪ xs (FVTy A) ⟩
       suspSupp (xs ∪ FVTy A) ∎
 
 suspSuppTm′ : (Γ : Ctx n) → (t : Tm n) → SuppTm (susp-ctx Γ) (susp-tm t) ≡ suspSupp (SuppTm Γ t)
@@ -296,6 +296,10 @@ lookup-fst-var-snd : (n : ℕ) → lookup (trueAt (inject₁ (fromℕ n))) (from
 lookup-fst-var-snd zero = refl
 lookup-fst-var-snd (suc n) = lookup-fst-var-snd n
 
+lookup-snd-var-fst : (n : ℕ) → lookup (trueAt (fromℕ (suc n))) (inject₁ (fromℕ n)) ≡ false
+lookup-snd-var-fst zero = refl
+lookup-snd-var-fst (suc n) = lookup-snd-var-fst n
+
 suspSupp-non-empty : (xs : VarSet n) → Truth (varset-non-empty (suspSupp xs))
 suspSupp-non-empty emp = tt
 suspSupp-non-empty (ewf xs) = suspSupp-non-empty xs
@@ -304,3 +308,11 @@ suspSupp-non-empty (ewt xs) = tt
 suspSupp-fst-var : (xs : VarSet n) → lookup (suspSupp xs) (fromℕ _) ≡ true
 suspSupp-fst-var emp = refl
 suspSupp-fst-var (x ∷ xs) = suspSupp-fst-var xs
+
+suspSupp-contains-fst : (xs : VarSet n) → trueAt (fromℕ _) ∪ suspSupp xs ≡ suspSupp xs
+suspSupp-contains-fst emp = refl
+suspSupp-contains-fst (x ∷ xs) = cong (x ∷_) (suspSupp-contains-fst xs)
+
+suspSupp-reflect : {xs ys : VarSet n} → suspSupp xs ≡ suspSupp ys → xs ≡ ys
+suspSupp-reflect {xs = emp} {ys = emp} p = refl
+suspSupp-reflect {xs = x ∷ xs} {ys = y ∷ ys} p = cong₂ _∷_ (cong head p) (suspSupp-reflect (cong tail p))

@@ -81,8 +81,7 @@ TransportVarSet (ewt xs) ⟨ σ , t ⟩ = TransportVarSet xs σ ∪ FVTm t
 -- susp-supp-tree-bd (suc d) (Join S T) b = refl
 
 lookup-isVar : (xs : VarSet n) → (t : Tm n) → .⦃ isVar t ⦄ → Bool
-lookup-isVar (x ∷ xs) (Var zero) = x
-lookup-isVar (x ∷ xs) (Var (suc i)) = lookup-isVar xs (Var i)
+lookup-isVar xs (Var i) = lookup xs i
 
 _⊆_ : VarSet n → VarSet n → Set
 xs ⊆ ys = ys ≡ ys ∪ xs

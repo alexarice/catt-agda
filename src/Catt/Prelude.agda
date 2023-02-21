@@ -3,6 +3,7 @@ module Catt.Prelude where
 open import Data.Nat hiding (NonZero) public
 open import Data.Bool using (not;Bool;true;false;_∨_;if_then_else_) renaming (T to Truth) public
 open import Data.Fin using (Fin; zero; suc; inject₁; fromℕ; toℕ; cast; opposite; splitAt; inject+; raise) renaming (_≟_ to _f≟_; _<?_ to _f<?_) public
+open import Data.Maybe using (Maybe; just; nothing; fromMaybe; maybe′;maybe) public
 open import Relation.Binary.PropositionalEquality hiding ([_]) public
 open import Data.Product renaming (_,_ to _,,_) hiding (map) public
 open import Relation.Binary.Definitions

@@ -12,10 +12,15 @@ import Relation.Binary.Reasoning.StrictPartialOrder
 open import Algebra.Construct.NaturalChoice.Base
 import Algebra.Construct.NaturalChoice.MinMaxOp as MinMaxOp
 open import Algebra.Bundles
+import Algebra.Solver.IdempotentCommutativeMonoid
 
+module Solver = Algebra.Solver.IdempotentCommutativeMonoid
 module Reasoning = Relation.Binary.Reasoning.Setoid
 module PReasoning = Relation.Binary.Reasoning.PartialOrder
 module SPReasoning = Relation.Binary.Reasoning.StrictPartialOrder
+
+absurd : true ≡ false → ⊥
+absurd ()
 
 suc-pred : (n : ℕ) → .⦃ NonZero n ⦄ → suc (pred n) ≡ n
 suc-pred (suc n) = refl
@@ -44,12 +49,6 @@ NonZero-≤ {suc n} {suc m} p x = it
 ⊔-lem n zero = refl
 ⊔-lem n (suc m) = cong suc (⊔-comm n m)
 
--- proof-≡ : {I : Set} → {P : I → Set} → (c : Cases P) → {i : I} → doesC c ≡ i → P i
--- proof-≡ {P = P} (case _ proof) refl = proof
-
--- cases-≡ : {I A : Set} → {P : I → Set} → (c : Cases P) → (f : ∀ i (p : P i) → A) → {i : I} → (p : doesC c ≡ i) → cases c f ≡ f i (proof-≡ c p)
--- cases-≡ (case doesC₁ proofC₁) f refl = refl
-
 Truth-left : (b b′ : Bool) → Truth b → Truth (b ∨ b′)
 Truth-left true b′ p = tt
 
@@ -71,6 +70,9 @@ Truth-prop′ refl = tt
 
 Truth-not-prop : {b : Bool} → Truth (not b) → b ≡ false
 Truth-not-prop {b = false} p = refl
+
+Truth-not-prop′ : {b : Bool} → b ≡ false → Truth (not b)
+Truth-not-prop′ refl = tt
 
 ∨-monoid : Monoid _ _
 ∨-monoid = CommutativeMonoid.monoid ∨-commutativeMonoid

@@ -159,6 +159,16 @@ strip-lem (VSNotHere xs) (VSNotHere ys) = refl
 ∪t′-comm (VSShift xs) (VSExt ys ys′) = cong (VSExt ys) (∪t′-comm (strip xs) ys′)
 ∪t′-comm (VSShift xs) (VSShift ys) = cong VSShift (∪t-comm xs ys)
 
+∪t-idem : Idempotent _≡_ (_∪t_ {S = S})
+∪t′-idem : Idempotent _≡_ (_∪t′_ {S = S})
+
+∪t-idem (VSHere x) = cong VSHere (∪t′-idem x)
+∪t-idem (VSNotHere xs) = cong VSNotHere (∪t-idem xs)
+
+∪t′-idem VSEmp = refl
+∪t′-idem (VSExt xs ys) = cong₂ VSExt (∪t-idem xs) (∪t′-idem ys)
+∪t′-idem (VSShift ys) = cong VSShift (∪t-idem ys)
+
 {-
 data TVarSet : (T : Tree n) → Set where
   VSSing : (b : Bool) → TVarSet Sing

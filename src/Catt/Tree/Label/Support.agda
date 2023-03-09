@@ -32,21 +32,21 @@ _∪m_ : MVarSet X → MVarSet X → MVarSet X
 _∪m_ {X = someTree x} xs ys = xs ∪t ys
 _∪m_ {X = Other _} xs ys = xs ∪ ys
 
-mEmp : {X : MaybeTree n} → MVarSet X
-mEmp {X = someTree x} = tEmp
-mEmp {X = Other _} = empty
+-- mEmp : {X : MaybeTree n} → MVarSet X
+-- mEmp {X = someTree x} = tEmp
+-- mEmp {X = Other _} = empty
 
 mFull : {X : MaybeTree n} → MVarSet X
 mFull {X = someTree S} = tFull
 mFull {X = Other Γ} = full
 
-∪m-left-unit : {X : MaybeTree n} → LeftIdentity _≡_ mEmp (_∪m_ {X = X})
-∪m-left-unit {X = someTree x} = ∪t-left-unit
-∪m-left-unit {X = Other _} = ∪-left-unit
+-- ∪m-left-unit : {X : MaybeTree n} → LeftIdentity _≡_ mEmp (_∪m_ {X = X})
+-- ∪m-left-unit {X = someTree x} = ∪t-left-unit
+-- ∪m-left-unit {X = Other _} = ∪-left-unit
 
-∪m-right-unit : {X : MaybeTree n} → RightIdentity _≡_ mEmp (_∪m_ {X = X})
-∪m-right-unit {X = someTree x} = ∪t-right-unit
-∪m-right-unit {X = Other _} = ∪-right-unit
+-- ∪m-right-unit : {X : MaybeTree n} → RightIdentity _≡_ mEmp (_∪m_ {X = X})
+-- ∪m-right-unit {X = someTree x} = ∪t-right-unit
+-- ∪m-right-unit {X = Other _} = ∪-right-unit
 
 ∪m-assoc : {X : MaybeTree n} → Associative _≡_ (_∪m_ {X = X})
 ∪m-assoc {X = someTree x} = ∪t-assoc
@@ -60,63 +60,63 @@ mFull {X = Other Γ} = full
 ∪m-idem {X = someTree x} = ∪t-idem
 ∪m-idem {X = Other _} = ∪-idem
 
-module _ {X : MaybeTree n} where
+-- module _ {X : MaybeTree n} where
 
-  open import Algebra.Definitions {A = MVarSet X} _≡_
-  open import Algebra.Structures {A = MVarSet X} _≡_
+--   open import Algebra.Definitions {A = MVarSet X} _≡_
+--   open import Algebra.Structures {A = MVarSet X} _≡_
 
-  ∪m-isMagma : IsMagma (_∪m_)
-  ∪m-isMagma = record
-    { isEquivalence = isEquivalence
-    ; ∙-cong = cong₂ _∪m_
-    }
+--   ∪m-isMagma : IsMagma (_∪m_)
+--   ∪m-isMagma = record
+--     { isEquivalence = isEquivalence
+--     ; ∙-cong = cong₂ _∪m_
+--     }
 
-  ∪m-isSemigroup : IsSemigroup _∪m_
-  ∪m-isSemigroup = record
-    { isMagma = ∪m-isMagma
-    ; assoc = ∪m-assoc
-    }
+--   ∪m-isSemigroup : IsSemigroup _∪m_
+--   ∪m-isSemigroup = record
+--     { isMagma = ∪m-isMagma
+--     ; assoc = ∪m-assoc
+--     }
 
-  ∪m-isMonoid : IsMonoid _∪m_ mEmp
-  ∪m-isMonoid = record
-    { isSemigroup = ∪m-isSemigroup
-    ; identity = ∪m-left-unit ,, ∪m-right-unit
-    }
+--   ∪m-isMonoid : IsMonoid _∪m_ mEmp
+--   ∪m-isMonoid = record
+--     { isSemigroup = ∪m-isSemigroup
+--     ; identity = ∪m-left-unit ,, ∪m-right-unit
+--     }
 
-  ∪m-monoid : Monoid _ _
-  ∪m-monoid = record
-    { isMonoid = ∪m-isMonoid }
+--   ∪m-monoid : Monoid _ _
+--   ∪m-monoid = record
+--     { isMonoid = ∪m-isMonoid }
 
-  ∪m-isCommutativeMonoid : IsCommutativeMonoid _∪m_ mEmp
-  ∪m-isCommutativeMonoid = record
-    { isMonoid = ∪m-isMonoid
-    ; comm = ∪m-comm
-    }
+--   ∪m-isCommutativeMonoid : IsCommutativeMonoid _∪m_ mEmp
+--   ∪m-isCommutativeMonoid = record
+--     { isMonoid = ∪m-isMonoid
+--     ; comm = ∪m-comm
+--     }
 
-  ∪m-isIdempotentCommutativeMonoid : IsIdempotentCommutativeMonoid _∪m_ mEmp
-  ∪m-isIdempotentCommutativeMonoid = record
-    { isCommutativeMonoid = ∪m-isCommutativeMonoid
-    ; idem = ∪m-idem
-    }
+--   ∪m-isIdempotentCommutativeMonoid : IsIdempotentCommutativeMonoid _∪m_ mEmp
+--   ∪m-isIdempotentCommutativeMonoid = record
+--     { isCommutativeMonoid = ∪m-isCommutativeMonoid
+--     ; idem = ∪m-idem
+--     }
 
-  ∪m-idempotentCommutativeMonoid : IdempotentCommutativeMonoid _ _
-  ∪m-idempotentCommutativeMonoid = record
-    { isIdempotentCommutativeMonoid = ∪m-isIdempotentCommutativeMonoid }
+--   ∪m-idempotentCommutativeMonoid : IdempotentCommutativeMonoid _ _
+--   ∪m-idempotentCommutativeMonoid = record
+--     { isIdempotentCommutativeMonoid = ∪m-isIdempotentCommutativeMonoid }
 
 DCM : (ΓS : CtxOrTree n) → (xs : MVarSet (COT-to-MT ΓS)) → MVarSet (COT-to-MT ΓS)
-DCM (incTree S) xs = DCT xs
+DCM (incTree S) xs = xs
 DCM (incCtx Γ) xs = DC Γ xs
 
 FVSTm : {X : MaybeTree n} → STm X → MVarSet X
 FVLabel : {X : MaybeTree n} → Label X S → MVarSet X
 FVLabel′ : {X : MaybeTree n} → ((P : Path S) → MVarSet X) → MVarSet X
-FVLabel-WT : {X : MaybeTree n} → Label-WT X S → MVarSet X
-FVSTy : {X : MaybeTree n} → STy X → MVarSet X
+-- FVLabel-WT : {X : MaybeTree n} → Label-WT X S → MVarSet X --
+-- FVSTy : {X : MaybeTree n} → STy X → MVarSet X
 
-FVSTm (SExt a) = VSJoin false (FVSTm a) tEmp
-FVSTm (SShift a) = VSJoin false tEmp (FVSTm a)
+FVSTm (SExt a) = VSHere (VSExt (FVSTm a) VSEmp) -- VSJoin false (FVSTm a) tEmp
+FVSTm (SShift a) = VSNotHere (FVSTm a) -- VSJoin false tEmp (FVSTm a)
 FVSTm (SPath x) = fromPath x
-FVSTm (SCoh S A L) = FVLabel-WT L
+FVSTm (SCoh S A L) = FVLabel (ap L)
 FVSTm (SOther t) = FVTm t
 
 FVLabel L = FVLabel′ (λ P → FVSTm (L P))
@@ -124,13 +124,13 @@ FVLabel L = FVLabel′ (λ P → FVSTm (L P))
 FVLabel′ {S = Sing} f = f PHere
 FVLabel′ {S = Join S T} f = f PHere ∪m FVLabel′ (f ∘ PExt) ∪m FVLabel′ (f ∘ PShift)
 
-FVLabel-WT L = FVSTy (lty L) ∪m FVLabel (ap L)
+-- FVLabel-WT L = ? -- FVSTy (lty L) ∪m FVLabel (ap L)
 
-FVSTy S⋆ = mEmp
-FVSTy (SArr s A t) = FVSTy A ∪m FVSTm s ∪m FVSTm t
+-- FVSTy S⋆ = mEmp
+-- FVSTy (SArr s A t) = FVSTy A ∪m FVSTm s ∪m FVSTm t
 
-FVLabel-WT-⋆ : (L : Label X S) → FVLabel-WT (L ,, S⋆) ≡ FVLabel L
-FVLabel-WT-⋆ L = ∪m-left-unit (FVLabel L)
+-- FVLabel-WT-⋆ : (L : Label X S) → FVLabel-WT (L ,, S⋆) ≡ FVLabel L
+-- FVLabel-WT-⋆ L = ∪m-left-unit (FVLabel L)
 
 FVLabel′-map : {X : MaybeTree n}
              → {Y : MaybeTree m}
@@ -143,20 +143,20 @@ FVLabel′-map {S = Join S T} f g p = begin
   g (f PHere) ∪m FVLabel′ (g ∘ f ∘ PExt) ∪m FVLabel′ (g ∘ f ∘ PShift)
     ≡⟨ cong₂ (λ a b → g (f PHere) ∪m a ∪m b) (FVLabel′-map (f ∘ PExt) g p) (FVLabel′-map (f ∘ PShift) g p) ⟩
   g (f PHere) ∪m g (FVLabel′ (f ∘ PExt)) ∪m g (FVLabel′ (f ∘ PShift))
-    ≡˘⟨ cong (_∪m g (FVLabel′ (f ∘ PShift))) (p (f PHere) (FVLabel′ (f ∘ PExt))) ⟩
+    ≡˘⟨ cong (_∪m _) (p (f PHere) (FVLabel′ (f ∘ PExt))) ⟩
   g (f PHere ∪m FVLabel′ (f ∘ PExt)) ∪m g (FVLabel′ (f ∘ PShift))
     ≡˘⟨ p (f PHere ∪m FVLabel′ (f ∘ PExt)) (FVLabel′ (f ∘ PShift)) ⟩
-  g (f PHere ∪m FVLabel′ (f ∘ PExt) ∪m FVLabel′ (f ∘ PShift)) ∎
+  g (FVLabel′ f) ∎
   where
     open ≡-Reasoning
 
 supp-condition-s : (b : Bool) → (S : Tree n) → (As : STy (someTree S)) → Set
-supp-condition-s false S As = DCT (FVSTy As) ≡ mFull
-supp-condition-s true S S⋆ = ⊥
+supp-condition-s b S S⋆ = ⊥
+supp-condition-s false S (SArr s As t) = FVSTm s ∪m FVSTm t ≡ mFull
 supp-condition-s true S (SArr s As t) = NonZero (tree-dim S)
-                                      × DCT (FVSTm s) ≡ supp-tree-bd (pred (tree-dim S)) S false
-                                      × DCT (FVSTm t) ≡ supp-tree-bd (pred (tree-dim S)) S true
-
+                                      × FVSTm s ≡ supp-tree-bd (pred (tree-dim S)) S false
+                                      × FVSTm t ≡ supp-tree-bd (pred (tree-dim S)) S true
+{-
 label-ap-⊆ : {X : MaybeTree n} → (L : Label X S) → (P : Path S) → FVLabel L ≡ FVLabel L ∪m FVSTm (L P)
 label-ap-⊆ {S = Sing} L PHere = sym (∪m-idem (FVSTm (L PHere)))
 label-ap-⊆ {S = Join S T} {X = X} L PHere = begin
@@ -189,11 +189,11 @@ label-ap-⊆ {S = Join S T} {X = X} L (PShift P) = begin
   FVSTm (L PHere) ∪m FVLabel (L ∘ PExt) ∪m FVLabel (L ∘ PShift) ∪m FVSTm (L (PShift P)) ∎
   where
     open ≡-Reasoning
-
+-}
 MtoVarSet : (ΓS : CtxOrTree n) → MVarSet (COT-to-MT ΓS) → VarSet n
 MtoVarSet (incTree _) xs = toVarSet xs
 MtoVarSet (incCtx Γ) xs = DC Γ xs
-
+{-
 FVLabel-non-empty : (L : Label (someTree T) S) → Truth (tvarset-non-empty (FVLabel L))
 FVSTm-non-empty : (a : STm (someTree S)) → Truth (tvarset-non-empty (FVSTm a))
 
@@ -206,43 +206,66 @@ FVSTm-non-empty {S = Join S T} (SExt a) = Truth-left (tvarset-non-empty (FVSTm a
 FVSTm-non-empty {S = Join S T} (SShift a) = Truth-right (tvarset-non-empty (tEmp {S = S})) (tvarset-non-empty (FVSTm a))
                                               (FVSTm-non-empty a)
 FVSTm-non-empty (SPath P) = fromPath-non-empty P
-
+-}
 MtoVarSet-∪m : {ΓS : CtxOrTree n} (xs ys : MVarSet (COT-to-MT ΓS)) → MtoVarSet ΓS (xs ∪m ys) ≡ MtoVarSet ΓS xs ∪ MtoVarSet ΓS ys
 MtoVarSet-∪m {ΓS = incTree x} xs ys = toVarSet-∪t xs ys
 MtoVarSet-∪m {ΓS = incCtx Γ} xs ys = DC-∪ Γ xs ys
-
+{-
 MtoVarSet-emp : (ΓS : CtxOrTree n) → MtoVarSet ΓS mEmp ≡ empty
 MtoVarSet-emp (incTree S) = toVarSet-emp S
 MtoVarSet-emp (incCtx Γ) = DC-empty Γ
-
+-}
 open ≡-Reasoning
 
 DCM-toVarSet : (xs : MVarSet (COT-to-MT ΓS)) → MtoVarSet ΓS (DCM ΓS xs) ≡ MtoVarSet ΓS xs
-DCM-toVarSet {ΓS = incTree S} xs = DCT-toVarSet xs
+DCM-toVarSet {ΓS = incTree S} xs = refl
 DCM-toVarSet {ΓS = incCtx Γ} xs = DC-idem Γ xs
+
+-- fromPath-to-term : (P : Path S) → toVarSet (fromPath P) ≡ SuppTm (tree-to-ctx S) (path-to-term P)
+-- fromPath-to-term {S = S} PHere = begin
+--   toVarSet (fromPath (PHere {S = S}))
+--     ≡⟨ fromPath-PHere S ⟩
+--   trueAt (fromℕ _)
+--     ≡˘⟨ DC-fromℕ (tree-to-ctx S) ⟩
+--   SuppTm (tree-to-ctx S) (Var (fromℕ _)) ∎
+-- fromPath-to-term {S = Join S T} (PExt P) rewrite Truth-prop (fromPath-non-empty P) = begin
+--   connect-susp-supp (suspSupp (toVarSet (fromPath P))) (toVarSet (tEmp {S = T}))
+--     ≡⟨ cong₂ (λ x y → connect-susp-supp (suspSupp x) y) (fromPath-to-term P) (toVarSet-emp T) ⟩
+--   connect-susp-supp (suspSupp (SuppTm (tree-to-ctx S) (path-to-term P))) empty
+--     ≡⟨ connect-susp-supp-ext (tree-to-ctx S) (path-to-term P) (tree-to-ctx T) ⟩
+--   SuppTm (tree-to-ctx (Join S T)) (susp-tm (path-to-term P) [ connect-susp-inc-left _ _ ]tm) ∎
+-- fromPath-to-term {S = Join S T} (PShift P) rewrite Truth-not-prop (tvarset-empty S) = begin
+--   connect-susp-supp empty (toVarSet (fromPath P))
+--     ≡⟨ cong (connect-susp-supp empty) (fromPath-to-term P) ⟩
+--   connect-susp-supp empty (SuppTm (tree-to-ctx T) (path-to-term P))
+--     ≡⟨ connect-susp-supp-shift (tree-to-ctx S) (tree-to-ctx T) (path-to-term P) ⟩
+--   SuppTm (connect-susp (tree-to-ctx S) (tree-to-ctx T)) (path-to-term P [ connect-susp-inc-right _ _ ]tm) ∎
 
 fromPath-to-term : (P : Path S) → toVarSet (fromPath P) ≡ SuppTm (tree-to-ctx S) (path-to-term P)
 fromPath-to-term {S = S} PHere = begin
-  toVarSet (fromPath (PHere {S = S}))
-    ≡⟨ fromPath-PHere S ⟩
+  toVarSet {S = S} (fromPath PHere)
+    ≡⟨ ∪-right-unit (trueAt (fromℕ _)) ⟩
   trueAt (fromℕ _)
     ≡˘⟨ DC-fromℕ (tree-to-ctx S) ⟩
-  SuppTm (tree-to-ctx S) (Var (fromℕ _)) ∎
-fromPath-to-term {S = Join S T} (PExt P) rewrite Truth-prop (fromPath-non-empty P) = begin
-  connect-susp-supp (suspSupp (toVarSet (fromPath P))) (toVarSet (tEmp {S = T}))
-    ≡⟨ cong₂ (λ x y → connect-susp-supp (suspSupp x) y) (fromPath-to-term P) (toVarSet-emp T) ⟩
+  DC (tree-to-ctx S) (trueAt (fromℕ _)) ∎
+fromPath-to-term {S = Join S T} (PExt P) = begin
+  trueAt (fromℕ _) ∪ connect-susp-supp (suspSupp (toVarSet (fromPath P))) empty
+    ≡⟨ connect-susp-supp-trueAt-lem (toVarSet (fromPath P)) empty ⟩
+  connect-susp-supp (suspSupp (toVarSet (fromPath P))) empty
+    ≡⟨ cong (λ - → connect-susp-supp (suspSupp -) empty) (fromPath-to-term P) ⟩
   connect-susp-supp (suspSupp (SuppTm (tree-to-ctx S) (path-to-term P))) empty
     ≡⟨ connect-susp-supp-ext (tree-to-ctx S) (path-to-term P) (tree-to-ctx T) ⟩
-  SuppTm (tree-to-ctx (Join S T)) (susp-tm (path-to-term P) [ connect-susp-inc-left _ _ ]tm) ∎
-fromPath-to-term {S = Join S T} (PShift P) rewrite Truth-not-prop (tvarset-empty S) = begin
+  SuppTm (tree-to-ctx (Join S T)) (path-to-term (PExt {T = T} P)) ∎
+fromPath-to-term {S = Join S T} (PShift P) = begin
   connect-susp-supp empty (toVarSet (fromPath P))
     ≡⟨ cong (connect-susp-supp empty) (fromPath-to-term P) ⟩
   connect-susp-supp empty (SuppTm (tree-to-ctx T) (path-to-term P))
     ≡⟨ connect-susp-supp-shift (tree-to-ctx S) (tree-to-ctx T) (path-to-term P) ⟩
-  SuppTm (connect-susp (tree-to-ctx S) (tree-to-ctx T)) (path-to-term P [ connect-susp-inc-right _ _ ]tm) ∎
+  SuppTm (tree-to-ctx (Join S T)) (path-to-term (PShift {S = S} P)) ∎
 
+{-
 FVSTm-to-term : {ΓS : CtxOrTree n} → (a : STm (COT-to-MT ΓS)) → MtoVarSet ΓS (FVSTm a) ≡ SuppTm (COT-to-Ctx ΓS) (stm-to-term a)
-FVSTy-to-type : {ΓS : CtxOrTree n} → (A : STy (COT-to-MT ΓS)) → MtoVarSet ΓS (FVSTy A) ≡ SuppTy (COT-to-Ctx ΓS) (sty-to-type A)
+-- FVSTy-to-type : {ΓS : CtxOrTree n} → (A : STy (COT-to-MT ΓS)) → MtoVarSet ΓS (FVSTy A) ≡ SuppTy (COT-to-Ctx ΓS) (sty-to-type A)
 FVLabel-to-sub : {ΓS : CtxOrTree n} → (L : Label-WT (COT-to-MT ΓS) S) → MtoVarSet ΓS (FVLabel-WT L) ≡ SuppSub (COT-to-Ctx ΓS) (label-to-sub L)
 FVLabel-to-sub′ : {ΓS : CtxOrTree n}
                 → (L : Label-WT (COT-to-MT ΓS) S)
@@ -388,7 +411,8 @@ FVLabel-to-sub′ {S = Join S T} {ΓS = ΓS} L f g = begin
       where
         module PR = PReasoning (⊆-poset _)
         open PR
-
+-}
+{-
 supp-condition-compat : (b : Bool) → (S : Tree n) → (As : STy (someTree S)) → supp-condition-s b S As → supp-condition b (sty-to-type As) (tree-to-ctx S) ⦃ tree-to-pd S ⦄
 supp-condition-compat false S As sc = begin
   SuppTy (tree-to-ctx S) (sty-to-type As)
@@ -435,50 +459,51 @@ supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = NonZero-subst le
       toVarSet (supp-tree-bd (pred (ctx-dim (tree-to-ctx S))) S true)
         ≡⟨ supp-compat′ (pred (ctx-dim (tree-to-ctx S))) S true ⟩
       pd-bd-supp (pred (ctx-dim (tree-to-ctx S))) (tree-to-ctx S) true ∎
+-}
 
 DCM-reflect : {xs ys : MVarSet (COT-to-MT ΓS)} → MtoVarSet ΓS xs ≡ MtoVarSet ΓS ys → DCM ΓS xs ≡ DCM ΓS ys
-DCM-reflect {ΓS = incTree x} p = DCT-reflect p
+DCM-reflect {ΓS = incTree x} p = toVarSet-reflect p
 DCM-reflect {ΓS = incCtx x} p = p
 
 DCM-∪ : (ΓS : CtxOrTree n) → (xs ys : MVarSet (COT-to-MT ΓS)) → DCM ΓS (xs ∪m ys) ≡ DCM ΓS xs ∪m DCM ΓS ys
-DCM-∪ (incTree x) xs ys = DCT-∪ xs ys
+DCM-∪ (incTree x) xs ys = refl
 DCM-∪ (incCtx x) xs ys = DC-∪ x xs ys
 
-FVSTm-≃ : {a b : STm (COT-to-MT ΓS)} → a ≃stm b → DCM ΓS (FVSTm a) ≡ DCM ΓS (FVSTm b)
-FVSTm-≃ {ΓS = ΓS} {a = a} {b = b} [ p ] = DCM-reflect (begin
-  MtoVarSet ΓS (FVSTm a)
-    ≡⟨ FVSTm-to-term a ⟩
-  SuppTm (COT-to-Ctx ΓS) (stm-to-term a)
-    ≡⟨ cong (SuppTm (COT-to-Ctx ΓS)) (≃tm-to-≡ p) ⟩
-  SuppTm (COT-to-Ctx ΓS) (stm-to-term b)
-    ≡˘⟨ FVSTm-to-term b ⟩
-  MtoVarSet ΓS (FVSTm b) ∎)
+-- FVSTm-≃ : {a b : STm (COT-to-MT ΓS)} → a ≃stm b → DCM ΓS (FVSTm a) ≡ DCM ΓS (FVSTm b)
+-- FVSTm-≃ {ΓS = ΓS} {a = a} {b = b} [ p ] = DCM-reflect (begin
+--   MtoVarSet ΓS (FVSTm a)
+--     ≡⟨ FVSTm-to-term a ⟩
+--   SuppTm (COT-to-Ctx ΓS) (stm-to-term a)
+--     ≡⟨ cong (SuppTm (COT-to-Ctx ΓS)) (≃tm-to-≡ p) ⟩
+--   SuppTm (COT-to-Ctx ΓS) (stm-to-term b)
+--     ≡˘⟨ FVSTm-to-term b ⟩
+--   MtoVarSet ΓS (FVSTm b) ∎)
 
-FVSTy-≃ : {As Bs : STy (COT-to-MT ΓS)} → As ≃sty Bs → DCM ΓS (FVSTy As) ≡ DCM ΓS (FVSTy Bs)
-FVSTy-≃ {ΓS = ΓS} {As = As} {Bs = Bs} [ p ] = DCM-reflect (begin
-  MtoVarSet ΓS (FVSTy As)
-    ≡⟨ FVSTy-to-type As ⟩
-  SuppTy (COT-to-Ctx ΓS) (sty-to-type As)
-    ≡⟨ cong (SuppTy (COT-to-Ctx ΓS)) (≃ty-to-≡ p) ⟩
-  SuppTy (COT-to-Ctx ΓS) (sty-to-type Bs)
-    ≡˘⟨ FVSTy-to-type Bs ⟩
-  MtoVarSet ΓS (FVSTy Bs) ∎)
+-- FVSTy-≃ : {As Bs : STy (COT-to-MT ΓS)} → As ≃sty Bs → DCM ΓS (FVSTy As) ≡ DCM ΓS (FVSTy Bs)
+-- FVSTy-≃ {ΓS = ΓS} {As = As} {Bs = Bs} [ p ] = DCM-reflect (begin
+--   MtoVarSet ΓS (FVSTy As)
+--     ≡⟨ FVSTy-to-type As ⟩
+--   SuppTy (COT-to-Ctx ΓS) (sty-to-type As)
+--     ≡⟨ cong (SuppTy (COT-to-Ctx ΓS)) (≃ty-to-≡ p) ⟩
+--   SuppTy (COT-to-Ctx ΓS) (sty-to-type Bs)
+--     ≡˘⟨ FVSTy-to-type Bs ⟩
+--   MtoVarSet ΓS (FVSTy Bs) ∎)
 
-FVLabel-≃ : {L M : Label (COT-to-MT ΓS) S} → L ≃l M → DCM ΓS (FVLabel L) ≡ DCM ΓS (FVLabel M)
-FVLabel-≃ {S = Sing} {L = L} {M = M} [ p ] = FVSTm-≃ (p PHere)
-FVLabel-≃ {ΓS = ΓS} {S = Join S T} {L = L} {M = M} [ p ] = begin
-  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (L ∘ PExt) ∪m FVLabel (L ∘ PShift))
-    ≡⟨ DCM-∪ ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) (FVLabel (λ x → L (PShift x))) ⟩
-  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (L ∘ PExt)) ∪m DCM ΓS (FVLabel (L ∘ PShift))
-    ≡⟨ cong₂ _∪m_ (DCM-∪ ΓS (FVSTm (L PHere)) (FVLabel (L ∘ PExt))) (FVLabel-≃ [ p ∘ PShift ]) ⟩
-  DCM ΓS (FVSTm (L PHere)) ∪m DCM ΓS (FVLabel (L ∘ PExt)) ∪m DCM ΓS (FVLabel (M ∘ PShift))
-    ≡⟨ cong₂ (λ a b → a ∪m b ∪m DCM ΓS (FVLabel (M ∘ PShift))) (FVSTm-≃ (p PHere)) (FVLabel-≃ [ p ∘ PExt ]) ⟩
-  DCM ΓS (FVSTm (M PHere)) ∪m DCM ΓS (FVLabel (M ∘ PExt)) ∪m DCM ΓS (FVLabel (M ∘ PShift))
-    ≡˘⟨ cong (_∪m DCM ΓS (FVLabel (M ∘ PShift))) (DCM-∪ ΓS (FVSTm (M PHere)) (FVLabel (M ∘ PExt))) ⟩
-  DCM ΓS (FVSTm (M PHere) ∪m FVLabel (M ∘ PExt)) ∪m DCM ΓS (FVLabel (M ∘ PShift))
-    ≡˘⟨ DCM-∪ ΓS (FVSTm (M PHere) ∪m FVLabel (M ∘ PExt)) (FVLabel (M ∘ PShift)) ⟩
-  DCM ΓS (FVSTm (M PHere) ∪m FVLabel (M ∘ PExt) ∪m FVLabel (M ∘ PShift)) ∎
-
+-- FVLabel-≃ : {L M : Label (COT-to-MT ΓS) S} → L ≃l M → DCM ΓS (FVLabel L) ≡ DCM ΓS (FVLabel M)
+-- FVLabel-≃ {S = Sing} {L = L} {M = M} [ p ] = FVSTm-≃ (p PHere)
+-- FVLabel-≃ {ΓS = ΓS} {S = Join S T} {L = L} {M = M} [ p ] = begin
+--   DCM ΓS (FVSTm (L PHere) ∪m FVLabel (L ∘ PExt) ∪m FVLabel (L ∘ PShift))
+--     ≡⟨ DCM-∪ ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) (FVLabel (λ x → L (PShift x))) ⟩
+--   DCM ΓS (FVSTm (L PHere) ∪m FVLabel (L ∘ PExt)) ∪m DCM ΓS (FVLabel (L ∘ PShift))
+--     ≡⟨ cong₂ _∪m_ (DCM-∪ ΓS (FVSTm (L PHere)) (FVLabel (L ∘ PExt))) (FVLabel-≃ [ p ∘ PShift ]) ⟩
+--   DCM ΓS (FVSTm (L PHere)) ∪m DCM ΓS (FVLabel (L ∘ PExt)) ∪m DCM ΓS (FVLabel (M ∘ PShift))
+--     ≡⟨ cong₂ (λ a b → a ∪m b ∪m DCM ΓS (FVLabel (M ∘ PShift))) (FVSTm-≃ (p PHere)) (FVLabel-≃ [ p ∘ PExt ]) ⟩
+--   DCM ΓS (FVSTm (M PHere)) ∪m DCM ΓS (FVLabel (M ∘ PExt)) ∪m DCM ΓS (FVLabel (M ∘ PShift))
+--     ≡˘⟨ cong (_∪m DCM ΓS (FVLabel (M ∘ PShift))) (DCM-∪ ΓS (FVSTm (M PHere)) (FVLabel (M ∘ PExt))) ⟩
+--   DCM ΓS (FVSTm (M PHere) ∪m FVLabel (M ∘ PExt)) ∪m DCM ΓS (FVLabel (M ∘ PShift))
+--     ≡˘⟨ DCM-∪ ΓS (FVSTm (M PHere) ∪m FVLabel (M ∘ PExt)) (FVLabel (M ∘ PShift)) ⟩
+--   DCM ΓS (FVSTm (M PHere) ∪m FVLabel (M ∘ PExt) ∪m FVLabel (M ∘ PShift)) ∎
+{-
 FVLabel-WT-≃ : {L M : Label-WT (COT-to-MT ΓS) S} → ap L ≃l ap M → lty L ≃sty lty M → DCM ΓS (FVLabel-WT L) ≡ DCM ΓS (FVLabel-WT M)
 FVLabel-WT-≃ {ΓS = ΓS} {L = L} {M = M} p q = begin
   DCM ΓS (FVSTy (lty L) ∪m FVLabel (ap L))
@@ -491,36 +516,37 @@ FVLabel-WT-≃ {ΓS = ΓS} {L = L} {M = M} p q = begin
 
 FVSTm-susp : (a : STm (someTree S)) → supp-tvarset (DCT (FVSTm a)) ≡ DCT (FVSTm (susp-stm a))
 FVSTm-susp {S = S} a rewrite Truth-prop (FVSTm-non-empty a) = refl
-
+-}
 id-label-full : (S : Tree n) → FVLabel (id-label S) ≡ tFull
 id-label-full Sing = refl
-id-label-full (Join S T) = begin
-  VSJoin true tEmp tEmp ∪t
-      FVLabel′ (λ x → VSJoin false (fromPath x) tEmp)
-      ∪t FVLabel′ (λ x → VSJoin false tEmp (fromPath x))
-    ≡⟨ cong₂ (λ a b → VSJoin true tEmp tEmp ∪t a ∪t b) (FVLabel′-map fromPath (λ x → VSJoin false x tEmp) λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp))) (FVLabel′-map fromPath (VSJoin false tEmp) λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))) ⟩
-  VSJoin true tEmp tEmp ∪t VSJoin false (FVLabel′ fromPath) tEmp ∪t VSJoin false tEmp (FVLabel′ fromPath)
-    ≡⟨ cong₂ (VSJoin true) (trans (∪t-right-unit (tEmp ∪t FVLabel′ fromPath)) (∪t-left-unit (FVLabel (id-label S)))) (trans (cong (_∪t FVLabel (id-label T)) (∪t-left-unit tEmp)) (∪t-left-unit (FVLabel (id-label T)))) ⟩
-  VSJoin true (FVLabel (id-label S)) (FVLabel (id-label T))
-    ≡⟨ cong₂ (VSJoin true) (id-label-full S) (id-label-full T) ⟩
-  VSJoin true tFull tFull
-    ≡⟨⟩
-  tFull ∎
+id-label-full (Join S T) = ?
+  -- begin
+  -- VSJoin true tEmp tEmp ∪t
+  --     FVLabel′ (λ x → VSJoin false (fromPath x) tEmp)
+  --     ∪t FVLabel′ (λ x → VSJoin false tEmp (fromPath x))
+  --   ≡⟨ cong₂ (λ a b → VSJoin true tEmp tEmp ∪t a ∪t b) (FVLabel′-map fromPath (λ x → VSJoin false x tEmp) λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp))) (FVLabel′-map fromPath (VSJoin false tEmp) λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))) ⟩
+  -- VSJoin true tEmp tEmp ∪t VSJoin false (FVLabel′ fromPath) tEmp ∪t VSJoin false tEmp (FVLabel′ fromPath)
+  --   ≡⟨ cong₂ (VSJoin true) (trans (∪t-right-unit (tEmp ∪t FVLabel′ fromPath)) (∪t-left-unit (FVLabel (id-label S)))) (trans (cong (_∪t FVLabel (id-label T)) (∪t-left-unit tEmp)) (∪t-left-unit (FVLabel (id-label T)))) ⟩
+  -- VSJoin true (FVLabel (id-label S)) (FVLabel (id-label T))
+  --   ≡⟨ cong₂ (VSJoin true) (id-label-full S) (id-label-full T) ⟩
+  -- VSJoin true tFull tFull
+  --   ≡⟨⟩
+  -- tFull ∎
 
 ppath-≃-full : (p : S ≃′ T) → FVLabel (SPath ∘ ppath-≃ p) ≡ tFull
 ppath-≃-full {S = S} Refl≃′ = id-label-full S
-ppath-≃-full (Join≃′ {S′ = S′} {T′ = T′} p q) = begin
-  VSJoin true tEmp tEmp
-  ∪t FVLabel′ (λ x → VSJoin false (fromPath (ppath-≃ p x)) tEmp)
-  ∪t FVLabel′ (λ x → VSJoin false tEmp (fromPath (ppath-≃ q x)))
-    ≡⟨ cong₂ (λ a b → VSJoin true tEmp tEmp ∪t a ∪t b) (FVLabel′-map (fromPath ∘ ppath-≃ p) (λ x → VSJoin false x tEmp) (λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp)))) (FVLabel′-map (fromPath ∘ ppath-≃ q) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp)))) ⟩
-  VSJoin true tEmp tEmp ∪t
-    VSJoin false (FVLabel′ (λ x → fromPath (ppath-≃ p x))) tEmp
-    ∪t VSJoin false tEmp (FVLabel′ (λ x → fromPath (ppath-≃ q x)))
-    ≡⟨ cong₂ (VSJoin true) (solve (∪t-monoid {S = S′})) (solve (∪t-monoid {S = T′})) ⟩
-  VSJoin true (FVLabel (SPath ∘ ppath-≃ p)) (FVLabel (SPath ∘ ppath-≃ q))
-    ≡⟨ cong₂ (VSJoin true) (ppath-≃-full p) (ppath-≃-full q) ⟩
-  tFull ∎
+ppath-≃-full (Join≃′ {S′ = S′} {T′ = T′} p q) = {!!} -- begin
+  -- VSJoin true tEmp tEmp
+  -- ∪t FVLabel′ (λ x → VSJoin false (fromPath (ppath-≃ p x)) tEmp)
+  -- ∪t FVLabel′ (λ x → VSJoin false tEmp (fromPath (ppath-≃ q x)))
+  --   ≡⟨ cong₂ (λ a b → VSJoin true tEmp tEmp ∪t a ∪t b) (FVLabel′-map (fromPath ∘ ppath-≃ p) (λ x → VSJoin false x tEmp) (λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp)))) (FVLabel′-map (fromPath ∘ ppath-≃ q) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp)))) ⟩
+  -- VSJoin true tEmp tEmp ∪t
+  --   VSJoin false (FVLabel′ (λ x → fromPath (ppath-≃ p x))) tEmp
+  --   ∪t VSJoin false tEmp (FVLabel′ (λ x → fromPath (ppath-≃ q x)))
+  --   ≡⟨ cong₂ (VSJoin true) (solve (∪t-monoid {S = S′})) (solve (∪t-monoid {S = T′})) ⟩
+  -- VSJoin true (FVLabel (SPath ∘ ppath-≃ p)) (FVLabel (SPath ∘ ppath-≃ q))
+  --   ≡⟨ cong₂ (VSJoin true) (ppath-≃-full p) (ppath-≃-full q) ⟩
+  -- tFull ∎
 
 connect-tree-incs-full : (S : Tree n) → (T : Tree m) → FVLabel (ap (connect-tree-inc-left S T)) ∪m FVLabel (ap (connect-tree-inc-right S T)) ≡ tFull
 connect-tree-incs-full Sing T = begin
@@ -529,46 +555,46 @@ connect-tree-incs-full Sing T = begin
   fromPath PHere ∪t tFull
     ≡⟨ ∪t-right-zero (fromPath PHere) ⟩
   tFull ∎
-connect-tree-incs-full (Join S₁ S₂) T = begin
-  VSJoin true tEmp tEmp ∪t
-      FVLabel′ (λ x → VSJoin false (fromPath x) tEmp)
-      ∪t
-      FVLabel′
-      (λ x →
-         VSJoin false tEmp (fromPath (connect-tree-inc-left′ S₂ T x)))
-      ∪t
-      FVLabel′
-      (λ P →
-         VSJoin false tEmp (fromPath (connect-tree-inc-right′ S₂ T P)))
-    ≡⟨ cong₃ (λ a b c → VSJoin true tEmp tEmp ∪t a ∪t b ∪t c)
-             (FVLabel′-map fromPath (λ x → VSJoin false x tEmp) (λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp))))
-             (FVLabel′-map (λ x → fromPath (connect-tree-inc-left′ S₂ T x)) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))))
-             ((FVLabel′-map (λ x → fromPath (connect-tree-inc-right′ S₂ T x)) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))))) ⟩
-  VSJoin true
-    (tEmp ∪t FVLabel (id-label S₁) ∪t tEmp ∪t tEmp)
-    (tEmp ∪t tEmp ∪t
-     FVLabel′ (λ x → fromPath (connect-tree-inc-left′ S₂ T x))
-     ∪t FVLabel′ (λ x → fromPath (connect-tree-inc-right′ S₂ T x)))
-    ≡⟨ cong₂ (VSJoin true) lem1 lem2 ⟩
-  tFull ∎
+connect-tree-incs-full (Join S₁ S₂) T = {!!} -- begin
+  -- VSJoin true tEmp tEmp ∪t
+  --     FVLabel′ (λ x → VSJoin false (fromPath x) tEmp)
+  --     ∪t
+  --     FVLabel′
+  --     (λ x →
+  --        VSJoin false tEmp (fromPath (connect-tree-inc-left′ S₂ T x)))
+  --     ∪t
+  --     FVLabel′
+  --     (λ P →
+  --        VSJoin false tEmp (fromPath (connect-tree-inc-right′ S₂ T P)))
+  --   ≡⟨ cong₃ (λ a b c → VSJoin true tEmp tEmp ∪t a ∪t b ∪t c)
+  --            (FVLabel′-map fromPath (λ x → VSJoin false x tEmp) (λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp))))
+  --            (FVLabel′-map (λ x → fromPath (connect-tree-inc-left′ S₂ T x)) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))))
+  --            ((FVLabel′-map (λ x → fromPath (connect-tree-inc-right′ S₂ T x)) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))))) ⟩
+  -- VSJoin true
+  --   (tEmp ∪t FVLabel (id-label S₁) ∪t tEmp ∪t tEmp)
+  --   (tEmp ∪t tEmp ∪t
+  --    FVLabel′ (λ x → fromPath (connect-tree-inc-left′ S₂ T x))
+  --    ∪t FVLabel′ (λ x → fromPath (connect-tree-inc-right′ S₂ T x)))
+  --   ≡⟨ cong₂ (VSJoin true) lem1 lem2 ⟩
+  -- tFull ∎
   where
-    lem1 : tEmp ∪t FVLabel (id-label S₁) ∪t tEmp ∪t tEmp ≡ tFull
-    lem1 = begin
-      tEmp ∪t FVLabel (id-label S₁) ∪t tEmp ∪t tEmp
-        ≡⟨ solve (∪t-monoid {S = S₁}) ⟩
-      FVLabel (id-label S₁)
-        ≡⟨ id-label-full S₁ ⟩
-      tFull ∎
+    -- lem1 : tEmp ∪t FVLabel (id-label S₁) ∪t tEmp ∪t tEmp ≡ tFull
+    -- lem1 = begin
+    --   tEmp ∪t FVLabel (id-label S₁) ∪t tEmp ∪t tEmp
+    --     ≡⟨ solve (∪t-monoid {S = S₁}) ⟩
+    --   FVLabel (id-label S₁)
+    --     ≡⟨ id-label-full S₁ ⟩
+    --   tFull ∎
 
-    lem2 : tEmp ∪t tEmp ∪t
-             FVLabel (ap (connect-tree-inc-left S₂ T))
-             ∪t FVLabel (ap (connect-tree-inc-right S₂ T))
-             ≡ tFull
-    lem2 = begin
-      tEmp ∪t tEmp ∪t FVLabel (ap (connect-tree-inc-left S₂ T)) ∪t
-        FVLabel (ap (connect-tree-inc-right S₂ T))
-        ≡⟨ solve (∪t-monoid {S = connect-tree S₂ T}) ⟩
-      FVLabel (ap (connect-tree-inc-left S₂ T)) ∪t
-        FVLabel (ap (connect-tree-inc-right S₂ T))
-        ≡⟨ connect-tree-incs-full S₂ T ⟩
-      tFull ∎
+    -- lem2 : tEmp ∪t tEmp ∪t
+    --          FVLabel (ap (connect-tree-inc-left S₂ T))
+    --          ∪t FVLabel (ap (connect-tree-inc-right S₂ T))
+    --          ≡ tFull
+    -- lem2 = begin
+    --   tEmp ∪t tEmp ∪t FVLabel (ap (connect-tree-inc-left S₂ T)) ∪t
+    --     FVLabel (ap (connect-tree-inc-right S₂ T))
+    --     ≡⟨ solve (∪t-monoid {S = connect-tree S₂ T}) ⟩
+    --   FVLabel (ap (connect-tree-inc-left S₂ T)) ∪t
+    --     FVLabel (ap (connect-tree-inc-right S₂ T))
+    --     ≡⟨ connect-tree-incs-full S₂ T ⟩
+    --   tFull ∎

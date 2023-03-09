@@ -22,20 +22,20 @@ open import Catt.Tree.Label.Typing rule
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Typing.Properties.Support rule supp-rule
-open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
+-- open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Tactic.MonoidSolver
 
 open ≡-Reasoning
 
-EqSuppSTy : {As Bs : STy (COT-to-MT ΓS)} → As ≈[ COT-to-Ctx ΓS ]sty Bs → DCM ΓS (FVSTy As) ≡ DCM ΓS (FVSTy Bs)
-EqSuppSTy {ΓS = ΓS} {As = As} {Bs = Bs} [ p ] = DCM-reflect (begin
-  MtoVarSet ΓS (FVSTy As)
-    ≡⟨ FVSTy-to-type As ⟩
-  SuppTy (COT-to-Ctx ΓS) (sty-to-type As)
-    ≡⟨ EqSuppTy p ⟩
-  SuppTy (COT-to-Ctx ΓS) (sty-to-type Bs)
-    ≡˘⟨ FVSTy-to-type Bs ⟩
-  MtoVarSet ΓS (FVSTy Bs) ∎)
+-- EqSuppSTy : {As Bs : STy (COT-to-MT ΓS)} → As ≈[ COT-to-Ctx ΓS ]sty Bs → DCM ΓS (FVSTy As) ≡ DCM ΓS (FVSTy Bs)
+-- EqSuppSTy {ΓS = ΓS} {As = As} {Bs = Bs} [ p ] = DCM-reflect (begin
+--   MtoVarSet ΓS (FVSTy As)
+--     ≡⟨ FVSTy-to-type As ⟩
+--   SuppTy (COT-to-Ctx ΓS) (sty-to-type As)
+--     ≡⟨ EqSuppTy p ⟩
+--   SuppTy (COT-to-Ctx ΓS) (sty-to-type Bs)
+--     ≡˘⟨ FVSTy-to-type Bs ⟩
+--   MtoVarSet ΓS (FVSTy Bs) ∎)
 
 EqSuppSTm : {a b : STm (COT-to-MT ΓS)} → a ≈[ COT-to-Ctx ΓS ]stm b → DCM ΓS (FVSTm a) ≡ DCM ΓS (FVSTm b)
 EqSuppSTm {ΓS = ΓS} {a = a} {b = b} [ p ] = DCM-reflect (begin

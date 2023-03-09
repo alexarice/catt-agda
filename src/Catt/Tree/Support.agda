@@ -56,6 +56,7 @@ strip : TVarSet S → TVarSet′ S
 strip (VSHere xs) = xs
 strip (VSNotHere xs) = VSShift xs
 
+infixl 60 _∪t_
 _∪t_ : TVarSet S → TVarSet S → TVarSet S
 _∪t′_ : TVarSet′ S → TVarSet′ S → TVarSet′ S
 
@@ -70,6 +71,15 @@ VSExt xs ys ∪t′ VSShift ys′ = VSExt xs (ys ∪t′ strip ys′)
 VSShift ys ∪t′ VSEmp = VSShift ys
 VSShift ys ∪t′ VSExt xs′ ys′ = VSExt xs′ (strip ys ∪t′ ys′)
 VSShift ys ∪t′ VSShift ys′ = VSShift (ys ∪t ys′)
+
+ExtTVarSet : TVarSet S → TVarSet (Join S T)
+ExtTVarSet xs = VSHere (VSExt xs VSEmp)
+
+ExtTVarSet-cond : (xs ys : TVarSet S) → ExtTVarSet {T = T} (xs ∪t ys) ≡ ExtTVarSet xs ∪t ExtTVarSet ys
+ExtTVarSet-cond xs ys = refl
+
+VSNotHere-cond : (xs ys : TVarSet T) → VSNotHere {S = S} (xs ∪t ys) ≡ VSNotHere xs ∪t VSNotHere ys
+VSNotHere-cond xs ys = refl
 
 ∪t′-left-unit : LeftIdentity _≡_ VSEmp (_∪t′_ {S = S})
 ∪t′-left-unit xs = refl

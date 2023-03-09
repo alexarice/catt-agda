@@ -122,7 +122,7 @@ FVSTm (SOther t) = FVTm t
 FVLabel L = FVLabel′ (λ P → FVSTm (L P))
 
 FVLabel′ {S = Sing} f = f PHere
-FVLabel′ {S = Join S T} f = f PHere ∪m FVLabel′ (f ∘ PExt) ∪m FVLabel′ (f ∘ PShift)
+FVLabel′ {S = Join S T} f = FVLabel′ (f ∘ PExt) ∪m FVLabel′ (f ∘ PShift)
 
 -- FVLabel-WT L = ? -- FVSTy (lty L) ∪m FVLabel (ap L)
 
@@ -140,12 +140,10 @@ FVLabel′-map : {X : MaybeTree n}
              → FVLabel′ (g ∘ f) ≡ g (FVLabel′ f)
 FVLabel′-map {S = Sing} f g p = refl
 FVLabel′-map {S = Join S T} f g p = begin
-  g (f PHere) ∪m FVLabel′ (g ∘ f ∘ PExt) ∪m FVLabel′ (g ∘ f ∘ PShift)
-    ≡⟨ cong₂ (λ a b → g (f PHere) ∪m a ∪m b) (FVLabel′-map (f ∘ PExt) g p) (FVLabel′-map (f ∘ PShift) g p) ⟩
-  g (f PHere) ∪m g (FVLabel′ (f ∘ PExt)) ∪m g (FVLabel′ (f ∘ PShift))
-    ≡˘⟨ cong (_∪m _) (p (f PHere) (FVLabel′ (f ∘ PExt))) ⟩
-  g (f PHere ∪m FVLabel′ (f ∘ PExt)) ∪m g (FVLabel′ (f ∘ PShift))
-    ≡˘⟨ p (f PHere ∪m FVLabel′ (f ∘ PExt)) (FVLabel′ (f ∘ PShift)) ⟩
+  FVLabel′ (g ∘ f ∘ PExt) ∪m FVLabel′ (g ∘ f ∘ PShift)
+    ≡⟨ cong₂ (λ a b → a ∪m b) (FVLabel′-map (f ∘ PExt) g p) (FVLabel′-map (f ∘ PShift) g p) ⟩
+  g (FVLabel′ (f ∘ PExt)) ∪m g (FVLabel′ (f ∘ PShift))
+    ≡˘⟨ p (FVLabel′ (f ∘ PExt)) (FVLabel′ (f ∘ PShift)) ⟩
   g (FVLabel′ f) ∎
   where
     open ≡-Reasoning
@@ -519,34 +517,21 @@ FVSTm-susp {S = S} a rewrite Truth-prop (FVSTm-non-empty a) = refl
 -}
 id-label-full : (S : Tree n) → FVLabel (id-label S) ≡ tFull
 id-label-full Sing = refl
-id-label-full (Join S T) = ?
-  -- begin
-  -- VSJoin true tEmp tEmp ∪t
-  --     FVLabel′ (λ x → VSJoin false (fromPath x) tEmp)
-  --     ∪t FVLabel′ (λ x → VSJoin false tEmp (fromPath x))
-  --   ≡⟨ cong₂ (λ a b → VSJoin true tEmp tEmp ∪t a ∪t b) (FVLabel′-map fromPath (λ x → VSJoin false x tEmp) λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp))) (FVLabel′-map fromPath (VSJoin false tEmp) λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))) ⟩
-  -- VSJoin true tEmp tEmp ∪t VSJoin false (FVLabel′ fromPath) tEmp ∪t VSJoin false tEmp (FVLabel′ fromPath)
-  --   ≡⟨ cong₂ (VSJoin true) (trans (∪t-right-unit (tEmp ∪t FVLabel′ fromPath)) (∪t-left-unit (FVLabel (id-label S)))) (trans (cong (_∪t FVLabel (id-label T)) (∪t-left-unit tEmp)) (∪t-left-unit (FVLabel (id-label T)))) ⟩
-  -- VSJoin true (FVLabel (id-label S)) (FVLabel (id-label T))
-  --   ≡⟨ cong₂ (VSJoin true) (id-label-full S) (id-label-full T) ⟩
-  -- VSJoin true tFull tFull
-  --   ≡⟨⟩
-  -- tFull ∎
+id-label-full (Join S T) = begin
+  FVLabel′ (λ x → VSHere (VSExt (fromPath x) VSEmp)) ∪t FVLabel′ (λ x → VSNotHere (fromPath x))
+    ≡⟨ cong₂ _∪t_ (FVLabel′-map fromPath ExtTVarSet ExtTVarSet-cond) (FVLabel′-map fromPath VSNotHere VSNotHere-cond) ⟩
+  VSHere (VSExt (FVLabel′ fromPath) (strip (FVLabel′ fromPath)))
+    ≡⟨ cong₂ (λ a b → VSHere (VSExt a (strip b))) (id-label-full S) (id-label-full T) ⟩
+  VSHere (VSExt tFull (strip tFull)) ∎
 
 ppath-≃-full : (p : S ≃′ T) → FVLabel (SPath ∘ ppath-≃ p) ≡ tFull
 ppath-≃-full {S = S} Refl≃′ = id-label-full S
-ppath-≃-full (Join≃′ {S′ = S′} {T′ = T′} p q) = {!!} -- begin
-  -- VSJoin true tEmp tEmp
-  -- ∪t FVLabel′ (λ x → VSJoin false (fromPath (ppath-≃ p x)) tEmp)
-  -- ∪t FVLabel′ (λ x → VSJoin false tEmp (fromPath (ppath-≃ q x)))
-  --   ≡⟨ cong₂ (λ a b → VSJoin true tEmp tEmp ∪t a ∪t b) (FVLabel′-map (fromPath ∘ ppath-≃ p) (λ x → VSJoin false x tEmp) (λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp)))) (FVLabel′-map (fromPath ∘ ppath-≃ q) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp)))) ⟩
-  -- VSJoin true tEmp tEmp ∪t
-  --   VSJoin false (FVLabel′ (λ x → fromPath (ppath-≃ p x))) tEmp
-  --   ∪t VSJoin false tEmp (FVLabel′ (λ x → fromPath (ppath-≃ q x)))
-  --   ≡⟨ cong₂ (VSJoin true) (solve (∪t-monoid {S = S′})) (solve (∪t-monoid {S = T′})) ⟩
-  -- VSJoin true (FVLabel (SPath ∘ ppath-≃ p)) (FVLabel (SPath ∘ ppath-≃ q))
-  --   ≡⟨ cong₂ (VSJoin true) (ppath-≃-full p) (ppath-≃-full q) ⟩
-  -- tFull ∎
+ppath-≃-full (Join≃′ {S′ = S′} {T′ = T′} p q) = begin
+  (FVLabel′ (λ x → VSHere (VSExt (fromPath (ppath-≃ p x)) VSEmp)) ∪t FVLabel′ (λ x → VSNotHere (fromPath (ppath-≃ q x))))
+    ≡⟨ cong₂ _∪t_ (FVLabel′-map (fromPath ∘ ppath-≃ p) ExtTVarSet ExtTVarSet-cond) (FVLabel′-map (fromPath ∘ ppath-≃ q) VSNotHere VSNotHere-cond) ⟩
+  VSHere (VSExt (FVLabel′ (λ x → fromPath (ppath-≃ p x))) (strip (FVLabel′ (fromPath ∘ ppath-≃ q))))
+    ≡⟨ cong₂ (λ a b → VSHere (VSExt a (strip b))) (ppath-≃-full p) (ppath-≃-full q) ⟩
+  VSHere (VSExt tFull (strip tFull)) ∎
 
 connect-tree-incs-full : (S : Tree n) → (T : Tree m) → FVLabel (ap (connect-tree-inc-left S T)) ∪m FVLabel (ap (connect-tree-inc-right S T)) ≡ tFull
 connect-tree-incs-full Sing T = begin
@@ -555,7 +540,22 @@ connect-tree-incs-full Sing T = begin
   fromPath PHere ∪t tFull
     ≡⟨ ∪t-right-zero (fromPath PHere) ⟩
   tFull ∎
-connect-tree-incs-full (Join S₁ S₂) T = {!!} -- begin
+connect-tree-incs-full (Join S₁ S₂) T = begin
+  FVLabel′ (λ x → VSHere (VSExt (fromPath x) VSEmp)) ∪t
+    FVLabel′ (λ x → VSNotHere (fromPath (connect-tree-inc-left′ S₂ T x))) ∪t
+    FVLabel′ (λ P → VSNotHere (fromPath (connect-tree-inc-right′ S₂ T P)))
+    ≡⟨ cong₃ (λ a b c → a ∪t b ∪t c) (FVLabel′-map fromPath ExtTVarSet ExtTVarSet-cond)
+                                     (FVLabel′-map (fromPath ∘ connect-tree-inc-left′ S₂ T) VSNotHere VSNotHere-cond)
+                                     (FVLabel′-map (fromPath ∘ connect-tree-inc-right′ S₂ T) VSNotHere VSNotHere-cond) ⟩
+  VSHere (VSExt (FVLabel′ fromPath)
+       (strip (FVLabel′ (λ x → fromPath (connect-tree-inc-left′ S₂ T x)))
+        ∪t′ strip (FVLabel′ (λ x → fromPath (connect-tree-inc-right′ S₂ T x)))))
+    ≡⟨ cong₂ (λ a b → VSHere (VSExt a b)) (id-label-full S₁) (strip-lem (FVLabel (ap (connect-tree-inc-left S₂ T))) (FVLabel (ap (connect-tree-inc-right S₂ T)))) ⟩
+  VSHere (VSExt tFull (strip
+                        (FVLabel (ap (connect-tree-inc-left S₂ T)) ∪t
+                         FVLabel (ap (connect-tree-inc-right S₂ T)))))
+    ≡⟨ cong (VSHere ∘ VSExt tFull ∘ strip) (connect-tree-incs-full S₂ T) ⟩
+  tFull ∎
   -- VSJoin true tEmp tEmp ∪t
   --     FVLabel′ (λ x → VSJoin false (fromPath x) tEmp)
   --     ∪t
@@ -577,7 +577,7 @@ connect-tree-incs-full (Join S₁ S₂) T = {!!} -- begin
   --    ∪t FVLabel′ (λ x → fromPath (connect-tree-inc-right′ S₂ T x)))
   --   ≡⟨ cong₂ (VSJoin true) lem1 lem2 ⟩
   -- tFull ∎
-  where
+  -- where
     -- lem1 : tEmp ∪t FVLabel (id-label S₁) ∪t tEmp ∪t tEmp ≡ tFull
     -- lem1 = begin
     --   tEmp ∪t FVLabel (id-label S₁) ∪t tEmp ∪t tEmp

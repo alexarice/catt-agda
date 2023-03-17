@@ -1,4 +1,3 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
@@ -6,6 +5,7 @@ module Catt.Typing.Properties.Lifting {index : Set}
                                       (rule : index → Rule)
                                       (lift-rule : ∀ i → P.LiftRule rule (rule i)) where
 
+open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality

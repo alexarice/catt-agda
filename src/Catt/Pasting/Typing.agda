@@ -1,21 +1,21 @@
-open import Catt.Prelude
 open import Catt.Typing.Base
 import Catt.Typing.Properties.Base as P
 
-module Catt.Pasting.Typing (index : ℕ)
-                           (rule : Fin index → Rule)
-                           (lift-rule : ∀ i a → P.LiftRule index rule {i} a) where
+module Catt.Pasting.Typing {index : Set}
+                           (rule : index → Rule)
+                           (lift-rule : ∀ i → P.LiftRule rule (rule i)) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing index rule
-open import Catt.Typing.Properties.Lifting index rule lift-rule
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Lifting rule lift-rule
 open import Catt.Syntax
 open import Catt.Pasting
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Catt.Globular.Typing index rule lift-rule
-open P index rule
+open import Catt.Globular.Typing rule lift-rule
+open P rule
 
 
 pdb-to-Ty : Γ ⊢pdb → Typing-Ctx Γ
@@ -28,22 +28,19 @@ pdb-to-Ty (Extend pdb p q) with ≃ty-to-≡ p | ≃ty-to-≡ q
                                  (pdb-focus-ty-Ty pdb))
                           (TyArr (lift-tm-typing (pdb-focus-tm-Ty pdb))
                                  (lift-ty-typing (pdb-focus-ty-Ty pdb))
-                                 (TyVarZ (pdb-focus-ty-Ty pdb) refl≈ty))
+                                 (TyVar zero))
 pdb-to-Ty (Restr pdb) = pdb-to-Ty pdb
 
 pdb-focus-ty-Ty Base = TyStar
 pdb-focus-ty-Ty (Extend pdb p q) with ≃ty-to-≡ p | ≃ty-to-≡ q
 ... | refl | refl = lift-ty-typing (TyArr (lift-tm-typing (pdb-focus-tm-Ty pdb))
                                           (lift-ty-typing (pdb-focus-ty-Ty pdb))
-                                          (TyVarZ (pdb-focus-ty-Ty pdb) refl≈ty))
+                                          (TyVar zero))
 pdb-focus-ty-Ty (Restr pdb) = ty-base-Ty (pdb-focus-ty-Ty pdb)
 
-pdb-focus-tm-Ty Base = TyVarZ TyStar refl≈ty
+pdb-focus-tm-Ty Base = TyVar zero
 pdb-focus-tm-Ty (Extend pdb p q) with ≃ty-to-≡ p | ≃ty-to-≡ q
-... | refl | refl = TyVarZ (TyArr (lift-tm-typing (pdb-focus-tm-Ty pdb))
-                                  (lift-ty-typing (pdb-focus-ty-Ty pdb))
-                                  (TyVarZ (pdb-focus-ty-Ty pdb) refl≈ty))
-                           refl≈ty
+... | refl | refl = TyVar zero
 pdb-focus-tm-Ty (Restr pdb) = ty-tgt-Ty (pdb-focus-ty-Ty pdb)
 
 pd-to-Ty : Γ ⊢pd → Typing-Ctx Γ

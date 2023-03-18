@@ -1,5 +1,3 @@
-{-# OPTIONS --without-K --safe --exact-split #-}
-
 module Catt.Everything where
 
 import Catt.Prelude

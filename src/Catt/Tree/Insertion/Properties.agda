@@ -1,5 +1,3 @@
--- To find 50 52 53 54 55 56 57 58
-
 module Catt.Tree.Insertion.Properties where
 
 open import Catt.Prelude

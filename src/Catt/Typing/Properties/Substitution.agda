@@ -36,7 +36,7 @@ apply-sub-ty-typing (TyArr sty Aty tty) σty = TyArr (apply-sub-tm-typing sty σ
 apply-sub-tm-typing (TyConv tty p) σty = TyConv (apply-sub-tm-typing tty σty) (apply-sub-ty-eq σty p)
 apply-sub-tm-typing (TyVar zero) (TyExt {σ = σ} {A = A} σty x) = TyConv x (reflexive≈ty (sym≃ty (lift-sub-comp-lem-ty σ A)))
 apply-sub-tm-typing {Γ = Γ , _} (TyVar (suc i)) (TyExt {σ = σ} σty x) = TyConv (apply-sub-tm-typing (TyVar i) σty) (reflexive≈ty (sym≃ty (lift-sub-comp-lem-ty σ (Γ ‼ i))))
-apply-sub-tm-typing (TyCoh {A = A} Aty τty b sc) σty = TyConv (TyCoh Aty (apply-sub-sub-typing τty σty) b sc) (reflexive≈ty (assoc-ty _ _ A))
+apply-sub-tm-typing (TyCoh {A = A} Aty τty) σty = TyConv (TyCoh Aty (apply-sub-sub-typing τty σty)) (reflexive≈ty (assoc-ty _ _ A))
 
 apply-sub-sub-typing (TyNull x) σty = TyNull (apply-sub-ty-typing x σty)
 apply-sub-sub-typing (TyExt {A = A} τty tty) σty = TyExt (apply-sub-sub-typing τty σty) (TyConv (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ A))))

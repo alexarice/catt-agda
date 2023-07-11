@@ -36,10 +36,8 @@ term-conversion′ {A = C} (Coh≈ {A = A} {Δ = Δ} {B = B} {σ = σ} {Γ = Γ}
   where
     f : ∀ C → Typing-Tm Γ (Coh Δ A σ) C → Typing-Tm Γ (Coh Δ B τ) C
     f C (TyConv tty p) = TyConv (f _ tty) p
-    f C (TyCoh Aty σty b sc) = TyConv (TyCoh (E.f (type-conversion′ p) Aty)
-                                   (E.f (sub-conversion′ q) σty)
-                                   b
-                                   (supp-condition-preserved b p Aty (E.f (type-conversion′ p) Aty) sc))
+    f C (TyCoh Aty σty) = TyConv (TyCoh (E.f (type-conversion′ p) Aty)
+                                   (E.f (sub-conversion′ q) σty))
                                    lem
       where
         open Reasoning (ty-setoid-≈ Γ)
@@ -53,10 +51,8 @@ term-conversion′ {A = C} (Coh≈ {A = A} {Δ = Δ} {B = B} {σ = σ} {Γ = Γ}
 
     g : ∀ C → Typing-Tm Γ (Coh Δ B τ) C → Typing-Tm Γ (Coh Δ A σ) C
     g C (TyConv tty p) = TyConv (g _ tty) p
-    g C (TyCoh Bty τty b sc) = TyConv (TyCoh (E.g (type-conversion′ p) Bty)
-                                     (E.g (sub-conversion′ q) τty)
-                                     b
-                                     (supp-condition-preserved b (sym≈ty p) Bty (E.g (type-conversion′ p) Bty) sc))
+    g C (TyCoh Bty τty) = TyConv (TyCoh (E.g (type-conversion′ p) Bty)
+                                     (E.g (sub-conversion′ q) τty))
                                      lem
       where
         open Reasoning (ty-setoid-≈ Γ)

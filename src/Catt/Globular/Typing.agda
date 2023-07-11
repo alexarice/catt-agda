@@ -20,12 +20,12 @@ open import Catt.Support.Properties
 tm-to-ty-prop : Typing-Tm Γ t A → tm-to-ty Γ t ≈[ Γ ]ty A
 tm-to-ty-prop (TyConv tty p) = trans≈ty (tm-to-ty-prop tty) p
 tm-to-ty-prop (TyVar i) = refl≈ty
-tm-to-ty-prop (TyCoh v w x y) = refl≈ty
+tm-to-ty-prop (TyCoh v w) = refl≈ty
 
 tm-to-ty-Ty : Typing-Tm Γ t A → Typing-Tm Γ t (tm-to-ty Γ t)
 tm-to-ty-Ty (TyConv tty p) = tm-to-ty-Ty tty
 tm-to-ty-Ty (TyVar i) = TyVar i
-tm-to-ty-Ty (TyCoh v w x y) = TyCoh v w x y
+tm-to-ty-Ty (TyCoh v w) = TyCoh v w
 
 Ty-unique : Typing-Tm Γ t A → Typing-Tm Γ t B → A ≈[ Γ ]ty B
 Ty-unique tty1 tty2 = trans≈ty (sym≈ty (tm-to-ty-prop tty1)) (tm-to-ty-prop tty2)

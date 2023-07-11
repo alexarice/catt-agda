@@ -133,11 +133,11 @@ transport-typing-sub σty p q r with ≃c-preserve-length p | ≃c-preserve-leng
 
 coh-sub-ty : Typing-Tm Γ (Coh Δ A τ) B → Typing-Sub Δ Γ τ
 coh-sub-ty (TyConv tty p) = coh-sub-ty tty
-coh-sub-ty (TyCoh x τty b x₂) = τty
+coh-sub-ty (TyCoh x τty) = τty
 
 coh-ty-ty : Typing-Tm Γ (Coh Δ A τ) B → Typing-Ty Δ A
 coh-ty-ty (TyConv tty p) = coh-ty-ty tty
-coh-ty-ty (TyCoh Aty τty b a) = Aty
+coh-ty-ty (TyCoh Aty τty) = Aty
 
 isVar-Ty : (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
 isVar-Ty (Var i) = TyVar i

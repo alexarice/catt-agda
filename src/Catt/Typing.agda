@@ -6,7 +6,6 @@ open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Relation.Binary.PropositionalEquality
-open import Catt.Support
 open import Catt.Pasting
 
 open Rule
@@ -44,7 +43,7 @@ data Typing-Ctx where
 data Typing-Tm where
   TyConv : Typing-Tm Γ s A → A ≈[ Γ ]ty B → Typing-Tm Γ s B
   TyVar : (i : Fin (ctxLength Γ)) → Typing-Tm Γ (Var i) (Γ ‼ i)
-  TyCoh : .⦃ pd : Δ ⊢pd ⦄ → Typing-Ty Δ A → Typing-Sub Δ Γ σ → (b : Bool) → supp-condition b A Δ → Typing-Tm Γ (Coh Δ A σ) (A [ σ ]ty)
+  TyCoh : .⦃ pd : Δ ⊢pd ⦄ → Typing-Ty Δ A → Typing-Sub Δ Γ σ → Typing-Tm Γ (Coh Δ A σ) (A [ σ ]ty)
 
 data Typing-Ty where
   TyStar : Typing-Ty Γ ⋆

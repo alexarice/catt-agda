@@ -115,7 +115,7 @@ SuppTmChar (TyVar {Γ = Γ , A} (suc i)) = begin
     ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewf (FVTm (Var i))) (supp-lift-ty (Γ ‼ i)) ⟩
   SuppTy (Γ , A) (lift-ty (Γ ‼ i)) ∪ ewf (FVTm (Var i)) ∎
 
-SuppTmChar {Γ = Γ} (TyCoh {Δ = Δ} {A = A} {σ = σ} Aty σty b s) = begin
+SuppTmChar {Γ = Γ} (TyCoh {Δ = Δ} {A = A} {σ = σ} Aty σty) = begin
   SuppSub Γ σ
     ≡⟨ cong (DC Γ) (trans (FVTy-comp-⊆ A σ) (∪-comm (FVSub σ) (FVTy (A [ σ ]ty)))) ⟩
   DC Γ (FVTy (A [ σ ]ty) ∪ FVSub σ)

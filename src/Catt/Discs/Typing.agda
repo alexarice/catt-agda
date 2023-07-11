@@ -83,8 +83,6 @@ identity-Ty : (n : ℕ) → ∀ {σ} → Typing-Sub (Disc n) Γ σ → Typing-Tm
 identity-Ty n σty = TyCoh ⦃ disc-pd n ⦄
                           (TyArr (TyVar zero) (lift-ty-typing (sphere-type-Ty n)) (TyVar zero))
                           σty
-                          false
-                          lem2
   where
     open ≡-Reasoning
 
@@ -133,8 +131,8 @@ sub-from-sphere-to-ty-Ty {A = s ─⟨ A ⟩⟶ t} (suc d) p (TyExt (TyExt σty 
 
 identity-to-term-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Tm Γ t A
 identity-to-term-Ty (TyConv tty p) = identity-to-term-Ty tty
-identity-to-term-Ty (TyCoh Aty σty _ _) = sub-from-disc-to-term-Ty (ty-dim _) refl σty
+identity-to-term-Ty (TyCoh Aty σty) = sub-from-disc-to-term-Ty (ty-dim _) refl σty
 
 identity-to-type-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Ty Γ A
 identity-to-type-Ty (TyConv tty p) = identity-to-type-Ty tty
-identity-to-type-Ty (TyCoh Aty (TyExt σty _) _ _) = sub-from-sphere-to-ty-Ty (ty-dim _) refl σty
+identity-to-type-Ty (TyCoh Aty (TyExt σty _)) = sub-from-sphere-to-ty-Ty (ty-dim _) refl σty

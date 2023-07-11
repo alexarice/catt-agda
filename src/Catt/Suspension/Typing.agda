@@ -42,7 +42,7 @@ susp-tyTy (TyArr p q r) = TyArr (susp-tmTy p) (susp-tyTy q) (susp-tmTy r)
 
 susp-tmTy (TyConv tty p) = TyConv (susp-tmTy tty) (susp-tyEq p)
 susp-tmTy {Γ = Γ} (TyVar i) = TyConv (TyVar (inject₁ (inject₁ i))) (reflexive≈ty (susp-‼ Γ i))
-susp-tmTy (TyCoh Aty σty b sc) = TyConv (TyCoh ⦃ susp-pd it ⦄ (susp-tyTy Aty) (susp-subTy σty) b (suspSuppCondition sc)) (reflexive≈ty (sym≃ty (susp-functorial-ty _ _)))
+susp-tmTy (TyCoh Aty σty) = TyConv (TyCoh ⦃ susp-pd it ⦄ (susp-tyTy Aty) (susp-subTy σty)) (reflexive≈ty (sym≃ty (susp-functorial-ty _ _)))
 
 susp-subTy (TyNull x) = TyExt (TyExt (TyNull TyStar) get-fstTy) get-sndTy
 susp-subTy (TyExt p r) = TyExt (susp-subTy p) (TyConv (susp-tmTy r) (reflexive≈ty (susp-functorial-ty _ _)))

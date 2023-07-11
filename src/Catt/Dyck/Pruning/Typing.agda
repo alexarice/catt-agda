@@ -1,10 +1,9 @@
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 
 module Catt.Dyck.Pruning.Typing {index : Set}
                                 (rule : index → Rule)
-                                (lift-rule : ∀ i → P.LiftRule rule (rule i))
-                                (sub-rule : ∀ i → P.SubRule rule (rule i)) where
+                                (lift-rule : ∀ i → LiftRule rule (rule i))
+                                (sub-rule : ∀ i → SubRule rule (rule i)) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -22,7 +21,7 @@ open import Catt.Discs
 open import Catt.Discs.Properties
 open import Catt.Discs.Typing rule lift-rule
 open import Catt.Syntax.Bundles
-open P rule
+open import Catt.Typing.Properties.Base rule
 
 prune-project-Ty : (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) (dyck-to-ctx (prune-peak p)) (prune-project p)
 prune-project-Ty (⇕pk dy)

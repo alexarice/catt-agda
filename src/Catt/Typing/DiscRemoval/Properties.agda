@@ -1,12 +1,11 @@
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 import Catt.Typing.DiscRemoval as DR
 
 module Catt.Typing.DiscRemoval.Properties {index : Set}
                                           (rule : index → Rule)
-                                          (lift-rule : ∀ i → P.LiftRule rule (rule i))
-                                          (susp-rule : ∀ i → P.SuspRule rule (rule i))
-                                          (sub-rule : ∀ i → P.SubRule rule (rule i))
+                                          (lift-rule : ∀ i → LiftRule rule (rule i))
+                                          (susp-rule : ∀ i → SuspRule rule (rule i))
+                                          (sub-rule : ∀ i → SubRule rule (rule i))
                                           (disc-rem : DR.HasDiscRemoval rule) where
 
 open import Catt.Prelude

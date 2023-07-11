@@ -1,9 +1,8 @@
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 
 module Catt.Typing.Properties.Support {index : Set}
                                       (rule : index → Rule)
-                                      (supp-rule : ∀ i → P.SupportRule rule (rule i)) where
+                                      (supp-rule : ∀ i → SupportRule rule (rule i)) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -164,8 +163,8 @@ supp-condition-preserved {A = A} {Γ = Γ} {B = B} false p Aty Bty sc = begin
   SuppTy Γ A
     ≡⟨ sc ⟩
   full ∎
-supp-condition-preserved {Γ = Γ} true (Arr≈ p q r) (TyArr {s = s} {A} {t} sty Aty tty) (TyArr {s = s′} {B} {t′} sty′ Bty tty′) (nz ,, sc1 ,, sc2)
-  = nz ,, l1 ,, l2
+supp-condition-preserved {Γ = Γ} true (Arr≈ p q r) (TyArr {s = s} {A} {t} sty Aty tty) (TyArr {s = s′} {B} {t′} sty′ Bty tty′) (pd ,, nz ,, sc1 ,, sc2)
+  = pd ,, nz ,, l1 ,, l2
   where
     l1 : SuppTm Γ s′ ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false
     l1 = begin

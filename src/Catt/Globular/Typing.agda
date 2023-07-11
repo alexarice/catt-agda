@@ -1,21 +1,18 @@
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 
 module Catt.Globular.Typing {index : Set}
                             (rule : index → Rule)
-                            (lift-rule : ∀ i → P.LiftRule rule (rule i)) where
+                            (lift-rule : ∀ i → LiftRule rule (rule i)) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
+open import Catt.Syntax
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Lifting rule lift-rule
-open P rule
-open import Catt.Syntax
+open import Catt.Typing.Properties.Base rule
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Catt.Syntax.SyntacticEquality
-open import Catt.Support
-open import Catt.Support.Properties
 
 tm-to-ty-prop : Typing-Tm Γ t A → tm-to-ty Γ t ≈[ Γ ]ty A
 tm-to-ty-prop (TyConv tty p) = trans≈ty (tm-to-ty-prop tty) p

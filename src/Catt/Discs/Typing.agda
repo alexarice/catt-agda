@@ -1,9 +1,8 @@
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 
 module Catt.Discs.Typing {index : Set}
                          (rule : index → Rule)
-                         (lift-rule : ∀ i → P.LiftRule rule (rule i)) where
+                         (lift-rule : ∀ i → LiftRule rule (rule i)) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -13,7 +12,7 @@ open import Catt.Discs
 open import Catt.Globular
 open import Catt.Globular.Typing rule lift-rule
 open import Catt.Typing.Properties.Lifting rule lift-rule
-open P rule
+open import Catt.Typing.Properties.Base rule
 open import Catt.Discs.Properties
 open import Catt.Discs.Pasting
 open import Catt.Discs.Support

@@ -1,27 +1,21 @@
-open import Catt.Prelude
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 
 module Catt.Suspension.Typing {index : Set}
                               (rule : index → Rule)
-                              (lift-rule : ∀ i → P.LiftRule rule (rule i))
-                              (susp-rule : ∀ i → P.SuspRule rule (rule i)) where
+                              (lift-rule : ∀ i → LiftRule rule (rule i))
+                              (susp-rule : ∀ i → SuspRule rule (rule i)) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing rule
 open import Catt.Syntax
-open import Catt.Support
-open import Catt.Support.Properties
-open import Catt.Tree
-open import Catt.Tree.Properties
+open import Catt.Syntax.SyntacticEquality
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Base rule
+open import Catt.Typing.Properties.Lifting rule lift-rule
 open import Catt.Suspension
 open import Catt.Suspension.Properties
-open import Catt.Suspension.Support
-open import Catt.Syntax.SyntacticEquality
-open P rule
-open import Catt.Typing.Properties.Lifting rule lift-rule
-open import Catt.Pasting
 open import Catt.Suspension.Pasting
+
 
 susp-ctxTy : Typing-Ctx Γ → Typing-Ctx (susp-ctx Γ)
 susp-tyTy : Typing-Ty Γ A → Typing-Ty (susp-ctx Γ) (susp-ty A)

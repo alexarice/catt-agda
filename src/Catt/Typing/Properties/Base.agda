@@ -9,8 +9,6 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing rule
 open import Catt.Suspension
-open import Catt.Tree
-open import Catt.Tree.Label
 open import Catt.Globular
 open import Catt.Support
 open import Catt.Variables
@@ -156,35 +154,10 @@ unrestrictEq : σ ≈[ Δ ]s τ → unrestrict σ ≈[ Δ ]s unrestrict τ
 unrestrictEq (Null≈ (Arr≈ p q r)) = Ext≈ (Ext≈ (Null≈ q) p) r
 unrestrictEq (Ext≈ eq x) = Ext≈ (unrestrictEq eq) x
 
-module _ (r : Rule) where
-  open Rule r
+truncate′-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate′ d A ≈[ Γ ]ty truncate′ d′ A′
+truncate′-≈ {d = zero} refl p = p
+truncate′-≈ {d = suc d} refl Star≈ = refl≈ty
+truncate′-≈ {d = suc d} refl (Arr≈ x p x₁) = truncate′-≈ {d = d} refl p
 
-  LiftRule : Set
-  LiftRule = {A : Ty len}
-           → {C : Ty len}
-           → Typing-Tm (tgtCtx , A) (lift-tm lhs) (lift-ty C)
-           → (lift-tm lhs) ≈[ tgtCtx , A ]tm (lift-tm rhs)
-
-  SuspRule : Set
-  SuspRule = {C : Ty len}
-           → Typing-Tm (susp-ctx tgtCtx) (susp-tm lhs) (susp-ty C)
-           → susp-tm lhs ≈[ susp-ctx tgtCtx ]tm susp-tm rhs
-
-  SubRule : Set
-  SubRule = ∀ {n}
-          → {σ : Sub len n ⋆}
-          → {Δ : Ctx n}
-          → {C : Ty len}
-          → Typing-Sub tgtCtx Δ σ
-          → Typing-Tm Δ (lhs [ σ ]tm) (C [ σ ]ty)
-          → lhs [ σ ]tm ≈[ Δ ]tm rhs [ σ ]tm
-
-  SupportRule : Set
-  SupportRule = {A : Ty len}
-              → (tty : Typing-Tm tgtCtx lhs A)
-              → SuppTm tgtCtx lhs ≡ SuppTm tgtCtx rhs
-
-  ConvRule : Set
-  ConvRule = {A : Ty len}
-           → Typing-Tm tgtCtx lhs A
-           → Typing-Tm tgtCtx rhs A
+truncate-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate d A ≈[ Γ ]ty truncate d′ A′
+truncate-≈ {d} {d′} {A = A} {A′ = A′} refl p = truncate′-≈ {d = ty-dim A ∸ d} {d′ = ty-dim A′ ∸ d} (cong (_∸ d) (≈ty-preserve-height p)) p

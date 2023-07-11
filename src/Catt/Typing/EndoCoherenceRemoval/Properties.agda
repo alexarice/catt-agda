@@ -1,12 +1,11 @@
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 import Catt.Typing.EndoCoherenceRemoval as ECR
 
 module Catt.Typing.EndoCoherenceRemoval.Properties {index : Set}
                                                    (rule : index → Rule)
-                                                   (lift-rule : ∀ i → P.LiftRule rule (rule i))
-                                                   (susp-rule : ∀ i → P.SuspRule rule (rule i))
-                                                   (sub-rule : ∀ i → P.SubRule rule (rule i))
+                                                   (lift-rule : ∀ i → LiftRule rule (rule i))
+                                                   (susp-rule : ∀ i → SuspRule rule (rule i))
+                                                   (sub-rule : ∀ i → SubRule rule (rule i))
                                                    (ecr : ECR.HasEndoCoherenceRemoval rule) where
 
 open import Catt.Prelude

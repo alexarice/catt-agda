@@ -1,11 +1,10 @@
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 
 module Catt.Typing.Properties {index : Set}
                               (rule : index → Rule)
-                              (lift-rule : ∀ i → P.LiftRule rule (rule i))
-                              (susp-rule : ∀ i → P.SuspRule rule (rule i))
-                              (sub-rule : ∀ i → P.SubRule rule (rule i)) where
+                              (lift-rule : ∀ i → LiftRule rule (rule i))
+                              (susp-rule : ∀ i → SuspRule rule (rule i))
+                              (sub-rule : ∀ i → SubRule rule (rule i)) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -32,14 +31,15 @@ restrictTy : {σ : Sub (2 + n) m A}
            → t ≈[ Δ ]tm get-snd [ σ ]tm
            → Typing-Sub Γ Δ (restrict σ s t)
 restrictTy {Γ = ∅} (TyExt (TyExt (TyNull z) y) x) Γty sty tty p q = TyNull (TyArr sty z tty)
-restrictTy {Γ = ∅ , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd TyEmp Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty z) y) TyEmp sty tty p q) (TyConv x (trans≈ty (sym≈ty (apply-sub-eq-ty (susp-ty A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q))) (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _)))))
-restrictTy {Γ = ∅ , B , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd Γty Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty z) y) Γty sty tty p q) (TyConv x (trans≈ty (sym≈ty (apply-sub-eq-ty (susp-ty A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q))) (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _)))))
-restrictTy {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd Γty Aty) sty tty p q = TyExt (restrictTy (TyExt (TyExt σty z) y) Γty sty tty p q) (TyConv x (trans≈ty (sym≈ty (apply-sub-eq-ty (susp-ty A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q))) (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _)))))
-
-truncate′-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate′ d A ≈[ Γ ]ty truncate′ d′ A′
-truncate′-≈ {d = zero} refl p = p
-truncate′-≈ {d = suc d} refl Star≈ = refl≈ty
-truncate′-≈ {d = suc d} refl (Arr≈ x p x₁) = truncate′-≈ {d = d} refl p
-
-truncate-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate d A ≈[ Γ ]ty truncate d′ A′
-truncate-≈ {d} {d′} {A = A} {A′ = A′} refl p = truncate′-≈ {d = ty-dim A ∸ d} {d′ = ty-dim A′ ∸ d} (cong (_∸ d) (≈ty-preserve-height p)) p
+restrictTy {Γ = ∅ , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd TyEmp Aty) sty tty p q
+  = TyExt (restrictTy (TyExt (TyExt σty z) y) TyEmp sty tty p q)
+          (TyConv x (trans≈ty (sym≈ty (apply-sub-eq-ty (susp-ty A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))
+                              (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _)))))
+restrictTy {Γ = ∅ , B , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd Γty Aty) sty tty p q
+  = TyExt (restrictTy (TyExt (TyExt σty z) y) Γty sty tty p q)
+          (TyConv x (trans≈ty (sym≈ty (apply-sub-eq-ty (susp-ty A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))
+                              (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _)))))
+restrictTy {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd Γty Aty) sty tty p q
+  = TyExt (restrictTy (TyExt (TyExt σty z) y) Γty sty tty p q)
+          (TyConv x (trans≈ty (sym≈ty (apply-sub-eq-ty (susp-ty A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))
+                              (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _)))))

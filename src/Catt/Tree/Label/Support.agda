@@ -389,7 +389,7 @@ FVLabel-to-sub′ {S = Join S T} {ΓS = ΓS} L f g = begin
         module PR = PReasoning (⊆-poset _)
         open PR
 
-supp-condition-compat : (b : Bool) → (S : Tree n) → (As : STy (someTree S)) → supp-condition-s b S As → supp-condition b (sty-to-type As) (tree-to-ctx S) ⦃ tree-to-pd S ⦄
+supp-condition-compat : (b : Bool) → (S : Tree n) → (As : STy (someTree S)) → supp-condition-s b S As → supp-condition b (sty-to-type As) (tree-to-ctx S)
 supp-condition-compat false S As sc = begin
   SuppTy (tree-to-ctx S) (sty-to-type As)
     ≡˘⟨ FVSTy-to-type As ⟩
@@ -400,7 +400,7 @@ supp-condition-compat false S As sc = begin
   toVarSet (tFull {S = S})
     ≡⟨ toVarSet-full S ⟩
   full ∎
-supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = NonZero-subst lem nz ,, lem1 ,, lem2
+supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = tree-to-pd S ,, NonZero-subst lem nz ,, lem1 ,, lem2
   where
     lem : tree-dim S ≡ ctx-dim (tree-to-ctx S)
     lem = sym (tree-dim-ctx-dim S)

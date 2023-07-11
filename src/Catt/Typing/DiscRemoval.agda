@@ -12,7 +12,6 @@ open import Catt.Tree
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
 open import Catt.Tree.Label.Typing rule
-open import Catt.Tree.Label.Support
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Path

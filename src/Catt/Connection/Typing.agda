@@ -1,24 +1,24 @@
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 
 module Catt.Connection.Typing {index : Set}
                               (rule : index → Rule)
-                              (lift-rule : ∀ i → P.LiftRule rule (rule i))
-                              (susp-rule : ∀ i → P.SuspRule rule (rule i))
-                              (sub-rule : ∀ i → P.SubRule rule (rule i)) where
+                              (lift-rule : ∀ i → LiftRule rule (rule i))
+                              (susp-rule : ∀ i → SuspRule rule (rule i))
+                              (sub-rule : ∀ i → SubRule rule (rule i)) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing rule
-open import Catt.Suspension
-open import Catt.Suspension.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Connection
-open import Catt.Connection.Properties
+open import Catt.Typing rule
 open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Suspension.Typing rule lift-rule susp-rule
+open import Catt.Suspension
+open import Catt.Suspension.Properties
+open import Catt.Connection
+open import Catt.Connection.Properties
+
 
 connect-Ty : {Γ : Ctx (suc n)} → Typing-Ctx Γ → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → {Δ : Ctx (suc m)} → Typing-Ctx Δ → Typing-Ctx (connect Γ t Δ)
 connect-inc-right-Ty : {Γ : Ctx (suc n)} → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → Typing-Sub Δ (connect Γ t Δ) (connect-inc-right t m)
@@ -28,7 +28,7 @@ connect-Ty Γty tty (TyAdd (TyAdd Δty y) x) = TyAdd (connect-Ty Γty tty (TyAdd
 
 connect-inc-right-Ty {Δ = ∅ , ⋆} tty = TyExt (TyNull TyStar) tty
 connect-inc-right-Ty {Δ = ∅ , s ─⟨ _ ⟩⟶ _} tty = ⊥-elim (no-term-in-empty-context s)
-connect-inc-right-Ty {Δ = Δ , B , A} tty = TyExt (lift-sub-typing (connect-inc-right-Ty tty)) (TyConv (TyVar zero) (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ A (connect-inc-right _ _))))) -- TyExt (lift-sub-typing (connect-inc-right-Ty tty (TyAdd Δty y))) x (TyVarZ (apply-sub-ty-typing x (connect-inc-right-Ty tty (TyAdd Δty y))) (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ _ (connect-inc-right _ _)))))
+connect-inc-right-Ty {Δ = Δ , B , A} tty = TyExt (lift-sub-typing (connect-inc-right-Ty tty)) (TyConv (TyVar zero) (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ A (connect-inc-right _ _)))))
 
 connect-inc-left-Ty : {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → (Δ : Ctx (suc m)) → Typing-Sub Γ (connect Γ t Δ) (connect-inc-left t m)
 connect-inc-left-Ty tty (∅ , A) = id-Ty

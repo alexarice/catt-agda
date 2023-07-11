@@ -1,27 +1,21 @@
-open import Catt.Prelude
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 
 module Catt.Tree.Label.Typing {index : Set}
                               (rule : index → Rule) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing rule
 open import Catt.Syntax
+open import Catt.Syntax.Bundles
+open import Catt.Syntax.SyntacticEquality
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Base rule
 open import Catt.Tree
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
-open import Catt.Tree.Label.Support
-open import Catt.Tree.Pasting
 open import Catt.Tree.Path
-open import Catt.Tree.Path.Properties
 open import Catt.Tree.Properties
-open import Catt.Suspension
-open import Catt.Connection
-open import Catt.Connection.Properties
-open import Catt.Syntax.Bundles
-open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing.Properties.Base rule
+
 
 stm-eq : {X : MaybeTree n} → (Γ : Ctx n) → STm X → STm X → Set
 stm-eq Γ = Wrap (λ a b → stm-to-term a ≈[ Γ ]tm stm-to-term b)

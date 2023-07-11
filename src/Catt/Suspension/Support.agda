@@ -243,7 +243,7 @@ SuspSuppTmProp {Γ = Γ} s t p = begin
   where
     open ≡-Reasoning
 
-suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {Γ : Ctx (suc n)} → .⦃ pd : Γ ⊢pd ⦄ → supp-condition b A Γ → supp-condition b (susp-ty A) (susp-ctx Γ) ⦃ susp-pd it ⦄
+suspSuppCondition : {b : Bool} → {A : Ty (suc n)} → {Γ : Ctx (suc n)} → supp-condition b A Γ → supp-condition b (susp-ty A) (susp-ctx Γ)
 suspSuppCondition {b = false} {A} {Γ} sc = begin
   SuppTy (susp-ctx Γ) (susp-ty A)
     ≡⟨ suspSuppTy′ Γ A ⟩
@@ -254,10 +254,11 @@ suspSuppCondition {b = false} {A} {Γ} sc = begin
   full ∎
   where
     open ≡-Reasoning
-suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {Γ} ⦃ pd ⦄ (nz ,, sc1 ,, sc2) = NonZero-subst (sym (susp-ctx-dim Γ)) it ,, l1 ,, l2
+suspSuppCondition {b = true} {s ─⟨ A ⟩⟶ t} {Γ} (pd ,, nz ,, sc1 ,, sc2) = it ,, NonZero-subst (sym (susp-ctx-dim Γ)) it ,, l1 ,, l2
   where
     instance _ = nz
-    instance _ = susp-pd {Γ = Γ} (recompute (pd-dec Γ) it)
+    instance _ = pd
+    instance _ = susp-pd {Γ = Γ} pd
     open ≡-Reasoning
 
     l3 : suc (pred (ctx-dim Γ)) ≡ pred (ctx-dim (susp-ctx Γ))

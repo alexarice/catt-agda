@@ -74,12 +74,6 @@ TransportVarSet xs ⟨⟩ = empty
 TransportVarSet (ewf xs) ⟨ σ , t ⟩ = TransportVarSet xs σ
 TransportVarSet (ewt xs) ⟨ σ , t ⟩ = TransportVarSet xs σ ∪ FVTm t
 
--- susp-supp-tree-bd : (d : ℕ) → (T : Tree n) → (b : Bool) → suspSupp (supp-tree-bd d T b) ≡ supp-tree-bd (suc d) (suspTree T) b
--- susp-supp-tree-bd zero T false = refl
--- susp-supp-tree-bd zero T true = refl
--- susp-supp-tree-bd (suc d) Sing b = refl
--- susp-supp-tree-bd (suc d) (Join S T) b = refl
-
 lookup-isVar : (xs : VarSet n) → (t : Tm n) → .⦃ isVar t ⦄ → Bool
 lookup-isVar (x ∷ xs) (Var zero) = x
 lookup-isVar (x ∷ xs) (Var (suc i)) = lookup-isVar xs (Var i)
@@ -113,12 +107,25 @@ SuppTy Γ A = DC Γ (FVTy A)
 SuppSub : (Γ : Ctx n) → (σ : Sub m n A) → VarSet n
 SuppSub Γ σ = DC Γ (FVSub σ)
 
-supp-condition : (b : Bool) → (A : Ty (suc n)) → (Γ : Ctx (suc n)) → .⦃ pd : Γ ⊢pd ⦄ → Set
+supp-condition : (b : Bool) → (A : Ty (suc n)) → (Γ : Ctx (suc n)) → Set
 supp-condition false A Γ = SuppTy Γ A ≡ full
 supp-condition true ⋆ Γ = ⊥
-supp-condition true (s ─⟨ A ⟩⟶ t) Γ = NonZero (ctx-dim Γ) × SuppTm Γ s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false × SuppTm Γ t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true
+supp-condition true (s ─⟨ A ⟩⟶ t) Γ = Σ[ pd ∈ Γ ⊢pd ] NonZero (ctx-dim Γ) × SuppTm Γ s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ ⦃ pd ⦄ false × SuppTm Γ t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ ⦃ pd ⦄ true
 
 varset-non-empty : VarSet n → Bool
 varset-non-empty emp = false
 varset-non-empty (ewf xs) = varset-non-empty xs
 varset-non-empty (ewt xs) = true
+
+SupportedTm : Tm n → Set
+SupportedTy : Ty n → Set
+SupportedSub : Sub n m A → Set
+
+SupportedTm (Var i) = ⊤
+SupportedTm (Coh Δ A σ) = SupportedTy A × SupportedSub σ × Σ[ b ∈ Bool ] supp-condition b A Δ
+
+SupportedTy ⋆ = ⊤
+SupportedTy (s ─⟨ A ⟩⟶ t) = SupportedTm s × SupportedTy A × SupportedTm t
+
+SupportedSub ⟨⟩ = ⊤
+SupportedSub ⟨ σ , t ⟩ = SupportedSub σ × SupportedTm t

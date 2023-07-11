@@ -1,17 +1,16 @@
-open import Catt.Prelude
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 
 module Catt.Typing.Properties.Substitution {index : Set}
                               (rule : index → Rule)
-                              (lift-rule : ∀ i → P.LiftRule rule (rule i))
-                              (sub-rule : ∀ i → P.SubRule rule (rule i)) where
+                              (lift-rule : ∀ i → LiftRule rule (rule i))
+                              (sub-rule : ∀ i → SubRule rule (rule i)) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing rule
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
-open P rule
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Base rule
 open import Catt.Typing.Properties.Lifting rule lift-rule
 open import Catt.Suspension
 

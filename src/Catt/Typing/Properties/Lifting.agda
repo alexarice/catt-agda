@@ -1,17 +1,16 @@
-open import Catt.Typing.Base
-import Catt.Typing.Properties.Base as P
+open import Catt.Typing.Rule
 
 module Catt.Typing.Properties.Lifting {index : Set}
                                       (rule : index → Rule)
-                                      (lift-rule : ∀ i → P.LiftRule rule (rule i)) where
+                                      (lift-rule : ∀ i → LiftRule rule (rule i)) where
 
 open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Typing rule
-open P rule
-open import Catt.Prelude.Properties
+open import Catt.Typing.Properties.Base rule
 
 lift-ty-typing : Typing-Ty Γ A → Typing-Ty (Γ , B) (lift-ty A)
 lift-tm-typing : Typing-Tm Γ t A → Typing-Tm (Γ , B) (lift-tm t) (lift-ty A)

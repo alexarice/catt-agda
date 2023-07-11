@@ -14,7 +14,6 @@ open import Catt.Syntax
 open import Catt.Tree
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
-open import Catt.Tree.Label.Support
 open import Catt.Tree.Pasting
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
@@ -85,10 +84,8 @@ TySCoh : (S : Tree n) → {As : STy (someTree S)} → {L : Label-WT X S}
          → Typing-STy (tree-to-ctx S) As
          → Typing-Label Γ L
          → Typing-STy Γ (lty L)
-         → (b : Bool)
-         → supp-condition-s b S As
          → Typing-STm Γ (SCoh S As L) (label-on-sty As L)
-TySCoh S {As} {L} [ Aty ] Lty Ltyty b sc .get = TyConv (apply-sub-tm-typing (TyCoh ⦃ tree-to-pd S ⦄ Aty id-Ty) (label-to-sub-Ty Lty Ltyty)) (reflexive≈ty (begin
+TySCoh S {As} {L} [ Aty ] Lty Ltyty .get = TyConv (apply-sub-tm-typing (TyCoh ⦃ tree-to-pd S ⦄ Aty id-Ty) (label-to-sub-Ty Lty Ltyty)) (reflexive≈ty (begin
   < sty-to-type As [ idSub ]ty [ label-to-sub L ]ty >ty
     ≈⟨ sub-action-≃-ty (id-on-ty (sty-to-type As)) refl≃s ⟩
   < sty-to-type As [ label-to-sub L ]ty >ty

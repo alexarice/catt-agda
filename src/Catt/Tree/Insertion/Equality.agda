@@ -68,7 +68,7 @@ module Lemma58Part2 (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
                  (unbiased-type d T)
                  (unbiased-stm d T))
            (id-label-wt T)
-      ≈⟨ ecr-stm T (unbiased-stm d T) (unbiased-type d T) (id-label T) (unbiased-stm-Ty d T (≤-pred p)) (unbiased-type-Ty d T) (id-label-Ty T) ⟩
+      ≈⟨ ecr-stm T (unbiased-stm d T) (unbiased-type d T) (id-label T) (unbiased-stm-Ty d T) (unbiased-type-Ty d T) (id-label-Ty T) ⟩
     (identity-stm (sty-dim (unbiased-type d T)) >>=
       label-wt-comp (label-from-linear-tree (n-disc (sty-dim (unbiased-type d T)))
                                             (unbiased-stm d T)

@@ -67,7 +67,7 @@ exterior-sub-label-Ty : (S : Tree n)
                       → (q : height-of-branching p ≥ tree-dim T)
                       → Typing-Label (tree-to-ctx (insertion-tree S p T)) (exterior-sub-label S p T ,, S⋆)
 exterior-sub-label-Ty (Join S₁ S₂) BPHere T q
-  = label-between-connect-trees-Ty (label-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T q)
+  = label-between-connect-trees-Ty (label-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T)
                                    (id-label-Ty S₂)
                                    refl≈stm
                                    refl≈stm

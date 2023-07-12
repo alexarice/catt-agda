@@ -7,13 +7,16 @@ module Catt.Typing.Properties.Support {index : Set}
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
+open import Catt.Globular
+open import Catt.Pasting
+open import Catt.Tree
+
+open import Catt.Typing rule
+
 open import Catt.Support
 open import Catt.Support.Properties
-open import Catt.Typing rule
-open import Catt.Tree
-open import Catt.Pasting
+
 open import Tactic.MonoidSolver
-open import Catt.Globular
 
 open ≡-Reasoning
 

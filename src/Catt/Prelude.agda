@@ -5,7 +5,7 @@ open import Data.Bool using (not;Bool;true;false;_∨_;if_then_else_) renaming (
 open import Data.Fin using (Fin; zero; suc; inject₁; fromℕ; toℕ; cast; opposite; splitAt; inject+; raise) renaming (_≟_ to _f≟_; _<?_ to _f<?_) public
 open import Relation.Binary.PropositionalEquality hiding ([_]) public
 open import Data.Product renaming (_,_ to _,,_) hiding (map) public
-open import Relation.Binary.Definitions
+open import Relation.Binary.Definitions hiding (Irrelevant) public
 open import Data.Empty using (⊥) public
 open import Data.Unit using (⊤; tt) public
 open import Relation.Nullary public

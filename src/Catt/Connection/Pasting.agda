@@ -5,14 +5,14 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Globular
+open import Catt.Globular.Properties
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Pasting
 open import Catt.Connection
 open import Catt.Connection.Properties
-open import Catt.Globular
-open import Catt.Globular.Properties
 
 connect-pdb : (pd : Γ ⊢pd) → Δ ⊢pdb → connect Γ (pd-focus-tm pd) Δ ⊢pdb
 connect-focus-ty : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (pd : Γ ⊢pd) → (pdb : Δ ⊢pdb) → focus-ty (connect-pdb {Δ = Δ} pd pdb) ≃ty focus-ty pdb [ connect-inc-right (pd-focus-tm pd) m ]ty

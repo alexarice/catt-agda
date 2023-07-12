@@ -2,11 +2,11 @@ module Catt.Support.Context where
 
 open import Catt.Prelude
 open import Catt.Syntax
-open import Catt.Support
-open import Catt.Support.Properties
 open import Catt.Variables
 open import Catt.Variables.Properties
-open import Relation.Nullary
+
+open import Catt.Support
+open import Catt.Support.Properties
 
 subctx-inc-ty : (A : Ty n) → (σ : Sub m n ⋆) → .⦃ varToVar σ ⦄ → .(FVTy A ⊆ FVSub σ) → Ty m
 subctx-inc-tm : (t : Tm n) → (σ : Sub m n ⋆) → .⦃ varToVar σ ⦄ → .(FVTm t ⊆ FVSub σ) → Tm m

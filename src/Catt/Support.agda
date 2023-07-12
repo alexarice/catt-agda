@@ -2,21 +2,13 @@ module Catt.Support where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
+open import Catt.Syntax
+open import Catt.Variables
+open import Catt.Globular
+open import Catt.Pasting
+
 open import Data.Vec hiding (drop ; [_]; _>>=_) public
 open import Data.Vec.Relation.Binary.Pointwise.Inductive using (Pointwise)
-open import Catt.Syntax
-open import Catt.Tree
-open import Catt.Tree.Properties
-open import Catt.Suspension
-open import Relation.Nullary
-open import Relation.Binary.Definitions
-open import Catt.Globular
-open import Catt.Globular.Properties
-open import Catt.Connection
-open import Catt.Pasting
-open import Catt.Tree.Pasting
-open import Catt.Connection.Pasting
-open import Catt.Variables
 
 VarSet : ℕ → Set
 VarSet = Vec Bool

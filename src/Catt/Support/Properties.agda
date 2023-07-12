@@ -5,32 +5,30 @@ module Catt.Support.Properties where
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Support
-open import Catt.Variables
-open import Relation.Binary
-open import Tactic.MonoidSolver
-open import Algebra.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Suspension
-open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise)
-open import Data.Sum
+open import Catt.Variables
+open import Catt.Variables.Properties
 open import Catt.Globular
+open import Catt.Globular.Properties
 open import Catt.Pasting
 open import Catt.Pasting.Properties
-open import Catt.Connection
-open import Catt.Connection.Pasting
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Suspension.Pasting
-open import Catt.Globular
-open import Catt.Globular.Properties
+open import Catt.Connection
+open import Catt.Connection.Pasting
 open import Catt.Tree
 open import Catt.Tree.Pasting
-open import Catt.Variables
-open import Catt.Variables.Properties
-open import Relation.Nullary
 
+open import Catt.Support
+
+open import Algebra.Bundles
 open import Algebra.Definitions
+open import Data.Sum
+open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise)
+open import Relation.Binary
+open import Relation.Nullary
+open import Tactic.MonoidSolver
 
 FVTm-≃ : s ≃tm t → FVTm s ≡ FVTm t
 FVTy-≃ : A ≃ty B → FVTy A ≡ FVTy B

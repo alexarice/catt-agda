@@ -4,12 +4,12 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
-open import Relation.Nullary
+open import Catt.Globular
+open import Catt.Suspension
+
 open import Relation.Nullary.Decidable
 open import Relation.Binary hiding (Irrelevant)
 open import Function.Equivalence using (equivalence)
-open import Catt.Suspension
-open import Catt.Globular
 
 no-term-in-empty-context : ¬ Tm 0
 no-term-in-empty-context (Coh S A ⟨ σ , t ⟩) = no-term-in-empty-context t

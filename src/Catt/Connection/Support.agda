@@ -5,22 +5,23 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Connection
-open import Catt.Connection.Pasting
-open import Catt.Connection.Properties
+open import Catt.Variables
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Pasting
 open import Catt.Pasting.Properties
-open import Catt.Support
-open import Catt.Support.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Pasting
-open import Catt.Suspension.Support
+open import Catt.Connection
+open import Catt.Connection.Pasting
+open import Catt.Connection.Properties
 open import Catt.Tree
-open import Catt.Variables
+
+open import Catt.Support
+open import Catt.Support.Properties
+open import Catt.Suspension.Support
+
 open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise; Pointwise-≡⇒≡)
-open import Relation.Binary.Definitions
 open import Tactic.MonoidSolver
 
 connect-supp : VarSet (suc n) → (t : Tm (suc n)) → VarSet (suc m) → VarSet (suc (m + n))

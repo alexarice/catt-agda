@@ -5,13 +5,13 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Tree
 open import Catt.Pasting
 open import Catt.Suspension
 open import Catt.Suspension.Pasting
 open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Connection.Pasting
+open import Catt.Tree
 
 -- Extendability
 n-extendable : ℕ → Tree n → Set

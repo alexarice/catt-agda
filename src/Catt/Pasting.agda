@@ -3,13 +3,8 @@ module Catt.Pasting where
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Globular
 open import Catt.Syntax.SyntacticEquality
-open import Relation.Nullary
-open import Relation.Binary.Definitions
-open import Data.Empty
-open import Data.Unit
-open import Data.Bool
+open import Catt.Globular
 
 data _⊢pdb : (Γ : Ctx n) → Set
 

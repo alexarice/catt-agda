@@ -9,18 +9,19 @@ module Catt.Tree.Insertion.Typing {index : Set}
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Typing rule
 open import Catt.Tree
 open import Catt.Tree.Path
-open import Catt.Tree.Insertion
-open import Catt.Tree.Insertion.Properties
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
-open import Catt.Tree.Unbiased.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
+open import Catt.Tree.Unbiased
+open import Catt.Tree.Unbiased.Properties
+open import Catt.Tree.Insertion
+open import Catt.Tree.Insertion.Properties
+
+open import Catt.Typing rule
 open import Catt.Tree.Label.Typing rule
 open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Unbiased.Typing rule lift-rule susp-rule sub-rule
 
 interior-sub-label-Ty : (S : Tree n)
                       → (p : BranchingPoint S d)

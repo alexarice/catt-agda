@@ -13,18 +13,18 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing rule
+open import Catt.Discs
 open import Catt.Tree
+open import Catt.Tree.Properties
+open import Catt.Tree.Path
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
-open import Catt.Tree.Label.Typing rule
-open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
-open import Catt.Tree.Path
+
 open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Discs
-open import Catt.Discs.Properties
+open import Catt.Tree.Label.Typing rule
+open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
 
 disc-rem-stm : DR.HasDiscRemoval-STm rule
 disc-rem-stm S L Lty .get = begin

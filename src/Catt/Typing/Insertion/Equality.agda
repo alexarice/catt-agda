@@ -9,30 +9,31 @@ module Catt.Typing.Insertion.Equality {index : Set}
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Typing rule
-open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Suspension
-open import Catt.Suspension.Typing rule lift-rule susp-rule
 open import Catt.Connection
-open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree
 open import Catt.Tree.Properties
-open import Catt.Tree.Boundary
-open import Catt.Tree.Boundary.Properties
-open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Insertion
-open import Catt.Tree.Insertion.Properties
-open import Catt.Tree.Insertion.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
-open import Catt.Tree.Label.Typing rule
-open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
-open import Catt.Tree.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Label
+open import Catt.Tree.Label.Properties
+open import Catt.Tree.Boundary
+open import Catt.Tree.Boundary.Properties
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
+open import Catt.Tree.Insertion
+open import Catt.Tree.Insertion.Properties
+
+open import Catt.Typing rule
+open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Suspension.Typing rule lift-rule susp-rule
+open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Label.Typing rule
+open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Unbiased.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Insertion.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Typing.DiscRemoval rule
 open import Catt.Typing.EndoCoherenceRemoval rule
 open import Catt.Typing.Insertion rule

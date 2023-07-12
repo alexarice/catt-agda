@@ -11,6 +11,19 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Globular
+open import Catt.Globular.Properties
+open import Catt.Suspension
+open import Catt.Connection
+open import Catt.Connection.Properties
+open import Catt.Tree
+open import Catt.Tree.Properties
+open import Catt.Tree.Pasting
+open import Catt.Tree.Path
+open import Catt.Tree.Path.Properties
+open import Catt.Tree.Label
+open import Catt.Tree.Label.Properties
+
 open import Catt.Typing rule
 open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing rule lift-rule
@@ -19,18 +32,6 @@ open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Path.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Label.Typing rule
-open import Catt.Globular
-open import Catt.Globular.Properties
-open import Catt.Suspension
-open import Catt.Connection
-open import Catt.Connection.Properties
-open import Catt.Tree
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
-open import Catt.Tree.Pasting
-open import Catt.Tree.Path
-open import Catt.Tree.Path.Properties
-open import Catt.Tree.Properties
 
 ≈SExt : {a b : STm (someTree S)} → a ≈[ tree-to-ctx S ]stm b → SExt {T = T} a ≈[ tree-to-ctx (Join S T) ]stm SExt b
 ≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (connect-susp-inc-left-Ty (tree-to-ctx T)) (susp-tmEq p)) ]

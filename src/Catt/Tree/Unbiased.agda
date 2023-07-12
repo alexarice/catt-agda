@@ -3,14 +3,13 @@ module Catt.Tree.Unbiased where
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
+open import Catt.Globular
 open import Catt.Suspension
 open import Catt.Tree
-open import Catt.Tree.Path
-open import Catt.Tree.Boundary
 open import Catt.Tree.Properties
+open import Catt.Tree.Path
 open import Catt.Tree.Label
-open import Catt.Globular
-open import Relation.Nullary
+open import Catt.Tree.Boundary
 
 unbiased-type : (d : ℕ) → (T : Tree n) → STy (someTree T)
 unbiased-term : (d : ℕ) → (T : Tree n) → Tm (suc n)

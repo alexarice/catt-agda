@@ -2,10 +2,11 @@ module Catt.Discs.Support where
 
 open import Catt.Prelude
 open import Catt.Syntax
+open import Catt.Globular
 open import Catt.Discs
+
 open import Catt.Support
 open import Catt.Support.Properties
-open import Catt.Globular
 
 sphere-supp : (d : ℕ) → FVTy (sphere-type d) ≡ full
 sphere-supp zero = refl

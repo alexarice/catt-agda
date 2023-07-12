@@ -3,14 +3,13 @@ module Catt.Connection.Properties where
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
-open import Catt.Connection
-open import Catt.Suspension
-open import Catt.Suspension.Properties
 open import Catt.Syntax.Bundles
-open import Relation.Nullary
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Variables
 open import Catt.Variables.Properties
+open import Catt.Suspension
+open import Catt.Suspension.Properties
+open import Catt.Connection
 
 connect-≃ : Γ ≃c Γ′ → t ≃tm t′ → Δ ≃c Δ′ → connect Γ t Δ ≃c connect Γ′ t′ Δ′
 connect-inc-right-≃ : {t : Tm (suc n)} → {t′ : Tm (suc n′)} → n ≡ n′ → t ≃tm t′ → m ≡ m′ → connect-inc-right t m ≃s connect-inc-right t′ m′

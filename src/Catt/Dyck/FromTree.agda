@@ -4,12 +4,12 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
-open import Catt.Dyck
-open import Catt.Dyck.Properties
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Suspension
 open import Catt.Tree
 open import Catt.Tree.Properties
-open import Catt.Syntax.SyntacticEquality
+open import Catt.Dyck
+open import Catt.Dyck.Properties
 
 n-extendable : ℕ → Tree n → Set
 n-extendable zero T = ⊤

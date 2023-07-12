@@ -1,14 +1,15 @@
 module Catt.Tree.Path where
 
 open import Catt.Prelude
-open import Catt.Tree
-open import Catt.Tree.Properties
+open import Catt.Prelude.Properties
 open import Catt.Syntax
+open import Catt.Variables
 open import Catt.Suspension
 open import Catt.Connection
-open import Catt.Variables
+open import Catt.Tree
+open import Catt.Tree.Properties
+
 open import Data.Sum
-open import Catt.Prelude.Properties
 
 data Path : Tree n → Set where
   PHere : Path S

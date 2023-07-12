@@ -1,12 +1,16 @@
-module Catt.Typing.Rule where
+import Catt.Typing.Base as B
+
+module Catt.Typing.Rule {index : Set} (rule : index → B.Rule) where
 
 open import Catt.Prelude
 open import Catt.Syntax
-open import Catt.Typing.Base public
 open import Catt.Suspension
+
+open B public
+
 open import Catt.Support
 
-module _ {index : Set} (rule : index → Rule) (r : Rule) where
+module _ (r : Rule) where
   open import Catt.Typing rule
   open Rule r
 

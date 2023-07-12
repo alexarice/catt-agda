@@ -5,24 +5,25 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Variables
+open import Catt.Variables.Properties
+open import Catt.Globular
+open import Catt.Suspension
+open import Catt.Suspension.Properties
+open import Catt.Connection
+open import Catt.Connection.Properties
 open import Catt.Tree
+open import Catt.Tree.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
-open import Catt.Tree.Properties
-open import Catt.Tree.Insertion
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
-open import Catt.Variables
-open import Catt.Variables.Properties
-open import Catt.Connection
-open import Catt.Connection.Properties
-open import Catt.Suspension
-open import Catt.Suspension.Properties
-open import Catt.Globular
+open import Catt.Tree.Unbiased
+open import Catt.Tree.Unbiased.Properties
+open import Catt.Tree.Insertion
+
 open import Relation.Binary
 
 branching-path-to-var-is-var : (S : Tree n) → (p : BranchingPoint S d) → isVar (branching-path-to-var S p)

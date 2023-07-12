@@ -2,10 +2,10 @@ module Catt.Discs.Pasting where
 
 open import Catt.Prelude
 open import Catt.Syntax
-open import Catt.Discs
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Pasting
 open import Catt.Pasting.Properties
-open import Catt.Syntax.SyntacticEquality
+open import Catt.Discs
 
 disc-pdb : (d : ℕ) → Disc d ⊢pdb
 disc-pdb-focus-ty : (d : ℕ) → focus-ty (disc-pdb d) ≃ty lift-ty (sphere-type d)

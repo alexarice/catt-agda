@@ -11,14 +11,12 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Suspension
+
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule
 open import Catt.Typing.Properties.Substitution rule lift-rule sub-rule as S hiding (apply-sub-ty-typing;apply-sub-tm-typing;apply-sub-sub-typing;apply-sub-ty-eq;apply-sub-tm-eq;apply-sub-sub-eq) public
-open import Catt.Suspension
 open import Catt.Suspension.Typing rule lift-rule susp-rule
-
-
-
 
 apply-sub-ty-typing : {σ : Sub n m B} → Typing-Ty Γ A → Typing-Sub Γ Δ σ → Typing-Ty Δ (A [ σ ]ty)
 apply-sub-tm-typing : {σ : Sub n m B} → Typing-Tm Γ t A → Typing-Sub Γ Δ σ → Typing-Tm Δ (t [ σ ]tm) (A [ σ ]ty)

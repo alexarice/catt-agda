@@ -10,9 +10,11 @@ module Catt.Typing.Properties.Conversion {index : Set}
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
+
 open import Catt.Typing rule
 open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing rule lift-rule
+
 open import Function
 open import Function.Construct.Identity
 open import Function.Construct.Composition

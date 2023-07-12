@@ -4,11 +4,11 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
-open import Catt.Variables
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Suspension
+open import Catt.Variables
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Catt.Suspension
 
 getVarFinProp : (t : Tm n) → .⦃ _ : isVar t ⦄ → t ≃tm Var (getVarFin t)
 getVarFinProp (Var j) = refl≃tm

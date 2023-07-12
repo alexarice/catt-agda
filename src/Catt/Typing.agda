@@ -5,7 +5,6 @@ module Catt.Typing {index : Set} (rule : index → Rule) where
 open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
-open import Relation.Binary.PropositionalEquality
 open import Catt.Pasting
 
 open Rule

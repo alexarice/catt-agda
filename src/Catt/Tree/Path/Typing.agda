@@ -11,16 +11,17 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Suspension
+open import Catt.Connection
+open import Catt.Tree
+open import Catt.Tree.Path
+open import Catt.Tree.Label
+open import Catt.Tree.Label.Properties
+
 open import Catt.Typing rule
 open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Suspension.Typing rule lift-rule susp-rule
 open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree
-open import Catt.Tree.Path
-open import Catt.Suspension
-open import Catt.Connection
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
 
 getPathType : (P : Path S) → STy (someTree S)
 getPathType PHere = S⋆

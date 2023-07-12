@@ -8,13 +8,14 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
 open import Catt.Tree
+open import Catt.Tree.Properties
+open import Catt.Tree.Path
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
-open import Catt.Tree.Path
-open import Catt.Tree.Properties
+
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Base rule
 
 
 stm-eq : {X : MaybeTree n} → (Γ : Ctx n) → STm X → STm X → Set

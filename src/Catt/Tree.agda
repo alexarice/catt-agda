@@ -2,15 +2,8 @@ module Catt.Tree where
 
 open import Catt.Prelude
 open import Catt.Syntax
-open import Catt.Connection
 open import Catt.Suspension
-open import Data.Nat
-open import Data.Fin using (fromℕ)
-open import Data.Empty
-open import Data.Bool using (Bool; true; false)
-open import Relation.Nullary
-open import Data.Unit using (⊤; tt)
-open import Relation.Binary.PropositionalEquality
+open import Catt.Connection
 
 data Tree : ℕ → Set where
   Sing : Tree 0

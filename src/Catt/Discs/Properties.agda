@@ -4,14 +4,12 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
-open import Catt.Suspension
-open import Catt.Suspension.Properties
-open import Catt.Discs
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Relation.Nullary
-open import Catt.Tree
+open import Catt.Suspension
+open import Catt.Suspension.Properties
+open import Catt.Discs
 
 disc-≡ : .(d ≡ d′) → Disc d ≃c Disc d′
 disc-≡ p with recompute (_ ≟ _) p
@@ -29,10 +27,6 @@ sphere-susp (suc n) = Add≃ (disc-susp n) (trans≃ty (susp-ty-lift (sphere-typ
 
 sphere-type-susp zero = refl≃ty
 sphere-type-susp (suc n) = Arr≃ (refl≃tm) (trans≃ty (susp-ty-lift (lift-ty (sphere-type n))) (lift-ty-≃ (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n))))) (refl≃tm)
-
-linear-tree-compat : (T : Tree n) → .⦃ _ : is-linear T ⦄ → tree-to-ctx T ≃c Disc (tree-dim T)
-linear-tree-compat Sing = Add≃ Emp≃ (Star≃ refl)
-linear-tree-compat (Join S Sing) = trans≃c (susp-ctx-≃ (linear-tree-compat S)) (disc-susp (tree-dim S))
 
 sub-from-sphere-prop : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → sphere-type d [ sub-from-sphere d A p ]ty ≃ty A
 sub-from-sphere-prop zero ⋆ p = refl≃ty

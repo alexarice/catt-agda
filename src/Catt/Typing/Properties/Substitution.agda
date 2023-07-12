@@ -9,10 +9,11 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Suspension
+
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule
 open import Catt.Typing.Properties.Lifting rule lift-rule
-open import Catt.Suspension
 
 sub-typing-implies-ty-typing : {σ : Sub n m A} → Typing-Sub Γ Δ σ → Typing-Ty Δ A
 sub-typing-implies-ty-typing (TyNull x) = x

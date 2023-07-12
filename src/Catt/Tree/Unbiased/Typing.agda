@@ -13,12 +13,13 @@ open import Catt.Tree
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Path
-open import Catt.Tree.Boundary
-open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
+open import Catt.Tree.Boundary
+
 open import Catt.Tree.Label.Typing rule
 open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
 
 unbiased-type-Ty : (d : ℕ) → (T : Tree n) → Typing-STy (tree-to-ctx T) (unbiased-type d T)
 unbiased-stm-Ty : (d : ℕ) → (T : Tree n) → Typing-STm (tree-to-ctx T) (unbiased-stm d T) (unbiased-type d T)

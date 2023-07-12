@@ -2,10 +2,10 @@ module Catt.Dyck.Pruning where
 
 open import Catt.Prelude
 open import Catt.Syntax
+open import Catt.Globular
+open import Catt.Discs
 open import Catt.Dyck
 open import Catt.Dyck.Properties
-open import Catt.Discs
-open import Catt.Globular
 
 prune-peak : {dy : Dyck (suc n) d} → Peak dy → Dyck n d
 prune-peak (⇕pk d) = d

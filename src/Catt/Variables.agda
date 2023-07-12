@@ -2,7 +2,6 @@ module Catt.Variables where
 
 open import Catt.Prelude
 open import Catt.Syntax
-open import Data.Sum
 open import Catt.Syntax.SyntacticEquality
 
 isVar : Tm n → Set

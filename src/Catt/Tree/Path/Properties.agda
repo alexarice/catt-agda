@@ -2,18 +2,19 @@ module Catt.Tree.Path.Properties where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Tree
-open import Catt.Tree.Properties
 open import Catt.Syntax
-open import Catt.Tree.Path
+open import Catt.Syntax.SyntacticEquality
+open import Catt.Syntax.Bundles
 open import Catt.Variables
 open import Catt.Variables.Properties
 open import Catt.Suspension
 open import Catt.Connection
 open import Catt.Connection.Properties
+open import Catt.Tree
+open import Catt.Tree.Properties
+open import Catt.Tree.Path
+
 open import Data.Sum
-open import Catt.Syntax.SyntacticEquality
-open import Catt.Syntax.Bundles
 
 data _≃p_ : Path S → Path T → Set where
   ≃Here : S ≃ S′ → PHere {S = S} ≃p PHere {S = S′}

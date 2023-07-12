@@ -12,16 +12,19 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Tree
 open import Catt.Tree.Path
-open import Catt.Tree.Support
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
-open import Catt.Tree.Label.Support
+
 open import Catt.Typing rule
 open import Catt.Tree.Label.Typing rule
-open import Catt.Support
-open import Catt.Support.Properties
 open import Catt.Typing.Properties.Support rule supp-rule
 open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
+
+open import Catt.Support
+open import Catt.Support.Properties
+open import Catt.Tree.Support
+open import Catt.Tree.Label.Support
+
 open import Tactic.MonoidSolver
 
 open ≡-Reasoning

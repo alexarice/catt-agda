@@ -6,20 +6,18 @@ module Catt.Discs.Typing {index : Set}
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Typing rule
 open import Catt.Syntax
-open import Catt.Discs
-open import Catt.Globular
-open import Catt.Globular.Typing rule lift-rule
-open import Catt.Typing.Properties.Lifting rule lift-rule
-open import Catt.Typing.Properties.Base rule
-open import Catt.Discs.Properties
-open import Catt.Discs.Pasting
-open import Catt.Discs.Support
-open import Catt.Support
-open import Catt.Support.Properties
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
+open import Catt.Globular
+open import Catt.Discs
+open import Catt.Discs.Properties
+open import Catt.Discs.Pasting
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Base rule
+open import Catt.Typing.Properties.Lifting rule lift-rule
+open import Catt.Globular.Typing rule lift-rule
+
 open import Tactic.MonoidSolver
 
 sphere-type-Ty : (d : ℕ) → Typing-Ty (Sphere d) (sphere-type d)
@@ -85,23 +83,23 @@ identity-Ty n σty = TyCoh ⦃ disc-pd n ⦄
   where
     open ≡-Reasoning
 
-    lem : FVTy (lift-ty (sphere-type n)) ∪ ewt empty ∪ ewt empty ≡ full
-    lem = begin
-      FVTy (lift-ty (sphere-type n)) ∪ ewt empty ∪ ewt empty
-        ≡⟨ cong (λ - → - ∪ ewt empty ∪ ewt empty) (supp-lift-ty (sphere-type n)) ⟩
-      ewt (FVTy (sphere-type n) ∪ empty ∪ empty)
-        ≡⟨ cong ewt (solve (∪-monoid {n = sphere-size n})) ⟩
-      ewt (FVTy (sphere-type n))
-        ≡⟨ cong ewt (sphere-supp n) ⟩
-      full ∎
+    -- lem : FVTy (lift-ty (sphere-type n)) ∪ ewt empty ∪ ewt empty ≡ full
+    -- lem = begin
+    --   FVTy (lift-ty (sphere-type n)) ∪ ewt empty ∪ ewt empty
+    --     ≡⟨ cong (λ - → - ∪ ewt empty ∪ ewt empty) (supp-lift-ty (sphere-type n)) ⟩
+    --   ewt (FVTy (sphere-type n) ∪ empty ∪ empty)
+    --     ≡⟨ cong ewt (solve (∪-monoid {n = sphere-size n})) ⟩
+    --   ewt (FVTy (sphere-type n))
+    --     ≡⟨ cong ewt (sphere-supp n) ⟩
+    --   full ∎
 
-    lem2 : SuppTy (Disc n) (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F) ≡ full
-    lem2 = begin
-      SuppTy (Disc n) (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F)
-        ≡⟨ cong (DC (Disc n)) lem ⟩
-      DC (Disc n) full
-        ≡⟨ DC-full (Disc n) ⟩
-      full ∎
+    -- lem2 : SuppTy (Disc n) (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F) ≡ full
+    -- lem2 = begin
+    --   SuppTy (Disc n) (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F)
+    --     ≡⟨ cong (DC (Disc n)) lem ⟩
+    --   DC (Disc n) full
+    --     ≡⟨ DC-full (Disc n) ⟩
+    --   full ∎
 
 identity-term-Ty : Typing-Ty Γ A → Typing-Tm Γ t A → Typing-Tm Γ (identity-term A t) (t ─⟨ A ⟩⟶ t)
 identity-term-Ty {A = A} Aty tty

@@ -11,13 +11,14 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing rule
-open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Suspension.Typing rule lift-rule susp-rule
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Connection
 open import Catt.Connection.Properties
+
+open import Catt.Typing rule
+open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Suspension.Typing rule lift-rule susp-rule
 
 
 connect-Ty : {Γ : Ctx (suc n)} → Typing-Ctx Γ → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → {Δ : Ctx (suc m)} → Typing-Ctx Δ → Typing-Ctx (connect Γ t Δ)

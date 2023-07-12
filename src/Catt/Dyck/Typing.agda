@@ -9,13 +9,14 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Globular.Properties
+open import Catt.Dyck
+open import Catt.Dyck.Properties
+
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule
 open import Catt.Typing.Properties.Lifting rule lift-rule
-open import Catt.Dyck
-open import Catt.Dyck.Properties
 open import Catt.Globular.Typing rule lift-rule
-open import Catt.Globular.Properties
 
 dyck-to-ctx-Ty : (dy : Dyck n d) → Typing-Ctx (dyck-to-ctx dy)
 dyck-type-Ty : (dy : Dyck n d) → Typing-Ty (dyck-to-ctx dy) (dyck-type dy)

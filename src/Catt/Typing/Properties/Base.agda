@@ -1,17 +1,17 @@
-open import Catt.Prelude
-open import Catt.Typing.Base
+open import Catt.Typing.Rule
 
 module Catt.Typing.Properties.Base {index : Set} (rule : index → Rule) where
 
+open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing rule
-open import Catt.Suspension
-open import Catt.Globular
-open import Catt.Support
 open import Catt.Variables
+open import Catt.Globular
+open import Catt.Suspension
+
+open import Catt.Typing rule
 
 refl≈ty : A ≈[ Γ ]ty A
 refl≈tm : t ≈[ Γ ]tm t

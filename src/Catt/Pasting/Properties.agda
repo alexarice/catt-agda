@@ -7,13 +7,11 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Pasting
 open import Catt.Variables
 open import Catt.Variables.Properties
 open import Catt.Globular
-open import Catt.Globular
 open import Catt.Globular.Properties
-open import Relation.Nullary
+open import Catt.Pasting
 
 pdb-≃ : Γ ≃c Δ → Γ ⊢pdb → Δ ⊢pdb
 pdb-≃ p pdb with ≃c-preserve-length p

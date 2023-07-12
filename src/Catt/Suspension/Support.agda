@@ -2,8 +2,6 @@ module Catt.Suspension.Support where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Support
-open import Catt.Support.Properties
 open import Catt.Syntax
 open import Catt.Suspension
 open import Catt.Suspension.Properties
@@ -15,8 +13,9 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Suspension.Pasting
-open import Relation.Binary.Definitions
-open import Relation.Nullary
+
+open import Catt.Support
+open import Catt.Support.Properties
 
 suspSupp : VarSet n → VarSet (2 + n)
 suspSupp [] = full

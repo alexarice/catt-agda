@@ -4,32 +4,33 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Tree
-open import Catt.Tree.Boundary
-open import Catt.Tree.Properties
-open import Catt.Tree.Boundary.Properties
-open import Catt.Tree.Path
-open import Catt.Connection.Support
-open import Catt.Suspension.Support
-open import Catt.Suspension.Pasting
-open import Catt.Support
-open import Catt.Support.Properties
 open import Catt.Variables
-open import Catt.Suspension
-open import Catt.Connection
-open import Catt.Connection.Properties
-open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using ()
-open import Catt.Pasting
-open import Catt.Pasting.Properties
-open import Catt.Tree.Pasting
-open import Relation.Binary.Definitions
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Catt.Connection.Support
+open import Catt.Pasting
+open import Catt.Pasting.Properties
+open import Catt.Suspension
+open import Catt.Suspension.Pasting
+open import Catt.Connection
+open import Catt.Connection.Properties
 open import Catt.Connection.Pasting
-open import Algebra.Definitions
+open import Catt.Tree
+open import Catt.Tree.Properties
+open import Catt.Tree.Pasting
+open import Catt.Tree.Path
+open import Catt.Tree.Boundary
+open import Catt.Tree.Boundary.Properties
+
+open import Catt.Support
+open import Catt.Support.Properties
+open import Catt.Connection.Support
+open import Catt.Connection.Support
+open import Catt.Suspension.Support
+
 open import Algebra.Bundles
+open import Algebra.Definitions
 import Algebra.Solver.IdempotentCommutativeMonoid as Solver
+open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using ()
 
 data TVarSet : (T : Tree n) → Set where
   VSSing : (b : Bool) → TVarSet Sing

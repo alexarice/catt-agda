@@ -5,11 +5,11 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Globular
+open import Catt.Globular.Properties
 open import Catt.Pasting
 open import Catt.Suspension
 open import Catt.Suspension.Properties
-open import Catt.Globular
-open import Catt.Globular.Properties
 
 susp-pdb : Γ ⊢pdb → susp-ctx Γ ⊢pdb
 susp-focus-ty : (pdb : Γ ⊢pdb) → focus-ty (susp-pdb pdb) ≃ty susp-ty (focus-ty pdb)

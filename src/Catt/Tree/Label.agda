@@ -1,11 +1,11 @@
 module Catt.Tree.Label where
 
 open import Catt.Prelude
-open import Catt.Tree
-open import Catt.Tree.Properties
 open import Catt.Syntax
 open import Catt.Suspension
 open import Catt.Connection
+open import Catt.Tree
+open import Catt.Tree.Properties
 open import Catt.Tree.Path
 
 data MaybeTree : ℕ → Set where

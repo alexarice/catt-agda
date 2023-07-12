@@ -11,16 +11,17 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing rule
-open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Globular.Typing rule lift-rule
-open import Catt.Suspension.Typing rule lift-rule susp-rule
 open import Catt.Suspension
 open import Catt.Suspension.Properties
-
 open import Catt.Tree
 open import Catt.Tree.Properties
+
+open import Catt.Typing rule
+open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Globular.Typing rule lift-rule
+open import Catt.Suspension.Typing rule lift-rule susp-rule
+open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
+
 
 tree-to-ctx-Ty : (T : Tree n) → Typing-Ctx (tree-to-ctx T)
 tree-to-ctx-Ty Sing = TyAdd TyEmp TyStar

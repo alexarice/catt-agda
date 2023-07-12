@@ -2,25 +2,27 @@ module Catt.Tree.Label.Support where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
+open import Catt.Syntax
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Catt.Suspension
+open import Catt.Connection
+open import Catt.Tree
+open import Catt.Tree.Properties
+open import Catt.Tree.Pasting
+open import Catt.Tree.Path
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
-open import Catt.Tree.Path
-open import Catt.Tree.Pasting
+
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Suspension.Support
 open import Catt.Connection.Support
 open import Catt.Tree.Support
-open import Catt.Tree
-open import Catt.Tree.Properties
-open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
-open import Catt.Suspension
-open import Catt.Connection
-open import Algebra.Definitions
+
 open import Algebra.Bundles
+open import Algebra.Definitions
 open import Tactic.MonoidSolver
 
 MVarSet : (X : MaybeTree n) → Set

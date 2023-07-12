@@ -5,10 +5,10 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Dyck
+open import Catt.Variables
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Catt.Variables
+open import Catt.Dyck
 
 data _≃d_ : Dyck n d → Dyck n′ d′ → Set where
   End≃ : End ≃d End

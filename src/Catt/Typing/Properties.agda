@@ -10,13 +10,15 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Suspension
+open import Catt.Variables
 open import Catt.Globular
+open import Catt.Suspension
+
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule public
 open import Catt.Typing.Properties.Lifting rule lift-rule public
 open import Catt.Typing.Properties.Substitution.Suspended rule lift-rule susp-rule sub-rule public
-open import Catt.Variables
+
 
 unrestrict-restrict-≈ : (σ : Sub (2 + n) m A) → s ≈[ Δ ]tm get-fst [ σ ]tm → t ≈[ Δ ]tm get-snd [ σ ]tm → unrestrict (restrict σ s t) ≈[ Δ ]s σ
 unrestrict-restrict-≈ ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ p q = Ext≈ (Ext≈ refl≈s p) q

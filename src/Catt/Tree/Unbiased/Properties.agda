@@ -5,15 +5,6 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Tree.Unbiased
-open import Catt.Tree
-open import Catt.Tree.Boundary
-open import Catt.Tree.Boundary.Properties
-open import Catt.Tree.Properties
-open import Catt.Tree.Path
-open import Catt.Tree.Path.Properties
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Variables
@@ -22,6 +13,15 @@ open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Discs
 open import Catt.Discs.Properties
+open import Catt.Tree
+open import Catt.Tree.Properties
+open import Catt.Tree.Path
+open import Catt.Tree.Path.Properties
+open import Catt.Tree.Label
+open import Catt.Tree.Label.Properties
+open import Catt.Tree.Boundary
+open import Catt.Tree.Boundary.Properties
+open import Catt.Tree.Unbiased
 
 unbiased-type-dim : (d : ℕ) → (T : Tree n) → sty-dim (unbiased-type d T) ≡ d
 unbiased-type-dim zero T = refl

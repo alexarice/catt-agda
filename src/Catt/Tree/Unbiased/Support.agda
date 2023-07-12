@@ -5,26 +5,29 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
-open import Catt.Support
-open import Catt.Support.Properties
-open import Catt.Tree.Pasting
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
-open import Catt.Tree
-open import Catt.Tree.Properties
-open import Catt.Tree.Support
-open import Catt.Tree.Path
-open import Tactic.MonoidSolver
-open import Catt.Suspension
 open import Catt.Variables
-open import Catt.Connection
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Catt.Suspension
+open import Catt.Connection
+open import Catt.Tree
+open import Catt.Tree.Properties
+open import Catt.Tree.Pasting
+open import Catt.Tree.Path
 open import Catt.Tree.Label
-open import Catt.Tree.Label.Support
 open import Catt.Tree.Label.Properties
+open import Catt.Tree.Unbiased
+open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Boundary
+
+open import Catt.Support
+open import Catt.Support.Properties
+open import Catt.Tree.Support
 open import Catt.Tree.Boundary.Support
+open import Catt.Tree.Label.Support
+
+open import Tactic.MonoidSolver
+
 
 supp-unbiased-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → DCT (FVSTm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b)) ≡ supp-tree-bd d T b
 supp-unbiased-comp-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → DCT (FVSTm (unbiased-comp d (tree-bd d T) >>= tree-inc-label d T b)) ≡ supp-tree-bd d T b

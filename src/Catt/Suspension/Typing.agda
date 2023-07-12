@@ -9,12 +9,13 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
-open import Catt.Typing.Properties.Lifting rule lift-rule
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Suspension.Pasting
+
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Base rule
+open import Catt.Typing.Properties.Lifting rule lift-rule
 
 
 susp-ctxTy : Typing-Ctx Γ → Typing-Ctx (susp-ctx Γ)

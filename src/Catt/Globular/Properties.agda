@@ -4,11 +4,11 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
+open import Catt.Syntax.SyntacticEquality
 open import Catt.Globular
 open import Catt.Suspension
 open import Catt.Connection
 open import Catt.Tree
-open import Catt.Syntax.SyntacticEquality
 
 tm-to-ty-≃ : Γ ≃c Δ → s ≃tm t → tm-to-ty Γ s ≃ty tm-to-ty Δ t
 tm-to-ty-≃ p (Var≃ x y) = ‼-≃ _ _ y p

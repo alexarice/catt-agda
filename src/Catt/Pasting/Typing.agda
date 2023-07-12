@@ -8,12 +8,13 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
+open import Catt.Globular
+open import Catt.Globular.Properties
+open import Catt.Pasting
+
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule
 open import Catt.Typing.Properties.Lifting rule lift-rule
-open import Catt.Pasting
-open import Catt.Globular
-open import Catt.Globular.Properties
 open import Catt.Globular.Typing rule lift-rule
 
 

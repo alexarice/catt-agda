@@ -5,11 +5,10 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
-open import Catt.Suspension
-open import Relation.Nullary
+open import Catt.Variables
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Catt.Variables
+open import Catt.Suspension
 
 get-fst-Lem : susp-ctx Γ ≃c susp-ctx Δ → get-fst {n = ctxLength Γ} ≃tm get-fst {n = ctxLength Δ}
 get-fst-Lem p = Var≃ (≃c-preserve-length p) (cong (λ - → suc (toℕ (fromℕ (pred (pred -))))) (≃c-preserve-length p))

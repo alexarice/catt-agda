@@ -3,9 +3,6 @@ module Catt.Syntax where
 open import Catt.Prelude
 open import Catt.Syntax.Base public
 open import Catt.Suspension
-open import Relation.Nullary
-open import Data.Empty
-open import Relation.Binary.Definitions
 
 lift-tm : Tm n → Tm (suc n)
 lift-ty : Ty n → Ty (suc n)

@@ -8,20 +8,21 @@ module Catt.Dyck.Pruning.Typing {index : Set}
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Lifting rule lift-rule
-open import Catt.Dyck.Typing rule lift-rule sub-rule
-open import Catt.Typing.Properties.Substitution rule lift-rule sub-rule
+open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Globular.Typing rule lift-rule
+open import Catt.Discs
+open import Catt.Discs.Properties
 open import Catt.Dyck
 open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Properties
-open import Catt.Discs
-open import Catt.Discs.Properties
-open import Catt.Discs.Typing rule lift-rule
-open import Catt.Syntax.Bundles
+
+open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule
+open import Catt.Typing.Properties.Lifting rule lift-rule
+open import Catt.Typing.Properties.Substitution rule lift-rule sub-rule
+open import Catt.Globular.Typing rule lift-rule
+open import Catt.Discs.Typing rule lift-rule
+open import Catt.Dyck.Typing rule lift-rule sub-rule
 
 prune-project-Ty : (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) (dyck-to-ctx (prune-peak p)) (prune-project p)
 prune-project-Ty (⇕pk dy)

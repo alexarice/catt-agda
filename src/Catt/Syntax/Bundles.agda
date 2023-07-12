@@ -1,7 +1,7 @@
 module Catt.Syntax.Bundles where
 
+open import Catt.Prelude
 open import Catt.Syntax
-open import Data.Nat
 
 record CTX : Set where
   constructor <_>c

@@ -2,19 +2,19 @@ module Catt.Tree.Label.Properties where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
-open import Catt.Tree
-open import Catt.Tree.Properties
 open import Catt.Syntax
+open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Tree.Label
+open import Catt.Globular
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Connection
 open import Catt.Connection.Properties
-open import Catt.Syntax.Bundles
+open import Catt.Tree
+open import Catt.Tree.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
-open import Catt.Globular
+open import Catt.Tree.Label
 
 _≃stm_ : (a : STm X) → (b : STm Y) → Set
 a ≃stm b = Wrap (λ a b → stm-to-term a ≃tm stm-to-term b) a b

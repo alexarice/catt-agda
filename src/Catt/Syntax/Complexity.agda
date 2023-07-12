@@ -3,12 +3,13 @@ module Catt.Syntax.Complexity where
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
+open import Catt.Globular
+
 open import Data.List
 open import Relation.Binary
 open import Induction.WellFounded
 import Data.Nat.Induction as I
 open import Algebra.Bundles
-open import Catt.Globular
 
 Ordinal : Set
 Ordinal = List ℕ

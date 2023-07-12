@@ -13,26 +13,27 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Typing rule
-open import Catt.Tree
-open import Catt.Tree.Properties
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
-open import Catt.Tree.Label.Typing rule
-open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
-open import Catt.Tree.Unbiased.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Path
-open import Catt.Typing.Properties.Base rule
-open import Catt.Tree.Boundary
-open import Catt.Tree.Boundary.Properties
-open import Catt.Tree.Pasting
-open import Catt.Typing.EndoCoherenceRemoval rule
-open import Catt.Discs
-open import Catt.Discs.Properties
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Catt.Discs
+open import Catt.Discs.Properties
+open import Catt.Tree
+open import Catt.Tree.Properties
+open import Catt.Tree.Pasting
+open import Catt.Tree.Path
+open import Catt.Tree.Label
+open import Catt.Tree.Label.Properties
+open import Catt.Tree.Boundary
+open import Catt.Tree.Boundary.Properties
+open import Catt.Tree.Unbiased
+open import Catt.Tree.Unbiased.Properties
+
+open import Catt.Typing rule
+open import Catt.Typing.Properties.Base rule
+open import Catt.Tree.Label.Typing rule
+open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Unbiased.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Typing.EndoCoherenceRemoval rule
 
 ecr-stm : HasEndoCoherenceRemoval-STm
 ecr-stm S s As L [ sty ] [ Asty ] Lty .get = begin

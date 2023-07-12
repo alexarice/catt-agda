@@ -5,15 +5,21 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Syntax.Bundles
-open import Catt.Connection
-open import Catt.Connection.Properties
-open import Catt.Suspension
-open import Catt.Suspension.Properties
-open import Catt.Tree
-open import Catt.Globular
-open import Catt.Globular.Properties
 open import Catt.Variables
 open import Catt.Variables.Properties
+open import Catt.Globular
+open import Catt.Globular.Properties
+open import Catt.Suspension
+open import Catt.Suspension.Properties
+open import Catt.Connection
+open import Catt.Connection.Properties
+open import Catt.Discs
+open import Catt.Discs.Properties
+open import Catt.Tree
+
+linear-tree-compat : (T : Tree n) → .⦃ _ : is-linear T ⦄ → tree-to-ctx T ≃c Disc (tree-dim T)
+linear-tree-compat Sing = Add≃ Emp≃ (Star≃ refl)
+linear-tree-compat (Join S Sing) = trans≃c (susp-ctx-≃ (linear-tree-compat S)) (disc-susp (tree-dim S))
 
 linear-non-linear : (T : Tree n)
                   → .⦃ non-linear T ⦄

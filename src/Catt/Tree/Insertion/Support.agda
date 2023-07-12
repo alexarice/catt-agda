@@ -11,39 +11,41 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
-open import Catt.Support
-open import Catt.Support.Properties
-open import Catt.Connection.Support
-open import Catt.Connection.Properties
-open import Catt.Suspension.Support
-open import Catt.Tree.Insertion
-open import Catt.Tree.Insertion.Properties
-open import Catt.Tree
-open import Catt.Tree.Properties
-open import Catt.Connection
-open import Catt.Suspension
 open import Catt.Syntax.SyntacticEquality
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
 open import Catt.Variables
-open import Catt.Tree.Unbiased.Support
-open import Catt.Tree.Support
-open import Catt.Tree.Pasting
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Catt.Suspension
+open import Catt.Connection
+open import Catt.Connection.Properties
+open import Catt.Tree
+open import Catt.Tree.Properties
+open import Catt.Tree.Pasting
+open import Catt.Tree.Path
 open import Catt.Tree.Label
-open import Catt.Tree.Label.Typing rule
-open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Label.Support
-open import Catt.Tree.Label.Support.Typed rule lift-rule susp-rule sub-rule supp-rule
-open import Catt.Tree.Unbiased.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Insertion.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Label.Properties
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
-open import Catt.Tree.Boundary.Support
+open import Catt.Tree.Unbiased
+open import Catt.Tree.Unbiased.Properties
+open import Catt.Tree.Insertion
+open import Catt.Tree.Insertion.Properties
+open import Catt.Tree.Label.Typing rule
+open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Path
-open import Catt.Tree.Label.Properties
+open import Catt.Tree.Unbiased.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Insertion.Typing rule lift-rule susp-rule sub-rule
+
+open import Catt.Support
+open import Catt.Support.Properties
+open import Catt.Suspension.Support
+open import Catt.Connection.Support
+open import Catt.Tree.Support
+open import Catt.Tree.Label.Support
+open import Catt.Tree.Boundary.Support
+open import Catt.Tree.Unbiased.Support
+
+open import Catt.Tree.Label.Support.Typed rule lift-rule susp-rule sub-rule supp-rule
 
 exterior-sub-full : (S : Tree n)
                   → (p : BranchingPoint S d)

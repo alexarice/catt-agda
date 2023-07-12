@@ -1,6 +1,7 @@
 module Catt.Syntax.Base where
 
 open import Catt.Prelude
+
 open import Data.Fin.Patterns
 
 data Ctx : ℕ → Set

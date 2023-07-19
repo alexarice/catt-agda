@@ -42,7 +42,7 @@ ecr-stm S s As L [ sty ] [ Asty ] Lty .get = begin
     ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (id-right-unit (label-to-sub (L ,, S⋆)))) ⟩
   Coh (tree-to-ctx S) (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s)
       (label-to-sub (L ,, S⋆))
-    ≈⟨ ecr ⦃ tree-to-pd S ⦄ Asty sty (label-to-sub-Ty Lty TySStar) ⟩
+    ≈⟨ ecr (TyCoh ⦃ tree-to-pd S ⦄ (TyArr sty Asty sty) (label-to-sub-Ty Lty TySStar)) ⟩
   identity (ty-dim (sty-to-type As))
     (sub-from-disc (ty-dim (sty-to-type As))
      (sty-to-type As [ label-to-sub (L ,, S⋆) ]ty) _

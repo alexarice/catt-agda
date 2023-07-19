@@ -298,27 +298,26 @@ susp-tm-lift (Coh Δ A σ) = Coh≃ refl≃c refl≃ty (susp-sub-lift σ)
 susp-sub-lift ⟨⟩ = refl≃s
 susp-sub-lift ⟨ σ , t ⟩ = Ext≃ (susp-sub-lift σ) (susp-tm-lift t)
 
-lift-subbed-ty-≃ : (B : Ty n) → (σ : Sub n m A) → {t : Tm (suc _)} → (lift-ty B) [ ⟨ lift-sub σ , t ⟩ ]ty ≃ty lift-ty (B [ σ ]ty)
-lift-subbed-tm-≃ : (s : Tm n) → (σ : Sub n m A) → {t : Tm (suc _)} → (lift-tm s) [ ⟨ lift-sub σ , t ⟩ ]tm ≃tm lift-tm (s [ σ ]tm)
-lift-subbed-sub-≃ : (τ : Sub l n B) → (σ : Sub n m A) → {t : Tm (suc _)} → ⟨ lift-sub σ , t ⟩ ● lift-sub τ ≃s lift-sub (σ ● τ)
+apply-sub-lifted-ty-≃ : (B : Ty n) → (σ : Sub (suc n) m A) → (lift-ty B) [ σ ]ty ≃ty B [ sub-proj₁ σ ]ty
+apply-sub-lifted-tm-≃ : (s : Tm n) → (σ : Sub (suc n) m A) → (lift-tm s) [ σ ]tm ≃tm s [ sub-proj₁ σ ]tm
+apply-sub-lifted-sub-≃ : (τ : Sub l n B) → (σ : Sub (suc n) m A) → σ ● lift-sub τ ≃s sub-proj₁ σ ● τ
 
-lift-subbed-ty-≃ ⋆ σ = refl≃ty
-lift-subbed-ty-≃ (s ─⟨ B ⟩⟶ t) σ = Arr≃ (lift-subbed-tm-≃ s σ) (lift-subbed-ty-≃ B σ) (lift-subbed-tm-≃ t σ)
+apply-sub-lifted-ty-≃ ⋆ σ = refl≃ty
+apply-sub-lifted-ty-≃ (s ─⟨ B ⟩⟶ t) σ = Arr≃ (apply-sub-lifted-tm-≃ s σ) (apply-sub-lifted-ty-≃ B σ) (apply-sub-lifted-tm-≃ t σ)
 
-lift-subbed-tm-≃ (Var zero) ⟨ σ , t ⟩ = refl≃tm
-lift-subbed-tm-≃ (Var (suc i)) ⟨ σ , t ⟩ = apply-lifted-sub-tm-≃ (Var i) σ
-lift-subbed-tm-≃ {A = ⋆} (Coh Δ B τ) σ = Coh≃ refl≃c refl≃ty (lift-subbed-sub-≃ τ σ)
-lift-subbed-tm-≃ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ {t = u} = begin
-  < Coh (susp-ctx Δ) (susp-ty B) (susp-sub (lift-sub τ)) [ ⟨ unrestrict (lift-sub σ) , u ⟩ ]tm >tm
-    ≈⟨ sub-action-≃-tm (Coh≃ refl≃c refl≃ty (susp-sub-lift τ)) (Ext≃ (unrestrict-lift σ) (refl≃tm {s = u})) ⟩
-  < Coh (susp-ctx Δ) (susp-ty B) (lift-sub (susp-sub τ)) [ ⟨ lift-sub (unrestrict σ) , u ⟩ ]tm >tm
-    ≈⟨ lift-subbed-tm-≃ (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (unrestrict σ) ⟩
-  < lift-tm (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm) >tm ∎
+apply-sub-lifted-tm-≃ (Var i) σ = refl≃tm
+apply-sub-lifted-tm-≃ {A = ⋆} (Coh Δ B τ) σ = Coh≃ refl≃c refl≃ty (apply-sub-lifted-sub-≃ τ σ)
+apply-sub-lifted-tm-≃ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) ⟨ σ , u ⟩ = begin
+  < susp-tm (lift-tm (Coh Δ B τ)) [ ⟨ unrestrict σ , u ⟩ ]tm >tm
+    ≈⟨ sub-action-≃-tm (susp-tm-lift (Coh Δ B τ)) (refl≃s {σ = ⟨ unrestrict σ , u ⟩}) ⟩
+  < lift-tm (susp-tm (Coh Δ B τ)) [ ⟨ unrestrict σ , u ⟩ ]tm >tm
+    ≈⟨ apply-sub-lifted-tm-≃ (susp-tm (Coh Δ B τ)) ⟨ unrestrict σ , u ⟩ ⟩
+  < Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm >tm ∎
   where
     open Reasoning tm-setoid
 
-lift-subbed-sub-≃ {B = B} ⟨⟩ σ {t = t} = Null≃ (lift-subbed-ty-≃ B σ {t})
-lift-subbed-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (lift-subbed-sub-≃ τ σ) (lift-subbed-tm-≃ t σ)
+apply-sub-lifted-sub-≃ {B = B} ⟨⟩ σ = Null≃ (apply-sub-lifted-ty-≃ B σ)
+apply-sub-lifted-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (apply-sub-lifted-sub-≃ τ σ) (apply-sub-lifted-tm-≃ t σ)
 
 ‼-≃ : (i : Fin (ctxLength Γ)) → (j : Fin (ctxLength Δ)) → toℕ i ≡ toℕ j → Γ ≃c Δ → Γ ‼ i ≃ty Δ ‼ j
 ‼-≃ zero zero p (Add≃ q x) = lift-ty-≃ x

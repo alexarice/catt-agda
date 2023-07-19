@@ -25,6 +25,19 @@ open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule
 open import Catt.Tree.Label.Typing rule
 
+open Rule
+
+EndoCoherenceRemoval : (Γ : Ctx m)
+                     → (Δ : Ctx (suc n))
+                     → (s : Tm (suc n))
+                     → (A : Ty (suc n))
+                     → (σ : Sub (suc n) m ⋆)
+                     → Rule
+EndoCoherenceRemoval Γ Δ s A σ .len = _
+EndoCoherenceRemoval Γ Δ s A σ .tgtCtx = Γ
+EndoCoherenceRemoval Γ Δ s A σ .lhs = Coh Δ (s ─⟨ A ⟩⟶ s) σ
+EndoCoherenceRemoval Γ Δ s A σ .rhs = identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))
+
 HasEndoCoherenceRemoval : Set
 HasEndoCoherenceRemoval = ∀ {m n}
                         → {Γ : Ctx m}
@@ -32,10 +45,8 @@ HasEndoCoherenceRemoval = ∀ {m n}
                         → {A : Ty (suc n)}
                         → {σ : Sub (suc n) m ⋆}
                         → {Δ : Ctx (suc n)}
-                        → .⦃ pd : Δ ⊢pd ⦄
-                        → Typing-Ty Δ A
-                        → Typing-Tm Δ s A
-                        → Typing-Sub Δ Γ σ
+                        → {B : Ty m}
+                        → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ s) σ) B
                         → Coh Δ (s ─⟨ A ⟩⟶ s) σ ≈[ Γ ]tm identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))
 
 HasEndoCoherenceRemoval-STm : Set
@@ -52,15 +63,12 @@ HasEndoCoherenceRemoval-STm = ∀ {m n}
                         → SCoh S (SArr s As s) (L ,, S⋆) ≈[ Γ ]stm (identity-stm (sty-dim As) >>= label-wt-comp (label-from-linear-tree (n-disc (sty-dim As)) ⦃ n-disc-is-linear (sty-dim As) ⦄ s As (≤-reflexive (tree-dim-n-disc (sty-dim As))) ,, S⋆) (L ,, S⋆))
 
 module Conditions (ecr : HasEndoCoherenceRemoval) where
+  open import Catt.Typing.Rule rule
 
-  lift-rule : .⦃ pd : Δ ⊢pd ⦄
-            → Typing-Ty Δ A
-            → Typing-Tm Δ s A
-            → Typing-Sub Δ (Γ , B) (lift-sub σ)
-            → lift-tm (Coh Δ (s ─⟨ A ⟩⟶ s) σ) ≈[ Γ , B ]tm lift-tm (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm)))
-  lift-rule {Δ = Δ} {A = A} {s = s} {σ = σ} Aty sty σty = begin
+  lift-rule : LiftRule (EndoCoherenceRemoval Γ Δ s A σ)
+  lift-rule {Δ = Δ} {s = s} {A = A} {σ = σ} tty = begin
     Coh Δ (s ─⟨ A ⟩⟶ s) (lift-sub σ)
-      ≈⟨ ecr Aty sty σty ⟩
+      ≈⟨ ecr tty ⟩
     identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ lift-sub σ ]ty) _ (s [ lift-sub σ ]tm))
       ≈⟨ reflexive≈tm (identity-≃ refl (sub-from-disc-≃ (ty-dim A) (ty-dim A) (apply-lifted-sub-ty-≃ A σ) _ _ (apply-lifted-sub-tm-≃ s σ))) ⟩
     identity (ty-dim A) (sub-from-disc (ty-dim A) (lift-ty (A [ σ ]ty)) _ (lift-tm (s [ σ ]tm)))
@@ -69,14 +77,10 @@ module Conditions (ecr : HasEndoCoherenceRemoval) where
     where
       open Reasoning (tm-setoid-≈ _)
 
-  susp-rule : .⦃ pd : susp-ctx Δ ⊢pd ⦄
-            → Typing-Ty (susp-ctx Δ) (susp-ty A)
-            → Typing-Tm (susp-ctx Δ) (susp-tm s) (susp-ty A)
-            → Typing-Sub (susp-ctx Δ) (susp-ctx Γ) (susp-sub σ)
-            → susp-tm (Coh Δ (s ─⟨ A ⟩⟶ s) σ) ≈[ susp-ctx Γ ]tm susp-tm (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm)))
-  susp-rule {Δ = Δ} {A = A} {s = s} {σ = σ} Aty sty σty = begin
+  susp-rule : SuspRule (EndoCoherenceRemoval Γ Δ s A σ)
+  susp-rule {Δ = Δ} {s = s} {A = A} {σ = σ} tty = begin
     Coh (susp-ctx Δ) (susp-tm s ─⟨ susp-ty A ⟩⟶ susp-tm s) (susp-sub σ)
-      ≈⟨ ecr Aty sty σty ⟩
+      ≈⟨ ecr tty ⟩
     identity (ty-dim (susp-ty A)) (sub-from-disc (ty-dim (susp-ty A)) (susp-ty A [ susp-sub σ ]ty) _
        (susp-tm s [ susp-sub σ ]tm))
       ≈˘⟨ reflexive≈tm (identity-≃ (sym (susp-dim A)) (sub-from-disc-≃ (suc (ty-dim A)) (ty-dim (susp-ty A)) (susp-functorial-ty σ A) (trans (susp-dim (A [ σ ]ty)) (cong suc (sym (sub-dim σ A)))) (sym (sub-dim (susp-sub σ) (susp-ty A))) (susp-functorial-tm σ s))) ⟩
@@ -99,20 +103,15 @@ module Conditions (ecr : HasEndoCoherenceRemoval) where
           open Reasoning ty-setoid
       open Reasoning (tm-setoid-≈ _)
 
-  sub-rule : .⦃ pd : Δ ⊢pd ⦄
-           → Typing-Ty Δ A
-           → Typing-Tm Δ s A
-           → {τ : Sub n m ⋆}
-           → Typing-Sub Δ Γ (τ ● σ)
-           → Coh Δ (s ─⟨ A ⟩⟶ s) σ [ τ ]tm ≈[ Γ ]tm identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm)) [ τ ]tm
-  sub-rule {Δ = Δ} {A = A} {s = s} {σ = σ} Aty sty {τ} σty = begin
-    Coh Δ (s ─⟨ A ⟩⟶ s) (τ ● σ)
-      ≈⟨ ecr Aty sty σty ⟩
-    identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ τ ● σ ]ty) _ (s [ τ ● σ ]tm))
-      ≈⟨ reflexive≈tm (identity-≃ refl (sub-from-disc-≃ (ty-dim A) (ty-dim A) (assoc-ty τ σ A) (sym (sub-dim (τ ● σ) A)) (trans (sym (sub-dim τ (A [ σ ]ty))) (sym (sub-dim σ A))) (assoc-tm τ σ s))) ⟩
+  sub-rule : SubRule (EndoCoherenceRemoval Γ Δ s A τ)
+  sub-rule {Δ = Δ} {s = s} {A = A} {τ = τ} {σ = σ} τty tty = begin
+    Coh Δ (s ─⟨ A ⟩⟶ s) (σ ● τ)
+      ≈⟨ ecr tty ⟩
+    identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ● τ ]ty) _ (s [ σ ● τ ]tm))
+      ≈⟨ reflexive≈tm (identity-≃ refl (sub-from-disc-≃ (ty-dim A) (ty-dim A) (assoc-ty σ τ A) (sym (sub-dim (σ ● τ) A)) (trans (sym (sub-dim σ (A [ τ ]ty))) (sym (sub-dim τ A))) (assoc-tm σ τ s))) ⟩
     identity (ty-dim A)
-      (sub-from-disc (ty-dim A) (A [ σ ]ty [ τ ]ty) _ (s [ σ ]tm [ τ ]tm))
-      ≈⟨ reflexive≈tm (identity-≃ refl (sub-from-disc-sub (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm) τ)) ⟩
-    identity (ty-dim A) (τ ● sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm)) ∎
+      (sub-from-disc (ty-dim A) (A [ τ ]ty [ σ ]ty) _ (s [ τ ]tm [ σ ]tm))
+      ≈⟨ reflexive≈tm (identity-≃ refl (sub-from-disc-sub (ty-dim A) (A [ τ ]ty) (sym (sub-dim τ A)) (s [ τ ]tm) σ)) ⟩
+    identity (ty-dim A) (σ ● sub-from-disc (ty-dim A) (A [ τ ]ty) _ (s [ τ ]tm)) ∎
     where
       open Reasoning (tm-setoid-≈ _)

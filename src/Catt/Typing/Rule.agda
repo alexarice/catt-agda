@@ -34,12 +34,12 @@ module _ (r : Rule) where
           → Typing-Tm Δ (lhs [ σ ]tm) (C [ σ ]ty)
           → lhs [ σ ]tm ≈[ Δ ]tm rhs [ σ ]tm
 
-  SupportRule : Set
-  SupportRule = {A : Ty len}
-              → (tty : Typing-Tm tgtCtx lhs A)
-              → SuppTm tgtCtx lhs ≡ SuppTm tgtCtx rhs
-
   ConvRule : Set
   ConvRule = {A : Ty len}
            → Typing-Tm tgtCtx lhs A
            → Typing-Tm tgtCtx rhs A
+
+  SupportRule : Set
+  SupportRule = {A : Ty len}
+              → (tty : Typing-Tm tgtCtx lhs A)
+              → SuppTm tgtCtx lhs ≡ SuppTm tgtCtx rhs

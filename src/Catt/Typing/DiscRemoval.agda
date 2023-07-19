@@ -23,12 +23,22 @@ open import Catt.Tree.Unbiased.Properties
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule
 
+open Rule
+
+DiscRemoval : (Γ : Ctx m)
+            → (σ : Sub (disc-size n) m ⋆) → Rule
+DiscRemoval Γ σ .len = _
+DiscRemoval Γ σ .tgtCtx = Γ
+DiscRemoval Γ σ .lhs = disc-term _ σ
+DiscRemoval Γ σ .rhs = 0V [ σ ]tm
+
 HasDiscRemoval : Set
 HasDiscRemoval = ∀ {m n}
                → .⦃ NonZero n ⦄
                → {Γ : Ctx m}
                → {σ : Sub (disc-size n) m ⋆}
-               → Typing-Sub (Disc n) Γ σ
+               → {A : Ty m}
+               → Typing-Tm Γ (disc-term n σ) A
                → disc-term n σ ≈[ Γ ]tm 0V [ σ ]tm
 
 HasDiscRemoval-STm : Set
@@ -43,26 +53,28 @@ HasDiscRemoval-STm = ∀ {m n}
                → (unbiased-comp (tree-dim S) S >>= L ,, S⋆) ≈[ Γ ]stm L (is-linear-max-path S)
 
 module Conditions (dr : HasDiscRemoval) where
+  open import Catt.Typing.Rule rule
 
   lift-rule : .⦃ NonZero n ⦄
-            → Typing-Sub (Disc n) (Γ , A) (lift-sub σ)
-            → lift-tm (disc-term n σ) ≈[ Γ , A ]tm lift-tm (0V [ σ ]tm)
-  lift-rule {n = n} {σ = σ} σty = begin
+             → {σ : Sub (disc-size n) m ⋆}
+             → LiftRule (DiscRemoval Γ σ)
+  lift-rule {n = n} {σ = σ} tty = begin
     disc-term n (lift-sub σ)
-      ≈⟨ dr σty ⟩
+      ≈⟨ dr tty ⟩
     0V [ lift-sub σ ]tm
       ≈⟨ reflexive≈tm (apply-lifted-sub-tm-≃ 0V σ) ⟩
     lift-tm (0V [ σ ]tm) ∎
     where
       open Reasoning (tm-setoid-≈ _)
 
-  susp-rule : Typing-Sub (Disc (suc n)) (susp-ctx Γ) (susp-sub σ)
-            → susp-tm (disc-term n σ) ≈[ susp-ctx Γ ]tm susp-tm (0V [ σ ]tm)
-  susp-rule {n = n} {σ = σ} σty = begin
+  susp-rule : .⦃ NonZero n ⦄
+            → {σ : Sub (disc-size n) m ⋆}
+            → SuspRule (DiscRemoval Γ σ)
+  susp-rule {n = n} {σ = σ} tty = begin
     susp-tm (disc-term n σ)
-      ≈⟨ reflexive≈tm (Coh≃ (disc-susp n) (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n))) refl≃s) ⟩
+      ≈⟨ reflexive≈tm (disc-term-susp n σ) ⟩
     disc-term (suc n) (susp-sub σ)
-      ≈⟨ dr σty ⟩
+      ≈⟨ dr (transport-typing tty (disc-term-susp n σ)) ⟩
     0V [ susp-sub σ ]tm
       ≈˘⟨ reflexive≈tm (susp-functorial-tm σ 0V) ⟩
     susp-tm (0V [ σ ]tm) ∎
@@ -70,15 +82,13 @@ module Conditions (dr : HasDiscRemoval) where
       open Reasoning (tm-setoid-≈ _)
 
   sub-rule : ⦃ NonZero n ⦄
-           → {σ : Sub (disc-size n) m ⋆}
-           → {τ : Sub m l ⋆}
-           → Typing-Sub (Disc n) Δ (τ ● σ)
-           → disc-term n σ [ τ ]tm ≈[ Δ ]tm 0V [ σ ]tm [ τ ]tm
-  sub-rule {n = n} {σ = σ} {τ = τ} σty = begin
-    disc-term n (τ ● σ)
-      ≈⟨ dr σty ⟩
-    0V [ τ ● σ ]tm
-      ≈⟨ reflexive≈tm (assoc-tm τ σ 0V) ⟩
-    0V [ σ ]tm [ τ ]tm ∎
+           → {τ : Sub (disc-size n) m ⋆}
+           → SubRule (DiscRemoval Γ τ)
+  sub-rule {n = n} {τ = τ} {σ = σ} σty tty = begin
+    disc-term n (σ ● τ)
+      ≈⟨ dr tty ⟩
+    0V [ σ ● τ ]tm
+      ≈⟨ reflexive≈tm (assoc-tm σ τ 0V) ⟩
+    0V [ τ ]tm [ σ ]tm ∎
     where
       open Reasoning (tm-setoid-≈ _)

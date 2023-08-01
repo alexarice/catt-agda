@@ -115,3 +115,13 @@ identity-term-lift A s
                (Var≃ (cong (suc ∘ double) (sym (lift-ty-dim A))) refl))
          (trans≃s (lift-sub-from-disc (ty-dim A) A refl s)
                   (sub-from-disc-≃ (ty-dim A) (ty-dim (lift-ty A)) refl≃ty (trans (lift-ty-dim A) refl) refl refl≃tm))
+
+identity-term-susp : (A : Ty m) → (s : Tm m) → susp-tm (identity-term A s) ≃tm identity-term (susp-ty A) (susp-tm s)
+identity-term-susp A s
+  = Coh≃ (trans≃c (disc-susp (ty-dim A)) (disc-≡ (sym (susp-dim A))))
+         (Arr≃ (Var≃ (cong (λ - → suc (double -)) (sym (susp-dim A))) refl)
+               (trans≃ty (susp-ty-lift (sphere-type (ty-dim A)))
+                         (lift-ty-≃ (trans≃ty (sphere-type-susp (ty-dim A))
+                                              (sphere-≡ (sym (susp-dim A))))))
+               (Var≃ (cong (λ - → suc (double -)) (sym (susp-dim A))) refl))
+         (trans≃s (susp-sub-from-disc (ty-dim A) A refl s) (sub-from-disc-≃ (suc (ty-dim A)) (ty-dim (susp-ty A)) refl≃ty (trans (susp-dim A) (cong suc refl)) refl refl≃tm))

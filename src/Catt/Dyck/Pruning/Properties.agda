@@ -7,6 +7,10 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.SyntacticEquality
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Catt.Suspension
+open import Catt.Suspension.Properties
+open import Catt.Discs
+open import Catt.Discs.Properties
 open import Catt.Dyck
 open import Catt.Dyck.Properties
 open import Catt.Dyck.Pruning
@@ -87,3 +91,41 @@ lift-prune-sub : (p : Peak dy) → (σ : Sub _ n ⋆) → prune-sub p (lift-sub 
 lift-prune-sub (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ = refl≃s
 lift-prune-sub (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (lift-prune-sub p σ) refl≃tm) refl≃tm
 lift-prune-sub (⇓pk p) σ = lift-prune-sub p σ
+
+prune-susp-peak : (p : Peak dy) → prune-peak (susp-peak p) ≃d susp-dyck (prune-peak p)
+prune-susp-peak (⇕pk dy) = refl≃d
+prune-susp-peak (⇑pk p) = ⇑≃ (prune-susp-peak p)
+prune-susp-peak (⇓pk p) = ⇓≃ (prune-susp-peak p)
+
+susp-prune-project : (p : Peak dy) → prune-project (susp-peak p) ≃s susp-sub (prune-project p)
+susp-prune-project (⇕pk dy) = Ext≃ (Ext≃ (sym≃s susp-functorial-id) (susp-dyck-term dy)) (begin
+  < identity-term (dyck-type (susp-dyck dy)) (dyck-term (susp-dyck dy)) >tm
+    ≈⟨ identity-term-≃ (susp-dyck-type dy) (susp-dyck-term dy) ⟩
+  < identity-term (susp-ty (dyck-type dy)) (susp-tm (dyck-term dy)) >tm
+    ≈˘⟨ identity-term-susp (dyck-type dy) (dyck-term dy) ⟩
+  < susp-tm (identity-term (dyck-type dy) (dyck-term dy)) >tm ∎)
+  where
+    open Reasoning tm-setoid
+susp-prune-project (⇑pk p)
+  = Ext≃ (Ext≃ lem
+               refl≃tm)
+         refl≃tm
+  where
+    lem : lift-sub (lift-sub (prune-project (susp-peak p))) ≃s
+           unrestrict (susp-sub-res (lift-sub (lift-sub (prune-project p))))
+    lem = begin
+      < lift-sub (lift-sub (prune-project (susp-peak p))) >s
+        ≈⟨ lift-sub-≃ (lift-sub-≃ (susp-prune-project p)) ⟩
+      < lift-sub (lift-sub (susp-sub (prune-project p))) >s
+        ≈˘⟨ lift-sub-≃ (susp-sub-lift (prune-project p)) ⟩
+      < lift-sub (susp-sub (lift-sub (prune-project p))) >s
+        ≈˘⟨ susp-sub-lift (lift-sub (prune-project p)) ⟩
+      < susp-sub (lift-sub (lift-sub (prune-project p))) >s ∎
+      where
+        open Reasoning sub-setoid
+susp-prune-project (⇓pk p) = susp-prune-project p
+
+susp-prune-sub : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + n * 2) m ⋆) → prune-sub (susp-peak p) (susp-sub σ) ≃s susp-sub (prune-sub p σ)
+susp-prune-sub (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ = refl≃s
+susp-prune-sub (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (susp-prune-sub p σ) refl≃tm) refl≃tm
+susp-prune-sub (⇓pk p) σ = susp-prune-sub p σ

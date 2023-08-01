@@ -105,3 +105,9 @@ ty-src-susp (s ─⟨ A ⟩⟶ t) = refl≃tm
 
 ty-tgt-susp : (A : Ty n) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-tgt (susp-ty A) ⦃ NonZero-subst (sym (susp-dim A)) it ⦄ ≃tm susp-tm (ty-tgt A)
 ty-tgt-susp (s ─⟨ A ⟩⟶ t) = refl≃tm
+
+ty-src′-susp : (A : Ty (suc n)) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-src′ (susp-ty A) ≃tm susp-tm (ty-src′ A)
+ty-src′-susp (s ─⟨ A ⟩⟶ t) = refl≃tm
+
+ty-tgt′-susp : (A : Ty (suc n)) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-tgt′ (susp-ty A) ≃tm susp-tm (ty-tgt′ A)
+ty-tgt′-susp (s ─⟨ A ⟩⟶ t) = refl≃tm

@@ -49,6 +49,11 @@ susp-dyck End = ⇑ End
 susp-dyck (⇑ d) = ⇑ (susp-dyck d)
 susp-dyck (⇓ d) = ⇓ (susp-dyck d)
 
+susp-peak : {dy : Dyck (suc n) d} → Peak dy → Peak (susp-dyck dy)
+susp-peak (⇕pk dy) = ⇕pk (susp-dyck dy)
+susp-peak (⇑pk p) = ⇑pk (susp-peak p)
+susp-peak (⇓pk p) = ⇓pk (susp-peak p)
+
 connect-dyck : (dy : Dyck n 0) → Dyck m d → Dyck (m + n) d
 connect-dyck d End = d
 connect-dyck d (⇑ e) = ⇑ (connect-dyck d e)

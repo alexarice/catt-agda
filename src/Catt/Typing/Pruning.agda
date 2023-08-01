@@ -64,11 +64,50 @@ module Conditions (prune : HasPruning) where
   susp-rule : (p : Peak dy) → (pf : peak-term p [ σ ]tm ≃tm identity-term B t) → SuspRule (Pruning Γ dy A p σ B t pf)
   susp-rule {dy = dy} {σ = σ} {B = B} {t = t} {Γ = Γ} {A = A} p pf tty = begin
     Coh (susp-ctx (dyck-to-ctx dy)) (susp-ty A) (susp-sub σ)
-      ≈˘⟨ reflexive≈tm (Coh≃ (dyck-to-ctx-≃ {!!}) refl≃ty refl≃s) ⟩
+      ≈˘⟨ reflexive≈tm (Coh≃ (susp-dyck-to-ctx dy) refl≃ty refl≃s) ⟩
     Coh (dyck-to-ctx (susp-dyck dy)) (susp-ty A) (susp-sub σ)
-      ≈⟨ {!!} ⟩
-    {!!}
-      ≈⟨ {!!} ⟩
-    {!!} ∎
+      ≈⟨ prune (⇓pk (susp-peak p)) lem (transport-typing tty (Coh≃ (sym≃c (susp-dyck-to-ctx dy)) refl≃ty refl≃s)) ⟩
+    Coh (dyck-to-ctx (prune-peak (susp-peak p)))
+        (susp-ty A [ prune-project (susp-peak p) ]ty)
+        (prune-sub (susp-peak p) (susp-sub σ))
+      ≈⟨ reflexive≈tm (Coh≃ l1 l2 (susp-prune-sub p σ)) ⟩
+    Coh (susp-ctx (dyck-to-ctx (prune-peak p)))
+        (susp-ty (A [ prune-project p ]ty))
+        (susp-sub (prune-sub p σ)) ∎
     where
+      l1 : dyck-to-ctx (prune-peak (susp-peak p)) ≃c
+            susp-ctx (dyck-to-ctx (prune-peak p))
+      l1 = begin
+        < dyck-to-ctx (prune-peak (susp-peak p)) >c
+          ≈⟨ dyck-to-ctx-≃ (prune-susp-peak p) ⟩
+        < dyck-to-ctx (susp-dyck (prune-peak p)) >c
+          ≈⟨ susp-dyck-to-ctx (prune-peak p) ⟩
+        < susp-ctx (dyck-to-ctx (prune-peak p)) >c ∎
+        where
+          open Reasoning ctx-setoid
+
+      l2 : (susp-ty A [ prune-project (susp-peak p) ]ty) ≃ty
+            susp-ty (A [ prune-project p ]ty)
+      l2 = begin
+        < susp-ty A [ prune-project (susp-peak p) ]ty >ty
+          ≈⟨ sub-action-≃-ty refl≃ty (susp-prune-project p) ⟩
+        < susp-ty A [ susp-sub (prune-project p) ]ty >ty
+          ≈˘⟨ susp-functorial-ty (prune-project p) A ⟩
+        < susp-ty (A [ prune-project p ]ty) >ty ∎
+        where
+          open Reasoning ty-setoid
+
+      lem : (peak-term (susp-peak p) [ susp-sub σ ]tm) ≃tm identity-term (susp-ty B) (susp-tm t)
+      lem = begin
+        < peak-term (susp-peak p) [ susp-sub σ ]tm >tm
+          ≈⟨ sub-action-≃-tm (susp-peak-term p) refl≃s ⟩
+        < susp-tm (peak-term p) [ susp-sub σ ]tm >tm
+          ≈˘⟨ susp-functorial-tm σ (peak-term p) ⟩
+        < susp-tm (peak-term p [ σ ]tm) >tm
+          ≈⟨ susp-tm-≃ pf ⟩
+        < susp-tm (identity-term B t) >tm
+          ≈⟨ identity-term-susp B t ⟩
+        < identity-term (susp-ty B) (susp-tm t) >tm ∎
+        where
+          open Reasoning tm-setoid
       open Reasoning (tm-setoid-≈ _)

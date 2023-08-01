@@ -128,9 +128,25 @@ susp-dyck-type d = begin
 
 susp-dyck-term End = refl≃tm
 susp-dyck-term (⇑ d) = refl≃tm
-susp-dyck-term (⇓ d) = {!!}
+susp-dyck-term (⇓ d) = trans≃tm (ty-tgt′-≃ (susp-dyck-type d)) (ty-tgt′-susp (dyck-type d) ⦃ NonZero-subst (sym (dyck-type-dim d)) it ⦄)
 
 susp-dyck-to-ctx : (d : Dyck n d) → dyck-to-ctx (susp-dyck d) ≃c susp-ctx (dyck-to-ctx d)
 susp-dyck-to-ctx End = refl≃c
-susp-dyck-to-ctx (⇑ d) = Add≃ (Add≃ (susp-dyck-to-ctx d) {!!}) {!!}
+susp-dyck-to-ctx (⇑ d)
+  = Add≃ (Add≃ (susp-dyck-to-ctx d) (susp-dyck-type d))
+         (susp-dyck-pre-type (⇑ d))
 susp-dyck-to-ctx (⇓ d) = susp-dyck-to-ctx d
+
+susp-peak-term : (p : Peak dy) → peak-term (susp-peak p) ≃tm susp-tm (peak-term p)
+susp-peak-term (⇕pk dy) = refl≃tm
+susp-peak-term (⇑pk p) = begin
+  < lift-tm (lift-tm (peak-term (susp-peak p))) >tm
+    ≈⟨ lift-tm-≃ (lift-tm-≃ (susp-peak-term p)) ⟩
+  < lift-tm (lift-tm (susp-tm (peak-term p))) >tm
+    ≈˘⟨ lift-tm-≃ (susp-tm-lift (peak-term p)) ⟩
+  < lift-tm (susp-tm (lift-tm (peak-term p))) >tm
+    ≈˘⟨ susp-tm-lift (lift-tm (peak-term p)) ⟩
+  < susp-tm (peak-term (⇑pk p)) >tm ∎
+  where
+    open Reasoning tm-setoid
+susp-peak-term (⇓pk p) = susp-peak-term p

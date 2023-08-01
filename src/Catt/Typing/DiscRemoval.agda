@@ -16,21 +16,16 @@ open import Catt.Tree
 open import Catt.Tree.Path
 open import Catt.Tree.Label
 open import Catt.Tree.Label.Properties
-open import Catt.Tree.Label.Typing rule
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule
+open import Catt.Tree.Label.Typing rule
+
+open import Catt.Typing.DiscRemoval.Base public
 
 open Rule
-
-DiscRemoval : (Γ : Ctx m)
-            → (σ : Sub (disc-size n) m ⋆) → Rule
-DiscRemoval Γ σ .len = _
-DiscRemoval Γ σ .tgtCtx = Γ
-DiscRemoval Γ σ .lhs = disc-term _ σ
-DiscRemoval Γ σ .rhs = 0V [ σ ]tm
 
 HasDiscRemoval : Set
 HasDiscRemoval = ∀ {m n}

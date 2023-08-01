@@ -15,6 +15,10 @@ disc-≡ : .(d ≡ d′) → Disc d ≃c Disc d′
 disc-≡ p with recompute (_ ≟ _) p
 ... | refl = refl≃c
 
+sphere-≡ : .(d ≡ d′) → sphere-type d ≃ty sphere-type d′
+sphere-≡ p with recompute (_ ≟ _) p
+... | refl = refl≃ty
+
 disc-susp : (n : ℕ) → susp-ctx (Disc n) ≃c Disc (suc n)
 sphere-susp : (n : ℕ) → susp-ctx (Sphere n) ≃c Sphere (suc n)
 sphere-type-susp : (n : ℕ) → susp-ty (sphere-type n) ≃ty sphere-type (suc n)
@@ -102,3 +106,12 @@ identity-term-sub A s σ = begin
     ≈˘⟨ identity-≃ refl (sub-from-disc-sub (ty-dim (A [ σ ]ty)) A (sub-dim σ A) s σ) ⟩
   < identity-term (A [ σ ]ty) (s [ σ ]tm) >tm ∎
   where open Reasoning tm-setoid
+
+identity-term-lift : (A : Ty m) → (s : Tm m) → lift-tm (identity-term A s) ≃tm identity-term (lift-ty A) (lift-tm s)
+identity-term-lift A s
+  = Coh≃ (disc-≡ (sym (lift-ty-dim A)))
+         (Arr≃ (Var≃ (cong (suc ∘ double) (sym (lift-ty-dim A))) refl)
+               (lift-ty-≃ (sphere-≡ (sym (lift-ty-dim A))))
+               (Var≃ (cong (suc ∘ double) (sym (lift-ty-dim A))) refl))
+         (trans≃s (lift-sub-from-disc (ty-dim A) A refl s)
+                  (sub-from-disc-≃ (ty-dim A) (ty-dim (lift-ty A)) refl≃ty (trans (lift-ty-dim A) refl) refl refl≃tm))

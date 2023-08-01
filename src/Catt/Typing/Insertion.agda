@@ -20,7 +20,6 @@ open import Catt.Tree.Insertion.Properties
 open import Catt.Typing rule
 open import Catt.Tree.Label.Typing rule
 
-
 HasInsertion : Set
 HasInsertion = ∀ {m n l n′}
              → {Γ : Ctx m}

@@ -81,11 +81,16 @@ import Catt.Dyck.Typing
 import Catt.Dyck.Pruning.Typing
 
 import Catt.Typing.DiscRemoval
+import Catt.Typing.DiscRemoval.Base
 import Catt.Typing.DiscRemoval.Properties
 import Catt.Typing.EndoCoherenceRemoval
+import Catt.Typing.EndoCoherenceRemoval.Base
 import Catt.Typing.EndoCoherenceRemoval.Properties
 import Catt.Typing.Insertion
+-- TODO import Catt.Typing.Insertion.Base
 import Catt.Typing.Insertion.Equality
+import Catt.Typing.Pruning
+import Catt.Typing.Pruning.Base
 
 import Catt.Support
 import Catt.Support.Properties
@@ -104,3 +109,4 @@ import Catt.Tree.Label.Support.Typed
 import Catt.Tree.Insertion.Support
 
 import Catt.Typing.Weak
+import Catt.Typing.Strict.Units

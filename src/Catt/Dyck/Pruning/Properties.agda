@@ -82,3 +82,8 @@ dyck-term-prune (⇓pk {dy = dy} p) = begin
   < dyck-term (⇓ dy) [ prune-project (⇓pk p) ]tm >tm ∎
   where
     open Reasoning tm-setoid
+
+lift-prune-sub : (p : Peak dy) → (σ : Sub _ n ⋆) → prune-sub p (lift-sub σ) ≃s lift-sub (prune-sub p σ)
+lift-prune-sub (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ = refl≃s
+lift-prune-sub (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (lift-prune-sub p σ) refl≃tm) refl≃tm
+lift-prune-sub (⇓pk p) σ = lift-prune-sub p σ

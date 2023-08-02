@@ -76,7 +76,7 @@ module Conditions (dr : HasDiscRemoval) where
     where
       open Reasoning (tm-setoid-≈ _)
 
-  sub-rule : ⦃ NonZero n ⦄
+  sub-rule : .⦃ NonZero n ⦄
            → {τ : Sub (disc-size n) m ⋆}
            → SubRule (DiscRemoval Γ τ)
   sub-rule {n = n} {τ = τ} {σ = σ} σty tty = begin

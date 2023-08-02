@@ -111,3 +111,24 @@ module Conditions (prune : HasPruning) where
         where
           open Reasoning tm-setoid
       open Reasoning (tm-setoid-≈ _)
+
+  sub-rule : (p : Peak dy) → (pf : peak-term p [ σ ]tm ≃tm identity-term B t) → SubRule (Pruning Γ dy A p σ B t pf)
+  sub-rule {dy = dy} {σ = σ} {B = B} {t = t} {A = A} p pf {σ = τ} σty tty = begin
+    Coh (dyck-to-ctx dy) A (τ ● σ)
+      ≈⟨ prune p lem tty ⟩
+    Coh (dyck-to-ctx (prune-peak p)) (A [ prune-project p ]ty) (prune-sub p (τ ● σ))
+      ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (prune-sub-sub p σ τ)) ⟩
+    Coh (dyck-to-ctx (prune-peak p)) (A [ prune-project p ]ty) (τ ● prune-sub p σ) ∎
+    where
+      lem : (peak-term p [ τ ● σ ]tm) ≃tm identity-term (B [ τ ]ty) (t [ τ ]tm)
+      lem = begin
+        < peak-term p [ τ ● σ ]tm >tm
+          ≈⟨ assoc-tm τ σ (peak-term p) ⟩
+        < peak-term p [ σ ]tm [ τ ]tm >tm
+          ≈⟨ sub-action-≃-tm pf refl≃s ⟩
+        < identity-term B t [ τ ]tm >tm
+          ≈⟨ identity-term-sub B t τ ⟩
+        < identity-term (B [ τ ]ty) (t [ τ ]tm) >tm ∎
+        where
+          open Reasoning tm-setoid
+      open Reasoning (tm-setoid-≈ _)

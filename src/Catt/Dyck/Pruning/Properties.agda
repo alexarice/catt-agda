@@ -129,3 +129,8 @@ susp-prune-sub : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + n * 
 susp-prune-sub (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ = refl≃s
 susp-prune-sub (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (susp-prune-sub p σ) refl≃tm) refl≃tm
 susp-prune-sub (⇓pk p) σ = susp-prune-sub p σ
+
+prune-sub-sub : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + n * 2) m ⋆) → (τ : Sub m l ⋆) → prune-sub p (τ ● σ) ≃s τ ● prune-sub p σ
+prune-sub-sub (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ τ = refl≃s
+prune-sub-sub (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ τ = Ext≃ (Ext≃ (prune-sub-sub p σ τ) refl≃tm) refl≃tm
+prune-sub-sub (⇓pk p) σ τ = prune-sub-sub p σ τ

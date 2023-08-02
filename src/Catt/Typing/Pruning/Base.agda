@@ -15,9 +15,6 @@ Pruning : (Γ : Ctx m)
         → (A : Ty (3 + n * 2))
         → (p : Peak dy)
         → (σ : Sub (3 + n * 2) m ⋆)
-        → (B : Ty m)
-        → (t : Tm m)
-        → (peak-term p [ σ ]tm ≃tm identity-term B t)
         → Rule
 Pruning Γ dy A p σ B t pf .len = _
 Pruning Γ dy A p σ B t pf .tgtCtx = Γ

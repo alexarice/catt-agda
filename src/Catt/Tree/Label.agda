@@ -118,6 +118,24 @@ label-to-sub′ {S = Join S₁ S₂} f A = sub-from-connect (unrestrict (label-t
 
 label-to-sub (L ,, A) = label-to-sub′ (λ P → stm-to-term (L P)) (sty-to-type A)
 
+stm-to-other : STm X → STm (Other (maybeTreeSize X))
+sty-to-other : STy X → STy (Other (maybeTreeSize X))
+label-to-other : Label X S → Label (Other (maybeTreeSize X)) S
+label-wt-to-other : Label-WT X S → Label-WT (Other (maybeTreeSize X)) S
+
+stm-to-other s@(SExt _) = SOther (stm-to-term s)
+stm-to-other s@(SShift _) = SOther (stm-to-term s)
+stm-to-other s@(SPath _) = SOther (stm-to-term s)
+stm-to-other (SCoh S A L) = SCoh S A (label-wt-to-other L)
+stm-to-other (SOther t) = SOther t
+
+sty-to-other S⋆ = S⋆
+sty-to-other (SArr s As t) = SArr (stm-to-other s) (sty-to-other As) (stm-to-other t)
+
+label-to-other L P = stm-to-other (L P)
+
+label-wt-to-other (L ,, As) = (label-to-other L) ,, (sty-to-other As)
+
 map-sty-pext : STy (someTree S) → STy (someTree (Join S T))
 map-sty-pext S⋆ = SArr SHere S⋆ (SShift (SPath PHere))
 map-sty-pext (SArr s A t) = SArr (SExt s) (map-sty-pext A) (SExt t)

@@ -16,6 +16,7 @@ unbiased-term : (d : ℕ) → (T : Tree n) → Tm (suc n)
 unbiased-stm : (d : ℕ) → (T : Tree n) → STm (someTree T)
 unbiased-comp : (d : ℕ) → (T : Tree n) → STm (someTree T)
 unbiased-comp′ : (d : ℕ) → (T : Tree n) → STm (someTree T)
+unbiased-comp-term : (d : ℕ) → (T : Tree n) → Tm (suc n)
 
 unbiased-type zero T = S⋆
 unbiased-type (suc d) T = SArr (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false) (unbiased-type d T) (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true)
@@ -34,6 +35,8 @@ unbiased-comp′ zero T = unbiased-comp zero T
 unbiased-comp′ (suc d) Sing = unbiased-comp (suc d) Sing
 unbiased-comp′ (suc d) (Join T Sing) = SExt (unbiased-comp′ d T)
 unbiased-comp′ (suc d) T@(Join _ (Join _ _)) = unbiased-comp (suc d) T
+
+unbiased-comp-term d T = stm-to-term (unbiased-comp d T)
 
 label-from-linear-tree-unbiased : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → Label (someTree T) S
 label-from-linear-tree-unbiased Sing T d P = unbiased-comp′ d T

@@ -65,10 +65,10 @@ branching-path-to-path {T = Join S T} BPHere = PExt (is-linear-max-path S)
 branching-path-to-path {T = Join S T} (BPExt p) = PExt (branching-path-to-path p)
 branching-path-to-path {T = Join S T} (BPShift p) = PShift (branching-path-to-path p)
 
-branching-path-to-var : (T : Tree n) → (p : BranchingPoint T d) → Tm (suc n)
-branching-path-to-var (Join S T) (BPHere) = 0V [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm
-branching-path-to-var (Join S T) (BPExt P) = susp-tm (branching-path-to-var S P) [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm
-branching-path-to-var (Join S T) (BPShift P) = branching-path-to-var T P [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm
+branching-path-to-var : (p : BranchingPoint T d) → Tm (suc (tree-size T))
+branching-path-to-var {T = Join S T} BPHere = 0V [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm
+branching-path-to-var {T = Join S T} (BPExt P) = susp-tm (branching-path-to-var P) [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm
+branching-path-to-var {T = Join S T} (BPShift P) = branching-path-to-var P [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm
 
 branching-path-to-type : (T : Tree n) → (P : BranchingPoint T d) → STy (someTree T)
 branching-path-to-type (Join S T) (BPHere) = map-sty-pext (unbiased-type (tree-dim S) S)

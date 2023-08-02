@@ -87,7 +87,7 @@ import Catt.Typing.EndoCoherenceRemoval
 import Catt.Typing.EndoCoherenceRemoval.Base
 import Catt.Typing.EndoCoherenceRemoval.Properties
 import Catt.Typing.Insertion
--- TODO import Catt.Typing.Insertion.Base
+import Catt.Typing.Insertion.Base
 import Catt.Typing.Insertion.Equality
 import Catt.Typing.Pruning
 import Catt.Typing.Pruning.Base
@@ -110,3 +110,4 @@ import Catt.Tree.Insertion.Support
 
 import Catt.Typing.Weak
 import Catt.Typing.Strict.Units
+import Catt.Typing.Strict.UA

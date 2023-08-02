@@ -28,7 +28,7 @@ module _ where
   Unit-Rules : Index → Rule
   Unit-Rules (DR Γ σ) = DiscRemoval Γ σ
   Unit-Rules (ECR Γ Δ s A σ) = EndoCoherenceRemoval Γ Δ s A σ
-  Unit-Rules (Prune Γ dy A p σ B t pf) = Pruning Γ dy A p σ B t pf
+  Unit-Rules (Prune Γ dy A p σ B t pf) = Pruning Γ dy A p σ
 
 open import Catt.Typing Unit-Rules public
 open import Catt.Typing.DiscRemoval Unit-Rules as D

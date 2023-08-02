@@ -16,7 +16,7 @@ Pruning : (Γ : Ctx m)
         → (p : Peak dy)
         → (σ : Sub (3 + n * 2) m ⋆)
         → Rule
-Pruning Γ dy A p σ B t pf .len = _
-Pruning Γ dy A p σ B t pf .tgtCtx = Γ
-Pruning Γ dy A p σ B t pf .lhs = Coh (dyck-to-ctx dy) A σ
-Pruning Γ dy A p σ B t pf .rhs = Coh (dyck-to-ctx (prune-peak p)) (A [ prune-project p ]ty) (prune-sub p σ)
+Pruning Γ dy A p σ .len = _
+Pruning Γ dy A p σ .tgtCtx = Γ
+Pruning Γ dy A p σ .lhs = Coh (dyck-to-ctx dy) A σ
+Pruning Γ dy A p σ .rhs = Coh (dyck-to-ctx (prune-peak p)) (A [ prune-project p ]ty) (prune-sub p σ)

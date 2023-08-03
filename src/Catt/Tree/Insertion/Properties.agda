@@ -819,12 +819,12 @@ module Lemma46 where
   unbiased-exterior-comm-1 (Join S₁ S₂) (BPHere ⦃ l ⦄) (Join T Sing) (suc d) p q r b .get (PExt Z) = begin
     < label-from-linear-tree-unbiased S₁ (Join T Sing) 1 (tree-inc-label′ d S₁ b Z)
           >>= connect-tree-inc-left (Join T Sing) S₂ >stm
-      ≈⟨ extend-≃ (lfltu-≤-linear-height S₁ (suspTree T) 1 d q (≤-pred p) r b Z) refl≃l refl≃sty ⟩
+      ≈⟨ extend-≃ (lfltu-≤-linear-height S₁ (susp-tree T) 1 d q (≤-pred p) r b Z) refl≃l refl≃sty ⟩
     < SPath (PExt (tree-inc-label′ d T b (is-linear-max-path (tree-bd d T)))) >stm
       ≈⟨ ≃SPath (≃Ext (ap′-≃ (tree-inc-label′ d T b) lem) refl≃) ⟩
     < SPath (PExt (tree-inc-label′ d T b (ppath-≃ (linear-tree-unique (tree-bd d S₁) (tree-bd d T) _) Z))) >stm ∎
     where
-      instance _ = bd-linear-height (1 + d) (suspTree T) q
+      instance _ = bd-linear-height (1 + d) (susp-tree T) q
       instance _ = bd-linear-height d S₁ (≤-trans (≤-pred (≤-pred (≤-step p))) (≤-reflexive (sym (linear-linear-height S₁ ⦃ l ⦄))))
       lem : is-linear-max-path (tree-bd d T) ≃p
               ppath-≃ (linear-tree-unique (tree-bd d S₁) (tree-bd d T) _) Z
@@ -858,7 +858,7 @@ data Condition (d : ℕ) (T : Tree n) (m : ℕ) : Set where
   Cond1 : d > (linear-height T) → d ≤ m → Condition d T m
   Cond2 : d ≥ m → Condition d T m
 
-cond-pred : Condition (suc d) (suspTree T) (suc m) → Condition d T m
+cond-pred : Condition (suc d) (susp-tree T) (suc m) → Condition d T m
 cond-pred (Cond1 x y) = Cond1 (≤-pred x) (≤-pred y)
 cond-pred (Cond2 x) = Cond2 (≤-pred x)
 

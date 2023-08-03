@@ -52,7 +52,7 @@ exterior-sub-full : (S : Tree n)
                   → (T : Tree m)
                   → .⦃ _ : has-linear-height d T ⦄
                   → DCT (FVLabel (exterior-sub-label S p T)) ≡ tFull
-exterior-sub-full (Join S₁ S₂) BPHere T = label-between-connect-trees-full (label-from-linear-tree-unbiased (suspTree S₁) T 0) (id-label S₂) refl≈stm refl≈stm (label-from-linear-tree-unbiased-full (suspTree S₁) T 0) (trans (cong DCT (id-label-full S₂)) DCT-full)
+exterior-sub-full (Join S₁ S₂) BPHere T = label-between-connect-trees-full (label-from-linear-tree-unbiased (susp-tree S₁) T 0) (id-label S₂) refl≈stm refl≈stm (label-from-linear-tree-unbiased-full (susp-tree S₁) T 0) (trans (cong DCT (id-label-full S₂)) DCT-full)
 exterior-sub-full (Join S₁ S₂) (BPExt p) (Join T Sing) = label-between-joins-full (exterior-sub-label S₁ p T) (id-label S₂) (exterior-sub-full S₁ p T) (trans (cong DCT (id-label-full S₂)) DCT-full)
 exterior-sub-full (Join S₁ S₂) (BPShift p) T = label-between-joins-full (id-label S₁) (exterior-sub-label S₂ p T) (trans (cong DCT (id-label-full S₁)) DCT-full) (exterior-sub-full S₂ p T)
 

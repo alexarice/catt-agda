@@ -106,7 +106,7 @@ tree′-setoid = record { Carrier = TREE
     γ Sing≃ = refl
     γ (Join≃ q r) = trans (subst-Tree (≃-to-same-n q) (≃-to-same-n r) _ _) (cong₂ Join (γ q) (γ r))
 
-susp-tree-≃ : S ≃ T → suspTree S ≃ suspTree T
+susp-tree-≃ : S ≃ T → susp-tree S ≃ susp-tree T
 susp-tree-≃ p = Join≃ p Sing≃
 
 ≃-dec : (S : Tree n) → (T : Tree m) → Dec (S ≃ T)

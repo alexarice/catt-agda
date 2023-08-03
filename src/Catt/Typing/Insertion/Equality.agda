@@ -153,12 +153,12 @@ module Lemma58Part2 (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
   pruned-bp-exterior-sub (Join (Join S₁ Sing) S₂) BPHere T q x .get (PExt Z) = let
     instance _ = n-disc-is-linear (tree-dim S₁)
     in begin
-    (label-from-linear-tree-unbiased (suspTree S₁) (Join (n-disc (tree-dim S₁)) Sing) 1 Z
+    (label-from-linear-tree-unbiased (susp-tree S₁) (Join (n-disc (tree-dim S₁)) Sing) 1 Z
       >>= connect-tree-inc-left (Join (n-disc (tree-dim S₁)) Sing) S₂
       >>= (connect-label (label-comp (label-from-linear-tree-unbiased (Join (n-disc (tree-dim S₁)) Sing) T 0)
                                      (connect-tree-inc-left T S₂))
                         (ap (connect-tree-inc-right T S₂)) ,, S⋆))
-      ≈⟨ reflexive≈stm (extend-≃ (extend-≃ (lfltu-maximal-path (suspTree S₁) (Join (n-disc (tree-dim S₁)) Sing) 1 Z) refl≃l refl≃sty) refl≃l refl≃sty) ⟩
+      ≈⟨ reflexive≈stm (extend-≃ (extend-≃ (lfltu-maximal-path (susp-tree S₁) (Join (n-disc (tree-dim S₁)) Sing) 1 Z) refl≃l refl≃sty) refl≃l refl≃sty) ⟩
     (unbiased-comp′ (suc (tree-dim S₁)) (n-disc (tree-dim S₁))
       >>= (SPath ∘ PExt) ,, SArr (SPath PHere) S⋆ (SPath (PShift PHere))
       >>= (connect-label (label-comp (label-from-linear-tree-unbiased (Join (n-disc (tree-dim S₁)) Sing) T 0)
@@ -199,9 +199,9 @@ module Lemma45Part2 (disc-rem : HasDiscRemoval) where
   exterior-disc (Join S T) BPHere .get (PExt Z) = let
     instance _ = n-disc-is-linear (tree-dim S)
     in begin
-    (label-from-linear-tree-unbiased (suspTree S) (n-disc (suc (tree-dim S))) 0 (PExt Z) >>= (connect-tree-inc-left (Join (n-disc (tree-dim S)) Sing) T))
-      ≈⟨ reflexive≈stm (extend-≃ (lfltu-maximal-path (suspTree S) (n-disc (suc (tree-dim S))) 0 (PExt Z)) refl≃l refl≃sty) ⟩
-    (unbiased-comp′ (tree-dim (suspTree S)) (n-disc (suc (tree-dim S)))
+    (label-from-linear-tree-unbiased (susp-tree S) (n-disc (suc (tree-dim S))) 0 (PExt Z) >>= (connect-tree-inc-left (Join (n-disc (tree-dim S)) Sing) T))
+      ≈⟨ reflexive≈stm (extend-≃ (lfltu-maximal-path (susp-tree S) (n-disc (suc (tree-dim S))) 0 (PExt Z)) refl≃l refl≃sty) ⟩
+    (unbiased-comp′ (tree-dim (susp-tree S)) (n-disc (suc (tree-dim S)))
       >>= connect-tree-inc-left (Join (n-disc (tree-dim S)) Sing) T)
       ≈˘⟨ extend-≈ (unbiased-stm-is-comp′ (suc (tree-dim S)) (n-disc (suc (tree-dim S)))) (connect-tree-inc-left-Ty (n-disc (suc (tree-dim S))) T) TySStar ⟩
     (unbiased-stm (suc (tree-dim S)) (n-disc (suc (tree-dim S))) >>=
@@ -341,7 +341,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
 
   exterior-unbiased-comp S P T d q p = begin
     SCoh S (unbiased-type d S) (exterior-sub-label S P T ,, S⋆)
-      ≈⟨ insert S (unbiased-type d S) (exterior-sub-label S P T) P T (interior-sub-label S P T) (exterior-branching-path S P T) (unbiased-type-Ty d S) (exterior-sub-label-Ty S P T p) ⟩
+      ≈⟨ insert S (unbiased-type d S) (exterior-sub-label S P T) P T (interior-sub-label S P T) (exterior-branching-path S P T) (TySCoh S (unbiased-type-Ty d S) (exterior-sub-label-Ty S P T p) TySStar) ⟩
     SCoh (insertion-tree S P T) (label-on-sty (unbiased-type d S) (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T (exterior-sub-label S P T) (interior-sub-label S P T) ,, S⋆)
       ≈⟨ ≈SCoh (insertion-tree S P T) (exterior-unbiased-type S P T d (≤-trans (≤-reflexive q) (n≤1+n (tree-dim S))) p) (reflexive≈l (exterior-interior-prop S P T)) refl≈sty ⟩
     SCoh (insertion-tree S P T) (unbiased-type d (insertion-tree S P T)) (id-label-wt _) ∎

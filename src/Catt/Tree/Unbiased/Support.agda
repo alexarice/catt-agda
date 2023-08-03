@@ -38,8 +38,8 @@ supp-unbiased-lem zero (Join S T) false rewrite tEmp-empty S = cong₂ (VSJoin t
 supp-unbiased-lem zero (Join S T) true rewrite tEmp-empty S = cong₂ (VSJoin false) DCT-emp (DCT-last-path T)
 supp-unbiased-lem (suc d) Sing b = refl
 supp-unbiased-lem (suc d) (Join T Sing) b = begin
-  DCT (FVSTm (unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) b)))
-    ≡⟨ FVSTm-≃ {a = unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) b)}
+  DCT (FVSTm (unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b)))
+    ≡⟨ FVSTm-≃ {a = unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b)}
                {b = susp-stm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b)}
                l1 ⟩
   DCT (FVSTm (susp-stm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b)))
@@ -49,11 +49,11 @@ supp-unbiased-lem (suc d) (Join T Sing) b = begin
   supp-tvarset (supp-tree-bd d T b) ∎
   where
     l1 : (unbiased-stm d (tree-bd d T) >>=
-            label₁ (tree-inc-label (suc d) (suspTree T) b))
+            label₁ (tree-inc-label (suc d) (susp-tree T) b))
            ≃stm
            susp-stm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b)
     l1 = begin
-      < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) b) >stm
+      < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b) >stm
         ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] [ refl≃ty ] ⟩
       < unbiased-stm d (tree-bd d T) >>= susp-label (tree-inc-label d T b) >stm
         ≈˘⟨ extend-susp-label (unbiased-stm d (tree-bd d T)) (tree-inc-label d T b) ⟩

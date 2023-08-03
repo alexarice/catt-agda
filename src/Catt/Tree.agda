@@ -43,8 +43,8 @@ connect-tree : (S : Tree n) → (T : Tree m) → Tree (connect-tree-length S T)
 connect-tree Sing T = T
 connect-tree (Join S S′) T = Join S (connect-tree S′ T)
 
-suspTree : Tree n → Tree (2 + n)
-suspTree T = Join T Sing
+susp-tree : Tree n → Tree (2 + n)
+susp-tree T = Join T Sing
 
 tree-dim : Tree n → ℕ
 tree-dim Sing = 0

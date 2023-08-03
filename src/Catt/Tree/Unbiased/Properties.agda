@@ -208,29 +208,29 @@ module _ where
   lfltu->-linear-height (Join S Sing) T (suc d₁) zero p q r true PHere
     = extend-≃ (unbiased-stm-bd-non-linear (suc d₁) T (<-transˡ q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
 
-unbiased-type-susp-lem : (d : ℕ) → (T : Tree n) → susp-sty (unbiased-type d T) ≃sty unbiased-type (suc d) (suspTree T)
-unbiased-comp-susp-lem : (d : ℕ) → (T : Tree n) → SExt {T = Sing} (unbiased-comp d T) ≃stm unbiased-comp (suc d) (suspTree T)
+unbiased-type-susp-lem : (d : ℕ) → (T : Tree n) → susp-sty (unbiased-type d T) ≃sty unbiased-type (suc d) (susp-tree T)
+unbiased-comp-susp-lem : (d : ℕ) → (T : Tree n) → SExt {T = Sing} (unbiased-comp d T) ≃stm unbiased-comp (suc d) (susp-tree T)
 
 unbiased-type-susp-lem zero T = ≃SArr [ refl≃tm ] refl≃sty [ refl≃tm ]
 unbiased-type-susp-lem (suc d) T = ≃SArr (lem false) (unbiased-type-susp-lem d T) (lem true)
   where
     open Reasoning stm-setoid
-    lem : (b : Bool) → susp-stm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b) ≃stm (unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) b))
+    lem : (b : Bool) → susp-stm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b) ≃stm (unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b))
     lem b = begin
       < SExt (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b) >stm
         ≈˘⟨ extend-map-pext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T b) ⟩
       < unbiased-stm d (tree-bd d T) >>= map-pext (tree-inc-label d T b) >stm
         ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
-      < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) b) >stm ∎
+      < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b) >stm ∎
 
 unbiased-comp-susp-lem d T = begin
   < SExt (unbiased-comp d T) >stm
     ≈˘⟨ SCoh-ext T (unbiased-type d T) (id-label-wt T) ⟩
   < SCoh T (unbiased-type d T) (map-pext (id-label-wt T)) >stm
     ≈⟨ SCoh-unrestrict T (unbiased-type d T) (map-pext (id-label-wt T)) ⟩
-  < SCoh (suspTree T) (susp-sty (unbiased-type d T)) (susp-label-full (id-label T) ,, S⋆) >stm
-    ≈⟨ ≃SCoh (suspTree T) (unbiased-type-susp-lem d T) (id-label-susp-full T) refl≃sty ⟩
-  < unbiased-comp (suc d) (suspTree T) >stm ∎
+  < SCoh (susp-tree T) (susp-sty (unbiased-type d T)) (susp-label-full (id-label T) ,, S⋆) >stm
+    ≈⟨ ≃SCoh (susp-tree T) (unbiased-type-susp-lem d T) (id-label-susp-full T) refl≃sty ⟩
+  < unbiased-comp (suc d) (susp-tree T) >stm ∎
   where
     open Reasoning stm-setoid
 
@@ -247,10 +247,10 @@ unbiased-comp′-compat (suc d) (Join T Sing) = begin
     open Reasoning stm-setoid
 unbiased-comp′-compat (suc d) T@(Join _ (Join _ _)) = refl≃stm
 
-lfltu-susp : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → (label-from-linear-tree-unbiased S (suspTree T) (suc d)) ≃l (SExt {T = Sing} ∘ label-from-linear-tree-unbiased S T d)
+lfltu-susp : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → (label-from-linear-tree-unbiased S (susp-tree T) (suc d)) ≃l (SExt {T = Sing} ∘ label-from-linear-tree-unbiased S T d)
 lfltu-susp Sing T d .get PHere = refl≃stm
 lfltu-susp (Join S Sing) T d .get PHere = begin
-  < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) false) >stm
+  < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) false) >stm
     ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
   < unbiased-stm d (tree-bd d T) >>= map-pext (tree-inc-label d T false) >stm
     ≈⟨ extend-map-pext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T false) ⟩
@@ -259,7 +259,7 @@ lfltu-susp (Join S Sing) T d .get PHere = begin
     open Reasoning stm-setoid
 lfltu-susp (Join S Sing) T d .get (PExt Z) = lfltu-susp S T (suc d) .get Z
 lfltu-susp (Join S Sing) T d .get (PShift PHere) = begin
-  < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (suspTree T) true) >stm
+  < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) true) >stm
     ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
   < unbiased-stm d (tree-bd d T) >>= map-pext (tree-inc-label d T true) >stm
     ≈⟨ extend-map-pext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T true) ⟩
@@ -404,7 +404,7 @@ label-from-linear-tree-susp-full : (S : Tree n)
                             → (a : STm X)
                             → (As : STy X)
                             → .(p : tree-dim S ≡ sty-dim As)
-                            → label-from-linear-tree (suspTree S) (susp-stm a) (susp-sty As) (≤-reflexive (trans (cong suc p) (sym (susp-sty-dim As)))) ≃l susp-label-full (label-from-linear-tree S a As (≤-reflexive p))
+                            → label-from-linear-tree (susp-tree S) (susp-stm a) (susp-sty As) (≤-reflexive (trans (cong suc p) (sym (susp-sty-dim As)))) ≃l susp-label-full (label-from-linear-tree S a As (≤-reflexive p))
 label-from-linear-tree-susp-full S a As p = unrestrict-label-≃ _ _ ⦃ _ ⦄ (label-from-linear-tree-susp S a As (≤-reflexive p)) (begin
   < label-from-linear-tree-type S (susp-sty As) >sty
     ≈⟨ label-from-linear-tree-type-susp S As (≤-reflexive p) ⟩
@@ -453,7 +453,7 @@ label-from-disc-type-prop {S = Join S Sing} L = begin
     ≈⟨ label-on-sty-≃ (map-sty-pext-susp-compat (unbiased-type (tree-dim S) S)) refl≃l refl≃sty ⟩
   < label-on-sty (susp-sty (unbiased-type (tree-dim S) S)) L >sty
     ≈⟨ label-on-sty-≃ (unbiased-type-susp-lem (tree-dim S) S) refl≃l refl≃sty ⟩
-  < label-on-sty (unbiased-type (suc (tree-dim S)) (suspTree S)) L >sty ∎
+  < label-on-sty (unbiased-type (suc (tree-dim S)) (susp-tree S)) L >sty ∎
   where
     open Reasoning sty-setoid
 
@@ -464,7 +464,7 @@ label-from-disc-term-prop {S = Join S Sing} L = label-from-disc-term-prop (label
 unbiased-type-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → sty-to-type (unbiased-type d S) ≃ty lift-ty (sphere-type d)
 unbiased-type-linear zero Sing p = refl≃ty
 unbiased-type-linear (suc d) (Join S Sing) p = begin
-  < sty-to-type (unbiased-type (suc d) (suspTree S)) >ty
+  < sty-to-type (unbiased-type (suc d) (susp-tree S)) >ty
     ≈˘⟨ unbiased-type-susp-lem d S .get ⟩
   < sty-to-type (susp-sty (unbiased-type d S)) >ty
     ≈⟨ susp-sty-to-type (unbiased-type d S) ⟩

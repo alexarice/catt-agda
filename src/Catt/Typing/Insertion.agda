@@ -35,8 +35,8 @@ HasInsertion = ∀ {m n l n′}
              → .⦃ _ : has-linear-height l T ⦄
              → (M : Label X T)
              → L (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆)
-             → Typing-STy (tree-to-ctx S) As
-             → Typing-Label Γ (L ,, S⋆)
+             → {Bs : STy X}
+             → Typing-STm Γ (SCoh S As (L ,, S⋆)) Bs
              → (SCoh S As (L ,, S⋆)) ≈[ Γ ]stm SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆)
 
 HasSUAInsertion : Set
@@ -52,8 +52,8 @@ HasSUAInsertion = ∀ {m n l n′}
                 → {M : Label X T}
                 → L (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆)
                 → IsCompOrIdent (height-of-branching P) T
-                → Typing-STy (tree-to-ctx S) As
-                → Typing-Label Γ (L ,, S⋆)
+                → {Bs : STy X}
+                → Typing-STm Γ (SCoh S As (L ,, S⋆)) Bs
                 → (SCoh S As (L ,, S⋆)) ≈[ Γ ]stm SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆)
 
 module Conditions (ins : HasSUAInsertion) where
@@ -64,191 +64,160 @@ module Conditions (ins : HasSUAInsertion) where
             → (pf : L (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆))
             → (p : IsCompOrIdent (height-of-branching P) T)
             → LiftRule (Insertion Γ S As L P T M)
-  lift-rule {S = S} {L = L} {As = As} P pf p tty = begin
+  lift-rule {S = S} {T = T} {L = L} {M = M} {Γ = Γ} {As = As} P pf p {A = A} {C = C} tty = begin
     lift-tm (stm-to-term (SCoh S As (L ,, S⋆)))
-      ≈⟨ {!!} ⟩
+      ≈˘⟨ reflexive≈tm (lift-stm-to-term (SCoh S As (L ,, S⋆))) ⟩
     stm-to-term (SCoh S As (lift-label (L ,, S⋆)))
-      ≈⟨ {!!} ⟩
-    {!!}
-      ≈⟨ {!!} ⟩
-    {!!} ∎
+      ≈⟨ lem .get ⟩
+    stm-to-term (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (lift-label (sub-from-insertion-label S P T L M ,, S⋆)))
+      ≈⟨ reflexive≈tm (lift-stm-to-term (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆))) ⟩
+    lift-tm (stm-to-term (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆))) ∎
     where
+      pf-lift : lift-stm (L (branching-path-to-path P)) ≃stm
+                 (unbiased-comp′ (height-of-branching P) T >>= lift-label (M ,, S⋆))
+      pf-lift = begin
+        < lift-stm (L (branching-path-to-path P)) >stm
+          ≈⟨ lift-stm-≃ pf ⟩
+        < lift-stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆) >stm
+          ≈˘⟨ extend-lift (unbiased-comp′ (height-of-branching P) T) (M ,, S⋆) ⟩
+        < unbiased-comp′ (height-of-branching P) T >>= lift-label (M ,, S⋆) >stm ∎
+        where
+          open Reasoning stm-setoid
+
+      lem : stm-eq (Γ , A) (SCoh S As (lift-label (L ,, S⋆))) (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (lift-label (sub-from-insertion-label S P T L M ,, S⋆)))
+      lem = begin
+        SCoh S As (lift-label (L ,, S⋆))
+          ≈⟨ ins P pf-lift p [ (transport-typing-full tty (sym≃tm (lift-stm-to-term (SCoh S As (L ,, S⋆)))) (sym≃ty (to-sty-to-type (lift-ty C)))) ] ⟩
+        SCoh (insertion-tree S P T)
+             (label-on-sty As (exterior-sub-label S P T ,, S⋆))
+             (sub-from-insertion-label S P T (lift-stm ∘ L) (lift-stm ∘ M) ,, S⋆)
+          ≈˘⟨ reflexive≈stm (≃SCoh (insertion-tree S P T) refl≃sty (sub-from-insertion-label-map lift-stm S P T L M) refl≃sty) ⟩
+        SCoh (insertion-tree S P T)
+             (label-on-sty As (exterior-sub-label S P T ,, S⋆))
+             (lift-label (sub-from-insertion-label S P T L M ,, S⋆)) ∎
+        where
+          open Reasoning stm-setoid-≈
       open Reasoning (tm-setoid-≈ _)
 
-  -- lift-rule : ∀ {m n l n′}
-  --            → {Γ : Ctx m}
-  --            → (S : Tree n)
-  --            → (As : STy (someTree S))
-  --            → (L : Label (Other m) S)
-  --            → (P : BranchingPoint S l)
-  --            → (T : Tree n′)
-  --            → .⦃ _ : has-linear-height l T ⦄
-  --            → (M : Label (Other m) T)
-  --            → L (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆)
-  --            → IsCompOrIdent (height-of-branching P) T
-  --            → {A : Ty m}
-  --            → Typing-STy (tree-to-ctx S) As
-  --            → Typing-Label (Γ , A) (lift-label (L ,, S⋆))
-  --            → lift-stm (SCoh S As (L ,, S⋆)) ≈[ Γ , A ]stm lift-stm (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆))
-  -- lift-rule S As L P T M p q tty = begin
-  --   SCoh S As (lift-label (L ,, S⋆))
-  --     ≈⟨ ins P lem q ? ⟩
-  --   SCoh (insertion-tree S P T)
-  --     (label-on-sty As (exterior-sub-label S P T ,, S⋆))
-  --     (sub-from-insertion-label S P T (ap (lift-label (L ,, S⋆)))
-  --      (ap (lift-label (M ,, S⋆)))
-  --      ,, S⋆)
-  --     ≈˘⟨ reflexive≈stm (≃SCoh (insertion-tree S P T) refl≃sty (sub-from-insertion-label-map lift-stm S P T L M) refl≃sty) ⟩
-  --   SCoh (insertion-tree S P T)
-  --      (label-on-sty As (exterior-sub-label S P T ,, S⋆))
-  --      (lift-label (sub-from-insertion-label S P T L M ,, S⋆)) ∎
-  --   where
-  --     lem : (ap (lift-label (L ,, S⋆)) (branching-path-to-path P) ≃stm
-  --              (unbiased-comp′ (height-of-branching P) T >>=
-  --               lift-label (M ,, S⋆)))
-  --     lem = begin
-  --       < lift-stm (L (branching-path-to-path P)) >stm
-  --         ≈⟨ lift-stm-≃ p ⟩
-  --       < lift-stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆) >stm
-  --         ≈˘⟨ extend-lift (unbiased-comp′ (height-of-branching P) T) (M ,, S⋆) ⟩
-  --       < unbiased-comp′ (height-of-branching P) T >>= lift-label (M ,, S⋆) >stm ∎
-  --       where
-  --         open Reasoning stm-setoid
+  IsCompOrIdent-susp : (n : ℕ) → .⦃ NonZero n ⦄ → (T : Tree m) → IsCompOrIdent n T → IsCompOrIdent (suc n) (susp-tree T)
+  IsCompOrIdent-susp n T (IsComp x) = IsComp (cong suc x)
+  IsCompOrIdent-susp (suc n) T (IsIdent x) = IsIdent (Join≃ x Sing≃)
 
-  --     open Reasoning stm-setoid-≈
+  susp-rule : (P : BranchingPoint S l)
+            → .⦃ _ : has-linear-height l T ⦄
+            → (pf : L (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆))
+            → (p : IsCompOrIdent (height-of-branching P) T)
+            → SuspRule (Insertion Γ S As L P T M)
+  susp-rule {S = S} {T = T} {L = L} {M = M} {Γ = Γ} {As = As} P pf p {C = C} tty = begin
+    susp-tm (stm-to-term (SCoh S As (L ,, S⋆)))
+      ≈˘⟨ reflexive≈tm (susp-stm-to-term (SCoh S As (L ,, S⋆))) ⟩
+    stm-to-term (susp-stm (SCoh S As (L ,, S⋆)))
+      ≈⟨ lem .get ⟩
+    stm-to-term (susp-stm (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆)))
+      ≈⟨ reflexive≈tm (susp-stm-to-term (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆))) ⟩
+    susp-tm (stm-to-term (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆))) ∎
+    where
+      l1 : susp-label-full L (PExt (branching-path-to-path P)) ≃stm
+             (unbiased-comp′ (suc (height-of-branching P)) (susp-tree T) >>=
+              susp-label-full M ,, S⋆)
+      l1 = begin
+        < susp-stm (L (branching-path-to-path P)) >stm
+          ≈⟨ susp-stm-≃ pf ⟩
+        < susp-stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆) >stm
+          ≈⟨ extend-susp-label-full (unbiased-comp′ (height-of-branching P) T) M ⟩
+        < susp-stm (unbiased-comp′ (height-of-branching P) T) >>= susp-label-full M ,, S⋆ >stm ∎
+        where open Reasoning stm-setoid
 
-  -- IsCompOrIdent-susp : (n : ℕ) → .⦃ NonZero n ⦄ → (T : Tree m) → IsCompOrIdent n T → IsCompOrIdent (suc n) (suspTree T)
-  -- IsCompOrIdent-susp n T (IsComp x) = IsComp (cong suc x)
-  -- IsCompOrIdent-susp (suc n) T (IsIdent x) = IsIdent (Join≃ x Sing≃)
+      l4 : exterior-sub-label (susp-tree S) (BPExt P) (susp-tree T) ≃l
+              susp-label-full (exterior-sub-label S P T)
+      l4 .get PHere = refl≃stm
+      l4 .get (PExt Z) = refl≃stm
+      l4 .get (PShift PHere) = refl≃stm
 
-  -- susp-rule : ∀ {m n l n′}
-  --            → {Γ : Ctx m}
-  --            → {X : MaybeTree m}
-  --            → (S : Tree n)
-  --            → (As : STy (someTree S))
-  --            → (L : Label X S)
-  --            → (P : BranchingPoint S l)
-  --            → (T : Tree n′)
-  --            → .⦃ _ : has-linear-height l T ⦄
-  --            → (M : Label X T)
-  --            → L (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆)
-  --            → IsCompOrIdent (height-of-branching P) T
-  --            → Typing-STy (tree-to-ctx (suspTree S)) (susp-sty As)
-  --            → Typing-Label (susp-ctx Γ) (susp-label-full L ,, S⋆)
-  --            → susp-stm (SCoh S As (L ,, S⋆)) ≈[ susp-ctx Γ ]stm susp-stm (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆))
-  -- susp-rule S As L P T M p q Asty Lty = begin
-  --   susp-stm (SCoh S As (L ,, S⋆))
-  --     ≈⟨ reflexive≈stm (susp-stm-SCoh S As (L ,, S⋆)) ⟩
-  --   SCoh S As (susp-label (L ,, S⋆))
-  --     ≈⟨ reflexive≈stm (SCoh-unrestrict S As (susp-label (L ,, S⋆))) ⟩
-  --   SCoh (suspTree S) (susp-sty As)
-  --     (susp-label-full L ,, S⋆)
-  --     ≈⟨ ins -- (suspTree S) (susp-sty As) (susp-label-full L)
-  --     (BPExt P) -- (suspTree T) (susp-label-full M)
-  --     l1 (IsCompOrIdent-susp (height-of-branching P) T q) Asty Lty ⟩
-  --   SCoh (insertion-tree (suspTree S) (BPExt P) (suspTree T))
-  --     (label-on-sty (susp-sty As)
-  --      (exterior-sub-label (suspTree S) (BPExt P) (suspTree T) ,, S⋆))
-  --     (sub-from-insertion-label (suspTree S) (BPExt P) (suspTree T)
-  --      (susp-label-full L) (susp-label-full M)
-  --      ,, S⋆)
-  --     ≈⟨ reflexive≈stm (≃SCoh (suspTree (insertion-tree S P T)) l2 l3 refl≃sty) ⟩
-  --   SCoh (suspTree (insertion-tree S P T))
-  --     (susp-sty (label-on-sty As (exterior-sub-label S P T ,, S⋆)))
-  --      (susp-label-full (sub-from-insertion-label S P T L M) ,, S⋆)
-  --     ≈˘⟨ reflexive≈stm (SCoh-unrestrict (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (susp-label (sub-from-insertion-label S P T L M ,, S⋆))) ⟩
-  --   SCoh (insertion-tree S P T)
-  --     (label-on-sty As (exterior-sub-label S P T ,, S⋆))
-  --     (susp-label (sub-from-insertion-label S P T L M ,, S⋆))
-  --     ≈˘⟨ reflexive≈stm (susp-stm-SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆)) ⟩
-  --   susp-stm
-  --      (SCoh (insertion-tree S P T)
-  --       (label-on-sty As (exterior-sub-label S P T ,, S⋆))
-  --       (sub-from-insertion-label S P T L M ,, S⋆)) ∎
-  --   where
-  --     l1 : susp-label-full L (PExt (branching-path-to-path P)) ≃stm
-  --            (unbiased-comp′ (suc (height-of-branching P)) (suspTree T) >>=
-  --             susp-label-full M ,, S⋆)
-  --     l1 = begin
-  --       < susp-stm (L (branching-path-to-path P)) >stm
-  --         ≈⟨ susp-stm-≃ p ⟩
-  --       < susp-stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆) >stm
-  --         ≈⟨ extend-susp-label-full (unbiased-comp′ (height-of-branching P) T) M ⟩
-  --       < susp-stm (unbiased-comp′ (height-of-branching P) T) >>= susp-label-full M ,, S⋆ >stm ∎
-  --       where open Reasoning stm-setoid
+      l2 : label-on-sty (susp-sty As) (exterior-sub-label (susp-tree S) (BPExt P) (susp-tree T) ,, S⋆)
+             ≃sty susp-sty (label-on-sty As (exterior-sub-label S P T ,, S⋆))
+      l2 = begin
+        < label-on-sty (susp-sty As) (exterior-sub-label (susp-tree S) (BPExt P) (susp-tree T) ,, S⋆) >sty
+          ≈⟨ label-on-sty-≃ (refl≃sty {A = susp-sty As}) l4 refl≃sty ⟩
+        < label-on-sty (susp-sty As) (susp-label-full (exterior-sub-label S P T) ,, S⋆) >sty
+          ≈˘⟨ susp-label-full-on-sty As (exterior-sub-label S P T) ⟩
+        < susp-sty (label-on-sty As (exterior-sub-label S P T ,, S⋆)) >sty ∎
+        where
+          open Reasoning sty-setoid
 
-  --     lem : exterior-sub-label (suspTree S) (BPExt P) (suspTree T) ≃l
-  --             susp-label-full (exterior-sub-label S P T)
-  --     lem .get PHere = refl≃stm
-  --     lem .get (PExt Z) = refl≃stm
-  --     lem .get (PShift PHere) = refl≃stm
+      l3 : ap
+             (sub-from-insertion-label (susp-tree S) (BPExt P) (susp-tree T)
+              (susp-label-full L) (susp-label-full M)
+              ,, S⋆)
+             ≃l ap (susp-label-full (sub-from-insertion-label S P T L M) ,, S⋆)
+      l3 .get PHere = refl≃stm
+      l3 .get (PExt Z) = sym≃stm (sub-from-insertion-label-map susp-stm S P T L M .get Z)
+      l3 .get (PShift PHere) = refl≃stm
 
-  --     l2 : label-on-sty (susp-sty As) (exterior-sub-label (suspTree S) (BPExt P) (suspTree T) ,, S⋆)
-  --            ≃sty susp-sty (label-on-sty As (exterior-sub-label S P T ,, S⋆))
-  --     l2 = begin
-  --       < label-on-sty (susp-sty As) (exterior-sub-label (suspTree S) (BPExt P) (suspTree T) ,, S⋆) >sty
-  --         ≈⟨ label-on-sty-≃ (refl≃sty {A = susp-sty As}) lem refl≃sty ⟩
-  --       < label-on-sty (susp-sty As) (susp-label-full (exterior-sub-label S P T) ,, S⋆) >sty
-  --         ≈˘⟨ susp-label-full-on-sty As (exterior-sub-label S P T) ⟩
-  --       < susp-sty (label-on-sty As (exterior-sub-label S P T ,, S⋆)) >sty ∎
-  --       where
-  --         open Reasoning sty-setoid
+      lem : stm-eq (susp-ctx Γ) (susp-stm (SCoh S As (L ,, S⋆))) (susp-stm (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆)))
+      lem = begin
+        SCoh S As (susp-label (L ,, S⋆))
+          ≈⟨ reflexive≈stm (SCoh-unrestrict S As (susp-label (L ,, S⋆))) ⟩
+        SCoh (susp-tree S) (susp-sty As) (susp-label-full L ,, S⋆)
+          ≈⟨ ins (BPExt P)
+                 l1
+                 (IsCompOrIdent-susp (suc (height-of-branching′ P)) T p)
+                 [ (transport-typing-full tty
+                                          (trans≃tm (sym≃tm (susp-stm-to-term (SCoh S As (L ,, S⋆))))
+                                                    (SCoh-unrestrict S As (susp-label (L ,, S⋆)) .get))
+                                          (sym≃ty (to-sty-to-type (susp-ty C)))) ] ⟩
+        SCoh (susp-tree (insertion-tree S P T))
+             (label-on-sty (susp-sty As) (exterior-sub-label (Join S Sing) (BPExt P) (susp-tree T) ,, S⋆))
+             (sub-from-insertion-label (Join S Sing) (BPExt P) (susp-tree T) (susp-label-full L) (susp-label-full M) ,, S⋆)
+          ≈⟨ reflexive≈stm (≃SCoh (susp-tree (insertion-tree S P T)) l2 l3 refl≃sty) ⟩
+        SCoh (susp-tree (insertion-tree S P T))
+             (susp-sty (label-on-sty As (exterior-sub-label S P T ,, S⋆)))
+             (susp-label-full (sub-from-insertion-label S P T L M) ,, S⋆)
+          ≈˘⟨ reflexive≈stm (SCoh-unrestrict (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (susp-label (sub-from-insertion-label S P T L M ,, S⋆))) ⟩
+        SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (susp-label (sub-from-insertion-label S P T L M ,, S⋆)) ∎
+        where
+          open Reasoning stm-setoid-≈
 
-  --     l3 : ap
-  --            (sub-from-insertion-label (suspTree S) (BPExt P) (suspTree T)
-  --             (susp-label-full L) (susp-label-full M)
-  --             ,, S⋆)
-  --            ≃l ap (susp-label-full (sub-from-insertion-label S P T L M) ,, S⋆)
-  --     l3 .get PHere = refl≃stm
-  --     l3 .get (PExt Z) = sym≃stm (sub-from-insertion-label-map susp-stm S P T L M .get Z)
-  --     l3 .get (PShift PHere) = refl≃stm
 
-  --     open Reasoning stm-setoid-≈
+      open Reasoning (tm-setoid-≈ _)
 
-  -- sub-rule : ∀ {m n l n′}
-  --            → {Γ : Ctx l}
-  --            → {Δ : Ctx m}
-  --            → {X : MaybeTree m}
-  --            → (S : Tree n)
-  --            → (As : STy (someTree S))
-  --            → (L : Label X S)
-  --            → (P : BranchingPoint S l)
-  --            → (T : Tree n′)
-  --            → .⦃ _ : has-linear-height l T ⦄
-  --            → (M : Label X T)
-  --            → L (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆)
-  --            → IsCompOrIdent (height-of-branching P) T
-  --            → (σ : Sub m l ⋆)
-  --            → Typing-STy (tree-to-ctx S) As
-  --            → Typing-Label Γ (label-sub (L ,, S⋆) σ)
-  --            → stm-sub (SCoh S As (L ,, S⋆)) σ ≈[ Γ ]stm stm-sub (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆)) σ
-  -- sub-rule S As L P T M p q σ Asty Lty = begin
-  --   stm-sub (SCoh S As (L ,, S⋆)) σ
-  --     ≈⟨ reflexive≈stm (stm-sub-SCoh S As (L ,, S⋆) σ) ⟩
-  --   SCoh S As (label-sub (L ,, S⋆) σ)
-  --     ≈⟨ ins P lem q Asty Lty ⟩
-  --   SCoh (insertion-tree S P T)
-  --     (label-on-sty As (exterior-sub-label S P T ,, S⋆))
-  --     (sub-from-insertion-label S P T (ap (label-sub (L ,, S⋆) σ))
-  --      (ap (label-sub (M ,, S⋆) σ)) ,, S⋆)
-  --     ≈˘⟨ reflexive≈stm (≃SCoh (insertion-tree S P T) refl≃sty (sub-from-insertion-label-map (λ a → stm-sub a σ) S P T L M) refl≃sty) ⟩
-  --   SCoh (insertion-tree S P T)
-  --     (label-on-sty As (exterior-sub-label S P T ,, S⋆))
-  --     (label-sub (sub-from-insertion-label S P T L M ,, S⋆) σ)
-  --     ≈˘⟨ reflexive≈stm (stm-sub-SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆) σ) ⟩
-  --   stm-sub
-  --      (SCoh (insertion-tree S P T)
-  --       (label-on-sty As (exterior-sub-label S P T ,, S⋆))
-  --       (sub-from-insertion-label S P T L M ,, S⋆)) σ ∎
-  --   where
-  --     lem : proj₁ (label-sub (L ,, S⋆) σ) (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>=
-  --                                                                           proj₁ (label-sub (M ,, S⋆) σ) ,, S⋆)
-  --     lem = begin
-  --       < stm-sub (L (branching-path-to-path P)) σ >stm
-  --         ≈⟨ stm-sub-≃ p σ ⟩
-  --       < stm-sub (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆) σ >stm
-  --         ≈⟨ stm-sub-extend (unbiased-comp′ (height-of-branching P) T) (M ,, S⋆) σ ⟩
-  --       < unbiased-comp′ (height-of-branching P) T >>= label-sub (M ,, S⋆) σ >stm ∎
-  --       where
-  --         open Reasoning stm-setoid
-  --     open Reasoning stm-setoid-≈
+  sub-rule : (P : BranchingPoint S l)
+            → .⦃ _ : has-linear-height l T ⦄
+            → (pf : L (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆))
+            → (p : IsCompOrIdent (height-of-branching P) T)
+            → SubRule (Insertion Γ S As L P T M)
+  sub-rule {S = S} {T = T} {L = L} {M = M} {Γ = Γ} {As = As} P pf p {σ = σ} {Δ = Δ} {C = C} σty tty = lem .get
+    where
+      l1 : ap (label-sub (L ,, S⋆) σ) (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= label-sub (M ,, S⋆) σ)
+      l1 = begin
+        < stm-sub (L (branching-path-to-path P)) σ >stm
+          ≈⟨ stm-sub-≃ pf σ ⟩
+        < stm-sub (unbiased-comp′ (height-of-branching P) T >>= M ,, S⋆) σ >stm
+          ≈⟨ stm-sub-extend (unbiased-comp′ (height-of-branching P) T) (M ,, S⋆) σ ⟩
+        < unbiased-comp′ (height-of-branching P) T >>= label-sub (M ,, S⋆) σ >stm ∎
+        where
+          open Reasoning stm-setoid
+
+      lem : stm-eq Δ (stm-sub (SCoh S As (L ,, S⋆)) σ) (stm-sub (SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆)) σ)
+      lem = begin
+        stm-sub (SCoh S As (L ,, S⋆)) σ
+          ≈⟨ reflexive≈stm (stm-sub-SCoh S As (L ,, S⋆) σ) ⟩
+        SCoh S As (label-sub (L ,, S⋆) σ)
+          ≈⟨ ins P l1 p [ (transport-typing-full tty (stm-sub-SCoh S As (L ,, S⋆) σ .get) (sym≃ty (to-sty-to-type (C [ σ ]ty)))) ] ⟩
+        SCoh (insertion-tree S P T)
+             (label-on-sty As (exterior-sub-label S P T ,, S⋆))
+             (sub-from-insertion-label S P T (λ x → stm-sub (L x) σ) (λ x → stm-sub (M x) σ) ,, S⋆)
+          ≈˘⟨ reflexive≈stm (≃SCoh (insertion-tree S P T)
+                           refl≃sty
+                           (sub-from-insertion-label-map (λ x → stm-sub x σ) S P T L M)
+                           refl≃sty) ⟩
+        SCoh (insertion-tree S P T)
+             (label-on-sty As (exterior-sub-label S P T ,, S⋆))
+             (label-sub (sub-from-insertion-label S P T L M ,, S⋆) σ)
+          ≈˘⟨ reflexive≈stm (stm-sub-SCoh (insertion-tree S P T) (label-on-sty As (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆) σ) ⟩
+        stm-sub (SCoh (insertion-tree S P T)
+                      (label-on-sty As (exterior-sub-label S P T ,, S⋆))
+                      (sub-from-insertion-label S P T L M ,, S⋆))
+                σ ∎
+        where
+          open Reasoning stm-setoid-≈

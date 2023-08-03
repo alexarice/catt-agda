@@ -19,7 +19,7 @@ maybeTreeSize : (X : MaybeTree n) → ℕ
 maybeTreeSize {n} X = n
 
 suspMaybeTree : MaybeTree n → MaybeTree (2 + n)
-suspMaybeTree (someTree x) = someTree (suspTree x)
+suspMaybeTree (someTree x) = someTree (susp-tree x)
 suspMaybeTree (Other _) = Other (2 + _)
 
 data CtxOrTree : ℕ → Set where
@@ -172,7 +172,7 @@ sty-src (SArr s As t) = s
 sty-tgt : (As : STy X) → .⦃ NonZero (sty-dim As) ⦄ → STm X
 sty-tgt (SArr s As t) = t
 
-unrestrict-label : (L : Label-WT X S) → .⦃ NonZero (sty-dim (lty L)) ⦄ → Label X (suspTree S)
+unrestrict-label : (L : Label-WT X S) → .⦃ NonZero (sty-dim (lty L)) ⦄ → Label X (susp-tree S)
 unrestrict-label {X = X} {S = S} (L ,, As) PHere = sty-src As
 unrestrict-label {X = X} {S = S} (L ,, As) (PExt P) = L P
 unrestrict-label {X = X} {S = S} (L ,, As) (PShift P) = sty-tgt As
@@ -180,7 +180,7 @@ unrestrict-label {X = X} {S = S} (L ,, As) (PShift P) = sty-tgt As
 susp-stm : STm X → STm (suspMaybeTree X)
 susp-sty : STy X → STy (suspMaybeTree X)
 susp-label : Label-WT X S → Label-WT (suspMaybeTree X) S
-susp-label-full : Label X S → Label (suspMaybeTree X) (suspTree S)
+susp-label-full : Label X S → Label (suspMaybeTree X) (susp-tree S)
 
 stm-fst : STm (suspMaybeTree X)
 stm-snd : STm (suspMaybeTree X)

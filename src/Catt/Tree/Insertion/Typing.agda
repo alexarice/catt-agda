@@ -49,7 +49,7 @@ exterior-sub-label-Ty : (S : Tree n)
                       → (q : height-of-branching p ≥ tree-dim T)
                       → Typing-Label (tree-to-ctx (insertion-tree S p T)) (exterior-sub-label S p T ,, S⋆)
 exterior-sub-label-Ty (Join S₁ S₂) BPHere T q
-  = label-between-connect-trees-Ty (label-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T)
+  = label-between-connect-trees-Ty (label-from-linear-tree-unbiased-Ty-0 (susp-tree S₁) T)
                                    (id-label-Ty S₂)
                                    refl≈stm
                                    refl≈stm
@@ -198,8 +198,8 @@ branching-path-to-var-height : (S : Tree n)
 branching-path-to-var-height (Join S₁ S₂) BPHere = begin
   tm-height (connect-susp (tree-to-ctx S₁) (tree-to-ctx S₂))
       (0V [ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm)
-    ≡˘⟨ sub-tm-height-0 0V (tree-to-ctx (suspTree S₁)) (connect-susp-inc-left-Ty (tree-to-ctx S₂)) ⟩
-  tm-height (tree-to-ctx (suspTree S₁)) 0V
+    ≡˘⟨ sub-tm-height-0 0V (tree-to-ctx (susp-tree S₁)) (connect-susp-inc-left-Ty (tree-to-ctx S₂)) ⟩
+  tm-height (tree-to-ctx (susp-tree S₁)) 0V
     ≡⟨ susp-tm-height 0V (tree-to-ctx S₁) ⟩
   suc (tm-height (tree-to-ctx S₁) 0V)
     ≡⟨ cong suc (linear-tree-dim S₁) ⟩
@@ -210,8 +210,8 @@ branching-path-to-var-height (Join S₁ S₂) (BPExt P) = begin
   tm-height (connect-susp (tree-to-ctx S₁) (tree-to-ctx S₂))
       (susp-tm (branching-path-to-var S₁ P)
         [ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm)
-    ≡˘⟨ sub-tm-height-0 (susp-tm (branching-path-to-var S₁ P)) (tree-to-ctx (suspTree S₁)) (connect-susp-inc-left-Ty (tree-to-ctx S₂)) ⟩
-  tm-height (tree-to-ctx (suspTree S₁)) (susp-tm (branching-path-to-var S₁ P))
+    ≡˘⟨ sub-tm-height-0 (susp-tm (branching-path-to-var S₁ P)) (tree-to-ctx (susp-tree S₁)) (connect-susp-inc-left-Ty (tree-to-ctx S₂)) ⟩
+  tm-height (tree-to-ctx (susp-tree S₁)) (susp-tm (branching-path-to-var S₁ P))
     ≡⟨ susp-tm-height (branching-path-to-var S₁ P) (tree-to-ctx S₁) ⟩
   suc (tm-height (tree-to-ctx S₁) (branching-path-to-var S₁ P))
     ≡⟨ cong suc (branching-path-to-var-height S₁ P) ⟩
@@ -309,7 +309,7 @@ exterior-sub-label-Ty : (S : Tree n)
                       → .⦃ q : height-of-branching p ≡ tree-dim T ⦄
                       → Typing-Label (incTree (insertion-tree S p T)) (exterior-sub-label S p T)
 exterior-sub-label-Ty (Join S₁ S₂) BPHere T
-  = label-between-connect-trees-Ty (to-label-Ty (suspTree S₁) (incTree T) (sub-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T ⦃ NonZero-subst it it ⦄ (sym it)))
+  = label-between-connect-trees-Ty (to-label-Ty (susp-tree S₁) (incTree T) (sub-from-linear-tree-unbiased-Ty-0 (susp-tree S₁) T ⦃ NonZero-subst it it ⦄ (sym it)))
                                    (id-label-Ty S₂)
                                    (reflexive≈tm (unrestrict-snd (sub-from-linear-tree-unbiased S₁ T 1)))
                                    refl≈tm
@@ -446,7 +446,7 @@ sub-from-insertion-fst-var {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ
     ]tm
     ≈⟨ reflexive≈tm (unrestrict-fst (sub-from-insertion S₁ P T _ _)) ⟩
   get-fst [ τ ]tm
-    ≈˘⟨ src-eq (sub-from-insertion-lem S₁ S₂ (suspTree T)
+    ≈˘⟨ src-eq (sub-from-insertion-lem S₁ S₂ (susp-tree T)
                                              (branching-path-to-var S₁ P)
                                              ⦃ branching-path-to-var-is-var S₁ P ⦄
                                              σty τty p) ⟩
@@ -499,7 +499,7 @@ sub-from-insertion-Ty {Γ = Γ} (Join S₁ S₂) PHere T {σ} {τ} σty τty p =
       get-snd [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm
         ≈⟨ reflexive≈tm (assoc-tm σ (connect-susp-inc-left (tree-size S₁) (tree-size S₂)) get-snd) ⟩
       get-snd [ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm [ σ ]tm
-        ≈⟨ reflexive≈tm (sub-action-≃-tm (connect-inc-fst-var {n = tree-size (suspTree S₁)} get-snd (tree-size S₂)) refl≃s) ⟩
+        ≈⟨ reflexive≈tm (sub-action-≃-tm (connect-inc-fst-var {n = tree-size (susp-tree S₁)} get-snd (tree-size S₂)) refl≃s) ⟩
       Var (fromℕ (tree-size S₂)) [ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm [ σ ]tm
         ≈˘⟨ reflexive≈tm (assoc-tm σ (connect-susp-inc-right (tree-size S₁) (tree-size S₂)) (Var (fromℕ _))) ⟩
       Var (fromℕ _) [ σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm ∎
@@ -539,7 +539,7 @@ sub-from-insertion-Ty {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ} {τ
         ≈⟨ assoc-tm σ (connect-inc-left get-snd _) (susp-tm (branching-path-to-var S₁ P)) ⟩
       < susp-tm (branching-path-to-var S₁ P) [ connect-inc-left get-snd _ ]tm [ σ ]tm >tm
         ≈⟨ p ⟩
-      < unbiased-comp (suc (tree-dim T)) (suspTree T) [ τ ]tm >tm
+      < unbiased-comp (suc (tree-dim T)) (susp-tree T) [ τ ]tm >tm
         ≈˘⟨ sub-action-≃-tm (unbiased-comp-susp-lem (tree-dim T) T) (refl≃s {σ = τ}) ⟩
       < susp-tm (unbiased-comp (tree-dim T) T) [ τ ]tm >tm
         ≈⟨ restrict-susp-full (unbiased-comp (tree-dim T) T) τ refl≃tm refl≃tm ⟩
@@ -553,12 +553,12 @@ sub-from-insertion-Ty {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ} {τ
     tm-eq-1 : get-fst [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm
               ≈[ Γ ]tm
               get-fst [ τ ]tm
-    tm-eq-1 = src-eq (sub-from-insertion-lem S₁ S₂ (suspTree T) (branching-path-to-var S₁ P) σty τty p)
+    tm-eq-1 = src-eq (sub-from-insertion-lem S₁ S₂ (susp-tree T) (branching-path-to-var S₁ P) σty τty p)
 
     tm-eq-2 : get-snd [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm
               ≈[ Γ ]tm
               get-snd [ τ ]tm
-    tm-eq-2 = tgt-eq (sub-from-insertion-lem S₁ S₂ (suspTree T) (branching-path-to-var S₁ P) σty τty p)
+    tm-eq-2 = tgt-eq (sub-from-insertion-lem S₁ S₂ (susp-tree T) (branching-path-to-var S₁ P) σty τty p)
 
     l2 : get-snd [ unrestrict (sub-from-insertion S₁ P T
              (restrict (σ ∘ connect-inc-left get-snd _) (get-fst [ τ ]tm)
@@ -1046,7 +1046,7 @@ interior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ} {τ} σ
         ≈⟨ assoc-tm σ (connect-inc-left get-snd _) (susp-tm (branching-path-to-var S₁ P)) ⟩
       < susp-tm (branching-path-to-var S₁ P) [ connect-inc-left get-snd _ ]tm [ σ ]tm >tm
         ≈⟨ p ⟩
-      < unbiased-comp (tree-dim (suspTree T)) (suspTree T) [ τ ]tm >tm
+      < unbiased-comp (tree-dim (susp-tree T)) (susp-tree T) [ τ ]tm >tm
         ≈˘⟨ sub-action-≃-tm (unbiased-comp-susp-lem (tree-dim T) T) (refl≃s {σ = τ}) ⟩
       < susp-tm (unbiased-comp (tree-dim T) T) [ τ ]tm >tm
         ≈⟨ restrict-susp-full (unbiased-comp (tree-dim T) T) τ refl≃tm refl≃tm ⟩
@@ -1058,14 +1058,14 @@ interior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ} {τ} σ
     tm-eq-1 : get-fst [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm
               ≈[ Γ ]tm
               get-fst [ τ ]tm
-    tm-eq-1 = src-eq (sub-from-insertion-lem S₁ S₂ (suspTree T) (branching-path-to-var S₁ P) σty τty p)
+    tm-eq-1 = src-eq (sub-from-insertion-lem S₁ S₂ (susp-tree T) (branching-path-to-var S₁ P) σty τty p)
 
     tm-eq-2 : get-snd [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm
               ≈[ Γ ]tm
               get-snd [ τ ]tm
-    tm-eq-2 = tgt-eq (sub-from-insertion-lem S₁ S₂ (suspTree T) (branching-path-to-var S₁ P) σty τty p)
+    tm-eq-2 = tgt-eq (sub-from-insertion-lem S₁ S₂ (susp-tree T) (branching-path-to-var S₁ P) σty τty p)
 
-    open Reasoning (sub-setoid-≈ (suc (tree-size (suspTree T))) Γ)
+    open Reasoning (sub-setoid-≈ (suc (tree-size (susp-tree T))) Γ)
 
 interior-sub-comm {Γ = Γ} (Join S₁ S₂) (PShift P) T {σ} {τ} σty τty p = begin
   < sub-from-connect (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂))
@@ -1116,22 +1116,22 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) PHere T {σ} {τ} σty τty p = beg
        ∘ idSub≃ (connect-tree-to-ctx T S₂)
        ∘ (idSub≃ (sym≃c (connect-tree-to-ctx T S₂)) ∘
          sub-between-connects
-         (sub-from-linear-tree-unbiased (suspTree S₁) T 0)
+         (sub-from-linear-tree-unbiased (susp-tree S₁) T 0)
          idSub (tree-last-var T)) >s′
     ≈⟨ reflexive≈s (sub-action-≃-sub (idSub≃-on-sub _ _) (idSub≃-right-unit _ _)) ⟩
   < sub-from-connect τ
       (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
       ∘ sub-between-connects
-         (sub-from-linear-tree-unbiased (suspTree S₁) T 0)
+         (sub-from-linear-tree-unbiased (susp-tree S₁) T 0)
          idSub (tree-last-var T) >s′
-    ≈⟨ between-connect-from-connect-≈ (sub-from-linear-tree-unbiased (suspTree S₁) T 0)
+    ≈⟨ between-connect-from-connect-≈ (sub-from-linear-tree-unbiased (susp-tree S₁) T 0)
                                       idSub
                                       (tree-last-var T)
                                       τ
                                       (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂))
                                       lem2 ⟩
   < sub-from-connect
-      (τ ∘ sub-from-linear-tree-unbiased (suspTree S₁) T 0)
+      (τ ∘ sub-from-linear-tree-unbiased (susp-tree S₁) T 0)
       (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ∘ idSub) >s′
     ≈⟨ sub-from-connect-≈ l1 (reflexive≈s (id-right-unit (σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂)))) ⟩
   < sub-from-connect
@@ -1153,25 +1153,25 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) PHere T {σ} {τ} σty τty p = beg
       get-snd [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm
         ≈⟨ reflexive≈tm (assoc-tm σ (connect-susp-inc-left (tree-size S₁) (tree-size S₂)) get-snd) ⟩
       get-snd [ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm [ σ ]tm
-        ≈⟨ reflexive≈tm (sub-action-≃-tm (connect-inc-fst-var {n = tree-size (suspTree S₁)} get-snd (tree-size S₂)) refl≃s) ⟩
+        ≈⟨ reflexive≈tm (sub-action-≃-tm (connect-inc-fst-var {n = tree-size (susp-tree S₁)} get-snd (tree-size S₂)) refl≃s) ⟩
       Var (fromℕ (tree-size S₂)) [ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm [ σ ]tm
         ≈˘⟨ reflexive≈tm (assoc-tm σ (connect-susp-inc-right (tree-size S₁) (tree-size S₂)) (Var (fromℕ _))) ⟩
       Var (fromℕ _) [ σ ∘ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm ∎
       where
         open Reasoning (tm-setoid-≈ Γ)
 
-    dim-lem : tree-dim (suspTree S₁) ≡ tree-dim T
+    dim-lem : tree-dim (susp-tree S₁) ≡ tree-dim T
     dim-lem = insertion-dim-lem (Join S₁ S₂) PHere T σty τty p
 
-    l2 : (0V [ τ ∘ sub-from-linear-tree-unbiased (suspTree S₁) T 0 ]tm)
+    l2 : (0V [ τ ∘ sub-from-linear-tree-unbiased (susp-tree S₁) T 0 ]tm)
            ≃tm (0V [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm)
     l2 = begin
-      < 0V [ τ ∘ sub-from-linear-tree-unbiased (suspTree S₁) T 0 ]tm >tm
-        ≈⟨ assoc-tm τ (sub-from-linear-tree-unbiased (suspTree S₁) T 0) 0V ⟩
-      < 0V [ sub-from-linear-tree-unbiased (suspTree S₁) T 0 ]tm
+      < 0V [ τ ∘ sub-from-linear-tree-unbiased (susp-tree S₁) T 0 ]tm >tm
+        ≈⟨ assoc-tm τ (sub-from-linear-tree-unbiased (susp-tree S₁) T 0) 0V ⟩
+      < 0V [ sub-from-linear-tree-unbiased (susp-tree S₁) T 0 ]tm
            [ τ ]tm >tm
-        ≈⟨ sub-action-≃-tm (sub-from-linear-tree-unbiased-0V (suspTree S₁) T 0) refl≃s ⟩
-      < unbiased-comp (tree-dim (suspTree S₁)) T [ τ ]tm >tm
+        ≈⟨ sub-action-≃-tm (sub-from-linear-tree-unbiased-0V (susp-tree S₁) T 0) refl≃s ⟩
+      < unbiased-comp (tree-dim (susp-tree S₁)) T [ τ ]tm >tm
         ≈⟨ sub-action-≃-tm (unbiased-comp-≃ dim-lem (refl≃ {T = T})) (refl≃s {σ = τ}) ⟩
       < unbiased-comp (tree-dim T) T [ τ ]tm >tm
         ≈˘⟨ p ⟩
@@ -1182,17 +1182,17 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) PHere T {σ} {τ} σty τty p = beg
       where
         open Reasoning tm-setoid
 
-    l1 : τ ∘ (sub-from-linear-tree-unbiased (suspTree S₁) T 0)
+    l1 : τ ∘ (sub-from-linear-tree-unbiased (susp-tree S₁) T 0)
          ≈[ Γ ]s σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)
     l1 = begin
-      < τ ∘ sub-from-linear-tree-unbiased (suspTree S₁) T 0 >s′
-        ≈⟨ sub-from-linear-Eq (suspTree S₁)
-                              (apply-sub-sub-typing (sub-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T ⦃ NonZero-subst dim-lem it ⦄ (sym dim-lem)) τty)
+      < τ ∘ sub-from-linear-tree-unbiased (susp-tree S₁) T 0 >s′
+        ≈⟨ sub-from-linear-Eq (susp-tree S₁)
+                              (apply-sub-sub-typing (sub-from-linear-tree-unbiased-Ty-0 (susp-tree S₁) T ⦃ NonZero-subst dim-lem it ⦄ (sym dim-lem)) τty)
                               (apply-sub-sub-typing (connect-susp-inc-left-Ty (tree-to-ctx S₂)) σty)
                               l2 ⟩
       < σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) >s′ ∎
       where
-        open Reasoning (sub-setoid-≈ (suc (tree-size (suspTree S₁))) Γ)
+        open Reasoning (sub-setoid-≈ (suc (tree-size (susp-tree S₁))) Γ)
 
     open Reasoning (sub-setoid-≈ (suc (tree-size (Join S₁ S₂))) Γ)
 
@@ -1241,7 +1241,7 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ = σ} {�
         ≈⟨ assoc-tm σ (connect-inc-left get-snd _) (susp-tm (branching-path-to-var S₁ P)) ⟩
       < susp-tm (branching-path-to-var S₁ P) [ connect-inc-left get-snd _ ]tm [ σ ]tm >tm
         ≈⟨ p ⟩
-      < unbiased-comp (tree-dim (suspTree T)) (suspTree T) [ τ ]tm >tm
+      < unbiased-comp (tree-dim (susp-tree T)) (susp-tree T) [ τ ]tm >tm
         ≈˘⟨ sub-action-≃-tm (Coh≃ refl≃c (unbiased-type-susp-lem (tree-dim T) T) susp-functorial-id) (refl≃s {σ = τ}) ⟩
       < susp-tm (unbiased-comp (tree-dim T) T) [ τ ]tm >tm
         ≈⟨ restrict-susp-full (unbiased-comp (tree-dim T) T) τ refl≃tm refl≃tm ⟩
@@ -1255,12 +1255,12 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ = σ} {�
     tm-eq-1 : get-fst [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm
               ≈[ Γ ]tm
               get-fst [ τ ]tm
-    tm-eq-1 = src-eq (sub-from-insertion-lem S₁ S₂ (suspTree T) (branching-path-to-var S₁ P) σty τty p)
+    tm-eq-1 = src-eq (sub-from-insertion-lem S₁ S₂ (susp-tree T) (branching-path-to-var S₁ P) σty τty p)
 
     tm-eq-2 : get-snd [ σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂) ]tm
               ≈[ Γ ]tm
               get-snd [ τ ]tm
-    tm-eq-2 = tgt-eq (sub-from-insertion-lem S₁ S₂ (suspTree T) (branching-path-to-var S₁ P) σty τty p)
+    tm-eq-2 = tgt-eq (sub-from-insertion-lem S₁ S₂ (susp-tree T) (branching-path-to-var S₁ P) σty τty p)
 
     l2 : get-snd [ unrestrict (sub-from-insertion S₁ P T
              (restrict (σ ∘ connect-inc-left get-snd _) (get-fst [ τ ]tm)
@@ -1325,7 +1325,7 @@ exterior-sub-comm {Γ = Γ} (Join S₁ S₂) (PExt P) (Join T Sing) {σ = σ} {�
         ≈⟨ unrestrict-restrict-≈ (σ ∘ connect-susp-inc-left (tree-size S₁) (tree-size S₂)) (sym≈tm tm-eq-1) (sym≈tm tm-eq-2) ⟩
       < σ ∘ connect-inc-left get-snd _ >s′ ∎
       where
-        open Reasoning (sub-setoid-≈ (suc (tree-size (suspTree S₁))) Γ)
+        open Reasoning (sub-setoid-≈ (suc (tree-size (susp-tree S₁))) Γ)
 
     open Reasoning (sub-setoid-≈ (suc (tree-size (Join S₁ S₂))) Γ)
 
@@ -1392,7 +1392,7 @@ exterior-sub-label-Ty : (S : Tree n)
 exterior-sub-label-Ty (Join S₁ S₂) PHere T
   = label-between-connect-trees-Ty T
                                    S₂
-                                   (to-label-Ty (suspTree S₁) (sub-from-linear-tree-unbiased-Ty-0 (suspTree S₁) T ⦃ NonZero-subst it it ⦄ (sym it)))
+                                   (to-label-Ty (susp-tree S₁) (sub-from-linear-tree-unbiased-Ty-0 (susp-tree S₁) T ⦃ NonZero-subst it it ⦄ (sym it)))
                                    (id-label-Ty S₂)
                                    (reflexive≈tm (unrestrict-snd (sub-from-linear-tree-unbiased S₁ T 1)))
                                    (reflexive≈tm (id-first-label S₂))

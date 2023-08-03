@@ -819,7 +819,7 @@ SCoh-ext {U = U} S A L .get = begin
 susp-label-full-to-sub : (L : Label X S) → label-to-sub (susp-label-full L ,, S⋆) ≃s susp-sub (label-to-sub (L ,, S⋆))
 susp-label-full-to-sub L = unrestrict-≃ (susp-label-to-sub (L ,, S⋆))
 
-SCoh-unrestrict : (S : Tree n) → (As : STy (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → SCoh S As L ≃stm SCoh (suspTree S) (susp-sty As) (unrestrict-label L ,, sty-base (lty L))
+SCoh-unrestrict : (S : Tree n) → (As : STy (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → SCoh S As L ≃stm SCoh (susp-tree S) (susp-sty As) (unrestrict-label L ,, sty-base (lty L))
 SCoh-unrestrict S As (L ,, SArr s Bs t) .get
   = sub-action-≃-tm (Coh≃ refl≃c (sym≃ty (susp-sty-to-type As)) susp-functorial-id)
                     (refl≃s {σ = unrestrict (label-to-sub′ (λ P → stm-to-term (L P))
@@ -852,7 +852,7 @@ susp-label-full-on-sty As L = begin
   where
     open Reasoning sty-setoid
 
-id-label-susp-full : (T : Tree n) → susp-label-full (id-label T) ≃l id-label (suspTree T)
+id-label-susp-full : (T : Tree n) → susp-label-full (id-label T) ≃l id-label (susp-tree T)
 id-label-susp-full T .get PHere = refl≃stm
 id-label-susp-full T .get (PExt Z) = compute-≃ refl≃stm
 id-label-susp-full T .get (PShift PHere) = compute-≃ refl≃stm
@@ -1167,3 +1167,20 @@ label-linear-0V {S = S} L = begin
   < 0V [ label-to-sub L ]tm >tm ∎
   where
     open Reasoning tm-setoid
+
+stm-to-other-prop : (a : STm X) → stm-to-other a ≃stm a
+sty-to-other-prop : (As : STy X) → sty-to-other As ≃sty As
+label-to-other-prop : (L : Label X S) → label-to-other L ≃l L
+
+stm-to-other-prop a@(SExt _) = [ refl≃tm ]
+stm-to-other-prop a@(SShift _) = [ refl≃tm ]
+stm-to-other-prop a@(SPath _) = [ refl≃tm ]
+stm-to-other-prop (SCoh S A L) = ≃SCoh S refl≃sty (label-to-other-prop (ap L)) (sty-to-other-prop (lty L))
+stm-to-other-prop (SOther t) = refl≃stm
+
+sty-to-other-prop S⋆ = [ refl≃ty ]
+sty-to-other-prop (SArr s As t) = ≃SArr (stm-to-other-prop s)
+                                        (sty-to-other-prop As)
+                                        (stm-to-other-prop t)
+
+label-to-other-prop L .get P = stm-to-other-prop (L P)

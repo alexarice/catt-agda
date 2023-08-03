@@ -817,7 +817,7 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
             last-lem rewrite DCT-toVarSet xs
                      rewrite DCT-toVarSet ys = p
 
-supp-tvarset : TVarSet S → TVarSet (suspTree S)
+supp-tvarset : TVarSet S → TVarSet (susp-tree S)
 supp-tvarset xs = VSJoin true xs (VSSing true)
 
 supp-tvarset-DCT : (xs : TVarSet S) → DCT (supp-tvarset xs) ≡ supp-tvarset (DCT xs)

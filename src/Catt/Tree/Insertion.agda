@@ -81,7 +81,7 @@ exterior-sub-label : (S : Tree n)
                   → .⦃ _ : has-linear-height d T ⦄
                   → Label (someTree (insertion-tree S p T)) S
 exterior-sub-label (Join S₁ S₂) BPHere T
-  = label-between-connect-trees (label-from-linear-tree-unbiased (suspTree S₁) T 0) SPath
+  = label-between-connect-trees (label-from-linear-tree-unbiased (susp-tree S₁) T 0) SPath
 exterior-sub-label (Join S₁ S₂) (BPExt p) (Join T Sing)
   = label-between-joins (exterior-sub-label S₁ p T) SPath
 exterior-sub-label (Join S₁ S₂) (BPShift p) T

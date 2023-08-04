@@ -7,8 +7,8 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Discs
 open import Catt.Tree
 open import Catt.Tree.Path.Properties
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
+open import Catt.Tree.Structured
+open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties

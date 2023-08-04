@@ -1,4 +1,4 @@
-module Catt.Tree.Label where
+module Catt.Tree.Structured where
 
 open import Catt.Prelude
 open import Catt.Syntax

@@ -15,8 +15,8 @@ open import Catt.Suspension
 open import Catt.Connection
 open import Catt.Tree
 open import Catt.Tree.Path
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
+open import Catt.Tree.Structured
+open import Catt.Tree.Structured.Properties
 
 open import Catt.Typing rule
 open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule

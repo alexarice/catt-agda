@@ -12,7 +12,7 @@ open import Catt.Connection.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
-open import Catt.Tree.Label
+open import Catt.Tree.Structured
 open import Catt.Tree.Unbiased
 
 data BranchingPoint : Tree n → ℕ → Set where

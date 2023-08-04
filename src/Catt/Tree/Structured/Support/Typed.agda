@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Label.Support.Typed {index : Set}
+module Catt.Tree.Structured.Support.Typed {index : Set}
                                       (rule : index → Rule)
                                       (lift-rule : ∀ i → LiftRule rule (rule i))
                                       (susp-rule : ∀ i → SuspRule rule (rule i))
@@ -12,18 +12,18 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Tree
 open import Catt.Tree.Path
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
+open import Catt.Tree.Structured
+open import Catt.Tree.Structured.Properties
 
 open import Catt.Typing rule
-open import Catt.Tree.Label.Typing rule
+open import Catt.Tree.Structured.Typing rule
 open import Catt.Typing.Properties.Support rule supp-rule
-open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
 
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Tree.Support
-open import Catt.Tree.Label.Support
+open import Catt.Tree.Structured.Support
 
 open import Tactic.MonoidSolver
 

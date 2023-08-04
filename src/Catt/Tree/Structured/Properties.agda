@@ -1,4 +1,4 @@
-module Catt.Tree.Label.Properties where
+module Catt.Tree.Structured.Properties where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -14,7 +14,7 @@ open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
-open import Catt.Tree.Label
+open import Catt.Tree.Structured
 
 _≃stm_ : (a : STm X) → (b : STm Y) → Set
 a ≃stm b = Wrap (λ a b → stm-to-term a ≃tm stm-to-term b) a b

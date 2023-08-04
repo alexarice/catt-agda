@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Label.Typing.Properties {index : Set}
+module Catt.Tree.Structured.Typing.Properties {index : Set}
                                          (rule : index → Rule)
                                          (lift-rule : ∀ i → LiftRule rule (rule i))
                                          (susp-rule : ∀ i → SuspRule rule (rule i))
@@ -21,8 +21,8 @@ open import Catt.Tree.Properties
 open import Catt.Tree.Pasting
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
+open import Catt.Tree.Structured
+open import Catt.Tree.Structured.Properties
 
 open import Catt.Typing rule
 open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
@@ -31,7 +31,7 @@ open import Catt.Suspension.Typing rule lift-rule susp-rule
 open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Path.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Label.Typing rule
+open import Catt.Tree.Structured.Typing rule
 
 ≈SExt : {a b : STm (someTree S)} → a ≈[ tree-to-ctx S ]stm b → SExt {T = T} a ≈[ tree-to-ctx (Join S T) ]stm SExt b
 ≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (connect-susp-inc-left-Ty (tree-to-ctx T)) (susp-tmEq p)) ]

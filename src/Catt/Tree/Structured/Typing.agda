@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Label.Typing {index : Set}
+module Catt.Tree.Structured.Typing {index : Set}
                               (rule : index → Rule) where
 
 open import Catt.Prelude
@@ -11,8 +11,8 @@ open import Catt.Syntax.SyntacticEquality
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
+open import Catt.Tree.Structured
+open import Catt.Tree.Structured.Properties
 
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule

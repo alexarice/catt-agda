@@ -4,13 +4,13 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Tree
 open import Catt.Tree.Path
-open import Catt.Tree.Label
+open import Catt.Tree.Structured
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
 
 open import Catt.Support
 open import Catt.Tree.Support
-open import Catt.Tree.Label.Support
+open import Catt.Tree.Structured.Support
 
 open import Tactic.MonoidSolver
 

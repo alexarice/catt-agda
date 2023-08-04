@@ -1,4 +1,4 @@
-module Catt.Tree.Label.Support where
+module Catt.Tree.Structured.Support where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -12,8 +12,8 @@ open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Pasting
 open import Catt.Tree.Path
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
+open import Catt.Tree.Structured
+open import Catt.Tree.Structured.Properties
 
 open import Catt.Support
 open import Catt.Support.Properties

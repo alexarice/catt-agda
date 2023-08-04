@@ -17,8 +17,8 @@ open import Catt.Discs
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
-open import Catt.Tree.Label
-open import Catt.Tree.Label.Properties
+open import Catt.Tree.Structured
+open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 
@@ -26,8 +26,8 @@ open import Catt.Typing rule
 open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Globular.Typing rule lift-rule
 open import Catt.Discs.Typing rule lift-rule
-open import Catt.Tree.Label.Typing rule
-open import Catt.Tree.Label.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Structured.Typing rule
+open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
 
 open DR rule
 open R rule

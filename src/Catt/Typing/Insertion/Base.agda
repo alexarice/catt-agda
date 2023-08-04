@@ -4,7 +4,7 @@ open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Tree
 open import Catt.Tree.Properties
-open import Catt.Tree.Label
+open import Catt.Tree.Structured
 open import Catt.Tree.Insertion
 open import Catt.Typing.Rule
 

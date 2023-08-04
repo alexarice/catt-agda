@@ -37,8 +37,8 @@ import Catt.Tree.Pasting
 import Catt.Tree.Path
 import Catt.Tree.Path.Properties
 
-import Catt.Tree.Label
-import Catt.Tree.Label.Properties
+import Catt.Tree.Structured
+import Catt.Tree.Structured.Properties
 
 import Catt.Tree.Boundary
 import Catt.Tree.Boundary.Properties
@@ -72,8 +72,8 @@ import Catt.Connection.Typing
 import Catt.Discs.Typing
 import Catt.Tree.Typing
 import Catt.Tree.Path.Typing
-import Catt.Tree.Label.Typing
-import Catt.Tree.Label.Typing.Properties
+import Catt.Tree.Structured.Typing
+import Catt.Tree.Structured.Typing.Properties
 import Catt.Tree.Boundary.Typing
 import Catt.Tree.Unbiased.Typing
 import Catt.Tree.Insertion.Typing
@@ -100,12 +100,12 @@ import Catt.Suspension.Support
 import Catt.Connection.Support
 import Catt.Discs.Support
 import Catt.Tree.Support
-import Catt.Tree.Label.Support
+import Catt.Tree.Structured.Support
 import Catt.Tree.Boundary.Support
 import Catt.Tree.Unbiased.Support
 
 import Catt.Typing.Properties.Support
-import Catt.Tree.Label.Support.Typed
+import Catt.Tree.Structured.Support.Typed
 import Catt.Tree.Insertion.Support
 
 import Catt.Typing.Weak

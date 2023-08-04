@@ -7,6 +7,7 @@ open import Catt.Suspension
 open import Catt.Tree
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
+open import Catt.Tree.Structured.ToTerm
 
 tree-bd-len : (d : ℕ) → (T : Tree n) → ℕ
 tree-bd-len zero T = 0

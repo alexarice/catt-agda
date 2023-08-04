@@ -39,6 +39,11 @@ import Catt.Tree.Path.Properties
 
 import Catt.Tree.Structured
 import Catt.Tree.Structured.Properties
+import Catt.Tree.Structured.Globular
+import Catt.Tree.Structured.Globular.Properties
+import Catt.Tree.Structured.Construct
+import Catt.Tree.Structured.Construct.Properties
+import Catt.Tree.Structured.ToTerm
 
 import Catt.Tree.Boundary
 import Catt.Tree.Boundary.Properties

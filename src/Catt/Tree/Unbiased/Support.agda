@@ -16,6 +16,7 @@ open import Catt.Tree.Pasting
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
+open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Boundary

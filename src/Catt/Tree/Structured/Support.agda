@@ -14,6 +14,8 @@ open import Catt.Tree.Pasting
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
+open import Catt.Tree.Structured.Construct
+open import Catt.Tree.Structured.ToTerm
 
 open import Catt.Support
 open import Catt.Support.Properties

@@ -13,6 +13,8 @@ open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
+open import Catt.Tree.Structured.Construct
+open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Unbiased
 
 data BranchingPoint : Tree n → ℕ → Set where

@@ -13,6 +13,10 @@ open import Catt.Tree.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
+open import Catt.Tree.Structured.Globular
+open import Catt.Tree.Structured.Construct
+open import Catt.Tree.Structured.Construct.Properties
+open import Catt.Tree.Structured.ToTerm
 
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule

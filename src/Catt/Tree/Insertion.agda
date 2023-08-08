@@ -73,9 +73,9 @@ branching-path-to-var {T = Join S T} (BPExt P) = susp-tm (branching-path-to-var 
 branching-path-to-var {T = Join S T} (BPShift P) = branching-path-to-var P [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm
 
 branching-path-to-type : (T : Tree n) → (P : BranchingPoint T d) → STy (someTree T)
-branching-path-to-type (Join S T) (BPHere) = map-sty-pext (unbiased-type (tree-dim S) S)
-branching-path-to-type (Join S T) (BPExt P) = map-sty-pext (branching-path-to-type S P)
-branching-path-to-type (Join S T) (BPShift P) = map-sty-pshift (branching-path-to-type T P)
+branching-path-to-type (Join S T) (BPHere) = map-sty-ext (unbiased-type (tree-dim S) S)
+branching-path-to-type (Join S T) (BPExt P) = map-sty-ext (branching-path-to-type S P)
+branching-path-to-type (Join S T) (BPShift P) = map-sty-shift (branching-path-to-type T P)
 
 exterior-sub-label : (S : Tree n)
                   → (p : BranchingPoint S d)

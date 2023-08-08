@@ -45,7 +45,7 @@ HasDiscRemoval-STm = ∀ {m n}
                → .⦃ NonZero (tree-dim S) ⦄
                → (L : Label X S)
                → Typing-Label Γ (L ,, S⋆)
-               → (unbiased-comp (tree-dim S) S >>= L ,, S⋆) ≈[ Γ ]stm L (is-linear-max-path S)
+               → unbiased-comp (tree-dim S) S >>= (L ,, S⋆) ≈[ Γ ]stm L (is-linear-max-path S)
 
 module Conditions (dr : HasDiscRemoval) where
   open import Catt.Typing.Rule rule

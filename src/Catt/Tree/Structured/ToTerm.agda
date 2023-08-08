@@ -52,18 +52,19 @@ to-sty : Ty n → STy (Other n)
 to-sty ⋆ = S⋆
 to-sty (s ─⟨ A ⟩⟶ t) = SArr (SOther s) (to-sty A) (SOther t)
 
-stm-sub : {X : MaybeTree n} → STm X → (σ : Sub n m B) → STm (Other m)
-stm-sub a σ = SOther (stm-to-term a [ σ ]tm)
+infixr 30 _[_]stm _[_]sty _[_]l
+_[_]stm : {X : MaybeTree n} → STm X → (σ : Sub n m B) → STm (Other m)
+a [ σ ]stm = SOther (stm-to-term a [ σ ]tm)
 
-sty-sub : {X : MaybeTree n} → STy X → (σ : Sub n m B) → STy (Other m)
-sty-sub {B = B} S⋆ σ = to-sty B
-sty-sub (SArr s A t) σ = SArr (stm-sub s σ) (sty-sub A σ) (stm-sub t σ)
+_[_]sty : {X : MaybeTree n} → STy X → (σ : Sub n m B) → STy (Other m)
+S⋆ [ σ ]sty = to-sty (sub-type σ)
+SArr s A t [ σ ]sty = SArr (s [ σ ]stm) (A [ σ ]sty) (t [ σ ]stm)
 
-label-sub : {X : MaybeTree n} → Label-WT X S → (σ : Sub n m B) → Label-WT (Other m) S
-label-sub L σ = (λ a → stm-sub a σ) ∘ ap L ,, sty-sub (lty L) σ
+_[_]l : {X : MaybeTree n} → Label-WT X S → (σ : Sub n m B) → Label-WT (Other m) S
+L [ σ ]l = (λ a → a [ σ ]stm) ∘ ap L ,, lty L [ σ ]sty
 
 to-label-wt : (S : Tree n) → (σ : Sub (suc n) m A) → Label-WT (Other m) S
-to-label-wt {A = A} S σ = label-sub (id-label-wt S) σ
+to-label-wt {A = A} S σ = id-label-wt S [ σ ]l
 
 to-label : (S : Tree n) → (σ : Sub (suc n) m A) → Label (Other m) S
 to-label S σ = ap (to-label-wt S σ)

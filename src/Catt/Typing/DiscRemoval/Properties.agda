@@ -35,7 +35,7 @@ open R rule
 
 disc-rem-stm : HasDiscRemoval-STm
 disc-rem-stm S L Lty .get = begin
-  stm-to-term (unbiased-comp (tree-dim S) S >>= L ,, S⋆)
+  stm-to-term (unbiased-comp (tree-dim S) S >>= (L ,, S⋆))
     ≈⟨ reflexive≈tm (Coh≃ (linear-tree-compat S) (unbiased-type-linear (tree-dim S) S refl) (trans≃s (id-right-unit (label-to-sub (L ,, S⋆))) (sym≃s (idSub≃-right-unit (sym≃c (linear-tree-compat S)) (label-to-sub (L ,, S⋆)))))) ⟩
   disc-term (tree-dim S) (label-to-sub (L ,, S⋆) ● idSub≃ (sym≃c (linear-tree-compat S)))
     ≈⟨ disc-rem (disc-term-Ty (tree-dim S) (apply-sub-sub-typing (idSub≃-Ty (sym≃c (linear-tree-compat S))) (label-to-sub-Ty Lty TySStar))) ⟩

@@ -200,7 +200,7 @@ transport-label-typing : {L : Label-WT X S} → {M : Label-WT Y S} → Typing-La
 transport-label-typing (TySing x) [ p ] q = TySing (transport-stm-typing x (p PHere) q)
 transport-label-typing (TyJoin x Lty Lty′) [ p ] q
   = TyJoin (transport-stm-typing x (p PHere) q)
-           (transport-label-typing Lty [ p ∘ PExt ] (≃SArr (p PHere) q (p (PShift PHere))))
+           (transport-label-typing Lty [ p ∘ PExt ] (SArr≃ (p PHere) q (p (PShift PHere))))
            (transport-label-typing Lty′ [ p ∘ PShift ] q)
 
 label-typing-conv : Typing-Label Γ (L ,, As) → As ≈[ Γ ]sty Bs → Typing-Label Γ (L ,, Bs)

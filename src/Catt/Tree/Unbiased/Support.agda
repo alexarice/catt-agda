@@ -55,9 +55,9 @@ supp-unbiased-lem (suc d) (Join T Sing) b = begin
            susp-stm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b)
     l1 = begin
       < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b) >stm
-        ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] [ refl≃ty ] ⟩
+        ≈⟨ >>=-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] [ refl≃ty ] ⟩
       < unbiased-stm d (tree-bd d T) >>= susp-label (tree-inc-label d T b) >stm
-        ≈˘⟨ extend-susp-label (unbiased-stm d (tree-bd d T)) (tree-inc-label d T b) ⟩
+        ≈˘⟨ >>=-susp-label (unbiased-stm d (tree-bd d T)) (tree-inc-label d T b) ⟩
       < susp-stm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b) >stm ∎
       where
         open Reasoning stm-setoid

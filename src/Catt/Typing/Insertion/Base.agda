@@ -25,7 +25,7 @@ Insertion Γ S As L P T M .tgtCtx = Γ
 Insertion Γ S As L P T M .lhs = stm-to-term (SCoh S As (L ,, S⋆))
 Insertion Γ S As L P T M .rhs
   = stm-to-term (SCoh (insertion-tree S P T)
-                      (label-on-sty As (exterior-sub-label S P T ,, S⋆))
+                      (As >>=′ (exterior-sub-label S P T ,, S⋆))
                       (sub-from-insertion-label S P T L M ,, S⋆))
 
 data IsCompOrIdent {m} (n : ℕ) (T : Tree m) : Set where

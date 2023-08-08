@@ -51,19 +51,19 @@ susp-label L = susp-stm ∘ (ap L) ,, susp-sty (lty L)
 
 susp-label-full L = unrestrict-label (susp-label (L ,, S⋆))
 
-map-sty-pext : STy (someTree S) → STy (someTree (Join S T))
-map-sty-pext S⋆ = SArr SHere S⋆ (SShift (SPath PHere))
-map-sty-pext (SArr s A t) = SArr (SExt s) (map-sty-pext A) (SExt t)
+map-sty-ext : STy (someTree S) → STy (someTree (Join S T))
+map-sty-ext S⋆ = SArr SHere S⋆ (SShift (SPath PHere))
+map-sty-ext (SArr s A t) = SArr (SExt s) (map-sty-ext A) (SExt t)
 
-map-pext : Label-WT (someTree S) U → Label-WT (someTree (Join S T)) U
-map-pext L = SExt ∘ ap L ,, (map-sty-pext (lty L))
+map-ext : Label-WT (someTree S) U → Label-WT (someTree (Join S T)) U
+map-ext L = SExt ∘ ap L ,, (map-sty-ext (lty L))
 
-map-sty-pshift : STy (someTree T) → STy (someTree (Join S T))
-map-sty-pshift S⋆ = S⋆
-map-sty-pshift (SArr s A t) = SArr (SShift s) (map-sty-pshift A) (SShift t)
+map-sty-shift : STy (someTree T) → STy (someTree (Join S T))
+map-sty-shift S⋆ = S⋆
+map-sty-shift (SArr s A t) = SArr (SShift s) (map-sty-shift A) (SShift t)
 
-map-pshift : Label-WT (someTree T) U → Label-WT (someTree (Join S T)) U
-map-pshift L = SShift ∘ ap L ,, map-sty-pshift (lty L)
+map-shift : Label-WT (someTree T) U → Label-WT (someTree (Join S T)) U
+map-shift L = SShift ∘ ap L ,, map-sty-shift (lty L)
 
 replace-label : Label X S → STm X → Label X S
 replace-label L P PHere = P
@@ -103,7 +103,7 @@ connect-tree-inc-right : (S : Tree n) → (T : Tree m) → Label-WT (someTree (c
 connect-tree-inc-right S T = SPath ∘ connect-tree-inc-right′ S T ,, S⋆
 
 label-between-connect-trees : (L : Label (someTree S′) S) → (M : Label (someTree T′) T) → Label (someTree (connect-tree S′ T′)) (connect-tree S T)
-label-between-connect-trees {S′ = S′} {T′ = T′} L M = connect-label (label-comp L (connect-tree-inc-left S′ T′)) (label-comp M (connect-tree-inc-right S′ T′))
+label-between-connect-trees {S′ = S′} {T′ = T′} L M = connect-label (L ●l (connect-tree-inc-left S′ T′)) (M ●l (connect-tree-inc-right S′ T′))
 
 label-between-joins : (L : Label (someTree S′) S) → (M : Label (someTree T′) T) → Label (someTree (Join S′ T′)) (Join S T)
 label-between-joins L M PHere = SHere
@@ -113,14 +113,17 @@ label-between-joins L M (PShift P) = SShift (M P)
 stm-≃ : (S ≃′ T) → STm (someTree S) → STm (someTree T)
 sty-≃ : (S ≃′ T) → STy (someTree S) → STy (someTree T)
 ≃-label : (S ≃′ T) → Label (someTree S) U → Label (someTree T) U
+≃-label-wt : (S ≃′ T) → Label-WT (someTree S) U → Label-WT (someTree T) U
 
 stm-≃ Refl≃′ a = a
 stm-≃ (Join≃′ p q) (SExt a) = SExt (stm-≃ p a)
 stm-≃ (Join≃′ p q) (SShift a) = SShift (stm-≃ q a)
 stm-≃ (Join≃′ p q) (SPath x) = SPath (ppath-≃ (Join≃′ p q) x)
-stm-≃ (Join≃′ p q) (SCoh S A (L ,, B)) = SCoh S A ((≃-label (Join≃′ p q) L) ,, sty-≃ (Join≃′ p q) B)
+stm-≃ (Join≃′ p q) (SCoh S A L) = SCoh S A (≃-label-wt (Join≃′ p q) L)
 
 sty-≃ p S⋆ = S⋆
 sty-≃ p (SArr s A t) = SArr (stm-≃ p s) (sty-≃ p A) (stm-≃ p t)
 
 ≃-label p L = stm-≃ p ∘ L
+
+≃-label-wt p L = (≃-label p (ap L)) ,, (sty-≃ p (lty L))

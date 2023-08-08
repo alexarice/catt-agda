@@ -29,13 +29,13 @@ connect-tree-inc-phere : (S : Tree n)
                        → (T : Tree m)
                        → connect-tree-inc-left′ S T (last-path S) ≃p connect-tree-inc-right′ S T PHere
 connect-tree-inc-phere Sing T = refl≃p
-connect-tree-inc-phere (Join S₁ S₂) T = ≃Shift refl≃ (connect-tree-inc-phere S₂ T)
+connect-tree-inc-phere (Join S₁ S₂) T = Shift≃ refl≃ (connect-tree-inc-phere S₂ T)
 
 connect-tree-inc-right-last-path : (S : Tree n)
                                  → (T : Tree m)
                                  → connect-tree-inc-right′ S T (last-path T) ≃p last-path (connect-tree S T)
 connect-tree-inc-right-last-path Sing T = refl≃p
-connect-tree-inc-right-last-path (Join S₁ S₂) T = ≃Shift refl≃ (connect-tree-inc-right-last-path S₂ T)
+connect-tree-inc-right-last-path (Join S₁ S₂) T = Shift≃ refl≃ (connect-tree-inc-right-last-path S₂ T)
 
 
 lift-stm-to-term : (a : STm (Other n)) → stm-to-term (lift-stm a) ≃tm lift-tm (stm-to-term a)
@@ -47,7 +47,7 @@ lift-stm-to-term (SCoh S A L) = begin
   < Coh (tree-to-ctx S) (sty-to-type A) idSub [ label-to-sub (lift-label L) ]tm >tm
     ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh (tree-to-ctx S) (sty-to-type A) idSub}) (lift-label-to-sub L) ⟩
   < Coh (tree-to-ctx S) (sty-to-type A) idSub [ lift-sub (label-to-sub L) ]tm >tm
-    ≈⟨ apply-lifted-sub-tm-≃ (Coh (tree-to-ctx S ) (sty-to-type A) idSub) (label-to-sub L) ⟩
+    ≈⟨ apply-lifted-sub-tm-≃ (Coh (tree-to-ctx S) (sty-to-type A) idSub) (label-to-sub L) ⟩
   < lift-tm (Coh (tree-to-ctx S) (sty-to-type A) idSub [ label-to-sub L ]tm) >tm ∎
   where
     open Reasoning tm-setoid
@@ -73,9 +73,9 @@ lift-label-to-sub L = lift-label-to-sub′ L (λ P → lift-stm-to-term (ap L P)
 connect-tree-inc-left-unit : (T : Tree n)
                            → connect-tree-inc-left′ T Sing ≃lp (λ Z → Z)
 connect-tree-inc-left-unit Sing .get PHere = refl≃p
-connect-tree-inc-left-unit (Join S T) .get PHere = ≃Here (≃′-to-≃ (Join≃′ Refl≃′ (connect-tree-right-unit T)))
-connect-tree-inc-left-unit (Join S T) .get (PExt Z) = ≃Ext refl≃p (≃′-to-≃ (connect-tree-right-unit T))
-connect-tree-inc-left-unit (Join S T) .get (PShift Z) = ≃Shift refl≃ (connect-tree-inc-left-unit T .get Z)
+connect-tree-inc-left-unit (Join S T) .get PHere = Here≃ (≃′-to-≃ (Join≃′ Refl≃′ (connect-tree-right-unit T)))
+connect-tree-inc-left-unit (Join S T) .get (PExt Z) = Ext≃ refl≃p (≃′-to-≃ (connect-tree-right-unit T))
+connect-tree-inc-left-unit (Join S T) .get (PShift Z) = Shift≃ refl≃ (connect-tree-inc-left-unit T .get Z)
 
 connect-label-right-unit : (L : Label X S)
                          → (M : Label X Sing)
@@ -107,7 +107,7 @@ connect-label-phere {S = Join S₁ S₂} L M = refl≃stm
 connect-label-inc-left : (L : Label X S)
                        → (M : Label X T)
                        → (A : STy X)
-                       → (label-comp (ap (connect-tree-inc-left S T)) (connect-label L M ,, A)) ≃l L
+                       → (ap (connect-tree-inc-left S T) ●l (connect-label L M ,, A)) ≃l L
 connect-label-inc-left {S = Sing} L M A .get PHere = refl≃stm
 connect-label-inc-left {S = Join S₁ S₂} L M A .get PHere = refl≃stm
 connect-label-inc-left {S = Join S₁ S₂} L M A .get (PExt Q) = refl≃stm
@@ -116,7 +116,7 @@ connect-label-inc-left {S = Join S₁ S₂} L M A .get (PShift Q) = connect-labe
 connect-label-inc-right : (L : Label X S)
                         → (M : Label X T)
                         → (A : STy X)
-                        → (Z : Path T) → .⦃ not-here Z ⦄ → .⦃ is-Maximal Z ⦄ → (label-comp (ap (connect-tree-inc-right S T)) (connect-label L M ,, A)) Z ≃stm M Z
+                        → (Z : Path T) → .⦃ not-here Z ⦄ → .⦃ is-Maximal Z ⦄ → (ap (connect-tree-inc-right S T) ●l (connect-label L M ,, A)) Z ≃stm M Z
 connect-label-inc-right {S = Sing} L M A Z = replace-not-here M (L PHere) Z
 connect-label-inc-right {S = Join S₁ S₂} L M A Z = connect-label-inc-right (L ∘ PShift) M A Z
 
@@ -194,7 +194,7 @@ connect-label-prop (Join S₁ S₂) T .get (PShift Z) = begin
     ≈˘⟨ connect-label-map SShift (ap (connect-tree-inc-left S₂ T)) (ap (connect-tree-inc-right S₂ T)) .get Z ⟩
   < SShift (connect-label (ap (connect-tree-inc-left S₂ T))
                           (ap (connect-tree-inc-right S₂ T)) Z) >stm
-    ≈⟨ ≃SShift refl≃ (connect-label-prop S₂ T .get Z) ⟩
+    ≈⟨ SShift≃ refl≃ (connect-label-prop S₂ T .get Z) ⟩
   < SShift {S = S₁} (SPath Z) >stm
     ≈⟨ [ refl≃tm ] ⟩
   < SPath (PShift Z) >stm ∎
@@ -207,9 +207,9 @@ connect-tree-inc-left-assoc : (S : Tree n)
                             → (connect-tree-inc-left′ (connect-tree S T) U ∘ connect-tree-inc-left′ S T)
                             ≃lp connect-tree-inc-left′ S (connect-tree T U)
 connect-tree-inc-left-assoc Sing T U .get Z = connect-tree-inc-left-phere T U
-connect-tree-inc-left-assoc (Join S₁ S₂) T U .get PHere = ≃Here (≃′-to-≃ (sym≃′ (connect-tree-assoc (Join S₁ S₂) T U)))
-connect-tree-inc-left-assoc (Join S₁ S₂) T U .get (PExt Z) = ≃Ext refl≃p (sym≃ (≃′-to-≃ (connect-tree-assoc S₂ T U)))
-connect-tree-inc-left-assoc (Join S₁ S₂) T U .get (PShift Z) = ≃Shift refl≃ (connect-tree-inc-left-assoc S₂ T U .get Z)
+connect-tree-inc-left-assoc (Join S₁ S₂) T U .get PHere = Here≃ (≃′-to-≃ (sym≃′ (connect-tree-assoc (Join S₁ S₂) T U)))
+connect-tree-inc-left-assoc (Join S₁ S₂) T U .get (PExt Z) = Ext≃ refl≃p (sym≃ (≃′-to-≃ (connect-tree-assoc S₂ T U)))
+connect-tree-inc-left-assoc (Join S₁ S₂) T U .get (PShift Z) = Shift≃ refl≃ (connect-tree-inc-left-assoc S₂ T U .get Z)
 
 connect-tree-inc-right-assoc : (S : Tree n)
                              → (T : Tree m)
@@ -217,7 +217,7 @@ connect-tree-inc-right-assoc : (S : Tree n)
                              → (connect-tree-inc-right′ S (connect-tree T U) ∘ connect-tree-inc-right′ T U)
                              ≃lp connect-tree-inc-right′ (connect-tree S T) U
 connect-tree-inc-right-assoc Sing T U .get Z = refl≃p
-connect-tree-inc-right-assoc (Join S₁ S₂) T U .get Z = ≃Shift refl≃ (connect-tree-inc-right-assoc S₂ T U .get Z)
+connect-tree-inc-right-assoc (Join S₁ S₂) T U .get Z = Shift≃ refl≃ (connect-tree-inc-right-assoc S₂ T U .get Z)
 
 connect-tree-inc-assoc : (S : Tree n)
                        → (T : Tree m)
@@ -225,7 +225,7 @@ connect-tree-inc-assoc : (S : Tree n)
                        → (connect-tree-inc-right′ S (connect-tree T U) ∘ connect-tree-inc-left′ T U)
                        ≃lp (connect-tree-inc-left′ (connect-tree S T) U ∘ connect-tree-inc-right′ S T)
 connect-tree-inc-assoc Sing T U .get Z = refl≃p
-connect-tree-inc-assoc (Join S₁ S₂) T U .get Z = ≃Shift refl≃ (connect-tree-inc-assoc S₂ T U .get Z)
+connect-tree-inc-assoc (Join S₁ S₂) T U .get Z = Shift≃ refl≃ (connect-tree-inc-assoc S₂ T U .get Z)
 
 replace-connect-label : (L : Label X S)
                       → (M : Label X T)
@@ -253,13 +253,13 @@ sty-≃-≃sty : (p : S ≃′ T) → (A : STy (someTree S)) → A ≃sty sty-�
 ≃-label-≃l : (p : S ≃′ T) → (L : Label (someTree S) U) → L ≃l ≃-label p L
 
 stm-≃-≃stm Refl≃′ a = refl≃stm
-stm-≃-≃stm (Join≃′ p q) (SExt a) = ≃SExt (stm-≃-≃stm p a) (≃′-to-≃ q)
-stm-≃-≃stm (Join≃′ p q) (SShift a) = ≃SShift (≃′-to-≃ p) (stm-≃-≃stm q a)
-stm-≃-≃stm (Join≃′ p q) (SPath P) = ≃SPath (ppath-≃-≃p (Join≃′ p q) P)
-stm-≃-≃stm (Join≃′ p q) (SCoh S A L) = ≃SCoh S refl≃sty (≃-label-≃l (Join≃′ p q) (ap L)) (sty-≃-≃sty (Join≃′ p q) (lty L))
+stm-≃-≃stm (Join≃′ p q) (SExt a) = SExt≃ (stm-≃-≃stm p a) (≃′-to-≃ q)
+stm-≃-≃stm (Join≃′ p q) (SShift a) = SShift≃ (≃′-to-≃ p) (stm-≃-≃stm q a)
+stm-≃-≃stm (Join≃′ p q) (SPath P) = SPath≃ (ppath-≃-≃p (Join≃′ p q) P)
+stm-≃-≃stm (Join≃′ p q) (SCoh S A L) = SCoh≃ S refl≃sty (≃-label-≃l (Join≃′ p q) (ap L)) (sty-≃-≃sty (Join≃′ p q) (lty L))
 
-sty-≃-≃sty p S⋆ = ≃S⋆ (≃′-to-≃ p)
-sty-≃-≃sty p (SArr s A t) = ≃SArr (stm-≃-≃stm p s) (sty-≃-≃sty p A) (stm-≃-≃stm p t)
+sty-≃-≃sty p S⋆ = S⋆-≃ (≃′-to-≃ p)
+sty-≃-≃sty p (SArr s A t) = SArr≃ (stm-≃-≃stm p s) (sty-≃-≃sty p A) (stm-≃-≃stm p t)
 
 ≃-label-≃l p L .get Z = stm-≃-≃stm p (L Z)
 

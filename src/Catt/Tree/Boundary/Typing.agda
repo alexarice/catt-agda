@@ -25,5 +25,5 @@ tree-inc-Ty zero T true = TySing (last-path-Ty T)
 tree-inc-Ty (suc d) Sing b = TySing (TySPath PHere)
 tree-inc-Ty (suc d) (Join S T) b
   = TyJoin (TySPath PHere)
-           (transport-label-typing (map-pext-Ty (tree-inc-Ty d S b)) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ (≃SShift refl≃ (≃SPath (sym≃p (tree-inc-label-phere d T b)))))))
-           (transport-label-typing (map-pshift-Ty (tree-inc-Ty (suc d) T b)) [ (λ P → compute-≃ refl≃stm) ] refl≃sty)
+           (transport-label-typing (map-ext-Ty (tree-inc-Ty d S b)) [ (λ P → compute-≃ refl≃stm) ] (SArr≃ refl≃stm refl≃sty (compute-≃ (SShift≃ refl≃ (SPath≃ (sym≃p (tree-inc-label-phere d T b)))))))
+           (transport-label-typing (map-shift-Ty (tree-inc-Ty (suc d) T b)) [ (λ P → compute-≃ refl≃stm) ] refl≃sty)

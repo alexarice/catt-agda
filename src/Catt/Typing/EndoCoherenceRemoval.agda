@@ -52,7 +52,7 @@ HasEndoCoherenceRemoval-STm = ∀ {m n}
                         → Typing-STm (tree-to-ctx S) s As
                         → Typing-STy (tree-to-ctx S) As
                         → Typing-Label Γ (L ,, S⋆)
-                        → SCoh S (SArr s As s) (L ,, S⋆) ≈[ Γ ]stm (identity-stm (sty-dim As) >>= label-wt-comp (label-from-linear-tree (n-disc (sty-dim As)) ⦃ n-disc-is-linear (sty-dim As) ⦄ s As (≤-reflexive (tree-dim-n-disc (sty-dim As))) ,, S⋆) (L ,, S⋆))
+                        → SCoh S (SArr s As s) (L ,, S⋆) ≈[ Γ ]stm (identity-stm (sty-dim As) >>= (label-from-linear-tree (n-disc (sty-dim As)) ⦃ n-disc-is-linear (sty-dim As) ⦄ s As (≤-reflexive (tree-dim-n-disc (sty-dim As))) ,, S⋆) ●lt (L ,, S⋆))
 
 module Conditions (ecr : HasEndoCoherenceRemoval) where
   open import Catt.Typing.Rule rule

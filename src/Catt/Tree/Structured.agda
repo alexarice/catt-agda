@@ -60,15 +60,6 @@ Label X S = Path S → STm X
 SHere : STm (someTree S)
 SHere = SPath PHere
 
-compute-stm : STm X → STm X
-compute-stm (SExt a) = SExt a
-compute-stm (SShift a) = SShift a
-compute-stm (SPath PHere) = SPath PHere
-compute-stm (SPath (PExt x)) = SExt (SPath x)
-compute-stm (SPath (PShift x)) = SShift (SPath x)
-compute-stm (SCoh S A L) = SCoh S A L
-compute-stm (SOther t) = SOther t
-
 ap : Label-WT X S → Path S → STm X
 ap = proj₁
 {-# INLINE ap #-}
@@ -89,26 +80,37 @@ variable
   a b c a′ b′ c′ : STm X
   As Bs Cs As′ Bs′ Cs′ : STy X
 
-infixl 1 _>>=_
+infixl 25 _>>=_ _>>=′_
 _>>=_ : STm (someTree S) → Label-WT X S → STm X
-label-on-sty : STy (someTree S) → Label-WT X S → STy X
-label-comp : Label (someTree T) S → Label-WT X T → Label X S
+_>>=′_ : STy (someTree S) → Label-WT X S → STy X
+infixl 31 _●l_
+_●l_ : Label (someTree T) S → Label-WT X T → Label X S
 
-label-wt-comp : Label-WT (someTree T) S → Label-WT X T → Label-WT X S
-label-wt-comp L M = label-comp (ap L) M ,, label-on-sty (lty L) M
+infixl 31 _●lt_
+_●lt_ : Label-WT (someTree T) S → Label-WT X T → Label-WT X S
+L ●lt M = ap L ●l M ,, lty L >>=′ M
 
-SExt s >>= L = s >>= label₁ L
-SShift s >>= L = s >>= label₂ L
-SPath P >>= L = ap L P
-SCoh S A M >>= L = SCoh S A (label-wt-comp M L)
+SExt a >>= L = a >>= label₁ L
+SShift a >>= L = a >>= label₂ L
+SPath x >>= L = ap L x
+SCoh S A M >>= L = SCoh S A (M ●lt L)
 
-label-on-sty S⋆ M = lty M
-label-on-sty (SArr s A t) M = SArr (s >>= M) (label-on-sty A M) (t >>= M)
+_>>=′_ S⋆ M = lty M
+_>>=′_ (SArr s A t) M = SArr (s >>= M) (A >>=′ M) (t >>= M)
 
-label-comp L M P = L P >>= M
+(L ●l M) P = L P >>= M
 
 id-label : (S : Tree n) → Label (someTree S) S
 id-label S = SPath
 
 id-label-wt : (S : Tree n) → Label-WT (someTree S) S
 id-label-wt S = id-label S ,, S⋆
+
+compute-stm : STm X → STm X
+compute-stm (SExt a) = SExt a
+compute-stm (SShift a) = SShift a
+compute-stm (SPath PHere) = SHere
+compute-stm (SPath (PExt x)) = SExt (SPath x)
+compute-stm (SPath (PShift x)) = SShift (SPath x)
+compute-stm (SCoh S A L) = SCoh S A L
+compute-stm (SOther t) = SOther t

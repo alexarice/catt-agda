@@ -52,12 +52,12 @@ unbiased-stm-≃ {S = S} refl q with ≃-to-same-n q
 ... | refl with ≃-to-≡ q
 ... | refl = refl≃stm
 
-unbiased-stm-≃-prop : (d : ℕ) → (p : S ≃′ T) → (unbiased-stm d S >>= SPath ∘ ppath-≃ p ,, S⋆) ≃stm unbiased-stm d T
+unbiased-stm-≃-prop : (d : ℕ) → (p : S ≃′ T) → (unbiased-stm d S >>= (SPath ∘ ppath-≃ p ,, S⋆)) ≃stm unbiased-stm d T
 unbiased-stm-≃-prop {S = S} {T = T} d p = begin
-  < unbiased-stm d S >>= SPath ∘ ppath-≃ p ,, S⋆ >stm
-    ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d S}) (ppath-≃l p) (≃S⋆ (sym≃ (≃′-to-≃ p))) ⟩
+  < unbiased-stm d S >>= (SPath ∘ ppath-≃ p ,, S⋆) >stm
+    ≈⟨ >>=-≃ (refl≃stm {a = unbiased-stm d S}) (ppath-≃l p) (S⋆-≃ (sym≃ (≃′-to-≃ p))) ⟩
   < unbiased-stm d S >>= id-label-wt S >stm
-    ≈⟨ extend-id (unbiased-stm d S) ⟩
+    ≈⟨ >>=-id (unbiased-stm d S) ⟩
   < unbiased-stm d S >stm
     ≈⟨ unbiased-stm-≃ refl (≃′-to-≃ p) ⟩
   < unbiased-stm d T >stm ∎
@@ -65,21 +65,21 @@ unbiased-stm-≃-prop {S = S} {T = T} d p = begin
 
 unbiased-stm-linear : (d : ℕ) → (T : Tree n) → .⦃ _ : is-linear T ⦄ → .(d ≡ tree-dim T) → unbiased-stm d T ≃stm SPath (is-linear-max-path T)
 unbiased-stm-linear zero Sing p = [ refl≃tm ]
-unbiased-stm-linear (suc d) (Join T Sing) p = compute-≃ (≃SExt (unbiased-stm-linear d T (cong pred p)) refl≃)
+unbiased-stm-linear (suc d) (Join T Sing) p = compute-≃ (SExt≃ (unbiased-stm-linear d T (cong pred p)) refl≃)
 
 unbiased-stm-bd-non-linear : (d : ℕ) → (T : Tree n) → .(d > linear-height T) → unbiased-stm d (tree-bd d T) ≃stm unbiased-comp′ d (tree-bd d T)
 unbiased-stm-bd-non-linear (suc d) Sing p = refl≃stm
-unbiased-stm-bd-non-linear (suc d) (Join T Sing) p = ≃SExt (unbiased-stm-bd-non-linear d T (≤-pred p)) Sing≃
+unbiased-stm-bd-non-linear (suc d) (Join T Sing) p = SExt≃ (unbiased-stm-bd-non-linear d T (≤-pred p)) Sing≃
 unbiased-stm-bd-non-linear (suc d) (Join T (Join T₁ T₂)) p = refl≃stm
 
 unbiased-stm-full-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → (tree-dim T ≤ d) → (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b) ≃stm unbiased-stm d T
 unbiased-stm-full-lem d T b p = begin
   < unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b >stm
-    ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → ≃SPath (tree-inc-label-full d T b p .get P)) ] refl≃sty ⟩
-  < unbiased-stm d (tree-bd d T) >>= (λ z → SPath (ppath-≃ (tree-bd-full d T p) z)) ,, S⋆ >stm
-    ≈˘⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → ≃SPath (ppath-≃-≃p (tree-bd-full d T p) P)) ] [ (Star≃ (cong suc (≃-to-same-n (≃′-to-≃ (tree-bd-full d T p))))) ] ⟩
+    ≈⟨ >>=-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → SPath≃ (tree-inc-label-full d T b p .get P)) ] refl≃sty ⟩
+  < unbiased-stm d (tree-bd d T) >>= ((λ z → SPath (ppath-≃ (tree-bd-full d T p) z)) ,, S⋆) >stm
+    ≈˘⟨ >>=-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → SPath≃ (ppath-≃-≃p (tree-bd-full d T p) P)) ] [ (Star≃ (cong suc (≃-to-same-n (≃′-to-≃ (tree-bd-full d T p))))) ] ⟩
   < unbiased-stm d (tree-bd d T) >>= id-label-wt (tree-bd d T) >stm
-    ≈⟨ extend-id (unbiased-stm d (tree-bd d T)) ⟩
+    ≈⟨ >>=-id (unbiased-stm d (tree-bd d T)) ⟩
   < unbiased-stm d (tree-bd d T) >stm
     ≈⟨ unbiased-stm-≃ refl (≃′-to-≃ (tree-bd-full d T p)) ⟩
   < unbiased-stm d T >stm ∎
@@ -91,19 +91,19 @@ unbiased-term-≃ refl p with ≃-to-same-n p
 ... | refl with ≃-to-≡ p
 ... | refl = refl≃tm
 
-unbiased-type-prop : (d : ℕ) → (T : Tree n) → (d′ : ℕ) → (d ≤ d′) → (b : Bool) → unbiased-type d T ≃sty label-on-sty (unbiased-type d (tree-bd d′ T)) (tree-inc-label d′ T b)
+unbiased-type-prop : (d : ℕ) → (T : Tree n) → (d′ : ℕ) → (d ≤ d′) → (b : Bool) → unbiased-type d T ≃sty unbiased-type d (tree-bd d′ T) >>=′ tree-inc-label d′ T b
 unbiased-type-prop zero T d′ p b = refl≃sty
-unbiased-type-prop (suc d) T d′ p b = ≃SArr (lem false) (unbiased-type-prop d T d′ (≤-trans (n≤1+n d) p) b) (lem true)
+unbiased-type-prop (suc d) T d′ p b = SArr≃ (lem false) (unbiased-type-prop d T d′ (≤-trans (n≤1+n d) p) b) (lem true)
   where
     lem : (b′ : Bool) → (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b′)
       ≃stm (unbiased-stm d (tree-bd d (tree-bd d′ T)) >>=
         tree-inc-label d (tree-bd d′ T) b′ >>= tree-inc-label d′ T b)
     lem b′ = begin
       < unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b′ >stm
-        ≈˘⟨ extend-≃′ (unbiased-stm-≃ {d = d} refl (≃′-to-≃ (tree-bd-glob d d′ T p))) ((tree-bd-glob d d′ T p) ,, [ (λ P → ≃SPath (tree-inc-label-glob d d′ T b′ b p .get P)) ]) refl≃sty ⟩
+        ≈˘⟨ >>=-≃′ (unbiased-stm-≃ {d = d} refl (≃′-to-≃ (tree-bd-glob d d′ T p))) ((tree-bd-glob d d′ T p) ,, [ (λ P → SPath≃ (tree-inc-label-glob d d′ T b′ b p .get P)) ]) refl≃sty ⟩
       < unbiased-stm d (tree-bd d (tree-bd d′ T))
-        >>= label-wt-comp (tree-inc-label d (tree-bd d′ T) b′) (tree-inc-label d′ T b) >stm
-        ≈˘⟨ extend-assoc (unbiased-stm d (tree-bd d (tree-bd d′ T))) _ _ ⟩
+        >>= tree-inc-label d (tree-bd d′ T) b′ ●lt tree-inc-label d′ T b >stm
+        ≈˘⟨ >>=-assoc (unbiased-stm d (tree-bd d (tree-bd d′ T))) _ _ ⟩
       < unbiased-stm d (tree-bd d (tree-bd d′ T))
         >>= tree-inc-label d (tree-bd d′ T) b′
         >>= tree-inc-label d′ T b >stm ∎
@@ -145,7 +145,7 @@ module _ where
     instance _ = bd-linear-height (d₁ + zero) T p
     in begin
     < unbiased-stm d₁ (tree-bd d₁ T) >>= tree-inc-label d₁ T false >stm
-      ≈⟨ extend-≃ (unbiased-stm-linear d₁ (tree-bd d₁ T) (sym (tree-dim-bd′ d₁ T (≤-trans p′ (linear-height-dim T))))) (refl≃l {L = ap (tree-inc-label d₁ T false)}) refl≃sty ⟩
+      ≈⟨ >>=-≃ (unbiased-stm-linear d₁ (tree-bd d₁ T) (sym (tree-dim-bd′ d₁ T (≤-trans p′ (linear-height-dim T))))) (refl≃l {L = ap (tree-inc-label d₁ T false)}) refl≃sty ⟩
     < SPath (tree-inc-label′ d₁ T false (is-linear-max-path (tree-bd d₁ T))) >stm
       ≈˘⟨ lfltu-≤-linear-height-lem (+-identityʳ d₁) T false p ⟩
     < SPath (tree-inc-label′ (d₁ + zero) T false (is-linear-max-path (tree-bd (d₁ + zero) T))) >stm ∎
@@ -156,7 +156,7 @@ module _ where
     instance _ = bd-linear-height (d₁ + zero) T p
     in begin
     < unbiased-stm d₁ (tree-bd d₁ T) >>= tree-inc-label d₁ T true >stm
-      ≈⟨ extend-≃ (unbiased-stm-linear d₁ (tree-bd d₁ T) (sym (tree-dim-bd′ d₁ T (≤-trans p′ (linear-height-dim T))))) (refl≃l {L = ap (tree-inc-label d₁ T true)}) refl≃sty ⟩
+      ≈⟨ >>=-≃ (unbiased-stm-linear d₁ (tree-bd d₁ T) (sym (tree-dim-bd′ d₁ T (≤-trans p′ (linear-height-dim T))))) (refl≃l {L = ap (tree-inc-label d₁ T true)}) refl≃sty ⟩
     < SPath (tree-inc-label′ d₁ T true (is-linear-max-path (tree-bd d₁ T))) >stm
       ≈˘⟨ lfltu-≤-linear-height-lem (+-identityʳ d₁) T true p ⟩
     < SPath (tree-inc-label′ (d₁ + zero) T true (is-linear-max-path (tree-bd (d₁ + zero) T))) >stm ∎
@@ -190,13 +190,13 @@ module _ where
     < unbiased-comp′ d₁ T >stm
       ≈˘⟨ unbiased-comp′-≃ refl (≃′-to-≃ (tree-bd-full d₁ T p′)) ⟩
     < unbiased-comp′ d₁ (tree-bd d₁ T) >stm
-      ≈˘⟨ extend-id (unbiased-comp′ d₁ (tree-bd d₁ T)) ⟩
+      ≈˘⟨ >>=-id (unbiased-comp′ d₁ (tree-bd d₁ T)) ⟩
     < unbiased-comp′ d₁ (tree-bd d₁ T) >>= id-label-wt (tree-bd d₁ T) >stm
-      ≈⟨ extend-≃ (refl≃stm {a = unbiased-comp′ d₁ (tree-bd d₁ T)}) [ (λ P → ≃SPath (ppath-≃-≃p (tree-bd-full d₁ T p′) P )) ] [ (Star≃ (cong suc (≃-to-same-n (≃′-to-≃ (tree-bd-full d₁ T p′))))) ]
+      ≈⟨ >>=-≃ (refl≃stm {a = unbiased-comp′ d₁ (tree-bd d₁ T)}) [ (λ P → SPath≃ (ppath-≃-≃p (tree-bd-full d₁ T p′) P )) ] [ (Star≃ (cong suc (≃-to-same-n (≃′-to-≃ (tree-bd-full d₁ T p′))))) ]
       ⟩
     < unbiased-comp′ d₁ (tree-bd d₁ T)
-      >>= (λ z → SPath (ppath-≃ (tree-bd-full d₁ T p′) z)) ,, S⋆ >stm
-      ≈˘⟨ extend-≃ (refl≃stm {a = unbiased-comp′ d₁ (tree-bd d₁ T)}) [ (λ P → ≃SPath (tree-inc-label-full d₁ T b p′ .get P)) ] refl≃sty ⟩
+      >>= ((λ z → SPath (ppath-≃ (tree-bd-full d₁ T p′) z)) ,, S⋆) >stm
+      ≈˘⟨ >>=-≃ (refl≃stm {a = unbiased-comp′ d₁ (tree-bd d₁ T)}) [ (λ P → SPath≃ (tree-inc-label-full d₁ T b p′ .get P)) ] refl≃sty ⟩
     < unbiased-comp′ d₁ (tree-bd d₁ T) >>= tree-inc-label d₁ T b >stm ∎
   lfltu->-linear-height (Join S Sing) T d₁ (suc d₂) p q r b (PExt Z) = begin
     < label-from-linear-tree-unbiased S T (suc d₁)
@@ -209,32 +209,32 @@ module _ where
       >>= tree-inc-label (suc d₂ + d₁) T b >stm ∎
   lfltu->-linear-height (Join S Sing) T d₁ (suc d₂) p q r b (PShift PHere) = ⊥-elim it
   lfltu->-linear-height (Join S Sing) T (suc d₁) zero p q r false PHere
-    = extend-≃ (unbiased-stm-bd-non-linear (suc d₁) T (<-transˡ q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
+    = >>=-≃ (unbiased-stm-bd-non-linear (suc d₁) T (<-transˡ q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
   lfltu->-linear-height (Join S Sing) T (suc d₁) zero p q r true PHere
-    = extend-≃ (unbiased-stm-bd-non-linear (suc d₁) T (<-transˡ q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
+    = >>=-≃ (unbiased-stm-bd-non-linear (suc d₁) T (<-transˡ q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
 
 unbiased-type-susp-lem : (d : ℕ) → (T : Tree n) → susp-sty (unbiased-type d T) ≃sty unbiased-type (suc d) (susp-tree T)
 unbiased-comp-susp-lem : (d : ℕ) → (T : Tree n) → SExt {T = Sing} (unbiased-comp d T) ≃stm unbiased-comp (suc d) (susp-tree T)
 
-unbiased-type-susp-lem zero T = ≃SArr [ refl≃tm ] refl≃sty [ refl≃tm ]
-unbiased-type-susp-lem (suc d) T = ≃SArr (lem false) (unbiased-type-susp-lem d T) (lem true)
+unbiased-type-susp-lem zero T = SArr≃ [ refl≃tm ] refl≃sty [ refl≃tm ]
+unbiased-type-susp-lem (suc d) T = SArr≃ (lem false) (unbiased-type-susp-lem d T) (lem true)
   where
     open Reasoning stm-setoid
     lem : (b : Bool) → susp-stm (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b) ≃stm (unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b))
     lem b = begin
       < SExt (unbiased-stm d (tree-bd d T) >>= tree-inc-label d T b) >stm
-        ≈˘⟨ extend-map-pext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T b) ⟩
-      < unbiased-stm d (tree-bd d T) >>= map-pext (tree-inc-label d T b) >stm
-        ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
+        ≈˘⟨ >>=-ext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T b) ⟩
+      < unbiased-stm d (tree-bd d T) >>= map-ext (tree-inc-label d T b) >stm
+        ≈⟨ >>=-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
       < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b) >stm ∎
 
 unbiased-comp-susp-lem d T = begin
   < SExt (unbiased-comp d T) >stm
     ≈˘⟨ SCoh-ext T (unbiased-type d T) (id-label-wt T) ⟩
-  < SCoh T (unbiased-type d T) (map-pext (id-label-wt T)) >stm
-    ≈⟨ SCoh-unrestrict T (unbiased-type d T) (map-pext (id-label-wt T)) ⟩
+  < SCoh T (unbiased-type d T) (map-ext (id-label-wt T)) >stm
+    ≈⟨ SCoh-unrestrict T (unbiased-type d T) (map-ext (id-label-wt T)) ⟩
   < SCoh (susp-tree T) (susp-sty (unbiased-type d T)) (susp-label-full (id-label T) ,, S⋆) >stm
-    ≈⟨ ≃SCoh (susp-tree T) (unbiased-type-susp-lem d T) (id-label-susp-full T) refl≃sty ⟩
+    ≈⟨ SCoh≃ (susp-tree T) (unbiased-type-susp-lem d T) (id-label-susp-full T) refl≃sty ⟩
   < unbiased-comp (suc d) (susp-tree T) >stm ∎
   where
     open Reasoning stm-setoid
@@ -244,7 +244,7 @@ unbiased-comp′-compat zero T = refl≃stm
 unbiased-comp′-compat (suc d) Sing = refl≃stm
 unbiased-comp′-compat (suc d) (Join T Sing) = begin
   < SExt (unbiased-comp′ d T) >stm
-    ≈⟨ ≃SExt (unbiased-comp′-compat d T) Sing≃ ⟩
+    ≈⟨ SExt≃ (unbiased-comp′-compat d T) Sing≃ ⟩
   < SExt (unbiased-comp d T) >stm
     ≈⟨ unbiased-comp-susp-lem d T ⟩
   < unbiased-comp (suc d) (Join T Sing) >stm ∎
@@ -256,18 +256,18 @@ lfltu-susp : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d :
 lfltu-susp Sing T d .get PHere = refl≃stm
 lfltu-susp (Join S Sing) T d .get PHere = begin
   < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) false) >stm
-    ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
-  < unbiased-stm d (tree-bd d T) >>= map-pext (tree-inc-label d T false) >stm
-    ≈⟨ extend-map-pext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T false) ⟩
+    ≈⟨ >>=-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
+  < unbiased-stm d (tree-bd d T) >>= map-ext (tree-inc-label d T false) >stm
+    ≈⟨ >>=-ext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T false) ⟩
   < SExt (unbiased-stm d (tree-bd d T) >>= (tree-inc-label d T false)) >stm ∎
   where
     open Reasoning stm-setoid
 lfltu-susp (Join S Sing) T d .get (PExt Z) = lfltu-susp S T (suc d) .get Z
 lfltu-susp (Join S Sing) T d .get (PShift PHere) = begin
   < unbiased-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) true) >stm
-    ≈⟨ extend-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (≃SArr refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
-  < unbiased-stm d (tree-bd d T) >>= map-pext (tree-inc-label d T true) >stm
-    ≈⟨ extend-map-pext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T true) ⟩
+    ≈⟨ >>=-≃ (refl≃stm {a = unbiased-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
+  < unbiased-stm d (tree-bd d T) >>= map-ext (tree-inc-label d T true) >stm
+    ≈⟨ >>=-ext (unbiased-stm d (tree-bd d T)) (tree-inc-label d T true) ⟩
   < SExt (unbiased-stm d (tree-bd d T) >>= (tree-inc-label d T true)) >stm ∎
   where
     open Reasoning stm-setoid
@@ -447,18 +447,18 @@ label-from-linear-tree-prop {S = Join S Sing} L .get PHere = sym≃stm (sty-src-
 label-from-linear-tree-prop {S = Join S Sing} L .get (PExt P) = label-from-linear-tree-prop (label₁ L) .get P
 label-from-linear-tree-prop {S = Join S Sing} L .get (PShift PHere) = sym≃stm (sty-tgt-≃ (label-from-disc-type-lem (label₁ L)) ⦃ _ ⦄)
 
-label-from-disc-type-prop : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → label-from-disc-type L ≃sty label-on-sty (unbiased-type (tree-dim S) S) L
+label-from-disc-type-prop : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → label-from-disc-type L ≃sty unbiased-type (tree-dim S) S >>=′ L
 label-from-disc-type-prop {S = Sing} L = refl≃sty
 label-from-disc-type-prop {S = Join S Sing} L = begin
   < label-from-disc-type (label₁ L) >sty
     ≈⟨ label-from-disc-type-prop (label₁ L) ⟩
-  < label-on-sty (unbiased-type (tree-dim S) S) (label₁ L) >sty
-    ≈˘⟨ map-sty-pext-label (unbiased-type (tree-dim S) S) L ⟩
-  < label-on-sty (map-sty-pext (unbiased-type (tree-dim S) S)) L >sty
-    ≈⟨ label-on-sty-≃ (map-sty-pext-susp-compat (unbiased-type (tree-dim S) S)) refl≃l refl≃sty ⟩
-  < label-on-sty (susp-sty (unbiased-type (tree-dim S) S)) L >sty
-    ≈⟨ label-on-sty-≃ (unbiased-type-susp-lem (tree-dim S) S) refl≃l refl≃sty ⟩
-  < label-on-sty (unbiased-type (suc (tree-dim S)) (susp-tree S)) L >sty ∎
+  < unbiased-type (tree-dim S) S >>=′ label₁ L >sty
+    ≈˘⟨ map-sty-ext-label (unbiased-type (tree-dim S) S) L ⟩
+  < map-sty-ext (unbiased-type (tree-dim S) S) >>=′ L >sty
+    ≈⟨ >>=′-≃ (map-sty-ext-susp-compat (unbiased-type (tree-dim S) S)) refl≃l refl≃sty ⟩
+  < susp-sty (unbiased-type (tree-dim S) S) >>=′ L >sty
+    ≈⟨ >>=′-≃ (unbiased-type-susp-lem (tree-dim S) S) refl≃l refl≃sty ⟩
+  < unbiased-type (suc (tree-dim S)) (susp-tree S) >>=′ L >sty ∎
   where
     open Reasoning sty-setoid
 
@@ -568,7 +568,7 @@ label-to-sub-from-disc-type {d = suc d} L = begin
 
 label-from-linear-tree-disc-type : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(p : tree-dim S ≤ sty-dim As) → (Bs : STy X) → (Bs ≃sty label-from-linear-tree-type S As) → label-from-disc-type (label-from-linear-tree S a As p ,, Bs) ≃sty As
 label-from-linear-tree-disc-type Sing a As p Bs q = q
-label-from-linear-tree-disc-type (Join S Sing) a As p Bs q = label-from-linear-tree-disc-type S a As _ _ (trans≃sty (≃SArr refl≃stm (trans≃sty q (label-from-linear-tree-type-prop S As)) refl≃stm) (sty-prop (label-from-linear-tree-type S As) ⦃ label-from-linear-tree-nz S As p ⦄))
+label-from-linear-tree-disc-type (Join S Sing) a As p Bs q = label-from-linear-tree-disc-type S a As _ _ (trans≃sty (SArr≃ refl≃stm (trans≃sty q (label-from-linear-tree-type-prop S As)) refl≃stm) (sty-prop (label-from-linear-tree-type S As) ⦃ label-from-linear-tree-nz S As p ⦄))
 
 label-from-linear-tree-disc-term : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(p : tree-dim S ≤ sty-dim As) → (Bs : STy X) → label-from-disc-term (label-from-linear-tree S a As p ,, Bs) ≃stm a
 label-from-linear-tree-disc-term Sing a As p Bs = refl≃stm

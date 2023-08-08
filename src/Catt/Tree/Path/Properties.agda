@@ -17,34 +17,34 @@ open import Catt.Tree.Path
 open import Data.Sum
 
 data _≃p_ : Path S → Path T → Set where
-  ≃Here : S ≃ S′ → PHere {S = S} ≃p PHere {S = S′}
-  ≃Ext : ∀ {P : Path S} {Q : Path S′} → P ≃p Q → T ≃ T′ → PExt {T = T} P ≃p PExt {T = T′} Q
-  ≃Shift : ∀ {P : Path T} {Q : Path T′} → S ≃ S′ → P ≃p Q → PShift {S = S} P ≃p PShift {S = S′} Q
+  Here≃ : S ≃ S′ → PHere {S = S} ≃p PHere {S = S′}
+  Ext≃ : ∀ {P : Path S} {Q : Path S′} → P ≃p Q → T ≃ T′ → PExt {T = T} P ≃p PExt {T = T′} Q
+  Shift≃ : ∀ {P : Path T} {Q : Path T′} → S ≃ S′ → P ≃p Q → PShift {S = S} P ≃p PShift {S = S′} Q
 
 ≃p-to-same-n : {S : Tree n} → {T : Tree m} → {P : Path S} → {Q : Path T} → P ≃p Q → n ≡ m
-≃p-to-same-n (≃Here x) = ≃-to-same-n x
-≃p-to-same-n (≃Ext p x) = cong₂ (λ a b → a + (2 + b)) (≃-to-same-n x) (≃p-to-same-n p)
-≃p-to-same-n (≃Shift x p) = cong₂ (λ a b → a + suc (suc b)) (≃p-to-same-n p) (≃-to-same-n x)
+≃p-to-same-n (Here≃ x) = ≃-to-same-n x
+≃p-to-same-n (Ext≃ p x) = cong₂ (λ a b → a + (2 + b)) (≃-to-same-n x) (≃p-to-same-n p)
+≃p-to-same-n (Shift≃ x p) = cong₂ (λ a b → a + suc (suc b)) (≃p-to-same-n p) (≃-to-same-n x)
 
 path-to-term-≃ : P ≃p Q → path-to-term P ≃tm path-to-term Q
-path-to-term-≃ (≃Here x) = Var≃ (cong suc (≃-to-same-n x)) (cong (λ - → toℕ (fromℕ -)) (≃-to-same-n x))
-path-to-term-≃ (≃Ext p x) = sub-action-≃-tm (susp-tm-≃ (path-to-term-≃ p)) (connect-susp-inc-left-≃ (≃p-to-same-n p) (≃-to-same-n x))
-path-to-term-≃ (≃Shift x p) = sub-action-≃-tm (path-to-term-≃ p) (connect-susp-inc-right-≃ (≃-to-same-n x) (≃p-to-same-n p))
+path-to-term-≃ (Here≃ x) = Var≃ (cong suc (≃-to-same-n x)) (cong (λ - → toℕ (fromℕ -)) (≃-to-same-n x))
+path-to-term-≃ (Ext≃ p x) = sub-action-≃-tm (susp-tm-≃ (path-to-term-≃ p)) (connect-susp-inc-left-≃ (≃p-to-same-n p) (≃-to-same-n x))
+path-to-term-≃ (Shift≃ x p) = sub-action-≃-tm (path-to-term-≃ p) (connect-susp-inc-right-≃ (≃-to-same-n x) (≃p-to-same-n p))
 
 refl≃p : P ≃p P
-refl≃p {P = PHere} = ≃Here refl≃
-refl≃p {P = PExt P} = ≃Ext refl≃p refl≃
-refl≃p {P = PShift P} = ≃Shift refl≃ refl≃p
+refl≃p {P = PHere} = Here≃ refl≃
+refl≃p {P = PExt P} = Ext≃ refl≃p refl≃
+refl≃p {P = PShift P} = Shift≃ refl≃ refl≃p
 
 sym≃p : P ≃p Q → Q ≃p P
-sym≃p (≃Here x) = ≃Here (sym≃ x)
-sym≃p (≃Ext p x) = ≃Ext (sym≃p p) (sym≃ x)
-sym≃p (≃Shift x p) = ≃Shift (sym≃ x) (sym≃p p)
+sym≃p (Here≃ x) = Here≃ (sym≃ x)
+sym≃p (Ext≃ p x) = Ext≃ (sym≃p p) (sym≃ x)
+sym≃p (Shift≃ x p) = Shift≃ (sym≃ x) (sym≃p p)
 
 trans≃p : P ≃p Q → Q ≃p Q′ → P ≃p Q′
-trans≃p (≃Here x) (≃Here y) = ≃Here (trans≃ x y)
-trans≃p (≃Ext p x) (≃Ext q y) = ≃Ext (trans≃p p q) (trans≃ x y)
-trans≃p (≃Shift x p) (≃Shift y q) = ≃Shift (trans≃ x y) (trans≃p p q)
+trans≃p (Here≃ x) (Here≃ y) = Here≃ (trans≃ x y)
+trans≃p (Ext≃ p x) (Ext≃ q y) = Ext≃ (trans≃p p q) (trans≃ x y)
+trans≃p (Shift≃ x p) (Shift≃ y q) = Shift≃ (trans≃ x y) (trans≃p p q)
 
 record PATH : Set where
   constructor <_>p
@@ -65,15 +65,15 @@ path-setoid = record { Carrier = PATH
                         }
 
 -- ppath-≃-≃tm : (p : S ≃ T) → (P : Path S) → ppath-≃ p P ≃p P
--- ppath-≃-≃tm p PHere = ≃Here (sym≃ p)
--- ppath-≃-≃tm (Join≃ p q) (PExt P) = ≃Ext (ppath-≃-≃tm p P) (sym≃ q)
--- ppath-≃-≃tm (Join≃ p q) (PShift P) = ≃Shift (sym≃ p) (ppath-≃-≃tm q P)
+-- ppath-≃-≃tm p PHere = Here≃ (sym≃ p)
+-- ppath-≃-≃tm (Join≃ p q) (PExt P) = Ext≃ (ppath-≃-≃tm p P) (sym≃ q)
+-- ppath-≃-≃tm (Join≃ p q) (PShift P) = Shift≃ (sym≃ p) (ppath-≃-≃tm q P)
 
 ppath-≃-≃p : (p : S ≃′ T) → (P : Path S) → P ≃p ppath-≃ p P
 ppath-≃-≃p Refl≃′ P = refl≃p
-ppath-≃-≃p (Join≃′ p q) PHere = ≃Here (≃′-to-≃ (Join≃′ p q))
-ppath-≃-≃p (Join≃′ p q) (PExt P) = ≃Ext (ppath-≃-≃p p P) (≃′-to-≃ q)
-ppath-≃-≃p (Join≃′ p q) (PShift P) = ≃Shift (≃′-to-≃ p) (ppath-≃-≃p q P)
+ppath-≃-≃p (Join≃′ p q) PHere = Here≃ (≃′-to-≃ (Join≃′ p q))
+ppath-≃-≃p (Join≃′ p q) (PExt P) = Ext≃ (ppath-≃-≃p p P) (≃′-to-≃ q)
+ppath-≃-≃p (Join≃′ p q) (PShift P) = Shift≃ (≃′-to-≃ p) (ppath-≃-≃p q P)
 
 maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-Maximal P ⦄ → not-here P
 maximal-join-not-here {T = Join S T} (PExt P) = tt
@@ -85,21 +85,21 @@ path-to-term-is-var (PExt P) = var-to-var-comp-tm (susp-tm (path-to-term P)) ⦃
 path-to-term-is-var (PShift P) = var-to-var-comp-tm (path-to-term P) ⦃ path-to-term-is-var P ⦄ (connect-susp-inc-right _ _) ⦃ connect-susp-inc-right-var-to-var _ _ ⦄
 
 max-path-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (Z : Path T) → .⦃ is-Maximal Z ⦄ → S ≃ T → is-linear-max-path S ≃p Z
-max-path-lin-tree Sing PHere Sing≃ = ≃Here Sing≃
-max-path-lin-tree (Join S Sing) (PExt Z) (Join≃ p Sing≃) = ≃Ext (max-path-lin-tree S Z p) Sing≃
+max-path-lin-tree Sing PHere Sing≃ = Here≃ Sing≃
+max-path-lin-tree (Join S Sing) (PExt Z) (Join≃ p Sing≃) = Ext≃ (max-path-lin-tree S Z p) Sing≃
 max-path-lin-tree (Join S Sing) (PShift PHere) (Join≃ p Sing≃) = ⊥-elim it
 
 max-path-unique : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (P : Path S) → .⦃ is-Maximal P ⦄ → (Q : Path S) → .⦃ is-Maximal Q ⦄ → P ≃p Q
 max-path-unique Sing PHere PHere = refl≃p
-max-path-unique (Join S Sing) (PExt P) (PExt Q) = ≃Ext (max-path-unique S P Q) refl≃
+max-path-unique (Join S Sing) (PExt P) (PExt Q) = Ext≃ (max-path-unique S P Q) refl≃
 max-path-unique (Join S Sing) (PExt P) (PShift PHere) = ⊥-elim it
 max-path-unique (Join S Sing) (PShift PHere) Q = ⊥-elim it
 
 proj-ext : PExt {T = S} P ≃p PExt {T = T} Q → P ≃p Q
-proj-ext (≃Ext p _) = p
+proj-ext (Ext≃ p _) = p
 
 proj-shift : PShift {S = S} P ≃p PShift {S = T} Q → P ≃p Q
-proj-shift (≃Shift _ p) = p
+proj-shift (Shift≃ _ p) = p
 
 -- susp-path-to-term : (P : Path X) → path-to-term (susp-path P) ≃tm susp-tm (path-to-term P)
 -- susp-path-to-term {X = someTree x} P = id-on-tm (susp-tm (path-to-term P))
@@ -576,14 +576,14 @@ is-linear-max-path-max Sing = tt
 is-linear-max-path-max (Join S Sing) = is-linear-max-path-max S
 
 not-here-≃ : (P ≃p Q) → .⦃ not-here P ⦄ → not-here Q
-not-here-≃ (≃Ext p x) = tt
-not-here-≃ (≃Shift x p) = tt
+not-here-≃ (Ext≃ p x) = tt
+not-here-≃ (Shift≃ x p) = tt
 
 maximal-≃ : (P ≃p Q) → .⦃ is-Maximal P ⦄ → is-Maximal Q
-maximal-≃ (≃Here Sing≃) = tt
-maximal-≃ (≃Ext p x) = maximal-≃ p
-maximal-≃ (≃Shift x p) .p₁ = not-here-≃ p
-maximal-≃ (≃Shift x p) .p₂ = maximal-≃ p
+maximal-≃ (Here≃ Sing≃) = tt
+maximal-≃ (Ext≃ p x) = maximal-≃ p
+maximal-≃ (Shift≃ x p) .p₁ = not-here-≃ p
+maximal-≃ (Shift≃ x p) .p₂ = maximal-≃ p
 
 is-linear-max-path-is-0V : (S : Tree n) → .⦃ _ : is-linear S ⦄ → path-to-term (is-linear-max-path S) ≃tm (0V {n = suc n})
 is-linear-max-path-is-0V Sing = refl≃tm

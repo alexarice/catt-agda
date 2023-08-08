@@ -68,15 +68,10 @@ ecr-stm S s As L [ sty ] [ Asty ] Lty .get = begin
     ≈⟨ reflexive≈tm (sub-action-≃-tm (sym≃tm (identity-stm-to-term (sty-dim As))) (label-comp-to-sub (label-from-linear-tree (n-disc (sty-dim As)) ⦃ _ ⦄ s As _ ,, S⋆) (L ,, S⋆))) ⟩
   stm-to-term (identity-stm (sty-dim As)) [
     label-to-sub
-    (label-wt-comp
-     (label-from-linear-tree (n-disc (sty-dim As)) ⦃ _ ⦄ s As _ ,, S⋆)
-     (L ,, S⋆))
-    ]tm
+    ((label-from-linear-tree (n-disc (sty-dim As)) ⦃ _ ⦄ s As _ ,, S⋆) ●lt (L ,, S⋆)) ]tm
     ≈⟨ reflexive≈tm (label-to-sub-stm _ (identity-stm (sty-dim As))) ⟩
   stm-to-term
-    (identity-stm (sty-dim As) >>=
-     label-wt-comp
-     (label-from-linear-tree (n-disc (sty-dim As)) ⦃ _ ⦄ s As _ ,, S⋆) (L ,, S⋆)) ∎
+    (identity-stm (sty-dim As) >>= (label-from-linear-tree (n-disc (sty-dim As)) ⦃ _ ⦄ s As _ ,, S⋆) ●lt (L ,, S⋆)) ∎
   where
     lem : sub-from-disc (ty-dim (sty-to-type As)) (sty-to-type As) refl (stm-to-term s)
         ≃s label-to-sub (label-from-linear-tree (n-disc (sty-dim As)) ⦃ n-disc-is-linear (sty-dim As) ⦄ s As (≤-reflexive (tree-dim-n-disc (sty-dim As))) ,, S⋆)

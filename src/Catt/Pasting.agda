@@ -3,7 +3,7 @@ module Catt.Pasting where
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
+open import Catt.Syntax.Properties
 open import Catt.Globular
 
 data _⊢pdb : (Γ : Ctx n) → Set

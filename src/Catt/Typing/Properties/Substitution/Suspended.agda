@@ -10,7 +10,7 @@ module Catt.Typing.Properties.Substitution.Suspended {index : Set}
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
+open import Catt.Syntax.Properties
 open import Catt.Suspension
 
 open import Catt.Typing rule

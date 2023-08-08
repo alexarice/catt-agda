@@ -3,7 +3,7 @@ module Catt.Typing.Strict.UA where
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
+open import Catt.Syntax.Properties
 open import Catt.Discs
 open import Catt.Tree
 open import Catt.Tree.Path.Properties

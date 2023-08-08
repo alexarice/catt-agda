@@ -9,7 +9,7 @@ open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Globular
 open import Catt.Globular.Properties
-open import Catt.Syntax.SyntacticEquality
+open import Catt.Syntax.Properties
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Suspension.Pasting

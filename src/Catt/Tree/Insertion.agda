@@ -3,7 +3,7 @@ module Catt.Tree.Insertion where
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
+open import Catt.Syntax.Properties
 open import Catt.Variables
 open import Catt.Variables.Properties
 open import Catt.Suspension

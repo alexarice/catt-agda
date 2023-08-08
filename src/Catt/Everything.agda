@@ -6,7 +6,7 @@ import Catt.Prelude.Properties
 import Catt.Syntax.Base
 import Catt.Syntax
 import Catt.Syntax.Bundles
-import Catt.Syntax.SyntacticEquality
+import Catt.Syntax.Properties
 import Catt.Syntax.Complexity
 
 import Catt.Variables

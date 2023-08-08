@@ -2,7 +2,7 @@ module Catt.Variables where
 
 open import Catt.Prelude
 open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
+open import Catt.Syntax.Properties
 
 isVar : Tm n → Set
 isVar (Var i) = ⊤

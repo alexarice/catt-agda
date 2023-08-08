@@ -1,4 +1,4 @@
-module Catt.Syntax.SyntacticEquality where
+module Catt.Syntax.Properties where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties

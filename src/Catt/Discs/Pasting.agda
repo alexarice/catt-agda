@@ -2,7 +2,7 @@ module Catt.Discs.Pasting where
 
 open import Catt.Prelude
 open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
+open import Catt.Syntax.Properties
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Discs

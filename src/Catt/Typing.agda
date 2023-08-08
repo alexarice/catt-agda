@@ -4,7 +4,7 @@ module Catt.Typing {index : Set} (rule : index → Rule) where
 
 open import Catt.Prelude
 open import Catt.Syntax
-open import Catt.Syntax.SyntacticEquality
+open import Catt.Syntax.Properties
 open import Catt.Pasting
 
 open Rule

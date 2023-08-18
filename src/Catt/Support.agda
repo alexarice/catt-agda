@@ -109,6 +109,39 @@ varset-non-empty emp = false
 varset-non-empty (ewf xs) = varset-non-empty xs
 varset-non-empty (ewt xs) = true
 
+VarSetF : (n : ℕ) → Set₁
+VarSetF n = Fin n → Set
+
+record _≃vs_ (xs ys : VarSetF n) : Set where
+  field
+    forward : ∀ i → xs i → ys i
+    backward : ∀ i → ys i → xs i
+
+data TmFV : Tm n → VarSetF n
+data TyFV : Ty n → VarSetF n
+data SubFV : Sub m n A → VarSetF n
+
+data TmFV where
+  ∋Var : (i : Fin n) → TmFV (Var i) i
+  ∋Coh : {i : Fin (suc n)} → SubFV σ i → TmFV (Coh Δ A σ) i
+
+data TyFV where
+  ∋Src : {i : Fin n} → TmFV s i → TyFV (s ─⟨ A ⟩⟶ t) i
+  ∋Base : {i : Fin n} → TyFV A i → TyFV (s ─⟨ A ⟩⟶ t) i
+  ∋Tgt : {i : Fin n} → TmFV t i → TyFV (s ─⟨ A ⟩⟶ t) i
+
+data SubFV where
+  ∋Type : {i : Fin n} → TyFV (sub-type σ) i → SubFV σ i
+  ∋Sub : {j : Fin m} → {i : Fin n} → TmFV (Var j [ σ ]tm) i → SubFV σ i
+
+data ContainingVar : (Γ : Ctx n) → (i j : Fin n) → Set where
+  ConCtx : ∀ {i j} → TyFV (Γ ‼ i) j → ContainingVar Γ i j
+  ConRefl : ∀ i → ContainingVar Γ i i
+  ConTrans : ∀ {i j k} → ContainingVar Γ i j → ContainingVar Γ j k → ContainingVar Γ i k
+
+Close : (Γ : Ctx n) → (xs : VarSetF n) → VarSetF n
+Close Γ xs j = Σ[ i ∈ Fin _ ] ContainingVar Γ i j × xs i
+
 SupportedTm : Tm n → Set
 SupportedTy : Ty n → Set
 SupportedSub : Sub n m A → Set

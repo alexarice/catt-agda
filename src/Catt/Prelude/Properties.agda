@@ -4,7 +4,7 @@ open import Catt.Prelude
 
 open import Data.Nat.Properties public
 open import Data.Fin.Properties using (toℕ-injective; toℕ-inject₁;toℕ-fromℕ;toℕ-lower₁;inject₁-lower₁;inject₁-injective; toℕ-cast) public
-open import Data.Bool.Properties using (∨-identityʳ;∨-assoc;∨-comm;∨-idem;∨-zeroʳ;∨-commutativeMonoid;∨-idempotentCommutativeMonoid;push-function-into-if) public
+open import Data.Bool.Properties using (∨-identityʳ;∨-assoc;∨-comm;∨-idem;∨-zeroʳ;∨-commutativeMonoid;∨-idempotentCommutativeMonoid;push-function-into-if;∨-sel) public
 open import Relation.Binary using (Setoid) public
 import Relation.Binary.Reasoning.Setoid
 import Relation.Binary.Reasoning.PartialOrder

@@ -7,6 +7,7 @@ open import Catt.Connection
 open import Catt.Tree
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
+open import Catt.Tree.Structured.Construct
 
 stm-to-term : {X : MaybeTree n} → STm X → Tm n
 sty-to-type : {X : MaybeTree n} → STy X → Ty n
@@ -68,3 +69,8 @@ to-label-wt {A = A} S σ = id-label-wt S [ σ ]l
 
 to-label : (S : Tree n) → (σ : Sub (suc n) m A) → Label (Other m) S
 to-label S σ = ap (to-label-wt S σ)
+
+getPathType : (P : Path S) → STy (someTree S)
+getPathType PHere = S⋆
+getPathType (PExt P) = map-sty-ext (getPathType P)
+getPathType (PShift P) = map-sty-shift (getPathType P)

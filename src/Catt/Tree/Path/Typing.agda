@@ -25,11 +25,6 @@ open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Suspension.Typing rule lift-rule susp-rule
 open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
 
-getPathType : (P : Path S) → STy (someTree S)
-getPathType PHere = S⋆
-getPathType (PExt P) = map-sty-ext (getPathType P)
-getPathType (PShift P) = map-sty-shift (getPathType P)
-
 path-to-term-Ty : (P : Path S) → Typing-Tm (tree-to-ctx S) (path-to-term P) (sty-to-type (getPathType P))
 path-to-term-Ty {S = S} PHere = fromℕ-Ty (tree-to-ctx S)
 path-to-term-Ty (PExt {T = T} P) = TyConv (apply-sub-tm-typing (susp-tmTy (path-to-term-Ty P)) (connect-susp-inc-left-Ty (tree-to-ctx T))) (reflexive≈ty (begin

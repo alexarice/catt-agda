@@ -2,8 +2,10 @@ module Catt.Tree.Structured where
 
 open import Catt.Prelude
 open import Catt.Syntax
+open import Catt.Variables
 open import Catt.Tree
 open import Catt.Tree.Path
+open import Catt.Tree.Path.Properties
 
 data MaybeTree : ℕ → Set where
   someTree : Tree n → MaybeTree (suc n)
@@ -18,6 +20,14 @@ maybeTreeSize {n} X = n
 suspMaybeTree : MaybeTree n → MaybeTree (2 + n)
 suspMaybeTree (someTree x) = someTree (susp-tree x)
 suspMaybeTree (Other _) = Other (2 + _)
+
+Position : MaybeTree n → Set
+Position (someTree S) = Path S
+Position (Other n) = Fin n
+
+Pos-to-fin : {X : MaybeTree n} → Position X → Fin n
+Pos-to-fin {X = someTree x} P = getVarFin (path-to-term P) ⦃ path-to-term-is-var P ⦄
+Pos-to-fin {X = Other _} P = P
 
 data CtxOrTree : ℕ → Set where
   incTree : Tree n → CtxOrTree (suc n)
@@ -114,3 +124,8 @@ compute-stm (SPath (PExt x)) = SExt (SPath x)
 compute-stm (SPath (PShift x)) = SShift (SPath x)
 compute-stm (SCoh S A L) = SCoh S A L
 compute-stm (SOther t) = SOther t
+
+path-to-stm : Path S → STm (someTree S)
+path-to-stm PHere = SPath PHere
+path-to-stm (PExt P) = SExt (path-to-stm P)
+path-to-stm (PShift P) = SShift (path-to-stm P)

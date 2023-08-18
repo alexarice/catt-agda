@@ -544,9 +544,29 @@ lookup-trueAt : (i : Fin n) → lookup (trueAt i) i ≡ true
 lookup-trueAt 0F = refl
 lookup-trueAt (suc i) = lookup-trueAt i
 
+lookup-trueAt-prop : (i j : Fin n) → lookup (trueAt i) j ≡ true → i ≡ j
+lookup-trueAt-prop 0F 0F p = refl
+lookup-trueAt-prop 0F (suc j) p with trans (sym (lookup-empty j)) p
+... | ()
+lookup-trueAt-prop (suc i) (suc j) p = cong suc (lookup-trueAt-prop i j p)
+
 lookup-∪ : (xs ys : VarSet n) → (i : Fin n) → lookup (xs ∪ ys) i ≡ lookup xs i ∨ lookup ys i
 lookup-∪ (x ∷ xs) (y ∷ ys) 0F = refl
 lookup-∪ (x ∷ xs) (y ∷ ys) (suc i) = lookup-∪ xs ys i
+
+lookup-⊆ : {xs ys : VarSet n} → xs ⊆ ys → (i : Fin n) → lookup xs i ≡ true → lookup ys i ≡ true
+lookup-⊆ {xs = xs} {ys = ys} p i q = begin
+  lookup ys i
+    ≡⟨ cong (λ - → lookup - i) p ⟩
+  lookup (ys ∪ xs) i
+    ≡⟨ lookup-∪ ys xs i ⟩
+  lookup ys i ∨ lookup xs i
+    ≡⟨ cong (lookup ys i ∨_) q ⟩
+  lookup ys i ∨ true
+    ≡⟨ ∨-zeroʳ (lookup ys i) ⟩
+  true ∎
+  where
+    open ≡-Reasoning
 
 trueAt-non-empty : (i : Fin n) → Truth (varset-non-empty (trueAt i))
 trueAt-non-empty 0F = tt
@@ -560,3 +580,131 @@ trueAt-non-empty (suc i) = trueAt-non-empty i
 empty-is-empty : {n : ℕ} → varset-non-empty (empty {n = n}) ≡ false
 empty-is-empty {n = zero} = refl
 empty-is-empty {n = suc n} = empty-is-empty {n = n}
+
+-- ∋tm-prop-⇒ : {i : Fin n} → t ∋tm i → lookup (FVTm t) i ≡ true
+-- ∋ty-prop-⇒ : {i : Fin n} → A ∋ty i → lookup (FVTy A) i ≡ true
+-- ∋s-prop-⇒ : {i : Fin n} → σ ∋s i → lookup (FVSub σ) i ≡ true
+
+-- ∋tm-prop-⇒ (∋Var i) = lookup-trueAt i
+-- ∋tm-prop-⇒ (∋Coh p) = ∋s-prop-⇒ p
+
+-- ∋ty-prop-⇒ {i = i} (∋Src {s = s} {A = A} {t = t} p) = begin
+--   lookup (FVTy A ∪ FVTm s ∪ FVTm t) i
+--     ≡⟨ lookup-∪ (FVTy A ∪ FVTm s) (FVTm t) i ⟩
+--   lookup (FVTy A ∪ FVTm s) i ∨ lookup (FVTm t) i
+--     ≡⟨ cong (_∨ lookup (FVTm t) i) (lookup-∪ (FVTy A) (FVTm s) i) ⟩
+--   (lookup (FVTy A) i ∨ lookup (FVTm s) i) ∨ lookup (FVTm t) i
+--     ≡⟨ cong (λ - → (lookup (FVTy A) i ∨ -) ∨ lookup (FVTm t) i) (∋tm-prop-⇒ p) ⟩
+--   (lookup (FVTy A) i ∨ true) ∨ lookup (FVTm t) i
+--     ≡⟨ cong (_∨ lookup (FVTm t) i) (∨-zeroʳ (lookup (FVTy A ) i)) ⟩
+--   true ∎
+--   where
+--     open ≡-Reasoning
+-- ∋ty-prop-⇒ {i = i} (∋Base {A = A} {s = s} {t = t} p) = begin
+--   lookup (FVTy A ∪ FVTm s ∪ FVTm t) i
+--     ≡⟨ lookup-∪ (FVTy A ∪ FVTm s) (FVTm t) i ⟩
+--   lookup (FVTy A ∪ FVTm s) i ∨ lookup (FVTm t) i
+--     ≡⟨ cong (_∨ lookup (FVTm t) i) (lookup-∪ (FVTy A) (FVTm s) i) ⟩
+--   (lookup (FVTy A) i ∨ lookup (FVTm s) i) ∨ lookup (FVTm t) i
+--     ≡⟨ cong (λ - → (- ∨ lookup (FVTm s) i) ∨ lookup (FVTm t) i) (∋ty-prop-⇒ p) ⟩
+--   true ∎
+--   where
+--     open ≡-Reasoning
+-- ∋ty-prop-⇒ {i = i} (∋Tgt {t = t} {s = s} {A = A} p) = begin
+--   lookup (FVTy A ∪ FVTm s ∪ FVTm t) i
+--     ≡⟨ lookup-∪ (FVTy A ∪ FVTm s) (FVTm t) i ⟩
+--   lookup (FVTy A ∪ FVTm s) i ∨ lookup (FVTm t) i
+--     ≡⟨ cong (lookup (FVTy A ∪ FVTm s) i ∨_) (∋tm-prop-⇒ p) ⟩
+--   lookup (FVTy A ∪ FVTm s) i ∨ true
+--     ≡⟨ ∨-zeroʳ (lookup (FVTy A ∪ FVTm s) i) ⟩
+--   true ∎
+--   where
+--     open ≡-Reasoning
+
+-- ∋s-prop-⇒ {i = i} (∋Type {σ = σ} p) = lookup-⊆ (sub-type-⊆ σ) i (∋ty-prop-⇒ p)
+-- ∋s-prop-⇒ {i = i} (∋Left {σ = σ} {t = t} p) = begin
+--   lookup (FVSub σ ∪ FVTm t) i
+--     ≡⟨ lookup-∪ (FVSub σ) (FVTm t) i ⟩
+--   lookup (FVSub σ) i ∨ lookup (FVTm t) i
+--     ≡⟨ cong (_∨ lookup (FVTm t) i) (∋s-prop-⇒ p) ⟩
+--   true ∎
+--   where
+--     open ≡-Reasoning
+-- ∋s-prop-⇒ {i = i} (∋Right {t = t} {σ = σ} p) = begin
+--   lookup (FVSub σ ∪ FVTm t) i
+--     ≡⟨ lookup-∪ (FVSub σ) (FVTm t) i ⟩
+--   lookup (FVSub σ) i ∨ lookup (FVTm t) i
+--     ≡⟨ cong (lookup (FVSub σ) i ∨_) (∋tm-prop-⇒ p) ⟩
+--   lookup (FVSub σ) i ∨ true
+--     ≡⟨ ∨-zeroʳ (lookup (FVSub σ) i) ⟩
+--   true ∎
+--   where
+--     open ≡-Reasoning
+
+-- ∋tm-prop-⇐ : (t : Tm n) → (i : Fin n) → lookup (FVTm t) i ≡ true → t ∋tm i
+-- ∋ty-prop-⇐ : (A : Ty n) → (i : Fin n) → lookup (FVTy A) i ≡ true → A ∋ty i
+-- ∋s-prop-⇐ : (σ : Sub m n A) → (i : Fin n) → lookup (FVSub σ) i ≡ true → σ ∋s i
+
+-- ∋tm-prop-⇐ (Var j) i p with lookup-trueAt-prop j i p
+-- ... | refl = ∋Var i
+-- ∋tm-prop-⇐ {n = suc n} (Coh Δ A σ) i p = ∋Coh (∋s-prop-⇐ σ i p)
+
+-- ∋ty-prop-⇐ ⋆ i p with trans (sym (lookup-empty i)) p
+-- ... | ()
+-- ∋ty-prop-⇐ (s ─⟨ A ⟩⟶ t) i p = lemma (lookup (FVTy A) i)
+--                                      (lookup (FVTm s) i)
+--                                      (lookup (FVTm t) i)
+--                                      (λ p → ∋Base (∋ty-prop-⇐ A i p))
+--                                      (λ p → ∋Src (∋tm-prop-⇐ s i p))
+--                                      (λ p → ∋Tgt (∋tm-prop-⇐ t i p))
+--                                      lem
+--   where
+--     open ≡-Reasoning
+--     lem : (lookup (FVTy A) i ∨ lookup (FVTm s) i) ∨ lookup (FVTm t) i ≡ true
+--     lem = begin
+--       (lookup (FVTy A) i ∨ lookup (FVTm s) i) ∨ lookup (FVTm t) i
+--         ≡˘⟨ cong (_∨ lookup (FVTm t) i) (lookup-∪ (FVTy A) (FVTm s) i) ⟩
+--       lookup (FVTy A ∪ FVTm s) i ∨ lookup (FVTm t) i
+--         ≡˘⟨ lookup-∪ (FVTy A ∪ FVTm s) (FVTm t) i ⟩
+--       lookup (FVTy A ∪ FVTm s ∪ FVTm t) i
+--         ≡⟨ p ⟩
+--       true ∎
+
+--     lemma : (x y z : Bool)
+--           → {X : Set}
+--           → (x ≡ true → X)
+--           → (y ≡ true → X)
+--           → (z ≡ true → X)
+--           → (x ∨ y) ∨ z ≡ true → X
+--     lemma false false true p q r a = r refl
+--     lemma false true z p q r a = q refl
+--     lemma true y z p q r a = p refl
+
+-- ∋s-prop-⇐ (⟨⟩ {A = A}) i p = ∋Type (∋ty-prop-⇐ A i p)
+-- ∋s-prop-⇐ ⟨ σ , t ⟩ i p = lemma (lookup (FVSub σ) i)
+--                                 (lookup (FVTm t) i)
+--                                 (λ p → ∋Left (∋s-prop-⇐ σ i p))
+--                                 (λ p → ∋Right (∋tm-prop-⇐ t i p))
+--                                 lem
+--   where
+--     open ≡-Reasoning
+--     lem : lookup (FVSub σ) i ∨ lookup (FVTm t) i ≡ true
+--     lem = begin
+--       lookup (FVSub σ) i ∨ lookup (FVTm t) i
+--         ≡˘⟨ lookup-∪ (FVSub σ) (FVTm t) i ⟩
+--       lookup (FVSub ⟨ σ , t ⟩) i
+--         ≡⟨ p ⟩
+--       true ∎
+
+--     lemma : (x y : Bool)
+--           → {X : Set}
+--           → (x ≡ true → X)
+--           → (y ≡ true → X)
+--           → x ∨ y ≡ true
+--           → X
+--     lemma false true p q r = q refl
+--     lemma true y p q r = p refl
+
+CloseMul : (Γ : Ctx n) → (xs : VarSetF n) → Close Γ (Close Γ xs) ≃vs Close Γ xs
+CloseMul Γ xs ._≃vs_.forward i (j ,, con ,, k ,, con2 ,, p) = k ,, ConTrans con2 con ,, p
+CloseMul Γ xs ._≃vs_.backward i p = i ,, ConRefl i ,, p

@@ -46,6 +46,10 @@ connect-tree (Join S S′) T = Join S (connect-tree S′ T)
 susp-tree : Tree n → Tree (2 + n)
 susp-tree T = Join T Sing
 
+susp-tree-n : (d : ℕ) → Tree n → Tree (d * 2 + n)
+susp-tree-n zero T = T
+susp-tree-n (suc d) T = susp-tree (susp-tree-n d T)
+
 tree-dim : Tree n → ℕ
 tree-dim Sing = 0
 tree-dim (Join S T) = suc (pred (tree-dim T) ⊔ tree-dim S)

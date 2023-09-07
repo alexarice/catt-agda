@@ -37,6 +37,10 @@ record IsZero (n : ℕ) : Set where
   field
     isZero : Truth (n ≡ᵇ 0)
 
+infix 4 _≃n_
+_≃n_ : ℕ → ℕ → Set
+n ≃n m = Truth (n ≡ᵇ m)
+
 -- Instances
 
 instance

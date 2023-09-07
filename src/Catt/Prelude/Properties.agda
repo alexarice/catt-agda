@@ -24,6 +24,14 @@ suc-pred-≤ : (n : ℕ) → n ≤ suc (pred n)
 suc-pred-≤ zero = z≤n
 suc-pred-≤ (suc n) = ≤-refl
 
+≤-step′ : suc n ≤ m → n ≤ m
+≤-step′ (s≤s z≤n) = z≤n
+≤-step′ (s≤s (s≤s p)) = s≤s (≤-step′ (s≤s p))
+
+≤-from-≃n : n ≃n m → n ≤ m
+≤-from-≃n {n = zero} p = z≤n
+≤-from-≃n {n = suc n} {m = suc m} p = s≤s (≤-from-≃n p)
+
 extract-is-zero : (n : ℕ) → .⦃ IsZero n ⦄ → n ≡ 0
 extract-is-zero zero = refl
 

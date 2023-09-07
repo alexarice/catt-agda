@@ -300,3 +300,17 @@ unrestrict-label-≃ : (L M : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get PHere = [ x ]
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get (PExt Z) = p .get Z
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get (PShift PHere) = [ y ]
+
+label-from-linear-tree-dim : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → sty-dim (label-from-linear-tree-type S As) ≡ sty-dim As ∸ tree-dim S
+label-from-linear-tree-dim Sing As = refl
+label-from-linear-tree-dim (Join S Sing) As = begin
+  sty-dim
+      (label-from-linear-tree-type S (sty-base As))
+    ≡⟨ label-from-linear-tree-dim S (sty-base As) ⟩
+  sty-dim (sty-base As) ∸ tree-dim S
+    ≡⟨ cong (_∸ tree-dim S) (sty-base-dim As) ⟩
+  sty-dim As ∸ 1 ∸ tree-dim S
+    ≡⟨ ∸-+-assoc (sty-dim As) 1 (tree-dim S) ⟩
+  sty-dim As ∸ suc (tree-dim S) ∎
+  where
+    open ≡-Reasoning

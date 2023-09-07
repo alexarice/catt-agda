@@ -84,3 +84,7 @@ truncate-sty-label d As L = begin
 truncate-sty-≤ : (d : ℕ) → (As : STy X) → (d < sty-dim As) → truncate-sty d As ≃sty truncate-sty d (sty-base As)
 truncate-sty-≤ d (SArr s As t) p
   rewrite +-∸-assoc 1 p = refl≃sty
+
+sty-base-dim : (As : STy X) → sty-dim (sty-base As) ≡ pred (sty-dim As)
+sty-base-dim S⋆ = refl
+sty-base-dim (SArr s As t) = refl

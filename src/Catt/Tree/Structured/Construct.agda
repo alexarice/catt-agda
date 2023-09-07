@@ -1,6 +1,7 @@
 module Catt.Tree.Structured.Construct where
 
 open import Catt.Prelude
+open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Suspension
 open import Catt.Tree
@@ -127,3 +128,20 @@ sty-≃ p (SArr s A t) = SArr (stm-≃ p s) (sty-≃ p A) (stm-≃ p t)
 ≃-label p L = stm-≃ p ∘ L
 
 ≃-label-wt p L = (≃-label p (ap L)) ,, (sty-≃ p (lty L))
+
+label-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(tree-dim S ≤ sty-dim As) → Label X S
+label-from-linear-tree-type : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → STy X
+label-from-linear-tree-nz : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → .(suc (tree-dim S) ≤ sty-dim As) → NonZero (sty-dim (label-from-linear-tree-type S As))
+
+label-from-linear-tree Sing a As p P = a
+label-from-linear-tree (Join S Sing) a As p = unrestrict-label (label-from-linear-tree S a As (≤-step′ p) ,, label-from-linear-tree-type S As) ⦃ label-from-linear-tree-nz S As p ⦄
+
+label-from-linear-tree-type Sing As = As
+label-from-linear-tree-type (Join S Sing) As = label-from-linear-tree-type S (sty-base As)
+
+sty-base-dim-prop : (As : STy X) → sty-dim As ≤ suc (sty-dim (sty-base As))
+sty-base-dim-prop S⋆ = z≤n
+sty-base-dim-prop (SArr s As t) = ≤-refl
+
+label-from-linear-tree-nz Sing As p = NonZero-≤ p it
+label-from-linear-tree-nz (Join S Sing) As p = label-from-linear-tree-nz S (sty-base As) (≤-pred (≤-trans p (sty-base-dim-prop As)))

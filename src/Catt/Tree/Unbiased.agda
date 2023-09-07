@@ -50,36 +50,6 @@ label-from-linear-tree-unbiased (Join S Sing) T d (PShift PHere) = unbiased-stm 
 identity-stm : (n : ℕ) → STm (someTree (n-disc n))
 identity-stm n = unbiased-comp′ (suc n) (n-disc n)
 
-sty-base-dim : (As : STy X) → sty-dim (sty-base As) ≡ pred (sty-dim As)
-sty-base-dim S⋆ = refl
-sty-base-dim (SArr s As t) = refl
-
-label-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(tree-dim S ≤ sty-dim As) → Label X S
-label-from-linear-tree-type : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → STy X
-label-from-linear-tree-dim : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → sty-dim (label-from-linear-tree-type S As) ≡ sty-dim As ∸ tree-dim S
-label-from-linear-tree-nz : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → .(suc (tree-dim S) ≤ sty-dim As) → NonZero (sty-dim (label-from-linear-tree-type S As))
-
-label-from-linear-tree Sing a As p P = a
-label-from-linear-tree (Join S Sing) a As p = unrestrict-label (label-from-linear-tree S a As (≤-trans (n≤1+n (tree-dim S)) p) ,, label-from-linear-tree-type S As) ⦃ label-from-linear-tree-nz S As p ⦄
-
-label-from-linear-tree-type Sing As = As
-label-from-linear-tree-type (Join S Sing) As = label-from-linear-tree-type S (sty-base As)
-
-label-from-linear-tree-dim Sing As = refl
-label-from-linear-tree-dim (Join S Sing) As = begin
-  sty-dim
-      (label-from-linear-tree-type S (sty-base As))
-    ≡⟨ label-from-linear-tree-dim S (sty-base As) ⟩
-  sty-dim (sty-base As) ∸ tree-dim S
-    ≡⟨ cong (_∸ tree-dim S) (sty-base-dim As) ⟩
-  sty-dim As ∸ 1 ∸ tree-dim S
-    ≡⟨ ∸-+-assoc (sty-dim As) 1 (tree-dim S) ⟩
-  sty-dim As ∸ suc (tree-dim S) ∎
-  where
-    open ≡-Reasoning
-
-label-from-linear-tree-nz S As p = NonZero-≤ (≤-trans (≤-reflexive (sym (+-∸-assoc 1 {n = tree-dim S} ≤-refl))) (≤-trans (∸-monoˡ-≤ (tree-dim S) p) (≤-reflexive (sym (label-from-linear-tree-dim S As))))) it
-
 label-from-disc-type : Label-WT X S → .⦃ is-linear S ⦄ → STy X
 label-from-disc-type {S = Sing} L = lty L
 label-from-disc-type {S = Join S Sing} L = label-from-disc-type (label₁ L)

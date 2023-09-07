@@ -27,7 +27,7 @@ open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Insertion
 
 open import Relation.Binary
-
+{-
 branching-path-to-var-is-var : (p : BranchingPoint S d) → isVar (branching-path-to-var p)
 branching-path-to-var-is-var {S = Join S T} BPHere = var-to-var-comp-tm 0V (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
 branching-path-to-var-is-var {S = Join S T} (BPExt P) = var-to-var-comp-tm (susp-tm (branching-path-to-var P)) ⦃ susp-tm-var (branching-path-to-var P) ⦃ branching-path-to-var-is-var P ⦄ ⦄ (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
@@ -1244,3 +1244,4 @@ module Lemma55Part1 where
     sub-from-inserted-bp (Join S₁ S₂) (BPShift P) T Q U L M N .get (PExt Z) = refl≃stm
     sub-from-inserted-bp (Join S₁ S₂) (BPShift P) T Q U L M N .get (PShift Z) = sub-from-inserted-bp S₂ P T Q U (L ∘ PShift) M N .get Z
 open Lemma55Part1 public
+-}

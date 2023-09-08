@@ -4,10 +4,10 @@ open import Catt.Prelude
 
 open import Data.Fin.Patterns
 
-data Ctx : ℕ → Set
-data Ty : ℕ → Set
-data Tm : ℕ → Set
-data Sub : (n m : ℕ) → (Ty m) → Set
+data Ctx : @0 ℕ → Set
+data Ty : @0 ℕ → Set
+data Tm : @0 ℕ → Set
+data Sub : (@0 n m : ℕ) → (@0 A : Ty m) → Set
 
 variable
   Γ Γ′ Δ Δ′ Υ Θ : Ctx n
@@ -15,26 +15,31 @@ variable
   s s′ t t′ u : Tm n
   σ σ′ τ τ′ μ : Sub n m A
 
-infixl 25 _,_
+-- infixl 25 _,_
 data Ctx where
-  ∅ : Ctx 0
-  _,_ : (Γ : Ctx n) → (A : Ty n) → Ctx (suc n)
+  C1 : Ctx 0
+  C2 : (Γ : Ctx n) → (A : Ty n) → Ctx (suc n)
+{-# COMPILE AGDA2HS Ctx #-}
 
-ctxLength : (Γ : Ctx n) → ℕ
-ctxLength {n = n} Γ = n
+-- ctxLength : (Γ : Ctx n) → ℕ
+-- ctxLength {n = n} Γ = n
 
-infix 30 _─⟨_⟩⟶_
+-- infix 30 _─⟨_⟩⟶_
 data Ty where
-  ⋆ : Ty n
-  _─⟨_⟩⟶_ : (s : Tm n) → (A : Ty n) → (t : Tm n) → Ty n
+  Ty1 : ∀ {@0 n} → Ty n
+  Ty2 : ∀ {@0 n} → (s : Tm n) → (A : Ty n) → (t : Tm n) → Ty n
+{-# COMPILE AGDA2HS Ty #-}
 
 data Sub where
-  ⟨⟩ : Sub 0 n A
-  ⟨_,_⟩ : (σ : Sub n m A) → (t : Tm m) → Sub (suc n) m A
+  S1 : ∀ {@0 n A} → Sub 0 n A
+  S2 : ∀ {@0 n m A} → (σ : Sub n m A) → (t : Tm m) → Sub (suc n) m A
+{-# COMPILE AGDA2HS Sub #-}
 
 data Tm where
-  Var : (i : (Fin n)) → Tm n
-  Coh : (Δ : Ctx (suc n)) → (A : Ty (suc n)) → (σ : Sub (suc n) m ⋆) → Tm m
+  Var : ∀ {@0 n} → (m : ℕ) → @0 (m < n) → Tm n
+  Coh : ∀ {@0 n m} → (Δ : Ctx (suc n)) → (A : Ty (suc n)) → (σ : Sub (suc n) m Ty1) → Tm m
+{-# COMPILE AGDA2HS Tm #-}
+
 
 pattern 0V {n} = Var {n} 0F
 pattern 1V {n} = Var {n} 1F

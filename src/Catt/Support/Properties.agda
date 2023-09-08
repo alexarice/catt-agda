@@ -1,5 +1,3 @@
-{-# OPTIONS --without-K --safe --exact-split #-}
-
 module Catt.Support.Properties where
 
 open import Catt.Prelude

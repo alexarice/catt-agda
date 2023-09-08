@@ -1,5 +1,3 @@
-{-# OPTIONS --safe --without-K --exact-split #-}
-
 module Catt.Pasting.Properties where
 
 open import Catt.Prelude

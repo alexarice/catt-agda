@@ -24,7 +24,7 @@ record _×′_ (A : Set) (B : Set) : Set where
 open _×′_ public
 
 variable
-  n n′ m m′ l l′ o d d′ d″ : ℕ
+  @0 n n′ m m′ l l′ o d d′ d″ : ℕ
 
 ⊥-elim : ∀ {w} {Whatever : Set w} → .⊥ → Whatever
 ⊥-elim ()

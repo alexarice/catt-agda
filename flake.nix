@@ -12,6 +12,7 @@
     test = 1;
     devShell = pkgs.mkShell {
       nativeBuildInputs = with pkgs; [
+        ghc
         cabal-install
         haskell-language-server
         haskellPackages.fix-whitespace

@@ -27,169 +27,182 @@ open import Catt.Tree.Structured.Typing rule
 open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Unbiased.Typing rule lift-rule susp-rule sub-rule
 
-interior-sub-label-Ty : (S : Tree n)
-                      → (p : BranchingPoint S d)
-                      → (T : Tree m)
-                      → .⦃ _ : has-linear-height (bp-height p) T ⦄
-                      → Typing-Label (tree-to-ctx (insertion-tree S p T)) (interior-sub-label S p T ,, S⋆)
-interior-sub-label-Ty (Join S₁ S₂) BPHere T = connect-tree-inc-left-Ty T S₂
-interior-sub-label-Ty (Join S₁ S₂) (BPExt p) (Join T Sing)
+interior-label-Ty : (S : Tree n)
+                  → (p : BranchingPoint S d)
+                  → (T : Tree m)
+                  → Typing-Label (tree-to-ctx (insertion-tree S p T)) (interior-label S p T ,, S⋆)
+interior-label-Ty (Join S₁ S₂) BPHere T = connect-tree-inc-left-Ty T S₂
+interior-label-Ty (Join S₁ S₂) (BPExt p) T
   = TyJoin (TySPath PHere)
-           (map-ext-Ty (interior-sub-label-Ty S₁ p T))
+           (map-ext-Ty (interior-label-Ty S₁ p T))
            (TySing (TySShift (TySPath PHere)))
-interior-sub-label-Ty (Join S₁ S₂) (BPShift p) T = map-shift-Ty (interior-sub-label-Ty S₂ p T)
+interior-label-Ty (Join S₁ S₂) (BPShift p) T = map-shift-Ty (interior-label-Ty S₂ p T)
 
-interior-sub-Ty : (S : Tree n)
-                → (p : BranchingPoint S d)
-                → (T : Tree m)
-                → .⦃ _ : has-linear-height (bp-height p) T ⦄
-                → Typing-Sub (tree-to-ctx T) (tree-to-ctx (insertion-tree S p T)) (interior-sub S p T)
-interior-sub-Ty S p T = label-to-sub-Ty (interior-sub-label-Ty S p T) TySStar
+-- interior-sub-Ty : (S : Tree n)
+--                 → (p : BranchingPoint S d)
+--                 → (T : Tree m)
+--                 → .⦃ _ : has-linear-height (bp-height p) T ⦄
+--                 → Typing-Sub (tree-to-ctx T) (tree-to-ctx (insertion-tree S p T)) (interior-sub S p T)
+-- interior-sub-Ty S p T = label-to-sub-Ty (interior-sub-label-Ty S p T) TySStar
 
-exterior-sub-label-Ty : (S : Tree n)
-                      → (p : BranchingPoint S d)
-                      → (T : Tree m)
-                      → .⦃ _ : has-linear-height (bp-height p) T ⦄
-                      → (q : height-of-branching p ≥ tree-dim T)
-                      → Typing-Label (tree-to-ctx (insertion-tree S p T)) (exterior-sub-label S p T ,, S⋆)
-exterior-sub-label-Ty (Join S₁ S₂) BPHere T q
-  = label-between-connect-trees-Ty (label-from-linear-tree-unbiased-Ty-0 (susp-tree S₁) T)
+exterior-label-Ty : (S : Tree n)
+                  → (p : BranchingPoint S d)
+                  → (T : Tree m)
+                  → {As : STy (someTree T)}
+                  → Typing-STy (tree-to-ctx T) As
+                  → .⦃ _ : height-of-branching p ≃n d + sty-dim As ⦄
+                  → 1-Full As
+                  → Typing-Label (tree-to-ctx (insertion-tree S p T)) (exterior-label S p T As ,, S⋆)
+exterior-label-Ty (Join S₁ S₂) BPHere T {As} AsTy full
+  = label-between-connect-trees-Ty (label-comp-Ty (cast-to-disc-Ty (susp-tree S₁))
+                                                  (term-to-label-Ty (TySConv (TySCoh T AsTy (id-label-Ty T) TySStar)
+                                                                             (reflexive≈sty (>>=′-id As)))
+                                                                    AsTy)
+                                                  TySStar)
                                    (id-label-Ty S₂)
+                                   (reflexive≈stm (term-to-label-1-Full-tgt (SCoh T As (id-label-wt T)) As full))
                                    refl≈stm
-                                   refl≈stm
-exterior-sub-label-Ty (Join S₁ S₂) (BPExt p) (Join T Sing) q
-  = label-between-joins-Ty (exterior-sub-label-Ty S₁ p T (≤-pred q))
+
+-- label-between-connect-trees-Ty (label-from-linear-tree-unbiased-Ty-0 (susp-tree S₁) T)
+                                   -- (id-label-Ty S₂)
+                                   -- refl≈stm
+                                   -- refl≈stm
+exterior-label-Ty (Join S₁ S₂) (BPExt p) T AsTy full
+  = label-between-joins-Ty (exterior-label-Ty S₁ p T AsTy full)
                            (id-label-Ty S₂)
                            refl≈stm
-exterior-sub-label-Ty (Join S₁ S₂) (BPShift p) T q
+exterior-label-Ty (Join S₁ S₂) (BPShift p) T {As} AsTy full
   = label-between-joins-Ty (id-label-Ty S₁)
-                           (exterior-sub-label-Ty S₂ p T q)
-                           (reflexive≈stm (exterior-sub-label-phere S₂ p T) )
+                           (exterior-label-Ty S₂ p T AsTy full)
+                           (reflexive≈stm (exterior-label-phere S₂ p T As full) )
 
-exterior-sub-Ty : (S : Tree n)
-                → (p : BranchingPoint S d)
-                → (T : Tree m)
-                → .⦃ _ : has-linear-height (bp-height p) T ⦄
-                → (height-of-branching p ≥ tree-dim T)
-                → Typing-Sub (tree-to-ctx S) (tree-to-ctx (insertion-tree S p T)) (exterior-sub S p T)
-exterior-sub-Ty S p T q = label-to-sub-Ty (exterior-sub-label-Ty S p T q) TySStar
+-- exterior-sub-Ty : (S : Tree n)
+--                 → (p : BranchingPoint S d)
+--                 → (T : Tree m)
+--                 → .⦃ _ : has-linear-height (bp-height p) T ⦄
+--                 → (height-of-branching p ≥ tree-dim T)
+--                 → Typing-Sub (tree-to-ctx S) (tree-to-ctx (insertion-tree S p T)) (exterior-sub S p T)
+-- exterior-sub-Ty S p T q = label-to-sub-Ty (exterior-sub-label-Ty S p T q) TySStar
 
-sub-from-insertion-label-lem : (S₁ : Tree n)
-                             → (S₂ : Tree m)
-                             → (T : Tree l)
-                             → (As : STy (someTree S₁))
-                             → (L : Label X (Join S₁ S₂))
-                             → (M : Label X T)
-                             → (d : ℕ)
-                             → .⦃ NonZero d ⦄
-                             → map-sty-ext As >>=′ (L ,, Bs) ≈[ Γ ]sty unbiased-type d T >>=′ (M ,, Bs)
-                             → SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, Bs)
-                             ≈[ Γ ]sty
-                             SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, Bs)
-sub-from-insertion-label-lem {Bs = Bs} S₁ S₂ T As L M d p = begin
-  SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, Bs)
-    ≈˘⟨ reflexive≈sty (>>=′-≃ (truncate-sty-1-map-ext As) refl≃l refl≃sty) ⟩
-  truncate-sty 1 (map-sty-ext As) >>=′ (L ,, Bs)
-    ≈˘⟨ reflexive≈sty (truncate-sty-label 1 (map-sty-ext As) (L ,, Bs)) ⟩
-  truncate-sty (1 + sty-dim Bs) (map-sty-ext As >>=′ (L ,, Bs))
-    ≈⟨ truncate-sty-≈ {d = 1 + sty-dim Bs} refl p ⟩
-  truncate-sty (1 + sty-dim Bs) (unbiased-type d T >>=′ (M ,, Bs))
-    ≈⟨ reflexive≈sty (truncate-sty-label 1 (unbiased-type d T) (M ,, Bs)) ⟩
-  truncate-sty 1 (unbiased-type d T) >>=′ (M ,, Bs)
-    ≈⟨ reflexive≈sty (>>=′-≃ (truncate-unbiased-sty d T) refl≃l refl≃sty) ⟩
-  SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, Bs) ∎
-  where
-    open Reasoning sty-setoid-≈
+-- label-from-insertion-lem : (S₁ : Tree n)
+--                              → (S₂ : Tree m)
+--                              → (T : Tree l)
+--                              → (As : STy (someTree S₁))
+--                              → (L : Label X (Join S₁ S₂))
+--                              → (M : Label X T)
+--                              → (d : ℕ)
+--                              → .⦃ NonZero d ⦄
+--                              → map-sty-ext As >>=′ (L ,, Bs) ≈[ Γ ]sty unbiased-type d T >>=′ (M ,, Bs)
+--                              → SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, Bs)
+--                              ≈[ Γ ]sty
+--                              SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, Bs)
+-- label-from-insertion-lem {Bs = Bs} S₁ S₂ T As L M d p = begin
+--   SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, Bs)
+--     ≈˘⟨ reflexive≈sty (>>=′-≃ (truncate-sty-1-map-ext As) refl≃l refl≃sty) ⟩
+--   truncate-sty 1 (map-sty-ext As) >>=′ (L ,, Bs)
+--     ≈˘⟨ reflexive≈sty (truncate-sty-label 1 (map-sty-ext As) (L ,, Bs)) ⟩
+--   truncate-sty (1 + sty-dim Bs) (map-sty-ext As >>=′ (L ,, Bs))
+--     ≈⟨ truncate-sty-≈ {d = 1 + sty-dim Bs} refl p ⟩
+--   truncate-sty (1 + sty-dim Bs) (unbiased-type d T >>=′ (M ,, Bs))
+--     ≈⟨ reflexive≈sty (truncate-sty-label 1 (unbiased-type d T) (M ,, Bs)) ⟩
+--   truncate-sty 1 (unbiased-type d T) >>=′ (M ,, Bs)
+--     ≈⟨ reflexive≈sty (>>=′-≃ (truncate-unbiased-sty d T) refl≃l refl≃sty) ⟩
+--   SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, Bs) ∎
+--   where
+--     open Reasoning sty-setoid-≈
 
-sub-from-insertion-label-phere : (S : Tree n)
-                               → (P : BranchingPoint S l)
-                               → (T : Tree m)
-                               → .⦃ lh : has-linear-height (bp-height P) T ⦄
-                               → (L : Label X S)
-                               → (M : Label X T)
-                               → (d : ℕ)
-                               → .⦃ NonZero d ⦄
-                               → branching-path-to-type S P >>=′ (L ,, As) ≈[ Γ ]sty unbiased-type d T >>=′ (M ,, As)
-                               → sub-from-insertion-label S P T L M PHere ≈[ Γ ]stm L PHere
-sub-from-insertion-label-phere (Join S₁ S₂) BPHere T L M d p = begin
-  connect-label M (L ∘ PShift) PHere
-    ≈⟨ reflexive≈stm (connect-label-phere M (L ∘ PShift)) ⟩
-  M PHere
-    ≈˘⟨ ≈SArr-proj₁ lem ⟩
-  L PHere ∎
-  where
-    open Reasoning stm-setoid-≈
+-- label-from-insertion-phere : (S : Tree n)
+--                                → (P : BranchingPoint S l)
+--                                → (T : Tree m)
+--                                → .⦃ lh : has-linear-height (bp-height P) T ⦄
+--                                → (L : Label X S)
+--                                → (M : Label X T)
+--                                → (d : ℕ)
+--                                → .⦃ NonZero d ⦄
+--                                → branching-path-to-type S P >>=′ (L ,, As) ≈[ Γ ]sty unbiased-type d T >>=′ (M ,, As)
+--                                → label-from-insertion S P T L M PHere ≈[ Γ ]stm L PHere
+-- label-from-insertion-phere (Join S₁ S₂) BPHere T L M d p = begin
+--   connect-label M (L ∘ PShift) PHere
+--     ≈⟨ reflexive≈stm (connect-label-phere M (L ∘ PShift)) ⟩
+--   M PHere
+--     ≈˘⟨ ≈SArr-proj₁ lem ⟩
+--   L PHere ∎
+--   where
+--     open Reasoning stm-setoid-≈
 
-    lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, _) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, _)
-    lem = sub-from-insertion-label-lem S₁ S₂ T (unbiased-type (tree-dim S₁) S₁) L M d p
-sub-from-insertion-label-phere (Join S₁ S₂) (BPExt P) (Join T Sing) L M d p = sym≈stm (≈SArr-proj₁ lem)
-  where
-    lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, _) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path (Join T Sing))) >>=′ (M ,, _)
-    lem = sub-from-insertion-label-lem S₁ S₂ (Join T Sing) (branching-path-to-type S₁ P) L M d p
-sub-from-insertion-label-phere (Join S₁ S₂) (BPShift P) T L M d p = refl≈stm
+--     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, _) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, _)
+--     lem = label-from-insertion-lem S₁ S₂ T (unbiased-type (tree-dim S₁) S₁) L M d p
+-- label-from-insertion-phere (Join S₁ S₂) (BPExt P) (Join T Sing) L M d p = sym≈stm (≈SArr-proj₁ lem)
+--   where
+--     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, _) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path (Join T Sing))) >>=′ (M ,, _)
+--     lem = label-from-insertion-lem S₁ S₂ (Join T Sing) (branching-path-to-type S₁ P) L M d p
+-- label-from-insertion-phere (Join S₁ S₂) (BPShift P) T L M d p = refl≈stm
 
-sub-from-insertion-label-Ty : (S : Tree n)
-                            → (P : BranchingPoint S l)
-                            → (T : Tree m)
-                            → .⦃ lh : has-linear-height (bp-height P) T ⦄
-                            → {L : Label X S}
-                            → Typing-Label Γ (L ,, As)
-                            → {M : Label X T}
-                            → Typing-Label Γ (M ,, As)
-                            → branching-path-to-type S P >>=′ (L ,, As) ≈[ Γ ]sty unbiased-type (height-of-branching P) T >>=′ (M ,, As)
-                            → Typing-Label Γ (sub-from-insertion-label S P T L M ,, As)
-sub-from-insertion-label-Ty {As = As}(Join S₁ S₂) BPHere T {L} (TyJoin x Lty Lty′) {M} Mty p
-  = connect-label-Ty Mty Lty′ (sym≈stm (≈SArr-proj₃ lem))
-  where
-    lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, As) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, As)
-    lem = sub-from-insertion-label-lem S₁ S₂ T (unbiased-type (tree-dim S₁) S₁) L M (suc (tree-dim S₁)) p
-sub-from-insertion-label-Ty {As = As} (Join S₁ S₂) (BPExt P) (Join T Sing) {L} (TyJoin x Lty Lty′) {M} (TyJoin y Mty (TySing z)) p
-  = TyJoin y (sub-from-insertion-label-Ty S₁ P T (label-typing-conv Lty lem) Mty lem2) (replace-label-Ty Lty′ z (≈SArr-proj₃ lem))
-  where
-    lem : (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, As)) ≈[ _ ]sty
-            (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
-    lem = sub-from-insertion-label-lem S₁ S₂ (Join T Sing) (branching-path-to-type S₁ P) L M (suc (height-of-branching P)) p
+-- label-from-insertion-Ty : (S : Tree n)
+--                             → (P : BranchingPoint S l)
+--                             → (T : Tree m)
+--                             → .⦃ lh : has-linear-height (bp-height P) T ⦄
+--                             → {L : Label X S}
+--                             → Typing-Label Γ (L ,, As)
+--                             → {M : Label X T}
+--                             → Typing-Label Γ (M ,, As)
+--                             → branching-path-to-type S P >>=′ (L ,, As) ≈[ Γ ]sty unbiased-type (height-of-branching P) T >>=′ (M ,, As)
+--                             → Typing-Label Γ (label-from-insertion S P T L M ,, As)
+-- label-from-insertion-Ty {As = As}(Join S₁ S₂) BPHere T {L} (TyJoin x Lty Lty′) {M} Mty p
+--   = connect-label-Ty Mty Lty′ (sym≈stm (≈SArr-proj₃ lem))
+--   where
+--     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, As) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, As)
+--     lem = label-from-insertion-lem S₁ S₂ T (unbiased-type (tree-dim S₁) S₁) L M (suc (tree-dim S₁)) p
+-- label-from-insertion-Ty {As = As} (Join S₁ S₂) (BPExt P) (Join T Sing) {L} (TyJoin x Lty Lty′) {M} (TyJoin y Mty (TySing z)) p
+--   = TyJoin y (label-from-insertion-Ty S₁ P T (label-typing-conv Lty lem) Mty lem2) (replace-label-Ty Lty′ z (≈SArr-proj₃ lem))
+--   where
+--     lem : (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, As)) ≈[ _ ]sty
+--             (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
+--     lem = label-from-insertion-lem S₁ S₂ (Join T Sing) (branching-path-to-type S₁ P) L M (suc (height-of-branching P)) p
 
-    open Reasoning sty-setoid-≈
+--     open Reasoning sty-setoid-≈
 
-    lem2 : branching-path-to-type S₁ P >>=′
-             ((L ∘ PExt) ,, SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
-             ≈[ _ ]sty
-           unbiased-type (height-of-branching P) T >>=′
-             ((M ∘ PExt) ,, SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
-    lem2 = begin
-      branching-path-to-type S₁ P >>=′
-        (L ∘ PExt ,, SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
-        ≈˘⟨ label-on-sty-≈ (branching-path-to-type S₁ P) refl≈l lem ⟩
-      branching-path-to-type S₁ P >>=′ (label₁ (L ,, As))
-        ≈˘⟨ reflexive≈sty (map-sty-ext-label (branching-path-to-type S₁ P) (L ,, As)) ⟩
-      map-sty-ext (branching-path-to-type S₁ P) >>=′ (L ,, As)
-        ≈⟨ p ⟩
-      unbiased-type (suc (height-of-branching P)) (Join T Sing) >>=′ (M ,, As)
-        ≈˘⟨ reflexive≈sty (>>=′-≃ (unbiased-type-susp-lem (height-of-branching P) T) refl≃l refl≃sty) ⟩
-      susp-sty (unbiased-type (height-of-branching P) T) >>=′ (M ,, As)
-        ≈˘⟨ reflexive≈sty (>>=′-≃ (map-sty-ext-susp-compat (unbiased-type (height-of-branching P) T)) refl≃l refl≃sty) ⟩
-      map-sty-ext (unbiased-type (height-of-branching P) T) >>=′ (M ,, As)
-        ≈⟨ reflexive≈sty (map-sty-ext-label (unbiased-type (height-of-branching P) T) (M ,, As)) ⟩
-      unbiased-type (height-of-branching P) T >>=′ (label₁ (M ,, As)) ∎
+--     lem2 : branching-path-to-type S₁ P >>=′
+--              ((L ∘ PExt) ,, SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
+--              ≈[ _ ]sty
+--            unbiased-type (height-of-branching P) T >>=′
+--              ((M ∘ PExt) ,, SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
+--     lem2 = begin
+--       branching-path-to-type S₁ P >>=′
+--         (L ∘ PExt ,, SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
+--         ≈˘⟨ label-on-sty-≈ (branching-path-to-type S₁ P) refl≈l lem ⟩
+--       branching-path-to-type S₁ P >>=′ (label₁ (L ,, As))
+--         ≈˘⟨ reflexive≈sty (map-sty-ext-label (branching-path-to-type S₁ P) (L ,, As)) ⟩
+--       map-sty-ext (branching-path-to-type S₁ P) >>=′ (L ,, As)
+--         ≈⟨ p ⟩
+--       unbiased-type (suc (height-of-branching P)) (Join T Sing) >>=′ (M ,, As)
+--         ≈˘⟨ reflexive≈sty (>>=′-≃ (unbiased-type-susp-lem (height-of-branching P) T) refl≃l refl≃sty) ⟩
+--       susp-sty (unbiased-type (height-of-branching P) T) >>=′ (M ,, As)
+--         ≈˘⟨ reflexive≈sty (>>=′-≃ (map-sty-ext-susp-compat (unbiased-type (height-of-branching P) T)) refl≃l refl≃sty) ⟩
+--       map-sty-ext (unbiased-type (height-of-branching P) T) >>=′ (M ,, As)
+--         ≈⟨ reflexive≈sty (map-sty-ext-label (unbiased-type (height-of-branching P) T) (M ,, As)) ⟩
+--       unbiased-type (height-of-branching P) T >>=′ (label₁ (M ,, As)) ∎
 
-sub-from-insertion-label-Ty {As = As} (Join S₁ S₂) (BPShift P) T {L} (TyJoin x Lty Lty′) {M} Mty p
-  = TyJoin x (label-typing-conv Lty (≈SArr refl≈stm
-                                           refl≈sty
-                                           (sym≈stm (sub-from-insertion-label-phere S₂ P T (L ∘ PShift) M (height-of-branching P) lem))))
-             (sub-from-insertion-label-Ty S₂ P T Lty′ Mty lem)
+-- label-from-insertion-Ty {As = As} (Join S₁ S₂) (BPShift P) T {L} (TyJoin x Lty Lty′) {M} Mty p
+--   = TyJoin x (label-typing-conv Lty (≈SArr refl≈stm
+--                                            refl≈sty
+--                                            (sym≈stm (label-from-insertion-phere S₂ P T (L ∘ PShift) M (height-of-branching P) lem))))
+--              (label-from-insertion-Ty S₂ P T Lty′ Mty lem)
 
-  where
-    open Reasoning sty-setoid-≈
-    lem : branching-path-to-type S₂ P >>=′ ((L ∘ PShift) ,, As)
-          ≈[ _ ]sty
-          unbiased-type (height-of-branching P) T >>=′ (M ,, As)
-    lem = begin
-      branching-path-to-type S₂ P >>=′ ((L ∘ PShift) ,, As)
-        ≈˘⟨ reflexive≈sty (map-sty-shift-label (branching-path-to-type S₂ P) (L ,, As)) ⟩
-      map-sty-shift (branching-path-to-type S₂ P) >>=′ (L ,, As)
-        ≈⟨ p ⟩
-      unbiased-type (height-of-branching P) T >>=′ (M ,, As) ∎
+--   where
+--     open Reasoning sty-setoid-≈
+--     lem : branching-path-to-type S₂ P >>=′ ((L ∘ PShift) ,, As)
+--           ≈[ _ ]sty
+--           unbiased-type (height-of-branching P) T >>=′ (M ,, As)
+--     lem = begin
+--       branching-path-to-type S₂ P >>=′ ((L ∘ PShift) ,, As)
+--         ≈˘⟨ reflexive≈sty (map-sty-shift-label (branching-path-to-type S₂ P) (L ,, As)) ⟩
+--       map-sty-shift (branching-path-to-type S₂ P) >>=′ (L ,, As)
+--         ≈⟨ p ⟩
+--       unbiased-type (height-of-branching P) T >>=′ (M ,, As) ∎
+
+
+
 
 
 {-

@@ -308,3 +308,13 @@ SCoh-typing-prop {S = S} {Γ = Γ} {As = As} {L = L} [ tty ] .get = begin
   sty-to-type _ ∎
   where
     open Reasoning (ty-setoid-≈ _)
+
+cast-to-disc-Ty : (S : Tree n)
+                → .⦃ _ : is-linear S ⦄
+                → .⦃ _ : tree-dim S ≃n m ⦄
+                → Typing-Label (tree-to-ctx (n-disc m)) (SPath ∘ cast-to-disc S ,, S⋆)
+cast-to-disc-Ty Sing = TySing (TySPath PHere)
+cast-to-disc-Ty {m = suc m} (Join S Sing)
+  = TyJoin (TySPath PHere)
+           (transport-label-typing (map-ext-Ty (cast-to-disc-Ty S)) [ (λ P → compute-≃ refl≃stm) ] (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm)))
+           (TySing (TySPath (PShift PHere)))

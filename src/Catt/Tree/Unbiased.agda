@@ -50,10 +50,10 @@ label-from-linear-tree-unbiased (Join S Sing) T d (PShift PHere) = unbiased-stm 
 identity-stm : (n : ℕ) → STm (someTree (n-disc n))
 identity-stm n = unbiased-comp′ (suc n) (n-disc n)
 
-label-from-disc-type : Label-WT X S → .⦃ is-linear S ⦄ → STy X
-label-from-disc-type {S = Sing} L = lty L
-label-from-disc-type {S = Join S Sing} L = label-from-disc-type (label₁ L)
+-- label-from-disc-type : Label-WT X S → .⦃ is-linear S ⦄ → STy X
+-- label-from-disc-type {S = Sing} L = lty L
+-- label-from-disc-type {S = Join S Sing} L = label-from-disc-type (label₁ L)
 
-label-from-disc-term : Label-WT X S → .⦃ is-linear S ⦄ → STm X
-label-from-disc-term {S = Sing} L = ap L PHere
-label-from-disc-term {S = Join S Sing} L = label-from-disc-term (label₁ L)
+-- label-from-disc-term : Label-WT X S → .⦃ is-linear S ⦄ → STm X
+-- label-from-disc-term {S = Sing} L = ap L PHere
+-- label-from-disc-term {S = Join S Sing} L = label-from-disc-term (label₁ L)

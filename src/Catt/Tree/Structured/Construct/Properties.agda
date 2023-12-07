@@ -8,7 +8,7 @@ open import Catt.Syntax.Properties
 open import Catt.Suspension
 open import Catt.Connection
 open import Catt.Connection.Properties
-open import Catt.Tree           --
+open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
@@ -296,21 +296,110 @@ susp-unrestrict-label (L ,, SArr s As t) .get PHere = refl≃stm
 susp-unrestrict-label (L ,, SArr s As t) .get (PExt Z) = refl≃stm
 susp-unrestrict-label (L ,, SArr s As t) .get (PShift Z) = refl≃stm
 
-unrestrict-label-≃ : (L M : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → ap L ≃l ap M → (q : lty L ≃sty lty M) → unrestrict-label L ≃l unrestrict-label M ⦃ NonZero-subst (sty-dim-≃ q) it ⦄
+unrestrict-label-≃ : (L : Label-WT X S) → (M : Label-WT Y S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → ap L ≃l ap M → (q : lty L ≃sty lty M) → unrestrict-label L ≃l unrestrict-label M ⦃ NonZero-subst (sty-dim-≃ q) it ⦄
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get PHere = [ x ]
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get (PExt Z) = p .get Z
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get (PShift PHere) = [ y ]
 
-label-from-linear-tree-dim : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → sty-dim (label-from-linear-tree-type S As) ≡ sty-dim As ∸ tree-dim S
-label-from-linear-tree-dim Sing As = refl
-label-from-linear-tree-dim (Join S Sing) As = begin
-  sty-dim
-      (label-from-linear-tree-type S (sty-base As))
-    ≡⟨ label-from-linear-tree-dim S (sty-base As) ⟩
-  sty-dim (sty-base As) ∸ tree-dim S
-    ≡⟨ cong (_∸ tree-dim S) (sty-base-dim As) ⟩
-  sty-dim As ∸ 1 ∸ tree-dim S
-    ≡⟨ ∸-+-assoc (sty-dim As) 1 (tree-dim S) ⟩
-  sty-dim As ∸ suc (tree-dim S) ∎
+-- label-from-linear-tree-dim : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → sty-dim (label-from-linear-tree-type S As) ≡ sty-dim As ∸ tree-dim S
+-- label-from-linear-tree-dim Sing As = refl
+-- label-from-linear-tree-dim (Join S Sing) As = begin
+--   sty-dim
+--       (label-from-linear-tree-type S (sty-base As))
+--     ≡⟨ label-from-linear-tree-dim S (sty-base As) ⟩
+--   sty-dim (sty-base As) ∸ tree-dim S
+--     ≡⟨ cong (_∸ tree-dim S) (sty-base-dim As) ⟩
+--   sty-dim As ∸ 1 ∸ tree-dim S
+--     ≡⟨ ∸-+-assoc (sty-dim As) 1 (tree-dim S) ⟩
+--   sty-dim As ∸ suc (tree-dim S) ∎
+--   where
+--     open ≡-Reasoning
+
+-- label-from-linear-tree-≃ : (S : Tree n)
+--                          → .⦃ _ : is-linear S ⦄
+--                          → (a ≃stm b)
+--                          → (q : As ≃sty Bs) → .(r : tree-dim S ≤ sty-dim As) → label-from-linear-tree S a As r ≃l label-from-linear-tree S b Bs (≤-trans r (≤-reflexive (sty-dim-≃ q)))
+-- label-from-linear-tree-≃ Sing p q r .get P = p
+-- label-from-linear-tree-≃ (Join S Sing) p q r = unrestrict-label-≃ (label-from-linear-tree S _ _ _ ,, truncate-sty′ (tree-dim S) _)
+--                                                                    (label-from-linear-tree S _ _ _ ,, truncate-sty′ (tree-dim S) _)
+--                                                                    ⦃ _ ⦄
+--                                                                    (label-from-linear-tree-≃ S p q (≤-step′ r))
+--                                                                    (truncate-sty′-≃ {d = tree-dim S} refl q)
+
+extend-disc-label-max : (L : Label X (n-disc n))
+                      → (t : STm X)
+                      → (a : STm X)
+                      → extend-disc-label L t a (disc-path (suc n)) ≃stm a
+extend-disc-label-max {n = zero} L t a = refl≃stm
+extend-disc-label-max {n = suc n} L t a = extend-disc-label-max (L ∘ PExt) t a
+
+extend-disc-label-disc-type : (L : Label X (n-disc n))
+                            → (t : STm X)
+                            → (a : STm X)
+                            → (As : STy X)
+                            → disc-type (suc n) >>=′ (extend-disc-label L t a ,, As) ≃sty SArr (L (disc-path n))
+                                                                                               (disc-type n >>=′ (L ,, As))
+                                                                                               t
+extend-disc-label-disc-type {n = zero} L t a As = refl≃sty
+extend-disc-label-disc-type {n = suc n} L t a As = begin
+  < map-sty-ext (disc-type (suc n)) >>=′ (extend-disc-label L t a ,, As) >sty
+    ≈⟨ map-sty-ext-label (disc-type (suc n)) (extend-disc-label L t a ,, As) ⟩
+  < disc-type (suc n) >>=′ (extend-disc-label (L ∘ PExt) t a ,, SArr (L PHere) As (L (PShift PHere))) >sty
+    ≈⟨ extend-disc-label-disc-type (L ∘ PExt) t a (SArr (L PHere) As (L (PShift PHere))) ⟩
+  < SArr (L (PExt (disc-path n)))
+         (disc-type n >>=′ (L ∘ PExt ,, SArr (L PHere) As (L (PShift PHere))))
+         t >sty
+    ≈˘⟨ SArr≃ refl≃stm
+              (map-sty-ext-label (disc-type n) (L ,, As))
+              refl≃stm ⟩
+  < SArr (L (disc-path (suc n)))
+         (disc-type (suc n) >>=′ (L ,, As))
+         t >sty ∎
   where
-    open ≡-Reasoning
+    open Reasoning sty-setoid
+
+
+term-to-label-max : (a : STm X)
+                  → (As : STy X)
+                  → term-to-label a As (disc-path (sty-dim As)) ≃stm a
+term-to-label-max a S⋆ = refl≃stm
+term-to-label-max a (SArr s As t) = extend-disc-label-max (term-to-label s As) t a
+
+term-to-label-disc-type : (a : STm X)
+                        → (As : STy X)
+                        → disc-type (sty-dim As) >>=′ (term-to-label a As ,, S⋆) ≃sty As
+term-to-label-disc-type a S⋆ = refl≃sty
+term-to-label-disc-type a (SArr s As t) = begin
+  < disc-type (suc (sty-dim As)) >>=′ (extend-disc-label (term-to-label s As) t a ,, S⋆) >sty
+    ≈⟨ extend-disc-label-disc-type (term-to-label s As) t a S⋆ ⟩
+  < SArr (term-to-label s As (disc-path (sty-dim As)))
+         (disc-type (sty-dim As) >>=′ (term-to-label s As ,, S⋆))
+         t >sty
+    ≈⟨ SArr≃ (term-to-label-max s As)
+             (term-to-label-disc-type s As)
+             refl≃stm ⟩
+  < SArr s As t >sty ∎
+  where
+    open Reasoning sty-setoid
+
+term-to-label-1-Full-src : (a : STm (someTree T)) → (As : STy (someTree T)) → 1-Full As → term-to-label a As PHere ≃stm (SHere {S = T})
+term-to-label-1-Full-src a (SArr s S⋆ t) full = full .proj₁
+term-to-label-1-Full-src a (SArr s (SArr s′ As t′) t) full = begin
+  < term-to-label a (SArr s (SArr s′ As t′) t) PHere >stm
+    ≡⟨⟩
+  < term-to-label s (SArr s′ As t′) PHere >stm
+    ≈⟨ term-to-label-1-Full-src s (SArr s′ As t′) full ⟩
+  < SHere >stm ∎
+  where
+    open Reasoning stm-setoid
+
+term-to-label-1-Full-tgt : (a : STm (someTree T)) → (As : STy (someTree T)) → 1-Full As → term-to-label a As (last-path (n-disc (sty-dim As))) ≃stm SPath (last-path T)
+term-to-label-1-Full-tgt a (SArr s S⋆ t) full = full .proj₂
+term-to-label-1-Full-tgt {T = T} a (SArr s (SArr s′ As t′) t) full = begin
+  < term-to-label a (SArr s (SArr s′ As t′) t) (PShift PHere) >stm
+    ≡⟨⟩
+  < term-to-label s (SArr s′ As t′) (PShift PHere) >stm
+    ≈⟨ term-to-label-1-Full-tgt s (SArr s′ As t′) full ⟩
+  < SPath (last-path T) >stm ∎
+  where
+    open Reasoning stm-setoid

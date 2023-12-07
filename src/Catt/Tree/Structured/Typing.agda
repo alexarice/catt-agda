@@ -1,7 +1,7 @@
 open import Catt.Typing.Rule
 
 module Catt.Tree.Structured.Typing {index : Set}
-                              (rule : index → Rule) where
+                                   (rule : index → Rule) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -209,3 +209,30 @@ label-typing-conv (TyJoin x LTy LTy′) p = TyJoin (TySConv x p) (label-typing-c
 
 unrestrict-label-Ty : {L : Label-WT X S } → Typing-Label Γ L → Typing-STy Γ (lty L) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → Typing-Label Γ (unrestrict-label L ,, sty-base (lty L))
 unrestrict-label-Ty {L = L ,, SArr s As t} LTy AsTy = TyJoin (TySArr-proj₁ AsTy) LTy (TySing (TySArr-proj₃ AsTy))
+
+extend-disc-label-Ty : {L : Label X (n-disc n)}
+                     → Typing-Label Γ (L ,, As)
+                     → Typing-STm Γ b (disc-type n >>=′ (L ,, As))
+                     → Typing-STm Γ a (SArr (L (disc-path n))
+                                            (disc-type n >>=′ (L ,, As))
+                                            b)
+                     → Typing-Label Γ (extend-disc-label L b a ,, As)
+extend-disc-label-Ty {n = zero} (TySing x) bTy aTy = TyJoin x (TySing aTy) (TySing bTy)
+extend-disc-label-Ty {n = suc n} (TyJoin x LTy (TySing y)) bTy aTy
+  = TyJoin x
+           (extend-disc-label-Ty
+             LTy
+             (transport-stm-typing bTy refl≃stm (map-sty-ext-label (disc-type n) (_ ,, _)))
+             (transport-stm-typing aTy refl≃stm (SArr≃ refl≃stm
+                                                       (map-sty-ext-label (disc-type n) (_ ,, _))
+                                                       refl≃stm)))
+           (TySing y)
+
+term-to-label-Ty : Typing-STm Γ a As → Typing-STy Γ As → Typing-Label Γ (term-to-label a As ,, S⋆)
+term-to-label-Ty {As = S⋆} aTy AsTy = TySing aTy
+term-to-label-Ty {As = SArr s As t} aTy AsTy
+  = extend-disc-label-Ty (term-to-label-Ty (TySArr-proj₁ AsTy) (TySArr-proj₂ AsTy))
+                         (transport-stm-typing (TySArr-proj₃ AsTy) refl≃stm (sym≃sty (term-to-label-disc-type s As)))
+                         (transport-stm-typing aTy refl≃stm (sym≃sty (SArr≃ (term-to-label-max s As)
+                                                                            (term-to-label-disc-type s As)
+                                                                            refl≃stm)))

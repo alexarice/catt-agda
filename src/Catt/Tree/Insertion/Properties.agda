@@ -18,6 +18,7 @@ open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
+open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Boundary
@@ -27,7 +28,7 @@ open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Insertion
 
 open import Relation.Binary
-{-
+
 branching-path-to-var-is-var : (p : BranchingPoint S d) → isVar (branching-path-to-var p)
 branching-path-to-var-is-var {S = Join S T} BPHere = var-to-var-comp-tm 0V (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
 branching-path-to-var-is-var {S = Join S T} (BPExt P) = var-to-var-comp-tm (susp-tm (branching-path-to-var P)) ⦃ susp-tm-var (branching-path-to-var P) ⦃ branching-path-to-var-is-var P ⦄ ⦄ (connect-susp-inc-left (tree-size S) (tree-size T)) ⦃ connect-susp-inc-left-var-to-var (tree-size S) (tree-size T) ⦄
@@ -57,15 +58,26 @@ height-of-branching-linear : (S : Tree n) → .⦃ is-linear S ⦄ → (P : Bran
 height-of-branching-linear (Join S Sing) BPHere = refl
 height-of-branching-linear (Join S Sing) (BPExt P) = cong suc (height-of-branching-linear S P)
 
-exterior-sub-label-phere : (S : Tree n)
-                         → (p : BranchingPoint S d)
-                         → (T : Tree m)
-                         → .⦃ _ : has-linear-height (bp-height p) T ⦄
-                         → exterior-sub-label S p T PHere ≃stm SHere {S = insertion-tree S p T}
-exterior-sub-label-phere (Join S₁ S₂) BPHere T = SPath≃ (connect-tree-inc-left-phere T S₂)
-exterior-sub-label-phere (Join S₁ S₂) (BPExt p) (Join T Sing) = refl≃stm
-exterior-sub-label-phere (Join S₁ S₂) (BPShift p) T = refl≃stm
+exterior-label-phere : (S : Tree n)
+                     → (p : BranchingPoint S d)
+                     → (T : Tree m)
+                     → (A : STy (someTree T))
+                     → .⦃ _ : height-of-branching p ≃n d + sty-dim A ⦄
+                     → 1-Full A
+                     → exterior-label S p T A PHere ≃stm SHere {S = insertion-tree S p T}
+exterior-label-phere (Join S₁ S₂) BPHere T A full = begin
+  < term-to-label (SCoh T A (SPath ,, S⋆)) A PHere >>= connect-tree-inc-left T S₂ >stm
+    ≈⟨ >>=-≃ (term-to-label-1-Full-src (SCoh T A (SPath ,, S⋆)) A full) refl≃l refl≃sty ⟩
+  < SPath (connect-tree-inc-left′ T S₂ PHere) >stm
+    ≈⟨ SPath≃ (connect-tree-inc-left-phere T S₂) ⟩
+  < SHere >stm ∎
+  where
+    open Reasoning stm-setoid
+exterior-label-phere (Join S₁ S₂) (BPExt p) T A full = refl≃stm
+exterior-label-phere (Join S₁ S₂) (BPShift p) T A full = refl≃stm
 
+
+{-
 sub-from-replace-lem : (S : Tree n)
                      → (P : BranchingPoint S l)
                      → (T : Tree m)

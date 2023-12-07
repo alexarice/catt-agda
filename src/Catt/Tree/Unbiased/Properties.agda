@@ -272,89 +272,79 @@ lfltu-susp (Join S Sing) T d .get (PShift PHere) = begin
   where
     open Reasoning stm-setoid
 
-label-from-linear-tree-type-≃ : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As ≃sty Bs) → label-from-linear-tree-type S As ≃sty label-from-linear-tree-type S Bs
-label-from-linear-tree-type-≃ Sing p = p
-label-from-linear-tree-type-≃ (Join S Sing) p = label-from-linear-tree-type-≃ S (sty-base-≃ p)
+-- label-from-linear-tree-unbiased-type-lem : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → label-from-linear-tree-type S (unbiased-type (tree-dim S + d) T) ≃sty unbiased-type d T
+-- label-from-linear-tree-unbiased-type-lem Sing T d = refl≃sty
+-- label-from-linear-tree-unbiased-type-lem (Join S Sing) T d = label-from-linear-tree-unbiased-type-lem S T d
 
-label-from-linear-tree-≃ : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a ≃stm b) → (q : As ≃sty Bs) → .(r : tree-dim S ≤ sty-dim As) → label-from-linear-tree S a As r ≃l label-from-linear-tree S b Bs (≤-trans r (≤-reflexive (sty-dim-≃ q)))
-label-from-linear-tree-≃ Sing p q r .get P = p
-label-from-linear-tree-≃ (Join S Sing) p q r .get PHere = sty-src-≃ (label-from-linear-tree-type-≃ S q) ⦃ _ ⦄
-label-from-linear-tree-≃ (Join S Sing) p q r .get (PExt P) = label-from-linear-tree-≃ S p q _ .get P
-label-from-linear-tree-≃ (Join S Sing) p q r .get (PShift PHere) = sty-tgt-≃ (label-from-linear-tree-type-≃ S q) ⦃ _ ⦄
+-- label-from-linear-tree-unbiased-lem
+--   : (S : Tree n)
+--   → .⦃ _ : is-linear S ⦄
+--   → (T : Tree m)
+--   → (d : ℕ)
+--   → label-from-linear-tree S (unbiased-comp′ (tree-dim S + d) T)
+--                              (unbiased-type (tree-dim S + d) T)
+--                              (≤-trans (m≤m+n (tree-dim S) d) (≤-reflexive (sym (unbiased-type-dim (tree-dim S + d) T))))
+--   ≃l label-from-linear-tree-unbiased S T d
+-- label-from-linear-tree-unbiased-lem Sing T d .get P = refl≃stm
+-- label-from-linear-tree-unbiased-lem (Join S Sing) T d .get PHere = begin
+--   < sty-src (label-from-linear-tree-type S (unbiased-type (suc (tree-dim S) + d) T)) ⦃ _ ⦄ >stm
+--     ≈⟨ sty-src-≃ (label-from-linear-tree-type-≃ S (unbiased-type-≃ (sym (+-suc (tree-dim S) d)) refl≃)) ⦃ _ ⦄ ⟩
+--   < sty-src (label-from-linear-tree-type S (unbiased-type (tree-dim S + suc d) T)) ⦃ _ ⦄ >stm
+--     ≈⟨ sty-src-≃ (label-from-linear-tree-unbiased-type-lem S T (suc d)) ⦃ _ ⦄ ⟩
+--   < sty-src (unbiased-type (suc d) T) >stm
+--     ≡⟨⟩
+--   < unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false >stm ∎
+--   where
+--     open Reasoning stm-setoid
+-- label-from-linear-tree-unbiased-lem (Join S Sing) T d .get (PExt P) = begin
+--   < label-from-linear-tree S
+--                            (unbiased-comp′ (suc (tree-dim S + d)) T)
+--                            (unbiased-type (suc (tree-dim S + d)) T)
+--                            _ P >stm
+--     ≈⟨ label-from-linear-tree-≃ S (unbiased-comp′-≃ (sym (+-suc (tree-dim S) d)) refl≃) (unbiased-type-≃ (sym (+-suc (tree-dim S) d)) refl≃) _ .get P ⟩
+--   < label-from-linear-tree S
+--                            (unbiased-comp′ (tree-dim S + suc d) T)
+--                            (unbiased-type (tree-dim S + suc d) T)
+--                            _ P >stm
+--     ≈⟨ label-from-linear-tree-unbiased-lem S T (suc d) .get P ⟩
+--   < label-from-linear-tree-unbiased S T (suc d) P >stm ∎
+--   where
+--     open Reasoning stm-setoid
+-- label-from-linear-tree-unbiased-lem (Join S Sing) T d .get (PShift PHere) = begin
+--   < sty-tgt (label-from-linear-tree-type S (unbiased-type (suc (tree-dim S) + d) T)) ⦃ _ ⦄ >stm
+--     ≈⟨ sty-tgt-≃ (label-from-linear-tree-type-≃ S (unbiased-type-≃ (sym (+-suc (tree-dim S) d)) refl≃)) ⦃ _ ⦄ ⟩
+--   < sty-tgt (label-from-linear-tree-type S (unbiased-type (tree-dim S + suc d) T)) ⦃ _ ⦄ >stm
+--     ≈⟨ sty-tgt-≃ (label-from-linear-tree-unbiased-type-lem S T (suc d)) ⦃ _ ⦄ ⟩
+--   < sty-tgt (unbiased-type (suc d) T) >stm
+--     ≡⟨⟩
+--   < unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true >stm ∎
+--   where
+--     open Reasoning stm-setoid
 
-label-from-linear-tree-unbiased-type-lem : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → label-from-linear-tree-type S (unbiased-type (tree-dim S + d) T) ≃sty unbiased-type d T
-label-from-linear-tree-unbiased-type-lem Sing T d = refl≃sty
-label-from-linear-tree-unbiased-type-lem (Join S Sing) T d = label-from-linear-tree-unbiased-type-lem S T d
+-- label-from-linear-tree-unbiased-lem-0 :
+--     (S : Tree n)
+--   → .⦃ _ : is-linear S ⦄
+--   → (T : Tree m)
+--   → (d : ℕ)
+--   → (p : tree-dim S ≡ d)
+--   → label-from-linear-tree S (unbiased-comp′ d T)
+--                              (unbiased-type d T)
+--                              (≤-reflexive (trans p (sym (unbiased-type-dim d T))))
+--   ≃l label-from-linear-tree-unbiased S T 0
+-- label-from-linear-tree-unbiased-lem-0 S T d p = begin
+--   < label-from-linear-tree S (unbiased-comp′ d T)
+--                              (unbiased-type d T) _ >l
+--     ≈˘⟨ label-from-linear-tree-≃ S (unbiased-comp′-≃ (trans (+-identityʳ (tree-dim S)) p) refl≃) (unbiased-type-≃ (trans (+-identityʳ (tree-dim S)) p) refl≃) _ ⟩
+--   < label-from-linear-tree S (unbiased-comp′ (tree-dim S + 0) T)
+--                              (unbiased-type (tree-dim S + 0) T) _ >l
+--     ≈⟨ label-from-linear-tree-unbiased-lem S T 0 ⟩
+--   < label-from-linear-tree-unbiased S T 0 >l ∎
+--   where
+--     open Reasoning (label-setoid S)
 
-label-from-linear-tree-unbiased-lem
-  : (S : Tree n)
-  → .⦃ _ : is-linear S ⦄
-  → (T : Tree m)
-  → (d : ℕ)
-  → label-from-linear-tree S (unbiased-comp′ (tree-dim S + d) T)
-                             (unbiased-type (tree-dim S + d) T)
-                             (≤-trans (m≤m+n (tree-dim S) d) (≤-reflexive (sym (unbiased-type-dim (tree-dim S + d) T))))
-  ≃l label-from-linear-tree-unbiased S T d
-label-from-linear-tree-unbiased-lem Sing T d .get P = refl≃stm
-label-from-linear-tree-unbiased-lem (Join S Sing) T d .get PHere = begin
-  < sty-src (label-from-linear-tree-type S (unbiased-type (suc (tree-dim S) + d) T)) ⦃ _ ⦄ >stm
-    ≈⟨ sty-src-≃ (label-from-linear-tree-type-≃ S (unbiased-type-≃ (sym (+-suc (tree-dim S) d)) refl≃)) ⦃ _ ⦄ ⟩
-  < sty-src (label-from-linear-tree-type S (unbiased-type (tree-dim S + suc d) T)) ⦃ _ ⦄ >stm
-    ≈⟨ sty-src-≃ (label-from-linear-tree-unbiased-type-lem S T (suc d)) ⦃ _ ⦄ ⟩
-  < sty-src (unbiased-type (suc d) T) >stm
-    ≡⟨⟩
-  < unbiased-stm d (tree-bd d T) >>= tree-inc-label d T false >stm ∎
-  where
-    open Reasoning stm-setoid
-label-from-linear-tree-unbiased-lem (Join S Sing) T d .get (PExt P) = begin
-  < label-from-linear-tree S
-                           (unbiased-comp′ (suc (tree-dim S + d)) T)
-                           (unbiased-type (suc (tree-dim S + d)) T)
-                           _ P >stm
-    ≈⟨ label-from-linear-tree-≃ S (unbiased-comp′-≃ (sym (+-suc (tree-dim S) d)) refl≃) (unbiased-type-≃ (sym (+-suc (tree-dim S) d)) refl≃) _ .get P ⟩
-  < label-from-linear-tree S
-                           (unbiased-comp′ (tree-dim S + suc d) T)
-                           (unbiased-type (tree-dim S + suc d) T)
-                           _ P >stm
-    ≈⟨ label-from-linear-tree-unbiased-lem S T (suc d) .get P ⟩
-  < label-from-linear-tree-unbiased S T (suc d) P >stm ∎
-  where
-    open Reasoning stm-setoid
-label-from-linear-tree-unbiased-lem (Join S Sing) T d .get (PShift PHere) = begin
-  < sty-tgt (label-from-linear-tree-type S (unbiased-type (suc (tree-dim S) + d) T)) ⦃ _ ⦄ >stm
-    ≈⟨ sty-tgt-≃ (label-from-linear-tree-type-≃ S (unbiased-type-≃ (sym (+-suc (tree-dim S) d)) refl≃)) ⦃ _ ⦄ ⟩
-  < sty-tgt (label-from-linear-tree-type S (unbiased-type (tree-dim S + suc d) T)) ⦃ _ ⦄ >stm
-    ≈⟨ sty-tgt-≃ (label-from-linear-tree-unbiased-type-lem S T (suc d)) ⦃ _ ⦄ ⟩
-  < sty-tgt (unbiased-type (suc d) T) >stm
-    ≡⟨⟩
-  < unbiased-stm d (tree-bd d T) >>= tree-inc-label d T true >stm ∎
-  where
-    open Reasoning stm-setoid
-
-label-from-linear-tree-unbiased-lem-0 :
-    (S : Tree n)
-  → .⦃ _ : is-linear S ⦄
-  → (T : Tree m)
-  → (d : ℕ)
-  → (p : tree-dim S ≡ d)
-  → label-from-linear-tree S (unbiased-comp′ d T)
-                             (unbiased-type d T)
-                             (≤-reflexive (trans p (sym (unbiased-type-dim d T))))
-  ≃l label-from-linear-tree-unbiased S T 0
-label-from-linear-tree-unbiased-lem-0 S T d p = begin
-  < label-from-linear-tree S (unbiased-comp′ d T)
-                             (unbiased-type d T) _ >l
-    ≈˘⟨ label-from-linear-tree-≃ S (unbiased-comp′-≃ (trans (+-identityʳ (tree-dim S)) p) refl≃) (unbiased-type-≃ (trans (+-identityʳ (tree-dim S)) p) refl≃) _ ⟩
-  < label-from-linear-tree S (unbiased-comp′ (tree-dim S + 0) T)
-                             (unbiased-type (tree-dim S + 0) T) _ >l
-    ≈⟨ label-from-linear-tree-unbiased-lem S T 0 ⟩
-  < label-from-linear-tree-unbiased S T 0 >l ∎
-  where
-    open Reasoning (label-setoid S)
-
-label-from-linear-tree-type-prop : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → label-from-linear-tree-type S (sty-base As) ≃sty sty-base (label-from-linear-tree-type S As)
-label-from-linear-tree-type-prop Sing As = refl≃sty
-label-from-linear-tree-type-prop (Join S Sing) As = label-from-linear-tree-type-prop S (sty-base As)
+-- label-from-linear-tree-type-prop : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → label-from-linear-tree-type S (sty-base As) ≃sty sty-base (label-from-linear-tree-type S As)
+-- label-from-linear-tree-type-prop Sing As = refl≃sty
+-- label-from-linear-tree-type-prop (Join S Sing) As = label-from-linear-tree-type-prop S (sty-base As)
 
 truncate-unbiased-sty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → truncate-sty 1 (unbiased-type d T) ≃sty SArr SHere S⋆ (SPath (last-path T))
 truncate-unbiased-sty (suc zero) T = refl≃sty
@@ -367,104 +357,104 @@ truncate-unbiased-sty (suc (suc d)) T = begin
   where
     open Reasoning sty-setoid
 
-label-from-linear-tree-type-susp : (S : Tree n)
-                                 → .⦃ _ : is-linear S ⦄
-                                 → (As : STy X)
-                                 → .(sty-dim As ≥ tree-dim S)
-                                 → label-from-linear-tree-type S (susp-sty As) ≃sty susp-sty (label-from-linear-tree-type S As)
-label-from-linear-tree-type-susp Sing As p = refl≃sty
-label-from-linear-tree-type-susp (Join S Sing) As@(SArr _ _ _) p = label-from-linear-tree-type-susp S (sty-base As) (≤-pred p)
+-- label-from-linear-tree-type-susp : (S : Tree n)
+--                                  → .⦃ _ : is-linear S ⦄
+--                                  → (As : STy X)
+--                                  → .(sty-dim As ≥ tree-dim S)
+--                                  → label-from-linear-tree-type S (susp-sty As) ≃sty susp-sty (label-from-linear-tree-type S As)
+-- label-from-linear-tree-type-susp Sing As p = refl≃sty
+-- label-from-linear-tree-type-susp (Join S Sing) As@(SArr _ _ _) p = label-from-linear-tree-type-susp S (sty-base As) (≤-pred p)
 
-label-from-linear-tree-susp : (S : Tree n)
-                            → .⦃ _ : is-linear S ⦄
-                            → (a : STm X)
-                            → (As : STy X)
-                            → .(p : tree-dim S ≤ sty-dim As)
-                            → label-from-linear-tree S (susp-stm a) (susp-sty As) (≤-trans p (≤-trans (n≤1+n (sty-dim As)) (≤-reflexive (sym (susp-sty-dim As))))) ≃l (susp-stm ∘ label-from-linear-tree S a As p)
-label-from-linear-tree-susp Sing a As p .get PHere = refl≃stm
-label-from-linear-tree-susp (Join S Sing) a As p = begin
-  < unrestrict-label
-      (label-from-linear-tree S (susp-stm a) (susp-sty As) _ ,,
-       label-from-linear-tree-type S (susp-sty As)) ⦃ _ ⦄ >l
-    ≈⟨ unrestrict-label-≃ _ _ ⦃ _ ⦄ (label-from-linear-tree-susp S a As _) (label-from-linear-tree-type-susp S As (≤-trans (n≤1+n (tree-dim S)) p)) ⟩
-  < unrestrict-label (susp-label (label-from-linear-tree S a As _ ,, label-from-linear-tree-type S As)) ⦃ _ ⦄ >l
-    ≈˘⟨ susp-unrestrict-label (label-from-linear-tree S a As _ ,, label-from-linear-tree-type S As) ⦃ label-from-linear-tree-nz S As p ⦄ ⟩
-  < (susp-stm ∘
-       unrestrict-label
-       (label-from-linear-tree S a As _ ,,
-        label-from-linear-tree-type S As) ⦃ _ ⦄) >l ∎
-  where
-    open Reasoning (label-setoid _)
+-- label-from-linear-tree-susp : (S : Tree n)
+--                             → .⦃ _ : is-linear S ⦄
+--                             → (a : STm X)
+--                             → (As : STy X)
+--                             → .(p : tree-dim S ≤ sty-dim As)
+--                             → label-from-linear-tree S (susp-stm a) (susp-sty As) (≤-trans p (≤-trans (n≤1+n (sty-dim As)) (≤-reflexive (sym (susp-sty-dim As))))) ≃l (susp-stm ∘ label-from-linear-tree S a As p)
+-- label-from-linear-tree-susp Sing a As p .get PHere = refl≃stm
+-- label-from-linear-tree-susp (Join S Sing) a As p = begin
+--   < unrestrict-label
+--       (label-from-linear-tree S (susp-stm a) (susp-sty As) _ ,,
+--        label-from-linear-tree-type S (susp-sty As)) ⦃ _ ⦄ >l
+--     ≈⟨ unrestrict-label-≃ _ _ ⦃ _ ⦄ (label-from-linear-tree-susp S a As _) (label-from-linear-tree-type-susp S As (≤-trans (n≤1+n (tree-dim S)) p)) ⟩
+--   < unrestrict-label (susp-label (label-from-linear-tree S a As _ ,, label-from-linear-tree-type S As)) ⦃ _ ⦄ >l
+--     ≈˘⟨ susp-unrestrict-label (label-from-linear-tree S a As _ ,, label-from-linear-tree-type S As) ⦃ label-from-linear-tree-nz S As p ⦄ ⟩
+--   < (susp-stm ∘
+--        unrestrict-label
+--        (label-from-linear-tree S a As _ ,,
+--         label-from-linear-tree-type S As) ⦃ _ ⦄) >l ∎
+--   where
+--     open Reasoning (label-setoid _)
 
-label-from-linear-tree-type-0 : (S : Tree n)
-                            → .⦃ _ : is-linear S ⦄
-                            → (As : STy X)
-                            → .(p : tree-dim S ≡ sty-dim As)
-                            → label-from-linear-tree-type S As ≃sty (S⋆ {X = X})
-label-from-linear-tree-type-0 Sing S⋆ p = refl≃sty
-label-from-linear-tree-type-0 (Join S Sing) (SArr s As t) p = label-from-linear-tree-type-0 S As (cong pred p)
+-- label-from-linear-tree-type-0 : (S : Tree n)
+--                             → .⦃ _ : is-linear S ⦄
+--                             → (As : STy X)
+--                             → .(p : tree-dim S ≡ sty-dim As)
+--                             → label-from-linear-tree-type S As ≃sty (S⋆ {X = X})
+-- label-from-linear-tree-type-0 Sing S⋆ p = refl≃sty
+-- label-from-linear-tree-type-0 (Join S Sing) (SArr s As t) p = label-from-linear-tree-type-0 S As (cong pred p)
 
-label-from-linear-tree-susp-full : (S : Tree n)
-                            → .⦃ _ : is-linear S ⦄
-                            → (a : STm X)
-                            → (As : STy X)
-                            → .(p : tree-dim S ≡ sty-dim As)
-                            → label-from-linear-tree (susp-tree S) (susp-stm a) (susp-sty As) (≤-reflexive (trans (cong suc p) (sym (susp-sty-dim As)))) ≃l susp-label-full (label-from-linear-tree S a As (≤-reflexive p))
-label-from-linear-tree-susp-full S a As p = unrestrict-label-≃ _ _ ⦃ _ ⦄ (label-from-linear-tree-susp S a As (≤-reflexive p)) (begin
-  < label-from-linear-tree-type S (susp-sty As) >sty
-    ≈⟨ label-from-linear-tree-type-susp S As (≤-reflexive p) ⟩
-  < susp-sty (label-from-linear-tree-type S As) >sty
-    ≈⟨ susp-sty-≃ (label-from-linear-tree-type-0 S As p) ⟩
-  < SArr stm-fst S⋆ stm-snd >sty ∎)
-  where
-    open Reasoning sty-setoid
+-- label-from-linear-tree-susp-full : (S : Tree n)
+--                             → .⦃ _ : is-linear S ⦄
+--                             → (a : STm X)
+--                             → (As : STy X)
+--                             → .(p : tree-dim S ≡ sty-dim As)
+--                             → label-from-linear-tree (susp-tree S) (susp-stm a) (susp-sty As) (≤-reflexive (trans (cong suc p) (sym (susp-sty-dim As)))) ≃l susp-label-full (label-from-linear-tree S a As (≤-reflexive p))
+-- label-from-linear-tree-susp-full S a As p = unrestrict-label-≃ _ _ ⦃ _ ⦄ (label-from-linear-tree-susp S a As (≤-reflexive p)) (begin
+--   < label-from-linear-tree-type S (susp-sty As) >sty
+--     ≈⟨ label-from-linear-tree-type-susp S As (≤-reflexive p) ⟩
+--   < susp-sty (label-from-linear-tree-type S As) >sty
+--     ≈⟨ susp-sty-≃ (label-from-linear-tree-type-0 S As p) ⟩
+--   < SArr stm-fst S⋆ stm-snd >sty ∎)
+--   where
+--     open Reasoning sty-setoid
 
-label-from-disc-type-dim-lem : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → tree-dim S + (sty-dim (lty L)) ≡ sty-dim (label-from-disc-type L)
-label-from-disc-type-dim-lem {S = Sing} L = refl
-label-from-disc-type-dim-lem {S = Join S Sing} L = begin
-  suc (tree-dim S) + sty-dim (lty L)
-    ≡˘⟨ +-suc (tree-dim S) (sty-dim (proj₂ L)) ⟩
-  tree-dim S + suc (sty-dim (lty L))
-    ≡⟨ label-from-disc-type-dim-lem (label₁ L) ⟩
-  sty-dim (label-from-disc-type (label₁ L)) ∎
-  where
-    open ≡-Reasoning
+-- label-from-disc-type-dim-lem : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → tree-dim S + (sty-dim (lty L)) ≡ sty-dim (label-from-disc-type L)
+-- label-from-disc-type-dim-lem {S = Sing} L = refl
+-- label-from-disc-type-dim-lem {S = Join S Sing} L = begin
+--   suc (tree-dim S) + sty-dim (lty L)
+--     ≡˘⟨ +-suc (tree-dim S) (sty-dim (proj₂ L)) ⟩
+--   tree-dim S + suc (sty-dim (lty L))
+--     ≡⟨ label-from-disc-type-dim-lem (label₁ L) ⟩
+--   sty-dim (label-from-disc-type (label₁ L)) ∎
+--   where
+--     open ≡-Reasoning
 
-label-from-disc-type-lem : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → label-from-linear-tree-type S (label-from-disc-type L) ≃sty lty L
-label-from-disc-type-lem {S = Sing} L = refl≃sty
-label-from-disc-type-lem {S = Join S Sing} L = begin
-  < label-from-linear-tree-type S (sty-base (label-from-disc-type (label₁ L))) >sty
-    ≈⟨ label-from-linear-tree-type-prop S (label-from-disc-type (label₁ L)) ⟩
-  < sty-base (label-from-linear-tree-type S (label-from-disc-type (label₁ L))) >sty
-    ≈⟨ sty-base-≃ (label-from-disc-type-lem (label₁ L)) ⟩
-  < lty L >sty ∎
-  where
-    open Reasoning sty-setoid
+-- label-from-disc-type-lem : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → label-from-linear-tree-type S (label-from-disc-type L) ≃sty lty L
+-- label-from-disc-type-lem {S = Sing} L = refl≃sty
+-- label-from-disc-type-lem {S = Join S Sing} L = begin
+--   < label-from-linear-tree-type S (sty-base (label-from-disc-type (label₁ L))) >sty
+--     ≈⟨ label-from-linear-tree-type-prop S (label-from-disc-type (label₁ L)) ⟩
+--   < sty-base (label-from-linear-tree-type S (label-from-disc-type (label₁ L))) >sty
+--     ≈⟨ sty-base-≃ (label-from-disc-type-lem (label₁ L)) ⟩
+--   < lty L >sty ∎
+--   where
+--     open Reasoning sty-setoid
 
-label-from-linear-tree-prop : .⦃ _ : is-linear S ⦄ → (L : Label-WT X S) → ap L ≃l label-from-linear-tree S (label-from-disc-term L) (label-from-disc-type L) (≤-trans (m≤m+n (tree-dim S) (sty-dim (lty L))) (≤-reflexive (label-from-disc-type-dim-lem L)))
-label-from-linear-tree-prop {S = Sing} L .get PHere = refl≃stm
-label-from-linear-tree-prop {S = Join S Sing} L .get PHere = sym≃stm (sty-src-≃ (label-from-disc-type-lem (label₁ L)) ⦃ _ ⦄)
-label-from-linear-tree-prop {S = Join S Sing} L .get (PExt P) = label-from-linear-tree-prop (label₁ L) .get P
-label-from-linear-tree-prop {S = Join S Sing} L .get (PShift PHere) = sym≃stm (sty-tgt-≃ (label-from-disc-type-lem (label₁ L)) ⦃ _ ⦄)
+-- label-from-linear-tree-prop : .⦃ _ : is-linear S ⦄ → (L : Label-WT X S) → ap L ≃l label-from-linear-tree S (label-from-disc-term L) (label-from-disc-type L) (≤-trans (m≤m+n (tree-dim S) (sty-dim (lty L))) (≤-reflexive (label-from-disc-type-dim-lem L)))
+-- label-from-linear-tree-prop {S = Sing} L .get PHere = refl≃stm
+-- label-from-linear-tree-prop {S = Join S Sing} L .get PHere = sym≃stm (sty-src-≃ (label-from-disc-type-lem (label₁ L)) ⦃ _ ⦄)
+-- label-from-linear-tree-prop {S = Join S Sing} L .get (PExt P) = label-from-linear-tree-prop (label₁ L) .get P
+-- label-from-linear-tree-prop {S = Join S Sing} L .get (PShift PHere) = sym≃stm (sty-tgt-≃ (label-from-disc-type-lem (label₁ L)) ⦃ _ ⦄)
 
-label-from-disc-type-prop : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → label-from-disc-type L ≃sty unbiased-type (tree-dim S) S >>=′ L
-label-from-disc-type-prop {S = Sing} L = refl≃sty
-label-from-disc-type-prop {S = Join S Sing} L = begin
-  < label-from-disc-type (label₁ L) >sty
-    ≈⟨ label-from-disc-type-prop (label₁ L) ⟩
-  < unbiased-type (tree-dim S) S >>=′ label₁ L >sty
-    ≈˘⟨ map-sty-ext-label (unbiased-type (tree-dim S) S) L ⟩
-  < map-sty-ext (unbiased-type (tree-dim S) S) >>=′ L >sty
-    ≈⟨ >>=′-≃ (map-sty-ext-susp-compat (unbiased-type (tree-dim S) S)) refl≃l refl≃sty ⟩
-  < susp-sty (unbiased-type (tree-dim S) S) >>=′ L >sty
-    ≈⟨ >>=′-≃ (unbiased-type-susp-lem (tree-dim S) S) refl≃l refl≃sty ⟩
-  < unbiased-type (suc (tree-dim S)) (susp-tree S) >>=′ L >sty ∎
-  where
-    open Reasoning sty-setoid
+-- label-from-disc-type-prop : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → label-from-disc-type L ≃sty unbiased-type (tree-dim S) S >>=′ L
+-- label-from-disc-type-prop {S = Sing} L = refl≃sty
+-- label-from-disc-type-prop {S = Join S Sing} L = begin
+--   < label-from-disc-type (label₁ L) >sty
+--     ≈⟨ label-from-disc-type-prop (label₁ L) ⟩
+--   < unbiased-type (tree-dim S) S >>=′ label₁ L >sty
+--     ≈˘⟨ map-sty-ext-label (unbiased-type (tree-dim S) S) L ⟩
+--   < map-sty-ext (unbiased-type (tree-dim S) S) >>=′ L >sty
+--     ≈⟨ >>=′-≃ (map-sty-ext-susp-compat (unbiased-type (tree-dim S) S)) refl≃l refl≃sty ⟩
+--   < susp-sty (unbiased-type (tree-dim S) S) >>=′ L >sty
+--     ≈⟨ >>=′-≃ (unbiased-type-susp-lem (tree-dim S) S) refl≃l refl≃sty ⟩
+--   < unbiased-type (suc (tree-dim S)) (susp-tree S) >>=′ L >sty ∎
+--   where
+--     open Reasoning sty-setoid
 
-label-from-disc-term-prop : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → label-from-disc-term L ≃stm ap L (is-linear-max-path S)
-label-from-disc-term-prop {S = Sing} L = refl≃stm
-label-from-disc-term-prop {S = Join S Sing} L = label-from-disc-term-prop (label₁ L)
+-- label-from-disc-term-prop : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → label-from-disc-term L ≃stm ap L (is-linear-max-path S)
+-- label-from-disc-term-prop {S = Sing} L = refl≃stm
+-- label-from-disc-term-prop {S = Join S Sing} L = label-from-disc-term-prop (label₁ L)
 
 unbiased-type-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → sty-to-type (unbiased-type d S) ≃ty lift-ty (sphere-type d)
 unbiased-type-linear zero Sing p = refl≃ty
@@ -544,71 +534,71 @@ identity-stm-to-term n = begin
         open Reasoning sub-setoid
     open Reasoning tm-setoid
 
-label-to-sub-from-disc-term : (L : Label-WT X (n-disc d)) → sub-from-disc-term (label-to-sub L) ≃tm stm-to-term (label-from-disc-term L ⦃ n-disc-is-linear d ⦄)
-label-to-sub-from-disc-term {d = zero} L = refl≃tm
-label-to-sub-from-disc-term {d = suc d} L = begin
-  < sub-from-disc-term (label-to-sub L) >tm
-    ≈⟨ sub-from-disc-term-unrestrict (label-to-sub (label₁ L)) ⟩
-  < sub-from-disc-term (label-to-sub (label₁ L)) >tm
-    ≈⟨ label-to-sub-from-disc-term (label₁ L) ⟩
-  < stm-to-term (label-from-disc-term (label₁ L) ⦃ _ ⦄) >tm ∎
-  where
-    open Reasoning tm-setoid
+-- label-to-sub-from-disc-term : (L : Label-WT X (n-disc d)) → sub-from-disc-term (label-to-sub L) ≃tm stm-to-term (label-from-disc-term L ⦃ n-disc-is-linear d ⦄)
+-- label-to-sub-from-disc-term {d = zero} L = refl≃tm
+-- label-to-sub-from-disc-term {d = suc d} L = begin
+--   < sub-from-disc-term (label-to-sub L) >tm
+--     ≈⟨ sub-from-disc-term-unrestrict (label-to-sub (label₁ L)) ⟩
+--   < sub-from-disc-term (label-to-sub (label₁ L)) >tm
+--     ≈⟨ label-to-sub-from-disc-term (label₁ L) ⟩
+--   < stm-to-term (label-from-disc-term (label₁ L) ⦃ _ ⦄) >tm ∎
+--   where
+--     open Reasoning tm-setoid
 
-label-to-sub-from-disc-type : (L : Label-WT X (n-disc d)) → sub-from-disc-type (label-to-sub L) ≃ty sty-to-type (label-from-disc-type L ⦃ n-disc-is-linear d ⦄)
-label-to-sub-from-disc-type {d = zero} L = refl≃ty
-label-to-sub-from-disc-type {d = suc d} L = begin
-  < sub-from-disc-type (label-to-sub L) >ty
-    ≈⟨ sub-from-disc-type-unrestrict (label-to-sub (label₁ L)) ⟩
-  < sub-from-disc-type (label-to-sub (label₁ L)) >ty
-    ≈⟨ label-to-sub-from-disc-type (label₁ L) ⟩
-  < sty-to-type (label-from-disc-type (label₁ L) ⦃ _ ⦄) >ty ∎
-  where
-    open Reasoning ty-setoid
+-- label-to-sub-from-disc-type : (L : Label-WT X (n-disc d)) → sub-from-disc-type (label-to-sub L) ≃ty sty-to-type (label-from-disc-type L ⦃ n-disc-is-linear d ⦄)
+-- label-to-sub-from-disc-type {d = zero} L = refl≃ty
+-- label-to-sub-from-disc-type {d = suc d} L = begin
+--   < sub-from-disc-type (label-to-sub L) >ty
+--     ≈⟨ sub-from-disc-type-unrestrict (label-to-sub (label₁ L)) ⟩
+--   < sub-from-disc-type (label-to-sub (label₁ L)) >ty
+--     ≈⟨ label-to-sub-from-disc-type (label₁ L) ⟩
+--   < sty-to-type (label-from-disc-type (label₁ L) ⦃ _ ⦄) >ty ∎
+--   where
+--     open Reasoning ty-setoid
 
-label-from-linear-tree-disc-type : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(p : tree-dim S ≤ sty-dim As) → (Bs : STy X) → (Bs ≃sty label-from-linear-tree-type S As) → label-from-disc-type (label-from-linear-tree S a As p ,, Bs) ≃sty As
-label-from-linear-tree-disc-type Sing a As p Bs q = q
-label-from-linear-tree-disc-type (Join S Sing) a As p Bs q = label-from-linear-tree-disc-type S a As _ _ (trans≃sty (SArr≃ refl≃stm (trans≃sty q (label-from-linear-tree-type-prop S As)) refl≃stm) (sty-prop (label-from-linear-tree-type S As) ⦃ label-from-linear-tree-nz S As p ⦄))
+-- label-from-linear-tree-disc-type : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(p : tree-dim S ≤ sty-dim As) → (Bs : STy X) → (Bs ≃sty label-from-linear-tree-type S As) → label-from-disc-type (label-from-linear-tree S a As p ,, Bs) ≃sty As
+-- label-from-linear-tree-disc-type Sing a As p Bs q = q
+-- label-from-linear-tree-disc-type (Join S Sing) a As p Bs q = label-from-linear-tree-disc-type S a As _ _ (trans≃sty (SArr≃ refl≃stm (trans≃sty q (label-from-linear-tree-type-prop S As)) refl≃stm) (sty-prop (label-from-linear-tree-type S As) ⦃ label-from-linear-tree-nz S As p ⦄))
 
-label-from-linear-tree-disc-term : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(p : tree-dim S ≤ sty-dim As) → (Bs : STy X) → label-from-disc-term (label-from-linear-tree S a As p ,, Bs) ≃stm a
-label-from-linear-tree-disc-term Sing a As p Bs = refl≃stm
-label-from-linear-tree-disc-term (Join S Sing) a As p Bs = label-from-linear-tree-disc-term S a As _ _
+-- label-from-linear-tree-disc-term : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(p : tree-dim S ≤ sty-dim As) → (Bs : STy X) → label-from-disc-term (label-from-linear-tree S a As p ,, Bs) ≃stm a
+-- label-from-linear-tree-disc-term Sing a As p Bs = refl≃stm
+-- label-from-linear-tree-disc-term (Join S Sing) a As p Bs = label-from-linear-tree-disc-term S a As _ _
 
-label-from-linear-tree-to-sub : (d : ℕ) → (a : STm X) → (As : STy X) → .(p : d ≡ sty-dim As) → label-to-sub (label-from-linear-tree (n-disc d) ⦃ n-disc-is-linear d ⦄ a As (≤-reflexive (trans (tree-dim-n-disc d) p)) ,, S⋆) ≃s sub-from-disc d (sty-to-type As) (trans (sty-to-type-dim As) (sym p)) (stm-to-term a)
-label-from-linear-tree-to-sub d a As p = begin
-  < label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) >s
-    ≈⟨ prop-sub-from-disc (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)) ⟩
-  < sub-from-disc d
-    (sub-from-disc-type
-     (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)))
-    _
-    (sub-from-disc-term
-      (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)))
-    >s
-    ≈⟨ sub-from-disc-≃ d d lem1 (sub-from-disc-type-dim
-                                  (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆))) (trans (sty-to-type-dim As) (sym p)) lem2 ⟩
-  < sub-from-disc d (sty-to-type As) _ (stm-to-term a) >s ∎
-  where
-    lem1 : sub-from-disc-type (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆))
-         ≃ty sty-to-type As
-    lem1 = begin
-      < sub-from-disc-type (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)) >ty
-        ≈⟨ label-to-sub-from-disc-type (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⟩
-      < sty-to-type (label-from-disc-type (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⦃ _ ⦄) >ty
-        ≈⟨ label-from-linear-tree-disc-type (n-disc d) ⦃ _ ⦄ a As _ S⋆ (sym≃sty (label-from-linear-tree-type-0 (n-disc d) ⦃ _ ⦄ As (trans (tree-dim-n-disc d) p))) .get ⟩
-      < sty-to-type As >ty ∎
-      where
-        open Reasoning ty-setoid
+-- label-from-linear-tree-to-sub : (d : ℕ) → (a : STm X) → (As : STy X) → .(p : d ≡ sty-dim As) → label-to-sub (label-from-linear-tree (n-disc d) ⦃ n-disc-is-linear d ⦄ a As (≤-reflexive (trans (tree-dim-n-disc d) p)) ,, S⋆) ≃s sub-from-disc d (sty-to-type As) (trans (sty-to-type-dim As) (sym p)) (stm-to-term a)
+-- label-from-linear-tree-to-sub d a As p = begin
+--   < label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) >s
+--     ≈⟨ prop-sub-from-disc (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)) ⟩
+--   < sub-from-disc d
+--     (sub-from-disc-type
+--      (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)))
+--     _
+--     (sub-from-disc-term
+--       (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)))
+--     >s
+--     ≈⟨ sub-from-disc-≃ d d lem1 (sub-from-disc-type-dim
+--                                   (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆))) (trans (sty-to-type-dim As) (sym p)) lem2 ⟩
+--   < sub-from-disc d (sty-to-type As) _ (stm-to-term a) >s ∎
+--   where
+--     lem1 : sub-from-disc-type (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆))
+--          ≃ty sty-to-type As
+--     lem1 = begin
+--       < sub-from-disc-type (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)) >ty
+--         ≈⟨ label-to-sub-from-disc-type (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⟩
+--       < sty-to-type (label-from-disc-type (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⦃ _ ⦄) >ty
+--         ≈⟨ label-from-linear-tree-disc-type (n-disc d) ⦃ _ ⦄ a As _ S⋆ (sym≃sty (label-from-linear-tree-type-0 (n-disc d) ⦃ _ ⦄ As (trans (tree-dim-n-disc d) p))) .get ⟩
+--       < sty-to-type As >ty ∎
+--       where
+--         open Reasoning ty-setoid
 
-    lem2 : sub-from-disc-term (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As (≤-reflexive (trans (tree-dim-n-disc d) p)) ,, S⋆))
-         ≃tm stm-to-term a
-    lem2 = begin
-      < sub-from-disc-term (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)) >tm
-        ≈⟨ label-to-sub-from-disc-term (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⟩
-      < stm-to-term (label-from-disc-term (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⦃ _ ⦄) >tm
-        ≈⟨ label-from-linear-tree-disc-term (n-disc d) ⦃ _ ⦄ a As _ S⋆ .get ⟩
-      < stm-to-term a >tm ∎
-      where
-        open Reasoning tm-setoid
+--     lem2 : sub-from-disc-term (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As (≤-reflexive (trans (tree-dim-n-disc d) p)) ,, S⋆))
+--          ≃tm stm-to-term a
+--     lem2 = begin
+--       < sub-from-disc-term (label-to-sub (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆)) >tm
+--         ≈⟨ label-to-sub-from-disc-term (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⟩
+--       < stm-to-term (label-from-disc-term (label-from-linear-tree (n-disc d) ⦃ _ ⦄ a As _ ,, S⋆) ⦃ _ ⦄) >tm
+--         ≈⟨ label-from-linear-tree-disc-term (n-disc d) ⦃ _ ⦄ a As _ S⋆ .get ⟩
+--       < stm-to-term a >tm ∎
+--       where
+--         open Reasoning tm-setoid
 
-    open Reasoning sub-setoid
+--     open Reasoning sub-setoid

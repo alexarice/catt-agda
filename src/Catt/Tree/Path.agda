@@ -87,6 +87,9 @@ is-linear-max-path : (T : Tree n) → .⦃ is-linear T ⦄ → Path T
 is-linear-max-path Sing = PHere
 is-linear-max-path (Join S Sing) = PExt (is-linear-max-path S)
 
+disc-path : (n : ℕ) → Path (n-disc n)
+disc-path n = is-linear-max-path (n-disc n) ⦃ n-disc-is-linear n ⦄
+
 ppath-≃ : S ≃′ T → Path S → Path T
 ppath-≃ Refl≃′ P = P
 ppath-≃ (Join≃′ p q) PHere = PHere

@@ -649,9 +649,9 @@ label-to-sub-≃′ L M (p ,, [ q ]) r with ≃-to-same-n (≃′-to-≃ p)
   where
     open Reasoning tm-setoid
 
-susp-label-on-sty : (As : STy (someTree S)) → (L : Label-WT X S) → susp-sty (As >>=′ L) ≃sty As >>=′ susp-label L
-susp-label-on-sty S⋆ L = refl≃sty
-susp-label-on-sty (SArr s As t) L = SArr≃ (>>=-susp-label s L) (susp-label-on-sty As L) (>>=-susp-label t L)
+>>=′-susp-label : (As : STy (someTree S)) → (L : Label-WT X S) → susp-sty (As >>=′ L) ≃sty As >>=′ susp-label L
+>>=′-susp-label S⋆ L = refl≃sty
+>>=′-susp-label (SArr s As t) L = SArr≃ (>>=-susp-label s L) (>>=′-susp-label As L) (>>=-susp-label t L)
 
 >>=-shift : (a : STm (someTree U)) → (L : Label-WT (someTree T) U) → a >>= map-shift {S = S} L ≃stm SShift {S = S} (a >>= L)
 >>=-shift a L .get = begin
@@ -732,7 +732,7 @@ susp-stm-functorial a L = begin
 susp-sty-functorial : (As : STy (someTree S)) → (L : Label X S) → susp-sty (As >>=′ (L ,, S⋆)) ≃sty susp-sty As >>=′ (susp-label-full L ,, S⋆)
 susp-sty-functorial As L = begin
   < susp-sty (As >>=′ (L ,, S⋆)) >sty
-    ≈⟨ susp-label-on-sty As (L ,, S⋆) ⟩
+    ≈⟨ >>=′-susp-label As (L ,, S⋆) ⟩
   < As >>=′ susp-label (L ,, S⋆) >sty
     ≈˘⟨ >>=′-unrestrict As (susp-label (L ,, S⋆)) ⟩
   < susp-sty As >>=′ (susp-label-full L ,, S⋆) >sty ∎
@@ -880,3 +880,8 @@ sty-to-other-prop (SArr s As t) = SArr≃ (stm-to-other-prop s)
                                         (stm-to-other-prop t)
 
 label-to-other-prop L .get P = stm-to-other-prop (L P)
+
+1-Full : STy (someTree T) → Set
+1-Full S⋆ = ⊥
+1-Full {T = T} (SArr s S⋆ t) = s ≃stm (SHere {S = T}) × t ≃stm SPath (last-path T)
+1-Full (SArr s As@(SArr _ _ _) t) = 1-Full As

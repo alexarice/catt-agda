@@ -318,6 +318,10 @@ linear-tree-unique : (S : Tree n) → .⦃ is-linear S ⦄
 linear-tree-unique Sing Sing p = refl≃′
 linear-tree-unique (Join S Sing) (Join T Sing) p = Join≃′ (linear-tree-unique S T (cong pred p)) refl≃′
 
+linear-tree-compat-2 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → .⦃ _ : tree-dim S ≃n m ⦄ → S ≃′ n-disc m
+linear-tree-compat-2 {m = zero} Sing = Refl≃′
+linear-tree-compat-2 {m = suc m} (Join S Sing) = Join≃′ (linear-tree-compat-2 S) Refl≃′
+
 connect-tree-assoc : (S : Tree n)
                    → (T : Tree m)
                    → (U : Tree l)

@@ -70,10 +70,10 @@ branching-path-to-var {T = Join S T} BPHere = 0V [ connect-susp-inc-left (tree-s
 branching-path-to-var {T = Join S T} (BPExt P) = susp-tm (branching-path-to-var P) [ connect-susp-inc-left (tree-size S) (tree-size T) ]tm
 branching-path-to-var {T = Join S T} (BPShift P) = branching-path-to-var P [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm
 
--- branching-path-to-type : (T : Tree n) → (P : BranchingPoint T d) → STy (someTree T)
--- branching-path-to-type (Join S T) (BPHere) = map-sty-ext (unbiased-type (tree-dim S) S)
--- branching-path-to-type (Join S T) (BPExt P) = map-sty-ext (branching-path-to-type S P)
--- branching-path-to-type (Join S T) (BPShift P) = map-sty-shift (branching-path-to-type T P)
+branching-path-to-type : (T : Tree n) → (P : BranchingPoint T d) → STy (someTree T)
+branching-path-to-type (Join S T) (BPHere) = map-sty-ext (disc-type′ S)
+branching-path-to-type (Join S T) (BPExt P) = map-sty-ext (branching-path-to-type S P)
+branching-path-to-type (Join S T) (BPShift P) = map-sty-shift (branching-path-to-type T P)
 
 exterior-label : (S : Tree n)
                → (p : BranchingPoint S d)
@@ -101,9 +101,9 @@ label-from-insertion : (S : Tree n)
                      → (M : Label X (susp-tree-n d T))
                      → Label X (insertion-tree S p T)
 label-from-insertion (Join S₁ S₂) BPHere T L M = connect-label M (L ∘ PShift)
-label-from-insertion (Join S₁ S₂) (BPExt p) T L M PHere = L PHere
+label-from-insertion (Join S₁ S₂) (BPExt p) T L M PHere = M PHere
 label-from-insertion (Join S₁ S₂) (BPExt p) T L M (PExt Z) = label-from-insertion S₁ p T (L ∘ PExt) (M ∘ PExt) Z
-label-from-insertion (Join S₁ S₂) (BPExt p) T L M (PShift Z) = (L ∘ PShift) Z
+label-from-insertion (Join S₁ S₂) (BPExt p) T L M (PShift Z) = replace-label (L ∘ PShift) (M (PShift PHere)) Z
 label-from-insertion (Join S₁ S₂) (BPShift p) T L M PHere = L PHere
 label-from-insertion (Join S₁ S₂) (BPShift p) T L M (PExt Z) = L (PExt Z)
 label-from-insertion (Join S₁ S₂) (BPShift p) T L M (PShift Z) = label-from-insertion S₂ p T (L ∘ PShift) M Z

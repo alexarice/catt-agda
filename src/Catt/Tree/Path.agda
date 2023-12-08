@@ -70,16 +70,16 @@ not-here PHere = ⊥
 not-here (PExt P) = ⊤
 not-here (PShift P) = ⊤
 
-is-Maximal : Path S → Set
-is-Maximal {S = Sing} PHere = ⊤
-is-Maximal {S = Join S T} PHere = ⊥
-is-Maximal (PExt P) = is-Maximal P
-is-Maximal (PShift P) = not-here P ×′ is-Maximal P
+is-maximal : Path S → Set
+is-maximal {S = Sing} PHere = ⊤
+is-maximal {S = Join S T} PHere = ⊥
+is-maximal (PExt P) = is-maximal P
+is-maximal (PShift P) = not-here P ×′ is-maximal P
 
 -- record Is-Maximal (P : Path S) : Set where
 --   inductive
 --   field
---     ⦃ g ⦄ : is-Maximal P
+--     ⦃ g ⦄ : is-maximal P
 
 -- open Is-Maximal
 
@@ -106,7 +106,7 @@ ppath-≃ (Join≃′ p q) (PShift Z) = PShift (ppath-≃ q Z)
 -- path-inc-right (Join S₁ S₂) P = PShift (path-inc-right S₂ P)
 
 -- path-func : Set → (S : Tree n) → Set
--- path-func X S = ∀ (P : Path S) → .⦃ is-Maximal P ⦄ → X
+-- path-func X S = ∀ (P : Path S) → .⦃ is-maximal P ⦄ → X
 
 -- susp-path : Path X → Path (suspMaybeTree X)
 -- susp-path {X = someTree x} P = PExt P

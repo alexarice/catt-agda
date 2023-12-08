@@ -143,9 +143,9 @@ label-equality-to-sub {S = Join S T} L M [ p ] q
   where
     open Reasoning (tm-setoid-≈ _)
 
-label-on-sty-≈ : (As : STy (someTree S)) → {L M : Label-WT X S} → ap L ≈[ Γ ]l ap M → lty L ≈[ Γ ]sty lty M → As >>=′ L ≈[ Γ ]sty As >>=′ M
-label-on-sty-≈ S⋆ p q = q
-label-on-sty-≈ (SArr s As t) p q = ≈SArr (≈->>= s p q) (label-on-sty-≈ As p q) (≈->>= t p q)
+>>=′-≈ : (As : STy (someTree S)) → {L M : Label-WT X S} → ap L ≈[ Γ ]l ap M → lty L ≈[ Γ ]sty lty M → As >>=′ L ≈[ Γ ]sty As >>=′ M
+>>=′-≈ S⋆ p q = q
+>>=′-≈ (SArr s As t) p q = ≈SArr (≈->>= s p q) (>>=′-≈ As p q) (≈->>= t p q)
 
 >>=-Ty : {L : Label-WT X S} → Typing-STm (tree-to-ctx S) a As → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-STm Γ (a >>= L) (As >>=′ L)
 >>=-Ty {a = a} {As = As} {L = L} [ aty ] Lty Ltyty .get = transport-typing-full (apply-sub-tm-typing aty (label-to-sub-Ty Lty Ltyty)) (label-to-sub-stm L a) (label-to-sub-sty L As)
@@ -222,6 +222,14 @@ replace-label-Ty : {L : Label-WT X S}
 replace-label-Ty (TySing x) aTy p = TySing aTy
 replace-label-Ty (TyJoin x LTy LTy′) aTy p = TyJoin aTy (label-typing-conv LTy (≈SArr p refl≈sty refl≈stm)) LTy′
 
+replace-label-eq : (L : Label X S)
+                 → (a : STm X)
+                 → a ≈[ Γ ]stm L PHere
+                 → replace-label L a ≈[ Γ ]l L
+replace-label-eq L a p .get PHere = p
+replace-label-eq L a p .get (PExt P) = refl≈stm
+replace-label-eq L a p .get (PShift P) = refl≈stm
+
 connect-label-Ty : Typing-Label Γ (L ,, As)
                  → Typing-Label Γ (M ,, As)
                  → L (last-path S) ≈[ Γ ]stm M PHere
@@ -229,12 +237,37 @@ connect-label-Ty : Typing-Label Γ (L ,, As)
 connect-label-Ty (TySing x) MTy p = replace-label-Ty MTy x (sym≈stm p)
 connect-label-Ty (TyJoin {L = L} x LTy LTy′) MTy p = TyJoin x (label-typing-conv LTy (≈SArr refl≈stm refl≈sty (reflexive≈stm (sym≃stm (connect-label-phere (ap L ∘ PShift) _))))) (connect-label-Ty LTy′ MTy p)
 
+connect-label′-phere : (L : Label X S)
+                     → (M : Label X T)
+                     → L (last-path S) ≈[ Γ ]stm M PHere
+                     → L PHere ≈[ Γ ]stm connect-label′ L M PHere
+connect-label′-phere {S = Sing} L M p = p
+connect-label′-phere {S = Join S₁ S₂} L M p = refl≈stm
+
+connect-label′-Ty : Typing-Label Γ (L ,, As)
+                  → Typing-Label Γ (M ,, As)
+                  → L (last-path S) ≈[ Γ ]stm M PHere
+                  → Typing-Label Γ (connect-label′ L M ,, As)
+connect-label′-Ty (TySing x) MTy p = MTy
+connect-label′-Ty (TyJoin {L = L} x LTy LTy′) MTy p
+  = TyJoin x (label-typing-conv LTy (≈SArr refl≈stm refl≈sty (connect-label′-phere (ap (label₂ L)) _ p))) (connect-label′-Ty LTy′ MTy p)
+
+connect-label-eq : (L : Label X S)
+                 → (M : Label X T)
+                 → L (last-path S) ≈[ Γ ]stm M PHere
+                 → connect-label L M ≈[ Γ ]l connect-label′ L M
+connect-label-eq {S = Sing} L M p = replace-label-eq M (L PHere) p
+connect-label-eq {S = Join S₁ S₂} L M p .get PHere = refl≈stm
+connect-label-eq {S = Join S₁ S₂} L M p .get (PExt Z) = refl≈stm
+connect-label-eq {S = Join S₁ S₂} L M p .get (PShift Z) = connect-label-eq (L ∘ PShift) M p .get Z
+
 label-between-connect-trees-lem : (L : Label (someTree S′) S)
-                               → (M : Label (someTree T′) T)
-                               → L (last-path S) ≈[ tree-to-ctx S′ ]stm SPath (last-path S′)
-                               → M PHere ≈[ tree-to-ctx T′ ]stm SHere
-                               → ((L ●l connect-tree-inc-left S′ T′) (last-path S) ≈[ tree-to-ctx (connect-tree S′ T′) ]stm
-                                    (M ●l connect-tree-inc-right S′ T′) PHere)
+                                → (M : Label (someTree T′) T)
+                                → L (last-path S) ≈[ tree-to-ctx S′ ]stm SPath (last-path S′)
+                                → M PHere ≈[ tree-to-ctx T′ ]stm SHere
+                                → ((L ●l connect-tree-inc-left S′ T′) (last-path S)
+                                  ≈[ tree-to-ctx (connect-tree S′ T′) ]stm
+                                  (M ●l connect-tree-inc-right S′ T′) PHere)
 label-between-connect-trees-lem {S′ = S′} {S = S} {T′ = T′} L M p q = begin
   (L ●l connect-tree-inc-left S′ T′) (last-path S)
     ≡⟨⟩

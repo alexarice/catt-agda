@@ -30,10 +30,10 @@ label-to-sub′ {S = Join S₁ S₂} f A = sub-from-connect (unrestrict (label-t
 
 label-to-sub (L ,, A) = label-to-sub′ (λ P → stm-to-term (L P)) (sty-to-type A)
 
-stm-to-other : STm X → STm (Other (maybeTreeSize X))
-sty-to-other : STy X → STy (Other (maybeTreeSize X))
-label-to-other : Label X S → Label (Other (maybeTreeSize X)) S
-label-wt-to-other : Label-WT X S → Label-WT (Other (maybeTreeSize X)) S
+stm-to-other : STm X → STm (Other (maybe-tree-size X))
+sty-to-other : STy X → STy (Other (maybe-tree-size X))
+label-to-other : Label X S → Label (Other (maybe-tree-size X)) S
+label-wt-to-other : Label-WT X S → Label-WT (Other (maybe-tree-size X)) S
 
 stm-to-other s@(SExt _) = SOther (stm-to-term s)
 stm-to-other s@(SShift _) = SOther (stm-to-term s)

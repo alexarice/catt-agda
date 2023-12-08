@@ -179,7 +179,7 @@ tree-inc-label-full (suc d) (Join S T) b p .get PHere = refl≃p
 tree-inc-label-full (suc d) (Join S T) b p .get (PExt Z) = Ext≃ (tree-inc-label-full d S b (m⊔n≤o⇒n≤o (pred (tree-dim T)) (tree-dim S) (≤-pred p)) .get Z) refl≃
 tree-inc-label-full (suc d) (Join S T) b p .get (PShift Z) = Shift≃ refl≃ (tree-inc-label-full (suc d) T b (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p) .get Z)
 
-tree-inc-full-preserve-max : (d : ℕ) → (T : Tree n) → (b : Bool) → .(p : tree-dim T ≤ d) → (Z : Path (tree-bd d T)) → .⦃ is-Maximal Z ⦄ → is-Maximal (tree-inc-label′ d T b Z)
+tree-inc-full-preserve-max : (d : ℕ) → (T : Tree n) → (b : Bool) → .(p : tree-dim T ≤ d) → (Z : Path (tree-bd d T)) → .⦃ is-maximal Z ⦄ → is-maximal (tree-inc-label′ d T b Z)
 tree-inc-full-preserve-max d T b p Z = maximal-≃ (trans≃p (ppath-≃-≃p (tree-bd-full d T p) Z) (sym≃p (tree-inc-label-full d T b p .get Z)))
 
 tree-inc-full : (d : ℕ) → (T : Tree n) → (b : Bool) → (p : tree-dim T ≤ d) → tree-inc d T b ≃s idSub {suc (tree-size T)}

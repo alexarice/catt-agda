@@ -583,7 +583,7 @@ comp-right-unit : (L : Label (someTree T) S) → L ●l id-label-wt T ≃l L
 comp-right-unit L .get Z = >>=-id (L Z)
 
 _≃lm_ : (L : Label X S) → (M : Label Y S) → Set
-_≃lm_ {S = S} L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-Maximal Q ⦄ → L Q ≃stm M Q) L M
+_≃lm_ {S = S} L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-maximal Q ⦄ → L Q ≃stm M Q) L M
 
 refl≃lm : L ≃lm L
 refl≃lm = [ (λ Q → refl≃stm ) ]

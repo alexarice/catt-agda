@@ -22,8 +22,8 @@ lift-sty (SArr s A t) = SArr (lift-stm s) (lift-sty A) (lift-stm t)
 
 lift-label L = lift-stm ∘ (ap L) ,, lift-sty (lty L)
 
-stm-fst : STm (suspMaybeTree X)
-stm-snd : STm (suspMaybeTree X)
+stm-fst : STm (susp-maybe-tree X)
+stm-snd : STm (susp-maybe-tree X)
 
 stm-fst {X = someTree x} = SHere
 stm-fst {X = Other _} = SOther get-fst
@@ -36,10 +36,10 @@ unrestrict-label {X = X} {S = S} (L ,, As) PHere = sty-src As
 unrestrict-label {X = X} {S = S} (L ,, As) (PExt P) = L P
 unrestrict-label {X = X} {S = S} (L ,, As) (PShift P) = sty-tgt As
 
-susp-stm : STm X → STm (suspMaybeTree X)
-susp-sty : STy X → STy (suspMaybeTree X)
-susp-label : Label-WT X S → Label-WT (suspMaybeTree X) S
-susp-label-full : Label X S → Label (suspMaybeTree X) (susp-tree S)
+susp-stm : STm X → STm (susp-maybe-tree X)
+susp-sty : STy X → STy (susp-maybe-tree X)
+susp-label : Label-WT X S → Label-WT (susp-maybe-tree X) S
+susp-label-full : Label X S → Label (susp-maybe-tree X) (susp-tree S)
 
 susp-stm {X = someTree x} s = SExt s
 susp-stm {X = Other _} (SCoh S A L) = SCoh S A (susp-label L)
@@ -52,9 +52,17 @@ susp-label L = susp-stm ∘ (ap L) ,, susp-sty (lty L)
 
 susp-label-full L = unrestrict-label (susp-label (L ,, S⋆))
 
+susp-sty-n : (n : ℕ) → STy X → STy (susp-maybe-tree-n n X)
+susp-sty-n zero As = As
+susp-sty-n (suc n) As = susp-sty (susp-sty-n n As)
+
 map-sty-ext : STy (someTree S) → STy (someTree (Join S T))
 map-sty-ext S⋆ = SArr SHere S⋆ (SShift (SPath PHere))
 map-sty-ext (SArr s A t) = SArr (SExt s) (map-sty-ext A) (SExt t)
+
+map-sty-ext-n : (d : ℕ) → STy (someTree S) → STy (someTree (susp-tree-n d S))
+map-sty-ext-n zero As = As
+map-sty-ext-n (suc d) As = map-sty-ext (map-sty-ext-n d As)
 
 map-ext : Label-WT (someTree S) U → Label-WT (someTree (Join S T)) U
 map-ext L = SExt ∘ ap L ,, (map-sty-ext (lty L))
@@ -129,9 +137,12 @@ sty-≃ p (SArr s A t) = SArr (stm-≃ p s) (sty-≃ p A) (stm-≃ p t)
 
 ≃-label-wt p L = (≃-label p (ap L)) ,, (sty-≃ p (lty L))
 
+disc-type′ : (S : Tree n) → .⦃ is-linear S ⦄ → STy (someTree S)
+disc-type′ Sing = S⋆
+disc-type′ (Join S Sing) = map-sty-ext (disc-type′ S)
+
 disc-type : (n : ℕ) → STy (someTree (n-disc n))
-disc-type zero = S⋆
-disc-type (suc n) = map-sty-ext (disc-type n)
+disc-type n = disc-type′ (n-disc n) ⦃ n-disc-is-linear n ⦄
 
 extend-disc-label : Label X (n-disc n) → (t : STm X) → (a : STm X) → Label X (n-disc (1 + n))
 extend-disc-label {n = zero} L t a PHere = L PHere

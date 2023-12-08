@@ -110,7 +110,7 @@ unbiased-type-prop (suc d) T d′ p b = SArr≃ (lem false) (unbiased-type-prop 
       where
         open Reasoning stm-setoid
 
-lfltu-maximal-path : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → (Z : Path S) → .⦃ is-Maximal Z ⦄
+lfltu-maximal-path : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → (Z : Path S) → .⦃ is-maximal Z ⦄
                                              → label-from-linear-tree-unbiased S T d Z ≃stm unbiased-comp′ (d + tree-dim S) T
 lfltu-maximal-path Sing T d Z = unbiased-comp′-≃ (sym (+-identityʳ d)) refl≃
 lfltu-maximal-path (Join S Sing) T d (PExt Z) = trans≃stm (lfltu-maximal-path S T (suc d) Z) (unbiased-comp′-≃ (sym (+-suc d (tree-dim S))) refl≃)
@@ -134,7 +134,7 @@ module _ where
                         → .(d₂ < tree-dim S)
                         → .(d₁ + tree-dim S ≥ tree-dim T)
                         → (b : Bool)
-                        → (Z : Path (tree-bd d₂ S)) → .⦃ is-Maximal Z ⦄
+                        → (Z : Path (tree-bd d₂ S)) → .⦃ is-maximal Z ⦄
                         → label-from-linear-tree-unbiased S T d₁ (tree-inc-label′ d₂ S b Z)
                         ≃stm SPath (tree-inc-label′ (d₁ + d₂) T b (is-linear-max-path (tree-bd (d₁ + d₂) T) ⦃ bd-linear-height (d₁ + d₂) T p ⦄))
   lfltu-≤-linear-height Sing T d₁ d₂ p () r
@@ -181,7 +181,7 @@ module _ where
                         → .(d₁ + d₂ > linear-height T)
                         → .(d₂ ≤ tree-dim S)
                         → (b : Bool)
-                        → (Z : Path (tree-bd d₂ S)) → .⦃ _ : is-Maximal Z ⦄
+                        → (Z : Path (tree-bd d₂ S)) → .⦃ _ : is-maximal Z ⦄
                         → label-from-linear-tree-unbiased S T d₁ (tree-inc-label′ d₂ S b Z) ≃stm (unbiased-comp′ (d₂ + d₁) (tree-bd (d₂ + d₁) T) >>= tree-inc-label (d₂ + d₁) T b)
   lfltu->-linear-height Sing T d₁ zero p q r b Z = let
     .p′ : tree-dim T ≤ d₁

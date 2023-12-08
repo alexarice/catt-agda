@@ -98,6 +98,12 @@ syntax label-equality Γ L M = L ≈[ Γ ]l M
 refl≈l : L ≈[ Γ ]l L
 refl≈l .get Z = refl≈stm
 
+sym≈l : L ≈[ Γ ]l M → M ≈[ Γ ]l L
+sym≈l p .get Z = sym≈stm (p .get Z)
+
+trans≈l : L ≈[ Γ ]l M → M ≈[ Γ ]l M′ → L ≈[ Γ ]l M′
+trans≈l p q .get Z = trans≈stm (p .get Z) (q .get Z)
+
 reflexive≈l : L ≃l M → L ≈[ Γ ]l M
 reflexive≈l [ p ] .get Z = reflexive≈stm (p Z)
 

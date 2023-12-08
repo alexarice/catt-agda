@@ -75,7 +75,7 @@ ppath-≃-≃p (Join≃′ p q) PHere = Here≃ (≃′-to-≃ (Join≃′ p q))
 ppath-≃-≃p (Join≃′ p q) (PExt P) = Ext≃ (ppath-≃-≃p p P) (≃′-to-≃ q)
 ppath-≃-≃p (Join≃′ p q) (PShift P) = Shift≃ (≃′-to-≃ p) (ppath-≃-≃p q P)
 
-maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-Maximal P ⦄ → not-here P
+maximal-join-not-here : (P : Path T) → .⦃ is-join T ⦄ → .⦃ is-maximal P ⦄ → not-here P
 maximal-join-not-here {T = Join S T} (PExt P) = tt
 maximal-join-not-here {T = Join S T} (PShift P) = tt
 
@@ -84,12 +84,12 @@ path-to-term-is-var PHere = tt
 path-to-term-is-var (PExt P) = var-to-var-comp-tm (susp-tm (path-to-term P)) ⦃ susp-tm-var (path-to-term P) ⦃ path-to-term-is-var P ⦄ ⦄ (connect-susp-inc-left _ _) ⦃ connect-susp-inc-left-var-to-var _ _ ⦄
 path-to-term-is-var (PShift P) = var-to-var-comp-tm (path-to-term P) ⦃ path-to-term-is-var P ⦄ (connect-susp-inc-right _ _) ⦃ connect-susp-inc-right-var-to-var _ _ ⦄
 
-max-path-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (Z : Path T) → .⦃ is-Maximal Z ⦄ → S ≃ T → is-linear-max-path S ≃p Z
+max-path-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (Z : Path T) → .⦃ is-maximal Z ⦄ → S ≃ T → is-linear-max-path S ≃p Z
 max-path-lin-tree Sing PHere Sing≃ = Here≃ Sing≃
 max-path-lin-tree (Join S Sing) (PExt Z) (Join≃ p Sing≃) = Ext≃ (max-path-lin-tree S Z p) Sing≃
 max-path-lin-tree (Join S Sing) (PShift PHere) (Join≃ p Sing≃) = ⊥-elim it
 
-max-path-unique : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (P : Path S) → .⦃ is-Maximal P ⦄ → (Q : Path S) → .⦃ is-Maximal Q ⦄ → P ≃p Q
+max-path-unique : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (P : Path S) → .⦃ is-maximal P ⦄ → (Q : Path S) → .⦃ is-maximal Q ⦄ → P ≃p Q
 max-path-unique Sing PHere PHere = refl≃p
 max-path-unique (Join S Sing) (PExt P) (PExt Q) = Ext≃ (max-path-unique S P Q) refl≃
 max-path-unique (Join S Sing) (PExt P) (PShift PHere) = ⊥-elim it
@@ -571,7 +571,7 @@ last-path-to-term : (T : Tree n) → path-to-term (last-path T) ≃tm tree-last-
 last-path-to-term Sing = refl≃tm
 last-path-to-term (Join S T) = sub-action-≃-tm (last-path-to-term T) refl≃s
 
-is-linear-max-path-max : (S : Tree n) .⦃ _ : is-linear S ⦄ → is-Maximal (is-linear-max-path S)
+is-linear-max-path-max : (S : Tree n) .⦃ _ : is-linear S ⦄ → is-maximal (is-linear-max-path S)
 is-linear-max-path-max Sing = tt
 is-linear-max-path-max (Join S Sing) = is-linear-max-path-max S
 
@@ -579,7 +579,7 @@ not-here-≃ : (P ≃p Q) → .⦃ not-here P ⦄ → not-here Q
 not-here-≃ (Ext≃ p x) = tt
 not-here-≃ (Shift≃ x p) = tt
 
-maximal-≃ : (P ≃p Q) → .⦃ is-Maximal P ⦄ → is-Maximal Q
+maximal-≃ : (P ≃p Q) → .⦃ is-maximal P ⦄ → is-maximal Q
 maximal-≃ (Here≃ Sing≃) = tt
 maximal-≃ (Ext≃ p x) = maximal-≃ p
 maximal-≃ (Shift≃ x p) .p₁ = not-here-≃ p

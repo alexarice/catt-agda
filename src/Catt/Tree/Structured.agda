@@ -12,12 +12,16 @@ data MaybeTree : ℕ → Set where
 variable
   X Y Z : MaybeTree n
 
-maybeTreeSize : (X : MaybeTree n) → ℕ
-maybeTreeSize {n} X = n
+maybe-tree-size : (X : MaybeTree n) → ℕ
+maybe-tree-size {n} X = n
 
-suspMaybeTree : MaybeTree n → MaybeTree (2 + n)
-suspMaybeTree (someTree x) = someTree (susp-tree x)
-suspMaybeTree (Other _) = Other (2 + _)
+susp-maybe-tree : MaybeTree n → MaybeTree (2 + n)
+susp-maybe-tree (someTree x) = someTree (susp-tree x)
+susp-maybe-tree (Other _) = Other (2 + _)
+
+susp-maybe-tree-n : (d : ℕ) → MaybeTree n → MaybeTree (d * 2 + n)
+susp-maybe-tree-n zero X = X
+susp-maybe-tree-n (suc d) X = susp-maybe-tree (susp-maybe-tree-n d X)
 
 data CtxOrTree : ℕ → Set where
   incTree : Tree n → CtxOrTree (suc n)

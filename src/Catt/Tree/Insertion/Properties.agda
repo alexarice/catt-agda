@@ -21,10 +21,6 @@ open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
-open import Catt.Tree.Boundary
-open import Catt.Tree.Boundary.Properties
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
 open import Catt.Tree.Insertion
 
 open import Relation.Binary
@@ -39,7 +35,7 @@ branching-path-to-path-not-here BPHere = tt
 branching-path-to-path-not-here (BPExt P) = tt
 branching-path-to-path-not-here (BPShift P) = tt
 
-branching-path-to-path-maximal : (P : BranchingPoint S l) → is-Maximal (branching-path-to-path P)
+branching-path-to-path-maximal : (P : BranchingPoint S l) → is-maximal (branching-path-to-path P)
 branching-path-to-path-maximal {S = Join S T} BPHere = is-linear-max-path-max S
 branching-path-to-path-maximal (BPExt P) = branching-path-to-path-maximal P
 branching-path-to-path-maximal (BPShift P) = build ⦃ branching-path-to-path-not-here P ⦄ ⦃ branching-path-to-path-maximal P ⦄
@@ -63,99 +59,138 @@ exterior-label-phere : (S : Tree n)
                      → (T : Tree m)
                      → (A : STy (someTree T))
                      → .⦃ _ : height-of-branching p ≃n d + sty-dim A ⦄
-                     → 1-Full A
+                     → ⦃ 1-Full A ⦄
                      → exterior-label S p T A PHere ≃stm SHere {S = insertion-tree S p T}
-exterior-label-phere (Join S₁ S₂) BPHere T A full = begin
+exterior-label-phere (Join S₁ S₂) BPHere T A = begin
   < term-to-label (SCoh T A (SPath ,, S⋆)) A PHere >>= connect-tree-inc-left T S₂ >stm
-    ≈⟨ >>=-≃ (term-to-label-1-Full-src (SCoh T A (SPath ,, S⋆)) A full) refl≃l refl≃sty ⟩
+    ≈⟨ >>=-≃ (term-to-label-1-Full-src (SCoh T A (SPath ,, S⋆)) A) refl≃l refl≃sty ⟩
   < SPath (connect-tree-inc-left′ T S₂ PHere) >stm
     ≈⟨ SPath≃ (connect-tree-inc-left-phere T S₂) ⟩
   < SHere >stm ∎
   where
     open Reasoning stm-setoid
-exterior-label-phere (Join S₁ S₂) (BPExt p) T A full = refl≃stm
-exterior-label-phere (Join S₁ S₂) (BPShift p) T A full = refl≃stm
+exterior-label-phere (Join S₁ S₂) (BPExt p) T A = refl≃stm
+exterior-label-phere (Join S₁ S₂) (BPShift p) T A = refl≃stm
 
-
-{-
-sub-from-replace-lem : (S : Tree n)
-                     → (P : BranchingPoint S l)
-                     → (T : Tree m)
-                     → .⦃ _ : has-linear-height (bp-height P) T ⦄
-                     → (L : Label X S)
-                     → (a : STm X)
-                     → (M : Label X T)
-                     → sub-from-insertion-label S P T (replace-label L a) M ≃lm sub-from-insertion-label S P T L M
-sub-from-replace-lem (Join S₁ S₂) BPHere T L a M = refl≃lm
-sub-from-replace-lem (Join S₁ S₂) (BPExt P) (Join T Sing) L a M .get (PExt Z) = refl≃stm
-sub-from-replace-lem (Join S₁ S₂) (BPExt P) (Join T Sing) L a M .get (PShift Z) = refl≃stm
-sub-from-replace-lem (Join S₁ S₂) (BPShift P) T L a M .get (PExt Z) = refl≃stm
-sub-from-replace-lem (Join S₁ S₂) (BPShift P) T L a M .get (PShift Z) = refl≃stm
+label-from-replace-lem : (S : Tree n)
+                       → (P : BranchingPoint S l)
+                       → (T : Tree m)
+                       → (L : Label X S)
+                       → (a : STm X)
+                       → (M : Label X (susp-tree-n l T))
+                     → label-from-insertion S P T (replace-label L a) M ≃lm label-from-insertion S P T L M
+label-from-replace-lem (Join S₁ S₂) BPHere T L a M = refl≃lm
+label-from-replace-lem (Join S₁ S₂) (BPExt P) T L a M .get (PExt Z) = refl≃stm
+label-from-replace-lem (Join S₁ S₂) (BPExt P) T L a M .get (PShift Z) = refl≃stm
+label-from-replace-lem (Join S₁ S₂) (BPShift P) T L a M .get (PExt Z) = refl≃stm
+label-from-replace-lem (Join S₁ S₂) (BPShift P) T L a M .get (PShift Z) = refl≃stm
 
 module _ where
   open Reasoning stm-setoid
 
-  exterior-sub-label-last-path : (S : Tree n)
-                               → (p : BranchingPoint S d)
-                               → (T : Tree m)
-                               → .⦃ _ : has-linear-height (bp-height p) T ⦄
-                               → exterior-sub-label S p T (last-path S) ≃stm SPath (last-path (insertion-tree S p T))
-  exterior-sub-label-last-path (Join S₁ S₂) (BPExt p) (Join T Sing) = compute-≃ refl≃stm
-  exterior-sub-label-last-path (Join S₁ S₂) (BPShift p) T = compute-≃ (SShift≃ refl≃ (exterior-sub-label-last-path S₂ p T))
-  exterior-sub-label-last-path (Join S₁ Sing) BPHere T = begin
-    < ap (connect-tree-inc-left T Sing) (last-path T) >stm
+  exterior-label-last-path : (S : Tree n)
+                           → (p : BranchingPoint S d)
+                           → (T : Tree m)
+                           → (As : STy (someTree T))
+                           → .⦃ _ : height-of-branching p ≃n d + sty-dim As ⦄
+                           → ⦃ _ : 1-Full As ⦄
+                           → exterior-label S p T As (last-path S) ≃stm SPath (last-path (insertion-tree S p T))
+  exterior-label-last-path (Join S₁ S₂) (BPExt p) T As = compute-≃ refl≃stm
+  exterior-label-last-path (Join S₁ S₂) (BPShift p) T As = compute-≃ (SShift≃ refl≃ (exterior-label-last-path S₂ p T As))
+  exterior-label-last-path (Join S₁ Sing) BPHere T As = begin
+    < term-to-label (SCoh T As (SPath ,, S⋆)) As (last-path (n-disc (sty-dim As))) >>= connect-tree-inc-left T Sing >stm
+      ≈⟨ >>=-≃ (term-to-label-1-Full-tgt (SCoh T As (SPath ,, S⋆)) As) refl≃l refl≃sty ⟩
+    < SPath (connect-tree-inc-left′ T Sing (last-path T)) >stm
       ≈⟨ SPath≃ (connect-tree-inc-phere T Sing) ⟩
-    < ap (connect-tree-inc-right T Sing) PHere >stm
+    < SPath (connect-tree-inc-right′ T Sing PHere) >stm
       ≈⟨ SPath≃ (connect-tree-inc-right-last-path T Sing) ⟩
     < SPath (last-path (connect-tree T Sing)) >stm ∎
-  exterior-sub-label-last-path (Join S₁ S₂@(Join S₃ S₄)) BPHere T = SPath≃ (connect-tree-inc-right-last-path T S₂)
+  exterior-label-last-path (Join S₁ S₂@(Join S₃ S₄)) BPHere T As = SPath≃ (connect-tree-inc-right-last-path T S₂)
 
   module Lemma37 where
-    interior-sub-label-comm : (S : Tree n)
-                            → (p : BranchingPoint S d)
-                            → (T : Tree m)
-                            → .⦃ _ : has-linear-height (bp-height p) T ⦄
-                            → (L : Label X S)
-                            → (M : Label X T)
-                            → (A : STy X)
-                            → interior-sub-label S p T ●l (sub-from-insertion-label S p T L M ,, A) ≃lm M
-    interior-sub-label-comm (Join S₁ S₂) BPHere T L M A .get Z = connect-label-inc-left M (L ∘ PShift) A .get Z
-    interior-sub-label-comm (Join S₁ S₂) (BPExt p) (Join T Sing) L M A .get (PExt Z)
-      = interior-sub-label-comm S₁ p T (L ∘ PExt) (M ∘ PExt) _ .get Z
-    interior-sub-label-comm (Join S₁ S₂) (BPExt p) (Join T Sing) L M A .get (PShift PHere) = ⊥-elim it
-    interior-sub-label-comm (Join S₁ S₂) (BPShift p) T L M = interior-sub-label-comm S₂ p T (L ∘ PShift) M
+    interior-label-comm : (S : Tree n)
+                        → (p : BranchingPoint S d)
+                        → (T : Tree m)
+                        → (L : Label X S)
+                        → (M : Label X (susp-tree-n d T))
+                        → (As : STy X)
+                        → interior-label S p T ●l (label-from-insertion S p T L M ,, As) ≃lm M
+    interior-label-comm (Join S₁ S₂) BPHere T L M A .get Z = connect-label-inc-left M (L ∘ PShift) A .get Z
+    interior-label-comm (Join S₁ S₂) (BPExt p) T L M A .get (PExt Z)
+      = interior-label-comm S₁ p T (L ∘ PExt) (M ∘ PExt) _ .get Z
+    interior-label-comm (Join S₁ S₂) (BPExt p) T L M A .get (PShift PHere) = ⊥-elim it
+    interior-label-comm (Join S₁ S₂) (BPShift p) T L M = interior-label-comm S₂ p T (L ∘ PShift) M
 
-    exterior-sub-label-comm : (S : Tree n)
-                            → (p : BranchingPoint S d)
-                            → (T : Tree m)
-                            → .⦃ _ : has-linear-height (bp-height p) T ⦄
-                            → (L : Label X S)
-                            → (M : Label X T)
-                            → (A : STy X)
-                            → L (branching-path-to-path p) ≃stm (unbiased-comp′ (height-of-branching p) T >>= (M ,, A))
-                            → exterior-sub-label S p T ●l (sub-from-insertion-label S p T L M ,, A) ≃lm L
-    exterior-sub-label-comm (Join S₁ S₂) BPHere T L M A q .get (PExt Z) = begin
-      < label-from-linear-tree-unbiased S₁ T 1 Z >>= connect-tree-inc-left T S₂ >>= (connect-label M (L ∘ PShift) ,, A) >stm
-        ≈⟨ >>=-assoc (label-from-linear-tree-unbiased S₁ T 1 Z) (connect-tree-inc-left T S₂) (connect-label M (L ∘ PShift) ,, A) ⟩
-      < label-from-linear-tree-unbiased S₁ T 1 Z >>= connect-tree-inc-left T S₂ ●lt (connect-label M (L ∘ PShift) ,, A) >stm
-        ≈⟨ >>=-≃ (lfltu-maximal-path S₁ T 1 Z) (connect-label-inc-left M (L ∘ PShift) A) refl≃sty ⟩
-      < unbiased-comp′ (1 + tree-dim S₁) T >>= (M ,, A) >stm
+    exterior-label-comm : (S : Tree n)
+                        → (p : BranchingPoint S d)
+                        → (T : Tree m)
+                        → (L : Label X S)
+                        → (M : Label X (susp-tree-n d T))
+                        → (As : STy (someTree T))
+                        → .⦃ _ : height-of-branching p ≃n d + sty-dim As ⦄
+                        → ⦃ 1-Full As ⦄
+                        → (Bs : STy X)
+                        → L (branching-path-to-path p) ≃stm SCoh (susp-tree-n d T) (map-sty-ext-n d As) (M ,, Bs)
+                        → exterior-label S p T As ●l (label-from-insertion S p T L M ,, Bs) ≃lm L
+    exterior-label-comm (Join S₁ S₂) BPHere T L M As Bs q .get (PExt Z) = begin
+      < term-to-label (SCoh T As (SPath ,, S⋆)) As (cast-to-disc (Join S₁ Sing) (PExt Z))
+        >>= connect-tree-inc-left T S₂
+        >>= (connect-label M (L ∘ PShift) ,, Bs) >stm
+        ≈⟨ >>=-assoc (term-to-label (SCoh T As (SPath ,, S⋆)) As (cast-to-disc (Join S₁ Sing) (PExt Z)))
+                     (connect-tree-inc-left T S₂)
+                     ((connect-label M (L ∘ PShift) ,, Bs)) ⟩
+      < term-to-label (SCoh T As (SPath ,, S⋆)) As (cast-to-disc (Join S₁ Sing) (PExt Z))
+        >>= connect-tree-inc-left T S₂ ●lt (connect-label M (λ x → L (PShift x)) ,, Bs) >stm
+        ≈⟨ >>=-≃ (ap-≃ (refl≃l {L = term-to-label (SCoh T As (SPath ,, S⋆)) As})
+                       (cast-to-disc-max (Join S₁ Sing) (PExt Z)))
+                 (connect-label-inc-left M (L ∘ PShift) Bs)
+                 refl≃sty ⟩
+      < term-to-label (SCoh T As (SPath ,, S⋆)) As (disc-path (sty-dim As)) >>= (M ,, Bs) >stm
+        ≈⟨ >>=-≃ (term-to-label-max (SCoh T As (SPath ,, S⋆)) As) refl≃l refl≃sty ⟩
+      < SCoh T As (SPath ,, S⋆) >>= ((λ z → M z) ,, Bs) >stm
         ≈˘⟨ q ⟩
-      < L (branching-path-to-path BPHere) >stm
+      < L (PExt (is-linear-max-path S₁)) >stm
         ≈⟨ ap-≃ (refl≃l {L = L ∘ PExt}) (max-path-lin-tree S₁ Z refl≃) ⟩
       < L (PExt Z) >stm ∎
-    exterior-sub-label-comm (Join S₁ S₂) BPHere T L M A q .get (PShift Z) = begin
-      < replace-label (ap (connect-tree-inc-right T S₂)) (ap (connect-tree-inc-left T S₂) (last-path T)) Z >>= (connect-label M (L ∘ PShift) ,, A) >stm
-        ≈⟨ >>=-≃ (replace-not-here (ap (connect-tree-inc-right T S₂)) (ap (connect-tree-inc-left T S₂) (last-path T)) Z) refl≃l refl≃sty ⟩
-      < ap (connect-tree-inc-right T S₂) Z >>= (connect-label M (L ∘ PShift) ,, A) >stm
-        ≈⟨ connect-label-inc-right M (L ∘ PShift) A Z ⟩
+    exterior-label-comm (Join S₁ S₂) BPHere T L M As Bs q .get (PShift Z) = begin
+      < replace-label (ap (connect-tree-inc-right T S₂))
+                      (term-to-label (SCoh T As (SPath ,, S⋆))
+                                     As
+                                     (last-path (n-disc (sty-dim As)))
+                                     >>= connect-tree-inc-left T S₂)
+                      Z
+        >>= (connect-label M (L ∘ PShift) ,, Bs) >stm
+        ≈⟨ >>=-≃ (replace-not-here (ap (connect-tree-inc-right T S₂)) _ Z) refl≃l refl≃sty ⟩
+      < connect-label M (L ∘ PShift) (connect-tree-inc-right′ T S₂ Z) >stm
+        ≈⟨ connect-label-inc-right M (L ∘ PShift) Bs Z ⟩
       < L (PShift Z) >stm ∎
-    exterior-sub-label-comm (Join S₁ S₂) (BPExt p) (Join T Sing) L M A q .get (PExt Z) = exterior-sub-label-comm S₁ p T (L ∘ PExt) (M ∘ PExt) _ q .get Z
-    exterior-sub-label-comm (Join S₁ S₂) (BPExt p) (Join T Sing) L M A q .get (PShift Z) = replace-not-here (L ∘ PShift) (M (PShift PHere)) Z
-    exterior-sub-label-comm (Join S₁ S₂) (BPShift p) T L M A q .get (PExt Z) = refl≃stm
-    exterior-sub-label-comm (Join S₁ S₂) (BPShift p) T L M A q .get (PShift Z) = exterior-sub-label-comm S₂ p T (L ∘ PShift) M A q .get Z
+    exterior-label-comm (Join S₁ S₂) (BPExt p) T L M As Bs q .get (PExt Z) = exterior-label-comm S₁ p T (L ∘ PExt) (M ∘ PExt) As _ lem .get Z
+      where
+        lem : L (PExt (branching-path-to-path p))
+              ≃stm
+              (SCoh (susp-tree-n _ T)
+                    (map-sty-ext-n _ As)
+                    (M ∘ PExt ,, SArr (M PHere) Bs (M (PShift PHere))))
+        lem = begin
+          < L (PExt (branching-path-to-path p)) >stm
+            ≈⟨ q ⟩
+          < SCoh (susp-tree-n (suc _) T) (map-sty-ext-n (suc _) As) (M ,, Bs) >stm
+            ≈⟨ SCoh≃ (susp-tree-n (suc _) T)
+                     (map-sty-ext-susp-compat (map-sty-ext-n _ As))
+                     (unrestrict-label-prop (M ,, Bs))
+                     refl≃sty ⟩
+          < SCoh (susp-tree-n (suc _) T) (susp-sty (map-sty-ext-n _ As)) _ >stm
+            ≈˘⟨ SCoh-unrestrict (susp-tree-n _ T) (map-sty-ext-n _ As) _ ⟩
+          < SCoh (susp-tree-n _ T)
+                 (map-sty-ext-n _ As)
+                 (M ∘ PExt ,, SArr (label-from-insertion (Join S₁ S₂) (BPExt p) T L M PHere)
+                                   Bs
+                                   (label-from-insertion (Join S₁ S₂) (BPExt p) T L M (PShift PHere))) >stm ∎
+    exterior-label-comm (Join S₁ S₂) (BPExt p) T L M As Bs q .get (PShift Z) = replace-not-here (L ∘ PShift) (M (PShift PHere)) Z
+    exterior-label-comm (Join S₁ S₂) (BPShift p) T L M As Bs q .get (PExt Z) = refl≃stm
+    exterior-label-comm (Join S₁ S₂) (BPShift p) T L M As Bs q .get (PShift Z) = exterior-label-comm S₂ p T (L ∘ PShift) M As Bs q .get Z
   open Lemma37 public
-
+{-
 module Lemma44 where
   disc-insertion : (S : Tree n)
                  → .⦃ is-linear S ⦄

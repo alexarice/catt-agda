@@ -201,7 +201,7 @@ module _ where
   lfltu->-linear-height (Join S Sing) T d₁ (suc d₂) p q r b (PExt Z) = begin
     < label-from-linear-tree-unbiased S T (suc d₁)
          (tree-inc-label′ d₂ S b Z) >stm
-      ≈⟨ lfltu->-linear-height S T (suc d₁) d₂ (≤-trans p (≤-reflexive (+-suc d₁ (tree-dim S)))) (<-transˡ q (≤-reflexive (+-suc d₁ d₂))) (≤-pred r) b Z ⟩
+      ≈⟨ lfltu->-linear-height S T (suc d₁) d₂ (≤-trans p (≤-reflexive (+-suc d₁ (tree-dim S)))) (<-≤-trans q (≤-reflexive (+-suc d₁ d₂))) (≤-pred r) b Z ⟩
     < unbiased-comp′ (d₂ + suc d₁) (tree-bd (d₂ + suc d₁) T)
       >>= tree-inc-label (d₂ + suc d₁) T b >stm
       ≈⟨ reflexive≃stm (cong (λ - → unbiased-comp′ - (tree-bd - T) >>= tree-inc-label - T b) (+-suc d₂ d₁)) ⟩
@@ -209,9 +209,9 @@ module _ where
       >>= tree-inc-label (suc d₂ + d₁) T b >stm ∎
   lfltu->-linear-height (Join S Sing) T d₁ (suc d₂) p q r b (PShift PHere) = ⊥-elim it
   lfltu->-linear-height (Join S Sing) T (suc d₁) zero p q r false PHere
-    = >>=-≃ (unbiased-stm-bd-non-linear (suc d₁) T (<-transˡ q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
+    = >>=-≃ (unbiased-stm-bd-non-linear (suc d₁) T (<-≤-trans q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
   lfltu->-linear-height (Join S Sing) T (suc d₁) zero p q r true PHere
-    = >>=-≃ (unbiased-stm-bd-non-linear (suc d₁) T (<-transˡ q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
+    = >>=-≃ (unbiased-stm-bd-non-linear (suc d₁) T (<-≤-trans q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
 
 unbiased-type-susp-lem : (d : ℕ) → (T : Tree n) → susp-sty (unbiased-type d T) ≃sty unbiased-type (suc d) (susp-tree T)
 unbiased-comp-susp-lem : (d : ℕ) → (T : Tree n) → SExt {T = Sing} (unbiased-comp d T) ≃stm unbiased-comp (suc d) (susp-tree T)
@@ -495,9 +495,9 @@ identity-stm-to-term n = begin
     lem1 : tree-to-ctx (n-disc n) ≃c Disc n
     lem1 = begin
       < tree-to-ctx (n-disc n) >c
-        ≈⟨ linear-tree-compat (n-disc n) ⦃ n-disc-is-linear n ⦄ ⟩
+        ≈⟨ linear-tree-compat (n-disc n) ⟩
       < Disc (tree-dim (n-disc n)) >c
-        ≈⟨ disc-≡ (tree-dim-n-disc n) ⟩
+        ≈⟨ disc-≡ (≃n-to-≡ (tree-dim-n-disc n)) ⟩
       < Disc n >c ∎
       where
         open Reasoning ctx-setoid
@@ -510,18 +510,18 @@ identity-stm-to-term n = begin
       < stm-to-term (unbiased-stm n (tree-bd n (n-disc n)) >>= tree-inc-label n (n-disc n) b) >tm
         ≈˘⟨ label-to-sub-stm (tree-inc-label n (n-disc n) b) (unbiased-stm n (tree-bd n (n-disc n))) ⟩
       < stm-to-term (unbiased-stm n (tree-bd n (n-disc n))) [ label-to-sub (tree-inc-label n (n-disc n) b) ]tm >tm
-        ≈⟨ sub-action-≃-tm {s = stm-to-term (unbiased-stm n (tree-bd n (n-disc n)))} {t = stm-to-term (unbiased-stm n (n-disc n))} (unbiased-stm-≃ (refl {x = n}) (≃′-to-≃ (tree-bd-full n (n-disc n) (≤-reflexive (tree-dim-n-disc n)))) .get) (tree-inc-full n (n-disc n) b (≤-reflexive (tree-dim-n-disc n))) ⟩
+        ≈⟨ sub-action-≃-tm {s = stm-to-term (unbiased-stm n (tree-bd n (n-disc n)))} {t = stm-to-term (unbiased-stm n (n-disc n))} (unbiased-stm-≃ (refl {x = n}) (≃′-to-≃ (tree-bd-full n (n-disc n) (≤-reflexive (≃n-to-≡ (tree-dim-n-disc n))))) .get) (tree-inc-full n (n-disc n) b (≤-reflexive (≃n-to-≡ (tree-dim-n-disc n)))) ⟩
       < stm-to-term (unbiased-stm n (n-disc n)) [ idSub ]tm >tm
         ≈⟨ id-on-tm (stm-to-term (unbiased-stm n (n-disc n))) ⟩
       < stm-to-term (unbiased-stm n (n-disc n)) >tm
-        ≈⟨ unbiased-term-linear n (n-disc n) ⦃ n-disc-is-linear n ⦄ (sym (tree-dim-n-disc n)) ⟩
+        ≈⟨ unbiased-term-linear n (n-disc n) (sym (≃n-to-≡ (tree-dim-n-disc n))) ⟩
       < 0V >tm ∎
       where
         open Reasoning tm-setoid
 
     lem3 : sty-to-type (unbiased-type (suc n) (n-disc n)) ≃ty
              (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F)
-    lem3 = Arr≃ (lem2 false) (unbiased-type-linear n (n-disc n) ⦃ n-disc-is-linear n ⦄ (sym (tree-dim-n-disc n))) (lem2 true)
+    lem3 = Arr≃ (lem2 false) (unbiased-type-linear n (n-disc n) (sym (≃n-to-≡ (tree-dim-n-disc n)))) (lem2 true)
 
     lem4 : label-to-sub (id-label (n-disc n) ,, S⋆) ● idSub ≃s idSub
     lem4 = begin

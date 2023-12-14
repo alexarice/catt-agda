@@ -7,17 +7,17 @@ open import Catt.Variables
 open import Catt.Globular
 open import Catt.Pasting
 
-open import Data.Vec hiding (drop ; [_]; _>>=_) public
+open import Data.Vec hiding (drop ; [_]) public
 open import Data.Vec.Relation.Binary.Pointwise.Inductive using (Pointwise)
 
 VarSet : ℕ → Set
 VarSet = Vec Bool
 
 empty : VarSet n
-empty = replicate false
+empty = replicate _ false
 
 full : VarSet n
-full = replicate true
+full = replicate _ true
 
 pattern ewt xs = true ∷ xs
 pattern ewf xs = false ∷ xs

@@ -9,7 +9,7 @@ open import Catt.Suspension
 
 open import Relation.Nullary.Decidable
 open import Relation.Binary hiding (Irrelevant)
-open import Function.Equivalence using (equivalence)
+open import Function.Bundles
 
 no-term-in-empty-context : ¬ Tm 0
 no-term-in-empty-context (Coh S A ⟨ σ , t ⟩) = no-term-in-empty-context t
@@ -371,16 +371,16 @@ apply-sub-lifted-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (apply-sub-lifted-sub-≃ τ
 ... | no p | q = no (λ where (Ext≃ x _) → p x)
 
 ctx-dec : DecidableEquality (Ctx n)
-ctx-dec Γ Δ = map (equivalence ≃c-to-≡ reflexive≃c) (≃c-dec Γ Δ)
+ctx-dec Γ Δ = map (mk⇔ ≃c-to-≡ reflexive≃c) (≃c-dec Γ Δ)
 
 ty-dec : DecidableEquality (Ty n)
-ty-dec A B = map (equivalence ≃ty-to-≡ reflexive≃ty) (≃ty-dec A B)
+ty-dec A B = map (mk⇔ ≃ty-to-≡ reflexive≃ty) (≃ty-dec A B)
 
 tm-dec : DecidableEquality (Tm n)
-tm-dec s t = map (equivalence ≃tm-to-≡ reflexive≃tm) (≃tm-dec s t)
+tm-dec s t = map (mk⇔ ≃tm-to-≡ reflexive≃tm) (≃tm-dec s t)
 
 sub-dec : DecidableEquality (Sub n m A)
-sub-dec σ τ = map (equivalence ≃s-to-≡ reflexive≃s) (≃s-dec σ τ)
+sub-dec σ τ = map (mk⇔ ≃s-to-≡ reflexive≃s) (≃s-dec σ τ)
 
 ≃c-irrel : Irrelevant (Γ ≃c Δ)
 ≃ty-irrel : Irrelevant (A ≃ty B)

@@ -128,18 +128,18 @@ proj-shift (Shift≃ _ p) = p
 -- var-to-path-helper-2-is-path S T 0F = tt
 -- var-to-path-helper-2-is-path S T 1F = tt
 
-var-connect-susp-inc-left : (i : Fin (3 + m)) → (n : ℕ) → Var i [ connect-susp-inc-left m n ]tm ≃tm Var (raise n i)
+var-connect-susp-inc-left : (i : Fin (3 + m)) → (n : ℕ) → Var i [ connect-susp-inc-left m n ]tm ≃tm Var (n ↑ʳ i)
 var-connect-susp-inc-left i zero = id-on-tm (Var i)
 var-connect-susp-inc-left i (suc n) = begin
   < Var i [ connect-susp-inc-left _ (suc n) ]tm >tm
     ≈⟨ apply-lifted-sub-tm-≃ (Var i) (connect-susp-inc-left _ n) ⟩
   < lift-tm (Var i [ connect-susp-inc-left _ n ]tm) >tm
     ≈⟨ lift-tm-≃ (var-connect-susp-inc-left i n) ⟩
-  < Var (raise (suc n) i) >tm ∎
+  < Var (suc n ↑ʳ i) >tm ∎
   where
     open Reasoning tm-setoid
 
-var-connect-susp-inc-right : (i : Fin (suc m)) → (n : ℕ) → i ≢ fromℕ m → Var i [ connect-susp-inc-right n m ]tm ≃tm Var (inject+ (2 + n) i)
+var-connect-susp-inc-right : (i : Fin (suc m)) → (n : ℕ) → i ≢ fromℕ m → Var i [ connect-susp-inc-right n m ]tm ≃tm Var (i ↑ˡ 2 + n)
 var-connect-susp-inc-right {zero} 0F n p = ⊥-elim (p refl)
 var-connect-susp-inc-right {suc m} 0F n p = refl≃tm
 var-connect-susp-inc-right {suc m} (suc i) n p = begin
@@ -147,7 +147,7 @@ var-connect-susp-inc-right {suc m} (suc i) n p = begin
     ≈⟨ apply-lifted-sub-tm-≃ (Var i) (connect-susp-inc-right n m) ⟩
   < lift-tm (Var i [ connect-susp-inc-right n m ]tm) >tm
     ≈⟨ lift-tm-≃ (var-connect-susp-inc-right i n (λ x → p (cong suc x))) ⟩
-  < lift-tm (Var (inject+ (2 + n) i)) >tm ∎
+  < lift-tm (Var (i ↑ˡ 2 + n)) >tm ∎
   where
     open Reasoning tm-setoid
 
@@ -157,26 +157,25 @@ var-cast p i = Var≃ (sym p) (toℕ-cast p i)
 open import Data.Fin.Properties
 open import Data.Fin using (inject≤; lower₁;join)
 
-fromℕ≢inject₁ : (n : ℕ) → (i : Fin n) → toℕ (fromℕ n) ≢ toℕ (inject₁ i)
-fromℕ≢inject₁ (suc n) 0F ()
-fromℕ≢inject₁ (suc n) (suc i) p = fromℕ≢inject₁ n i (cong pred p)
+fromℕ≢inject₁-toℕ : (n : ℕ) → (i : Fin n) → toℕ (fromℕ n) ≢ toℕ (inject₁ i)
+fromℕ≢inject₁-toℕ n i x = fromℕ≢inject₁ (toℕ-injective x)
 
-fromℕ≢inject+ : (n m : ℕ) → (i : Fin (suc n)) → fromℕ (n + suc m) ≢ inject+ (suc m) i
+fromℕ≢inject+ : (n m : ℕ) → (i : Fin (suc n)) → fromℕ (n + suc m) ≢ i ↑ˡ suc m
 fromℕ≢inject+ zero m 0F ()
 fromℕ≢inject+ (suc n) m (suc i) p = fromℕ≢inject+ n m i (Data.Fin.Properties.suc-injective p)
 
 path-to-fin-lem : (P : Path T) → path-to-fin P ≡ fromℕ _ → P ≡ PHere
 path-to-fin-lem PHere p = refl
-path-to-fin-lem {T = Join {n} {m} S T} (PExt P) p = ⊥-elim (fromℕ≢inject₁ (2 + n) (inject₁ (path-to-fin P)) (sym lem))
+path-to-fin-lem {T = Join {n} {m} S T} (PExt P) p = ⊥-elim (fromℕ≢inject₁-toℕ (2 + n) (inject₁ (path-to-fin P)) (sym lem))
   where
     open ≡-Reasoning
     lem : toℕ (inject₁ (inject₁ (path-to-fin P))) ≡ toℕ (fromℕ (2 + n))
-    lem = +-cancelˡ-≡ m (begin
+    lem = +-cancelˡ-≡ m _ _ (begin
       m + toℕ (inject₁ (inject₁ (path-to-fin P)))
-        ≡˘⟨ toℕ-raise m (inject₁ (inject₁ (path-to-fin P))) ⟩
-      toℕ (raise m (inject₁ (inject₁ (path-to-fin P))))
-        ≡˘⟨ toℕ-cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P)))) ⟩
-      toℕ (cast _ (raise m (inject₁ (inject₁ (path-to-fin P)))))
+        ≡˘⟨ toℕ-↑ʳ m (inject₁ (inject₁ (path-to-fin P))) ⟩
+      toℕ (m ↑ʳ (inject₁ (inject₁ (path-to-fin P))))
+        ≡˘⟨ toℕ-cast (+-suc m (suc (suc n))) (m ↑ʳ (inject₁ (inject₁ (path-to-fin P)))) ⟩
+      toℕ (cast _ (m ↑ʳ (inject₁ (inject₁ (path-to-fin P)))))
         ≡⟨ cong toℕ p ⟩
       toℕ (fromℕ (m + (2 + n)))
         ≡⟨ toℕ-fromℕ (m + (2 + n)) ⟩
@@ -192,7 +191,7 @@ path-to-fin-lem {T = Join {n} {m} S T} (PShift PHere) p = ⊥-elim (lem n lem2)
 
     open ≡-Reasoning
     lem2 : n ≡ suc n
-    lem2 = cong pred (+-cancelˡ-≡ m (begin
+    lem2 = cong pred (+-cancelˡ-≡ m _ _ (begin
       m + suc n
         ≡˘⟨ toℕ-fromℕ (m + suc n) ⟩
       toℕ (fromℕ (m + suc n))
@@ -214,21 +213,21 @@ path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PExt P) = begin
     ≈⟨ sub-action-≃-tm (susp-tm-≃ (path-to-term-is-path-to-fin P)) refl≃s ⟩
   < Var (inject₁ (inject₁ (path-to-fin P))) [ connect-susp-inc-left n m ]tm >tm
     ≈⟨ var-connect-susp-inc-left (inject₁ (inject₁ (path-to-fin P))) m ⟩
-  < Var (raise m (inject₁ (inject₁ (path-to-fin P)))) >tm
-    ≈˘⟨ var-cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P)))) ⟩
-  < Var (cast _ (raise m (inject₁ (inject₁ (path-to-fin P))))) >tm ∎
+  < Var (m ↑ʳ (inject₁ (inject₁ (path-to-fin P)))) >tm
+    ≈˘⟨ var-cast (+-suc m (suc (suc n))) (m ↑ʳ (inject₁ (inject₁ (path-to-fin P)))) ⟩
+  < Var (cast _ (m ↑ʳ (inject₁ (inject₁ (path-to-fin P))))) >tm ∎
   where open Reasoning tm-setoid
 path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PShift PHere) = begin
   < Var (fromℕ m) [ connect-susp-inc-right n m ]tm >tm
     ≈˘⟨ connect-inc-fst-var get-snd m ⟩
   < get-snd [ connect-susp-inc-left n m ]tm >tm
     ≈⟨ var-connect-susp-inc-left (inject₁ (fromℕ _)) m ⟩
-  < Var (raise m (inject₁ (fromℕ (suc n)))) >tm
+  < Var (m ↑ʳ (inject₁ (fromℕ (suc n)))) >tm
     ≈˘⟨ Var≃ (sym (+-suc m (2 + n))) lem ⟩
   < Var (cast _ (inject₁ (fromℕ (m + suc n)))) >tm ∎
   where
     lem : toℕ (cast _ (inject₁ (fromℕ (m + suc n)))) ≡
-            toℕ (raise m (inject₁ (fromℕ (suc n))))
+            toℕ (m ↑ʳ (inject₁ (fromℕ (suc n))))
     lem = begin
       toℕ (cast _ (inject₁ (fromℕ (m + suc n))))
         ≡⟨ toℕ-cast (sym (+-suc (suc m) (suc n))) (inject₁ (fromℕ (m + suc n))) ⟩
@@ -239,8 +238,8 @@ path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PShift PHere) = begin
       m + suc n
         ≡˘⟨ cong (m +_) (trans (toℕ-inject₁ (suc (fromℕ n))) (toℕ-fromℕ (suc n))) ⟩
       m + toℕ (inject₁ (fromℕ (suc n)))
-        ≡˘⟨ toℕ-raise m (inject₁ (fromℕ (suc n))) ⟩
-      toℕ (raise m (inject₁ (fromℕ (suc n)))) ∎
+        ≡˘⟨ toℕ-↑ʳ m (inject₁ (fromℕ (suc n))) ⟩
+      toℕ (m ↑ʳ (inject₁ (fromℕ (suc n)))) ∎
       where
         open ≡-Reasoning
     open Reasoning tm-setoid
@@ -249,7 +248,7 @@ path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PShift P@(PExt _)) = begin
     ≈⟨ sub-action-≃-tm (path-to-term-is-path-to-fin P) refl≃s ⟩
   < Var (path-to-fin P) [ connect-susp-inc-right n m ]tm >tm
     ≈⟨ var-connect-susp-inc-right (path-to-fin P) n (λ y → l2 (path-to-fin-lem P y)) ⟩
-  < Var (inject+ (2 + n) (path-to-fin P)) >tm ∎
+  < Var (path-to-fin P ↑ˡ 2 + n) >tm ∎
   where
     open Reasoning tm-setoid
 
@@ -261,35 +260,35 @@ path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PShift P@(PShift _)) = begin
     ≈⟨ sub-action-≃-tm (path-to-term-is-path-to-fin P) refl≃s ⟩
   < Var (path-to-fin P) [ connect-susp-inc-right n m ]tm >tm
     ≈⟨ var-connect-susp-inc-right (path-to-fin P) n (λ y → l2 (path-to-fin-lem P y)) ⟩
-  < Var (inject+ (2 + n) (path-to-fin P)) >tm ∎
+  < Var (path-to-fin P ↑ˡ 2 + n) >tm ∎
   where
     open Reasoning tm-setoid
 
     l2 : P ≢ PHere
     l2 ()
 
-vtph-end : (S : Tree n) → (T : Tree m) → (i : Fin 2) → var-to-path-helper S T (raise m (raise (suc n) i)) ≡ var-to-path-helper-2 S T i
+vtph-end : (S : Tree n) → (T : Tree m) → (i : Fin 2) → var-to-path-helper S T (m ↑ʳ (suc n ↑ʳ i)) ≡ var-to-path-helper-2 S T i
 vtph-end S T i = begin
-  var-to-path-helper S T (raise _ (raise (suc _) i))
-    ≡⟨ cong [ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , var-to-path-helper-1 S T ]′ (splitAt-raise _ (suc _ + 2) (raise (suc _) i)) ⟩
-  var-to-path-helper-1 S T (raise (suc _) i)
-    ≡⟨ cong [ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt-raise (suc _) 2 i) ⟩
+  var-to-path-helper S T (_ ↑ʳ (suc _ ↑ʳ i))
+    ≡⟨ cong [ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , var-to-path-helper-1 S T ]′ (splitAt-↑ʳ _ (suc _ + 2) (suc _ ↑ʳ i)) ⟩
+  var-to-path-helper-1 S T (suc _ ↑ʳ i)
+    ≡⟨ cong [ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt-↑ʳ (suc _) 2 i) ⟩
   var-to-path-helper-2 S T i ∎
   where
     open ≡-Reasoning
 
-vtph-ext : (S : Tree n) → (T : Tree m) → (i : Fin (suc n)) → var-to-path-helper S T (raise m (inject+ 2 i)) ≡ PExt (var-to-path S (Var i))
+vtph-ext : (S : Tree n) → (T : Tree m) → (i : Fin (suc n)) → var-to-path-helper S T (m ↑ʳ (i ↑ˡ 2)) ≡ PExt (var-to-path S (Var i))
 vtph-ext S T i = begin
-  var-to-path-helper S T (raise (tree-size T) (inject+ 2 i))
-    ≡⟨ cong [ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ (splitAt-raise _ (suc _ + 2) (inject+ 2 i)) ⟩
-  var-to-path-helper-1 S T (inject+ 2 i)
-    ≡⟨ cong [ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt-inject+ (suc (tree-size S)) 2 i) ⟩
+  var-to-path-helper S T (tree-size T ↑ʳ (i ↑ˡ 2))
+    ≡⟨ cong [ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ (splitAt-↑ʳ _ (suc _ + 2) (i ↑ˡ 2)) ⟩
+  var-to-path-helper-1 S T (i ↑ˡ 2)
+    ≡⟨ cong [ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt-↑ˡ (suc (tree-size S)) i 2) ⟩
   PExt (var-to-path S (Var i)) ∎
   where
     open ≡-Reasoning
 
-vtph-shift : (S : Tree n) → (T : Tree m) → (i : Fin m) → var-to-path-helper S T (inject+ (suc n + 2) i) ≡ PShift (var-to-path T (Var (inject₁ i)))
-vtph-shift S T i = cong [ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , var-to-path-helper-1 S T ]′ (splitAt-inject+ _ (suc _ + 2) i)
+vtph-shift : (S : Tree n) → (T : Tree m) → (i : Fin m) → var-to-path-helper S T (i ↑ˡ (suc n + 2)) ≡ PShift (var-to-path T (Var (inject₁ i)))
+vtph-shift S T i = cong [ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , var-to-path-helper-1 S T ]′ (splitAt-↑ˡ _ i (suc _ + 2))
 
 path-to-fin-to-path : (P : Path T) → var-to-path T (Var (path-to-fin P)) ≡ P
 
@@ -297,14 +296,14 @@ path-to-fin-to-path {T = Sing} PHere = refl
 path-to-fin-to-path {T = Join {n} {m} S T} PHere = begin
   var-to-path-helper S T (cast _ (fromℕ (m + suc (suc n))))
     ≡⟨ cong (var-to-path-helper S T) (toℕ-injective lem) ⟩
-  var-to-path-helper S T (raise m (raise (suc n) 1F))
+  var-to-path-helper S T (m ↑ʳ (suc n ↑ʳ 1F))
     ≡⟨ vtph-end S T 1F ⟩
   PHere ∎
   where
     open ≡-Reasoning
 
     lem : toℕ (cast _ (fromℕ (m + suc (suc n)))) ≡
-            toℕ (raise m (raise (suc n) 1F))
+            toℕ (m ↑ʳ (suc n ↑ʳ 1F))
     lem = begin
       toℕ (cast _ (fromℕ (m + suc (suc n))))
         ≡⟨ toℕ-cast _ (fromℕ (m + suc (suc n))) ⟩
@@ -313,15 +312,15 @@ path-to-fin-to-path {T = Join {n} {m} S T} PHere = begin
       m + suc (suc n)
         ≡⟨ cong (λ - → m + suc -) (+-comm 1 n) ⟩
       m + (suc n + 1)
-        ≡˘⟨ cong (m +_) (toℕ-raise (suc n) 1F) ⟩
-      m + toℕ (suc (raise n 1F))
-        ≡˘⟨ toℕ-raise m (suc (raise n 1F)) ⟩
-      toℕ (raise m (suc (raise n 1F))) ∎
+        ≡˘⟨ cong (m +_) (toℕ-↑ʳ (suc n) 1F) ⟩
+      m + toℕ (suc (n ↑ʳ 1F))
+        ≡˘⟨ toℕ-↑ʳ m (suc (n ↑ʳ 1F)) ⟩
+      toℕ (m ↑ʳ (suc (n ↑ʳ 1F))) ∎
 
 path-to-fin-to-path {T = Join {n} {m} S T} (PExt P) = begin
-  var-to-path-helper S T (cast _ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P))))))
+  var-to-path-helper S T (cast _ (cast (+-suc m (suc (suc n))) (m ↑ʳ inject₁ (inject₁ (path-to-fin P)))))
     ≡⟨ cong (var-to-path-helper S T) (toℕ-injective lem) ⟩
-  var-to-path-helper S T (raise m (inject+ 2 (path-to-fin P)))
+  var-to-path-helper S T (m ↑ʳ (path-to-fin P ↑ˡ 2))
     ≡⟨ vtph-ext S T (path-to-fin P) ⟩
   PExt (var-to-path S (Var (path-to-fin P)))
     ≡⟨ cong PExt (path-to-fin-to-path P) ⟩
@@ -330,41 +329,41 @@ path-to-fin-to-path {T = Join {n} {m} S T} (PExt P) = begin
     open ≡-Reasoning
 
     lem2 : toℕ (inject₁ (inject₁ (path-to-fin P))) ≡
-             toℕ (inject+ 2 (path-to-fin P))
+             toℕ (path-to-fin P ↑ˡ 2)
     lem2 = begin
        toℕ (inject₁ (inject₁ (path-to-fin P)))
          ≡⟨ toℕ-inject₁ (inject₁ (path-to-fin P)) ⟩
        toℕ (inject₁ (path-to-fin P))
          ≡⟨ toℕ-inject₁ (path-to-fin P) ⟩
        toℕ (path-to-fin P)
-         ≡⟨ toℕ-inject+ 2 (path-to-fin P) ⟩
-       toℕ (inject+ 2 (path-to-fin P)) ∎
+         ≡˘⟨ toℕ-↑ˡ (path-to-fin P) 2 ⟩
+       toℕ (path-to-fin P ↑ˡ 2) ∎
 
-    lem : toℕ (cast _ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P)))))) ≡ toℕ (raise m (inject+ 2 (path-to-fin P)))
+    lem : toℕ (cast _ (cast (+-suc m (suc (suc n))) (m ↑ʳ (inject₁ (inject₁ (path-to-fin P)))))) ≡ toℕ (m ↑ʳ (path-to-fin P ↑ˡ 2))
     lem = begin
-      toℕ (cast _ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P))))))
-        ≡⟨ toℕ-cast _ (cast _ (raise m (inject₁ (inject₁ (path-to-fin P))))) ⟩
-      toℕ (cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P)))))
-        ≡⟨ toℕ-cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P)))) ⟩
-      toℕ (raise m (inject₁ (inject₁ (path-to-fin P))))
-        ≡⟨ toℕ-raise m (inject₁ (inject₁ (path-to-fin P))) ⟩
+      toℕ (cast _ (cast (+-suc m (suc (suc n))) (m ↑ʳ inject₁ (inject₁ (path-to-fin P)))))
+        ≡⟨ toℕ-cast _ (cast _ (m ↑ʳ (inject₁ (inject₁ (path-to-fin P))))) ⟩
+      toℕ (cast (+-suc m (suc (suc n))) (m ↑ʳ inject₁ (inject₁ (path-to-fin P))))
+        ≡⟨ toℕ-cast (+-suc m (suc (suc n))) (m ↑ʳ inject₁ (inject₁ (path-to-fin P))) ⟩
+      toℕ (m ↑ʳ (inject₁ (inject₁ (path-to-fin P))))
+        ≡⟨ toℕ-↑ʳ m (inject₁ (inject₁ (path-to-fin P))) ⟩
       m + toℕ (inject₁ (inject₁ (path-to-fin P)))
         ≡⟨ cong (m +_) lem2 ⟩
-      m + toℕ (inject+ 2 (path-to-fin P))
-        ≡˘⟨ toℕ-raise m (inject+ 2 (path-to-fin P)) ⟩
-      toℕ (raise m (inject+ 2 (path-to-fin P))) ∎
+      m + toℕ (path-to-fin P ↑ˡ 2)
+        ≡˘⟨ toℕ-↑ʳ m (path-to-fin P ↑ˡ 2) ⟩
+      toℕ (m ↑ʳ (path-to-fin P ↑ˡ 2)) ∎
 
 path-to-fin-to-path {T = Join {n} {m} S T} (PShift PHere) = begin
   var-to-path-helper S T (cast _ (cast (cong suc (sym (+-suc m (suc n)))) (inject₁ (fromℕ (m + suc n)))))
     ≡⟨ cong (var-to-path-helper S T) (toℕ-injective lem) ⟩
-  var-to-path-helper S T (raise m (raise (suc n) 0F))
+  var-to-path-helper S T (m ↑ʳ (suc n ↑ʳ 0F))
     ≡⟨ vtph-end S T 0F ⟩
   PShift PHere ∎
   where
     open ≡-Reasoning
 
     lem : toℕ (cast _ (cast (cong suc (sym (+-suc m (suc n)))) (inject₁ (fromℕ (m + suc n))))) ≡
-            toℕ (raise m (raise (suc n) 0F))
+            toℕ (m ↑ʳ (suc n ↑ʳ 0F))
     lem = begin
       toℕ (cast _ (cast (cong suc (sym (+-suc m (suc n)))) (inject₁ (fromℕ (m + suc n)))))
         ≡⟨ toℕ-cast _ (cast (cong suc (sym (+-suc m (suc n)))) (inject₁ (fromℕ (m + suc n)))) ⟩
@@ -377,15 +376,15 @@ path-to-fin-to-path {T = Join {n} {m} S T} (PShift PHere) = begin
       m + suc n
         ≡⟨ cong (m +_) (+-comm 0 (suc n)) ⟩
       m + (suc n + 0)
-        ≡˘⟨ cong (m +_) (toℕ-raise (suc n) 0F) ⟩
-      m + toℕ (suc (raise n 0F))
-        ≡˘⟨ toℕ-raise m (suc (raise n 0F)) ⟩
-      toℕ (raise m (suc (raise n 0F))) ∎
+        ≡˘⟨ cong (m +_) (toℕ-↑ʳ (suc n) 0F) ⟩
+      m + toℕ (suc (n ↑ʳ 0F))
+        ≡˘⟨ toℕ-↑ʳ m (suc (n ↑ʳ 0F)) ⟩
+      toℕ (m ↑ʳ (suc (n ↑ʳ 0F))) ∎
 
 path-to-fin-to-path {T = Join {n} {m} S T} (PShift P@(PExt _)) = begin
-  var-to-path-helper S T (cast _ (inject+ (suc (suc n)) (path-to-fin P)))
+  var-to-path-helper S T (cast _ (path-to-fin P ↑ˡ suc (suc n)))
     ≡⟨ cong (var-to-path-helper S T) (toℕ-injective lem) ⟩
-  var-to-path-helper S T (inject+ (suc n + 2) (lower₁ (path-to-fin P) l1))
+  var-to-path-helper S T (lower₁ (path-to-fin P) l1 ↑ˡ suc n + 2)
     ≡⟨ vtph-shift S T (lower₁ (path-to-fin P) l1) ⟩
   PShift (var-to-path T (Var (inject₁ (lower₁ (path-to-fin P) l1))))
     ≡⟨ cong (λ - → PShift (var-to-path T (Var -))) (inject₁-lower₁ (path-to-fin P) l1) ⟩
@@ -401,23 +400,23 @@ path-to-fin-to-path {T = Join {n} {m} S T} (PShift P@(PExt _)) = begin
     l1 : m ≢ toℕ (path-to-fin P)
     l1 p = l2 (path-to-fin-lem P (toℕ-injective (sym (trans (toℕ-fromℕ (_ + (2 + _))) p))))
 
-    lem : toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin P))) ≡
-            toℕ (inject+ (suc n + 2) (lower₁ (path-to-fin P) l1))
+    lem : toℕ (cast _ (path-to-fin P ↑ˡ suc (suc n))) ≡
+            toℕ (lower₁ (path-to-fin P) l1 ↑ˡ suc n + 2)
     lem = begin
-      toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin P)))
-        ≡⟨ toℕ-cast _ (inject+ (suc (suc n)) (path-to-fin P)) ⟩
-      toℕ (inject+ (2 + n) (path-to-fin P))
-        ≡˘⟨ toℕ-inject+ (2 + n) (path-to-fin P) ⟩
+      toℕ (cast _ (path-to-fin P ↑ˡ suc (suc n)))
+        ≡⟨ toℕ-cast _ (path-to-fin P ↑ˡ suc (suc n)) ⟩
+      toℕ (path-to-fin P ↑ˡ 2 + n)
+        ≡⟨ toℕ-↑ˡ (path-to-fin P) (2 + n) ⟩
       toℕ (path-to-fin P)
         ≡˘⟨ toℕ-lower₁ (path-to-fin P) l1 ⟩
       toℕ (lower₁ (path-to-fin P) l1)
-        ≡⟨ toℕ-inject+ (suc (n + 2)) (lower₁ (path-to-fin P) l1) ⟩
-      toℕ (inject+ (suc (n + 2)) (lower₁ (path-to-fin P) l1)) ∎
+        ≡˘⟨ toℕ-↑ˡ (lower₁ (path-to-fin P) l1) (suc (n + 2)) ⟩
+      toℕ (lower₁ (path-to-fin P) l1 ↑ˡ suc (n + 2)) ∎
 
 path-to-fin-to-path {T = Join {n} {m} S T} (PShift P@(PShift _)) = begin
-  var-to-path-helper S T (cast _ (inject+ (suc (suc n)) (path-to-fin P)))
+  var-to-path-helper S T (cast _ (path-to-fin P ↑ˡ suc (suc n)))
     ≡⟨ cong (var-to-path-helper S T) (toℕ-injective lem) ⟩
-  var-to-path-helper S T (inject+ (suc n + 2) (lower₁ (path-to-fin P) l1))
+  var-to-path-helper S T (lower₁ (path-to-fin P) l1 ↑ˡ suc n + 2)
     ≡⟨ vtph-shift S T (lower₁ (path-to-fin P) l1) ⟩
   PShift (var-to-path T (Var (inject₁ (lower₁ (path-to-fin P) l1))))
     ≡⟨ cong (λ - → PShift (var-to-path T (Var -))) (inject₁-lower₁ (path-to-fin P) l1) ⟩
@@ -433,18 +432,18 @@ path-to-fin-to-path {T = Join {n} {m} S T} (PShift P@(PShift _)) = begin
     l1 : m ≢ toℕ (path-to-fin P)
     l1 p = l2 (path-to-fin-lem P (toℕ-injective (sym (trans (toℕ-fromℕ (_ + (2 + _))) p))))
 
-    lem : toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin P))) ≡
-            toℕ (inject+ (suc n + 2) (lower₁ (path-to-fin P) l1))
+    lem : toℕ (cast _ (path-to-fin P ↑ˡ suc (suc n))) ≡
+            toℕ (lower₁ (path-to-fin P) l1 ↑ˡ suc n + 2)
     lem = begin
-      toℕ (cast _ (inject+ (suc (suc n)) (path-to-fin P)))
-        ≡⟨ toℕ-cast _ (inject+ (suc (suc n)) (path-to-fin P)) ⟩
-      toℕ (inject+ (2 + n) (path-to-fin P))
-        ≡˘⟨ toℕ-inject+ (2 + n) (path-to-fin P) ⟩
+      toℕ (cast _ (path-to-fin P ↑ˡ suc (suc n)))
+        ≡⟨ toℕ-cast _ (path-to-fin P ↑ˡ suc (suc n)) ⟩
+      toℕ (path-to-fin P ↑ˡ 2 + n)
+        ≡⟨ toℕ-↑ˡ (path-to-fin P) (2 + n) ⟩
       toℕ (path-to-fin P)
         ≡˘⟨ toℕ-lower₁ (path-to-fin P) l1 ⟩
       toℕ (lower₁ (path-to-fin P) l1)
-        ≡⟨ toℕ-inject+ (suc (n + 2)) (lower₁ (path-to-fin P) l1) ⟩
-      toℕ (inject+ (suc (n + 2)) (lower₁ (path-to-fin P) l1)) ∎
+        ≡˘⟨ toℕ-↑ˡ (lower₁ (path-to-fin P) l1) (suc (n + 2)) ⟩
+      toℕ (lower₁ (path-to-fin P) l1 ↑ˡ suc (n + 2)) ∎
 
 path-to-term-to-path : (P : Path T) → var-to-path T (path-to-term P) ⦃ path-to-term-is-var P ⦄ ≡ P
 path-to-term-to-path {T = T} P = begin
@@ -460,7 +459,7 @@ path-to-term-to-path {T = T} P = begin
     lem : (t s : Tm (suc _)) → .⦃ v : isVar s ⦄ → (p : t ≡ s) → var-to-path T t ⦃ subst isVar (sym p) v ⦄ ≡ var-to-path T s
     lem t s refl = refl
 
-path-to-fin-shift-lem : (S : Tree n) → (P : Path T) → P ≢ PHere → path-to-fin (PShift {S = S} P) ≡ inject+ (2 + n) (path-to-fin P)
+path-to-fin-shift-lem : (S : Tree n) → (P : Path T) → P ≢ PHere → path-to-fin (PShift {S = S} P) ≡ path-to-fin P ↑ˡ 2 + n
 path-to-fin-shift-lem S PHere p = ⊥-elim (p refl)
 path-to-fin-shift-lem S (PExt P) p = refl
 path-to-fin-shift-lem S (PShift P) p = refl
@@ -471,18 +470,18 @@ var-helper-to-fin : (S : Tree n) → (T : Tree m) → (i : Fin (m + ((suc n) + 2
 var-helper-to-fin {n} {m} S T i = begin
   toℕ (path-to-fin ([ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ (splitAt (tree-size T) i)))
     ≡⟨ lem (splitAt (tree-size T) i) ⟩
-  toℕ ([ inject+ (suc _ + 2) , raise (tree-size T) ]′ (splitAt (tree-size T) i))
+  toℕ ([ _↑ˡ (suc _ + 2) , (tree-size T) ↑ʳ_ ]′ (splitAt (tree-size T) i))
     ≡⟨ cong toℕ (join-splitAt (tree-size T) (suc _ + 2) i) ⟩
   toℕ i ∎
   where
     open ≡-Reasoning
 
-    l2 : ∀ x → toℕ (path-to-fin ([ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ x)) ≡ toℕ (raise m (join (suc (tree-size S)) 2 x))
+    l2 : ∀ x → toℕ (path-to-fin ([ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ x)) ≡ toℕ (m ↑ʳ (join (suc (tree-size S)) 2 x))
     l2 (inj₁ x) = begin
-      toℕ (cast _ (raise m (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x)))))))
-        ≡⟨ toℕ-cast _ (raise m (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x)))))) ⟩
-      toℕ (raise m (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x))))))
-        ≡⟨ toℕ-raise m (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x))))) ⟩
+      toℕ (cast _ (m ↑ʳ (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x)))))))
+        ≡⟨ toℕ-cast _ (m ↑ʳ (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x)))))) ⟩
+      toℕ (m ↑ʳ (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x))))))
+        ≡⟨ toℕ-↑ʳ m (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x))))) ⟩
       m + toℕ (inject₁ (inject₁ (path-to-fin (var-to-path S (Var x)))))
         ≡⟨ cong (m +_) (toℕ-inject₁ (inject₁ (path-to-fin (var-to-path S (Var x))))) ⟩
       m + toℕ (inject₁ (path-to-fin (var-to-path S (Var x))))
@@ -490,10 +489,10 @@ var-helper-to-fin {n} {m} S T i = begin
       m + toℕ (path-to-fin (var-to-path S (Var x)))
         ≡⟨ cong (m +_) (var-to-path-to-fin S (Var x)) ⟩
       m + toℕ x
-        ≡⟨ cong (m +_) (toℕ-inject+ 2 x) ⟩
-      m + toℕ (inject+ 2 x)
-        ≡˘⟨ toℕ-raise m (inject+ 2 x) ⟩
-      toℕ (raise m (inject+ 2 x)) ∎
+        ≡˘⟨ cong (m +_) (toℕ-↑ˡ x 2) ⟩
+      m + toℕ (x ↑ˡ 2)
+        ≡˘⟨ toℕ-↑ʳ m (x ↑ˡ 2) ⟩
+      toℕ (m ↑ʳ (x ↑ˡ 2)) ∎
     l2 (inj₂ 0F) = begin
       toℕ (cast _ (inject₁ (fromℕ (m + suc n))))
         ≡⟨ toℕ-cast _ (inject₁ (fromℕ (m + suc n))) ⟩
@@ -504,20 +503,20 @@ var-helper-to-fin {n} {m} S T i = begin
       m + suc n
         ≡⟨ cong (m +_) (+-comm 0 (suc n)) ⟩
       m + (suc n + 0)
-        ≡˘⟨ cong (m +_) (toℕ-raise (suc n) 0F) ⟩
-      m + toℕ (suc (raise n 0F))
-        ≡˘⟨ toℕ-raise m (suc (raise n 0F)) ⟩
-      toℕ (raise m (suc (raise n 0F))) ∎
+        ≡˘⟨ cong (m +_) (toℕ-↑ʳ (suc n) 0F) ⟩
+      m + toℕ (suc (n ↑ʳ 0F))
+        ≡˘⟨ toℕ-↑ʳ m (suc (n ↑ʳ 0F)) ⟩
+      toℕ (m ↑ʳ (suc (n ↑ʳ 0F))) ∎
     l2 (inj₂ 1F) = begin
       toℕ (fromℕ (m + suc (suc n)))
         ≡⟨ toℕ-fromℕ (m + suc (suc n)) ⟩
       m + suc (suc n)
         ≡⟨ cong (m +_) (+-comm 1 (suc n)) ⟩
       m + (suc n + 1)
-        ≡˘⟨ cong (m +_) (toℕ-raise (suc n) 1F) ⟩
-      m + toℕ (suc (raise n 1F))
-        ≡˘⟨ toℕ-raise m (suc (raise n 1F)) ⟩
-      toℕ (raise m (suc (raise n 1F))) ∎
+        ≡˘⟨ cong (m +_) (toℕ-↑ʳ (suc n) 1F) ⟩
+      m + toℕ (suc (n ↑ʳ 1F))
+        ≡˘⟨ toℕ-↑ʳ m (suc (n ↑ʳ 1F)) ⟩
+      toℕ (m ↑ʳ (suc (n ↑ʳ 1F))) ∎
 
     l3 : ∀ x → var-to-path T (Var (inject₁ x)) ≡ PHere → toℕ (inject₁ x) ≡ toℕ (fromℕ m)
     l3 x p = begin
@@ -530,22 +529,22 @@ var-helper-to-fin {n} {m} S T i = begin
     lem : ∀ x → toℕ (path-to-fin ([ (λ x → PShift (var-to-path T (Var (inject₁ x)))) , (var-to-path-helper-1 S T) ]′ x)) ≡ toℕ (join _ (suc _ + 2) x)
     lem (inj₁ x) = begin
       toℕ (path-to-fin (PShift (var-to-path T (Var (inject₁ x)))))
-        ≡⟨ cong toℕ (path-to-fin-shift-lem S (var-to-path T (Var (inject₁ x))) λ y → fromℕ≢inject₁ m x (sym (l3 x y))) ⟩
-      toℕ (inject+ (2 + n) (path-to-fin (var-to-path T (Var (inject₁ x)))))
-        ≡˘⟨ toℕ-inject+ (2 + n) (path-to-fin (var-to-path T (Var (inject₁ x)))) ⟩
+        ≡⟨ cong toℕ (path-to-fin-shift-lem S (var-to-path T (Var (inject₁ x))) λ y → fromℕ≢inject₁-toℕ m x (sym (l3 x y))) ⟩
+      toℕ (path-to-fin (var-to-path T (Var (inject₁ x))) ↑ˡ 2 + n)
+        ≡⟨ toℕ-↑ˡ (path-to-fin (var-to-path T (Var (inject₁ x)))) (2 + n) ⟩
       toℕ (path-to-fin (var-to-path T (Var (inject₁ x))))
         ≡⟨ var-to-path-to-fin T (Var (inject₁ x)) ⟩
       toℕ (inject₁ x)
         ≡⟨ toℕ-inject₁ x ⟩
       toℕ x
-        ≡⟨ toℕ-inject+ (suc (n + 2)) x ⟩
-      toℕ (inject+ (suc (n + 2)) x) ∎
+        ≡˘⟨ toℕ-↑ˡ x (suc (n + 2)) ⟩
+      toℕ (x ↑ˡ suc (n + 2)) ∎
     lem (inj₂ y) = begin
       toℕ (path-to-fin ([ (λ x → PExt (var-to-path S (Var x))) , var-to-path-helper-2 S T ]′ (splitAt (suc _) y)))
         ≡⟨ l2 (splitAt (suc _) y) ⟩
-      toℕ (raise m (join (suc (tree-size S)) 2 (splitAt (suc (tree-size S)) y)))
-        ≡⟨ cong toℕ (cong (raise m) (join-splitAt (suc (tree-size S)) 2 y)) ⟩
-      toℕ (raise m y) ∎
+      toℕ (m ↑ʳ (join (suc (tree-size S)) 2 (splitAt (suc (tree-size S)) y)))
+        ≡⟨ cong toℕ (cong (m ↑ʳ_) (join-splitAt (suc (tree-size S)) 2 y)) ⟩
+      toℕ (m ↑ʳ y) ∎
 
 var-to-path-to-fin Sing (Var 0F) = refl
 var-to-path-to-fin (Join S T) t = begin
@@ -571,17 +570,13 @@ last-path-to-term : (T : Tree n) → path-to-term (last-path T) ≃tm tree-last-
 last-path-to-term Sing = refl≃tm
 last-path-to-term (Join S T) = sub-action-≃-tm (last-path-to-term T) refl≃s
 
-is-linear-max-path-max : (S : Tree n) .⦃ _ : is-linear S ⦄ → is-maximal (is-linear-max-path S)
-is-linear-max-path-max Sing = tt
-is-linear-max-path-max (Join S Sing) = is-linear-max-path-max S
-
 not-here-≃ : (P ≃p Q) → .⦃ not-here P ⦄ → not-here Q
 not-here-≃ (Ext≃ p x) = tt
 not-here-≃ (Shift≃ x p) = tt
 
 maximal-≃ : (P ≃p Q) → .⦃ is-maximal P ⦄ → is-maximal Q
 maximal-≃ (Here≃ Sing≃) = tt
-maximal-≃ (Ext≃ p x) = maximal-≃ p
+maximal-≃ (Ext≃ p x) = inst ⦃ maximal-≃ p ⦄
 maximal-≃ (Shift≃ x p) .p₁ = not-here-≃ p
 maximal-≃ (Shift≃ x p) .p₂ = maximal-≃ p
 

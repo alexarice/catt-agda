@@ -210,7 +210,7 @@ pdb-right-base-prefix (Extend pdb p q) x = begin
   < pdb-right-base (Extend pdb p q) >tm
     ≈⟨ right-base-≃ (lift-ty-≃ q) refl≃tm ⟩
   < right-base (lift-ty (lift-ty (focus-ty pdb))) (lift-tm (Var zero)) >tm
-    ≈⟨ right-base-< (<-transˡ x (≤-reflexive (trans (ty-dim-≃ p) (sym (trans (lift-ty-dim (lift-ty (focus-ty pdb))) (lift-ty-dim (focus-ty pdb))))))) ⟩
+    ≈⟨ right-base-< (<-≤-trans x (≤-reflexive (trans (ty-dim-≃ p) (sym (trans (lift-ty-dim (lift-ty (focus-ty pdb))) (lift-ty-dim (focus-ty pdb))))))) ⟩
   < right-base (lift-ty (lift-ty (focus-ty pdb))) (lift-tm (lift-tm (focus-tm pdb))) >tm
     ≈⟨ right-base-lift (lift-ty (focus-ty pdb)) (lift-tm (focus-tm pdb)) ⟩
   < lift-tm (right-base (lift-ty (focus-ty pdb)) (lift-tm (focus-tm pdb))) >tm
@@ -245,7 +245,7 @@ pdb-right-base-0-dim {B = B} {A = A} (Restr (Restr pdb)) x = ⊥-elim (NonZero-�
       ty-dim (ty-base (focus-ty pdb))
         ≡⟨ ty-dim-ty-base (focus-ty pdb) ⟩
       pred (ty-dim (focus-ty pdb))
-        ≤⟨ pred-mono (pdb-dim-lem pdb) ⟩
+        ≤⟨ pred-mono-≤ (pdb-dim-lem pdb) ⟩
       pred (ty-dim A)
         ≡⟨ cong pred (pdb-dim-proj pdb) ⟩
       ty-dim B

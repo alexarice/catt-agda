@@ -1,8 +1,8 @@
 module Catt.Prelude where
 
-open import Data.Nat hiding (NonZero) public
+open import Data.Nat public
 open import Data.Bool using (not;Bool;true;false;_∨_;if_then_else_) renaming (T to Truth) public
-open import Data.Fin using (Fin; zero; suc; inject₁; fromℕ; toℕ; cast; opposite; splitAt; inject+; raise) renaming (_≟_ to _f≟_; _<?_ to _f<?_) public
+open import Data.Fin using (Fin; zero; suc; inject₁; fromℕ; toℕ; cast; opposite; splitAt; _↑ˡ_; _↑ʳ_) renaming (_≟_ to _f≟_; _<?_ to _f<?_) public
 open import Relation.Binary.PropositionalEquality hiding ([_]) public
 open import Data.Product renaming (_,_ to _,,_) hiding (map) public
 open import Relation.Binary.Definitions hiding (Irrelevant) public
@@ -23,15 +23,18 @@ record _×′_ (A : Set) (B : Set) : Set where
 
 open _×′_ public
 
+record WrapInst (A : Set) : Set where
+  constructor inst
+  field
+    ⦃ wrapped ⦄ : A
+
+open WrapInst public
+
 variable
   n n′ m m′ l l′ o d d′ d″ : ℕ
 
 ⊥-elim : ∀ {w} {Whatever : Set w} → .⊥ → Whatever
 ⊥-elim ()
-
-record NonZero (n : ℕ) : Set where
-  field
-    nonZero : Truth (not (n ≡ᵇ 0))
 
 record IsZero (n : ℕ) : Set where
   field
@@ -44,9 +47,6 @@ n ≃n m = Truth (n ≡ᵇ m)
 -- Instances
 
 instance
-  nonZero : ∀ {n} → NonZero (suc n)
-  nonZero = _
-
   isZero : IsZero zero
   isZero = _
 

@@ -27,9 +27,9 @@ linear-non-linear : (T : Tree n)
                   → ⊥
 linear-non-linear (Join T Sing) = linear-non-linear T
 
-tree-dim-n-disc : (n : ℕ) → tree-dim (n-disc n) ≡ n
-tree-dim-n-disc zero = refl
-tree-dim-n-disc (suc n) = cong suc (tree-dim-n-disc n)
+tree-dim-n-disc : (n : ℕ) → tree-dim (n-disc n) ≃n n
+tree-dim-n-disc zero = tt
+tree-dim-n-disc (suc n) = tree-dim-n-disc n
 
 record TREE : Set where
   constructor <_>t
@@ -298,10 +298,6 @@ tree-dim-≃ p with ≃-to-same-n p
 ... | refl with ≃-to-≡ p
 ... | refl = refl
 
-has-linear-height-prop : (d : ℕ) → (T : Tree n) → .⦃ has-linear-height d T ⦄ → d ≤ linear-height T
-has-linear-height-prop zero T = z≤n
-has-linear-height-prop (suc d) (Join T Sing) = s≤s (has-linear-height-prop d T)
-
 linear-linear-height : (T : Tree n) → .⦃ is-linear T ⦄ → linear-height T ≡ tree-dim T
 linear-linear-height Sing = refl
 linear-linear-height (Join T Sing) = cong suc (linear-linear-height T)
@@ -328,3 +324,10 @@ connect-tree-assoc : (S : Tree n)
                    → connect-tree S (connect-tree T U) ≃′ connect-tree (connect-tree S T) U
 connect-tree-assoc Sing T U = refl≃′
 connect-tree-assoc (Join S₁ S₂) T U = Join≃′ refl≃′ (connect-tree-assoc S₂ T U)
+
+susp-tree-n-linear : (n : ℕ)
+                   → (S : Tree m)
+                   → ⦃ is-linear S ⦄
+                   → is-linear (susp-tree-n n S)
+susp-tree-n-linear zero S = it
+susp-tree-n-linear (suc n) S = inst ⦃ susp-tree-n-linear n S ⦄

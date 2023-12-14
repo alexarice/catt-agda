@@ -40,7 +40,7 @@ tree-inc-not-here (suc d) (Join S T) b (PShift Z) = tt
 is-linear-bd : (d : ℕ) → (S : Tree n) → .⦃ is-linear S ⦄ → is-linear (tree-bd d S)
 is-linear-bd zero S = tt
 is-linear-bd (suc d) Sing = tt
-is-linear-bd (suc d) (Join S Sing) = is-linear-bd d S
+is-linear-bd (suc d) (Join S Sing) = inst ⦃ is-linear-bd d S ⦄
 
 connect-tree-bd : (d : ℕ)
                 → (S : Tree n)
@@ -232,4 +232,4 @@ tree-dim-bd″ d T = ≤-trans (≤-reflexive (tree-dim-bd d T)) (m⊓n≤m d (t
 
 bd-linear-height : (d : ℕ) → (T : Tree n) → .(d ≤ linear-height T) → is-linear (tree-bd d T)
 bd-linear-height zero T p = tt
-bd-linear-height (suc d) (Join T Sing) p = bd-linear-height d T (≤-pred p)
+bd-linear-height (suc d) (Join T Sing) p = inst ⦃ bd-linear-height d T (≤-pred p) ⦄

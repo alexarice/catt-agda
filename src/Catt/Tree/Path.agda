@@ -31,10 +31,10 @@ path-to-term (PShift P) = path-to-term P [ connect-susp-inc-right _ _ ]tm
 
 path-to-fin : {T : Tree n} → (P : Path T) → Fin (suc n)
 path-to-fin PHere = fromℕ _
-path-to-fin {T = Join {n} {m} S T} (PExt P) = cast (+-suc m (suc (suc n))) (raise m (inject₁ (inject₁ (path-to-fin P))))
+path-to-fin {T = Join {n} {m} S T} (PExt P) = cast (+-suc m (suc (suc n))) (m ↑ʳ (inject₁ (inject₁ (path-to-fin P))))
 path-to-fin {T = Join {n} {m} S T} (PShift PHere) = cast (cong suc (sym (+-suc m (suc n)))) (inject₁ (fromℕ _))
-path-to-fin {T = Join {n} {m} S T} (PShift P@(PExt _)) = inject+ (2 + n) (path-to-fin P)
-path-to-fin {T = Join {n} S T} (PShift P@(PShift _)) = inject+ (2 + n) (path-to-fin P)
+path-to-fin {T = Join {n} {m} S T} (PShift P@(PExt _)) = path-to-fin P ↑ˡ 2 + n
+path-to-fin {T = Join {n} S T} (PShift P@(PShift _)) = path-to-fin P ↑ˡ 2 + n
 
 var-to-path : (T : Tree n) → (t : Tm (suc n)) → .⦃ isVar t ⦄ → Path T
 var-to-path-helper : (S : Tree n) → (T : Tree m) → Fin (m + ((suc n) + 2)) → Path (Join S T)
@@ -73,22 +73,20 @@ not-here (PShift P) = ⊤
 is-maximal : Path S → Set
 is-maximal {S = Sing} PHere = ⊤
 is-maximal {S = Join S T} PHere = ⊥
-is-maximal (PExt P) = is-maximal P
+is-maximal (PExt P) = WrapInst (is-maximal P)
 is-maximal (PShift P) = not-here P ×′ is-maximal P
-
--- record Is-Maximal (P : Path S) : Set where
---   inductive
---   field
---     ⦃ g ⦄ : is-maximal P
-
--- open Is-Maximal
 
 is-linear-max-path : (T : Tree n) → .⦃ is-linear T ⦄ → Path T
 is-linear-max-path Sing = PHere
 is-linear-max-path (Join S Sing) = PExt (is-linear-max-path S)
 
+instance
+  is-linear-max-path-max : {S : Tree n} → .⦃ _ : is-linear S ⦄ → is-maximal (is-linear-max-path S)
+  is-linear-max-path-max {S = Sing} = tt
+  is-linear-max-path-max {S = Join S Sing} = inst
+
 disc-path : (n : ℕ) → Path (n-disc n)
-disc-path n = is-linear-max-path (n-disc n) ⦃ n-disc-is-linear n ⦄
+disc-path n = is-linear-max-path (n-disc n)
 
 ppath-≃ : S ≃′ T → Path S → Path T
 ppath-≃ Refl≃′ P = P

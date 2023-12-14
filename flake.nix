@@ -15,7 +15,6 @@
         cabal-install
         haskell-language-server
         haskellPackages.fix-whitespace
-        (agdaPackages-2_6_3.agda2hs.withPackages (p: [ p.standard-library ]))
         (agda-2_6_3.withPackages (p: [ p.standard-library ]))
       ];
     };

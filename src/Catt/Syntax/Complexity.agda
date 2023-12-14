@@ -48,17 +48,21 @@ StrictPartialOrder._<_ Ord-Order = _<ᵒ_
 StrictPartialOrder.isStrictPartialOrder Ord-Order = Ord-is-order
 
 Ord-wf : WellFounded _<ᵒ_
-Ord-wf [] = acc λ where y ()
-Ord-wf (x ∷ xs) = Some.wfRec (λ ys → (y : ℕ) → Acc _<ᵒ_ (y ∷ ys)) (λ ys rec → I.<-rec (λ z → Acc _<ᵒ_ (z ∷ ys)) λ y rec₂ → acc (f ys rec y rec₂)) xs (Ord-wf xs) x
+Ord-wf [] = acc λ where ()
+Ord-wf (x ∷ xs) = Some.wfRec (λ ys → (y : ℕ) → Acc _<ᵒ_ (y ∷ ys))
+                             (λ ys rec → I.<-rec (λ z → Acc _<ᵒ_ (z ∷ ys)) λ x rec₂ → acc (f ys rec x rec₂))
+                             xs
+                             (Ord-wf xs)
+                             x
   where
     f : (ys : Ordinal)
-      → ((zs : Ordinal) → zs <ᵒ ys → (z : ℕ) → Acc _<ᵒ_ (z ∷ zs))
+      → ({zs : Ordinal} → zs <ᵒ ys → (z : ℕ) → Acc _<ᵒ_ (z ∷ zs))
       → (y : ℕ)
-      → ((z : ℕ) → (z < y) → Acc _<ᵒ_ (z ∷ ys))
-      → (zs : Ordinal) → zs <ᵒ y ∷ ys → Acc _<ᵒ_ zs
-    f ys rec y rec₂ .[] EmpO = Ord-wf []
-    f ys rec y rec₂ .(_ ∷ _) (HigherO p) = rec _ p _
-    f ys rec y rec₂ .(_ ∷ ys) (HereO x refl) = rec₂ _ x
+      → ({z : ℕ} → (z < y) → Acc _<ᵒ_ (z ∷ ys))
+      → {zs : Ordinal} → zs <ᵒ y ∷ ys → Acc _<ᵒ_ zs
+    f ys rec y rec₂ EmpO = Ord-wf []
+    f ys rec y rec₂ (HigherO p) = rec p _
+    f ys rec y rec₂ (HereO x refl) = rec₂ x
 
 
 infixl 6 _♯_

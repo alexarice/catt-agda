@@ -38,13 +38,6 @@ interior-label-Ty (Join S₁ S₂) (BPExt p) T
            (TySing (TySShift (TySPath PHere)))
 interior-label-Ty (Join S₁ S₂) (BPShift p) T = map-shift-Ty (interior-label-Ty S₂ p T)
 
--- interior-sub-Ty : (S : Tree n)
---                 → (p : BranchingPoint S d)
---                 → (T : Tree m)
---                 → .⦃ _ : has-linear-height (bp-height p) T ⦄
---                 → Typing-Sub (tree-to-ctx T) (tree-to-ctx (insertion-tree S p T)) (interior-sub S p T)
--- interior-sub-Ty S p T = label-to-sub-Ty (interior-sub-label-Ty S p T) TySStar
-
 exterior-label-Ty : (S : Tree n)
                   → (p : BranchingPoint S d)
                   → (T : Tree m)
@@ -54,13 +47,12 @@ exterior-label-Ty : (S : Tree n)
                   → ⦃ 1-Full As ⦄
                   → Typing-Label (tree-to-ctx (insertion-tree S p T)) (exterior-label S p T As ,, S⋆)
 exterior-label-Ty (Join S₁ S₂) BPHere T {As} AsTy
-  = label-between-connect-trees-Ty (label-comp-Ty (cast-to-disc-Ty (susp-tree S₁))
-                                                  (term-to-label-Ty (TySConv (TySCoh T AsTy (id-label-Ty T) TySStar)
-                                                                             (reflexive≈sty (>>=′-id As)))
-                                                                    AsTy)
-                                                  TySStar)
+  = label-between-connect-trees-Ty (term-to-label-Ty (susp-tree S₁)
+                                                     (TySConv (TySCoh T AsTy (id-label-Ty T) TySStar)
+                                                              (reflexive≈sty (>>=′-id As)))
+                                                     AsTy)
                                    (id-label-Ty S₂)
-                                   (reflexive≈stm (term-to-label-1-Full-tgt (SCoh T As (id-label-wt T)) As))
+                                   (reflexive≈stm (term-to-label-1-Full-tgt (susp-tree S₁) (SCoh T As (id-label-wt T)) As))
                                    refl≈stm
 exterior-label-Ty (Join S₁ S₂) (BPExt p) T AsTy
   = label-between-joins-Ty (exterior-label-Ty S₁ p T AsTy)
@@ -70,14 +62,6 @@ exterior-label-Ty (Join S₁ S₂) (BPShift p) T {As} AsTy
   = label-between-joins-Ty (id-label-Ty S₁)
                            (exterior-label-Ty S₂ p T AsTy)
                            (reflexive≈stm (exterior-label-phere S₂ p T As) )
-
--- exterior-sub-Ty : (S : Tree n)
---                 → (p : BranchingPoint S d)
---                 → (T : Tree m)
---                 → .⦃ _ : has-linear-height (bp-height p) T ⦄
---                 → (height-of-branching p ≥ tree-dim T)
---                 → Typing-Sub (tree-to-ctx S) (tree-to-ctx (insertion-tree S p T)) (exterior-sub S p T)
--- exterior-sub-Ty S p T q = label-to-sub-Ty (exterior-sub-label-Ty S p T q) TySStar
 
 label-from-insertion-lem : (S₁ : Tree n)
                          → (S₂ : Tree m)
@@ -130,7 +114,7 @@ label-from-insertion-phere (Join S₁ S₂) BPHere T L M As p = begin
     open Reasoning stm-setoid-≈
 
     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, _) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, _)
-    lem = label-from-insertion-lem S₁ S₂ T (disc-type′ S₁) zero L M As p
+    lem = label-from-insertion-lem S₁ S₂ T (disc-type S₁) zero L M As p
 label-from-insertion-phere (Join S₁ S₂) (BPExt P) T L M As p = sym≈stm (≈SArr-proj₁ lem)
   where
     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, _) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path (susp-tree-n _ T))) >>=′ (M ,, _)
@@ -152,7 +136,7 @@ label-from-insertion-Ty {As = As} (Join S₁ S₂) BPHere T {L} (TyJoin x Lty Lt
   = connect-label-Ty Mty Lty′ (sym≈stm (≈SArr-proj₃ lem))
   where
     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, As) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, As)
-    lem = label-from-insertion-lem S₁ S₂ T (disc-type′ S₁) zero L M Bs p
+    lem = label-from-insertion-lem S₁ S₂ T (disc-type S₁) zero L M Bs p
 label-from-insertion-Ty {As = As} (Join S₁ S₂) (BPExt P) T {L} (TyJoin x LTy LTy′) {M} (TyJoin y MTy (TySing z)) Bs p
   = TyJoin y (label-from-insertion-Ty S₁ P T (label-typing-conv LTy lem) MTy Bs lem2) (replace-label-Ty LTy′ z (≈SArr-proj₃ lem))
   where
@@ -213,7 +197,7 @@ label-from-insertion-eq (Join S₁ S₂) BPHere T L M Bs p
                                      (trans≈stm (≈SArr-proj₁ lem) (connect-label′-phere M (L ∘ PShift) (sym≈stm (≈SArr-proj₃ lem))))))
   where
     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, _) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, _)
-    lem = label-from-insertion-lem S₁ S₂ T (disc-type′ S₁) zero L M Bs p
+    lem = label-from-insertion-lem S₁ S₂ T (disc-type S₁) zero L M Bs p
 label-from-insertion-eq {As = As} (Join S₁ S₂) (BPExt P) T L M Bs p = γ
   where
     lem : (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
@@ -262,33 +246,6 @@ label-from-insertion-eq {As = As} (Join S₁ S₂) (BPShift P) T L M Bs p .get (
       map-sty-shift (branching-path-to-type S₂ P) >>=′ (L ,, As)
         ≈⟨ p ⟩
       map-sty-ext-n _ Bs >>=′ (M ,, As) ∎
-
--- label-from-insertion′-Ty : (S : Tree n)
---                          → (P : BranchingPoint S l)
---                          → (T : Tree m)
---                          → {L : Label X S}
---                          → Typing-Label Γ (L ,, As)
---                          → {M : Label X (susp-tree-n l T)}
---                          → Typing-Label Γ (M ,, As)
---                          → (Bs : STy (someTree T))
---                          → ⦃ 1-Full Bs ⦄
---                          → branching-path-to-type S P >>=′ (L ,, As) ≈[ Γ ]sty map-sty-ext-n l Bs >>=′ (M ,, As)
---                          → Typing-Label Γ (label-from-insertion′ S P T L M ,, As)
--- label-from-insertion′-Ty {As = As} (Join S₁ S₂) BPHere T {L} (TyJoin x LTy LTy′) {M} MTy Bs p
---   = replace-label-Ty (connect-label′-Ty MTy LTy′ (≈SArr-proj₃ lem))
---                      x
---                      (trans≈stm (sym≈stm (connect-label′-phere M (L ∘ PShift) (≈SArr-proj₃ lem))) (≈SArr-proj₁ lem))
---   where
---     lem : SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, As) ≈[ _ ]sty SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, As)
---     lem = sym≈sty (label-from-insertion-lem S₁ S₂ T (disc-type′ S₁) zero L M Bs p)
-
--- label-from-insertion′-Ty (Join S₁ S₂) (BPExt P) T {L} (TyJoin x LTy LTy′) {M} (TyJoin y MTy (TySing z)) Bs p
---   = TyJoin x (label-from-insertion′-Ty S₁ P T LTy (label-typing-conv MTy {!!}) Bs {!!}) {!!}
--- label-from-insertion′-Ty (Join S₁ S₂) (BPShift P) T LTy MTy Bs p = {!!}
-
-
-
-
 
 {-
 branching-path-to-var-height : (S : Tree n)

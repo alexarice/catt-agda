@@ -17,9 +17,6 @@ module Reasoning = Relation.Binary.Reasoning.Setoid
 module PReasoning = Relation.Binary.Reasoning.PartialOrder
 module SPReasoning = Relation.Binary.Reasoning.StrictPartialOrder
 
-suc-pred : (n : ℕ) → .⦃ NonZero n ⦄ → suc (pred n) ≡ n
-suc-pred (suc n) = refl
-
 suc-pred-≤ : (n : ℕ) → n ≤ suc (pred n)
 suc-pred-≤ zero = z≤n
 suc-pred-≤ (suc n) = ≤-refl
@@ -93,6 +90,12 @@ if-lem true = refl
 if-lem-const : {A : Set} → (b : Bool) → (x : A) → (if b then x else x) ≡ x
 if-lem-const false x = refl
 if-lem-const true x = refl
+
+≃n-to-≡ : n ≃n m → n ≡ m
+≃n-to-≡ = ≡ᵇ⇒≡ _ _
+
+≡-to-≃n : n ≡ m → n ≃n m
+≡-to-≃n = ≡⇒≡ᵇ _ _
 
 -- ≤t-refl : n ≤t n
 -- ≤t-refl {zero} = tt

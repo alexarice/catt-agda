@@ -137,40 +137,27 @@ sty-≃ p (SArr s A t) = SArr (stm-≃ p s) (sty-≃ p A) (stm-≃ p t)
 
 ≃-label-wt p L = (≃-label p (ap L)) ,, (sty-≃ p (lty L))
 
-disc-type′ : (S : Tree n) → .⦃ is-linear S ⦄ → STy (someTree S)
-disc-type′ Sing = S⋆
-disc-type′ (Join S Sing) = map-sty-ext (disc-type′ S)
+disc-type : (S : Tree n) → .⦃ is-linear S ⦄ → STy (someTree S)
+disc-type Sing = S⋆
+disc-type (Join S Sing) = map-sty-ext (disc-type S)
 
-disc-type : (n : ℕ) → STy (someTree (n-disc n))
-disc-type n = disc-type′ (n-disc n) ⦃ n-disc-is-linear n ⦄
+extend-disc-label : Label X S
+                  → .⦃ is-linear S ⦄
+                  → (t : STm X)
+                  → (a : STm X)
+                  → Label X (susp-tree S)
+extend-disc-label {S = Sing} L t a PHere = L PHere
+extend-disc-label {S = Sing} L t a (PExt PHere) = a
+extend-disc-label {S = Sing} L t a (PShift PHere) = t
+extend-disc-label {S = Join S Sing} L t a PHere = L PHere
+extend-disc-label {S = Join S Sing} L t a (PExt P) = extend-disc-label (L ∘ PExt) t a P
+extend-disc-label {S = Join S Sing} L t a (PShift PHere) = L (PShift PHere)
 
-extend-disc-label : Label X (n-disc n) → (t : STm X) → (a : STm X) → Label X (n-disc (1 + n))
-extend-disc-label {n = zero} L t a PHere = L PHere
-extend-disc-label {n = zero} L t a (PExt P) = a
-extend-disc-label {n = zero} L t a (PShift PHere) = t
-extend-disc-label {n = suc n} L t a PHere = L PHere
-extend-disc-label {n = suc n} L t a (PExt P) = extend-disc-label (L ∘ PExt) t a P
-extend-disc-label {n = suc n} L t a (PShift PHere) = L (PShift PHere)
-
-term-to-label : (a : STm X) → (As : STy X) → Label X (n-disc (sty-dim As))
-term-to-label a S⋆ x = a
-term-to-label a (SArr s As t) = extend-disc-label (term-to-label s As) t a
-
-cast-to-disc : (S : Tree n) → .⦃ is-linear S ⦄ → .⦃ tree-dim S ≃n m ⦄ → Label′ (n-disc m) S
-cast-to-disc Sing PHere = PHere
-cast-to-disc (Join S Sing) PHere = PHere
-cast-to-disc {m = suc m} (Join S Sing) (PExt P) = PExt (cast-to-disc S P)
-cast-to-disc (Join S Sing) (PShift PHere) = last-path (n-disc _)
-
--- label-from-linear-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (a : STm X) → (As : STy X) → .(tree-dim S ≤ sty-dim As) → Label X S
--- label-from-linear-tree-nz : (n : ℕ) → (As : STy X) → .(suc n ≤ sty-dim As) → NonZero (sty-dim (truncate-sty′ n As))
-
--- label-from-linear-tree Sing a As p P = a
--- label-from-linear-tree (Join S Sing) a As p = unrestrict-label (label-from-linear-tree S a As (≤-step′ p) ,, truncate-sty′ (tree-dim S) As) ⦃ label-from-linear-tree-nz (tree-dim S) As p ⦄
-
--- sty-base-dim-prop : (As : STy X) → sty-dim As ≤ suc (sty-dim (sty-base As))
--- sty-base-dim-prop S⋆ = z≤n
--- sty-base-dim-prop (SArr s As t) = ≤-refl
-
--- label-from-linear-tree-nz zero As p = NonZero-≤ p it
--- label-from-linear-tree-nz (suc n) As p = label-from-linear-tree-nz n (sty-base As) (≤-pred (≤-trans p (sty-base-dim-prop As)))
+term-to-label : (S : Tree n)
+              → .⦃ is-linear S ⦄
+              → (a : STm X)
+              → (As : STy X)
+              → .⦃ tree-dim S ≃n sty-dim As ⦄
+              → Label X S
+term-to-label Sing a As P = a
+term-to-label (Join S Sing) a (SArr s As t) = extend-disc-label (term-to-label S s As) t a

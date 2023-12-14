@@ -307,15 +307,18 @@ label-max-equality-to-equality : {L M : Label-WT X S} → ap L ≃lm ap M → Ty
 label-max-equality-to-type-equality : {L M : Label-WT X S} → ap L ≃lm ap M → Typing-Label Γ L → Typing-Label Γ M → lty L ≈[ Γ ]sty lty M
 
 label-max-equality-to-equality {S = Sing} [ p ] Lty Mty .get PHere = reflexive≈stm (p PHere)
-label-max-equality-to-equality {S = Join S T} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) .get PHere with label-max-equality-to-type-equality [ p ∘ PExt ] Lty Mty
-... | a = sty-src-≈ a
-label-max-equality-to-equality {S = Join S T} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) .get (PExt P) = label-max-equality-to-equality [ p ∘ PExt ] Lty Mty .get P
-label-max-equality-to-equality {S = Join S Sing} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) .get (PShift PHere) with label-max-equality-to-type-equality [ p ∘ PExt ] Lty Mty
-... | a = sty-tgt-≈ a
-label-max-equality-to-equality {S = Join S T@(Join _ _)} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) .get (PShift P) = label-max-equality-to-equality [ (λ Q → p (PShift Q) ⦃ build ⦃ maximal-join-not-here Q ⦄ ⦃ it ⦄ ⦄) ] Lty′ Mty′ .get P
+label-max-equality-to-equality {S = Join S T} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) .get PHere
+  = sty-src-≈ (label-max-equality-to-type-equality [ (λ Q → p (PExt Q) ⦃ inst ⦄) ] Lty Mty)
+label-max-equality-to-equality {S = Join S T} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) .get (PExt P)
+  = label-max-equality-to-equality [ (λ Q → p (PExt Q) ⦃ inst ⦄) ] Lty Mty .get P
+label-max-equality-to-equality {S = Join S Sing} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) .get (PShift PHere)
+  = sty-tgt-≈ (label-max-equality-to-type-equality [ (λ Q → p (PExt Q) ⦃ inst ⦄) ] Lty Mty)
+label-max-equality-to-equality {S = Join S T@(Join _ _)} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) .get (PShift P)
+  = label-max-equality-to-equality [ (λ Q → p (PShift Q) ⦃ build ⦃ maximal-join-not-here Q ⦄ ⦄) ] Lty′ Mty′ .get P
 
 label-max-equality-to-type-equality {S = Sing} [ p ] (TySing x) (TySing y) = [ (Ty-unique-≃ (p PHere .get) (x .get) (y .get)) ]
-label-max-equality-to-type-equality {S = Join S T} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′) = sty-base-≈ (label-max-equality-to-type-equality [ p ∘ PExt ] Lty Mty)
+label-max-equality-to-type-equality {S = Join S T} [ p ] (TyJoin x Lty Lty′) (TyJoin y Mty Mty′)
+  = sty-base-≈ (label-max-equality-to-type-equality [ (λ Q → p (PExt Q) ⦃ inst ⦄) ] Lty Mty)
 
 label-≃-Ty : (p : S ≃′ T) → {L : Label-WT X T} → Typing-Label Γ L → Typing-Label Γ (label-wt-≃ p L)
 label-≃-Ty Refl≃′ LTy = LTy
@@ -341,13 +344,3 @@ SCoh-typing-prop {S = S} {Γ = Γ} {As = As} {L = L} [ tty ] .get = begin
   sty-to-type _ ∎
   where
     open Reasoning (ty-setoid-≈ _)
-
-cast-to-disc-Ty : (S : Tree n)
-                → .⦃ _ : is-linear S ⦄
-                → .⦃ _ : tree-dim S ≃n m ⦄
-                → Typing-Label (tree-to-ctx (n-disc m)) (SPath ∘ cast-to-disc S ,, S⋆)
-cast-to-disc-Ty Sing = TySing (TySPath PHere)
-cast-to-disc-Ty {m = suc m} (Join S Sing)
-  = TyJoin (TySPath PHere)
-           (transport-label-typing (map-ext-Ty (cast-to-disc-Ty S)) [ (λ P → compute-≃ refl≃stm) ] (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm)))
-           (TySing (TySPath (PShift PHere)))

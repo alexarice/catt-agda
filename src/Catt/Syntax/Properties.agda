@@ -449,6 +449,9 @@ id-on-tm (Var i) = lem i
     lem {m = suc m} (suc i) = trans≃tm (apply-lifted-sub-tm-≃ (Var i) idSub) (lift-tm-≃ (lem i))
 id-on-tm (Coh Δ A σ) = Coh≃ refl≃c refl≃ty (id-left-unit σ)
 
+idSub-≃ : (n ≡ m) → idSub {n = n} ≃s idSub {n = m}
+idSub-≃ refl = refl≃s
+
 susp-sub-preserve-get-fst : (σ : Sub n m ⋆) → get-fst {n = m} ≃tm get-fst [ susp-sub σ ]tm
 susp-sub-preserve-get-fst ⟨⟩ = refl≃tm
 susp-sub-preserve-get-fst ⟨ σ , t ⟩ = susp-sub-preserve-get-fst σ
@@ -618,3 +621,49 @@ apply-replaceSub-lift-ty A ⟨ σ , s ⟩ t = begin
   < lift-ty A [ ⟨ σ , s ⟩ ]ty >ty ∎
   where
     open Reasoning ty-setoid
+
+susp-ty-is-not-⋆ : susp-ty A ≃ty (⋆ {n = n}) → ⊥
+susp-ty-is-not-⋆ {A = ⋆} ()
+susp-ty-is-not-⋆ {A = s ─⟨ A ⟩⟶ t} ()
+
+susp-tm-proj : susp-tm s ≃tm susp-tm t → s ≃tm t
+susp-ty-proj : susp-ty A ≃ty susp-ty B → A ≃ty B
+susp-ctx-proj : susp-ctx Γ ≃c susp-ctx Δ → Γ ≃c Δ
+susp-sub-proj : susp-sub σ ≃s susp-sub τ → σ ≃s τ
+
+susp-tm-proj {s = Var i} {t = Var j} (Var≃ p q) = Var≃ (cong (_∸ 2) p) (begin
+  toℕ i
+    ≡˘⟨ toℕ-inject₁ i ⟩
+  toℕ (inject₁ i)
+    ≡˘⟨ toℕ-inject₁ (inject₁ i) ⟩
+  toℕ (inject₁ (inject₁ i))
+    ≡⟨ q ⟩
+  toℕ (inject₁ (inject₁ j))
+    ≡⟨ toℕ-inject₁ (inject₁ j) ⟩
+  toℕ (inject₁ j)
+    ≡⟨ toℕ-inject₁ j ⟩
+  toℕ j ∎)
+  where
+    open ≡-Reasoning
+susp-tm-proj {s = Coh Γ A σ} {t = Coh Δ B τ} (Coh≃ p q r)
+  = Coh≃ (susp-ctx-proj p) (susp-ty-proj q) (susp-sub-proj r)
+
+susp-ty-proj {A = ⋆} {B = ⋆} (Arr≃ _ (Star≃ x) _) = Star≃ (cong (_∸ 2) x)
+susp-ty-proj {A = ⋆} {B = s ─⟨ B ⟩⟶ t} (Arr≃ _ p _) = ⊥-elim (susp-ty-is-not-⋆ (sym≃ty p))
+susp-ty-proj {A = s ─⟨ A ⟩⟶ t} {B = ⋆} (Arr≃ _ p _) = ⊥-elim (susp-ty-is-not-⋆ p)
+susp-ty-proj {A = s ─⟨ A ⟩⟶ t} {B = s′ ─⟨ B ⟩⟶ t′} (Arr≃ p q r)
+  = Arr≃ (susp-tm-proj p) (susp-ty-proj q) (susp-tm-proj r)
+
+susp-ctx-proj {Γ = ∅} {Δ = ∅} p = Emp≃
+susp-ctx-proj {Γ = ∅} {Δ = ∅ , _} (Add≃ (Add≃ () _) _)
+susp-ctx-proj {Γ = ∅} {Δ = Δ , _ , _} (Add≃ (Add≃ () _) _)
+susp-ctx-proj {Γ = Γ , A} {Δ = Δ , B} (Add≃ p q) = Add≃ (susp-ctx-proj p) (susp-ty-proj q)
+susp-ctx-proj {Γ = ∅ , _} {Δ = ∅} (Add≃ (Add≃ () _) _)
+susp-ctx-proj {Γ = Γ , _ , _} {Δ = ∅} (Add≃ (Add≃ () _) _)
+
+susp-sub-proj {σ = ⟨⟩} {τ = ⟨⟩} (Ext≃ (Ext≃ (Null≃ (Star≃ x)) _) _) = Null≃ (Star≃ (cong (_∸ 2) x))
+susp-sub-proj {σ = ⟨⟩} {τ = ⟨ ⟨⟩ , _ ⟩} (Ext≃ (Ext≃ () _) _)
+susp-sub-proj {σ = ⟨⟩} {τ = ⟨ ⟨ τ , _ ⟩ , _ ⟩} (Ext≃ (Ext≃ () _) _)
+susp-sub-proj {σ = ⟨ σ , t ⟩} {τ = ⟨ τ , t₁ ⟩} (Ext≃ p q) = Ext≃ (susp-sub-proj p) (susp-tm-proj q)
+susp-sub-proj {σ = ⟨ ⟨⟩ , _ ⟩} {τ = ⟨⟩} (Ext≃ (Ext≃ () _) _)
+susp-sub-proj {σ = ⟨ ⟨ σ , _ ⟩ , _ ⟩} {τ = ⟨⟩} (Ext≃ (Ext≃ () _) _)

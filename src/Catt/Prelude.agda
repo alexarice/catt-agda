@@ -42,7 +42,10 @@ record IsZero (n : ℕ) : Set where
 
 infix 4 _≃n_
 _≃n_ : ℕ → ℕ → Set
-n ≃n m = Truth (n ≡ᵇ m)
+zero ≃n zero = ⊤
+zero ≃n suc m = ⊥
+suc n ≃n zero = ⊥
+suc n ≃n suc m = WrapInst (n ≃n m)
 
 -- Instances
 

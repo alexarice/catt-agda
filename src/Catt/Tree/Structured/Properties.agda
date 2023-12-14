@@ -87,6 +87,15 @@ sty-setoid = record { Carrier = STY
 SArr≃ : {A : STy X} → {B : STy Y} → (a ≃stm a′) → A ≃sty B → b ≃stm b′ → SArr a A b ≃sty SArr a′ B b′
 SArr≃ [ p ] [ q ] [ r ] = [ Arr≃ p q r ]
 
+SArr≃-proj₁ : SArr a As b ≃sty SArr a′ Bs b′ → a ≃stm a′
+SArr≃-proj₁ [ Arr≃ p _ _ ] = [ p ]
+
+SArr≃-proj₂ : SArr a As b ≃sty SArr a′ Bs b′ → As ≃sty Bs
+SArr≃-proj₂ [ Arr≃ _ p _ ] = [ p ]
+
+SArr≃-proj₃ : SArr a As b ≃sty SArr a′ Bs b′ → b ≃stm b′
+SArr≃-proj₃ [ Arr≃ _ _ p ] = [ p ]
+
 S⋆-≃ : S ≃ T → S⋆ {X = someTree S} ≃sty S⋆ {X = someTree T}
 S⋆-≃ p = [ (Star≃ (cong suc (≃-to-same-n p))) ]
 
@@ -139,7 +148,7 @@ label-to-sub-≃ {S = Join S T} L M [ p ] q
                        (label-to-sub-≃ (label₂ L) (label₂ M) ([ (λ P → p (PShift P)) ]) q)
 
 SCoh≃ : (S : Tree n) → {A A′ : STy (someTree S)} → A ≃sty A′ → {L : Label-WT X S} → {M : Label-WT Y S} → ap L ≃l ap M → lty L ≃sty lty M → SCoh S A L ≃stm SCoh S A′ M
-SCoh≃ S p q r .get = sub-action-≃-tm (Coh≃ refl≃c (p .get) refl≃s) (label-to-sub-≃ _ _ q r) -- [ Coh≃ refl≃c (p .get) (label-to-sub-≃ q r) ]
+SCoh≃ S p q r .get = sub-action-≃-tm (Coh≃ refl≃c (p .get) refl≃s) (label-to-sub-≃ _ _ q r)
 
 to-sty-to-type : (A : Ty n) → sty-to-type (to-sty A) ≃ty A
 to-sty-to-type ⋆ = refl≃ty
@@ -588,6 +597,9 @@ _≃lm_ {S = S} L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-maximal Q �
 refl≃lm : L ≃lm L
 refl≃lm = [ (λ Q → refl≃stm ) ]
 
+sym≃lm : L ≃lm M → M ≃lm L
+sym≃lm p .get Z = sym≃stm (p .get Z)
+
 ≃l-to-≃lm : L ≃l M → L ≃lm M
 ≃l-to-≃lm p .get Z = p .get Z
 
@@ -885,3 +897,27 @@ label-to-other-prop L .get P = stm-to-other-prop (L P)
 1-Full S⋆ = ⊥
 1-Full {T = T} (SArr s S⋆ t) = s ≃stm (SHere {S = T}) × t ≃stm SPath (last-path T)
 1-Full (SArr s As@(SArr _ _ _) t) = 1-Full As
+
+SExt-proj : SExt {T = Sing} a ≃stm SExt {T = Sing} b → a ≃stm b
+SExt-proj {a = a} {b = b} [ p ] = [ (susp-tm-proj lem) ]
+  where
+    lem : susp-tm (stm-to-term a) ≃tm susp-tm (stm-to-term b)
+    lem = begin
+      < susp-tm (stm-to-term a) >tm
+        ≈˘⟨ id-on-tm (susp-tm (stm-to-term a)) ⟩
+      < susp-tm (stm-to-term a) [ idSub ]tm >tm
+        ≈⟨ p ⟩
+      < susp-tm (stm-to-term b) [ idSub ]tm >tm
+        ≈⟨ id-on-tm (susp-tm (stm-to-term b)) ⟩
+      < susp-tm (stm-to-term b) >tm ∎
+      where
+        open Reasoning tm-setoid
+
+map-sty-ext-proj : {As Bs : STy (someTree S)} → map-sty-ext {T = Sing} As ≃sty map-sty-ext {T = Sing} Bs → As ≃sty Bs
+map-sty-ext-proj {As = S⋆} {Bs = S⋆} p = refl≃sty
+map-sty-ext-proj {As = S⋆} {Bs = SArr _ S⋆ _} [ Arr≃ _ () _ ]
+map-sty-ext-proj {As = S⋆} {Bs = SArr _ (SArr _ _ _) _} [ Arr≃ _ () _ ]
+map-sty-ext-proj {As = SArr s As t} {Bs = SArr s₁ Bs t₁} p
+  = SArr≃ (SExt-proj (SArr≃-proj₁ p)) (map-sty-ext-proj (SArr≃-proj₂ p)) (SExt-proj (SArr≃-proj₃ p))
+map-sty-ext-proj {As = SArr _ S⋆ _} {Bs = S⋆} [ Arr≃ _ () _ ]
+map-sty-ext-proj {As = SArr _ (SArr _ _ _) _} {Bs = S⋆} [ Arr≃ _ () _ ]

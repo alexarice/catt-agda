@@ -27,7 +27,19 @@ suc-pred-≤ (suc n) = ≤-refl
 
 ≤-from-≃n : n ≃n m → n ≤ m
 ≤-from-≃n {n = zero} p = z≤n
-≤-from-≃n {n = suc n} {m = suc m} p = s≤s (≤-from-≃n p)
+≤-from-≃n {n = suc n} {m = suc m} p = s≤s (≤-from-≃n it)
+
+refl≃n : n ≃n n
+refl≃n {n = zero} = tt
+refl≃n {n = suc n} = inst ⦃ refl≃n ⦄
+
+sym≃n : n ≃n m → m ≃n n
+sym≃n {n = zero} {m = zero} p = tt
+sym≃n {n = suc n} {m = suc m} p = inst ⦃ sym≃n it ⦄ -- inst ⦃ sym≃n p ⦄
+
+trans≃n : n ≃n m → m ≃n o → n ≃n o
+trans≃n {n = zero} {m = zero} {o = zero} p q = tt
+trans≃n {n = suc n} {m = suc m} {o = suc o} p q = inst ⦃ trans≃n it it ⦄
 
 extract-is-zero : (n : ℕ) → .⦃ IsZero n ⦄ → n ≡ 0
 extract-is-zero zero = refl
@@ -92,10 +104,11 @@ if-lem-const false x = refl
 if-lem-const true x = refl
 
 ≃n-to-≡ : n ≃n m → n ≡ m
-≃n-to-≡ = ≡ᵇ⇒≡ _ _
+≃n-to-≡ {n = zero} {m = zero} p = refl
+≃n-to-≡ {n = suc n} {m = suc m} p = cong suc (≃n-to-≡ it)
 
 ≡-to-≃n : n ≡ m → n ≃n m
-≡-to-≃n = ≡⇒≡ᵇ _ _
+≡-to-≃n refl = refl≃n
 
 -- ≤t-refl : n ≤t n
 -- ≤t-refl {zero} = tt

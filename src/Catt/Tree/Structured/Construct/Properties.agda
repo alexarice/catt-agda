@@ -458,3 +458,39 @@ term-to-label-to-sub (Join S Sing) a (SArr s As t) = begin
   < ⟨ ⟨ sub-from-disc (sty-dim As) (sty-to-type As) _ (stm-to-term s) , stm-to-term t ⟩ , stm-to-term a ⟩ >s ∎
   where
     open Reasoning sub-setoid
+
+sty-to-coh-≃ : {As : STy (someTree S)} → {Bs : STy (someTree T)} → S ≃ T → As ≃sty Bs → sty-to-coh As ≃stm sty-to-coh Bs
+sty-to-coh-≃ {S = S} {T = T} p [ q ] = [ (Coh≃ (tree-to-ctx-≃ p) q lem) ]
+  where
+    lem : label-to-sub (id-label-wt S) ● idSub ≃s label-to-sub (id-label-wt T) ● idSub
+    lem = begin
+      < label-to-sub (id-label-wt S) ● idSub >s
+        ≈⟨ id-right-unit (label-to-sub (id-label-wt S)) ⟩
+      < label-to-sub (id-label-wt S) >s
+        ≈⟨ id-label-to-sub S ⟩
+      < idSub >s
+        ≈⟨ idSub-≃ (cong suc (≃-to-same-n p)) ⟩
+      < idSub >s
+        ≈˘⟨ id-label-to-sub T ⟩
+      < label-to-sub (id-label-wt T) >s
+        ≈˘⟨ id-right-unit (label-to-sub (id-label-wt T)) ⟩
+      < label-to-sub (id-label-wt T) ● idSub >s ∎
+      where
+        open Reasoning sub-setoid
+
+sty-to-coh-map-ext : (As : STy (someTree S)) → sty-to-coh (map-sty-ext {T = Sing} As) ≃stm SExt {T = Sing} (sty-to-coh As)
+sty-to-coh-map-ext {S = S} As = begin
+  < SCoh (susp S) (map-sty-ext As) (id-label-wt (susp S)) >stm
+    ≈⟨ SCoh≃ (susp S) (map-sty-ext-susp-compat As) (sym≃l (id-label-susp-full S)) refl≃sty ⟩
+  < SCoh (susp S) (susp-sty As) (susp-label-full (id-label S) ,, S⋆) >stm
+    ≈˘⟨ SCoh-unrestrict S As (susp-label (id-label-wt S)) ⟩
+  < SCoh S As (susp-label (id-label-wt S)) >stm
+    ≈˘⟨ susp-stm-SCoh S As (id-label-wt S) ⟩
+  < SExt (sty-to-coh As) >stm ∎
+  where
+    open Reasoning stm-setoid
+
+replace-replace : (L : Label X S) → (a b : STm X) → replace-label (replace-label L a) b ≃l replace-label L b
+replace-replace L a b .get PHere = refl≃stm
+replace-replace L a b .get (PExt Z) = refl≃stm
+replace-replace L a b .get (PShift Z) = refl≃stm

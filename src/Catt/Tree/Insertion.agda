@@ -75,8 +75,8 @@ exterior-label : (S : Tree n)
                → (As : STy (someTree (chop-trunk d T)))
                → .⦃ height-of-branching p ≃n d + sty-dim As ⦄
                → Label (someTree (insertion-tree S p T)) S
-exterior-label (Join S₁ S₂) BPHere T A
-  = label-between-connect-trees (term-to-label (susp-tree S₁) (SCoh T A (id-label-wt T)) A) SPath
+exterior-label (Join S₁ S₂) BPHere T As
+  = label-between-connect-trees (replace-label (term-to-label (susp-tree S₁) (sty-to-coh As) As) SHere) SPath
 exterior-label (Join S₁ S₂) (BPExt p) (susp T) As
   = label-between-joins (exterior-label S₁ p T As) SPath
 exterior-label (Join S₁ S₂) (BPShift p) T A
@@ -112,31 +112,17 @@ label-from-insertion′ (Join S₁ S₂) (BPShift p) T L M PHere = L PHere
 label-from-insertion′ (Join S₁ S₂) (BPShift p) T L M (PExt Z) = L (PExt Z)
 label-from-insertion′ (Join S₁ S₂) (BPShift p) T L M (PShift Z) = label-from-insertion′ S₂ p T (L ∘ PShift) M Z
 
--- sub-from-insertion : (S : Tree n)
---                    → (p : BranchingPoint S d)
---                    → (T : Tree m)
---                    → .⦃ lh : has-linear-height d T ⦄
---                    → (σ : Sub (suc n) l ⋆)
---                    → (τ : Sub (suc m) l ⋆)
---                    → Sub (suc (insertion-tree-size S p T)) l ⋆
--- sub-from-insertion {l = l} S P T σ τ
---   = label-to-sub (label-from-insertion S P T (to-label S σ) (to-label T τ) ,, S⋆)
+bp-height-<-hob : (p : BranchingPoint S d) → d < height-of-branching p
+bp-height-<-hob BPHere = s≤s z≤n
+bp-height-<-hob (BPExt p) = s≤s (bp-height-<-hob p)
+bp-height-<-hob (BPShift p) = bp-height-<-hob p
 
--- is-linear-has-linear-height : (d : ℕ) → (T : Tree n) → .⦃ is-linear T ⦄ → d ≤ tree-dim T → has-linear-height d T
--- is-linear-has-linear-height zero T p = tt
--- is-linear-has-linear-height (suc d) (Join T Sing) p = is-linear-has-linear-height d T (≤-pred p)
+prune-tree-lem : (S : Tree n)
+               → (p : BranchingPoint S d)
+               → has-trunk-height d (n-disc (pred (height-of-branching p)))
+prune-tree-lem S p = has-trunk-height-n-disc (≤-pred (bp-height-<-hob p))
 
--- bp-height-<-hob : (p : BranchingPoint S d) → d < height-of-branching p
--- bp-height-<-hob BPHere = s≤s z≤n
--- bp-height-<-hob (BPExt p) = s≤s (bp-height-<-hob p)
--- bp-height-<-hob (BPShift p) = bp-height-<-hob p
-
--- prune-tree-lem : (S : Tree n)
---                → (p : BranchingPoint S d)
---                → has-linear-height d (n-disc (pred (height-of-branching p)))
--- prune-tree-lem S p = is-linear-has-linear-height (bp-height p) (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-pred (≤-trans (bp-height-<-hob p) (≤-trans (suc-pred-≤ (height-of-branching p)) (s≤s (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p)))))))))
-
--- prune-tree : (S : Tree n)
---            → (p : BranchingPoint S d)
---            → Tree (insertion-tree-size S p (n-disc (pred (height-of-branching p))) ⦃ prune-tree-lem S p ⦄)
--- prune-tree S p = insertion-tree S p (n-disc (pred (height-of-branching p))) ⦃ prune-tree-lem S p ⦄
+prune-tree : (S : Tree n)
+           → (p : BranchingPoint S d)
+           → Tree (insertion-tree-size S p (n-disc (pred (height-of-branching p))) ⦃ prune-tree-lem S p ⦄)
+prune-tree S p = insertion-tree S p (n-disc (pred (height-of-branching p))) ⦃ prune-tree-lem S p ⦄

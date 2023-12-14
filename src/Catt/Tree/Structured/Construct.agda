@@ -60,9 +60,9 @@ map-sty-ext : STy (someTree S) → STy (someTree (Join S T))
 map-sty-ext S⋆ = SArr SHere S⋆ (SShift (SPath PHere))
 map-sty-ext (SArr s A t) = SArr (SExt s) (map-sty-ext A) (SExt t)
 
-map-sty-ext-n : (d : ℕ) → STy (someTree S) → STy (someTree (susp-tree-n d S))
-map-sty-ext-n zero As = As
-map-sty-ext-n (suc d) As = map-sty-ext (map-sty-ext-n d As)
+resuspend : {S : Tree n} → (d : ℕ) → .⦃ _ : has-trunk-height d S ⦄ → STy (someTree (chop-trunk d S)) → STy (someTree S)
+resuspend zero As = As
+resuspend {S = susp S} (suc d) As = map-sty-ext (resuspend d As)
 
 map-ext : Label-WT (someTree S) U → Label-WT (someTree (Join S T)) U
 map-ext L = SExt ∘ ap L ,, (map-sty-ext (lty L))
@@ -112,7 +112,7 @@ connect-tree-inc-right : (S : Tree n) → (T : Tree m) → Label-WT (someTree (c
 connect-tree-inc-right S T = SPath ∘ connect-tree-inc-right′ S T ,, S⋆
 
 label-between-connect-trees : (L : Label (someTree S′) S) → (M : Label (someTree T′) T) → Label (someTree (connect-tree S′ T′)) (connect-tree S T)
-label-between-connect-trees {S′ = S′} {T′ = T′} L M = connect-label (L ●l (connect-tree-inc-left S′ T′)) (M ●l (connect-tree-inc-right S′ T′))
+label-between-connect-trees {S′ = S′} {T′ = T′} L M = connect-label′ (L ●l (connect-tree-inc-left S′ T′)) (M ●l (connect-tree-inc-right S′ T′))
 
 label-between-joins : (L : Label (someTree S′) S) → (M : Label (someTree T′) T) → Label (someTree (Join S′ T′)) (Join S T)
 label-between-joins L M PHere = SHere
@@ -161,3 +161,6 @@ term-to-label : (S : Tree n)
               → Label X S
 term-to-label Sing a As P = a
 term-to-label (Join S Sing) a (SArr s As t) = extend-disc-label (term-to-label S s As) t a
+
+sty-to-coh : (As : STy (someTree T)) → STm (someTree T)
+sty-to-coh {T = T} As = SCoh T As (id-label-wt T)

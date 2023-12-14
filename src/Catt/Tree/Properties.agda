@@ -27,9 +27,10 @@ linear-non-linear : (T : Tree n)
                   → ⊥
 linear-non-linear (Join T Sing) = linear-non-linear T
 
-tree-dim-n-disc : (n : ℕ) → tree-dim (n-disc n) ≃n n
-tree-dim-n-disc zero = tt
-tree-dim-n-disc (suc n) = tree-dim-n-disc n
+instance
+  tree-dim-n-disc : {n : ℕ} → tree-dim (n-disc n) ≃n n
+  tree-dim-n-disc {zero} = tt
+  tree-dim-n-disc {suc n} = inst
 
 record TREE : Set where
   constructor <_>t
@@ -331,3 +332,7 @@ susp-tree-n-linear : (n : ℕ)
                    → is-linear (susp-tree-n n S)
 susp-tree-n-linear zero S = it
 susp-tree-n-linear (suc n) S = inst ⦃ susp-tree-n-linear n S ⦄
+
+has-trunk-height-n-disc : (m ≤ n) → has-trunk-height m (n-disc n)
+has-trunk-height-n-disc z≤n = tt
+has-trunk-height-n-disc (s≤s p) = inst ⦃ has-trunk-height-n-disc p ⦄

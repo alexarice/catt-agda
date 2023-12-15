@@ -48,8 +48,8 @@ susp-pdb-bd-compat n ∅ b = ⊥-elim (pdb-odd-length it)
 susp-pdb-bd-compat n (∅ , A) b = refl
 susp-pdb-bd-compat n (Γ , B , A) b with  <-cmp n (ty-dim B) | <-cmp (suc n) (ty-dim (susp-ty B)) | b
 ... | tri< a ¬b ¬c | tri< a₁ ¬b₁ ¬c₁ | b = cong ewf (cong ewf (susp-pdb-bd-compat n Γ ⦃ pdb-prefix it ⦄ b))
-... | tri< a ¬b ¬c | tri≈ ¬a b₁ ¬c₁ | b = ⊥-elim (¬a (<-transʳ a (<-transˡ (n<1+n (ty-dim B)) (≤-reflexive (sym (susp-dim B))))))
-... | tri< a ¬b ¬c | tri> ¬a ¬b₁ c | b = ⊥-elim (¬a (<-transʳ a (<-transˡ (n<1+n (ty-dim B)) (≤-reflexive (sym (susp-dim B))))))
+... | tri< a ¬b ¬c | tri≈ ¬a b₁ ¬c₁ | b = ⊥-elim (¬a (≤-<-trans a (<-≤-trans (n<1+n (ty-dim B)) (≤-reflexive (sym (susp-dim B))))))
+... | tri< a ¬b ¬c | tri> ¬a ¬b₁ c | b = ⊥-elim (¬a (≤-<-trans a (<-≤-trans (n<1+n (ty-dim B)) (≤-reflexive (sym (susp-dim B))))))
 ... | tri≈ ¬a b₁ ¬c | tri< a ¬b ¬c₁ | b = ⊥-elim (¬b (trans (cong suc b₁) (sym (susp-dim B))))
 ... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | false = cong ewf (cong ewf (susp-pdb-bd-compat n Γ ⦃ pdb-prefix it ⦄ false))
 ... | tri≈ ¬a b₁ ¬c | tri≈ ¬a₁ b₂ ¬c₁ | true = cong ewf (cong ewt (trans (susp-supp-drop (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ true) ⦃ pdb-bd-supp-non-empty n Γ ⦃ pdb-prefix it ⦄ true ⦄) (cong drop (susp-pdb-bd-compat n Γ ⦃ pdb-prefix it ⦄ true))))

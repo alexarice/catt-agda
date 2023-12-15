@@ -181,13 +181,37 @@ connect-label-supp {S = Join S₁ S₂} {ΓS = ΓS} L M p = begin
     ≡˘⟨ cong (_∪m _) (DCM-∪ ΓS (FVSTm (L PHere) ∪m FVLabel′ (λ x → FVSTm (L (PExt x)))) (FVLabel′ (λ x → FVSTm (L (PShift x))))) ⟩
   DCM ΓS (FVLabel L) ∪m DCM ΓS (FVLabel M) ∎
 
+connect-label′-supp : {ΓS : CtxOrTree n} → (L : Label (COT-to-MT ΓS) S) → (M : Label (COT-to-MT ΓS) T) → L (last-path S) ≈[ COT-to-Ctx ΓS ]stm M PHere → DCM ΓS (FVLabel (connect-label′ L M)) ≡ DCM ΓS (FVLabel L) ∪m DCM ΓS (FVLabel M)
+connect-label′-supp {S = Sing} {ΓS = ΓS} L M p = begin
+  DCM ΓS (FVLabel M)
+    ≡⟨ cong (DCM ΓS) (label-ap-⊆ M PHere) ⟩
+  DCM ΓS (FVLabel M ∪m FVSTm (M PHere))
+    ≡⟨ DCM-∪ ΓS (FVLabel M) (FVSTm (M PHere)) ⟩
+  DCM ΓS (FVLabel M) ∪m DCM ΓS (FVSTm (M PHere))
+    ≡⟨ ∪m-comm (DCM ΓS (FVLabel M)) (DCM ΓS (FVSTm (M PHere))) ⟩
+  DCM ΓS (FVSTm (M PHere)) ∪m DCM ΓS (FVLabel M)
+    ≡˘⟨ cong (_∪m DCM ΓS (FVLabel M)) (EqSuppSTm p) ⟩
+  DCM ΓS (FVSTm (L PHere)) ∪m DCM ΓS (FVLabel M) ∎
+connect-label′-supp {S = Join S₁ S₂} {ΓS = ΓS} L M p = begin
+  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (L ∘ PExt) ∪m FVLabel (connect-label′ (L ∘ PShift) M))
+    ≡⟨ DCM-∪ ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) (FVLabel (connect-label′ (λ x → L (PShift x)) M)) ⟩
+  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) ∪m DCM ΓS (FVLabel (connect-label′ (λ x → L (PShift x)) M))
+    ≡⟨ cong (_ ∪m_) (connect-label′-supp (L ∘ PShift) M p) ⟩
+  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) ∪m (DCM ΓS (FVLabel (λ x → L (PShift x))) ∪m DCM ΓS (FVLabel M))
+    ≡⟨ solve (∪m-monoid {X = COT-to-MT ΓS}) ⟩
+  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) ∪m DCM ΓS (FVLabel (λ x → L (PShift x))) ∪m DCM ΓS (FVLabel M)
+    ≡˘⟨ cong (_∪m _) (DCM-∪ ΓS (FVSTm (L PHere) ∪m FVLabel′ (λ x → FVSTm (L (PExt x)))) (FVLabel′ (λ x → FVSTm (L (PShift x))))) ⟩
+  DCM ΓS (FVLabel L) ∪m DCM ΓS (FVLabel M) ∎
+
 label-between-connect-trees-full : (L : Label (someTree S′) S) → (M : Label (someTree T′) T)
-                               → L (last-path S) ≈[ tree-to-ctx S′ ]stm SPath (last-path S′)
-                               → M PHere ≈[ tree-to-ctx T′ ]stm SHere
-                                → DCM (incTree S′) (FVLabel L) ≡ tFull → DCM (incTree T′) (FVLabel M) ≡ tFull → DCM (incTree (connect-tree S′ T′)) (FVLabel (label-between-connect-trees L M)) ≡ tFull
+                                 → L (last-path S) ≈[ tree-to-ctx S′ ]stm SPath (last-path S′)
+                                 → M PHere ≈[ tree-to-ctx T′ ]stm SHere
+                                 → DCM (incTree S′) (FVLabel L) ≡ tFull
+                                 → DCM (incTree T′) (FVLabel M) ≡ tFull
+                                 → DCM (incTree (connect-tree S′ T′)) (FVLabel (label-between-connect-trees L M)) ≡ tFull
 label-between-connect-trees-full {S′ = S′} {T′ = T′} L M p q r s = begin
   DCM (incTree (connect-tree S′ T′)) (FVLabel (label-between-connect-trees L M))
-    ≡⟨ connect-label-supp (L ●l (connect-tree-inc-left S′ T′)) (M ●l (connect-tree-inc-right S′ T′)) (label-between-connect-trees-lem L M p q) ⟩
+    ≡⟨ connect-label′-supp (L ●l (connect-tree-inc-left S′ T′)) (M ●l (connect-tree-inc-right S′ T′)) (label-between-connect-trees-lem L M p q) ⟩
   DCM (incTree (connect-tree S′ T′))
     (FVLabel (L ●l (connect-tree-inc-left S′ T′)))
     ∪m

@@ -484,58 +484,58 @@ unbiased-term-linear (suc d) (Join S Sing) p = begin
   where
     open Reasoning tm-setoid
 
-identity-stm-to-term : (n : ℕ) → stm-to-term (identity-stm n) ≃tm identity n idSub
-identity-stm-to-term n = begin
-  < stm-to-term (identity-stm n) >tm
-    ≈⟨ unbiased-comp′-compat (suc n) (n-disc n) .get ⟩
-  < stm-to-term (unbiased-comp (suc n) (n-disc n)) >tm
-    ≈⟨ Coh≃ lem1 lem3 lem4 ⟩
-  < identity n idSub >tm ∎
-  where
-    lem1 : tree-to-ctx (n-disc n) ≃c Disc n
-    lem1 = begin
-      < tree-to-ctx (n-disc n) >c
-        ≈⟨ linear-tree-compat (n-disc n) ⟩
-      < Disc (tree-dim (n-disc n)) >c
-        ≈⟨ disc-≡ (≃n-to-≡ it) ⟩
-      < Disc n >c ∎
-      where
-        open Reasoning ctx-setoid
+-- identity-stm-to-term : (n : ℕ) → stm-to-term (identity-stm n) ≃tm identity n idSub
+-- identity-stm-to-term n = begin
+--   < stm-to-term (identity-stm n) >tm
+--     ≈⟨ unbiased-comp′-compat (suc n) (n-disc n) .get ⟩
+--   < stm-to-term (unbiased-comp (suc n) (n-disc n)) >tm
+--     ≈⟨ Coh≃ lem1 lem3 lem4 ⟩
+--   < identity n idSub >tm ∎
+--   where
+--     lem1 : tree-to-ctx (n-disc n) ≃c Disc n
+--     lem1 = begin
+--       < tree-to-ctx (n-disc n) >c
+--         ≈⟨ linear-tree-compat (n-disc n) ⟩
+--       < Disc (tree-dim (n-disc n)) >c
+--         ≈⟨ disc-≡ (≃n-to-≡ it) ⟩
+--       < Disc n >c ∎
+--       where
+--         open Reasoning ctx-setoid
 
-    lem2 : (b : Bool) → stm-to-term
-             (unbiased-stm n (tree-bd n (n-disc n)) >>=
-              tree-inc-label n (n-disc n) b)
-             ≃tm (0V {n = suc (double n)})
-    lem2 b = begin
-      < stm-to-term (unbiased-stm n (tree-bd n (n-disc n)) >>= tree-inc-label n (n-disc n) b) >tm
-        ≈˘⟨ label-to-sub-stm (tree-inc-label n (n-disc n) b) (unbiased-stm n (tree-bd n (n-disc n))) ⟩
-      < stm-to-term (unbiased-stm n (tree-bd n (n-disc n))) [ label-to-sub (tree-inc-label n (n-disc n) b) ]tm >tm
-        ≈⟨ sub-action-≃-tm {s = stm-to-term (unbiased-stm n (tree-bd n (n-disc n)))}
-                           {t = stm-to-term (unbiased-stm n (n-disc n))}
-                           (unbiased-stm-≃ (refl {x = n}) (≃′-to-≃ (tree-bd-full n (n-disc n) (≤-reflexive (≃n-to-≡ it)))) .get)
-                           (tree-inc-full n (n-disc n) b (≤-reflexive (≃n-to-≡ it))) ⟩
-      < stm-to-term (unbiased-stm n (n-disc n)) [ idSub ]tm >tm
-        ≈⟨ id-on-tm (stm-to-term (unbiased-stm n (n-disc n))) ⟩
-      < stm-to-term (unbiased-stm n (n-disc n)) >tm
-        ≈⟨ unbiased-term-linear n (n-disc n) (sym (≃n-to-≡ it)) ⟩
-      < 0V >tm ∎
-      where
-        open Reasoning tm-setoid
+--     lem2 : (b : Bool) → stm-to-term
+--              (unbiased-stm n (tree-bd n (n-disc n)) >>=
+--               tree-inc-label n (n-disc n) b)
+--              ≃tm (0V {n = suc (double n)})
+--     lem2 b = begin
+--       < stm-to-term (unbiased-stm n (tree-bd n (n-disc n)) >>= tree-inc-label n (n-disc n) b) >tm
+--         ≈˘⟨ label-to-sub-stm (tree-inc-label n (n-disc n) b) (unbiased-stm n (tree-bd n (n-disc n))) ⟩
+--       < stm-to-term (unbiased-stm n (tree-bd n (n-disc n))) [ label-to-sub (tree-inc-label n (n-disc n) b) ]tm >tm
+--         ≈⟨ sub-action-≃-tm {s = stm-to-term (unbiased-stm n (tree-bd n (n-disc n)))}
+--                            {t = stm-to-term (unbiased-stm n (n-disc n))}
+--                            (unbiased-stm-≃ (refl {x = n}) (≃′-to-≃ (tree-bd-full n (n-disc n) (≤-reflexive (≃n-to-≡ it)))) .get)
+--                            (tree-inc-full n (n-disc n) b (≤-reflexive (≃n-to-≡ it))) ⟩
+--       < stm-to-term (unbiased-stm n (n-disc n)) [ idSub ]tm >tm
+--         ≈⟨ id-on-tm (stm-to-term (unbiased-stm n (n-disc n))) ⟩
+--       < stm-to-term (unbiased-stm n (n-disc n)) >tm
+--         ≈⟨ unbiased-term-linear n (n-disc n) (sym (≃n-to-≡ it)) ⟩
+--       < 0V >tm ∎
+--       where
+--         open Reasoning tm-setoid
 
-    lem3 : sty-to-type (unbiased-type (suc n) (n-disc n)) ≃ty
-             (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F)
-    lem3 = Arr≃ (lem2 false) (unbiased-type-linear n (n-disc n) (sym (≃n-to-≡ it))) (lem2 true)
+--     lem3 : sty-to-type (unbiased-type (suc n) (n-disc n)) ≃ty
+--              (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F)
+--     lem3 = Arr≃ (lem2 false) (unbiased-type-linear n (n-disc n) (sym (≃n-to-≡ it))) (lem2 true)
 
-    lem4 : label-to-sub (id-label (n-disc n) ,, S⋆) ● idSub ≃s idSub
-    lem4 = begin
-      < label-to-sub (id-label (n-disc n) ,, S⋆) ● idSub >s
-        ≈⟨ id-right-unit (label-to-sub (id-label (n-disc n) ,, S⋆)) ⟩
-      < label-to-sub (id-label (n-disc n) ,, S⋆) >s
-        ≈⟨ id-label-to-sub (n-disc n) ⟩
-      < idSub >s ∎
-      where
-        open Reasoning sub-setoid
-    open Reasoning tm-setoid
+--     lem4 : label-to-sub (id-label (n-disc n) ,, S⋆) ● idSub ≃s idSub
+--     lem4 = begin
+--       < label-to-sub (id-label (n-disc n) ,, S⋆) ● idSub >s
+--         ≈⟨ id-right-unit (label-to-sub (id-label (n-disc n) ,, S⋆)) ⟩
+--       < label-to-sub (id-label (n-disc n) ,, S⋆) >s
+--         ≈⟨ id-label-to-sub (n-disc n) ⟩
+--       < idSub >s ∎
+--       where
+--         open Reasoning sub-setoid
+--     open Reasoning tm-setoid
 
 -- label-to-sub-from-disc-term : (L : Label-WT X (n-disc d)) → sub-from-disc-term (label-to-sub L) ≃tm stm-to-term (label-from-disc-term L ⦃ n-disc-is-linear d ⦄)
 -- label-to-sub-from-disc-term {d = zero} L = refl≃tm

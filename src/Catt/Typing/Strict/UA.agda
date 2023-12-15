@@ -10,7 +10,8 @@ open import Catt.Tree.Path.Properties
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.ToTerm
-open import Catt.Tree.Unbiased
+open import Catt.Tree.Structured.Globular
+open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 open import Catt.Typing.Base
@@ -26,10 +27,12 @@ data Index : Set where
          → (L : Label (Other m) S)
          → (P : BranchingPoint S l)
          → (T : Tree n′)
-         → .⦃ _ : has-linear-height l T ⦄
+         → .⦃ _ : has-trunk-height l T ⦄
+         → (Bs : STy (someTree (chop-trunk l T)))
+         → .⦃ _ : height-of-branching P ≃n l + sty-dim Bs ⦄
+         → .⦃ 1-Full Bs ⦄
          → (M : Label (Other m) T)
-         → L (branching-path-to-path P) ≃stm (unbiased-comp′ (height-of-branching P) T >>= (M ,, S⋆))
-         → Catt.Typing.Insertion.Base.IsCompOrIdent (height-of-branching P) T
+         → L (branching-path-to-path P) ≃stm (sty-to-coh (resuspend l Bs) >>= (M ,, S⋆))
          → Index
 
 module _ where
@@ -40,7 +43,7 @@ module _ where
   SUA-Rules : Index → Rule
   SUA-Rules (DR Γ σ) = DiscRemoval Γ σ
   SUA-Rules (ECR Γ Δ s A σ) = EndoCoherenceRemoval Γ Δ s A σ
-  SUA-Rules (Insert Γ S As L P T M pf p) = Insertion Γ S As L P T M
+  SUA-Rules (Insert Γ S As L P T Bs M p) = Insertion Γ S As L P T Bs M
 
 open import Catt.Typing SUA-Rules public
 open import Catt.Typing.DiscRemoval SUA-Rules as D
@@ -56,32 +59,32 @@ hasDiscRemoval tty = Rule≈ (DR _ _) tty
 hasEndoCoherenceRemoval : HasEndoCoherenceRemoval
 hasEndoCoherenceRemoval tty = Rule≈ (ECR _ _ _ _ _) tty
 
-hasInsertion : HasSUAInsertion
-hasInsertion {S = S} {As = As} {L = L} P {T = T} {M = M} pf p [ tty ] = [ begin
+hasInsertion : HasInsertion
+hasInsertion {l = l} {S = S} As L P {T = T} Bs M p [ tty ] = [ begin
   stm-to-term (SCoh S As (L ,, S⋆))
     ≈˘⟨ reflexive≈tm (stm-to-other-prop (SCoh S As (L ,, S⋆)) .get) ⟩
   stm-to-term (SCoh S As (label-to-other L ,, S⋆))
-    ≈⟨ Rule≈ (Insert _ S As (label-to-other L) P T (label-to-other M) lem p) (transport-typing tty (sym≃tm (stm-to-other-prop (SCoh S As (L ,, S⋆)) .get))) ⟩
-  stm-to-term (SCoh (insertion-tree S P T) (As >>=′ (exterior-sub-label S P T ,, S⋆)) ((sub-from-insertion-label S P T (label-to-other L) (label-to-other M)) ,, S⋆))
-    ≈˘⟨ reflexive≈tm (SCoh≃ (insertion-tree S P T) (refl≃sty {A = As >>=′ (exterior-sub-label S P T ,, S⋆)}) (sub-from-insertion-label-map stm-to-other S P T L M) (refl≃sty {A = S⋆}) .get) ⟩
+    ≈⟨ Rule≈ (Insert _ S As (label-to-other L) P T Bs (label-to-other M) lem) (transport-typing tty (sym≃tm (stm-to-other-prop (SCoh S As (L ,, S⋆)) .get))) ⟩
+  stm-to-term (SCoh (insertion-tree S P T) (As >>=′ (exterior-label S P T Bs ,, S⋆)) ((label-from-insertion S P T (label-to-other L) (label-to-other M)) ,, S⋆))
+    ≈˘⟨ reflexive≈tm (SCoh≃ (insertion-tree S P T) (refl≃sty {A = As >>=′ (exterior-label S P T Bs ,, S⋆)}) (label-from-insertion-map stm-to-other S P T L M) (refl≃sty {A = S⋆}) .get) ⟩
   stm-to-term
     (SCoh (insertion-tree S P T)
-     (As >>=′ (exterior-sub-label S P T ,, S⋆))
-     (label-to-other (sub-from-insertion-label S P T L M) ,, S⋆))
-    ≈⟨ reflexive≈tm (stm-to-other-prop (SCoh (insertion-tree S P T) (As >>=′ (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆)) .get) ⟩
-  stm-to-term (SCoh (insertion-tree S P T) (As >>=′ (exterior-sub-label S P T ,, S⋆)) (sub-from-insertion-label S P T L M ,, S⋆)) ∎ ]
+     (As >>=′ (exterior-label S P T Bs ,, S⋆))
+     (label-to-other (label-from-insertion S P T L M) ,, S⋆))
+    ≈⟨ reflexive≈tm (stm-to-other-prop (SCoh (insertion-tree S P T) (As >>=′ (exterior-label S P T Bs ,, S⋆)) (label-from-insertion S P T L M ,, S⋆)) .get) ⟩
+  stm-to-term (SCoh (insertion-tree S P T) (As >>=′ (exterior-label S P T Bs ,, S⋆)) (label-from-insertion S P T L M ,, S⋆)) ∎ ]
   where
-    lem : label-to-other L (branching-path-to-path P) ≃stm
-           (unbiased-comp′ (height-of-branching P) T >>=
-            (label-to-other M ,, S⋆))
+    lem : label-to-other L (branching-path-to-path P)
+          ≃stm
+          sty-to-coh (resuspend l Bs) >>= (label-to-other M ,, S⋆)
     lem = begin
       < label-to-other L (branching-path-to-path P) >stm
         ≈⟨ ap-≃ (label-to-other-prop L) refl≃p ⟩
       < L (branching-path-to-path P) >stm
-        ≈⟨ pf ⟩
-      < unbiased-comp′ (height-of-branching P) T >>= (M ,, S⋆) >stm
-        ≈˘⟨ >>=-≃ (refl≃stm {a = unbiased-comp′ (height-of-branching P) T}) (label-to-other-prop M) [ (refl≃ty {A = ⋆}) ] ⟩
-      < unbiased-comp′ (height-of-branching P) T >>= (label-to-other M ,, S⋆) >stm ∎
+        ≈⟨ p ⟩
+      < SCoh T (resuspend l Bs) (M ,, S⋆) >stm
+        ≈˘⟨ SCoh≃ T refl≃sty (label-to-other-prop M) (sty-to-other-prop S⋆) ⟩
+      < SCoh T (resuspend l Bs) (label-to-other M ,, S⋆) >stm ∎
       where
         open Reasoning stm-setoid
 
@@ -94,7 +97,7 @@ sua-lift-rule (DR Γ σ) = lift-rule
 sua-lift-rule (ECR Γ Δ s A σ) = lift-rule
   where
     open E.Conditions hasEndoCoherenceRemoval
-sua-lift-rule (Insert Γ S As L P T M pf p) = lift-rule P pf p
+sua-lift-rule (Insert Γ S As L P T Bs M p) = lift-rule P p
   where
     open I.Conditions hasInsertion
 
@@ -105,7 +108,7 @@ sua-susp-rule (DR Γ σ) = susp-rule
 sua-susp-rule (ECR Γ Δ s A σ) = susp-rule
   where
     open E.Conditions hasEndoCoherenceRemoval
-sua-susp-rule (Insert Γ S As L P T M pf p) = susp-rule P pf p
+sua-susp-rule (Insert Γ S As L P T Bs M p) = susp-rule P p
   where
     open I.Conditions hasInsertion
 
@@ -116,6 +119,6 @@ sua-sub-rule (DR Γ σ) = sub-rule
 sua-sub-rule (ECR Γ Δ s A σ) = sub-rule
   where
     open E.Conditions hasEndoCoherenceRemoval
-sua-sub-rule (Insert Γ S As L P T M pf p) = sub-rule P pf p
+sua-sub-rule (Insert Γ S As L P T Bs M p) = sub-rule P p
   where
     open I.Conditions hasInsertion

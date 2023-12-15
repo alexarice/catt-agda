@@ -536,7 +536,7 @@ tvarset-fst-toVarSet (VSJoin {n} b xs ys) = begin
   (if tvarset-non-empty xs then
     lookup (suspSupp (toVarSet xs)) (fromℕ (suc (suc _))) else
     lookup (if b then ewf (ewf (trueAt (fromℕ _))) else empty) (fromℕ (suc (suc _))))
-    ≡˘⟨ push-function-into-if (λ a → lookup a (fromℕ _)) (tvarset-non-empty xs) ⟩
+    ≡˘⟨ if-float (λ a → lookup a (fromℕ _)) (tvarset-non-empty xs) ⟩
   lookup
     (if tvarset-non-empty xs then suspSupp (toVarSet xs) else
      (if b then ewf (ewf (trueAt (fromℕ _))) else empty))
@@ -618,16 +618,16 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
                 (if varset-non-empty ys then suspSupp ys else
                  (if b′ then FVTm get-fst else empty)) ∪ FVTm get-snd
         lem = cong tail (begin
-          ewf ((if varset-non-empty xs then suspSupp xs else (if b then trueAt (fromℕ (suc _)) else replicate false)) ∪ FVTm get-snd)
-            ≡⟨ cong (_∪ FVTm get-snd) (push-function-into-if ewf (varset-non-empty xs)) ⟩
-          (if varset-non-empty xs then ewf (suspSupp xs) else ewf (if b then trueAt (fromℕ (suc _)) else replicate false)) ∪ FVTm get-snd
-            ≡⟨ cong (λ a → (if varset-non-empty xs then ewf (suspSupp xs) else a) ∪ FVTm get-snd) (push-function-into-if ewf b) ⟩
+          ewf ((if varset-non-empty xs then suspSupp xs else (if b then trueAt (fromℕ (suc _)) else replicate _ false)) ∪ FVTm get-snd)
+            ≡⟨ cong (_∪ FVTm get-snd) (if-float ewf (varset-non-empty xs)) ⟩
+          (if varset-non-empty xs then ewf (suspSupp xs) else ewf (if b then trueAt (fromℕ (suc _)) else replicate _ false)) ∪ FVTm get-snd
+            ≡⟨ cong (λ a → (if varset-non-empty xs then ewf (suspSupp xs) else a) ∪ FVTm get-snd) (if-float ewf b) ⟩
           (if varset-non-empty xs then ewf (suspSupp xs) else (if b then FVTm get-fst else empty)) ∪ FVTm get-snd
             ≡⟨ p ⟩
           (if varset-non-empty ys then ewf (suspSupp ys) else (if b′ then FVTm get-fst else empty)) ∪ FVTm get-snd
-            ≡˘⟨ cong (λ a → (if varset-non-empty ys then ewf (suspSupp ys) else a) ∪ FVTm get-snd) (push-function-into-if ewf b′) ⟩
-          (if varset-non-empty ys then ewf (suspSupp ys) else ewf (if b′ then trueAt (fromℕ (suc _)) else replicate false)) ∪ FVTm get-snd
-            ≡˘⟨ cong (_∪ FVTm get-snd) (push-function-into-if ewf (varset-non-empty ys)) ⟩
+            ≡˘⟨ cong (λ a → (if varset-non-empty ys then ewf (suspSupp ys) else a) ∪ FVTm get-snd) (if-float ewf b′) ⟩
+          (if varset-non-empty ys then ewf (suspSupp ys) else ewf (if b′ then trueAt (fromℕ (suc _)) else replicate _ false)) ∪ FVTm get-snd
+            ≡˘⟨ cong (_∪ FVTm get-snd) (if-float ewf (varset-non-empty ys)) ⟩
           ewf ((if varset-non-empty ys then suspSupp ys else (if b′ then FVTm get-fst else empty)) ∪ (FVTm get-snd)) ∎)
     susp-prop (ewf xs) (ewt ys) b b′ p = absurd (sym lem)
       where
@@ -639,9 +639,9 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
             ≡˘⟨ cong (if varset-non-empty (ewf xs) then false else_) (if-lem-const b false) ⟩
           (if varset-non-empty (ewf xs) then false else
             (if b then false else false))
-            ≡˘⟨ cong (if varset-non-empty (ewf xs) then false else_) (push-function-into-if (λ a → lookup a 0F) b) ⟩
+            ≡˘⟨ cong (if varset-non-empty (ewf xs) then false else_) (if-float (λ a → lookup a 0F) b) ⟩
           (if varset-non-empty (ewf xs) then false else lookup (if b then FVTm get-fst else empty) 0F)
-            ≡˘⟨ push-function-into-if (λ a → lookup a 0F) (varset-non-empty (ewf xs)) ⟩
+            ≡˘⟨ if-float (λ a → lookup a 0F) (varset-non-empty (ewf xs)) ⟩
           lookup (if varset-non-empty (ewf xs) then suspSupp (ewf xs) else (if b then FVTm get-fst else empty)) 0F
             ≡˘⟨ ∨-identityʳ _ ⟩
           lookup
@@ -673,9 +673,9 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
             ∨ false
             ≡⟨ ∨-identityʳ _ ⟩
           lookup (if varset-non-empty (ewf ys) then suspSupp (ewf ys) else (if b′ then FVTm get-fst else empty)) 0F
-            ≡⟨ push-function-into-if (λ a → lookup a 0F) (varset-non-empty ys) ⟩
+            ≡⟨ if-float (λ a → lookup a 0F) (varset-non-empty ys) ⟩
           (if varset-non-empty ys then false else lookup (if b′ then FVTm get-fst else empty) 0F)
-            ≡⟨ cong (if varset-non-empty ys then false else_) (push-function-into-if (λ a → lookup a 0F) b′) ⟩
+            ≡⟨ cong (if varset-non-empty ys then false else_) (if-float (λ a → lookup a 0F) b′) ⟩
           (if varset-non-empty ys then false else (if b′ then false else false))
             ≡⟨ cong (if varset-non-empty ys then false else_) (if-lem-const b′ false) ⟩
           (if varset-non-empty ys then false else false)
@@ -757,7 +757,7 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
               (if b then true else false)
                 ≡˘⟨ cong₂ (if b then_else_) (lookup-trueAt (fromℕ (2 + n))) (lookup-empty (fromℕ (3 + n))) ⟩
               (if b then lookup (trueAt (fromℕ (suc (suc n)))) (fromℕ (2 + n)) else lookup empty (fromℕ (2 + n)))
-                ≡˘⟨ push-function-into-if (λ a → lookup a (fromℕ (suc (suc n)))) b {y = trueAt (fromℕ (suc (suc n)))} {z = empty {n = 3 + n}} ⟩
+                ≡˘⟨ if-float (λ a → lookup a (fromℕ (2 + n))) b ⟩
               lookup (if b then trueAt (fromℕ (suc (suc n))) else empty) (fromℕ (suc (suc n)))
                 ≡˘⟨ connect-susp-supp-fst-var (if b then trueAt (fromℕ _) else empty) (toVarSet xs′) ⟩
               lookup (connect-susp-supp (if b then trueAt (fromℕ _) else empty) (toVarSet xs′)) (fromℕ _)
@@ -765,7 +765,7 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
               lookup (connect-susp-supp (if b′ then trueAt (fromℕ _) else empty) (toVarSet ys′)) (fromℕ _)
                 ≡⟨ connect-susp-supp-fst-var (if b′ then trueAt (fromℕ _) else empty) (toVarSet ys′) ⟩
               lookup (if b′ then trueAt (fromℕ (suc (suc n))) else empty) (fromℕ (suc (suc n)))
-                ≡⟨ push-function-into-if (λ a → lookup a (fromℕ (2 + n))) b′ ⟩
+                ≡⟨ if-float (λ a → lookup a (fromℕ (2 + n))) b′ ⟩
               (if b′ then lookup (trueAt (fromℕ (suc (suc n)))) (fromℕ (2 + n)) else lookup empty (fromℕ (2 + n)))
                 ≡⟨ cong₂ (if b′ then_else_) (lookup-trueAt (fromℕ (2 + n))) (lookup-empty (fromℕ (2 + n))) ⟩
               (if b′ then true else false)
@@ -794,10 +794,10 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
                 ∨ lookup (toVarSet xs′) (fromℕ _)
                 ≡˘⟨ connect-susp-supp-snd-var (if b then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet xs′) ⟩
               lookup (connect-susp-supp (if b then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet xs′))
-                (raise (suc m) (inject₁ (fromℕ n)))
-                ≡⟨ cong (λ a → lookup a (raise (suc m) (inject₁ (fromℕ n)))) p ⟩
+                (suc m ↑ʳ inject₁ (fromℕ n))
+                ≡⟨ cong (λ a → lookup a (suc m ↑ʳ inject₁ (fromℕ n))) p ⟩
               lookup (connect-susp-supp (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet ys′))
-                (raise (suc m) (inject₁ (fromℕ n)))
+                (suc m ↑ʳ inject₁ (fromℕ n))
                 ≡⟨ connect-susp-supp-snd-var (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet ys′) ⟩
               lookup (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty)
                 (inject₁ (fromℕ (suc n)))

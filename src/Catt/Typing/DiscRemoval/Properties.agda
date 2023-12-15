@@ -20,6 +20,8 @@ open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.ToTerm
+open import Catt.Tree.Structured.Construct
+open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Unbiased
 open import Catt.Tree.Unbiased.Properties
 
@@ -35,9 +37,12 @@ open R rule
 
 disc-rem-stm : HasDiscRemoval-STm
 disc-rem-stm S L Lty .get = begin
-  stm-to-term (unbiased-comp (tree-dim S) S >>= (L ,, S⋆))
-    ≈⟨ reflexive≈tm (Coh≃ (linear-tree-compat S) (unbiased-type-linear (tree-dim S) S refl) (trans≃s (id-right-unit (label-to-sub (L ,, S⋆))) (sym≃s (idSub≃-right-unit (sym≃c (linear-tree-compat S)) (label-to-sub (L ,, S⋆)))))) ⟩
-  disc-term (tree-dim S) (label-to-sub (L ,, S⋆) ● idSub≃ (sym≃c (linear-tree-compat S)))
+  Coh (tree-to-ctx S) (sty-to-type (disc-sty S)) (label-to-sub (L ,, S⋆) ● idSub)
+    ≈⟨ reflexive≈tm (Coh≃ (linear-tree-compat S)
+                          (disc-sty-to-type S)
+                          (trans≃s (id-right-unit _)
+                                   (sym≃s (idSub≃-right-unit (sym≃c (linear-tree-compat S)) _)))) ⟩
+  disc-term (tree-dim S) ((label-to-sub (L ,, S⋆)) ● idSub≃ (sym≃c (linear-tree-compat S)))
     ≈⟨ disc-rem (disc-term-Ty (tree-dim S) (apply-sub-sub-typing (idSub≃-Ty (sym≃c (linear-tree-compat S))) (label-to-sub-Ty Lty TySStar))) ⟩
   0V [ label-to-sub (L ,, S⋆) ● idSub≃ (sym≃c (linear-tree-compat S)) ]tm
     ≈⟨ reflexive≈tm (sub-action-≃-tm {s = 0V} {t = 0V} (Var≃ (≃c-preserve-length (sym≃c (linear-tree-compat S))) refl) (idSub≃-right-unit (sym≃c (linear-tree-compat S)) (label-to-sub (L ,, S⋆)))) ⟩
@@ -55,7 +60,7 @@ unbiased-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
     ≈⟨ compute-≈ refl≈stm ⟩
   SPath (is-linear-max-path (Join Sing Sing))
     ≈˘⟨ disc-rem-stm (Join Sing Sing) SPath (id-label-Ty (Join Sing Sing)) ⟩
-  unbiased-comp 1 (Join Sing Sing)
+  disc-stm (susp Sing) >>= id-label-wt (susp Sing)
     ≈⟨ [ refl≈tm ] ⟩
   SExt (SCoh Sing S⋆ (SPath ,, S⋆)) ∎
   where

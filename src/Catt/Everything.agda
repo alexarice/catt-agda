@@ -87,7 +87,7 @@ import Catt.Dyck.Pruning.Typing
 
 import Catt.Typing.DiscRemoval
 import Catt.Typing.DiscRemoval.Base
-import Catt.Typing.DiscRemoval.Properties
+import Catt.Typing.Properties
 import Catt.Typing.EndoCoherenceRemoval
 import Catt.Typing.EndoCoherenceRemoval.Base
 import Catt.Typing.EndoCoherenceRemoval.Properties
@@ -111,7 +111,7 @@ import Catt.Tree.Unbiased.Support
 
 import Catt.Typing.Properties.Support
 import Catt.Tree.Structured.Support.Typed
-import Catt.Tree.Insertion.Support
+-- import Catt.Tree.Insertion.Support
 
 import Catt.Typing.Weak
 import Catt.Typing.Strict.Units

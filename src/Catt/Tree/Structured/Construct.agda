@@ -137,9 +137,18 @@ sty-≃ p (SArr s A t) = SArr (stm-≃ p s) (sty-≃ p A) (stm-≃ p t)
 
 ≃-label-wt p L = (≃-label p (ap L)) ,, (sty-≃ p (lty L))
 
-disc-type : (S : Tree n) → .⦃ is-linear S ⦄ → STy (someTree S)
-disc-type Sing = S⋆
-disc-type (Join S Sing) = map-sty-ext (disc-type S)
+disc-sty : (S : Tree n) → .⦃ is-linear S ⦄ → STy (someTree S)
+disc-sty Sing = S⋆
+disc-sty (Join S Sing) = map-sty-ext (disc-sty S)
+
+sty-to-coh : (As : STy (someTree T)) → STm (someTree T)
+sty-to-coh {T = T} As = SCoh T As (id-label-wt T)
+
+disc-stm : (S : Tree n) → .⦃ is-linear S ⦄ → STm (someTree S)
+disc-stm S = sty-to-coh (disc-sty S)
+
+identity-stm : (S : Tree n) → .⦃ is-linear S ⦄ → STm (someTree S)
+identity-stm S = SCoh S (SArr (SPath (is-linear-max-path S)) (disc-sty S) (SPath (is-linear-max-path S))) (id-label-wt S)
 
 extend-disc-label : Label X S
                   → .⦃ is-linear S ⦄
@@ -153,14 +162,11 @@ extend-disc-label {S = Join S Sing} L t a PHere = L PHere
 extend-disc-label {S = Join S Sing} L t a (PExt P) = extend-disc-label (L ∘ PExt) t a P
 extend-disc-label {S = Join S Sing} L t a (PShift PHere) = L (PShift PHere)
 
-term-to-label : (S : Tree n)
+stm-to-label : (S : Tree n)
               → .⦃ is-linear S ⦄
               → (a : STm X)
               → (As : STy X)
               → .⦃ tree-dim S ≃n sty-dim As ⦄
               → Label X S
-term-to-label Sing a As P = a
-term-to-label (Join S Sing) a (SArr s As t) = extend-disc-label (term-to-label S s As) t a
-
-sty-to-coh : (As : STy (someTree T)) → STm (someTree T)
-sty-to-coh {T = T} As = SCoh T As (id-label-wt T)
+stm-to-label Sing a As P = a
+stm-to-label (Join S Sing) a (SArr s As t) = extend-disc-label (stm-to-label S s As) t a

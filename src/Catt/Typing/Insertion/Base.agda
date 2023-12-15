@@ -18,9 +18,10 @@ Insertion : (Γ : Ctx m)
           → (L : Label (Other m) S)
           → (P : BranchingPoint S l)
           → (T : Tree n′)
-          → (Bs : STy (someTree T))
+          → .⦃ _ : has-trunk-height l T ⦄
+          → (Bs : STy (someTree (chop-trunk l T)))
           → .⦃ height-of-branching P ≃n l + sty-dim Bs ⦄
-          → (M : Label (Other m) (susp-tree-n l T))
+          → (M : Label (Other m) T)
           → Rule
 Insertion Γ S As L P T Bs M .len = _
 Insertion Γ S As L P T Bs M .tgtCtx = Γ

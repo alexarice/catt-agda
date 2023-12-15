@@ -315,10 +315,6 @@ linear-tree-unique : (S : Tree n) → .⦃ is-linear S ⦄
 linear-tree-unique Sing Sing p = refl≃′
 linear-tree-unique (Join S Sing) (Join T Sing) p = Join≃′ (linear-tree-unique S T (cong pred p)) refl≃′
 
-linear-tree-compat-2 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → .⦃ _ : tree-dim S ≃n m ⦄ → S ≃′ n-disc m
-linear-tree-compat-2 {m = zero} Sing = Refl≃′
-linear-tree-compat-2 {m = suc m} (Join S Sing) = Join≃′ (linear-tree-compat-2 S) Refl≃′
-
 connect-tree-assoc : (S : Tree n)
                    → (T : Tree m)
                    → (U : Tree l)
@@ -333,6 +329,18 @@ susp-tree-n-linear : (n : ℕ)
 susp-tree-n-linear zero S = it
 susp-tree-n-linear (suc n) S = inst ⦃ susp-tree-n-linear n S ⦄
 
+has-trunk-height-≤ : (m ≤ n) → (T : Tree l) → ⦃ has-trunk-height n T ⦄ → has-trunk-height m T
+has-trunk-height-≤ z≤n T = tt
+has-trunk-height-≤ (s≤s p) (susp T) = inst ⦃ has-trunk-height-≤ p T ⦄
+
 has-trunk-height-n-disc : (m ≤ n) → has-trunk-height m (n-disc n)
-has-trunk-height-n-disc z≤n = tt
-has-trunk-height-n-disc (s≤s p) = inst ⦃ has-trunk-height-n-disc p ⦄
+has-trunk-height-n-disc {n = n} p = has-trunk-height-≤ (≤-trans p (≤-reflexive (sym (≃n-to-≡ (tree-dim-n-disc {n = n}))))) (n-disc n)
+
+chop-trunk-linear : (T : Tree n) → ⦃ _ : is-linear T ⦄ → {l : ℕ} → (p : l ≤ tree-dim T) → is-linear (chop-trunk l T ⦃ has-trunk-height-≤ p T ⦄)
+chop-trunk-linear Sing z≤n = it
+chop-trunk-linear (susp T) z≤n = inst
+chop-trunk-linear (susp T) (s≤s p) = chop-trunk-linear T p
+
+chop-trunk-dim : (l : ℕ) → (T : Tree n) → .⦃ _ : has-trunk-height l T ⦄ → tree-dim (chop-trunk l T) ≡ tree-dim T ∸ l
+chop-trunk-dim zero T = refl
+chop-trunk-dim (suc l) (susp T) = chop-trunk-dim l T

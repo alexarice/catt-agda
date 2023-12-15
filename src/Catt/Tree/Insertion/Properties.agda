@@ -113,15 +113,15 @@ module _ where
                       → L (branching-path-to-path p) ≃stm SCoh T (resuspend d As) (M ,, Bs)
                       → exterior-label S p T As ●l (label-from-insertion S p T L M ,, Bs) ≃lm L
   exterior-label-comm (Join S₁ S₂) BPHere T L M As Bs q .get (PExt Z) = begin
-    < term-to-label (susp-tree S₁) (sty-to-coh As) As (PExt Z)
+    < stm-to-label (susp-tree S₁) (sty-to-coh As) As (PExt Z)
       >>= connect-tree-inc-left T S₂
       >>= (connect-label M (L ∘ PShift) ,, Bs) >stm
-      ≈⟨ >>=-assoc (term-to-label (susp-tree S₁) (sty-to-coh As) As (PExt Z))
+      ≈⟨ >>=-assoc (stm-to-label (susp-tree S₁) (sty-to-coh As) As (PExt Z))
                    (connect-tree-inc-left T S₂)
                    ((connect-label M (L ∘ PShift) ,, Bs)) ⟩
-    < term-to-label (susp-tree S₁) (SCoh T As (SPath ,, S⋆)) As (PExt Z)
+    < stm-to-label (susp-tree S₁) (SCoh T As (SPath ,, S⋆)) As (PExt Z)
       >>= connect-tree-inc-left T S₂ ●lt (connect-label M (L ∘ PShift) ,, Bs) >stm
-      ≈⟨ >>=-≃ (term-to-label-max (susp-tree S₁) (sty-to-coh As) As (PExt Z)) (connect-label-inc-left M (L ∘ PShift) Bs) refl≃sty ⟩
+      ≈⟨ >>=-≃ (stm-to-label-max (susp-tree S₁) (sty-to-coh As) As (PExt Z)) (connect-label-inc-left M (L ∘ PShift) Bs) refl≃sty ⟩
     < SCoh T As (M ,, Bs) >stm
       ≈˘⟨ q ⟩
     < L (PExt (is-linear-max-path S₁)) >stm
@@ -295,7 +295,7 @@ exterior-branching-path : (S : Tree n)
                           ≃stm
                           SCoh T (resuspend l Bs) (interior-label S p T ,, S⋆)
 exterior-branching-path (Join S₁ S₂) BPHere T Bs
-  = >>=-≃ (term-to-label-max (susp-tree S₁) (sty-to-coh Bs) Bs (is-linear-max-path (susp-tree S₁)) ⦃ inst ⦄)
+  = >>=-≃ (stm-to-label-max (susp-tree S₁) (sty-to-coh Bs) Bs (is-linear-max-path (susp-tree S₁)) ⦃ inst ⦄)
           refl≃l
           refl≃sty
 exterior-branching-path (Join S₁ S₂) (BPExt {n = n} p) (susp T) Bs = begin
@@ -355,16 +355,16 @@ module _ where
                     → exterior-label S P T As ≃lm exterior-label S Q T Bs
   exterior-parallel (Join S₁ S₂) BPHere BPHere T As Bs p q .get (PExt Z) = begin
     < exterior-label (Join S₁ S₂) BPHere T As (PExt Z) >stm
-      ≈⟨ >>=-≃ (term-to-label-max (susp S₁) (sty-to-coh As) As (PExt Z)) refl≃l refl≃sty ⟩
+      ≈⟨ >>=-≃ (stm-to-label-max (susp S₁) (sty-to-coh As) As (PExt Z)) refl≃l refl≃sty ⟩
     < sty-to-coh As >>= connect-tree-inc-left T S₂ >stm
       ≈⟨ >>=-≃ (SCoh≃ T q (refl≃l {L = id-label T}) refl≃sty) refl≃l refl≃sty ⟩
     < sty-to-coh Bs >>= connect-tree-inc-left T S₂ >stm
-      ≈˘⟨ >>=-≃ (term-to-label-max (susp S₁) (sty-to-coh Bs) Bs (PExt Z)) refl≃l refl≃sty ⟩
+      ≈˘⟨ >>=-≃ (stm-to-label-max (susp S₁) (sty-to-coh Bs) Bs (PExt Z)) refl≃l refl≃sty ⟩
     < exterior-label (Join S₁ S₂) BPHere T Bs (PExt Z) >stm ∎
   exterior-parallel (Join S₁ S₂) BPHere BPHere T As Bs p q .get (PShift Z) = refl≃stm
   exterior-parallel (Join S₁ S₂) BPHere (BPExt {n = n} Q) (susp T) As Bs p q .get (PExt Z) = begin
-    < term-to-label (susp S₁) (sty-to-coh As) As (PExt Z) >>= connect-tree-inc-left (susp T) S₂ >stm
-      ≈⟨ >>=-≃ (term-to-label-max (susp S₁) (sty-to-coh As) As (PExt Z)) refl≃l refl≃sty ⟩
+    < stm-to-label (susp S₁) (sty-to-coh As) As (PExt Z) >>= connect-tree-inc-left (susp T) S₂ >stm
+      ≈⟨ >>=-≃ (stm-to-label-max (susp S₁) (sty-to-coh As) As (PExt Z)) refl≃l refl≃sty ⟩
     < sty-to-coh As >>= connect-tree-inc-left (susp T) S₂ >stm
       ≈⟨ >>=-≃ (sty-to-coh-≃ refl≃ q) refl≃l refl≃sty ⟩
     < sty-to-coh (resuspend (suc n) Bs) >>= connect-tree-inc-left (susp T) S₂ >stm
@@ -495,14 +495,14 @@ exterior-bp-left-inc-left (Join S₁ S₂) T BPHere U As .get PHere = SPath≃ (
   where
     open Reasoning path-setoid
 exterior-bp-left-inc-left (Join S₁ S₂) T BPHere U As .get (PExt Z) = begin
-  < term-to-label (susp S₁) (sty-to-coh As) As ⦃ _ ⦄ (PExt Z) >>= connect-tree-inc-left U (connect-tree S₂ T) >stm
-    ≈˘⟨ >>=-≃ (refl≃stm {a = term-to-label (susp S₁) (sty-to-coh As) As ⦃ _ ⦄ (PExt Z)})
+  < stm-to-label (susp S₁) (sty-to-coh As) As ⦃ _ ⦄ (PExt Z) >>= connect-tree-inc-left U (connect-tree S₂ T) >stm
+    ≈˘⟨ >>=-≃ (refl≃stm {a = stm-to-label (susp S₁) (sty-to-coh As) As ⦃ _ ⦄ (PExt Z)})
               [ (λ P → SPath≃ (connect-tree-inc-left-assoc U S₂ T .get P)) ]
               (S⋆-≃ (≃′-to-≃ (sym≃′ (connect-tree-assoc U S₂ T)))) ⟩
-  < term-to-label (susp S₁) (sty-to-coh As) As (PExt Z)
+  < stm-to-label (susp S₁) (sty-to-coh As) As (PExt Z)
     >>= connect-tree-inc-left U S₂ ●lt connect-tree-inc-left (connect-tree U S₂) T >stm
-    ≈˘⟨ >>=-assoc (term-to-label (susp S₁) (sty-to-coh As) As (PExt Z)) _ _ ⟩
-  < term-to-label (susp S₁) (sty-to-coh As) As (PExt Z)
+    ≈˘⟨ >>=-assoc (stm-to-label (susp S₁) (sty-to-coh As) As (PExt Z)) _ _ ⟩
+  < stm-to-label (susp S₁) (sty-to-coh As) As (PExt Z)
     >>= connect-tree-inc-left U S₂
     >>= connect-tree-inc-left (connect-tree U S₂) T >stm ∎
   where
@@ -739,14 +739,14 @@ module _ where
                   → exterior-label S P T As ●l (exterior-label (insertion-tree S P T) (orthog-bp P Q T) U Bs ⦃ trans≃n (orthog-bp-height P Q T) it ⦄ ,, S⋆)
                   ≃lm exterior-label S Q U Bs ●l (exterior-label (insertion-tree S Q U) (orthog-bp Q P ⦃ Orthogonal-sym P Q ⦄ U) T As ⦃ trans≃n (orthog-bp-height Q P ⦃ Orthogonal-sym P Q ⦄ U) it ⦄ ,, S⋆)
   exterior-orthog (Join S₁ S₂) BPHere T As (BPShift Q) U Bs .get (PExt Z) = begin
-    < term-to-label (susp S₁) (sty-to-coh As) As (PExt Z)
+    < stm-to-label (susp S₁) (sty-to-coh As) As (PExt Z)
       >>= connect-tree-inc-left T S₂
       >>= (exterior-label (connect-tree T S₂) (connect-bp-right T S₂ Q) U Bs ⦃ _ ⦄ ,, S⋆) >stm
-      ≈⟨ >>=-assoc (term-to-label (susp S₁) (sty-to-coh As) As (PExt Z)) (connect-tree-inc-left T S₂) _ ⟩
-    < term-to-label (susp S₁) (sty-to-coh As) As (PExt Z)
+      ≈⟨ >>=-assoc (stm-to-label (susp S₁) (sty-to-coh As) As (PExt Z)) (connect-tree-inc-left T S₂) _ ⟩
+    < stm-to-label (susp S₁) (sty-to-coh As) As (PExt Z)
       >>= connect-tree-inc-left T S₂ ●lt (exterior-label (connect-tree T S₂) (connect-bp-right T S₂ Q) U Bs ⦃ _ ⦄ ,, S⋆) >stm
-      ≈⟨ >>=-≃ (refl≃stm {a = term-to-label (susp S₁) (sty-to-coh As) As (PExt Z)}) (exterior-bp-right-inc-left T S₂ Q U Bs) (S⋆-≃ (≃′-to-≃ (insertion-bp-right T S₂ Q U))) ⟩
-    < term-to-label (susp S₁) (sty-to-coh As) As (PExt Z)
+      ≈⟨ >>=-≃ (refl≃stm {a = stm-to-label (susp S₁) (sty-to-coh As) As (PExt Z)}) (exterior-bp-right-inc-left T S₂ Q U Bs) (S⋆-≃ (≃′-to-≃ (insertion-bp-right T S₂ Q U))) ⟩
+    < stm-to-label (susp S₁) (sty-to-coh As) As (PExt Z)
       >>= connect-tree-inc-left T (insertion-tree S₂ Q U) >stm ∎
   exterior-orthog (Join S₁ S₂) BPHere T As (BPShift Q) U Bs .get (PShift Z) = exterior-bp-right-inc-right T S₂ Q U Bs .get Z
   exterior-orthog (Join S₁ S₂) (BPExt P) (susp T) As (BPExt Q) (susp U) Bs .get (PExt Z) = let

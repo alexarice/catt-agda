@@ -468,7 +468,9 @@ connect-susp-supp-fst-var {n} {m = zero} xs (ewt ys) = begin
     open ≡-Reasoning
 connect-susp-supp-fst-var {m = suc m} xs (y ∷ ys) = connect-susp-supp-fst-var xs ys
 
-connect-susp-supp-snd-var : (xs : VarSet (3 + n)) → (ys : VarSet (suc m)) → lookup (connect-susp-supp xs ys) (raise (suc m) (inject₁ (fromℕ _))) ≡ lookup xs (inject₁ (fromℕ _)) ∨ lookup ys (fromℕ _)
+connect-susp-supp-snd-var : (xs : VarSet (3 + n))
+                          → (ys : VarSet (suc m))
+                          → lookup (connect-susp-supp xs ys) (suc m ↑ʳ inject₁ (fromℕ _)) ≡ lookup xs (inject₁ (fromℕ _)) ∨ lookup ys (fromℕ _)
 connect-susp-supp-snd-var {m = zero} xs (ewf ys) = sym (∨-identityʳ (lookup xs (inject₁ (fromℕ (suc _)))))
 connect-susp-supp-snd-var {n} {m = zero} xs (ewt ys) = begin
   lookup (xs ∪ trueAt (inject₁ (fromℕ (suc n))))

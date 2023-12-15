@@ -64,7 +64,7 @@ branching-path-to-var {T = Join S T} (BPExt P) = susp-tm (branching-path-to-var 
 branching-path-to-var {T = Join S T} (BPShift P) = branching-path-to-var P [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm
 
 branching-path-to-type : (T : Tree n) → (P : BranchingPoint T d) → STy (someTree T)
-branching-path-to-type (Join S T) (BPHere) = map-sty-ext (disc-type S)
+branching-path-to-type (Join S T) (BPHere) = map-sty-ext (disc-sty S)
 branching-path-to-type (Join S T) (BPExt P) = map-sty-ext (branching-path-to-type S P)
 branching-path-to-type (Join S T) (BPShift P) = map-sty-shift (branching-path-to-type T P)
 
@@ -76,7 +76,7 @@ exterior-label : (S : Tree n)
                → .⦃ height-of-branching p ≃n d + sty-dim As ⦄
                → Label (someTree (insertion-tree S p T)) S
 exterior-label (Join S₁ S₂) BPHere T As
-  = label-between-connect-trees (replace-label (term-to-label (susp-tree S₁) (sty-to-coh As) As) SHere) SPath
+  = label-between-connect-trees (replace-label (stm-to-label (susp-tree S₁) (sty-to-coh As) As) SHere) SPath
 exterior-label (Join S₁ S₂) (BPExt p) (susp T) As
   = label-between-joins (exterior-label S₁ p T As) SPath
 exterior-label (Join S₁ S₂) (BPShift p) T A

@@ -36,11 +36,12 @@ HasInsertion = ∀ {m n l n′}
              → (L : Label X S)
              → (P : BranchingPoint S l)
              → {T : Tree n′}
-             → (Bs : STy (someTree T))
+             → .⦃ _ : has-trunk-height l T ⦄
+             → (Bs : STy (someTree (chop-trunk l T)))
              → .⦃ 1-Full Bs ⦄
              → .⦃ _ : height-of-branching P ≃n l + sty-dim Bs ⦄
-             → (M : Label X (susp-tree-n l T))
-             → L (branching-path-to-path P) ≃stm (SCoh (susp-tree-n l T) (map-sty-ext-n l Bs) (M ,, S⋆))
+             → (M : Label X T)
+             → L (branching-path-to-path P) ≃stm (SCoh T (resuspend l Bs) (M ,, S⋆))
              → {Cs : STy X}
              → Typing-STm Γ (SCoh S As (L ,, S⋆)) Cs
              → (SCoh S As (L ,, S⋆))
@@ -51,11 +52,13 @@ module Conditions (ins : HasInsertion) where
   open import Catt.Typing.Rule rule
 
   lift-rule : (P : BranchingPoint S l)
-            → (pf : L (branching-path-to-path P) ≃stm SCoh (susp-tree-n l T) (map-sty-ext-n l Bs) (M ,, S⋆))
+            → .⦃ _ : has-trunk-height l T ⦄
+            → {Bs : STy (someTree (chop-trunk l T))}
+            → (pf : L (branching-path-to-path P) ≃stm SCoh T (resuspend l Bs) (M ,, S⋆))
             → .⦃ _ : height-of-branching P ≃n l + sty-dim Bs ⦄
             → .⦃ 1-Full Bs ⦄
             → LiftRule (Insertion Γ S As L P T Bs M)
-  lift-rule {S = S} {L = L} {T = T} {Bs = Bs} {M = M} {Γ = Γ} {As = As} P pf {A = A} {C = C} tty = begin
+  lift-rule {S = S} {T = T} {L = L} {M = M} {Γ = Γ} {As = As} P {Bs = Bs} pf {A = A} {C = C} tty = begin
     lift-tm (stm-to-term (SCoh S As (L ,, S⋆)))
       ≈˘⟨ reflexive≈tm (lift-stm-to-term (SCoh S As (L ,, S⋆))) ⟩
     stm-to-term (SCoh S As (lift-label (L ,, S⋆)))
@@ -93,11 +96,13 @@ module Conditions (ins : HasInsertion) where
       open Reasoning (tm-setoid-≈ _)
 
   susp-rule : (P : BranchingPoint S l)
-            → (pf : L (branching-path-to-path P) ≃stm SCoh (susp-tree-n l T) (map-sty-ext-n l Bs) (M ,, S⋆))
+            → .⦃ _ : has-trunk-height l T ⦄
+            → {Bs : STy (someTree (chop-trunk l T))}
+            → (pf : L (branching-path-to-path P) ≃stm SCoh T (resuspend l Bs) (M ,, S⋆))
             → .⦃ _ : height-of-branching P ≃n l + sty-dim Bs ⦄
             → .⦃ 1-Full Bs ⦄
             → SuspRule (Insertion Γ S As L P T Bs M)
-  susp-rule {S = S} {l = l} {L = L} {T = T} {Bs = Bs} {M = M} {Γ = Γ} {As = As} P pf {C = C} tty = begin
+  susp-rule {S = S} {l = l} {T = T} {L = L} {M = M} {Γ = Γ} {As = As} P {Bs = Bs} pf {C = C} tty = begin
     susp-tm (stm-to-term (SCoh S As (L ,, S⋆)))
       ≈˘⟨ reflexive≈tm (susp-stm-to-term (SCoh S As (L ,, S⋆))) ⟩
     stm-to-term (susp-stm (SCoh S As (L ,, S⋆)))
@@ -112,36 +117,35 @@ module Conditions (ins : HasInsertion) where
                                (As >>=′ (exterior-label S P T Bs ,, S⋆))
                                (label-from-insertion S P T L M ,, S⋆))) ∎
     where
+      instance .x : has-trunk-height (suc l) (susp T)
+      x = inst
+      instance .y : height-of-branching (BPExt {T = Sing} P) ≃n suc l + sty-dim Bs
+      y = inst
+
       l1 : susp-label-full L (PExt (branching-path-to-path P))
            ≃stm
-           SCoh (susp-tree (susp-tree-n l T)) (map-sty-ext (map-sty-ext-n l Bs)) (susp-label-full M ,, S⋆)
+           SCoh (susp T) (map-sty-ext (resuspend l Bs)) (susp-label-full M ,, S⋆)
       l1 = begin
         < susp-stm (L (branching-path-to-path P)) >stm
           ≈⟨ susp-stm-≃ pf ⟩
-        < susp-stm (SCoh (susp-tree-n l T) (map-sty-ext-n l Bs) (M ,, S⋆)) >stm
-          ≈⟨ SCoh-unrestrict (susp-tree-n l T) (map-sty-ext-n l Bs) (susp-label (M ,, S⋆)) ⟩
-        < SCoh (susp-tree (susp-tree-n l T))
-               (susp-sty (map-sty-ext-n l Bs))
-               (susp-label-full M ,, S⋆) >stm
-          ≈˘⟨ SCoh≃ (susp-tree (susp-tree-n l T))
-                    (map-sty-ext-susp-compat (map-sty-ext-n l Bs))
-                    refl≃l
-                    refl≃sty ⟩
-        < SCoh (susp-tree (susp-tree-n l T))
-               (map-sty-ext (map-sty-ext-n l Bs))
-               (susp-label-full M ,, S⋆) >stm ∎
+        < susp-stm (SCoh T (resuspend l Bs) (M ,, S⋆)) >stm
+          ≈⟨ SCoh-unrestrict T (resuspend l Bs) (susp-label (M ,, S⋆)) ⟩
+        < SCoh (susp T) (susp-sty (resuspend l Bs)) (susp-label-full M ,, S⋆) >stm
+          ≈˘⟨ SCoh≃ (susp T) (map-sty-ext-susp-compat (resuspend l Bs)) refl≃l refl≃sty ⟩
+        < SCoh (susp T) (map-sty-ext (resuspend l Bs)) (susp-label-full M ,, S⋆) >stm ∎
         where open Reasoning stm-setoid
 
-      l4 : exterior-label (susp-tree S) (BPExt P) T Bs ≃l
+      l4 : exterior-label (susp S) (BPExt P) (susp T) Bs ≃l
               susp-label-full (exterior-label S P T Bs)
       l4 .get PHere = refl≃stm
       l4 .get (PExt Z) = refl≃stm
       l4 .get (PShift PHere) = refl≃stm
 
-      l2 : susp-sty As >>=′ (exterior-label (susp-tree S) (BPExt P) T Bs ,, S⋆)
-             ≃sty susp-sty (As >>=′ (exterior-label S P T Bs ,, S⋆))
+      l2 : susp-sty As >>=′ (exterior-label (susp S) (BPExt P) (susp T) Bs ,, S⋆)
+           ≃sty
+           susp-sty (As >>=′ (exterior-label S P T Bs ,, S⋆))
       l2 = begin
-        < susp-sty As >>=′ (exterior-label (susp-tree S) (BPExt P) T Bs ,, S⋆) >sty
+        < susp-sty As >>=′ (exterior-label (susp-tree S) (BPExt P) (susp T) Bs ,, S⋆) >sty
           ≈⟨ >>=′-≃ (refl≃sty {A = susp-sty As}) l4 refl≃sty ⟩
         < susp-sty As >>=′ (susp-label-full (exterior-label S P T Bs) ,, S⋆) >sty
           ≈˘⟨ susp-sty-functorial As (exterior-label S P T Bs) ⟩
@@ -149,11 +153,9 @@ module Conditions (ins : HasInsertion) where
         where
           open Reasoning sty-setoid
 
-      l3 : ap
-             (label-from-insertion (susp-tree S) (BPExt P) T
-              (susp-label-full L) (susp-label-full M)
-              ,, S⋆)
-             ≃l ap (susp-label-full (label-from-insertion S P T L M) ,, S⋆)
+      l3 : ap (label-from-insertion (susp S) (BPExt P) (susp T) ⦃ _ ⦄ (susp-label-full L) (susp-label-full M) ,, S⋆)
+           ≃l
+           ap (susp-label-full (label-from-insertion S P T L M) ,, S⋆)
       l3 .get PHere = refl≃stm
       l3 .get (PExt Z) = sym≃stm (label-from-insertion-map susp-stm S P T L M .get Z)
       l3 .get (PShift PHere) = refl≃stm
@@ -178,9 +180,9 @@ module Conditions (ins : HasInsertion) where
                                                     (SCoh-unrestrict S As (susp-label (L ,, S⋆)) .get) )
                                           (sym≃ty (to-sty-to-type (susp-ty C)))) ] ⟩
         SCoh (susp-tree (insertion-tree S P T))
-             (susp-sty As >>=′ (exterior-label (susp-tree S) (BPExt P) T Bs ,, S⋆))
-             (label-from-insertion (susp-tree S) (BPExt P) T (susp-label-full L) (susp-label-full M) ,, S⋆)
-          ≈⟨ reflexive≈stm (SCoh≃ (susp-tree (insertion-tree S P T)) l2 l3 refl≃sty) ⟩
+             (susp-sty As >>=′ (exterior-label (susp-tree S) (BPExt P) (susp T) ⦃ _ ⦄ Bs ,, S⋆))
+             (label-from-insertion (susp S) (BPExt P) (susp T) ⦃ it ⦄ (susp-label-full L) (susp-label-full M) ,, S⋆)
+          ≈⟨ reflexive≈stm (SCoh≃ (susp (insertion-tree S P T ⦃ it ⦄)) l2 l3 refl≃sty) ⟩
         SCoh (susp-tree (insertion-tree S P T))
              (susp-sty (As >>=′ (exterior-label S P T Bs ,, S⋆)))
              (susp-label-full (label-from-insertion S P T L M) ,, S⋆)
@@ -191,25 +193,26 @@ module Conditions (ins : HasInsertion) where
         where
           open Reasoning stm-setoid-≈
 
-
       open Reasoning (tm-setoid-≈ _)
 
   sub-rule : (P : BranchingPoint S l)
-           → (pf : L (branching-path-to-path P) ≃stm SCoh (susp-tree-n l T) (map-sty-ext-n l Bs) (M ,, S⋆))
+           → .⦃ _ : has-trunk-height l T ⦄
+           → {Bs : STy (someTree (chop-trunk l T))}
+           → (pf : L (branching-path-to-path P) ≃stm SCoh T (resuspend l Bs) (M ,, S⋆))
            → .⦃ _ : height-of-branching P ≃n l + sty-dim Bs ⦄
            → .⦃ 1-Full Bs ⦄
            → SubRule (Insertion Γ S As L P T Bs M)
-  sub-rule {S = S} {l = l} {L = L} {T = T} {Bs = Bs} {M = M} {Γ = Γ} {As = As} P pf {σ = σ} {Δ = Δ} {C = C} σty tty = lem .get
+  sub-rule {S = S} {l = l} {T = T} {L = L} {M = M} {Γ = Γ} {As = As} P {Bs = Bs} pf {σ = σ} {Δ = Δ} {C = C} σty tty = lem .get
     where
       l1 : L (branching-path-to-path P) [ σ ]stm
            ≃stm
-           SCoh (susp-tree-n l T) (map-sty-ext-n l Bs) ((M ,, S⋆) [ σ ]l)
+           SCoh T (resuspend l Bs) ((M ,, S⋆) [ σ ]l)
       l1 = begin
         < L (branching-path-to-path P) [ σ ]stm >stm
           ≈⟨ stm-sub-≃ pf σ ⟩
-        < SCoh (susp-tree-n l T) (map-sty-ext-n l Bs) (M ,, S⋆) [ σ ]stm >stm
-          ≈⟨ stm-sub-SCoh (susp-tree-n l T) (map-sty-ext-n l Bs) (M ,, S⋆) σ ⟩
-        < SCoh (susp-tree-n l T) (map-sty-ext-n l Bs) ((M ,, S⋆) [ σ ]l) >stm ∎
+        < SCoh T (resuspend l Bs) (M ,, S⋆) [ σ ]stm >stm
+          ≈⟨ stm-sub-SCoh T (resuspend l Bs) (M ,, S⋆) σ ⟩
+        < SCoh T (resuspend l Bs) ((M ,, S⋆) [ σ ]l) >stm ∎
         where
           open Reasoning stm-setoid
 

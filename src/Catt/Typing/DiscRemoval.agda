@@ -16,8 +16,7 @@ open import Catt.Tree
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
+open import Catt.Tree.Structured.Construct
 
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule
@@ -45,7 +44,7 @@ HasDiscRemoval-STm = ∀ {m n}
                → .⦃ NonZero (tree-dim S) ⦄
                → (L : Label X S)
                → Typing-Label Γ (L ,, S⋆)
-               → unbiased-comp (tree-dim S) S >>= (L ,, S⋆) ≈[ Γ ]stm L (is-linear-max-path S)
+               → disc-stm S >>= (L ,, S⋆) ≈[ Γ ]stm L (is-linear-max-path S)
 
 module Conditions (dr : HasDiscRemoval) where
   open import Catt.Typing.Rule rule

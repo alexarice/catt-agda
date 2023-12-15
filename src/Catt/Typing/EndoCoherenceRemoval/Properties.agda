@@ -64,32 +64,33 @@ ecr-stm S s As L [ sty ] [ Asty ] Lty .get = begin
                           (stm-to-term s))
     [ label-to-sub (L ,, S⋆) ]tm
     ≈⟨ reflexive≈tm (sub-action-≃-tm (identity-≃ (sty-to-type-dim As) lem) (refl≃s {σ = label-to-sub (L ,, S⋆)})) ⟩
-  identity (sty-dim As) (label-to-sub (term-to-label (n-disc (sty-dim As)) s As ,, S⋆)) [ label-to-sub (L ,, S⋆) ]tm
+  identity (sty-dim As) (label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆)) [ label-to-sub (L ,, S⋆) ]tm
     ≈˘⟨ reflexive≈tm (sub-action-≃-tm (identity-≃ (refl {x = sty-dim As})
-                                                  (id-right-unit (label-to-sub (term-to-label (n-disc (sty-dim As)) s As ,, S⋆))))
+                                                  (id-right-unit (label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆))))
                                       (refl≃s {σ = label-to-sub (L ,, S⋆)})) ⟩
   identity (sty-dim As) idSub
-    [ label-to-sub (term-to-label (n-disc (sty-dim As)) s As ,, S⋆) ]tm
+    [ label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ]tm
     [ label-to-sub (L ,, S⋆) ]tm
     ≈˘⟨ reflexive≈tm (assoc-tm (label-to-sub (L ,, S⋆))
-                     (label-to-sub (term-to-label (n-disc (sty-dim As)) s As ,, S⋆))
+                     (label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆))
                      (identity (sty-dim As) idSub)) ⟩
-  identity (sty-dim As) idSub [ label-to-sub (L ,, S⋆) ● label-to-sub (term-to-label (n-disc (sty-dim As)) s As ,, S⋆) ]tm
-    ≈⟨ reflexive≈tm (sub-action-≃-tm (sym≃tm (identity-stm-to-term (sty-dim As)))
-                                     (label-comp-to-sub (term-to-label (n-disc (sty-dim As)) s As ,, S⋆) (L ,, S⋆))) ⟩
-  stm-to-term (identity-stm (sty-dim As)) [ label-to-sub ((term-to-label (n-disc (sty-dim As)) s As ,, S⋆) ●lt (L ,, S⋆)) ]tm
-    ≈⟨ reflexive≈tm (label-to-sub-stm _ (identity-stm (sty-dim As))) ⟩
-  stm-to-term (identity-stm (sty-dim As) >>= ((term-to-label (n-disc (sty-dim As)) s As ,, S⋆) ●lt (L ,, S⋆))) ∎
+  identity (sty-dim As) idSub [ label-to-sub (L ,, S⋆) ● label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ]tm
+    ≈⟨ reflexive≈tm (sub-action-≃-tm (trans≃tm (identity-≃ (sym (≃n-to-≡ (tree-dim-n-disc {n = sty-dim As})))
+                                                           (idSub-≃ (cong disc-size (sym (≃n-to-≡ (tree-dim-n-disc {n = sty-dim As}))))))
+                                               (sym≃tm (identity-stm-to-term (n-disc (sty-dim As)))))
+                                     (label-comp-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) (L ,, S⋆))) ⟩
+  stm-to-term (identity-stm (n-disc (sty-dim As))) [ label-to-sub ((stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ●lt (L ,, S⋆)) ]tm
+    ≈⟨ reflexive≈tm (label-to-sub-stm ((stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ●lt (L ,, S⋆)) (identity-stm (n-disc (sty-dim As)))) ⟩
+  stm-to-term (identity-stm (n-disc (sty-dim As)) >>= ((stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ●lt (L ,, S⋆))) ∎
     where
-    instance _ = tree-dim-n-disc (sty-dim As)
     lem : sub-from-disc (ty-dim (sty-to-type As)) (sty-to-type As) refl (stm-to-term s)
-        ≃s label-to-sub (term-to-label (n-disc (sty-dim As)) s As ,, S⋆)
+        ≃s label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆)
     lem = begin
       < sub-from-disc (ty-dim (sty-to-type As)) (sty-to-type As) _ (stm-to-term s) >s
         ≈⟨ sub-from-disc-≃ (ty-dim (sty-to-type As)) (sty-dim As) refl≃ty refl (trans (sty-to-type-dim As) (sym refl)) refl≃tm ⟩
       < sub-from-disc (sty-dim As) (sty-to-type As) _ (stm-to-term s) >s
-        ≈˘⟨ term-to-label-to-sub (n-disc (sty-dim As)) s As ⟩
-      < label-to-sub (term-to-label (n-disc (sty-dim As)) s As ,, S⋆) >s ∎
+        ≈˘⟨ stm-to-label-to-sub (n-disc (sty-dim As)) s As ⟩
+      < label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) >s ∎
       where
         open Reasoning sub-setoid
     open Reasoning (tm-setoid-≈ _)

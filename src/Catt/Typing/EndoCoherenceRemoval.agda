@@ -55,8 +55,8 @@ HasEndoCoherenceRemoval-STm = ∀ {m n}
                         → Typing-Label Γ (L ,, S⋆)
                         → SCoh S (SArr s As s) (L ,, S⋆)
                           ≈[ Γ ]stm
-                          (identity-stm (sty-dim As)
-                            >>= (term-to-label (n-disc (sty-dim As)) s As ⦃ tree-dim-n-disc (sty-dim As) ⦄ ,, S⋆) ●lt (L ,, S⋆))
+                          (identity-stm (n-disc (sty-dim As))
+                            >>= (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ●lt (L ,, S⋆))
 
 module Conditions (ecr : HasEndoCoherenceRemoval) where
   open import Catt.Typing.Rule rule

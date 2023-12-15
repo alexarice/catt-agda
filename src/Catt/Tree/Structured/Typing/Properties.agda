@@ -291,9 +291,9 @@ label-between-connect-trees-Ty : {L : Label (someTree S′) S}
                                → M PHere ≈[ tree-to-ctx T′ ]stm SHere
                                → Typing-Label (tree-to-ctx (connect-tree S′ T′)) (label-between-connect-trees L M ,, S⋆)
 label-between-connect-trees-Ty {S′ = S′} {S = S} {T′ = T′} {L = L} {M = M} LTy MTy p q
-  = connect-label-Ty (label-comp-Ty LTy (connect-tree-inc-left-Ty _ _) TySStar)
-                     (label-comp-Ty MTy (connect-tree-inc-right-Ty _ _) TySStar)
-                     (label-between-connect-trees-lem L M p q)
+  = connect-label′-Ty (label-comp-Ty LTy (connect-tree-inc-left-Ty _ _) TySStar)
+                      (label-comp-Ty MTy (connect-tree-inc-right-Ty _ _) TySStar)
+                      (label-between-connect-trees-lem L M p q)
 
 label-between-joins-Ty : {L : Label (someTree S′) S}
                        → {M : Label (someTree T′) T}
@@ -344,3 +344,6 @@ SCoh-typing-prop {S = S} {Γ = Γ} {As = As} {L = L} [ tty ] .get = begin
   sty-to-type _ ∎
   where
     open Reasoning (ty-setoid-≈ _)
+
+sty-to-coh-Ty : {As : STy (someTree S)} → Typing-STy (tree-to-ctx S) As → Typing-STm (tree-to-ctx S) (sty-to-coh As) As
+sty-to-coh-Ty {S = S} {As = As} AsTy = TySConv (TySCoh S AsTy (id-label-Ty S) TySStar) (reflexive≈sty (>>=′-id As))

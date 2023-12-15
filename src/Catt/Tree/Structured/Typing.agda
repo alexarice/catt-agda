@@ -219,9 +219,9 @@ unrestrict-label-Ty {L = L ,, SArr s As t} LTy AsTy = TyJoin (TySArr-proj₁ AsT
 extend-disc-label-Ty : {L : Label X S}
                      → .⦃ _ : is-linear S ⦄
                      → Typing-Label Γ (L ,, As)
-                     → Typing-STm Γ b (disc-type S >>=′ (L ,, As))
+                     → Typing-STm Γ b (disc-sty S >>=′ (L ,, As))
                      → Typing-STm Γ a (SArr (L (is-linear-max-path S))
-                                            (disc-type S >>=′ (L ,, As))
+                                            (disc-sty S >>=′ (L ,, As))
                                             b)
                      → Typing-Label Γ (extend-disc-label L b a ,, As)
 extend-disc-label-Ty (TySing x) bTy aTy = TyJoin x (TySing aTy) (TySing bTy)
@@ -229,22 +229,22 @@ extend-disc-label-Ty {S = Join S Sing} (TyJoin x LTy (TySing y)) bTy aTy
   = TyJoin x
            (extend-disc-label-Ty
              LTy
-             (transport-stm-typing bTy refl≃stm (map-sty-ext-label (disc-type S) (_ ,, _)))
+             (transport-stm-typing bTy refl≃stm (map-sty-ext-label (disc-sty S) (_ ,, _)))
              (transport-stm-typing aTy refl≃stm (SArr≃ refl≃stm
-                                                       (map-sty-ext-label (disc-type S) (_ ,, _))
+                                                       (map-sty-ext-label (disc-sty S) (_ ,, _))
                                                        refl≃stm)))
            (TySing y)
 
-term-to-label-Ty : (S : Tree n)
+stm-to-label-Ty : (S : Tree n)
                  → .⦃ _ : is-linear S ⦄
                  → Typing-STm Γ a As
                  → Typing-STy Γ As
                  → .⦃ _ : tree-dim S ≃n sty-dim As ⦄
-                 → Typing-Label Γ (term-to-label S a As ,, S⋆)
-term-to-label-Ty {As = S⋆} Sing aTy AsTy = TySing aTy
-term-to-label-Ty {As = SArr s As t} (Join S Sing) aTy AsTy
-  = extend-disc-label-Ty (term-to-label-Ty S (TySArr-proj₁ AsTy) (TySArr-proj₂ AsTy))
-                         (transport-stm-typing (TySArr-proj₃ AsTy) refl≃stm (sym≃sty (term-to-label-disc-type S s As)))
-                         (transport-stm-typing aTy refl≃stm (sym≃sty (SArr≃ (term-to-label-max S s As (is-linear-max-path S))
-                                                                            (term-to-label-disc-type S s As)
+                 → Typing-Label Γ (stm-to-label S a As ,, S⋆)
+stm-to-label-Ty {As = S⋆} Sing aTy AsTy = TySing aTy
+stm-to-label-Ty {As = SArr s As t} (Join S Sing) aTy AsTy
+  = extend-disc-label-Ty (stm-to-label-Ty S (TySArr-proj₁ AsTy) (TySArr-proj₂ AsTy))
+                         (transport-stm-typing (TySArr-proj₃ AsTy) refl≃stm (sym≃sty (stm-to-label-disc-sty S s As)))
+                         (transport-stm-typing aTy refl≃stm (sym≃sty (SArr≃ (stm-to-label-max S s As (is-linear-max-path S))
+                                                                            (stm-to-label-disc-sty S s As)
                                                                             refl≃stm)))

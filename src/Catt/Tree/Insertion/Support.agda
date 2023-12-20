@@ -50,33 +50,33 @@ open import Catt.Tree.Structured.Support.Typed rule lift-rule susp-rule sub-rule
 exterior-sub-full : (S : Tree n)
                   → (p : BranchingPoint S d)
                   → (T : Tree m)
-                  → .⦃ _ : has-linear-height d T ⦄
-                  → DCT (FVLabel (exterior-sub-label S p T)) ≡ tFull
+                  → .⦃ _ : has-trunk-height d T ⦄
+                  → DCT (FVLabel (exterior-label S p T)) ≡ tFull
 exterior-sub-full (Join S₁ S₂) BPHere T = label-between-connect-trees-full (label-from-linear-tree-unbiased (susp-tree S₁) T 0) (id-label S₂) refl≈stm refl≈stm (label-from-linear-tree-unbiased-full (susp-tree S₁) T 0) (trans (cong DCT (id-label-full S₂)) DCT-full)
-exterior-sub-full (Join S₁ S₂) (BPExt p) (Join T Sing) = label-between-joins-full (exterior-sub-label S₁ p T) (id-label S₂) (exterior-sub-full S₁ p T) (trans (cong DCT (id-label-full S₂)) DCT-full)
-exterior-sub-full (Join S₁ S₂) (BPShift p) T = label-between-joins-full (id-label S₁) (exterior-sub-label S₂ p T) (trans (cong DCT (id-label-full S₁)) DCT-full) (exterior-sub-full S₂ p T)
+exterior-sub-full (Join S₁ S₂) (BPExt p) (Join T Sing) = label-between-joins-full (exterior-label S₁ p T) (id-label S₂) (exterior-sub-full S₁ p T) (trans (cong DCT (id-label-full S₂)) DCT-full)
+exterior-sub-full (Join S₁ S₂) (BPShift p) T = label-between-joins-full (id-label S₁) (exterior-label S₂ p T) (trans (cong DCT (id-label-full S₁)) DCT-full) (exterior-sub-full S₂ p T)
 
 exterior-sub-boundary-supp : (S : Tree n)
                   → (p : BranchingPoint S d)
                   → (T : Tree m)
-                  → .⦃ _ : has-linear-height d T ⦄
+                  → .⦃ _ : has-trunk-height d T ⦄
                   → (q : height-of-branching p ≥ tree-dim T)
                   → (d : ℕ)
                   → (b : Bool)
-                  → TransportVarSet-Label (supp-tree-bd d S b) (exterior-sub-label S p T) ≡ toVarSet (supp-tree-bd d (insertion-tree S p T) b)
+                  → TransportVarSet-Label (supp-tree-bd d S b) (exterior-label S p T) ≡ toVarSet (supp-tree-bd d (insertion-tree S p T) b)
 exterior-sub-boundary-supp S p T q d b = begin
   TransportVarSet-Label (supp-tree-bd d S b)
-    (exterior-sub-label S p T)
-    ≡˘⟨ cong (λ a → TransportVarSet-Label a (exterior-sub-label S p T)) (trans (sym (FVLabel-WT-⋆ (ap (tree-inc-label d S b)))) (tree-inc-label-supp d S b)) ⟩
+    (exterior-label S p T)
+    ≡˘⟨ cong (λ a → TransportVarSet-Label a (exterior-label S p T)) (trans (sym (FVLabel-WT-⋆ (ap (tree-inc-label d S b)))) (tree-inc-label-supp d S b)) ⟩
   TransportVarSet-Label (FVLabel (ap (tree-inc-label d S b)))
-    (exterior-sub-label S p T)
-    ≡˘⟨ TransportVarSet-Label-Label (ap (tree-inc-label d S b)) (exterior-sub-label S p T) (exterior-sub-label-Ty S p T q) ⟩
-  toVarSet (FVLabel (ap (tree-inc-label d S b) ●l (exterior-sub-label S p T ,, S⋆)))
-    ≡˘⟨ DCT-toVarSet (FVLabel (ap (tree-inc-label d S b) ●l (exterior-sub-label S p T ,, S⋆))) ⟩
+    (exterior-label S p T)
+    ≡˘⟨ TransportVarSet-Label-Label (ap (tree-inc-label d S b)) (exterior-label S p T) (exterior-label-Ty S p T q) ⟩
+  toVarSet (FVLabel (ap (tree-inc-label d S b) ●l (exterior-label S p T ,, S⋆)))
+    ≡˘⟨ DCT-toVarSet (FVLabel (ap (tree-inc-label d S b) ●l (exterior-label S p T ,, S⋆))) ⟩
   toVarSet
     (DCT
      (FVLabel
-      (ap (tree-inc-label d S b) ●l (exterior-sub-label S p T ,, S⋆))))
+      (ap (tree-inc-label d S b) ●l (exterior-label S p T ,, S⋆))))
     ≡⟨ cong toVarSet (lem (Bd-Conditions-one-of d p T)) ⟩
   toVarSet (supp-tree-bd d (insertion-tree S p T) b) ∎
   where
@@ -84,13 +84,13 @@ exterior-sub-boundary-supp S p T q d b = begin
 
     lem : Bd-Conditions d p T → DCT
             (FVLabel
-             (ap (tree-inc-label d S b) ●l (exterior-sub-label S p T ,, S⋆)))
+             (ap (tree-inc-label d S b) ●l (exterior-label S p T ,, S⋆)))
             ≡ supp-tree-bd d (insertion-tree S p T) b
     lem (Bd-Cond1 x y) = begin
       DCT
         (FVLabel
-         (ap (tree-inc-label d S b) ●l (exterior-sub-label S p T ,, S⋆)))
-        ≡⟨ EqSuppLabel (label-max-equality-to-equality (unbiased-exterior-comm-1 S p T d x y q b) (label-comp-Ty (tree-inc-Ty d S b) (exterior-sub-label-Ty S p T q) TySStar) (label-≃-Ty (insertion-bd-1 S p T d y q) (tree-inc-Ty d (insertion-tree S p T) b))) ⟩
+         (ap (tree-inc-label d S b) ●l (exterior-label S p T ,, S⋆)))
+        ≡⟨ EqSuppLabel (label-max-equality-to-equality (unbiased-exterior-comm-1 S p T d x y q b) (label-comp-Ty (tree-inc-Ty d S b) (exterior-label-Ty S p T q) TySStar) (label-≃-Ty (insertion-bd-1 S p T d y q) (tree-inc-Ty d (insertion-tree S p T) b))) ⟩
       DCT
         (FVLabel
          (label-≃ (insertion-bd-1 S p T d y q) (ap (tree-inc-label d (insertion-tree S p T) b))))
@@ -105,18 +105,18 @@ exterior-sub-boundary-supp S p T q d b = begin
     lem (Bd-Cond2 x) = begin
       DCT
         (FVLabel
-         (ap (tree-inc-label d S b) ●l (exterior-sub-label S p T ,, S⋆)))
-        ≡⟨ EqSuppLabel (label-max-equality-to-equality (unbiased-exterior-comm-2 S p T d b q x) (label-comp-Ty (tree-inc-Ty d S b) (exterior-sub-label-Ty S p T q) TySStar) (label-comp-Ty (exterior-sub-label-Ty (tree-bd d S) (bd-branching-point S p d _) (tree-bd d T) ⦃ _ ⦄ ((≤-trans (≤-reflexive (tree-dim-bd d T))
+         (ap (tree-inc-label d S b) ●l (exterior-label S p T ,, S⋆)))
+        ≡⟨ EqSuppLabel (label-max-equality-to-equality (unbiased-exterior-comm-2 S p T d b q x) (label-comp-Ty (tree-inc-Ty d S b) (exterior-label-Ty S p T q) TySStar) (label-comp-Ty (exterior-label-Ty (tree-bd d S) (bd-branching-point S p d _) (tree-bd d T) ⦃ _ ⦄ ((≤-trans (≤-reflexive (tree-dim-bd d T))
                       (≤-trans (⊓-monoʳ-≤ d q)
                                (≤-reflexive (sym (bd-branching-point-height S p d (bd-bp-lem p x)))))))) (label-≃-Ty (insertion-bd-2 S p T d (bd-bp-lem p x)) (tree-inc-Ty d (insertion-tree S p T) b)) TySStar)) ⟩
       DCT
         (FVLabel
-          (exterior-sub-label (tree-bd d S)
+          (exterior-label (tree-bd d S)
                               (bd-branching-point S p d (bd-bp-lem p x))
                               (tree-bd d T)
-                              ⦃ bd-has-linear-height d _ T (bd-bp-lem p x) ⦄
+                              ⦃ bd-has-trunk-height d _ T (bd-bp-lem p x) ⦄
           ●l (label-wt-≃ (insertion-bd-2 S p T d (bd-bp-lem p x)) (tree-inc-label d (insertion-tree S p T) b))))
-        ≡⟨ FV-label-comp-full (exterior-sub-label (tree-bd d S)
+        ≡⟨ FV-label-comp-full (exterior-label (tree-bd d S)
                                                               (bd-branching-point S p d (bd-bp-lem p x))
                                                               (tree-bd d T)
                                                               ⦃ _ ⦄) (label-≃ (insertion-bd-2 S p T d _)

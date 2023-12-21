@@ -60,6 +60,10 @@ map-sty-ext : STy (someTree S) → STy (someTree (Join S T))
 map-sty-ext S⋆ = SArr SHere S⋆ (SShift (SPath PHere))
 map-sty-ext (SArr s A t) = SArr (SExt s) (map-sty-ext A) (SExt t)
 
+resuspend-stm : {S : Tree n} → (d : ℕ) → .⦃ _ : has-trunk-height d S ⦄ → STm (someTree (chop-trunk d S)) → STm (someTree S)
+resuspend-stm zero s = s
+resuspend-stm {S = susp S} (suc d) s = SExt (resuspend-stm d s)
+
 resuspend : {S : Tree n} → (d : ℕ) → .⦃ _ : has-trunk-height d S ⦄ → STy (someTree (chop-trunk d S)) → STy (someTree S)
 resuspend zero As = As
 resuspend {S = susp S} (suc d) As = map-sty-ext (resuspend d As)
@@ -139,7 +143,7 @@ sty-≃ p (SArr s A t) = SArr (stm-≃ p s) (sty-≃ p A) (stm-≃ p t)
 
 disc-sty : (S : Tree n) → .⦃ is-linear S ⦄ → STy (someTree S)
 disc-sty Sing = S⋆
-disc-sty (Join S Sing) = map-sty-ext (disc-sty S)
+disc-sty (susp S) = map-sty-ext (disc-sty S)
 
 sty-to-coh : (As : STy (someTree T)) → STm (someTree T)
 sty-to-coh {T = T} As = SCoh T As (id-label-wt T)
@@ -158,9 +162,9 @@ extend-disc-label : Label X S
 extend-disc-label {S = Sing} L t a PHere = L PHere
 extend-disc-label {S = Sing} L t a (PExt PHere) = a
 extend-disc-label {S = Sing} L t a (PShift PHere) = t
-extend-disc-label {S = Join S Sing} L t a PHere = L PHere
-extend-disc-label {S = Join S Sing} L t a (PExt P) = extend-disc-label (L ∘ PExt) t a P
-extend-disc-label {S = Join S Sing} L t a (PShift PHere) = L (PShift PHere)
+extend-disc-label {S = susp S} L t a PHere = L PHere
+extend-disc-label {S = susp S} L t a (PExt P) = extend-disc-label (L ∘ PExt) t a P
+extend-disc-label {S = susp S} L t a (PShift PHere) = L (PShift PHere)
 
 stm-to-label : (S : Tree n)
               → .⦃ is-linear S ⦄
@@ -169,4 +173,4 @@ stm-to-label : (S : Tree n)
               → .⦃ tree-dim S ≃n sty-dim As ⦄
               → Label X S
 stm-to-label Sing a As P = a
-stm-to-label (Join S Sing) a (SArr s As t) = extend-disc-label (stm-to-label S s As) t a
+stm-to-label (susp S) a (SArr s As t) = extend-disc-label (stm-to-label S s As) t a

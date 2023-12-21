@@ -436,6 +436,17 @@ label-from-insertion-≃ (Join S₁ S₂) (BPShift P) T p q .get PHere = p .get 
 label-from-insertion-≃ (Join S₁ S₂) (BPShift P) T p q .get (PExt Z) = p .get (PExt Z)
 label-from-insertion-≃ (Join S₁ S₂) (BPShift P) T p q .get (PShift Z) = label-from-insertion-≃ S₂ P T [ (λ Z → p .get (PShift Z)) ] q .get Z
 
+label-from-prune-≃ : (S : Tree n)
+                   → (p : BranchingPoint S d)
+                   → {L : Label X S}
+                   → {L′ : Label Y S}
+                   → {M : Label X (n-disc (pred (height-of-branching p)))}
+                   → {M′ : Label Y (n-disc (pred (height-of-branching p)))}
+                   → L ≃l L′
+                   → M ≃l M′
+                   → label-from-prune S p L M ≃l label-from-prune S p L′ M′
+label-from-prune-≃ S P p q = label-from-insertion-≃ S P (n-disc (pred (height-of-branching P))) ⦃ prune-tree-lem S P ⦄ p q
+
 connect-bp-left : (S : Tree n)
                 → (T : Tree m)
                 → (P : BranchingPoint S l)
@@ -1138,7 +1149,7 @@ insertion-tree-pruned-bp : (S : Tree n)
                          → insertion-tree (prune-tree S p) (pruned-bp S p q) T ≃′ insertion-tree S p T
 insertion-tree-pruned-bp (Join S₁ S₂) (BPExt p) (susp T) q = Join≃′ (insertion-tree-pruned-bp S₁ p T (≤-pred q)) refl≃′
 insertion-tree-pruned-bp (Join S₁ S₂) (BPShift p) T q = Join≃′ refl≃′ (insertion-tree-pruned-bp S₂ p T q)
-insertion-tree-pruned-bp (Join (Join S₁ Sing) S₂) BPHere T q = refl≃′
+insertion-tree-pruned-bp (Join (susp S₁) S₂) BPHere T q = refl≃′
 
 
 pruned-bp-prop-2 : (S : Tree n)
@@ -1155,98 +1166,153 @@ pruned-bp-prop-2 (Join S T) (BPExt p) q = compute-≃ (SExt≃ (pruned-bp-prop-2
 pruned-bp-prop-2 (Join S T) (BPShift p) q = compute-≃ (SShift≃ refl≃ (pruned-bp-prop-2 T p q))
 pruned-bp-prop-2 (Join (susp S) T) BPHere q = refl≃stm
 
+label-from-pruned-bp-lem : (n : ℕ)
+                   → .⦃ NonZero n ⦄
+                   → (T : Tree m)
+                   → .⦃ _ : has-trunk-height l T ⦄
+                   → (As : STy (someTree (chop-trunk l T)))
+                   → ⦃ _ : n ≃n l + suc (sty-dim As) ⦄
+                   → tree-dim (n-disc (pred n)) ≃n sty-dim (resuspend l As)
+label-from-pruned-bp-lem {l = l} (suc n) T As ⦃ p ⦄ = ≡-to-≃n (begin
+  tree-dim (n-disc n)
+    ≡⟨ ≃n-to-≡ tree-dim-n-disc ⟩
+  n
+    ≡⟨ cong pred (≃n-to-≡ p) ⟩
+  pred (l + suc (sty-dim As))
+    ≡⟨ cong pred (+-suc l (sty-dim As)) ⟩
+  l + sty-dim As
+    ≡˘⟨ sty-dim-resuspend l T As ⟩
+  sty-dim (resuspend l As) ∎)
+  where
+    open ≡-Reasoning
 
--- pruned-bp-prop : (S : Tree n)
---                → (p : BranchingPoint S l)
---                → (T : Tree m)
---                → .⦃ _ : has-trunk-height l T ⦄
---                → .(q : bp-height p < pred (height-of-branching p))
---                → (L : Label X S)
---                → (M : Label-WT X T)
---                → (label-from-insertion S
---                                            p
---                                            (n-disc (pred (height-of-branching p)))
---                                            ⦃ ? ⦄
---                                            L
---                                            ? -- (label-from-linear-tree-unbiased (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ T 0 ●l M)
---                                            (branching-path-to-path (pruned-bp S p q)))
---                ≃stm (unbiased-comp′ (pred (height-of-branching p)) T >>= M)
--- pruned-bp-prop (Join S₁ S₂) (BPExt p) (susp T) q L M = let
---   instance .x : has-trunk-height (bp-height p) (n-disc (height-of-branching′ p))
---   x = is-linear-has-trunk-height (bp-height p) (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-trans (<⇒≤ (≤-pred q)) (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p))))))
---   instance _ = n-disc-is-linear (height-of-branching′ p)
---   in begin
---   < label-from-insertion S₁ p (n-disc (height-of-branching′ p)) ⦃ x ⦄
---        (L ∘ PExt)
---        (label-from-linear-tree-unbiased (n-disc (height-of-branching′ p)) (susp T) 1 ●l M)
---        (branching-path-to-path (pruned-bp S₁ p _)) >stm
---     ≈⟨ label-from-insertion-≃ S₁ p (n-disc (height-of-branching′ p)) ⦃ x ⦄ refl≃l (label-comp-≃ (lfltu-susp (n-disc (height-of-branching′ p)) T 0) (refl≃l {L = ap M}) refl≃sty) .get (branching-path-to-path (pruned-bp S₁ p _)) ⟩
---   < label-from-insertion S₁ p (n-disc (height-of-branching′ p)) ⦃ x ⦄
---        (L ∘ PExt)
---        (label-from-linear-tree-unbiased (n-disc (height-of-branching′ p)) T 0 ●l (label₁ M))
---        (branching-path-to-path (pruned-bp S₁ p _)) >stm
---     ≈⟨ pruned-bp-prop S₁ p T (≤-pred q) (L ∘ PExt) (label₁ M) ⟩
---   < unbiased-comp′ (pred (height-of-branching p)) T >>= label₁ M >stm ∎
---   where
---     open Reasoning stm-setoid
--- pruned-bp-prop (Join S₁ S₂) (BPShift p) T q L M = pruned-bp-prop S₂ p T q (L ∘ PShift) M
--- pruned-bp-prop (Join (Join S₁ Sing) S₂) BPHere T q L M = let
---   instance _ = n-disc-is-linear (suc (tree-dim S₁))
---   in begin
---   < label-from-linear-tree-unbiased (n-disc (suc (tree-dim S₁))) T 0
---        (is-linear-max-path (n-disc (suc (tree-dim S₁)))) >>= M >stm
---     ≈⟨ >>=-≃ (lfltu-maximal-path (n-disc (suc (tree-dim S₁))) T 0 (is-linear-max-path (n-disc (suc (tree-dim S₁)))) ⦃ is-linear-max-path-max (n-disc (suc (tree-dim S₁))) ⦄) refl≃l refl≃sty ⟩
---   < unbiased-comp′ (suc (tree-dim (n-disc (tree-dim S₁)))) T >>= M >stm
---     ≈⟨ >>=-≃ (unbiased-comp′-≃ {d = suc (tree-dim (n-disc (tree-dim S₁)))} {d′ = suc (tree-dim S₁)} (cong suc (tree-dim-n-disc (tree-dim S₁))) (refl≃ {T = T})) (refl≃l {L = ap M}) refl≃sty ⟩
---   < unbiased-comp′ (suc (tree-dim S₁)) T >>= M >stm ∎
---   where
---     open Reasoning stm-setoid
+label-from-pruned-bp : (S : Tree n)
+               → (p : BranchingPoint S l)
+               → (T : Tree m)
+               → .⦃ _ : has-trunk-height l T ⦄
+               → .(q : bp-height p < pred (height-of-branching p))
+               → (L : Label X S)
+               → (M : Label-WT X T)
+               → (s : STm (someTree (chop-trunk l T)))
+               → (As : STy (someTree (chop-trunk l T)))
+               → .⦃ x : height-of-branching p ≃n l + suc (sty-dim As) ⦄
+               → L (branching-path-to-path p) ≃stm SCoh T (resuspend l (SArr s As s)) M
+               → label-from-insertion (prune-tree S p)
+                                      (pruned-bp S p q)
+                                      T
+                                      (label-from-prune S p L
+                                                        (stm-to-label (n-disc (pred (height-of-branching p)))
+                                                                      (resuspend-stm l s)
+                                                                      (resuspend l As)
+                                                                      ⦃ label-from-pruned-bp-lem (height-of-branching p) T As ⦃ x ⦄ ⦄
+                                                         ●l M))
+                                      (ap M)
+                 ≃lm
+                 label-≃ (insertion-tree-pruned-bp S p T q)
+                         (label-from-insertion S p T L (ap M))
+label-from-pruned-bp (Join S₁ S₂) (BPExt {n = n} p) (susp T) q L M s As pf .get (PExt Z) = let
+    instance _ = label-from-pruned-bp-lem {l = suc n} (suc (height-of-branching p)) (susp T) As
+  in begin
+  < label-from-insertion
+      (prune-tree S₁ p)
+      (pruned-bp S₁ p _) T
+      (label-from-prune S₁ p (L ∘ PExt)
+         ((stm-to-label (n-disc (height-of-branching p))
+                        (SExt (resuspend-stm n s))
+                        (map-sty-ext (resuspend n As))
+          ●l M) ∘ PExt))
+      (ap M ∘ PExt) Z >stm
+    ≈⟨ label-from-insertion-≃
+         (prune-tree S₁ p)
+         (pruned-bp S₁ p _)
+         T
+         (label-from-prune-≃ S₁ p refl≃l (label-comp-≃ [ (λ P → lem .get (PExt P)) ] refl≃l refl≃sty))
+         refl≃l
+         .get Z ⟩
+  < label-from-insertion
+      (prune-tree S₁ p)
+      (pruned-bp S₁ p _) T
+      (label-from-prune S₁ p (L ∘ PExt)
+         (stm-to-label (n-disc (pred (height-of-branching p))) (resuspend-stm n s) (resuspend n As) ⦃ _ ⦄
+          ●l label₁ M))
+      (ap M ∘ PExt) Z >stm
+    ≈⟨ label-from-pruned-bp S₁ p T (≤-pred q) (L ∘ PExt) (label₁ M) s As l1 .get Z  ⟩
+  < label-≃ (insertion-tree-pruned-bp S₁ p T _)
+            (label-from-insertion S₁ p T (λ x₁ → L (PExt x₁)) (ap (label₁ M)))
+            Z >stm ∎
+  where
+    lem : stm-to-label (n-disc (height-of-branching p))
+                     (SExt {T = Sing} (resuspend-stm n s))
+                     (map-sty-ext (resuspend n As)) ⦃ _ ⦄
+              ≃l
+              susp-label-full
+                (stm-to-label (n-disc (pred (height-of-branching p)))
+                              (resuspend-stm n s)
+                              (resuspend n As) ⦃ _ ⦄)
+    lem = begin
+       < stm-to-label (n-disc (height-of-branching p))
+                     (SExt (resuspend-stm n s))
+                     (map-sty-ext (resuspend n As)) ⦃ _ ⦄ >l
+        ≈⟨ stm-to-label-≃ (n-disc (height-of-branching p)) refl≃stm (map-sty-ext-susp-compat (resuspend n As)) ⦃ _ ⦄ ⟩
+      < stm-to-label (n-disc (height-of-branching p))
+                     (SExt (resuspend-stm n s))
+                     (susp-sty (resuspend n As)) ⦃ _ ⦄ >l
+        ≈⟨ stm-to-label-susp (n-disc (pred (height-of-branching p))) (resuspend-stm n s) (resuspend n As) ⦃ _ ⦄ ⟩
+      < susp-label-full
+        (stm-to-label (n-disc (pred (height-of-branching p)))
+                      (resuspend-stm n s)
+                      (resuspend n As) ⦃ _ ⦄) >l ∎
+      where open Reasoning (label-setoid (n-disc (height-of-branching p)))
 
--- pruned-bp-label-from : (S : Tree n)
---                    → (p : BranchingPoint S l)
---                    → (T : Tree m)
---                    → .⦃ _ : has-trunk-height l T ⦄
---                    → .(q : bp-height p < pred (height-of-branching p))
---                    → (L : Label X S)
---                    → (M : Label-WT X T)
---                    → label-from-insertion (prune-tree S p) (pruned-bp S p q) T (label-from-insertion S
---                                            p
---                                            (n-disc (pred (height-of-branching p)))
---                                            ⦃ ? ⦄
---                                            L
---                                            (label-from-linear-tree-unbiased (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ T 0 ●l M)) (ap M)
---                    ≃lm label-≃ (insertion-tree-pruned-bp S p T q) (label-from-insertion S p T L (ap M))
--- pruned-bp-label-from (Join S₁ S₂) (BPExt p) (susp T) q L M .get (PExt Z) = let
---   instance .x : has-trunk-height (bp-height p) (n-disc (height-of-branching′ p))
---   x = is-linear-has-trunk-height (bp-height p) (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-trans (<⇒≤ (≤-pred q)) (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p))))))
---   instance _ = n-disc-is-linear (height-of-branching′ p)
---   in begin
---   < label-from-insertion
---        (prune-tree S₁ p)
---        (pruned-bp S₁ p _) T
---        (label-from-insertion S₁ p (n-disc (height-of-branching′ p)) ⦃ x ⦄
---           (L ∘ PExt)
---           (label-from-linear-tree-unbiased (n-disc (height-of-branching′ p)) (susp T) 1 ●l M))
---        (ap M ∘ PExt) Z >stm
---     ≈⟨ label-from-insertion-≃ (prune-tree S₁ p) (pruned-bp S₁ p _) T (label-from-insertion-≃ S₁ p (n-disc (pred (height-of-branching p))) ⦃ x ⦄ refl≃l (label-comp-≃ (lfltu-susp (n-disc (height-of-branching′ p)) T 0) refl≃l refl≃sty)) refl≃l .get Z ⟩
---   < label-from-insertion
---       (prune-tree S₁ p)
---       (pruned-bp S₁ p _) T
---       (label-from-insertion S₁ p (n-disc (height-of-branching′ p)) ⦃ x ⦄
---         (L ∘ PExt)
---         (label-from-linear-tree-unbiased (n-disc (pred (height-of-branching p))) T 0 ●l label₁ M))
---       (ap M ∘ PExt) Z >stm
---     ≈⟨ pruned-bp-label-from S₁ p T (≤-pred q) (L ∘ PExt) (label₁ M) .get Z ⟩
---   < label-≃ (insertion-tree-pruned-bp S₁ p T _) (label-from-insertion S₁ p T (L ∘ PExt) (ap M ∘ PExt)) Z >stm ∎
---   where
---     open Reasoning stm-setoid
--- pruned-bp-label-from (Join S₁ S₂) (BPExt p) (susp T) q L M .get (PShift Z) = replace-not-here (replace-label (L ∘ PShift) (ap M (PShift PHere))) (ap M (PShift PHere)) Z
--- pruned-bp-label-from (Join S₁ S₂) (BPShift p) T q L M .get (PExt Z) = refl≃stm
--- pruned-bp-label-from (Join S₁ S₂) (BPShift p) T q L M .get (PShift Z) = pruned-bp-label-from S₂ p T q (L ∘ PShift) M .get Z
--- pruned-bp-label-from (Join (Join S₁ Sing) Sing) BPHere T q L M = ≃l-to-≃lm (connect-label-sing (ap M) _ _)
--- pruned-bp-label-from (Join (Join S₁ Sing) (Join S₂ S₃)) BPHere T q L M
---   = connect-label-≃m (refl≃lm {L = ap M}) (replace-join-≃lm (L ∘ PShift) _)
 
+    open Reasoning stm-setoid
+    l1 : L (PExt (branching-path-to-path p)) ≃stm SCoh T (resuspend n (SArr s As s)) (label₁ M)
+    l1 = begin
+      < L (PExt (branching-path-to-path p)) >stm
+        ≈⟨ pf ⟩
+      < SCoh (susp T) (resuspend (suc n) (SArr s As s)) M >stm
+        ≈⟨ SCoh≃ (susp T)
+                 (map-sty-ext-susp-compat (resuspend n (SArr s As s)))
+                 (sym≃l (unrestrict-label₁ M))
+                 refl≃sty ⟩
+      <
+       SCoh (susp T) (susp-sty (resuspend n (SArr s As s)))
+       (unrestrict-label (label₁ M) ,, lty M)
+       >stm
+        ≈˘⟨ SCoh-unrestrict T (resuspend n (SArr s As s)) (label₁ M) ⟩
+      < SCoh T (resuspend n (SArr s As s)) (label₁ M) >stm ∎
+
+
+
+label-from-pruned-bp (Join S₁ S₂) (BPExt {n = n} p) (susp T) q L M s As pf .get (PShift Z) = let
+    instance _ = label-from-pruned-bp-lem {l = suc n} (suc (height-of-branching p)) (susp T) As
+  in begin
+  < replace-label
+       (replace-label (L ∘ PShift)
+          (stm-to-label (n-disc (height-of-branching p))
+           (SExt (resuspend-stm n s)) (map-sty-ext (resuspend n As))
+           (PShift PHere)
+           >>= M))
+       (ap M (PShift PHere)) Z >stm
+    ≈⟨ replace-not-here _ _ Z ⟩
+  < replace-label (L ∘ PShift)
+                  (stm-to-label (n-disc (height-of-branching p))
+                                (SExt (resuspend-stm n s))
+                                (map-sty-ext (resuspend n As))
+                                (PShift PHere) >>= M)
+                  Z >stm
+    ≈⟨ replace-not-here _ _ Z ⟩
+  < L (PShift Z) >stm
+    ≈˘⟨ replace-not-here _ _ Z ⟩
+  < replace-label (L ∘ PShift) (ap M (PShift PHere)) Z >stm ∎
+  where
+    open Reasoning stm-setoid
+label-from-pruned-bp (Join S₁ S₂) (BPShift p) T q L M s As pf .get (PExt Z) = refl≃stm
+label-from-pruned-bp {l = l} (Join S₁ S₂) (BPShift p) T q L M s As pf .get (PShift Z)
+  = label-from-pruned-bp S₂ p T q (L ∘ PShift) M s As pf .get Z
+label-from-pruned-bp (susp (susp S₁)) BPHere T q L M s As pf = ≃l-to-≃lm (connect-label-sing (ap M) _ _)
+label-from-pruned-bp (Join (susp S₁) (Join S₂ S₃)) BPHere T q L M s As pf
+  = connect-label-≃m (refl≃lm {L = ap M}) (replace-join-≃lm (L ∘ PShift) _)
 
 insertion-linear-height : (S : Tree n)
                         → .⦃ non-linear S ⦄

@@ -126,3 +126,10 @@ prune-tree : (S : Tree n)
            → (p : BranchingPoint S d)
            → Tree (insertion-tree-size S p (n-disc (pred (height-of-branching p))) ⦃ prune-tree-lem S p ⦄)
 prune-tree S p = insertion-tree S p (n-disc (pred (height-of-branching p))) ⦃ prune-tree-lem S p ⦄
+
+label-from-prune : (S : Tree n)
+                 → (p : BranchingPoint S d)
+                 → (L : Label X S)
+                 → (M : Label X (n-disc (pred (height-of-branching p))))
+                 → Label X (prune-tree S p)
+label-from-prune S p L M = label-from-insertion S p (n-disc (pred (height-of-branching p))) ⦃ prune-tree-lem S p ⦄ L M

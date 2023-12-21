@@ -921,3 +921,8 @@ map-sty-ext-proj {As = SArr s As t} {Bs = SArr s₁ Bs t₁} p
   = SArr≃ (SExt-proj (SArr≃-proj₁ p)) (map-sty-ext-proj (SArr≃-proj₂ p)) (SExt-proj (SArr≃-proj₃ p))
 map-sty-ext-proj {As = SArr _ S⋆ _} {Bs = S⋆} [ Arr≃ _ () _ ]
 map-sty-ext-proj {As = SArr _ (SArr _ _ _) _} {Bs = S⋆} [ Arr≃ _ () _ ]
+
+unrestrict-label₁ : (L : Label-WT X (susp S)) → unrestrict-label (label₁ L) ≃l ap L
+unrestrict-label₁ L .get PHere = refl≃stm
+unrestrict-label₁ L .get (PExt Z) = refl≃stm
+unrestrict-label₁ L .get (PShift PHere) = refl≃stm

@@ -15,6 +15,7 @@ open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.Construct
+open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Structured.ToTerm
 
 data BranchingPoint : Tree n → ℕ → Set where
@@ -133,3 +134,34 @@ label-from-prune : (S : Tree n)
                  → (M : Label X (n-disc (pred (height-of-branching p))))
                  → Label X (prune-tree S p)
 label-from-prune S p L M = label-from-insertion S p (n-disc (pred (height-of-branching p))) ⦃ prune-tree-lem S p ⦄ L M
+
+module _ where
+  open ≡-Reasoning
+  prune-label : (S : Tree n)
+              → (p : BranchingPoint S d)
+              → Label (someTree (prune-tree S p)) S
+  prune-label {d = d} S p = let
+    instance _ = prune-tree-lem S p
+    instance _ = chop-trunk-linear (n-disc (pred (height-of-branching p)))
+                                   (≤-trans (≤-pred (bp-height-<-hob p))
+                                            (≤-reflexive (sym (≃n-to-≡ tree-dim-n-disc))))
+    instance .lem : height-of-branching p
+                    ≃n
+                    d + suc (sty-dim (disc-sty (chop-trunk d (n-disc (pred (height-of-branching p))))))
+    lem = ≡-to-≃n (begin
+      height-of-branching p
+        ≡˘⟨ cong suc (m+[n∸m]≡n {m = d} {n = height-of-branching′ p} (≤-pred (bp-height-<-hob p))) ⟩
+      suc (d + (pred (height-of-branching p) ∸ d))
+        ≡˘⟨ +-suc d (pred (height-of-branching p) ∸ d) ⟩
+      d + suc (pred (height-of-branching p) ∸ d)
+        ≡˘⟨ cong (λ - → d + suc (- ∸ d)) (≃n-to-≡ tree-dim-n-disc) ⟩
+      d + suc (tree-dim (n-disc (pred (height-of-branching p))) ∸ d)
+        ≡˘⟨ cong (d +_) (cong suc (chop-trunk-dim d (n-disc (pred (height-of-branching p))))) ⟩
+      d + suc (tree-dim (chop-trunk d (n-disc (pred (height-of-branching p)))))
+        ≡˘⟨ cong (d +_) (cong suc (disc-sty-dim (chop-trunk d (n-disc (pred (height-of-branching p)))))) ⟩
+      d + suc (sty-dim (disc-sty (chop-trunk d (n-disc (pred (height-of-branching p)))))) ∎)
+    in exterior-label S p
+                      (n-disc (pred (height-of-branching p)))
+                      (SArr (SPath (is-linear-max-path _))
+                            (disc-sty _)
+                            (SPath (is-linear-max-path _)))

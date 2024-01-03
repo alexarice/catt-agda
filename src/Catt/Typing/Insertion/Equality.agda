@@ -98,6 +98,17 @@ open import Catt.Typing.Insertion rule
 --     where
 --       open Reasoning stm-setoid-≈
 
+pruned-bp-exterior-label : (S : Tree n)
+                         → (p : BranchingPoint S l)
+                         → (T : Tree m)
+                         → .⦃ _ : has-trunk-height l T ⦄
+                         → (q : bp-height p < pred (height-of-branching p))
+                         → (s : STm (someTree (chop-trunk l T)))
+                         → (As : STy (someTree (chop-trunk l T)))
+                         → .⦃ x : height-of-branching p ≃n l + suc (sty-dim As) ⦄
+                         → prune-label S p ●l (exterior-label (prune-tree S) (pruned-bp S p))
+pruned-bp-exterior-label = ?
+
 --   pruned-bp-exterior-sub : (S : Tree n)
 --                          → (p : BranchingPoint S l)
 --                          → (T : Tree m)

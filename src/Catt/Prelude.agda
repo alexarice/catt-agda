@@ -15,6 +15,7 @@ open import Function using (it; _∘_) public
 
 open Reveal_·_is_ public
 
+infixr 2 _×′_
 record _×′_ (A : Set) (B : Set) : Set where
   constructor build
   field

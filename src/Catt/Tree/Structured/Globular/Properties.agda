@@ -51,7 +51,7 @@ truncate-sty-1-map-ext (SArr s S⋆ t) = SArr≃ refl≃stm refl≃sty (compute-
 truncate-sty-1-map-ext (SArr _ (SArr s As t) _) = truncate-sty-1-map-ext (SArr s As t)
 
 truncate-sty-1-1-Full : (As : STy (someTree S)) → ⦃ 1-Full As ⦄ → truncate-sty 1 As ≃sty SArr SHere S⋆ (SPath (last-path S))
-truncate-sty-1-1-Full (SArr s S⋆ t) ⦃ full ⦄ = SArr≃ (full .proj₁) refl≃sty (full .proj₂)
+truncate-sty-1-1-Full (SArr s S⋆ t) = SArr≃ it refl≃sty it
 truncate-sty-1-1-Full (SArr _ As@(SArr _ _ _) _) = truncate-sty-1-1-Full As
 
 truncate-sty′-label : (d : ℕ) → (As : STy (someTree S)) → (L : Label-WT X S) → d ≤ sty-dim As → truncate-sty′ d (As >>=′ L) ≃sty truncate-sty′ d As >>=′ L

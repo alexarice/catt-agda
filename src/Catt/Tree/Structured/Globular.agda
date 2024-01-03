@@ -23,3 +23,6 @@ truncate-sty′ (suc d) As = truncate-sty′ d (sty-base As)
 
 truncate-sty : ℕ → STy X → STy X
 truncate-sty d As = truncate-sty′ (sty-dim As ∸ d) As
+
+has-dim : ℕ → STy X → Set
+has-dim n As = n ≃n sty-dim As

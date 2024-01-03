@@ -32,3 +32,11 @@ tree-inc-label d T b = SPath ∘ tree-inc-label′ d T b ,, S⋆
 
 tree-inc : (d : ℕ) → (T : Tree n) → (b : Bool) → Sub (suc (tree-bd-len d T)) (suc n) ⋆
 tree-inc d T b = label-to-sub (tree-inc-label d T b)
+
+is-linear-bd : (d : ℕ) → (S : Tree n) → .⦃ is-linear S ⦄ → is-linear (tree-bd d S)
+is-linear-bd zero S = tt
+is-linear-bd (suc d) Sing = tt
+is-linear-bd (suc d) (Join S Sing) = inst ⦃ is-linear-bd d S ⦄
+
+disc-inc : (d : ℕ) → (T : Tree n) → .⦃ is-linear T ⦄ → (b : Bool) → Path T
+disc-inc d T b = tree-inc-label′ d T b (is-linear-max-path (tree-bd d T) ⦃ is-linear-bd d T ⦄)

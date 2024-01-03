@@ -51,6 +51,11 @@ stm-setoid = record { Carrier = STM
                                              }
                     }
 
+≃stm-dec : (a : STm X) → (b : STm Y) → Dec (a ≃stm b)
+≃stm-dec a b with ≃tm-dec (stm-to-term a) (stm-to-term b)
+... | yes p = yes [ p ]
+... | no p = no (λ where [ x ] → p x)
+
 _≃sty_ : (a : STy X) → (b : STy Y) → Set
 a ≃sty b = Wrap (λ a b → sty-to-type a ≃ty sty-to-type b) a b
 
@@ -895,7 +900,7 @@ label-to-other-prop L .get P = stm-to-other-prop (L P)
 
 1-Full : STy (someTree T) → Set
 1-Full S⋆ = ⊥
-1-Full {T = T} (SArr s S⋆ t) = s ≃stm (SHere {S = T}) × t ≃stm SPath (last-path T)
+1-Full {T = T} (SArr s S⋆ t) = s ≃stm (SHere {S = T}) ×′ t ≃stm SPath (last-path T)
 1-Full (SArr s As@(SArr _ _ _) t) = 1-Full As
 
 SExt-proj : SExt {T = Sing} a ≃stm SExt {T = Sing} b → a ≃stm b

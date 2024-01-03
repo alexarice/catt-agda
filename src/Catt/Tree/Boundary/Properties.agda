@@ -37,11 +37,6 @@ tree-inc-not-here (suc d) Sing b PHere = ⊥-elim it
 tree-inc-not-here (suc d) (Join S T) b (PExt Z) = tt
 tree-inc-not-here (suc d) (Join S T) b (PShift Z) = tt
 
-is-linear-bd : (d : ℕ) → (S : Tree n) → .⦃ is-linear S ⦄ → is-linear (tree-bd d S)
-is-linear-bd zero S = tt
-is-linear-bd (suc d) Sing = tt
-is-linear-bd (suc d) (Join S Sing) = inst ⦃ is-linear-bd d S ⦄
-
 connect-tree-bd : (d : ℕ)
                 → (S : Tree n)
                 → (T : Tree m)
@@ -179,6 +174,9 @@ tree-inc-label-full (suc d) (Join S T) b p .get PHere = refl≃p
 tree-inc-label-full (suc d) (Join S T) b p .get (PExt Z) = Ext≃ (tree-inc-label-full d S b (m⊔n≤o⇒n≤o (pred (tree-dim T)) (tree-dim S) (≤-pred p)) .get Z) refl≃
 tree-inc-label-full (suc d) (Join S T) b p .get (PShift Z) = Shift≃ refl≃ (tree-inc-label-full (suc d) T b (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p) .get Z)
 
+tree-inc-label-full-is-id : (d : ℕ) → (T : Tree n) → (b : Bool) → .(p : tree-dim T ≤ d) → ap (tree-inc-label d T b) ≃l id-label (tree-bd d T)
+tree-inc-label-full-is-id d T b p .get Z = SPath≃ (trans≃p (tree-inc-label-full d T b p .get Z) (sym≃p (ppath-≃-≃p (tree-bd-full d T p) Z)))
+
 tree-inc-full-preserve-max : (d : ℕ) → (T : Tree n) → (b : Bool) → .(p : tree-dim T ≤ d) → (Z : Path (tree-bd d T)) → .⦃ is-maximal Z ⦄ → is-maximal (tree-inc-label′ d T b Z)
 tree-inc-full-preserve-max d T b p Z = maximal-≃ (trans≃p (ppath-≃-≃p (tree-bd-full d T p) Z) (sym≃p (tree-inc-label-full d T b p .get Z)))
 
@@ -230,6 +228,6 @@ tree-dim-bd″ d T = ≤-trans (≤-reflexive (tree-dim-bd d T)) (m⊓n≤m d (t
 -- tree-inc-susp-lem (suc d) Sing b = refl≃s
 -- tree-inc-susp-lem (suc d) (Join S T) b = sym≃s (id-left-unit _)
 
-bd-linear-height : (d : ℕ) → (T : Tree n) → .(d ≤ linear-height T) → is-linear (tree-bd d T)
-bd-linear-height zero T p = tt
-bd-linear-height (suc d) (Join T Sing) p = inst ⦃ bd-linear-height d T (≤-pred p) ⦄
+bd-trunk-height : (d : ℕ) → (T : Tree n) → .(d ≤ trunk-height T) → is-linear (tree-bd d T)
+bd-trunk-height zero T p = tt
+bd-trunk-height (suc d) (Join T Sing) p = inst ⦃ bd-trunk-height d T (≤-pred p) ⦄

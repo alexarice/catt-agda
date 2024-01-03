@@ -374,7 +374,7 @@ stm-to-label-max : (S : Tree n)
                   → .⦃ _ : is-linear S ⦄
                   → (a : STm X)
                   → (As : STy X)
-                  → .⦃ _ : tree-dim S ≃n sty-dim As ⦄
+                  → .⦃ _ : has-dim (tree-dim S) As ⦄
                   → (Z : Path S)
                   → .⦃ is-maximal Z ⦄
                   → stm-to-label S a As Z ≃stm a
@@ -382,11 +382,11 @@ stm-to-label-max Sing a S⋆ Z = refl≃stm
 stm-to-label-max (Join S Sing) a (SArr s As t) Z = extend-disc-label-max (stm-to-label S s As) t a Z
 
 stm-to-label-disc-sty : (S : Tree n)
-                        → .⦃ _ : is-linear S ⦄
-                        → (a : STm X)
-                        → (As : STy X)
-                        → .⦃ _ : tree-dim S ≃n sty-dim As ⦄
-                        → disc-sty S >>=′ (stm-to-label S a As ,, S⋆) ≃sty As
+                      → .⦃ _ : is-linear S ⦄
+                      → (a : STm X)
+                      → (As : STy X)
+                      → .⦃ _ : has-dim (tree-dim S) As ⦄
+                      → disc-sty S >>=′ (stm-to-label S a As ,, S⋆) ≃sty As
 stm-to-label-disc-sty Sing a S⋆ = refl≃sty
 stm-to-label-disc-sty (Join S Sing) a (SArr s As t) = begin
   < disc-sty (susp-tree S) >>=′ (extend-disc-label (stm-to-label S s As) t a ,, S⋆) >sty
@@ -402,13 +402,13 @@ stm-to-label-disc-sty (Join S Sing) a (SArr s As t) = begin
     open Reasoning sty-setoid
 
 stm-to-label-1-Full-src : (S : Tree n)
-                         → .⦃ _ : is-linear S ⦄
-                         → (a : STm (someTree T))
-                         → (As : STy (someTree T))
-                         → .⦃ _ : tree-dim S ≃n sty-dim As ⦄
-                         → ⦃ 1-Full As ⦄
-                         → stm-to-label S a As PHere ≃stm (SHere {S = T})
-stm-to-label-1-Full-src (Join Sing Sing) a (SArr s S⋆ t) ⦃ _ ⦄ ⦃ full ⦄ = full .proj₁
+                        → .⦃ _ : is-linear S ⦄
+                        → (a : STm (someTree T))
+                        → (As : STy (someTree T))
+                        → .⦃ _ : has-dim (tree-dim S) As ⦄
+                        → .⦃ 1-Full As ⦄
+                        → stm-to-label S a As PHere ≃stm (SHere {S = T})
+stm-to-label-1-Full-src (Join Sing Sing) a (SArr s S⋆ t) ⦃ _ ⦄ ⦃ full ⦄ = recompute (≃stm-dec _ _) it
 stm-to-label-1-Full-src (Join (Join S Sing) Sing) a (SArr s (SArr s′ As t′) t) = begin
   < stm-to-label (Join (Join S Sing) Sing) a (SArr s (SArr s′ As t′) t) PHere >stm
     ≡⟨⟩
@@ -422,10 +422,10 @@ stm-to-label-1-Full-tgt : (S : Tree n)
                          → .⦃ _ : is-linear S ⦄
                          → (a : STm (someTree T))
                          → (As : STy (someTree T))
-                         → .⦃ _ : tree-dim S ≃n sty-dim As ⦄
-                         → ⦃ 1-Full As ⦄
+                         → .⦃ _ : has-dim (tree-dim S) As ⦄
+                         → .⦃ 1-Full As ⦄
                          → stm-to-label S a As (last-path S) ≃stm SPath (last-path T)
-stm-to-label-1-Full-tgt (Join Sing Sing) a (SArr s S⋆ t) ⦃ _ ⦄ ⦃ full ⦄ = full .proj₂
+stm-to-label-1-Full-tgt (Join Sing Sing) a (SArr s S⋆ t) ⦃ _ ⦄ = recompute (≃stm-dec _ _) it
 stm-to-label-1-Full-tgt {T = T} (Join (Join S Sing) Sing) a (SArr s (SArr s′ As t′) t) = begin
   < stm-to-label (Join (Join S Sing) Sing) a (SArr s (SArr s′ As t′) t) (PShift PHere) >stm
     ≡⟨⟩
@@ -448,7 +448,7 @@ stm-to-label-to-sub : (S : Tree n)
                      → .⦃ _ : is-linear S ⦄
                      → (a : STm (someTree T))
                      → (As : STy (someTree T))
-                     → .⦃ _ : tree-dim S ≃n sty-dim As ⦄
+                     → .⦃ _ : has-dim (tree-dim S) As ⦄
                      → label-to-sub (stm-to-label S a As ,, S⋆) ≃s sub-from-disc (sty-dim As) (sty-to-type As) (sty-to-type-dim As) (stm-to-term a)
 stm-to-label-to-sub Sing a S⋆ = refl≃s
 stm-to-label-to-sub (Join S Sing) a (SArr s As t) = begin
@@ -585,8 +585,9 @@ stm-to-label-≃ : {X : MaybeTree m}
                → {As : STy X}
                → {Bs : STy Y}
                → (q : As ≃sty Bs)
-               → .⦃ _ : tree-dim S ≃n sty-dim As ⦄
-               → stm-to-label S a As ≃l stm-to-label S b Bs ⦃ trans≃n it (≡-to-≃n (sty-dim-≃ q)) ⦄
+               → .⦃ _ : has-dim (tree-dim S) As ⦄
+               → .⦃ _ : has-dim (tree-dim S) Bs ⦄
+               → stm-to-label S a As ≃l stm-to-label S b Bs
 stm-to-label-≃ Sing p q .get Z = p
 stm-to-label-≃ (susp S) p {SArr _ _ _} {SArr _ _ _} q
   = extend-disc-label-≃ (stm-to-label-≃ S (SArr≃-proj₁ q) (SArr≃-proj₂ q)) (SArr≃-proj₃ q) p
@@ -622,7 +623,7 @@ stm-to-label-susp : (S : Tree n)
                   → ⦃ _ : is-linear S ⦄
                   → (a : STm X)
                   → (As : STy X)
-                  → .⦃ _ : tree-dim S ≃n sty-dim As ⦄
+                  → .⦃ _ : has-dim (tree-dim S) As ⦄
                   → stm-to-label (susp S) (susp-stm a) (susp-sty As)
                     ⦃ trans≃n inst (≡-to-≃n (sym (susp-sty-dim As))) ⦄
                     ≃l

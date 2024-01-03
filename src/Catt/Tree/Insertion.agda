@@ -11,6 +11,7 @@ open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
+open import Catt.Tree.Canonical
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Globular
@@ -69,19 +70,31 @@ branching-path-to-type (Join S T) (BPHere) = map-sty-ext (disc-sty S)
 branching-path-to-type (Join S T) (BPExt P) = map-sty-ext (branching-path-to-type S P)
 branching-path-to-type (Join S T) (BPShift P) = map-sty-shift (branching-path-to-type T P)
 
+exterior-label′ : (S : Tree n)
+                → (p : BranchingPoint S d)
+                → (T : Tree m)
+                → .⦃ _ : has-trunk-height d T ⦄
+                → (As : STy (someTree (chop-trunk d T)))
+                → .⦃ has-dim (height-of-branching p ∸ d) As ⦄
+                → Label (someTree (insertion-tree S p T)) S
+exterior-label′ (Join S₁ S₂) BPHere T As
+  = label-between-connect-trees (replace-label (stm-to-label (susp-tree S₁) (sty-to-coh As) As) SHere) SPath
+exterior-label′ (Join S₁ S₂) (BPExt p) (susp T) As
+  = label-between-joins (exterior-label′ S₁ p T As) SPath
+exterior-label′ (Join S₁ S₂) (BPShift p) T A
+  = label-between-joins SPath (exterior-label′ S₂ p T A)
+
 exterior-label : (S : Tree n)
                → (p : BranchingPoint S d)
                → (T : Tree m)
                → .⦃ _ : has-trunk-height d T ⦄
-               → (As : STy (someTree (chop-trunk d T)))
-               → .⦃ height-of-branching p ≃n d + sty-dim As ⦄
                → Label (someTree (insertion-tree S p T)) S
-exterior-label (Join S₁ S₂) BPHere T As
-  = label-between-connect-trees (replace-label (stm-to-label (susp-tree S₁) (sty-to-coh As) As) SHere) SPath
-exterior-label (Join S₁ S₂) (BPExt p) (susp T) As
-  = label-between-joins (exterior-label S₁ p T As) SPath
-exterior-label (Join S₁ S₂) (BPShift p) T A
-  = label-between-joins SPath (exterior-label S₂ p T A)
+exterior-label (Join S₁ S₂) BPHere T
+  = label-between-connect-trees (replace-label (canonical-label (susp S₁) T) SHere) SPath
+exterior-label (Join S₁ S₂) (BPExt p) (susp T)
+  = label-between-joins (exterior-label S₁ p T) SPath
+exterior-label (Join S₁ S₂) (BPShift p) T
+  = label-between-joins SPath (exterior-label S₂ p T)
 
 label-from-insertion : (S : Tree n)
                      → (p : BranchingPoint S d)
@@ -160,8 +173,4 @@ module _ where
       d + suc (tree-dim (chop-trunk d (n-disc (pred (height-of-branching p)))))
         ≡˘⟨ cong (d +_) (cong suc (disc-sty-dim (chop-trunk d (n-disc (pred (height-of-branching p)))))) ⟩
       d + suc (sty-dim (disc-sty (chop-trunk d (n-disc (pred (height-of-branching p)))))) ∎)
-    in exterior-label S p
-                      (n-disc (pred (height-of-branching p)))
-                      (SArr (SPath (is-linear-max-path _))
-                            (disc-sty _)
-                            (SPath (is-linear-max-path _)))
+    in exterior-label S p (n-disc (pred (height-of-branching p)))

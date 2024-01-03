@@ -167,10 +167,10 @@ extend-disc-label {S = susp S} L t a (PExt P) = extend-disc-label (L ∘ PExt) t
 extend-disc-label {S = susp S} L t a (PShift PHere) = L (PShift PHere)
 
 stm-to-label : (S : Tree n)
-              → .⦃ is-linear S ⦄
-              → (a : STm X)
-              → (As : STy X)
-              → .⦃ tree-dim S ≃n sty-dim As ⦄
-              → Label X S
+             → .⦃ is-linear S ⦄
+             → (a : STm X)
+             → (As : STy X)
+             → .⦃ has-dim (tree-dim S) As ⦄
+             → Label X S
 stm-to-label Sing a As P = a
 stm-to-label (susp S) a (SArr s As t) = extend-disc-label (stm-to-label S s As) t a

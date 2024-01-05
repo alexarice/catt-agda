@@ -29,8 +29,8 @@ susp-tm (Coh Δ A σ) = Coh (susp-ctx Δ) (susp-ty A) (susp-sub σ)
 restrict ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ s t = ⟨⟩
 restrict ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = ⟨ restrict σ s t , u ⟩
 
-unrestrict {s = s} {A = A} {t = t} ⟨⟩  = ⟨ ⟨ ⟨⟩ {A = A} , s ⟩ , t ⟩
 unrestrict ⟨ σ , u ⟩ = ⟨ unrestrict σ , u ⟩
+unrestrict {s = s} {A = A} {t = t} ⟨⟩  = ⟨ ⟨ ⟨⟩ {A = A} , s ⟩ , t ⟩
 
 susp-sub-res ⟨⟩ = ⟨⟩
 susp-sub-res ⟨ σ , t ⟩ = ⟨ susp-sub-res σ , susp-tm t ⟩

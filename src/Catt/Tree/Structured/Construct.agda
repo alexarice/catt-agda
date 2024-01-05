@@ -60,14 +60,6 @@ map-sty-ext : STy (someTree S) → STy (someTree (Join S T))
 map-sty-ext S⋆ = SArr SHere S⋆ (SShift (SPath PHere))
 map-sty-ext (SArr s A t) = SArr (SExt s) (map-sty-ext A) (SExt t)
 
-resuspend-stm : {S : Tree n} → (d : ℕ) → .⦃ _ : has-trunk-height d S ⦄ → STm (someTree (chop-trunk d S)) → STm (someTree S)
-resuspend-stm zero s = s
-resuspend-stm {S = susp S} (suc d) s = SExt (resuspend-stm d s)
-
-resuspend : {S : Tree n} → (d : ℕ) → .⦃ _ : has-trunk-height d S ⦄ → STy (someTree (chop-trunk d S)) → STy (someTree S)
-resuspend zero As = As
-resuspend {S = susp S} (suc d) As = map-sty-ext (resuspend d As)
-
 map-ext : Label-WT (someTree S) U → Label-WT (someTree (Join S T)) U
 map-ext L = SExt ∘ ap L ,, (map-sty-ext (lty L))
 
@@ -77,6 +69,14 @@ map-sty-shift (SArr s A t) = SArr (SShift s) (map-sty-shift A) (SShift t)
 
 map-shift : Label-WT (someTree T) U → Label-WT (someTree (Join S T)) U
 map-shift L = SShift ∘ ap L ,, map-sty-shift (lty L)
+
+resuspend-stm : {S : Tree n} → (d : ℕ) → .⦃ _ : has-trunk-height d S ⦄ → STm (someTree (chop-trunk d S)) → STm (someTree S)
+resuspend-stm zero s = s
+resuspend-stm {S = susp S} (suc d) s = SExt (resuspend-stm d s)
+
+resuspend : {S : Tree n} → (d : ℕ) → .⦃ _ : has-trunk-height d S ⦄ → STy (someTree (chop-trunk d S)) → STy (someTree S)
+resuspend zero As = As
+resuspend {S = susp S} (suc d) As = map-sty-ext (resuspend d As)
 
 replace-label : Label X S → STm X → Label X S
 replace-label L P PHere = P

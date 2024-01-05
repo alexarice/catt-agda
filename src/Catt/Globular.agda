@@ -22,15 +22,15 @@ tm-to-ty Γ (Coh Δ A σ) = A [ σ ]ty
 tm-height : Ctx n → Tm n → ℕ
 tm-height Γ t = ty-dim (tm-to-ty Γ t)
 
+ty-base : Ty n → Ty n
+ty-base ⋆ = ⋆
+ty-base (s ─⟨ A ⟩⟶ t) = A
+
 ty-src : (A : Ty n) → .⦃ NonZero (ty-dim A) ⦄ → Tm n
 ty-src (s ─⟨ A ⟩⟶ t) = s
 
 ty-tgt : (A : Ty n) → .⦃ NonZero (ty-dim A) ⦄ → Tm n
 ty-tgt (s ─⟨ A ⟩⟶ t) = t
-
-ty-base : Ty n → Ty n
-ty-base ⋆ = ⋆
-ty-base (s ─⟨ A ⟩⟶ t) = A
 
 ty-src′ : Ty (suc n) → Tm (suc n)
 ty-src′ ⋆ = 0V

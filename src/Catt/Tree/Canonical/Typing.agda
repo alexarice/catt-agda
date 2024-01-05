@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Unbiased.Typing {index : Set}
+module Catt.Tree.Canonical.Typing {index : Set}
                                  (rule : index → Rule)
                                  (lift-rule : ∀ i → LiftRule rule (rule i))
                                  (susp-rule : ∀ i → SuspRule rule (rule i))
@@ -10,8 +10,8 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Tree
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
+open import Catt.Tree.Canonical
+open import Catt.Tree.Canonical.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
@@ -22,36 +22,39 @@ open import Catt.Tree.Structured.Typing rule
 open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
 
-unbiased-type-Ty : (d : ℕ) → (T : Tree n) → Typing-STy (tree-to-ctx T) (unbiased-type d T)
-unbiased-stm-Ty : (d : ℕ) → (T : Tree n) → Typing-STm (tree-to-ctx T) (unbiased-stm d T) (unbiased-type d T)
-unbiased-comp-Ty : (d : ℕ) → (T : Tree n) → Typing-STm (tree-to-ctx T) (unbiased-comp d T) (unbiased-type d T)
+canonical-type-Ty : (d : ℕ) → (T : Tree n) → Typing-STy (tree-to-ctx T) (canonical-type d T)
+canonical-stm-Ty : (d : ℕ) → (T : Tree n) → Typing-STm (tree-to-ctx T) (canonical-stm d T) (canonical-type d T)
+canonical-comp-Ty : (d : ℕ) → (T : Tree n) → Typing-STm (tree-to-ctx T) (canonical-comp d T) (canonical-type d T)
 
-unbiased-type-Ty zero T = TySStar
-unbiased-type-Ty (suc d) T
-  = TySArr (TySConv (>>=-Ty (unbiased-stm-Ty d (tree-bd d T)) (tree-inc-Ty d T false) TySStar) (reflexive≈sty (sym≃sty (unbiased-type-prop d T d ≤-refl false))))
-           (unbiased-type-Ty d T)
-           (TySConv (>>=-Ty (unbiased-stm-Ty d (tree-bd d T)) (tree-inc-Ty d T true) TySStar) (reflexive≈sty (sym≃sty (unbiased-type-prop d T d ≤-refl true))))
+canonical-type-Ty zero T = TySStar
+canonical-type-Ty (suc d) T
+  = TySArr (TySConv (>>=-Ty (canonical-stm-Ty d (tree-bd d T)) (tree-inc-Ty d T false) TySStar) (reflexive≈sty (sym≃sty (canonical-type-prop d T d ≤-refl false))))
+           (canonical-type-Ty d T)
+           (TySConv (>>=-Ty (canonical-stm-Ty d (tree-bd d T)) (tree-inc-Ty d T true) TySStar) (reflexive≈sty (sym≃sty (canonical-type-prop d T d ≤-refl true))))
 
-unbiased-stm-Ty zero Sing = TySPath PHere
-unbiased-stm-Ty zero (Join T₁ T₂) = unbiased-comp-Ty zero (Join T₁ T₂)
-unbiased-stm-Ty (suc d) Sing = unbiased-comp-Ty (suc d) Sing
-unbiased-stm-Ty (suc d) (Join T Sing) = TySConv (TySExt (unbiased-stm-Ty d T)) (reflexive≈sty (trans≃sty (map-sty-ext-susp-compat (unbiased-type d T)) (unbiased-type-susp-lem d T)))
-unbiased-stm-Ty (suc d) (Join T (Join T₁ T₂)) = unbiased-comp-Ty (suc d) (Join T (Join T₁ T₂))
+canonical-stm-Ty zero Sing = TySPath PHere
+canonical-stm-Ty zero (Join T₁ T₂) = canonical-comp-Ty zero (Join T₁ T₂)
+canonical-stm-Ty (suc d) Sing = canonical-comp-Ty (suc d) Sing
+canonical-stm-Ty (suc d) (Join T Sing) = TySConv (TySExt (canonical-stm-Ty d T)) (reflexive≈sty (trans≃sty (map-sty-ext-susp-compat (canonical-type d T)) (canonical-type-susp-lem d T)))
+canonical-stm-Ty (suc d) (Join T (Join T₁ T₂)) = canonical-comp-Ty (suc d) (Join T (Join T₁ T₂))
 
-unbiased-comp-Ty d T = TySConv (TySCoh T (unbiased-type-Ty d T) (id-label-Ty T) TySStar) (reflexive≈sty (>>=′-id (unbiased-type d T)))
+canonical-comp-Ty d T = TySConv (TySCoh T (canonical-type-Ty d T) (id-label-Ty T) TySStar) (reflexive≈sty (>>=′-id (canonical-type d T)))
 
-unbiased-comp′-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → Typing-STm (tree-to-ctx T) (unbiased-comp′ d T) (unbiased-type d T)
-unbiased-comp′-Ty d T = transport-stm-typing (unbiased-comp-Ty d T) (sym≃stm (unbiased-comp′-compat d T)) refl≃sty
+canonical-comp′-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → Typing-STm (tree-to-ctx T) (canonical-comp′ d T) (canonical-type d T)
+canonical-comp′-Ty d T = transport-stm-typing (canonical-comp-Ty d T) (sym≃stm (canonical-comp′-compat d T)) refl≃sty
 
-label-from-linear-tree-unbiased-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → .⦃ NonZero (tree-dim S + d) ⦄ → Typing-Label (tree-to-ctx T) (label-from-linear-tree-unbiased S T d ,, unbiased-type d T)
-label-from-linear-tree-unbiased-Ty Sing T d = TySing (unbiased-comp′-Ty d ⦃ it ⦄ T)
-label-from-linear-tree-unbiased-Ty (Join S Sing) T d
-  = TyJoin (transport-stm-typing (>>=-Ty (unbiased-stm-Ty d (tree-bd d T)) (tree-inc-Ty d T false) TySStar) refl≃stm (sym≃sty (unbiased-type-prop d T d ≤-refl false)))
-           (label-from-linear-tree-unbiased-Ty S T (suc d) ⦃ NonZero-subst (sym (+-suc (tree-dim S) d)) it ⦄)
-           (TySing (transport-stm-typing (>>=-Ty (unbiased-stm-Ty d (tree-bd d T)) (tree-inc-Ty d T true) TySStar) refl≃stm (sym≃sty (unbiased-type-prop d T d ≤-refl true))))
+canonical-label-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → .⦃ NonZero (tree-dim S) ⦄ → (T : Tree m) → Typing-Label (tree-to-ctx T) (canonical-label S T ,, S⋆)
+canonical-label-Ty S T = stm-to-label-Ty S (canonical-comp′-Ty (tree-dim S) T) (canonical-type-Ty (tree-dim S) T)
 
-label-from-linear-tree-unbiased-Ty-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim S) ⦄ → Typing-Label (tree-to-ctx T) (label-from-linear-tree-unbiased S T 0 ,, S⋆)
-label-from-linear-tree-unbiased-Ty-0 S T = label-from-linear-tree-unbiased-Ty S T 0 ⦃ NonZero-subst (sym (+-identityʳ (tree-dim S))) it ⦄
+-- label-from-linear-tree-canonical-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → .⦃ NonZero (tree-dim S + d) ⦄ → Typing-Label (tree-to-ctx T) (label-from-linear-tree-canonical S T d ,, canonical-type d T)
+-- label-from-linear-tree-canonical-Ty Sing T d = TySing (canonical-comp′-Ty d ⦃ it ⦄ T)
+-- label-from-linear-tree-canonical-Ty (Join S Sing) T d
+--   = TyJoin (transport-stm-typing (>>=-Ty (canonical-stm-Ty d (tree-bd d T)) (tree-inc-Ty d T false) TySStar) refl≃stm (sym≃sty (canonical-type-prop d T d ≤-refl false)))
+--            (label-from-linear-tree-canonical-Ty S T (suc d) ⦃ NonZero-subst (sym (+-suc (tree-dim S) d)) it ⦄)
+--            (TySing (transport-stm-typing (>>=-Ty (canonical-stm-Ty d (tree-bd d T)) (tree-inc-Ty d T true) TySStar) refl≃stm (sym≃sty (canonical-type-prop d T d ≤-refl true))))
+
+-- label-from-linear-tree-canonical-Ty-0 : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → .⦃ NonZero (tree-dim S) ⦄ → Typing-Label (tree-to-ctx T) (label-from-linear-tree-canonical S T 0 ,, S⋆)
+-- label-from-linear-tree-canonical-Ty-0 S T = label-from-linear-tree-canonical-Ty S T 0 ⦃ NonZero-subst (sym (+-identityʳ (tree-dim S))) it ⦄
 
 -- label-from-linear-tree-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {a : STm X} → {As : STy X} → Typing-STm Γ a As → Typing-STy Γ As → .(p : tree-dim S ≤ sty-dim As) → Typing-Label Γ (label-from-linear-tree S a As p ,, label-from-linear-tree-type S As)
 -- label-from-linear-tree-type-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → {As : STy X} → Typing-STy Γ As → Typing-STy Γ (label-from-linear-tree-type S As)

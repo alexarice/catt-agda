@@ -236,11 +236,11 @@ extend-disc-label-Ty {S = Join S Sing} (TyJoin x LTy (TySing y)) bTy aTy
            (TySing y)
 
 stm-to-label-Ty : (S : Tree n)
-                 → .⦃ _ : is-linear S ⦄
-                 → Typing-STm Γ a As
-                 → Typing-STy Γ As
-                 → .⦃ _ : tree-dim S ≃n sty-dim As ⦄
-                 → Typing-Label Γ (stm-to-label S a As ,, S⋆)
+                → .⦃ _ : is-linear S ⦄
+                → Typing-STm Γ a As
+                → Typing-STy Γ As
+                → .⦃ _ : tree-dim S ≃n sty-dim As ⦄
+                → Typing-Label Γ (stm-to-label S a As ,, S⋆)
 stm-to-label-Ty {As = S⋆} Sing aTy AsTy = TySing aTy
 stm-to-label-Ty {As = SArr s As t} (Join S Sing) aTy AsTy
   = extend-disc-label-Ty (stm-to-label-Ty S (TySArr-proj₁ AsTy) (TySArr-proj₂ AsTy))

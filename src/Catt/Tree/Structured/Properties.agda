@@ -901,7 +901,7 @@ label-to-other-prop L .get P = stm-to-other-prop (L P)
 1-Full : STy (someTree T) → Set
 1-Full S⋆ = ⊥
 1-Full {T = T} (SArr s S⋆ t) = s ≃stm (SHere {S = T}) ×′ t ≃stm SPath (last-path T)
-1-Full (SArr s As@(SArr _ _ _) t) = 1-Full As
+1-Full (SArr s As@(SArr _ _ _) t) = WrapInst (1-Full As)
 
 SExt-proj : SExt {T = Sing} a ≃stm SExt {T = Sing} b → a ≃stm b
 SExt-proj {a = a} {b = b} [ p ] = [ (susp-tm-proj lem) ]

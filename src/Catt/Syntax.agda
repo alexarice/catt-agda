@@ -45,7 +45,7 @@ _●_ : (σ : Sub n l A) → Sub m n B → Sub m l (B [ σ ]ty)
 Var zero [ σ ]tm = sub-proj₂ σ
 Var (suc x) [ σ ]tm = Var x [ sub-proj₁ σ ]tm
 _[_]tm {A = ⋆} (Coh T B τ) σ = Coh T B (σ ● τ)
-_[_]tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ (unrestrict σ) ]tm
+_[_]tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm
 σ ● ⟨⟩ = ⟨⟩
 σ ● ⟨ τ , t ⟩ = ⟨ (σ ● τ) , t [ σ ]tm ⟩
 

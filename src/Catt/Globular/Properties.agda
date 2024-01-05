@@ -81,7 +81,7 @@ tm-to-ty-coh-sub : (Δ : Ctx (suc n)) → (B : Ty (suc n)) → (τ : Sub (suc n)
 tm-to-ty-coh-sub {A = ⋆} Δ B τ Γ σ = refl≃ty
 tm-to-ty-coh-sub {A = s ─⟨ A ⟩⟶ t} Δ B τ Γ σ = begin
   < tm-to-ty Γ (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm) >ty
-    ≈⟨ tm-to-ty-coh-sub (susp-ctx Δ) (susp-ty B) (susp-sub τ) Γ (unrestrict σ) ⟩
+    ≈⟨ tm-to-ty-coh-sub {A = A} (susp-ctx Δ) (susp-ty B) (susp-sub τ) Γ (unrestrict σ) ⟩
   < susp-ty B [ unrestrict σ ● susp-sub τ ]ty >ty
     ≈˘⟨ sub-action-≃-ty (refl≃ty {A = susp-ty B}) (unrestrict-comp σ τ) ⟩
   < susp-ty B [ unrestrict (σ ● τ) ]ty >ty

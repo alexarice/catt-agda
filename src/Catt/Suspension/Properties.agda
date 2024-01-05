@@ -46,7 +46,14 @@ susp-res-comp-ty (s ─⟨ B ⟩⟶ t) σ = Arr≃ (susp-res-comp-tm s σ) (susp
 susp-res-comp-tm (Var zero) ⟨ σ , t ⟩ = refl≃tm
 susp-res-comp-tm (Var (suc i)) ⟨ σ , t ⟩ = susp-res-comp-tm (Var i) σ
 susp-res-comp-tm {A = ⋆} (Coh Δ B τ) σ = Coh≃ refl≃c refl≃ty (susp-functorial σ τ)
-susp-res-comp-tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = trans≃tm (susp-res-comp-tm (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (unrestrict σ)) (sub-action-≃-tm (refl≃tm {s = Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)}) (sub-res-unrestrict-comm σ))
+susp-res-comp-tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = begin
+  < susp-tm (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm) >tm
+    ≈⟨ susp-res-comp-tm {A = A} (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (unrestrict σ) ⟩
+  < Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ susp-sub-res (unrestrict σ) ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)}) (sub-res-unrestrict-comm σ) ⟩
+  < Coh Δ B τ [ susp-sub-res σ ]tm >tm ∎
+    where
+      open Reasoning tm-setoid
 
 susp-res-comp-sub σ ⟨⟩ = Null≃ (susp-res-comp-ty _ σ)
 susp-res-comp-sub σ ⟨ τ , t ⟩ = Ext≃ (susp-res-comp-sub σ τ) (susp-res-comp-tm t σ)

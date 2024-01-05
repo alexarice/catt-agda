@@ -111,6 +111,12 @@ canonical-type-prop (suc d) T d′ p b = SArr≃ (lem false) (canonical-type-pro
       where
         open Reasoning stm-setoid
 
+instance
+  canonical-type-1-Full : {d : ℕ} → .⦃ NonZero d ⦄ → {T : Tree n} → 1-Full (canonical-type d T)
+  canonical-type-1-Full {d = 1} .p₁ = refl≃stm
+  canonical-type-1-Full {d = 1} .p₂ = refl≃stm
+  canonical-type-1-Full {d = 2+ d} = inst
+
 canonical-label-max : (S : Tree n)
                     → .⦃ _ : is-linear S ⦄
                     → (T : Tree m)
@@ -119,6 +125,20 @@ canonical-label-max : (S : Tree n)
                     → canonical-label S T Z ≃stm canonical-comp′ (tree-dim S) T
 canonical-label-max S T
   = stm-to-label-max S (canonical-comp′ (tree-dim S) T) (canonical-type (tree-dim S) T)
+
+canonical-label-fst : (S : Tree n)
+                    → .⦃ _ : is-linear S ⦄
+                    → .⦃ NonZero (tree-dim S) ⦄
+                    → (T : Tree m)
+                    → canonical-label S T PHere ≃stm SHere {S = T}
+canonical-label-fst S T = stm-to-label-1-Full-src S (canonical-comp′ (tree-dim S) T) (canonical-type (tree-dim S) T)
+
+canonical-label-last : (S : Tree n)
+                     → .⦃ _ : is-linear S ⦄
+                     → .⦃ NonZero (tree-dim S) ⦄
+                     → (T : Tree m)
+                     → canonical-label S T (last-path S) ≃stm SPath (last-path T)
+canonical-label-last S T = stm-to-label-1-Full-tgt S (canonical-comp′ (tree-dim S) T) (canonical-type (tree-dim S) T)
 
 extend-disc-label-bd-< : (L : Label X S)
                        → .⦃ _ : is-linear S ⦄
@@ -385,6 +405,19 @@ canonical-comp′-compat (suc d) (Join T Sing) = begin
   where
     open Reasoning stm-setoid
 canonical-comp′-compat (suc d) T@(Join _ (Join _ _)) = refl≃stm
+
+disc-sty-is-canonical : (S : Tree n) → .⦃ _ : is-linear S ⦄ → disc-sty S ≃sty canonical-type (tree-dim S) S
+disc-sty-is-canonical Sing = refl≃sty
+disc-sty-is-canonical (susp S) = begin
+  < disc-sty (susp S) >sty
+    ≈⟨ map-sty-ext-susp-compat (disc-sty S) ⟩
+  < susp-sty (disc-sty S) >sty
+    ≈⟨ susp-sty-≃ (disc-sty-is-canonical S) ⟩
+  < susp-sty (canonical-type (tree-dim S) S) >sty
+    ≈⟨ canonical-type-susp-lem (tree-dim S) S ⟩
+  < canonical-type (tree-dim (susp S)) (susp S) >sty ∎
+  where
+    open Reasoning sty-setoid
 
 -- lfltu-susp : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → (label-from-linear-tree-canonical S (susp-tree T) (suc d)) ≃l (SExt {T = Sing} ∘ label-from-linear-tree-canonical S T d)
 -- lfltu-susp Sing T d .get PHere = refl≃stm

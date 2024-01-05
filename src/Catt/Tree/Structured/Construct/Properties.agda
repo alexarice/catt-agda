@@ -14,6 +14,7 @@ open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
+open import Catt.Tree.Canonical
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Globular

@@ -26,6 +26,8 @@ open import Catt.Support.Properties
 open import Catt.Tree.Support
 open import Catt.Tree.Boundary.Support
 open import Catt.Tree.Structured.Support
+open import Catt.Tree.Structured.Support.Properties
+open import Catt.Tree.Structured.Construct.Support
 
 open import Tactic.MonoidSolver
 
@@ -107,56 +109,20 @@ canonical-supp-condition-2 (suc d) T p = begin
         ≡⟨ supp-tree-bd-full d T true (≤-pred p) ⟩
       tFull ∎
 
--- label-from-linear-tree-canonical-full : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → DCT (FVLabel (label-from-linear-tree-canonical S T d)) ≡ tFull
--- label-from-linear-tree-canonical-full Sing T d = begin
---   DCT (FVSTm (canonical-comp′ d T))
---     ≡⟨ FVSTm-≃ (canonical-comp′-compat d T) ⟩
---   DCT (FVSTm (canonical-comp d T))
---     ≡⟨ cong DCT (∪t-left-unit (FVLabel (id-label T))) ⟩
---   DCT (FVLabel (id-label T))
---     ≡⟨ cong DCT (id-label-full T) ⟩
---   DCT tFull
---     ≡⟨ DCT-full ⟩
---   tFull ∎
---   where
---     open ≡-Reasoning
--- label-from-linear-tree-canonical-full (Join S Sing) T d = begin
---   DCT
---       (FVSTm
---        (canonical-stm d (tree-bd d T) >>=
---         (tree-inc-label d T false))
---        ∪t
---        FVLabel (label-from-linear-tree-canonical S T (suc d))
---        ∪t
---        FVSTm
---        (canonical-stm d (tree-bd d T) >>=
---         (tree-inc-label d T true)))
---     ≡⟨ DCT-∪ (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T false)
---                ∪t FVLabel (label-from-linear-tree-canonical S T (suc d))) (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T true)) ⟩
---   DCT
---     (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T false)
---      ∪t FVLabel (label-from-linear-tree-canonical S T (suc d)))
---     ∪t
---     DCT
---     (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T true))
---     ≡⟨ cong (_∪t _) (DCT-∪ (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T false)) (FVLabel (label-from-linear-tree-canonical S T (suc d)))) ⟩
---   DCT
---     (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T false))
---     ∪t DCT (FVLabel (label-from-linear-tree-canonical S T (suc d)))
---     ∪t
---     DCT
---     (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T true))
---     ≡⟨ cong (λ a → _ ∪t a ∪t _) (label-from-linear-tree-canonical-full S T (suc d)) ⟩
---   DCT
---     (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T false)) ∪t tFull ∪t
---     DCT
---     (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T true))
---     ≡⟨ cong (_∪t (DCT
---     (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T true)))) (∪t-right-zero (DCT (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T false)))) ⟩
---   tFull ∪t DCT
---              (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T true))
---     ≡⟨ ∪t-left-zero (DCT
---                       (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T true))) ⟩
---   tFull ∎
---   where
---     open ≡-Reasoning
+canonical-label-full : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → DCT (FVLabel (canonical-label S T)) ≡ tFull
+canonical-label-full S T = begin
+  DCT (FVLabel (canonical-label S T))
+    ≡⟨ cong DCT (stm-to-label-supp S (canonical-comp′ (tree-dim S) T) (canonical-type (tree-dim S) T)) ⟩
+  DCT (FVSTy (canonical-type (tree-dim S) T) ∪m FVSTm (canonical-comp′ (tree-dim S) T))
+    ≡⟨ DCT-∪ (FVSTy (canonical-type (tree-dim S) T)) (FVSTm (canonical-comp′ (tree-dim S) T)) ⟩
+  DCT (FVSTy (canonical-type (tree-dim S) T)) ∪t DCT (FVSTm (canonical-comp′ (tree-dim S) T))
+    ≡⟨ cong (DCT (FVSTy (canonical-type (tree-dim S) T)) ∪t_) (FVSTm-≃ (canonical-comp′-compat (tree-dim S) T)) ⟩
+  DCT (FVSTy (canonical-type (tree-dim S) T)) ∪t DCT (FVSTm (canonical-comp (tree-dim S) T))
+    ≡⟨ cong (DCT (FVSTy (canonical-type (tree-dim S) T)) ∪t_) (cong DCT (id-label-wt-full T)) ⟩
+  DCT (FVSTy (canonical-type (tree-dim S) T)) ∪t DCT tFull
+    ≡⟨ cong (DCT (FVSTy (canonical-type (tree-dim S) T)) ∪t_) DCT-full ⟩
+  DCT (FVSTy (canonical-type (tree-dim S) T)) ∪t tFull
+    ≡⟨ ∪t-right-zero (DCT (FVSTy (canonical-type (tree-dim S) T))) ⟩
+  tFull ∎
+  where
+    open ≡-Reasoning

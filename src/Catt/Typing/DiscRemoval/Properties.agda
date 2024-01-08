@@ -22,8 +22,8 @@ open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
+open import Catt.Tree.Canonical
+open import Catt.Tree.Canonical.Properties
 
 open import Catt.Typing rule
 open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
@@ -52,10 +52,10 @@ disc-rem-stm S L Lty .get = begin
   where
     open Reasoning (tm-setoid-≈ _)
 
-unbiased-stm-is-comp′ : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → unbiased-stm d S ≈[ tree-to-ctx S ]stm unbiased-comp′ d S
-unbiased-stm-is-comp′ (suc zero) Sing = refl≈stm
-unbiased-stm-is-comp′ (suc zero) (Join S (Join T₁ T₂)) = refl≈stm
-unbiased-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
+canonical-stm-is-comp′ : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → canonical-stm d S ≈[ tree-to-ctx S ]stm canonical-comp′ d S
+canonical-stm-is-comp′ (suc zero) Sing = refl≈stm
+canonical-stm-is-comp′ (suc zero) (Join S (Join T₁ T₂)) = refl≈stm
+canonical-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
   SExt (SPath PHere)
     ≈⟨ compute-≈ refl≈stm ⟩
   SPath (is-linear-max-path (Join Sing Sing))
@@ -65,18 +65,18 @@ unbiased-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
   SExt (SCoh Sing S⋆ (SPath ,, S⋆)) ∎
   where
     open Reasoning stm-setoid-≈
-unbiased-stm-is-comp′ (suc zero) (Join (Join S S₁) Sing) = refl≈stm
-unbiased-stm-is-comp′ (suc (suc d)) Sing = refl≈stm
-unbiased-stm-is-comp′ (suc (suc d)) (Join S Sing) = ≈SExt (unbiased-stm-is-comp′ (suc d) S)
-unbiased-stm-is-comp′ (suc (suc d)) (Join S (Join S₁ S₂)) = refl≈stm
+canonical-stm-is-comp′ (suc zero) (Join (Join S S₁) Sing) = refl≈stm
+canonical-stm-is-comp′ (suc (suc d)) Sing = refl≈stm
+canonical-stm-is-comp′ (suc (suc d)) (Join S Sing) = ≈SExt (canonical-stm-is-comp′ (suc d) S)
+canonical-stm-is-comp′ (suc (suc d)) (Join S (Join S₁ S₂)) = refl≈stm
 
-unbiased-stm-is-comp : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → unbiased-stm d S ≈[ tree-to-ctx S ]stm unbiased-comp d S
-unbiased-stm-is-comp d S = begin
-  unbiased-stm d S
-    ≈⟨ unbiased-stm-is-comp′ d S ⟩
-  unbiased-comp′ d S
-    ≈⟨ reflexive≈stm (unbiased-comp′-compat d S) ⟩
-  unbiased-comp d S ∎
+canonical-stm-is-comp : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → canonical-stm d S ≈[ tree-to-ctx S ]stm canonical-comp d S
+canonical-stm-is-comp d S = begin
+  canonical-stm d S
+    ≈⟨ canonical-stm-is-comp′ d S ⟩
+  canonical-comp′ d S
+    ≈⟨ reflexive≈stm (canonical-comp′-compat d S) ⟩
+  canonical-comp d S ∎
   where
     open Reasoning stm-setoid-≈
 
@@ -85,8 +85,3 @@ conv-rule : ⦃ NonZero n ⦄
           → ConvRule (DiscRemoval Γ σ)
 conv-rule {n = n} {σ = ⟨ σ , s ⟩} tty with coh-sub-ty tty
 ... | TyExt σty sty = TyConv sty (Ty-unique (disc-term-Ty n (TyExt σty sty)) tty)
-
-  -- supp-rule : ⦃ NonZero n ⦄
-  --           → {σ : Sub (disc-size n) m ⋆}
-  --           → SupportRule (DiscRemoval Γ σ)
-  -- supp-rule {n = n} {σ = σ} tty = {!!}

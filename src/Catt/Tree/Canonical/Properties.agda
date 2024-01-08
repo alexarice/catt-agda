@@ -419,6 +419,9 @@ disc-sty-is-canonical (susp S) = begin
   where
     open Reasoning sty-setoid
 
+disc-stm-is-canonical : (S : Tree n) → .⦃ _ : is-linear S ⦄ → disc-stm S ≃stm canonical-comp (tree-dim S) S
+disc-stm-is-canonical S = SCoh≃ S (disc-sty-is-canonical S) refl≃l refl≃sty
+
 -- lfltu-susp : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → (label-from-linear-tree-canonical S (susp-tree T) (suc d)) ≃l (SExt {T = Sing} ∘ label-from-linear-tree-canonical S T d)
 -- lfltu-susp Sing T d .get PHere = refl≃stm
 -- lfltu-susp (Join S Sing) T d .get PHere = begin

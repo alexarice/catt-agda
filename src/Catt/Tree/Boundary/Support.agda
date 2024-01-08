@@ -11,6 +11,7 @@ open import Catt.Tree.Boundary.Properties
 open import Catt.Support
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
+open import Catt.Tree.Structured.Support.Properties
 
 open import Tactic.MonoidSolver
 

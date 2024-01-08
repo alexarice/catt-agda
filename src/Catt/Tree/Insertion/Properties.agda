@@ -221,45 +221,36 @@ label-from-insertion-map f (Join S₁ S₂) (BPShift p) T L M .get PHere = refl�
 label-from-insertion-map f (Join S₁ S₂) (BPShift p) T L M .get (PExt Z) = refl≃stm
 label-from-insertion-map f (Join S₁ S₂) (BPShift p) T L M .get (PShift Z) = label-from-insertion-map f S₂ p T (L ∘ PShift) M .get Z
 
--- exterior-interior-prop : (S : Tree n)
---                        → (p : BranchingPoint S l)
---                        → (T : Tree m)
---                        → .⦃ _ : has-trunk-height (bp-height p) T ⦄
---                        → label-from-insertion S p T (exterior-label S p T) (interior-label S p T) ≃l id-label (insertion-tree S p T)
--- exterior-interior-prop (Join S₁ S₂) BPHere T = begin
---   < connect-label (ap (connect-tree-inc-left T S₂))
---       (λ x → replace-label (ap (connect-tree-inc-right T S₂))
---                            (SPath (connect-tree-inc-left′ T S₂ (last-path T))) x) >l
---     ≈⟨ connect-label-≃ (refl≃l {L = ap (connect-tree-inc-left T S₂)}) (replace-label-prop (ap (connect-tree-inc-right T S₂)) (SPath (connect-tree-inc-left′ T S₂ (last-path T))) (SPath≃ (connect-tree-inc-phere T S₂))) ⟩
---   < connect-label (ap (connect-tree-inc-left T S₂)) (ap (connect-tree-inc-right T S₂)) >l
---     ≈⟨ connect-label-prop T S₂ ⟩
---   < id-label (connect-tree T S₂) >l ∎
---   where
---     open Reasoning (label-setoid (connect-tree T S₂))
--- exterior-interior-prop (Join S₁ S₂) (BPExt p) (susp T) .get PHere = refl≃stm
--- exterior-interior-prop (Join S₁ S₂) (BPExt p) (susp T) .get (PExt Z) = begin
---   < label-from-insertion S₁ p T
---       (SExt ∘ exterior-label S₁ p T)
---       (SExt ∘ interior-label S₁ p T) Z >stm
---     ≈˘⟨ label-from-insertion-map SExt S₁ p T (exterior-label S₁ p T) (interior-label S₁ p T) .get Z ⟩
---   < (SExt ∘ label-from-insertion S₁ p T (exterior-label S₁ p T) (interior-label S₁ p T)) Z >stm
---     ≈⟨ compute-≃ (SExt≃ (exterior-interior-prop S₁ p T .get Z) refl≃) ⟩
---   < SPath (PExt Z) >stm ∎
---   where
---     open Reasoning stm-setoid
--- exterior-interior-prop (Join S₁ S₂) (BPExt p) (susp T) .get (PShift Z) = compute-≃ (compute-stm-≃ (replace-label-prop (SShift ∘ id-label S₂) (SShift SHere) refl≃stm .get Z))
--- exterior-interior-prop (Join S₁ S₂) (BPShift p) T .get PHere = refl≃stm
--- exterior-interior-prop (Join S₁ S₂) (BPShift p) T .get (PExt Z) = compute-≃ refl≃stm
--- exterior-interior-prop (Join S₁ S₂) (BPShift p) T .get (PShift Z) = begin
---   < label-from-insertion S₂ p T
---       (SShift ∘ exterior-label S₂ p T)
---       (SShift ∘ interior-label S₂ p T) Z >stm
---     ≈˘⟨ label-from-insertion-map SShift S₂ p T (exterior-label S₂ p T) (interior-label S₂ p T) .get Z ⟩
---   < (SShift ∘ label-from-insertion S₂ p T (exterior-label S₂ p T) (interior-label S₂ p T)) Z >stm
---     ≈⟨ compute-≃ (SShift≃ refl≃ (exterior-interior-prop S₂ p T .get Z )) ⟩
---   < SPath (PShift Z) >stm ∎
---   where
---     open Reasoning stm-setoid
+exterior-interior-prop : (S : Tree n)
+                       → (p : BranchingPoint S l)
+                       → (T : Tree m)
+                       → .⦃ _ : has-trunk-height (bp-height p) T ⦄
+                       → label-from-insertion S p T (exterior-label S p T) (interior-label S p T) ≃l id-label (insertion-tree S p T)
+exterior-interior-prop (Join S₁ S₂) BPHere T = connect-label-prop T S₂
+exterior-interior-prop (Join S₁ S₂) (BPExt p) (susp T) .get PHere = refl≃stm
+exterior-interior-prop (Join S₁ S₂) (BPExt p) (susp T) .get (PExt Z) = begin
+  < label-from-insertion S₁ p T
+      (SExt ∘ exterior-label S₁ p T)
+      (SExt ∘ interior-label S₁ p T) Z >stm
+    ≈˘⟨ label-from-insertion-map SExt S₁ p T (exterior-label S₁ p T) (interior-label S₁ p T) .get Z ⟩
+  < (SExt ∘ label-from-insertion S₁ p T (exterior-label S₁ p T) (interior-label S₁ p T)) Z >stm
+    ≈⟨ compute-≃ (SExt≃ (exterior-interior-prop S₁ p T .get Z) refl≃) ⟩
+  < SPath (PExt Z) >stm ∎
+  where
+    open Reasoning stm-setoid
+exterior-interior-prop (Join S₁ S₂) (BPExt p) (susp T) .get (PShift Z) = compute-≃ (compute-stm-≃ (replace-label-prop (SShift ∘ id-label S₂) (SShift SHere) refl≃stm .get Z))
+exterior-interior-prop (Join S₁ S₂) (BPShift p) T .get PHere = refl≃stm
+exterior-interior-prop (Join S₁ S₂) (BPShift p) T .get (PExt Z) = compute-≃ refl≃stm
+exterior-interior-prop (Join S₁ S₂) (BPShift p) T .get (PShift Z) = begin
+  < label-from-insertion S₂ p T
+      (SShift ∘ exterior-label S₂ p T)
+      (SShift ∘ interior-label S₂ p T) Z >stm
+    ≈˘⟨ label-from-insertion-map SShift S₂ p T (exterior-label S₂ p T) (interior-label S₂ p T) .get Z ⟩
+  < (SShift ∘ label-from-insertion S₂ p T (exterior-label S₂ p T) (interior-label S₂ p T)) Z >stm
+    ≈⟨ compute-≃ (SShift≃ refl≃ (exterior-interior-prop S₂ p T .get Z )) ⟩
+  < SPath (PShift Z) >stm ∎
+  where
+    open Reasoning stm-setoid
 
 exterior-branching-path : (S : Tree n)
                         → (p : BranchingPoint S l)

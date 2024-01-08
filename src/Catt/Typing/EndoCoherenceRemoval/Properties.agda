@@ -28,16 +28,11 @@ open import Catt.Tree.Structured.Globular.Properties
 open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
-open import Catt.Tree.Boundary
-open import Catt.Tree.Boundary.Properties
-open import Catt.Tree.Unbiased
-open import Catt.Tree.Unbiased.Properties
 
 open import Catt.Typing rule
 open import Catt.Typing.Properties.Base rule
 open import Catt.Tree.Structured.Typing rule
 open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Unbiased.Typing rule lift-rule susp-rule sub-rule
 open import Catt.Typing.EndoCoherenceRemoval rule
 
 ecr-stm : HasEndoCoherenceRemoval-STm

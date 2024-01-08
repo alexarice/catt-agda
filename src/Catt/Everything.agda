@@ -91,8 +91,8 @@ import Catt.Typing.Properties
 import Catt.Typing.EndoCoherenceRemoval
 import Catt.Typing.EndoCoherenceRemoval.Base
 import Catt.Typing.EndoCoherenceRemoval.Properties
-import Catt.Typing.Insertion
 import Catt.Typing.Insertion.Base
+import Catt.Typing.Insertion
 import Catt.Typing.Insertion.Equality
 import Catt.Typing.Pruning
 import Catt.Typing.Pruning.Base
@@ -106,12 +106,13 @@ import Catt.Connection.Support
 import Catt.Discs.Support
 import Catt.Tree.Support
 import Catt.Tree.Structured.Support
+import Catt.Tree.Structured.Support.Properties
 import Catt.Tree.Boundary.Support
 import Catt.Tree.Canonical.Support
 
 import Catt.Typing.Properties.Support
 import Catt.Tree.Structured.Support.Typed
--- import Catt.Tree.Insertion.Support
+import Catt.Tree.Insertion.Support
 
 import Catt.Typing.Weak
 import Catt.Typing.Strict.Units

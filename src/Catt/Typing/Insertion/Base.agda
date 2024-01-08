@@ -19,14 +19,12 @@ Insertion : (Γ : Ctx m)
           → (P : BranchingPoint S l)
           → (T : Tree n′)
           → .⦃ _ : has-trunk-height l T ⦄
-          → (Bs : STy (someTree (chop-trunk l T)))
-          → .⦃ height-of-branching P ≃n l + sty-dim Bs ⦄
           → (M : Label (Other m) T)
           → Rule
-Insertion Γ S As L P T Bs M .len = _
-Insertion Γ S As L P T Bs M .tgtCtx = Γ
-Insertion Γ S As L P T Bs M .lhs = stm-to-term (SCoh S As (L ,, S⋆))
-Insertion Γ S As L P T Bs M .rhs
+Insertion Γ S As L P T M .len = _
+Insertion Γ S As L P T M .tgtCtx = Γ
+Insertion Γ S As L P T M .lhs = stm-to-term (SCoh S As (L ,, S⋆))
+Insertion Γ S As L P T M .rhs
   = stm-to-term (SCoh (insertion-tree S P T)
-                      (As >>=′ (exterior-label S P T Bs ,, S⋆))
+                      (As >>=′ (exterior-label S P T ,, S⋆))
                       (label-from-insertion S P T L M ,, S⋆))

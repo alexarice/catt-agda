@@ -393,6 +393,24 @@ canonical-comp-susp-lem d T = begin
   where
     open Reasoning stm-setoid
 
+canonical-label-susp-lem : (S : Tree m)
+                         → .⦃ _ : is-linear S ⦄
+                         → (T : Tree n)
+                         → canonical-label (susp S) (susp T) ≃l susp-label-full (canonical-label S T)
+canonical-label-susp-lem S ⦃ lin ⦄ T = begin
+  < canonical-label (susp S) (susp T) >l
+    ≈⟨ stm-to-label-≃ (susp S) refl≃stm
+                      (sym≃sty (canonical-type-susp-lem (tree-dim S) T)) ⦃ inst ⦄ ⟩
+  < stm-to-label (susp S)
+                 (susp-stm (canonical-comp′ (tree-dim S) T))
+                 (susp-sty (canonical-type (tree-dim S) T))
+                 ⦃ trans≃n inst (≡-to-≃n (sym (susp-sty-dim (canonical-type (tree-dim S) T)))) ⦄
+   >l
+    ≈⟨ stm-to-label-susp S (canonical-comp′ (tree-dim S) T) (canonical-type (tree-dim S) T) ⟩
+  < susp-label-full (canonical-label S T) >l ∎
+  where
+    open Reasoning (label-setoid (susp S))
+
 canonical-comp′-compat : (d : ℕ) → (T : Tree n) → canonical-comp′ d T ≃stm canonical-comp d T
 canonical-comp′-compat zero T = refl≃stm
 canonical-comp′-compat (suc d) Sing = refl≃stm
@@ -421,6 +439,21 @@ disc-sty-is-canonical (susp S) = begin
 
 disc-stm-is-canonical : (S : Tree n) → .⦃ _ : is-linear S ⦄ → disc-stm S ≃stm canonical-comp (tree-dim S) S
 disc-stm-is-canonical S = SCoh≃ S (disc-sty-is-canonical S) refl≃l refl≃sty
+
+identity-stm-is-canonical : (S : Tree n) → .⦃ _ : is-linear S ⦄ → identity-stm S ≃stm canonical-comp (suc (tree-dim S)) S
+identity-stm-is-canonical S = SCoh≃ S (SArr≃ (lem false) (disc-sty-is-canonical S) (lem true)) refl≃l refl≃sty
+  where
+    open Reasoning stm-setoid
+    lem : (b : Bool) → SPath (is-linear-max-path S)
+                       ≃stm
+                       canonical-stm (tree-dim S) (tree-bd (tree-dim S) S) >>= tree-inc-label (tree-dim S) S b
+    lem b = begin
+      < SPath (is-linear-max-path S) >stm
+        ≈˘⟨ canonical-stm-linear (tree-dim S) S refl ⟩
+      < canonical-stm (tree-dim S) S >stm
+        ≈˘⟨ canonical-stm-full-lem (tree-dim S) S b ≤-refl ⟩
+      < canonical-stm (tree-dim S) (tree-bd (tree-dim S) S) >>= tree-inc-label (tree-dim S) S b >stm ∎
+
 
 -- lfltu-susp : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → (label-from-linear-tree-canonical S (susp-tree T) (suc d)) ≃l (SExt {T = Sing} ∘ label-from-linear-tree-canonical S T d)
 -- lfltu-susp Sing T d .get PHere = refl≃stm
@@ -626,33 +659,33 @@ truncate-canonical-sty (suc (suc d)) T = begin
 -- label-from-disc-term-prop {S = Sing} L = refl≃stm
 -- label-from-disc-term-prop {S = Join S Sing} L = label-from-disc-term-prop (label₁ L)
 
-canonical-type-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → sty-to-type (canonical-type d S) ≃ty lift-ty (sphere-type d)
-canonical-type-linear zero Sing p = refl≃ty
-canonical-type-linear (suc d) (Join S Sing) p = begin
-  < sty-to-type (canonical-type (suc d) (susp-tree S)) >ty
-    ≈˘⟨ canonical-type-susp-lem d S .get ⟩
-  < sty-to-type (susp-sty (canonical-type d S)) >ty
-    ≈⟨ susp-sty-to-type (canonical-type d S) ⟩
-  < susp-ty (sty-to-type (canonical-type d S)) >ty
-    ≈⟨ susp-ty-≃ (canonical-type-linear d S (cong pred p)) ⟩
-  < susp-ty (lift-ty (sphere-type d)) >ty
-    ≈⟨ susp-ty-lift (sphere-type d) ⟩
-  < lift-ty (susp-ty (sphere-type d)) >ty
-    ≈⟨ lift-ty-≃ (sphere-type-susp d) ⟩
-  < lift-ty (sphere-type (suc d)) >ty ∎
-  where
-    open Reasoning ty-setoid
+-- canonical-type-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → sty-to-type (canonical-type d S) ≃ty lift-ty (sphere-type d)
+-- canonical-type-linear zero Sing p = refl≃ty
+-- canonical-type-linear (suc d) (Join S Sing) p = begin
+--   < sty-to-type (canonical-type (suc d) (susp-tree S)) >ty
+--     ≈˘⟨ canonical-type-susp-lem d S .get ⟩
+--   < sty-to-type (susp-sty (canonical-type d S)) >ty
+--     ≈⟨ susp-sty-to-type (canonical-type d S) ⟩
+--   < susp-ty (sty-to-type (canonical-type d S)) >ty
+--     ≈⟨ susp-ty-≃ (canonical-type-linear d S (cong pred p)) ⟩
+--   < susp-ty (lift-ty (sphere-type d)) >ty
+--     ≈⟨ susp-ty-lift (sphere-type d) ⟩
+--   < lift-ty (susp-ty (sphere-type d)) >ty
+--     ≈⟨ lift-ty-≃ (sphere-type-susp d) ⟩
+--   < lift-ty (sphere-type (suc d)) >ty ∎
+--   where
+--     open Reasoning ty-setoid
 
-canonical-term-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → stm-to-term (canonical-stm d S) ≃tm (0V {n = suc n})
-canonical-term-linear zero Sing p = refl≃tm
-canonical-term-linear (suc d) (Join S Sing) p = begin
-  < susp-tm (stm-to-term (canonical-stm d S)) [ idSub ]tm >tm
-    ≈⟨ id-on-tm (susp-tm (stm-to-term (canonical-stm d S))) ⟩
-  < susp-tm (stm-to-term (canonical-stm d S)) >tm
-    ≈⟨ susp-tm-≃ (canonical-term-linear d S (cong pred p)) ⟩
-  < 0V >tm ∎
-  where
-    open Reasoning tm-setoid
+-- canonical-term-linear : (d : ℕ) → (S : Tree n) → .⦃ _ : is-linear S ⦄ → .(d ≡ tree-dim S) → stm-to-term (canonical-stm d S) ≃tm (0V {n = suc n})
+-- canonical-term-linear zero Sing p = refl≃tm
+-- canonical-term-linear (suc d) (Join S Sing) p = begin
+--   < susp-tm (stm-to-term (canonical-stm d S)) [ idSub ]tm >tm
+--     ≈⟨ id-on-tm (susp-tm (stm-to-term (canonical-stm d S))) ⟩
+--   < susp-tm (stm-to-term (canonical-stm d S)) >tm
+--     ≈⟨ susp-tm-≃ (canonical-term-linear d S (cong pred p)) ⟩
+--   < 0V >tm ∎
+--   where
+--     open Reasoning tm-setoid
 
 -- identity-stm-to-term : (n : ℕ) → stm-to-term (identity-stm n) ≃tm identity n idSub
 -- identity-stm-to-term n = begin

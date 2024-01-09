@@ -248,3 +248,30 @@ stm-to-label-Ty {As = SArr s As t} (Join S Sing) aTy AsTy
                          (transport-stm-typing aTy refl≃stm (sym≃sty (SArr≃ (stm-to-label-max S s As (is-linear-max-path S))
                                                                             (stm-to-label-disc-sty S s As)
                                                                             refl≃stm)))
+
+extend-disc-label-≈ : {L M : Label X S}
+                    → .⦃ _ : is-linear S ⦄
+                    → L ≈[ Γ ]l M
+                    → {s t : STm X}
+                    → s ≈[ Γ ]stm t
+                    → a ≈[ Γ ]stm b
+                    → extend-disc-label L s a ≈[ Γ ]l extend-disc-label M t b
+extend-disc-label-≈ {S = Sing} p q r .get PHere = p .get PHere
+extend-disc-label-≈ {S = Sing} p q r .get (PExt PHere) = r
+extend-disc-label-≈ {S = Sing} p q r .get (PShift PHere) = q
+extend-disc-label-≈ {S = susp S} p q r .get PHere = p .get PHere
+extend-disc-label-≈ {S = susp S} p q r .get (PExt Z) = extend-disc-label-≈ [ (λ Q → p .get (PExt Q)) ] q r .get Z
+extend-disc-label-≈ {S = susp S} p q r .get (PShift PHere) = p .get (PShift PHere)
+
+stm-to-label-≈ : (S : Tree n)
+               → .⦃ _ : is-linear S ⦄
+               → {X : MaybeTree m}
+               → {a b : STm X}
+               → a ≈[ Γ ]stm b
+               → {As Bs : STy X}
+               → (q : As ≈[ Γ ]sty Bs)
+               → .⦃ _ : has-dim (tree-dim S) As ⦄
+               → stm-to-label S a As ≈[ Γ ]l stm-to-label S b Bs ⦃ trans≃n it (≡-to-≃n (sty-dim-≈ q)) ⦄
+stm-to-label-≈ Sing p q .get Z = p
+stm-to-label-≈ (susp S) p {SArr s As t} {SArr s₁ Bs t₁} q
+  = extend-disc-label-≈ (stm-to-label-≈ S (sty-src-≈ q) (sty-base-≈ q)) (sty-tgt-≈ q) p

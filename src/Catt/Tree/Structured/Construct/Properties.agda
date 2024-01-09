@@ -587,8 +587,7 @@ stm-to-label-≃ : {X : MaybeTree m}
                → {Bs : STy Y}
                → (q : As ≃sty Bs)
                → .⦃ _ : has-dim (tree-dim S) As ⦄
-               → .⦃ _ : has-dim (tree-dim S) Bs ⦄
-               → stm-to-label S a As ≃l stm-to-label S b Bs
+               → stm-to-label S a As ≃l stm-to-label S b Bs ⦃ trans≃n it (≡-to-≃n (sty-dim-≃ q)) ⦄
 stm-to-label-≃ Sing p q .get Z = p
 stm-to-label-≃ (susp S) p {SArr _ _ _} {SArr _ _ _} q
   = extend-disc-label-≃ (stm-to-label-≃ S (SArr≃-proj₁ q) (SArr≃-proj₂ q)) (SArr≃-proj₃ q) p
@@ -621,7 +620,7 @@ extend-disc-label-susp-full L t a .get (PExt Z)
 extend-disc-label-susp-full L t a .get (PShift PHere) = refl≃stm
 
 stm-to-label-susp : (S : Tree n)
-                  → ⦃ _ : is-linear S ⦄
+                  → .⦃ _ : is-linear S ⦄
                   → (a : STm X)
                   → (As : STy X)
                   → .⦃ _ : has-dim (tree-dim S) As ⦄

@@ -42,155 +42,195 @@ open import Catt.Typing.EndoCoherenceRemoval rule
 open import Catt.Typing.Insertion rule
 
 
--- module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
---   open import Catt.Typing.DiscRemoval.Properties rule lift-rule susp-rule sub-rule dr
---   open import Catt.Typing.EndoCoherenceRemoval.Properties rule lift-rule susp-rule sub-rule ecr
+module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
+  open import Catt.Typing.DiscRemoval.Properties rule lift-rule susp-rule sub-rule dr
+  open import Catt.Typing.EndoCoherenceRemoval.Properties rule lift-rule susp-rule sub-rule ecr
 
---   canonical-ecr : (d : ℕ)
---                → (T : Tree n)
---                → (tree-dim T < d)
---                → (1 < d)
---                → canonical-comp d T ≈[ tree-to-ctx T ]stm (identity-stm (pred d) >>= (canonical-label (n-disc (pred d)) T 0 ,, S⋆))
---   canonical-ecr (suc d) T p q = let
---     instance _ = n-disc-is-linear (sty-dim (canonical-type d T))
---     instance _ = n-disc-is-linear d
---     in begin
---     SCoh T
---          (SArr (canonical-stm d (tree-bd d T) >>=
---                                (tree-inc-label d T false))
---                (canonical-type d T)
---                (canonical-stm d (tree-bd d T) >>=
---                                (tree-inc-label d T true)))
---          (id-label-wt T)
---       ≈⟨ reflexive≈stm (SCoh≃ T (SArr≃ (canonical-stm-full-lem d T false (≤-pred p))
---                                        refl≃sty
---                                        (canonical-stm-full-lem d T true (≤-pred p)))
---                                 refl≃l
---                                 refl≃sty) ⟩
---     SCoh T (SArr (canonical-stm d T)
---                  (canonical-type d T)
---                  (canonical-stm d T))
---            (id-label-wt T)
---       ≈⟨ ecr-stm T (canonical-stm d T) (canonical-type d T) (id-label T) (canonical-stm-Ty d T) (canonical-type-Ty d T) (id-label-Ty T) ⟩
---     (identity-stm (sty-dim (canonical-type d T)) >>=
---       (label-from-linear-tree (n-disc (sty-dim (canonical-type d T)))
---                                             (canonical-stm d T)
---                                             (canonical-type d T) _ ,, S⋆)
---       ●lt (id-label T ,, S⋆))
---       ≈⟨ reflexive≈stm (>>=-≃ (refl≃stm {a = identity-stm (sty-dim (canonical-type d T))}) (comp-right-unit ((label-from-linear-tree (n-disc (sty-dim (canonical-type d T)))
---                                             (canonical-stm d T)
---                                             (canonical-type d T) _))) refl≃sty) ⟩
---     (identity-stm (sty-dim (canonical-type d T)) >>=
---                   (label-from-linear-tree (n-disc (sty-dim (canonical-type d T)))
---                                          (canonical-stm d T)
---                                          (canonical-type d T) _ ,, S⋆))
---       ≈⟨ ≈->>= (identity-stm (sty-dim (canonical-type d T))) (label-from-linear-tree-≈ (n-disc (sty-dim (canonical-type d T))) (canonical-stm-is-comp′ d ⦃ NonZero-≤ (≤-pred q) it ⦄ T) refl≈sty _) refl≈sty ⟩
---     (identity-stm (sty-dim (canonical-type d T)) >>=
---                   (label-from-linear-tree (n-disc (sty-dim (canonical-type d T)))
---                                          (canonical-comp′ d T)
---                                          (canonical-type d T) _ ,, S⋆))
---       ≈⟨ reflexive≈stm (>>=-≃ (refl≃stm {a = identity-stm (sty-dim (canonical-type d T))}) (label-from-linear-tree-canonical-lem-0 (n-disc (sty-dim (canonical-type d T))) T d (trans (tree-dim-n-disc (sty-dim (canonical-type d T))) (canonical-type-dim d T))) refl≃sty) ⟩
---     (identity-stm (sty-dim (canonical-type d T)) >>=
---                   (label-from-linear-tree-canonical (n-disc (sty-dim (canonical-type d T))) T 0 ,, S⋆))
---       ≈⟨ reflexive≈stm (reflexive≃stm (cong (λ x → (identity-stm x >>=
---                   (label-from-linear-tree-canonical (n-disc x) ⦃ n-disc-is-linear x ⦄ T 0 ,, S⋆))) (canonical-type-dim d T))) ⟩
---     (identity-stm d >>= (label-from-linear-tree-canonical (n-disc d) T 0 ,, S⋆)) ∎
---     where
---       open Reasoning stm-setoid-≈
+  canonical-ecr : (d : ℕ)
+                → (T : Tree n)
+                → (tree-dim T < d)
+                → (1 < d)
+                → canonical-comp d T ≈[ tree-to-ctx T ]stm (identity-stm (n-disc (pred d)) >>= (canonical-label (n-disc (pred d)) T ,, S⋆))
+  canonical-ecr (suc d) T p q = begin
+    SCoh T
+         (SArr (canonical-stm d (tree-bd d T) >>=
+                               (tree-inc-label d T false))
+               (canonical-type d T)
+               (canonical-stm d (tree-bd d T) >>=
+                               (tree-inc-label d T true)))
+         (id-label-wt T)
+      ≈⟨ reflexive≈stm (SCoh≃ T (SArr≃ (canonical-stm-full-lem d T false (≤-pred p))
+                                       refl≃sty
+                                       (canonical-stm-full-lem d T true (≤-pred p)))
+                                refl≃l
+                                refl≃sty) ⟩
+    SCoh T (SArr (canonical-stm d T)
+                 (canonical-type d T)
+                 (canonical-stm d T))
+           (id-label-wt T)
+      ≈⟨ ecr-stm T (canonical-stm d T) (canonical-type d T) (id-label T) (canonical-stm-Ty d T) (canonical-type-Ty d T) (id-label-Ty T) ⟩
+    identity-stm (n-disc (sty-dim (canonical-type d T)))
+      >>=
+      (stm-to-label (n-disc (sty-dim (canonical-type d T)))
+                    (canonical-stm d T)
+                    (canonical-type d T) ,, S⋆)
+      ●lt id-label-wt T
+      ≈⟨ reflexive≈stm (>>=-≃ (refl≃stm {a = identity-stm (n-disc (sty-dim (canonical-type d T)))})
+                              (comp-right-unit (stm-to-label (n-disc (sty-dim (canonical-type d T)))
+                                                             (canonical-stm d T)
+                                                             (canonical-type d T)))
+                              refl≃sty) ⟩
+    identity-stm (n-disc (sty-dim (canonical-type d T)))
+      >>= (stm-to-label (n-disc (sty-dim (canonical-type d T)))
+                        (canonical-stm d T)
+                        (canonical-type d T) ,, S⋆)
+      ≈⟨ >>=-≈ (identity-stm (n-disc (sty-dim (canonical-type d T))))
+               (stm-to-label-≈ (n-disc (sty-dim (canonical-type d T)))
+                               (trans≈stm (canonical-stm-is-comp′ d ⦃ NonZero-≤ (≤-pred q) it ⦄ T)
+                                          (reflexive≈stm (canonical-comp′-≃ (sym (≃n-to-≡ tree-dim-n-disc)) refl≃)))
+                               (reflexive≈sty (canonical-type-≃ (sym (≃n-to-≡ tree-dim-n-disc)) refl≃)))
+               refl≈sty ⟩
+    identity-stm (n-disc (sty-dim (canonical-type d T)))
+      >>= (stm-to-label (n-disc (sty-dim (canonical-type d T)))
+                        (canonical-comp′ (tree-dim (n-disc d)) T)
+                        (canonical-type (tree-dim (n-disc d)) T)
+                        ⦃ l1 (canonical-type-dim d T) ⦄ ,, S⋆)
+      ≈⟨ reflexive≈stm (lem (sty-dim (canonical-type d T)) d (canonical-type-dim d T)) ⟩
+    identity-stm (n-disc d) >>= (canonical-label (n-disc d) T ,, S⋆) ∎
+    where
+      open Reasoning stm-setoid-≈
 
---   pruned-bp-exterior-sub : (S : Tree n)
---                          → (p : BranchingPoint S l)
---                          → (T : Tree m)
---                          → .⦃ _ : has-linear-height l T ⦄
---                          → .(q : bp-height p < pred (height-of-branching p))
---                          → (x : tree-dim T < height-of-branching p)
---                          → label-max-equality
---                            (tree-to-ctx (insertion-tree (prune-tree S p) (pruned-bp S p q) T))
---                            (exterior-sub-label S
---                                                p
---                                                (n-disc (pred (height-of-branching p)))
---                                                ⦃ is-linear-has-linear-height l (n-disc (pred (height-of-branching p))) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-trans (<⇒≤ q) (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p)))))) ⦄
---                            ●l (exterior-sub-label (prune-tree S p) (pruned-bp S p q) T ,, S⋆))
---                             (≃-label (sym≃′ (insertion-tree-pruned-bp S p T q)) (exterior-sub-label S p T))
---   pruned-bp-exterior-sub (Join S₁ S₂) (BPExt p) (Join T Sing) q x .get (PExt Z) = let
---     instance .y : _
---     y = is-linear-has-linear-height (bp-height p) (n-disc (height-of-branching′ p)) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-trans (<⇒≤ (≤-pred q)) (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p))))))
+      l1 : n ≡ m → has-dim (tree-dim (n-disc n)) (canonical-type (tree-dim (n-disc m)) T)
+      l1 {m = m} refl = ≡-to-≃n (sym (canonical-type-dim (tree-dim (n-disc m)) T))
 
---     in begin
---     (exterior-sub-label S₁ p (n-disc (height-of-branching′ p)) ⦃ y ⦄ Z >>=
---           ((SExt ∘ exterior-sub-label (insertion-tree S₁ p (n-disc (height-of-branching′ p)) ⦃ y ⦄)
---                                         (pruned-bp S₁ p _) T)
---           ,, SArr (SPath PHere) S⋆ (SShift (SPath PHere))))
---       ≈⟨ reflexive≈stm (>>=-≃ (refl≃stm {a = exterior-sub-label S₁ p (n-disc (height-of-branching′ p)) ⦃ y ⦄ Z}) refl≃l (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm))) ⟩
---     (exterior-sub-label S₁ p (n-disc (height-of-branching′ p)) ⦃ y ⦄ Z >>=
---           (map-ext (exterior-sub-label (insertion-tree S₁ p (n-disc (height-of-branching′ p)) ⦃ y ⦄)
---                                         (pruned-bp S₁ p _) T ,, S⋆)))
---       ≈⟨ reflexive≈stm (>>=-ext (exterior-sub-label S₁ p (n-disc (height-of-branching′ p)) ⦃ y ⦄ Z) (exterior-sub-label (insertion-tree S₁ p (n-disc (height-of-branching′ p)) ⦃ y ⦄)
---                                         (pruned-bp S₁ p _) T ,, S⋆)) ⟩
---     SExt (exterior-sub-label S₁ p (n-disc (height-of-branching′ p)) Z
---          >>= (exterior-sub-label (insertion-tree S₁ p (n-disc (height-of-branching′ p)) ⦃ y ⦄)
---                                  (pruned-bp S₁ p _) T ,, S⋆))
---       ≈⟨ ≈SExt (pruned-bp-exterior-sub S₁ p T (≤-pred q) (≤-pred x) .get Z) ⟩
---     SExt (≃-label (sym≃′ (insertion-tree-pruned-bp S₁ p T _)) (exterior-sub-label S₁ p T) Z) ∎
---     where
---       open Reasoning stm-setoid-≈
---   pruned-bp-exterior-sub (Join S₁ S₂) (BPExt p) (Join T Sing) q x .get (PShift Z) = refl≈stm
---   pruned-bp-exterior-sub (Join S₁ S₂) (BPShift p) T q x .get (PExt Z) = refl≈stm
---   pruned-bp-exterior-sub (Join S₁ S₂) (BPShift p) T q x .get (PShift Z) = let
---     instance .y : _
---     y = is-linear-has-linear-height (bp-height p) (n-disc (height-of-branching′ p)) ⦃ n-disc-is-linear (pred (height-of-branching p)) ⦄ (≤-trans (<⇒≤ q) (≤-reflexive (sym (tree-dim-n-disc (pred (height-of-branching p))))))
---     in begin
---     (exterior-sub-label S₂ p (n-disc (height-of-branching′ p)) ⦃ y ⦄ Z
---       >>= map-shift (exterior-sub-label (insertion-tree S₂ p (n-disc (height-of-branching′ p)) ⦃ y ⦄)
---                                         (pruned-bp S₂ p _) T ,, S⋆))
---       ≈⟨ reflexive≈stm (>>=-shift (exterior-sub-label S₂ p (n-disc (height-of-branching′ p)) ⦃ y ⦄ Z) (exterior-sub-label (insertion-tree S₂ p (n-disc (height-of-branching′ p)) ⦃ y ⦄)
---                                         (pruned-bp S₂ p _) T ,, S⋆)) ⟩
---     SShift (exterior-sub-label S₂ p (n-disc (height-of-branching′ p)) Z
---       >>= (exterior-sub-label (insertion-tree S₂ p (n-disc (height-of-branching′ p)) ⦃ y ⦄)
---                               (pruned-bp S₂ p _) T ,, S⋆))
---       ≈⟨ ≈SShift (pruned-bp-exterior-sub S₂ p T q x .get Z) ⟩
---     SShift (≃-label (sym≃′ (insertion-tree-pruned-bp S₂ p T _))
---                     (exterior-sub-label S₂ p T) Z) ∎
---     where
---       open Reasoning stm-setoid-≈
---   pruned-bp-exterior-sub (Join (Join S₁ Sing) S₂) BPHere T q x .get (PExt Z) = let
---     instance _ = n-disc-is-linear (tree-dim S₁)
---     in begin
---     (label-from-linear-tree-canonical (susp-tree S₁) (Join (n-disc (tree-dim S₁)) Sing) 1 Z
---       >>= connect-tree-inc-left (Join (n-disc (tree-dim S₁)) Sing) S₂
---       >>= (connect-label (label-from-linear-tree-canonical (Join (n-disc (tree-dim S₁)) Sing) T 0
---                           ●l (connect-tree-inc-left T S₂))
---                         (ap (connect-tree-inc-right T S₂)) ,, S⋆))
---       ≈⟨ reflexive≈stm (>>=-≃ (>>=-≃ (lfltu-maximal-path (susp-tree S₁) (Join (n-disc (tree-dim S₁)) Sing) 1 Z) refl≃l refl≃sty) refl≃l refl≃sty) ⟩
---     (canonical-comp′ (suc (tree-dim S₁)) (n-disc (tree-dim S₁))
---       >>= ((SPath ∘ PExt) ,, SArr (SPath PHere) S⋆ (SPath (PShift PHere)))
---       >>= (connect-label (label-from-linear-tree-canonical (Join (n-disc (tree-dim S₁)) Sing) T 0
---                           ●l (connect-tree-inc-left T S₂))
---                         (ap (connect-tree-inc-right T S₂)) ,, S⋆))
---       ≈⟨ reflexive≈stm (>>=-assoc (canonical-comp′ (suc (tree-dim S₁)) (n-disc (tree-dim S₁))) _ _) ⟩
---     (canonical-comp′ (suc (tree-dim S₁)) (n-disc (tree-dim S₁)) >>=
---           ((label-from-linear-tree-canonical (n-disc (tree-dim S₁)) T 1 ,, SArr SHere S⋆ (SPath (last-path T)))
---            ●lt (connect-tree-inc-left T S₂)))
---       ≈˘⟨ reflexive≈stm (>>=-assoc (canonical-comp′ (suc (tree-dim S₁)) (n-disc (tree-dim S₁))) _ _) ⟩
---     (canonical-comp′ (suc (tree-dim S₁)) (n-disc (tree-dim S₁))
---       >>= (label-from-linear-tree-canonical (n-disc (tree-dim S₁)) T 1 ,, SArr SHere S⋆ (SPath (last-path T)))
---       >>= connect-tree-inc-left T S₂)
---       ≡⟨⟩
---     (identity-stm (suc (tree-dim S₁))
---       >>= (label-from-linear-tree-canonical (n-disc (suc (tree-dim S₁))) T 0 ,, S⋆)
---       >>= connect-tree-inc-left T S₂)
---       ≈˘⟨ >>=-≈ (canonical-ecr (suc (suc (tree-dim S₁))) T x (s≤s (s≤s z≤n))) (connect-tree-inc-left-Ty T S₂) TySStar ⟩
---     (canonical-comp (2 + tree-dim S₁) T >>= (connect-tree-inc-left T S₂))
---       ≈˘⟨ reflexive≈stm (>>=-≃ (canonical-comp′-compat (2 + tree-dim S₁) T) refl≃l refl≃sty) ⟩
---     (canonical-comp′ (suc (suc (tree-dim S₁))) T >>=
---           (connect-tree-inc-left T S₂))
---       ≈˘⟨ reflexive≈stm (>>=-≃ (lfltu-maximal-path (Join S₁ Sing) T 1 Z) refl≃l refl≃sty) ⟩
---     (label-from-linear-tree-canonical (Join S₁ Sing) T 1 Z >>=
---           (connect-tree-inc-left T S₂)) ∎
---     where
---       open Reasoning stm-setoid-≈
---   pruned-bp-exterior-sub (Join (Join S₁ Sing) S₂) BPHere T q x .get (PShift Z) = reflexive≈stm (>>=-≃ (replace-not-here (SPath ∘ PShift) (SPath (PShift PHere)) Z) refl≃l refl≃sty)
+      lem : (n m : ℕ) → (q : n ≡ m)
+          → identity-stm (n-disc n)
+              >>= (stm-to-label (n-disc n) (canonical-comp′ (tree-dim (n-disc m)) T) (canonical-type (tree-dim (n-disc m)) T) ⦃ l1 q ⦄ ,, S⋆)
+            ≃stm
+            identity-stm (n-disc m) >>= (canonical-label (n-disc m) T ,, S⋆)
+      lem _ _ refl = refl≃stm
 
+  pruned-bp-exterior-label : (S : Tree n)
+                           → (p : BranchingPoint S l)
+                           → (T : Tree m)
+                           → .⦃ _ : has-trunk-height l T ⦄
+                           → .(q : bp-height p < pred (height-of-branching p))
+                           → (x : tree-dim T < height-of-branching p)
+                           → prune-label S p
+                               ●l (exterior-label (prune-tree S p) (pruned-bp S p q) T ,, S⋆)
+                             ≈[ (tree-to-ctx (insertion-tree (prune-tree S p) (pruned-bp S p q) T)) ]lm
+                             ≃-label (sym≃′ (insertion-tree-pruned-bp S p T q)) (exterior-label S p T)
+  pruned-bp-exterior-label (Join S₁ S₂) (BPExt p) (susp T) q x .get (PExt Z) = begin
+    prune-label S₁ p Z >>=
+          (SExt ∘ exterior-label (prune-tree S₁ p) (pruned-bp S₁ p _) T
+          ,, SArr (SPath PHere) S⋆ (SShift (SPath PHere)))
+      ≈⟨ reflexive≈stm (>>=-≃ (refl≃stm {a = prune-label S₁ p Z}) refl≃l (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm))) ⟩
+    (prune-label S₁ p Z >>=
+          (map-ext (exterior-label (prune-tree S₁ p) (pruned-bp S₁ p _) T ,, S⋆)))
+      ≈⟨ reflexive≈stm (>>=-ext (prune-label S₁ p Z) (exterior-label (prune-tree S₁ p) (pruned-bp S₁ p _) T ,, S⋆)) ⟩
+    SExt (prune-label S₁ p Z
+         >>= (exterior-label (prune-tree S₁ p) (pruned-bp S₁ p _) T ,, S⋆))
+      ≈⟨ ≈SExt (pruned-bp-exterior-label S₁ p T (≤-pred q) (≤-pred x) .get Z) ⟩
+    SExt (≃-label (sym≃′ (insertion-tree-pruned-bp S₁ p T _)) (exterior-label S₁ p T) Z) ∎
+    where
+      open Reasoning stm-setoid-≈
+  pruned-bp-exterior-label (Join S₁ S₂) (BPExt p) (susp T) q x .get (PShift Z) = refl≈stm
+  pruned-bp-exterior-label (Join S₁ S₂) (BPShift p) T q x .get (PExt Z) = refl≈stm
+  pruned-bp-exterior-label (Join S₁ S₂) (BPShift p) T q x .get (PShift Z) = begin
+    (prune-label S₂ p Z
+      >>= map-shift (exterior-label (prune-tree S₂ p)
+                                        (pruned-bp S₂ p _) T ,, S⋆))
+      ≈⟨ reflexive≈stm (>>=-shift (prune-label S₂ p Z) (exterior-label (prune-tree S₂ p)
+                                        (pruned-bp S₂ p _) T ,, S⋆)) ⟩
+    SShift (prune-label S₂ p Z
+      >>= (exterior-label (prune-tree S₂ p)
+                              (pruned-bp S₂ p _) T ,, S⋆))
+      ≈⟨ ≈SShift (pruned-bp-exterior-label S₂ p T q x .get Z) ⟩
+    SShift (≃-label (sym≃′ (insertion-tree-pruned-bp S₂ p T _))
+                    (exterior-label S₂ p T) Z) ∎
+    where
+      open Reasoning stm-setoid-≈
+  pruned-bp-exterior-label (Join (susp S₁) S₂) BPHere T q x .get (PExt Z) = begin
+    canonical-label (susp (susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z)
+      >>= connect-tree-inc-left (Join (n-disc (tree-dim S₁)) Sing) S₂
+      >>= (connect-label′ (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+                            ●l (connect-tree-inc-left T S₂))
+                          (ap (connect-tree-inc-right T S₂)) ,, S⋆)
+      ≈⟨ reflexive≈stm (>>=-≃ (>>=-≃ l1 refl≃l refl≃sty) refl≃l refl≃sty) ⟩
+    identity-stm (n-disc (suc (tree-dim S₁)))
+      >>= connect-tree-inc-left (susp (n-disc (tree-dim S₁))) S₂
+      >>= (connect-label′ (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+                            ●l (connect-tree-inc-left T S₂))
+                          (ap (connect-tree-inc-right T S₂)) ,, S⋆)
+      ≈⟨ reflexive≈stm (>>=-assoc (identity-stm (n-disc (suc (tree-dim S₁))))
+                                  (connect-tree-inc-left (susp (n-disc (tree-dim S₁))) S₂)
+                                  (connect-label′ (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+                                                    ●l (connect-tree-inc-left T S₂))
+                                                  (ap (connect-tree-inc-right T S₂)) ,, S⋆)) ⟩
+    identity-stm (n-disc (suc (tree-dim S₁)))
+      >>= connect-tree-inc-left (susp (n-disc (tree-dim S₁))) S₂
+          ●lt (connect-label′ (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+                                ●l (connect-tree-inc-left T S₂))
+                              (ap (connect-tree-inc-right T S₂)) ,, S⋆)
+      ≈⟨ >>=-≈ (identity-stm (n-disc (suc (tree-dim S₁))))
+               (connect-label′-inc-left (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+                                          ●l (connect-tree-inc-left T S₂))
+                                        (ap (connect-tree-inc-right T S₂))
+                                        S⋆
+                                        (reflexive≈stm l2))
+               refl≈sty ⟩
+    identity-stm (n-disc (suc (tree-dim S₁)))
+      >>= (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+          ●l (connect-tree-inc-left T S₂) ,, S⋆)
+      ≈⟨ >>=-≈ (identity-stm (n-disc (suc (tree-dim S₁))))
+               (≈-label-comp (replace-label-eq (canonical-label (n-disc (suc (tree-dim S₁))) T)
+                                               SHere
+                                               (reflexive≈stm (sym≃stm (canonical-label-fst (n-disc (suc (tree-dim S₁))) T))))
+                             (connect-tree-inc-left-Ty T S₂)
+                             TySStar)
+               refl≈sty ⟩
+    identity-stm (n-disc (suc (tree-dim S₁)))
+      >>= (canonical-label (n-disc (suc (tree-dim S₁))) T ●l (connect-tree-inc-left T S₂) ,, S⋆)
+      ≈˘⟨ reflexive≈stm (>>=-assoc (identity-stm (n-disc (suc (tree-dim S₁)))) (canonical-label (n-disc (suc (tree-dim S₁))) T ,, S⋆) _) ⟩
+    identity-stm (n-disc (suc (tree-dim S₁)))
+      >>= (canonical-label (n-disc (suc (tree-dim S₁))) T ,, S⋆)
+      >>= connect-tree-inc-left T S₂
+      ≈˘⟨ ≈->>= (canonical-ecr (2+ (tree-dim S₁)) T x (s≤s (s≤s z≤n))) (connect-tree-inc-left-Ty T S₂) TySStar ⟩
+    canonical-comp (2+ (tree-dim S₁)) T >>= connect-tree-inc-left T S₂
+      ≈˘⟨ reflexive≈stm (>>=-≃ (canonical-comp′-compat (2+ (tree-dim S₁)) T) refl≃l refl≃sty) ⟩
+    canonical-comp′ (2+ (tree-dim S₁)) T >>= connect-tree-inc-left T S₂
+      ≈˘⟨ reflexive≈stm (>>=-≃ (canonical-label-max (susp (susp S₁)) T (PExt Z)) refl≃l refl≃sty) ⟩
+    canonical-label (susp (susp S₁)) T (PExt Z) >>= connect-tree-inc-left T S₂ ∎
+    where
+      l1 : canonical-label (susp (susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z)
+           ≃stm
+           identity-stm (n-disc (suc (tree-dim S₁)))
+      l1 = begin
+        < canonical-label (susp (susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z) >stm
+          ≈⟨ canonical-label-max (susp (susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z) ⟩
+        < canonical-comp′ (tree-dim (susp (susp S₁))) (n-disc (suc (tree-dim S₁))) >stm
+          ≈⟨ canonical-comp′-compat (2+ (tree-dim S₁)) (n-disc (suc (tree-dim S₁))) ⟩
+        < canonical-comp (2+ (tree-dim S₁)) (n-disc (suc (tree-dim S₁))) >stm
+          ≈˘⟨ canonical-comp-≃ (≃n-to-≡ (tree-dim-n-disc {suc (suc (tree-dim S₁))})) refl≃ ⟩
+        < canonical-comp (suc (tree-dim (n-disc (suc (tree-dim S₁))))) (n-disc (suc (tree-dim S₁))) >stm
+          ≈˘⟨ identity-stm-is-canonical (n-disc (suc (tree-dim S₁))) ⟩
+        < identity-stm (n-disc (suc (tree-dim S₁))) >stm ∎
+        where
+          open Reasoning stm-setoid
+
+      l2 : canonical-label (n-disc (suc (tree-dim S₁))) T (PShift PHere) >>= connect-tree-inc-left T S₂
+           ≃stm
+           ap (connect-tree-inc-right T S₂) PHere
+      l2 = begin
+        < canonical-label (n-disc (suc (tree-dim S₁))) T (PShift PHere) >>= connect-tree-inc-left T S₂ >stm
+          ≈⟨ >>=-≃ (canonical-label-last (n-disc (suc (tree-dim S₁))) T) refl≃l refl≃sty ⟩
+        < ap (connect-tree-inc-left T S₂) (last-path T) >stm
+          ≈⟨ SPath≃ (connect-tree-inc-phere T S₂) ⟩
+        < ap (connect-tree-inc-right T S₂) PHere >stm ∎
+        where
+          open Reasoning stm-setoid
+      open Reasoning stm-setoid-≈
+  pruned-bp-exterior-label (Join (Join S₁ Sing) S₂) BPHere T q x .get (PShift Z) = refl≈stm
 
 module _ (disc-rem : HasDiscRemoval) where
   open import Catt.Typing.DiscRemoval.Properties rule lift-rule susp-rule sub-rule disc-rem
@@ -308,7 +348,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
              canonical-stm d (tree-bd d (insertion-tree S P T)) >>= tree-inc-label d (insertion-tree S P T) b
       lem2 b (Bd-Cond1 x y) = begin
         canonical-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (exterior-label S P T ,, S⋆)
-          ≈⟨ ≈->>= (canonical-stm d (tree-bd d S))
+          ≈⟨ >>=-≈ (canonical-stm d (tree-bd d S))
                    (label-max-equality-to-equality (canonical-exterior-comm-1 S P T d x y q b)
                                                    (label-comp-Ty (tree-inc-Ty d S b) (exterior-label-Ty S P T) TySStar)
                                                    (label-≃-Ty (insertion-bd-1 S P T d y q) (tree-inc-Ty d (insertion-tree S P T) b)))
@@ -321,7 +361,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
         canonical-stm d (tree-bd d (insertion-tree S P T)) >>= tree-inc-label d (insertion-tree S P T) b ∎
       lem2 b (Bd-Cond2 x) = begin
         canonical-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (exterior-label S P T ,, S⋆)
-          ≈⟨ ≈->>= (canonical-stm d (tree-bd d S))
+          ≈⟨ >>=-≈ (canonical-stm d (tree-bd d S))
                    (label-max-equality-to-equality
                      (canonical-exterior-comm-2 S P T d b q x)
                      (label-comp-Ty (tree-inc-Ty d S b) (exterior-label-Ty S P T) TySStar)
@@ -345,7 +385,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
         canonical-stm d (tree-bd d S)
           >>= (exterior-label (tree-bd d S) (bd-branching-point S P d _) (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
           >>= label-wt-≃ (insertion-bd-2 S P T d _) (tree-inc-label d (insertion-tree S P T) b)
-          ≈⟨ >>=-≈ (exterior-canonical-stm (tree-bd d S)
+          ≈⟨ ≈->>= (exterior-canonical-stm (tree-bd d S)
                                            (bd-branching-point S P d (bd-bp-lem P x))
                                            (tree-bd d T)
                                            ⦃ _ ⦄
@@ -409,7 +449,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
 
   exterior-canonical-stm S@(Join _ _) P T d q p = begin
     canonical-stm d S >>= (exterior-label S P T ,, S⋆)
-      ≈⟨ >>=-≈ (canonical-stm-is-comp d ⦃ NonZero-≤ q it ⦄ S) (exterior-label-Ty S P T) TySStar ⟩
+      ≈⟨ ≈->>= (canonical-stm-is-comp d ⦃ NonZero-≤ q it ⦄ S) (exterior-label-Ty S P T) TySStar ⟩
     canonical-comp d S >>= (exterior-label S P T ,, S⋆)
       ≈⟨ exterior-canonical-comp S P T d p ⟩
     canonical-comp d (insertion-tree S P T)
@@ -448,7 +488,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
     stm-≃ (sym≃′ (insertion-bp-left T S₂ Q U))
       (canonical-comp′ (1 + tree-dim S₁) T >>= (exterior-label T Q U ,, S⋆)
                                            >>= connect-tree-inc-left (insertion-tree T Q U) S₂)
-      ≈⟨ stm-≃-≈ ((sym≃′ (insertion-bp-left T S₂ Q U))) (>>=-≈ (exterior-canonical-comp′ T Q U (1 + tree-dim S₁) q) (connect-tree-inc-left-Ty (insertion-tree T Q U) S₂) TySStar) ⟩
+      ≈⟨ stm-≃-≈ ((sym≃′ (insertion-bp-left T S₂ Q U))) (≈->>= (exterior-canonical-comp′ T Q U (1 + tree-dim S₁) q) (connect-tree-inc-left-Ty (insertion-tree T Q U) S₂) TySStar) ⟩
     stm-≃ (sym≃′ (insertion-bp-left T S₂ Q U))
       (canonical-comp′ (1 + tree-dim S₁) (insertion-tree T Q U)
         >>= connect-tree-inc-left (insertion-tree T Q U) S₂)

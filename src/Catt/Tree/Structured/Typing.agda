@@ -28,6 +28,7 @@ stm-eq Γ = Wrap (λ a b → stm-to-term a ≈[ Γ ]tm stm-to-term b)
 sty-eq : {X : MaybeTree n} → (Γ : Ctx n) → STy X → STy X → Set
 sty-eq Γ = Wrap (λ A B → sty-to-type A ≈[ Γ ]ty sty-to-type B)
 
+infix 4 stm-eq sty-eq
 syntax stm-eq ΓS a b = a ≈[ ΓS ]stm b
 syntax sty-eq ΓS A B = A ≈[ ΓS ]sty B
 
@@ -85,6 +86,7 @@ sty-setoid-≈ {Γ = Γ} {X = X} = record { Carrier = STy X
 label-max-equality : {X : MaybeTree n} → (ΓS : Ctx n) → (L M : Label X S) → Set
 label-max-equality {S = S} Γ L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-maximal Q ⦄ → L Q ≈[ Γ ]stm M Q) L M
 
+infix 4 label-max-equality
 syntax label-max-equality Γ L M = L ≈[ Γ ]lm M
 
 refl≈lm : L ≈[ Γ ]lm L
@@ -93,6 +95,7 @@ refl≈lm .get Z = refl≈stm
 label-equality : {X : MaybeTree n} → (Γ : Ctx n) → (L M : Label X S) → Set
 label-equality {S = S} Γ L M = Wrap (λ L M → ∀ (Q : Path S) → L Q ≈[ Γ ]stm M Q) L M
 
+infix 4 label-equality
 syntax label-equality Γ L M = L ≈[ Γ ]l M
 
 refl≈l : L ≈[ Γ ]l L
@@ -107,7 +110,7 @@ trans≈l p q .get Z = trans≈stm (p .get Z) (q .get Z)
 reflexive≈l : L ≃l M → L ≈[ Γ ]l M
 reflexive≈l [ p ] .get Z = reflexive≈stm (p Z)
 
-compute-≈ : {a b : STm (someTree S)} → compute-stm a ≈[ tree-to-ctx S ]stm compute-stm b → a ≈[ tree-to-ctx S ]stm b
+compute-≈ : {a b : STm (someTree S)} → compute-stm a ≈[ ⌊ S ⌋ ]stm compute-stm b → a ≈[ ⌊ S ⌋ ]stm b
 compute-≈ {a = a} {b = b} p = begin
   a
     ≈˘⟨ reflexive≈stm (compute-to-term a) ⟩
@@ -119,7 +122,7 @@ compute-≈ {a = a} {b = b} p = begin
   where
     open Reasoning stm-setoid-≈
 
-fixup-reflexive≈stm : {a : STm (someTree S)} → {b : STm (someTree T)} → a ≃stm b → (p : S ≃′ T) → a ≈[ tree-to-ctx S ]stm stm-≃ (sym≃′ p) b
+fixup-reflexive≈stm : {a : STm (someTree S)} → {b : STm (someTree T)} → a ≃stm b → (p : S ≃′ T) → a ≈[ ⌊ S ⌋ ]stm stm-≃ (sym≃′ p) b
 fixup-reflexive≈stm {a = a} {b} q p = reflexive≈stm (begin
   < a >stm
     ≈⟨ q ⟩
@@ -129,7 +132,7 @@ fixup-reflexive≈stm {a = a} {b} q p = reflexive≈stm (begin
   where
     open Reasoning stm-setoid
 
-stm-≃-≈ : (p : S ≃′ T) → a ≈[ tree-to-ctx S ]stm b → stm-≃ p a ≈[ tree-to-ctx T ]stm stm-≃ p b
+stm-≃-≈ : (p : S ≃′ T) → a ≈[ ⌊ S ⌋ ]stm b → stm-≃ p a ≈[ ⌊ T ⌋ ]stm stm-≃ p b
 stm-≃-≈ {a = a} {b = b} p q with ≃-to-same-n (≃′-to-≃ p)
 ... | refl with ≃-to-≡ (≃′-to-≃ p)
 ... | refl = begin
@@ -166,7 +169,7 @@ Typing-STm Γ = Wrap (λ a As → Typing-Tm Γ (stm-to-term a) (sty-to-type As))
 
 Typing-STy Γ = Wrap (λ As → Typing-Ty Γ (sty-to-type As))
 
-Typing-Label′ {S = S} Γ = Wrap (λ L → Typing-Sub (tree-to-ctx S) Γ (label-to-sub L))
+Typing-Label′ {S = S} Γ = Wrap (λ L → Typing-Sub ⌊ S ⌋ Γ (label-to-sub L))
 
 data Typing-Label where
   TySing : {L : Label-WT X Sing} → Typing-STm Γ (ap L PHere) (lty L) → Typing-Label Γ L

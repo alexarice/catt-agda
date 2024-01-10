@@ -44,7 +44,7 @@ pred-n-extendable (suc n) (Join S Sing) = pred-n-extendable n S
 pred-n-extendable (suc n) (Join S T@(Join _ _)) = pred-n-extendable (suc n) T
 
 -- Tree to pd conversion
-tree-to-pd : (T : Tree m) → tree-to-ctx T ⊢pd
+tree-to-pd : (T : Tree m) → ⌊ T ⌋ ⊢pd
 tree-to-pd Sing = Finish Base
 tree-to-pd (Join S T) = connect-susp-pd (tree-to-pd S) (tree-to-pd T)
 

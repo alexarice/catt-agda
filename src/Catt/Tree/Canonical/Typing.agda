@@ -22,9 +22,9 @@ open import Catt.Tree.Structured.Typing rule
 open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
 open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
 
-canonical-type-Ty : (d : ℕ) → (T : Tree n) → Typing-STy (tree-to-ctx T) (canonical-type d T)
-canonical-stm-Ty : (d : ℕ) → (T : Tree n) → Typing-STm (tree-to-ctx T) (canonical-stm d T) (canonical-type d T)
-canonical-comp-Ty : (d : ℕ) → (T : Tree n) → Typing-STm (tree-to-ctx T) (canonical-comp d T) (canonical-type d T)
+canonical-type-Ty : (d : ℕ) → (T : Tree n) → Typing-STy ⌊ T ⌋ (canonical-type d T)
+canonical-stm-Ty : (d : ℕ) → (T : Tree n) → Typing-STm ⌊ T ⌋ (canonical-stm d T) (canonical-type d T)
+canonical-comp-Ty : (d : ℕ) → (T : Tree n) → Typing-STm ⌊ T ⌋ (canonical-comp d T) (canonical-type d T)
 
 canonical-type-Ty zero T = TySStar
 canonical-type-Ty (suc d) T
@@ -40,8 +40,8 @@ canonical-stm-Ty (suc d) (Join T (Join T₁ T₂)) = canonical-comp-Ty (suc d) (
 
 canonical-comp-Ty d T = TySConv (TySCoh T (canonical-type-Ty d T) (id-label-Ty T) TySStar) (reflexive≈sty (>>=′-id (canonical-type d T)))
 
-canonical-comp′-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → Typing-STm (tree-to-ctx T) (canonical-comp′ d T) (canonical-type d T)
+canonical-comp′-Ty : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → Typing-STm ⌊ T ⌋ (canonical-comp′ d T) (canonical-type d T)
 canonical-comp′-Ty d T = transport-stm-typing (canonical-comp-Ty d T) (sym≃stm (canonical-comp′-compat d T)) refl≃sty
 
-canonical-label-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → .⦃ NonZero (tree-dim S) ⦄ → (T : Tree m) → Typing-Label (tree-to-ctx T) (canonical-label S T ,, S⋆)
+canonical-label-Ty : (S : Tree n) → .⦃ _ : is-linear S ⦄ → .⦃ NonZero (tree-dim S) ⦄ → (T : Tree m) → Typing-Label ⌊ T ⌋ (canonical-label S T ,, S⋆)
 canonical-label-Ty S T = stm-to-label-Ty S (canonical-comp′-Ty (tree-dim S) T) (canonical-type-Ty (tree-dim S) T)

@@ -35,7 +35,7 @@ COT-to-MT (incTree x) = someTree x
 COT-to-MT (incCtx x) = Other _
 
 COT-to-Ctx : CtxOrTree n → Ctx n
-COT-to-Ctx (incTree x) = tree-to-ctx x
+COT-to-Ctx (incTree x) = ⌊ x ⌋
 COT-to-Ctx (incCtx x) = x
 
 Label′ : (T : Tree m) → (S : Tree n) → Set

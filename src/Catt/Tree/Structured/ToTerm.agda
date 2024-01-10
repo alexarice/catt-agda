@@ -18,7 +18,7 @@ apt L P = stm-to-term (ap L P)
 stm-to-term (SExt s) = susp-tm (stm-to-term s) [ connect-susp-inc-left _ _ ]tm
 stm-to-term (SShift s) = stm-to-term s [ connect-susp-inc-right _ _ ]tm
 stm-to-term (SPath P) = path-to-term P
-stm-to-term (SCoh S A L) = Coh (tree-to-ctx S) (sty-to-type A) idSub [ label-to-sub L ]tm
+stm-to-term (SCoh S A L) = Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm
 stm-to-term (SOther t) = t
 
 sty-to-type S⋆ = ⋆

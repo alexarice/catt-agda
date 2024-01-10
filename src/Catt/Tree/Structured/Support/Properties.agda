@@ -109,25 +109,25 @@ DCM-toVarSet : (xs : MVarSet (COT-to-MT ΓS)) → MtoVarSet ΓS (DCM ΓS xs) ≡
 DCM-toVarSet {ΓS = incTree S} xs = DCT-toVarSet xs
 DCM-toVarSet {ΓS = incCtx Γ} xs = DC-idem Γ xs
 
-fromPath-to-term : (P : Path S) → toVarSet (fromPath P) ≡ SuppTm (tree-to-ctx S) (path-to-term P)
+fromPath-to-term : (P : Path S) → toVarSet (fromPath P) ≡ SuppTm ⌊ S ⌋ (path-to-term P)
 fromPath-to-term {S = S} PHere = begin
   toVarSet (fromPath (PHere {S = S}))
     ≡⟨ fromPath-PHere S ⟩
   trueAt (fromℕ _)
-    ≡˘⟨ DC-fromℕ (tree-to-ctx S) ⟩
-  SuppTm (tree-to-ctx S) (Var (fromℕ _)) ∎
+    ≡˘⟨ DC-fromℕ ⌊ S ⌋ ⟩
+  SuppTm ⌊ S ⌋ (Var (fromℕ _)) ∎
 fromPath-to-term {S = Join S T} (PExt P) rewrite Truth-prop (fromPath-non-empty P) = begin
   connect-susp-supp (suspSupp (toVarSet (fromPath P))) (toVarSet (tEmp {S = T}))
     ≡⟨ cong₂ (λ x y → connect-susp-supp (suspSupp x) y) (fromPath-to-term P) (toVarSet-emp T) ⟩
-  connect-susp-supp (suspSupp (SuppTm (tree-to-ctx S) (path-to-term P))) empty
-    ≡⟨ connect-susp-supp-ext (tree-to-ctx S) (path-to-term P) (tree-to-ctx T) ⟩
-  SuppTm (tree-to-ctx (Join S T)) (susp-tm (path-to-term P) [ connect-susp-inc-left _ _ ]tm) ∎
+  connect-susp-supp (suspSupp (SuppTm ⌊ S ⌋ (path-to-term P))) empty
+    ≡⟨ connect-susp-supp-ext ⌊ S ⌋ (path-to-term P) ⌊ T ⌋ ⟩
+  SuppTm (⌊ Join S T ⌋) (susp-tm (path-to-term P) [ connect-susp-inc-left _ _ ]tm) ∎
 fromPath-to-term {S = Join S T} (PShift P) rewrite Truth-not-prop (tvarset-empty S) = begin
   connect-susp-supp empty (toVarSet (fromPath P))
     ≡⟨ cong (connect-susp-supp empty) (fromPath-to-term P) ⟩
-  connect-susp-supp empty (SuppTm (tree-to-ctx T) (path-to-term P))
-    ≡⟨ connect-susp-supp-shift (tree-to-ctx S) (tree-to-ctx T) (path-to-term P) ⟩
-  SuppTm (connect-susp (tree-to-ctx S) (tree-to-ctx T)) (path-to-term P [ connect-susp-inc-right _ _ ]tm) ∎
+  connect-susp-supp empty (SuppTm ⌊ T ⌋ (path-to-term P))
+    ≡⟨ connect-susp-supp-shift ⌊ S ⌋ ⌊ T ⌋ (path-to-term P) ⟩
+  SuppTm (connect-susp ⌊ S ⌋ ⌊ T ⌋) (path-to-term P [ connect-susp-inc-right _ _ ]tm) ∎
 
 FVSTm-to-term : {ΓS : CtxOrTree n} → (a : STm (COT-to-MT ΓS)) → MtoVarSet ΓS (FVSTm a) ≡ SuppTm (COT-to-Ctx ΓS) (stm-to-term a)
 FVSTy-to-type : {ΓS : CtxOrTree n} → (A : STy (COT-to-MT ΓS)) → MtoVarSet ΓS (FVSTy A) ≡ SuppTy (COT-to-Ctx ΓS) (sty-to-type A)
@@ -143,28 +143,28 @@ FVSTm-to-term {ΓS = incTree x} (SPath P) = fromPath-to-term P
 FVSTm-to-term {ΓS = incTree x} (SCoh S A L) = begin
   toVarSet (FVLabel-WT L)
     ≡⟨ FVLabel-to-sub L ⟩
-  SuppSub (tree-to-ctx x) (label-to-sub L)
-    ≡˘⟨ cong (DC (tree-to-ctx x)) (coh-sub-fv (tree-to-ctx S) (sty-to-type A) (label-to-sub L)) ⟩
-  SuppTm (tree-to-ctx x) (Coh (tree-to-ctx S) (sty-to-type A) idSub [ label-to-sub L ]tm) ∎
+  SuppSub ⌊ x ⌋ (label-to-sub L)
+    ≡˘⟨ cong (DC ⌊ x ⌋) (coh-sub-fv ⌊ S ⌋ (sty-to-type A) (label-to-sub L)) ⟩
+  SuppTm ⌊ x ⌋ (Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm) ∎
 FVSTm-to-term {ΓS = incCtx Γ} (SCoh S A L) = begin
   DC Γ (FVLabel-WT L)
     ≡⟨ FVLabel-to-sub L ⟩
   SuppSub Γ (label-to-sub L)
-    ≡˘⟨ cong (DC Γ) (coh-sub-fv (tree-to-ctx S) (sty-to-type A) (label-to-sub L)) ⟩
-  SuppTm Γ (Coh (tree-to-ctx S) (sty-to-type A) idSub [ label-to-sub L ]tm) ∎
+    ≡˘⟨ cong (DC Γ) (coh-sub-fv ⌊ S ⌋ (sty-to-type A) (label-to-sub L)) ⟩
+  SuppTm Γ (Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm) ∎
 FVSTm-to-term {ΓS = incCtx _} (SOther t) = refl
 FVSTm-to-term {ΓS = incTree (Join S T)} (SExt a) rewrite Truth-prop (FVSTm-non-empty a) = begin
   connect-susp-supp (suspSupp (toVarSet (FVSTm a))) (toVarSet (tEmp {S = T}))
     ≡⟨ cong₂ (λ x y → connect-susp-supp (suspSupp x) y) (FVSTm-to-term a) (toVarSet-emp T) ⟩
-  connect-susp-supp (suspSupp (SuppTm (tree-to-ctx S) (stm-to-term a))) empty
-    ≡⟨ connect-susp-supp-ext (tree-to-ctx S) (stm-to-term a) (tree-to-ctx T) ⟩
-  SuppTm (tree-to-ctx (Join S T)) (susp-tm (stm-to-term a) [ connect-susp-inc-left _ _ ]tm) ∎
+  connect-susp-supp (suspSupp (SuppTm ⌊ S ⌋ (stm-to-term a))) empty
+    ≡⟨ connect-susp-supp-ext ⌊ S ⌋ (stm-to-term a) ⌊ T ⌋ ⟩
+  SuppTm ⌊ Join S T ⌋ (susp-tm (stm-to-term a) [ connect-susp-inc-left _ _ ]tm) ∎
 FVSTm-to-term {ΓS = incTree (Join S T)} (SShift a) rewrite Truth-not-prop (tvarset-empty S) = begin
   connect-susp-supp empty (toVarSet (FVSTm a))
     ≡⟨ cong (connect-susp-supp empty) (FVSTm-to-term a) ⟩
-  connect-susp-supp empty (SuppTm (tree-to-ctx T) (stm-to-term a))
-    ≡⟨ connect-susp-supp-shift (tree-to-ctx S) (tree-to-ctx T) (stm-to-term a)  ⟩
-  SuppTm (tree-to-ctx (Join S T)) (stm-to-term a [ connect-susp-inc-right _ _ ]tm) ∎
+  connect-susp-supp empty (SuppTm ⌊ T ⌋ (stm-to-term a))
+    ≡⟨ connect-susp-supp-shift ⌊ S ⌋ ⌊ T ⌋ (stm-to-term a)  ⟩
+  SuppTm ⌊ Join S T ⌋ (stm-to-term a [ connect-susp-inc-right _ _ ]tm) ∎
 
 FVSTy-to-type {ΓS = ΓS} S⋆ = trans (MtoVarSet-emp ΓS) (sym (DC-empty (COT-to-Ctx ΓS)))
 FVSTy-to-type {ΓS = ΓS} (SArr s A t) = begin
@@ -277,9 +277,9 @@ FVLabel-to-sub′ {S = Join S T} {ΓS = ΓS} L f g = begin
         module PR = PReasoning (⊆-poset _)
         open PR
 
-supp-condition-compat : (b : Bool) → (S : Tree n) → (As : STy (someTree S)) → supp-condition-s b S As → supp-condition b (sty-to-type As) (tree-to-ctx S)
+supp-condition-compat : (b : Bool) → (S : Tree n) → (As : STy (someTree S)) → supp-condition-s b S As → supp-condition b (sty-to-type As) ⌊ S ⌋
 supp-condition-compat false S As sc = begin
-  SuppTy (tree-to-ctx S) (sty-to-type As)
+  SuppTy ⌊ S ⌋ (sty-to-type As)
     ≡˘⟨ FVSTy-to-type As ⟩
   toVarSet (FVSTy As)
     ≡˘⟨ DCT-toVarSet (FVSTy As) ⟩
@@ -290,14 +290,14 @@ supp-condition-compat false S As sc = begin
   full ∎
 supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = tree-to-pd S ,, NonZero-subst lem nz ,, lem1 ,, lem2
   where
-    lem : tree-dim S ≡ ctx-dim (tree-to-ctx S)
+    lem : tree-dim S ≡ ctx-dim ⌊ S ⌋
     lem = sym (tree-dim-ctx-dim S)
 
     instance _ = tree-to-pd S
-    lem1 : SuppTm (tree-to-ctx S) (stm-to-term s)
-         ≡ pd-bd-supp (pred (ctx-dim (tree-to-ctx S))) (tree-to-ctx S) false
+    lem1 : SuppTm ⌊ S ⌋ (stm-to-term s)
+         ≡ pd-bd-supp (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ false
     lem1 = begin
-      SuppTm (tree-to-ctx S) (stm-to-term s)
+      SuppTm ⌊ S ⌋ (stm-to-term s)
         ≡˘⟨ FVSTm-to-term s ⟩
       toVarSet (FVSTm s)
         ≡˘⟨ DCT-toVarSet (FVSTm s) ⟩
@@ -305,14 +305,14 @@ supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = tree-to-pd S ,, 
         ≡⟨ cong toVarSet sc1 ⟩
       toVarSet (supp-tree-bd (pred (tree-dim S)) S false)
         ≡⟨ cong (λ - → toVarSet (supp-tree-bd (pred -) S false)) lem  ⟩
-      toVarSet (supp-tree-bd (pred (ctx-dim (tree-to-ctx S))) S false)
-        ≡⟨ supp-compat′ (pred (ctx-dim (tree-to-ctx S))) S false ⟩
-      pd-bd-supp (pred (ctx-dim (tree-to-ctx S))) (tree-to-ctx S) false ∎
+      toVarSet (supp-tree-bd (pred (ctx-dim ⌊ S ⌋)) S false)
+        ≡⟨ supp-compat′ (pred (ctx-dim ⌊ S ⌋)) S false ⟩
+      pd-bd-supp (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ false ∎
 
-    lem2 : SuppTm (tree-to-ctx S) (stm-to-term t)
-         ≡ pd-bd-supp (pred (ctx-dim (tree-to-ctx S))) (tree-to-ctx S) true
+    lem2 : SuppTm ⌊ S ⌋ (stm-to-term t)
+         ≡ pd-bd-supp (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ true
     lem2 = begin
-      SuppTm (tree-to-ctx S) (stm-to-term t)
+      SuppTm ⌊ S ⌋ (stm-to-term t)
         ≡˘⟨ FVSTm-to-term t ⟩
       toVarSet (FVSTm t)
         ≡˘⟨ DCT-toVarSet (FVSTm t) ⟩
@@ -320,9 +320,9 @@ supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = tree-to-pd S ,, 
         ≡⟨ cong toVarSet sc2 ⟩
       toVarSet (supp-tree-bd (pred (tree-dim S)) S true)
         ≡⟨ cong (λ - → toVarSet (supp-tree-bd (pred -) S true)) lem  ⟩
-      toVarSet (supp-tree-bd (pred (ctx-dim (tree-to-ctx S))) S true)
-        ≡⟨ supp-compat′ (pred (ctx-dim (tree-to-ctx S))) S true ⟩
-      pd-bd-supp (pred (ctx-dim (tree-to-ctx S))) (tree-to-ctx S) true ∎
+      toVarSet (supp-tree-bd (pred (ctx-dim ⌊ S ⌋)) S true)
+        ≡⟨ supp-compat′ (pred (ctx-dim ⌊ S ⌋)) S true ⟩
+      pd-bd-supp (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ true ∎
 
 DCM-reflect : {xs ys : MVarSet (COT-to-MT ΓS)} → MtoVarSet ΓS xs ≡ MtoVarSet ΓS ys → DCM ΓS xs ≡ DCM ΓS ys
 DCM-reflect {ΓS = incTree x} p = DCT-reflect p
@@ -418,33 +418,33 @@ ppath-≃-full (Join≃′ {S′ = S′} {T′ = T′} p q) = begin
     ≡⟨ cong₂ (VSJoin true) (ppath-≃-full p) (ppath-≃-full q) ⟩
   tFull ∎
 
-connect-tree-incs-full : (S : Tree n) → (T : Tree m) → FVLabel (ap (connect-tree-inc-left S T)) ∪m FVLabel (ap (connect-tree-inc-right S T)) ≡ tFull
-connect-tree-incs-full Sing T = begin
+++t-incs-full : (S : Tree n) → (T : Tree m) → FVLabel (ap (++t-inc-left S T)) ∪m FVLabel (ap (++t-inc-right S T)) ≡ tFull
+++t-incs-full Sing T = begin
   fromPath PHere ∪t FVLabel (id-label T)
     ≡⟨ cong (fromPath PHere ∪t_) (id-label-full T) ⟩
   fromPath PHere ∪t tFull
     ≡⟨ ∪t-right-zero (fromPath PHere) ⟩
   tFull ∎
-connect-tree-incs-full (Join S₁ S₂) T = begin
+++t-incs-full (Join S₁ S₂) T = begin
   VSJoin true tEmp tEmp ∪t
       FVLabel′ (λ x → VSJoin false (fromPath x) tEmp)
       ∪t
       FVLabel′
       (λ x →
-         VSJoin false tEmp (fromPath (connect-tree-inc-left′ S₂ T x)))
+         VSJoin false tEmp (fromPath (++t-inc-left′ S₂ T x)))
       ∪t
       FVLabel′
       (λ P →
-         VSJoin false tEmp (fromPath (connect-tree-inc-right′ S₂ T P)))
+         VSJoin false tEmp (fromPath (++t-inc-right′ S₂ T P)))
     ≡⟨ cong₃ (λ a b c → VSJoin true tEmp tEmp ∪t a ∪t b ∪t c)
              (FVLabel′-map fromPath (λ x → VSJoin false x tEmp) (λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp))))
-             (FVLabel′-map (λ x → fromPath (connect-tree-inc-left′ S₂ T x)) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))))
-             ((FVLabel′-map (λ x → fromPath (connect-tree-inc-right′ S₂ T x)) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))))) ⟩
+             (FVLabel′-map (λ x → fromPath (++t-inc-left′ S₂ T x)) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))))
+             ((FVLabel′-map (λ x → fromPath (++t-inc-right′ S₂ T x)) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-left-unit tEmp))))) ⟩
   VSJoin true
     (tEmp ∪t FVLabel (id-label S₁) ∪t tEmp ∪t tEmp)
     (tEmp ∪t tEmp ∪t
-     FVLabel′ (λ x → fromPath (connect-tree-inc-left′ S₂ T x))
-     ∪t FVLabel′ (λ x → fromPath (connect-tree-inc-right′ S₂ T x)))
+     FVLabel′ (λ x → fromPath (++t-inc-left′ S₂ T x))
+     ∪t FVLabel′ (λ x → fromPath (++t-inc-right′ S₂ T x)))
     ≡⟨ cong₂ (VSJoin true) lem1 lem2 ⟩
   tFull ∎
   where
@@ -457,14 +457,14 @@ connect-tree-incs-full (Join S₁ S₂) T = begin
       tFull ∎
 
     lem2 : tEmp ∪t tEmp ∪t
-             FVLabel (ap (connect-tree-inc-left S₂ T))
-             ∪t FVLabel (ap (connect-tree-inc-right S₂ T))
+             FVLabel (ap (++t-inc-left S₂ T))
+             ∪t FVLabel (ap (++t-inc-right S₂ T))
              ≡ tFull
     lem2 = begin
-      tEmp ∪t tEmp ∪t FVLabel (ap (connect-tree-inc-left S₂ T)) ∪t
-        FVLabel (ap (connect-tree-inc-right S₂ T))
-        ≡⟨ solve (∪t-monoid {S = connect-tree S₂ T}) ⟩
-      FVLabel (ap (connect-tree-inc-left S₂ T)) ∪t
-        FVLabel (ap (connect-tree-inc-right S₂ T))
-        ≡⟨ connect-tree-incs-full S₂ T ⟩
+      tEmp ∪t tEmp ∪t FVLabel (ap (++t-inc-left S₂ T)) ∪t
+        FVLabel (ap (++t-inc-right S₂ T))
+        ≡⟨ solve (∪t-monoid {S = S₂ ++t T}) ⟩
+      FVLabel (ap (++t-inc-left S₂ T)) ∪t
+        FVLabel (ap (++t-inc-right S₂ T))
+        ≡⟨ ++t-incs-full S₂ T ⟩
       tFull ∎

@@ -48,8 +48,8 @@ HasEndoCoherenceRemoval-STm = ∀ {m n}
                         → (s : STm (someTree S))
                         → (As : STy (someTree S))
                         → (L : Label X S)
-                        → Typing-STm (tree-to-ctx S) s As
-                        → Typing-STy (tree-to-ctx S) As
+                        → Typing-STm ⌊ S ⌋ s As
+                        → Typing-STy ⌊ S ⌋ As
                         → Typing-Label Γ (L ,, S⋆)
                         → SCoh S (SArr s As s) (L ,, S⋆)
                           ≈[ Γ ]stm

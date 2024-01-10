@@ -30,9 +30,9 @@ getPathType PHere = S⋆
 getPathType (PExt P) = map-sty-ext (getPathType P)
 getPathType (PShift P) = map-sty-shift (getPathType P)
 
-path-to-term-Ty : (P : Path S) → Typing-Tm (tree-to-ctx S) (path-to-term P) (sty-to-type (getPathType P))
-path-to-term-Ty {S = S} PHere = fromℕ-Ty (tree-to-ctx S)
-path-to-term-Ty (PExt {T = T} P) = TyConv (apply-sub-tm-typing (susp-tmTy (path-to-term-Ty P)) (connect-susp-inc-left-Ty (tree-to-ctx T))) (reflexive≈ty (begin
+path-to-term-Ty : (P : Path S) → Typing-Tm ⌊ S ⌋ (path-to-term P) (sty-to-type (getPathType P))
+path-to-term-Ty {S = S} PHere = fromℕ-Ty ⌊ S ⌋
+path-to-term-Ty (PExt {T = T} P) = TyConv (apply-sub-tm-typing (susp-tmTy (path-to-term-Ty P)) (connect-susp-inc-left-Ty ⌊ T ⌋)) (reflexive≈ty (begin
   < susp-ty (sty-to-type (getPathType P)) [ connect-susp-inc-left _ _ ]ty >ty
     ≈˘⟨ sub-action-≃-ty (susp-sty-to-type (getPathType P)) refl≃s ⟩
   < sty-to-type (susp-sty (getPathType P)) [ connect-susp-inc-left _ (tree-size T) ]ty >ty
@@ -42,7 +42,7 @@ path-to-term-Ty (PExt {T = T} P) = TyConv (apply-sub-tm-typing (susp-tmTy (path-
   < sty-to-type (map-sty-ext (getPathType P)) >ty ∎))
   where
     open Reasoning ty-setoid
-path-to-term-Ty (PShift {S = S} P) = TyConv (apply-sub-tm-typing (path-to-term-Ty P) (connect-susp-inc-right-Ty (tree-to-ctx S))) (reflexive≈ty (begin
+path-to-term-Ty (PShift {S = S} P) = TyConv (apply-sub-tm-typing (path-to-term-Ty P) (connect-susp-inc-right-Ty ⌊ S ⌋)) (reflexive≈ty (begin
   < sty-to-type (getPathType P) [ connect-susp-inc-right _ _ ]ty >ty
     ≈˘⟨ sty-sub-to-type (getPathType P) (connect-susp-inc-right _ _) ⟩
   < sty-to-type (getPathType P [ connect-susp-inc-right (tree-size S) _ ]sty) >ty

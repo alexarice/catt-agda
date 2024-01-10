@@ -37,7 +37,7 @@ open R rule
 
 disc-rem-stm : HasDiscRemoval-STm
 disc-rem-stm S L Lty .get = begin
-  Coh (tree-to-ctx S) (sty-to-type (disc-sty S)) (label-to-sub (L ,, S⋆) ● idSub)
+  Coh ⌊ S ⌋ (sty-to-type (disc-sty S)) (label-to-sub (L ,, S⋆) ● idSub)
     ≈⟨ reflexive≈tm (Coh≃ (linear-tree-compat S)
                           (disc-sty-to-type S)
                           (trans≃s (id-right-unit _)
@@ -52,7 +52,7 @@ disc-rem-stm S L Lty .get = begin
   where
     open Reasoning (tm-setoid-≈ _)
 
-canonical-stm-is-comp′ : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → canonical-stm d S ≈[ tree-to-ctx S ]stm canonical-comp′ d S
+canonical-stm-is-comp′ : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → canonical-stm d S ≈[ ⌊ S ⌋ ]stm canonical-comp′ d S
 canonical-stm-is-comp′ (suc zero) Sing = refl≈stm
 canonical-stm-is-comp′ (suc zero) (Join S (Join T₁ T₂)) = refl≈stm
 canonical-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
@@ -70,7 +70,7 @@ canonical-stm-is-comp′ (suc (suc d)) Sing = refl≈stm
 canonical-stm-is-comp′ (suc (suc d)) (Join S Sing) = ≈SExt (canonical-stm-is-comp′ (suc d) S)
 canonical-stm-is-comp′ (suc (suc d)) (Join S (Join S₁ S₂)) = refl≈stm
 
-canonical-stm-is-comp : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → canonical-stm d S ≈[ tree-to-ctx S ]stm canonical-comp d S
+canonical-stm-is-comp : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → canonical-stm d S ≈[ ⌊ S ⌋ ]stm canonical-comp d S
 canonical-stm-is-comp d S = begin
   canonical-stm d S
     ≈⟨ canonical-stm-is-comp′ d S ⟩

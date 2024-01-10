@@ -56,6 +56,7 @@ stm-setoid = record { Carrier = STM
 ... | yes p = yes [ p ]
 ... | no p = no (λ where [ x ] → p x)
 
+infix 4 _≃sty_
 _≃sty_ : (a : STy X) → (b : STy Y) → Set
 a ≃sty b = Wrap (λ a b → sty-to-type a ≃ty sty-to-type b) a b
 
@@ -104,6 +105,7 @@ SArr≃-proj₃ [ Arr≃ _ _ p ] = [ p ]
 S⋆-≃ : S ≃ T → S⋆ {X = someTree S} ≃sty S⋆ {X = someTree T}
 S⋆-≃ p = [ (Star≃ (cong suc (≃-to-same-n p))) ]
 
+infix 4 _≃l_ _≃lp_
 _≃l_ : Label X S → Label Y S → Set
 _≃l_ {S = S} L M = Wrap (λ L M → (P : Path S) → L P ≃stm M P) L M
 
@@ -274,12 +276,12 @@ label-to-sub-stm L (SShift a) = begin
     open Reasoning tm-setoid
 label-to-sub-stm L (SPath P) = label-to-sub-path L P
 label-to-sub-stm L (SCoh U A M) = begin
-  < Coh (tree-to-ctx U) (sty-to-type A) idSub [ label-to-sub M ]tm
+  < Coh ⌊ U ⌋ (sty-to-type A) idSub [ label-to-sub M ]tm
                                 [ label-to-sub L ]tm >tm
-    ≈˘⟨ assoc-tm (label-to-sub L) (label-to-sub M) (Coh (tree-to-ctx U) (sty-to-type A) idSub) ⟩
-  < Coh (tree-to-ctx U) (sty-to-type A) idSub [ label-to-sub L ● label-to-sub M ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh (tree-to-ctx U) (sty-to-type A) idSub}) (label-comp-to-sub M L) ⟩
-  < Coh (tree-to-ctx U) (sty-to-type A) idSub [ label-to-sub (M ●lt L) ]tm >tm ∎
+    ≈˘⟨ assoc-tm (label-to-sub L) (label-to-sub M) (Coh ⌊ U ⌋ (sty-to-type A) idSub) ⟩
+  < Coh ⌊ U ⌋ (sty-to-type A) idSub [ label-to-sub L ● label-to-sub M ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh ⌊ U ⌋ (sty-to-type A) idSub}) (label-comp-to-sub M L) ⟩
+  < Coh ⌊ U ⌋ (sty-to-type A) idSub [ label-to-sub (M ●lt L) ]tm >tm ∎
   where
     open Reasoning tm-setoid
 
@@ -417,11 +419,11 @@ susp-label-to-sub : (L : Label-WT X S) → label-to-sub (susp-label L) ≃s susp
 
 susp-stm-to-term {X = someTree x} a = id-on-tm (susp-tm (stm-to-term a))
 susp-stm-to-term {X = Other _} (SCoh S A L) = begin
-  < Coh (tree-to-ctx S) (sty-to-type A) idSub [ label-to-sub (susp-label L) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh (tree-to-ctx S) (sty-to-type A) idSub}) (susp-label-to-sub L) ⟩
-  < Coh (tree-to-ctx S) (sty-to-type A) idSub [ susp-sub-res (label-to-sub L) ]tm >tm
-    ≈˘⟨ susp-res-comp-tm (Coh (tree-to-ctx S) (sty-to-type A) idSub) (label-to-sub L) ⟩
-  < susp-tm (Coh (tree-to-ctx S) (sty-to-type A) idSub [ label-to-sub L ]tm) >tm ∎
+  < Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub (susp-label L) ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh ⌊ S ⌋ (sty-to-type A) idSub}) (susp-label-to-sub L) ⟩
+  < Coh ⌊ S ⌋ (sty-to-type A) idSub [ susp-sub-res (label-to-sub L) ]tm >tm
+    ≈˘⟨ susp-res-comp-tm (Coh ⌊ S ⌋ (sty-to-type A) idSub) (label-to-sub L) ⟩
+  < susp-tm (Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm) >tm ∎
   where
     open Reasoning tm-setoid
 susp-stm-to-term {X = Other _} (SOther t) = refl≃tm
@@ -596,6 +598,7 @@ sty-to-type-to-sty As .get = to-sty-to-type (sty-to-type As)
 comp-right-unit : (L : Label (someTree T) S) → L ●l id-label-wt T ≃l L
 comp-right-unit L .get Z = >>=-id (L Z)
 
+infix 4 _≃lm_
 _≃lm_ : (L : Label X S) → (M : Label Y S) → Set
 _≃lm_ {S = S} L M = Wrap (λ L M → ∀ (Q : Path S) → .⦃ is-maximal Q ⦄ → L Q ≃stm M Q) L M
 
@@ -799,11 +802,11 @@ susp-stm-SCoh {X = Other _} S As L = refl≃stm
 
 stm-sub-SCoh : {X : MaybeTree m} → (S : Tree n) → (As : STy (someTree S)) → (L : Label-WT X S) → (σ : Sub m l A) → SCoh S As L [ σ ]stm ≃stm SCoh S As (L [ σ ]l)
 stm-sub-SCoh S As L σ .get = begin
-  < Coh (tree-to-ctx S) (sty-to-type As) idSub [ label-to-sub L ]tm [ σ ]tm >tm
-    ≈˘⟨ assoc-tm σ (label-to-sub L) (Coh (tree-to-ctx S) (sty-to-type As) idSub) ⟩
-  < Coh (tree-to-ctx S) (sty-to-type As) idSub [ σ ● label-to-sub L ]tm >tm
-    ≈˘⟨ sub-action-≃-tm (refl≃tm {s = Coh (tree-to-ctx S) (sty-to-type As) idSub}) (label-sub-to-sub L σ) ⟩
-  < Coh (tree-to-ctx S) (sty-to-type As) idSub [ label-to-sub (L [ σ ]l) ]tm >tm ∎
+  < Coh ⌊ S ⌋ (sty-to-type As) idSub [ label-to-sub L ]tm [ σ ]tm >tm
+    ≈˘⟨ assoc-tm σ (label-to-sub L) (Coh ⌊ S ⌋ (sty-to-type As) idSub) ⟩
+  < Coh ⌊ S ⌋ (sty-to-type As) idSub [ σ ● label-to-sub L ]tm >tm
+    ≈˘⟨ sub-action-≃-tm (refl≃tm {s = Coh ⌊ S ⌋ (sty-to-type As) idSub}) (label-sub-to-sub L σ) ⟩
+  < Coh ⌊ S ⌋ (sty-to-type As) idSub [ label-to-sub (L [ σ ]l) ]tm >tm ∎
   where
     open Reasoning tm-setoid
 

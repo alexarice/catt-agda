@@ -37,9 +37,9 @@ open import Catt.Typing.EndoCoherenceRemoval rule
 
 ecr-stm : HasEndoCoherenceRemoval-STm
 ecr-stm S s As L [ sty ] [ Asty ] Lty .get = begin
-  Coh (tree-to-ctx S) (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (label-to-sub (L ,, S⋆) ● idSub)
+  Coh ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (label-to-sub (L ,, S⋆) ● idSub)
     ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (id-right-unit (label-to-sub (L ,, S⋆)))) ⟩
-  Coh (tree-to-ctx S) (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (label-to-sub (L ,, S⋆))
+  Coh ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (label-to-sub (L ,, S⋆))
     ≈⟨ ecr (TyCoh ⦃ tree-to-pd S ⦄ (TyArr sty Asty sty) (label-to-sub-Ty Lty TySStar)) ⟩
   identity (ty-dim (sty-to-type As))
            (sub-from-disc (ty-dim (sty-to-type As))

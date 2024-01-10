@@ -19,7 +19,7 @@ open import Catt.Tree.Boundary.Properties
 open import Catt.Tree.Structured.Typing rule
 open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
 
-tree-inc-Ty : (d : ℕ) → (T : Tree n) → (b : Bool) → Typing-Label (tree-to-ctx T) (tree-inc-label d T b)
+tree-inc-Ty : (d : ℕ) → (T : Tree n) → (b : Bool) → Typing-Label ⌊ T ⌋ (tree-inc-label d T b)
 tree-inc-Ty zero T false = TySing (TySPath PHere)
 tree-inc-Ty zero T true = TySing (last-path-Ty T)
 tree-inc-Ty (suc d) Sing b = TySing (TySPath PHere)

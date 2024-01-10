@@ -20,11 +20,11 @@ singleton-ctx = ∅ , ⋆
 tree-size : Tree n → ℕ
 tree-size {n} T = n
 
-tree-to-ctx : (T : Tree m) → Ctx (suc m)
+⌊_⌋ : (T : Tree m) → Ctx (suc m)
 tree-last-var : (T : Tree n) → Tm (suc n)
 
-tree-to-ctx Sing = singleton-ctx
-tree-to-ctx (Join S T) = connect-susp (tree-to-ctx S) (tree-to-ctx T)
+⌊ Sing ⌋ = singleton-ctx
+⌊ Join S T ⌋ = connect-susp ⌊ S ⌋ ⌊ T ⌋
 
 tree-fst-var : (T : Tree n) → Tm (suc n)
 tree-fst-var T = Var (fromℕ _)
@@ -37,13 +37,14 @@ trunk-height Sing = 0
 trunk-height (Join T Sing) = suc (trunk-height T)
 trunk-height (Join T (Join T₁ T₂)) = 0
 
-connect-tree-length : (S : Tree n) → (T : Tree m) → ℕ
-connect-tree-length {m = m} Sing T = m
-connect-tree-length (Join {x} S S′) T = connect-tree-length S′ T + (2 + x)
+++t-length : (S : Tree n) → (T : Tree m) → ℕ
+++t-length {m = m} Sing T = m
+++t-length (Join {x} S S′) T = ++t-length S′ T + (2 + x)
 
-connect-tree : (S : Tree n) → (T : Tree m) → Tree (connect-tree-length S T)
-connect-tree Sing T = T
-connect-tree (Join S S′) T = Join S (connect-tree S′ T)
+infixr 5 _++t_
+_++t_ : (S : Tree n) → (T : Tree m) → Tree (++t-length S T)
+Sing ++t T = T
+Join S S′ ++t T = Join S (S′ ++t T)
 
 pattern Susp T = Join T Sing
 

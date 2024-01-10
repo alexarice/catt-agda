@@ -83,40 +83,41 @@ replace-label L P PHere = P
 replace-label L P (PExt Z) = L (PExt Z)
 replace-label L P (PShift Z) = L (PShift Z)
 
-connect-label : Label X S
-              → Label X T
-              → Label X (connect-tree S T)
-connect-label {S = Sing} L M = replace-label M (L PHere)
-connect-label {S = Join S₁ S₂} L M PHere = L PHere
-connect-label {S = Join S₁ S₂} L M (PExt Z) = L (PExt Z)
-connect-label {S = Join S₁ S₂} L M (PShift Z) = connect-label (λ x → L (PShift x)) M Z
+infixr 5 _++l_ _++l′_
+_++l_ : Label X S
+      → Label X T
+      → Label X (S ++t T)
+_++l_ {S = Sing} L M = replace-label M (L PHere)
+_++l_ {S = Join S₁ S₂} L M PHere = L PHere
+_++l_ {S = Join S₁ S₂} L M (PExt Z) = L (PExt Z)
+_++l_ {S = Join S₁ S₂} L M (PShift Z) = (L ∘ PShift ++l M) Z
 
-connect-label′ : Label X S
-               → Label X T
-               → Label X (connect-tree S T)
-connect-label′ {S = Sing} L M = M
-connect-label′ {S = Join S₁ S₂} L M PHere = L PHere
-connect-label′ {S = Join S₁ S₂} L M (PExt Z) = L (PExt Z)
-connect-label′ {S = Join S₁ S₂} L M (PShift Z) = connect-label′ (L ∘ PShift) M Z
+_++l′_ : Label X S
+       → Label X T
+       → Label X (S ++t T)
+_++l′_ {S = Sing} L M = M
+_++l′_ {S = Join S₁ S₂} L M PHere = L PHere
+_++l′_ {S = Join S₁ S₂} L M (PExt Z) = L (PExt Z)
+_++l′_ {S = Join S₁ S₂} L M (PShift Z) = (L ∘ PShift ++l′ M) Z
 
-connect-tree-inc-left′ : (S : Tree n) → (T : Tree m) → Label′ (connect-tree S T) S
-connect-tree-inc-left′ Sing T P = PHere
-connect-tree-inc-left′ (Join S₁ S₂) T PHere = PHere
-connect-tree-inc-left′ (Join S₁ S₂) T (PExt P) = PExt P
-connect-tree-inc-left′ (Join S₁ S₂) T (PShift P) = PShift (connect-tree-inc-left′ S₂ T P)
+++t-inc-left′ : (S : Tree n) → (T : Tree m) → Label′ (S ++t T) S
+++t-inc-left′ Sing T P = PHere
+++t-inc-left′ (Join S₁ S₂) T PHere = PHere
+++t-inc-left′ (Join S₁ S₂) T (PExt P) = PExt P
+++t-inc-left′ (Join S₁ S₂) T (PShift P) = PShift (++t-inc-left′ S₂ T P)
 
-connect-tree-inc-right′ : (S : Tree n) → (T : Tree m) → Label′ (connect-tree S T) T
-connect-tree-inc-right′ Sing T P = P
-connect-tree-inc-right′ (Join S₁ S₂) T P = PShift (connect-tree-inc-right′ S₂ T P)
+++t-inc-right′ : (S : Tree n) → (T : Tree m) → Label′ (S ++t T) T
+++t-inc-right′ Sing T P = P
+++t-inc-right′ (Join S₁ S₂) T P = PShift (++t-inc-right′ S₂ T P)
 
-connect-tree-inc-left : (S : Tree n) → (T : Tree m) → Label-WT (someTree (connect-tree S T)) S
-connect-tree-inc-left S T = SPath ∘ connect-tree-inc-left′ S T ,, S⋆
+++t-inc-left : (S : Tree n) → (T : Tree m) → Label-WT (someTree (S ++t T)) S
+++t-inc-left S T = SPath ∘ ++t-inc-left′ S T ,, S⋆
 
-connect-tree-inc-right : (S : Tree n) → (T : Tree m) → Label-WT (someTree (connect-tree S T)) T
-connect-tree-inc-right S T = SPath ∘ connect-tree-inc-right′ S T ,, S⋆
+++t-inc-right : (S : Tree n) → (T : Tree m) → Label-WT (someTree (S ++t T)) T
+++t-inc-right S T = SPath ∘ ++t-inc-right′ S T ,, S⋆
 
-label-between-connect-trees : (L : Label (someTree S′) S) → (M : Label (someTree T′) T) → Label (someTree (connect-tree S′ T′)) (connect-tree S T)
-label-between-connect-trees {S′ = S′} {T′ = T′} L M = connect-label′ (L ●l (connect-tree-inc-left S′ T′)) (M ●l (connect-tree-inc-right S′ T′))
+label-between-++t : (L : Label (someTree S′) S) → (M : Label (someTree T′) T) → Label (someTree (S′ ++t T′)) (S ++t T)
+label-between-++t {S′ = S′} {T′ = T′} L M = L ●l (++t-inc-left S′ T′) ++l′ M ●l (++t-inc-right S′ T′)
 
 label-between-joins : (L : Label (someTree S′) S) → (M : Label (someTree T′) T) → Label (someTree (Join S′ T′)) (Join S T)
 label-between-joins L M PHere = SHere

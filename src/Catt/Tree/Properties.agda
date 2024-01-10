@@ -17,7 +17,7 @@ open import Catt.Discs
 open import Catt.Discs.Properties
 open import Catt.Tree
 
-linear-tree-compat : (T : Tree n) → .⦃ _ : is-linear T ⦄ → tree-to-ctx T ≃c Disc (tree-dim T)
+linear-tree-compat : (T : Tree n) → .⦃ _ : is-linear T ⦄ → ⌊ T ⌋ ≃c Disc (tree-dim T)
 linear-tree-compat Sing = Add≃ Emp≃ (Star≃ refl)
 linear-tree-compat (Join S Sing) = trans≃c (susp-ctx-≃ (linear-tree-compat S)) (disc-susp (tree-dim S))
 
@@ -40,6 +40,7 @@ record TREE : Set where
 
 open TREE public
 
+infix 4 _≃_
 data _≃_ : Tree n → Tree m → Set where
   Sing≃ : Sing ≃ Sing
   Join≃ : {S : Tree n} → {S′ : Tree n′} → {T : Tree m} → {T′ : Tree m′} → S ≃ S′ → T ≃ T′ → Join S T ≃ Join S′ T′
@@ -65,6 +66,7 @@ tree-setoid = record { Carrier = TREE
                                               }
                      }
 
+infix 4 _≃′_
 data _≃′_ : Tree n → Tree m → Set where
   Refl≃′ : T ≃′ T
   Join≃′ : {S : Tree n} → {S′ : Tree n′} → {T : Tree m} → {T′ : Tree m′} → S ≃′ S′ → T ≃′ T′ → Join S T ≃′ Join S′ T′
@@ -123,28 +125,27 @@ Susp-≃ p = Join≃ p Sing≃
 ≃-irrel Sing≃ Sing≃ = refl
 ≃-irrel (Join≃ p q) (Join≃ p′ q′) = cong₂ Join≃ (≃-irrel p p′) (≃-irrel q q′)
 
-connect-tree-≃ : S ≃ S′ → T ≃ T′ → connect-tree S T ≃ connect-tree S′ T′
-connect-tree-≃ Sing≃ q = q
-connect-tree-≃ (Join≃ p p′) q = Join≃ p (connect-tree-≃ p′ q)
+++t-≃ : S ≃ S′ → T ≃ T′ → S ++t T ≃ S′ ++t T′
+++t-≃ Sing≃ q = q
+++t-≃ (Join≃ p p′) q = Join≃ p (++t-≃ p′ q)
 
-connect-tree-to-ctx : (S : Tree n) → (T : Tree m)
-                    → tree-to-ctx (connect-tree S T) ≃c connect (tree-to-ctx S) (tree-last-var S) (tree-to-ctx T)
+++t-to-ctx : (S : Tree n) → (T : Tree m)
+                    → ⌊ S ++t T ⌋ ≃c connect ⌊ S ⌋ (tree-last-var S) ⌊ T ⌋
 
-connect-tree-to-ctx Sing T = sym≃c (connect-left-unit (tree-to-ctx T))
-connect-tree-to-ctx (Join S₁ S₂) T = begin
-  < tree-to-ctx (connect-tree (Join S₁ S₂) T) >c ≡⟨⟩
-  < connect-susp (tree-to-ctx S₁) (tree-to-ctx (connect-tree S₂ T)) >c
-    ≈⟨ connect-≃ refl≃c refl≃tm (connect-tree-to-ctx S₂ T) ⟩
-  < connect-susp (tree-to-ctx S₁) (connect (tree-to-ctx S₂) (tree-last-var S₂) (tree-to-ctx T))
-    >c
-    ≈˘⟨ connect-susp-assoc (tree-to-ctx S₁) (tree-to-ctx S₂) (tree-last-var S₂) (tree-to-ctx T) ⟩
-  < connect (connect-susp (tree-to-ctx S₁) (tree-to-ctx S₂))
+++t-to-ctx Sing T = sym≃c (connect-left-unit ⌊ T ⌋)
+++t-to-ctx (Join S₁ S₂) T = begin
+  < ⌊ Join S₁ S₂ ++t T ⌋ >c ≡⟨⟩
+  < connect-susp ⌊ S₁ ⌋ ⌊ S₂ ++t T ⌋ >c
+    ≈⟨ connect-≃ refl≃c refl≃tm (++t-to-ctx S₂ T) ⟩
+  < connect-susp ⌊ S₁ ⌋ (connect ⌊ S₂ ⌋ (tree-last-var S₂) ⌊ T ⌋) >c
+    ≈˘⟨ connect-susp-assoc ⌊ S₁ ⌋ ⌊ S₂ ⌋ (tree-last-var S₂) ⌊ T ⌋ ⟩
+  < connect (connect-susp ⌊ S₁ ⌋ ⌊ S₂ ⌋)
             (tree-last-var S₂ [ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
-            (tree-to-ctx T) >c ∎
+            ⌊ T ⌋ >c ∎
   where
     open Reasoning ctx-setoid
 
-tree-to-ctx-≃ : S ≃ T → tree-to-ctx S ≃c tree-to-ctx T
+tree-to-ctx-≃ : S ≃ T → ⌊ S ⌋ ≃c ⌊ T ⌋
 tree-to-ctx-≃ Sing≃ = refl≃c
 tree-to-ctx-≃ (Join≃ p q) = connect-susp-≃ (tree-to-ctx-≃ p) (tree-to-ctx-≃ q)
 
@@ -154,24 +155,24 @@ tree-last-var-is-var (Join S T) = var-to-var-comp-tm (tree-last-var T) ⦃ tree-
 
 
 
-linear-tree-dim : (S : Tree n) → .⦃ is-linear S ⦄ → tm-height (tree-to-ctx S) 0V ≡ tree-dim S
+linear-tree-dim : (S : Tree n) → .⦃ is-linear S ⦄ → tm-height ⌊ S ⌋ 0V ≡ tree-dim S
 linear-tree-dim Sing = refl
 linear-tree-dim (Join S Sing) = begin
-  tm-height (susp-ctx (tree-to-ctx S)) 0V
-    ≡⟨ susp-tm-height 0V (tree-to-ctx S) ⟩
-  suc (tm-height (tree-to-ctx S) 0V)
+  tm-height (susp-ctx ⌊ S ⌋) 0V
+    ≡⟨ susp-tm-height 0V ⌊ S ⌋ ⟩
+  suc (tm-height ⌊ S ⌋ 0V)
     ≡⟨ cong suc (linear-tree-dim S) ⟩
   suc (tree-dim S) ∎
   where
     open ≡-Reasoning
 
-connect-tree-dim : (S : Tree n) → (T : Tree m) → tree-dim (connect-tree S T) ≡ tree-dim S ⊔ tree-dim T
-connect-tree-dim Sing T = refl
-connect-tree-dim (Join S₁ S₂) T = begin
-  suc (pred (tree-dim (connect-tree S₂ T)) ⊔ tree-dim S₁)
-    ≡˘⟨ ⊔-lem (tree-dim S₁) (tree-dim (connect-tree S₂ T)) ⟩
-  suc (tree-dim S₁) ⊔ tree-dim (connect-tree S₂ T)
-    ≡⟨ cong (suc (tree-dim S₁) ⊔_) (connect-tree-dim S₂ T) ⟩
+++t-dim : (S : Tree n) → (T : Tree m) → tree-dim (S ++t T) ≡ tree-dim S ⊔ tree-dim T
+++t-dim Sing T = refl
+++t-dim (Join S₁ S₂) T = begin
+  suc (pred (tree-dim (S₂ ++t T)) ⊔ tree-dim S₁)
+    ≡˘⟨ ⊔-lem (tree-dim S₁) (tree-dim (S₂ ++t T)) ⟩
+  suc (tree-dim S₁) ⊔ tree-dim (S₂ ++t T)
+    ≡⟨ cong (suc (tree-dim S₁) ⊔_) (++t-dim S₂ T) ⟩
   suc (tree-dim S₁) ⊔ (tree-dim S₂ ⊔ tree-dim T)
     ≡˘⟨ ⊔-assoc (suc (tree-dim S₁)) (tree-dim S₂) (tree-dim T) ⟩
   suc (tree-dim S₁) ⊔ tree-dim S₂ ⊔ tree-dim T
@@ -180,75 +181,75 @@ connect-tree-dim (Join S₁ S₂) T = begin
   where
     open ≡-Reasoning
 
-connect-tree-length-lem : (S : Tree n) → (T : Tree m) → connect-tree-length S T ≡ tree-size T + tree-size S
-connect-tree-length-lem Sing T = sym (+-identityʳ _)
-connect-tree-length-lem (Join S₁ S₂) T = trans (cong (_+ (2 + tree-size S₁)) (connect-tree-length-lem S₂ T)) (+-assoc (tree-size T) (tree-size S₂) (2 + tree-size S₁))
+++t-length-lem : (S : Tree n) → (T : Tree m) → ++t-length S T ≡ tree-size T + tree-size S
+++t-length-lem Sing T = sym (+-identityʳ _)
+++t-length-lem (Join S₁ S₂) T = trans (cong (_+ (2 + tree-size S₁)) (++t-length-lem S₂ T)) (+-assoc (tree-size T) (tree-size S₂) (2 + tree-size S₁))
 
-connect-tree-last-var : (S : Tree n) → (T : Tree m) → tree-last-var (connect-tree S T) ≃tm tree-last-var T [ idSub≃ (sym≃c (connect-tree-to-ctx S T)) ● (connect-inc-right (tree-last-var S) (tree-size T)) ]tm
-connect-tree-last-var Sing T = sym≃tm (trans≃tm (sub-action-≃-tm (refl≃tm {s = tree-last-var T}) lem) (id-on-tm (tree-last-var (connect-tree Sing T))))
+++t-last-var : (S : Tree n) → (T : Tree m) → tree-last-var (S ++t T) ≃tm tree-last-var T [ idSub≃ (sym≃c (++t-to-ctx S T)) ● (connect-inc-right (tree-last-var S) (tree-size T)) ]tm
+++t-last-var Sing T = sym≃tm (trans≃tm (sub-action-≃-tm (refl≃tm {s = tree-last-var T}) lem) (id-on-tm (tree-last-var (Sing ++t T))))
   where
-    lem : idSub≃ (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T)))) ● connect-inc-right (Var zero) (tree-size T) ≃s idSub {suc (tree-size T)}
+    lem : idSub≃ (sym≃c (sym≃c (connect-left-unit ⌊ T ⌋))) ● connect-inc-right (Var zero) (tree-size T) ≃s idSub {suc (tree-size T)}
     lem = begin
-      < idSub≃ (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T))))
+      < idSub≃ (sym≃c (sym≃c (connect-left-unit ⌊ T ⌋)))
         ● connect-inc-right (Var zero) (tree-size T) >s
-        ≈⟨ idSub≃-on-sub (sym≃c (sym≃c (connect-left-unit (tree-to-ctx T)))) (connect-inc-right (Var zero) _) ⟩
+        ≈⟨ idSub≃-on-sub (sym≃c (sym≃c (connect-left-unit ⌊ T ⌋))) (connect-inc-right (Var zero) _) ⟩
       < connect-inc-right (Var zero) _ >s
         ≈⟨ connect-inc-right-left-unit ⟩
       < idSub >s ∎
       where
         open Reasoning sub-setoid
-connect-tree-last-var (Join S₁ S₂) T = begin
-  < tree-last-var (connect-tree S₂ T) [
+++t-last-var (Join S₁ S₂) T = begin
+  < tree-last-var (S₂ ++t T) [
        connect-susp-inc-right (tree-size S₁)
-       (tree-size (connect-tree S₂ T))
+       (tree-size (S₂ ++t T))
        ]tm >tm
-    ≈⟨ sub-action-≃-tm (connect-tree-last-var S₂ T) refl≃s ⟩
+    ≈⟨ sub-action-≃-tm (++t-last-var S₂ T) refl≃s ⟩
   < tree-last-var T
-    [ idSub≃ (sym≃c (connect-tree-to-ctx S₂ T))
+    [ idSub≃ (sym≃c (++t-to-ctx S₂ T))
       ● connect-inc-right (tree-last-var S₂) (tree-size T) ]tm
-    [ connect-susp-inc-right (tree-size S₁) (tree-size (connect-tree S₂ T)) ]tm >tm
+    [ connect-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T)) ]tm >tm
     ≈˘⟨ assoc-tm _ _ (tree-last-var T) ⟩
   < tree-last-var T
-    [ connect-susp-inc-right (tree-size S₁) (tree-size (connect-tree S₂ T))
-    ● (idSub≃ (sym≃c (connect-tree-to-ctx S₂ T)) ●
+    [ connect-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T))
+    ● (idSub≃ (sym≃c (++t-to-ctx S₂ T)) ●
       connect-inc-right (tree-last-var S₂) (tree-size T)) ]tm >tm
     ≈⟨ sub-action-≃-tm (refl≃tm {s = tree-last-var T}) lem ⟩
   < tree-last-var T
-    [ idSub≃ (sym≃c (connect-tree-to-ctx (Join S₁ S₂) T))
+    [ idSub≃ (sym≃c (++t-to-ctx (Join S₁ S₂) T))
       ● connect-inc-right (tree-last-var S₂ [ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm) (tree-size T) ]tm >tm ∎
   where
     l2 : (connect-susp-inc-right (tree-size S₁)
-            (tree-size (connect-tree S₂ T))
-            ● idSub≃ (sym≃c (connect-tree-to-ctx S₂ T)))
+            (tree-size (S₂ ++t T))
+            ● idSub≃ (sym≃c (++t-to-ctx S₂ T)))
            ≃s connect-inc-right get-snd (tree-size T + tree-size S₂)
     l2 = begin
-      < connect-susp-inc-right (tree-size S₁) (tree-size (connect-tree S₂ T))
-        ● idSub≃ (sym≃c (connect-tree-to-ctx S₂ T)) >s
-        ≈⟨ idSub≃-right-unit (sym≃c (connect-tree-to-ctx S₂ T)) (connect-susp-inc-right (tree-size S₁)
-                                                                  (tree-size (connect-tree S₂ T))) ⟩
-      < connect-susp-inc-right (tree-size S₁) (tree-size (connect-tree S₂ T)) >s
-        ≈⟨ connect-inc-right-≃ refl refl≃tm (connect-tree-length-lem S₂ T) ⟩
+      < connect-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T))
+        ● idSub≃ (sym≃c (++t-to-ctx S₂ T)) >s
+        ≈⟨ idSub≃-right-unit (sym≃c (++t-to-ctx S₂ T)) (connect-susp-inc-right (tree-size S₁)
+                                                                  (tree-size (S₂ ++t T))) ⟩
+      < connect-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T)) >s
+        ≈⟨ connect-inc-right-≃ refl refl≃tm (++t-length-lem S₂ T) ⟩
       < connect-susp-inc-right (tree-size S₁) (tree-size T + tree-size S₂) >s ∎
       where
         open Reasoning sub-setoid
 
     lem : (connect-susp-inc-right (tree-size S₁)
-             (tree-size (connect-tree S₂ T))
+             (tree-size (S₂ ++t T))
              ●
-             (idSub≃ (sym≃c (connect-tree-to-ctx S₂ T)) ●
+             (idSub≃ (sym≃c (++t-to-ctx S₂ T)) ●
               connect-inc-right (tree-last-var S₂) (tree-size T)))
             ≃s
-            (idSub≃ (sym≃c (connect-tree-to-ctx (Join S₁ S₂) T)) ●
+            (idSub≃ (sym≃c (++t-to-ctx (Join S₁ S₂) T)) ●
              connect-inc-right
              (tree-last-var S₂ [
               connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
              (tree-size T))
     lem = begin
-      < connect-susp-inc-right (tree-size S₁) (tree-size (connect-tree S₂ T))
-        ● (idSub≃ (sym≃c (connect-tree-to-ctx S₂ T)) ● connect-inc-right (tree-last-var S₂) (tree-size T)) >s
+      < connect-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T))
+        ● (idSub≃ (sym≃c (++t-to-ctx S₂ T)) ● connect-inc-right (tree-last-var S₂) (tree-size T)) >s
         ≈˘⟨ ●-assoc _ _ _ ⟩
-      < connect-susp-inc-right (tree-size S₁) (tree-size (connect-tree S₂ T))
-        ● idSub≃ (sym≃c (connect-tree-to-ctx S₂ T))
+      < connect-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T))
+        ● idSub≃ (sym≃c (++t-to-ctx S₂ T))
         ● connect-inc-right (tree-last-var S₂) (tree-size T) >s
         ≈⟨ sub-action-≃-sub refl≃s l2 ⟩
       < connect-inc-right get-snd (tree-size T + tree-size S₂)
@@ -256,9 +257,9 @@ connect-tree-last-var (Join S₁ S₂) T = begin
         ≈˘⟨ connect-inc-right-assoc get-snd (tree-last-var S₂) (tree-size T) ⟩
       < connect-inc-right (tree-last-var S₂ [ connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
         (tree-size T) >s
-        ≈˘⟨ idSub≃-on-sub (sym≃c (connect-tree-to-ctx (Join S₁ S₂) T)) _ ⟩
+        ≈˘⟨ idSub≃-on-sub (sym≃c (++t-to-ctx (Join S₁ S₂) T)) _ ⟩
       <
-        idSub≃ (sym≃c (connect-tree-to-ctx (Join S₁ S₂) T)) ●
+        idSub≃ (sym≃c (++t-to-ctx (Join S₁ S₂) T)) ●
         connect-inc-right
         (tree-last-var S₂ [
          connect-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
@@ -269,25 +270,25 @@ connect-tree-last-var (Join S₁ S₂) T = begin
 
     open Reasoning tm-setoid
 
-connect-tree-right-unit : (S : Tree n)
-                        → connect-tree S Sing ≃′ S
-connect-tree-right-unit Sing = Refl≃′
-connect-tree-right-unit (Join S T) = Join≃′ Refl≃′ (connect-tree-right-unit T)
+++t-right-unit : (S : Tree n)
+               → S ++t Sing ≃′ S
+++t-right-unit Sing = Refl≃′
+++t-right-unit (Join S T) = Join≃′ Refl≃′ (++t-right-unit T)
 
-tree-to-ctx-glob : (S : Tree n) → ctx-is-globular (tree-to-ctx S)
+tree-to-ctx-glob : (S : Tree n) → ctx-is-globular ⌊ S ⌋
 tree-to-ctx-glob Sing = tt ,, tt
-tree-to-ctx-glob (Join S T) = connect-susp-glob (tree-to-ctx S) ⦃ tree-to-ctx-glob S ⦄ (tree-to-ctx T) ⦃ tree-to-ctx-glob T ⦄
+tree-to-ctx-glob (Join S T) = connect-susp-glob ⌊ S ⌋ ⦃ tree-to-ctx-glob S ⦄ ⌊ T ⌋ ⦃ tree-to-ctx-glob T ⦄
 
-susp-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → susp-ctx (tree-to-ctx S) ≃c tree-to-ctx S , tree-to-ctx S ‼ zero , 1V ─⟨ (lift-ty (tree-to-ctx S ‼ zero)) ⟩⟶ 0V
+susp-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → susp-ctx ⌊ S ⌋ ≃c ⌊ S ⌋ , ⌊ S ⌋ ‼ zero , 1V ─⟨ (lift-ty (⌊ S ⌋ ‼ zero)) ⟩⟶ 0V
 susp-lin-tree Sing = refl≃c
 susp-lin-tree (Join S Sing) = begin
-  < susp-ctx (susp-ctx (tree-to-ctx S)) >c
+  < susp-ctx (susp-ctx ⌊ S ⌋) >c
     ≈⟨ susp-ctx-≃ (susp-lin-tree S) ⟩
-  < susp-ctx (tree-to-ctx S) , susp-ty (tree-to-ctx S ‼ zero) ,
-       1V ─⟨ susp-ty (lift-ty (tree-to-ctx S ‼ zero)) ⟩⟶ 0V >c
-    ≈˘⟨ Add≃ (Add≃ refl≃c (susp-‼ (tree-to-ctx S) zero)) (Arr≃ refl≃tm (trans≃ty (lift-ty-≃ (susp-‼ (tree-to-ctx S) zero)) (sym≃ty (susp-ty-lift (tree-to-ctx S ‼ zero)))) refl≃tm) ⟩
-  < susp-ctx (tree-to-ctx S) , susp-ctx (tree-to-ctx S) ‼ zero ,
-       1V ─⟨ lift-ty (susp-ctx (tree-to-ctx S) ‼ zero) ⟩⟶ 0V >c ∎
+  < susp-ctx ⌊ S ⌋ , susp-ty (⌊ S ⌋ ‼ zero) ,
+       1V ─⟨ susp-ty (lift-ty (⌊ S ⌋ ‼ zero)) ⟩⟶ 0V >c
+    ≈˘⟨ Add≃ (Add≃ refl≃c (susp-‼ ⌊ S ⌋ zero)) (Arr≃ refl≃tm (trans≃ty (lift-ty-≃ (susp-‼ ⌊ S ⌋ zero)) (sym≃ty (susp-ty-lift (⌊ S ⌋ ‼ zero)))) refl≃tm) ⟩
+  < susp-ctx ⌊ S ⌋ , susp-ctx ⌊ S ⌋ ‼ zero ,
+       1V ─⟨ lift-ty (susp-ctx ⌊ S ⌋ ‼ zero) ⟩⟶ 0V >c ∎
   where
     open Reasoning ctx-setoid
 
@@ -315,12 +316,12 @@ linear-tree-unique : (S : Tree n) → .⦃ is-linear S ⦄
 linear-tree-unique Sing Sing p = refl≃′
 linear-tree-unique (Join S Sing) (Join T Sing) p = Join≃′ (linear-tree-unique S T (cong pred p)) refl≃′
 
-connect-tree-assoc : (S : Tree n)
+++t-assoc : (S : Tree n)
                    → (T : Tree m)
                    → (U : Tree l)
-                   → connect-tree S (connect-tree T U) ≃′ connect-tree (connect-tree S T) U
-connect-tree-assoc Sing T U = refl≃′
-connect-tree-assoc (Join S₁ S₂) T U = Join≃′ refl≃′ (connect-tree-assoc S₂ T U)
+                   → S ++t (T ++t U) ≃′ (S ++t T) ++t U
+++t-assoc Sing T U = refl≃′
+++t-assoc (Join S₁ S₂) T U = Join≃′ refl≃′ (++t-assoc S₂ T U)
 
 susp-tree-n-linear : (n : ℕ)
                    → (S : Tree m)

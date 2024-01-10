@@ -325,8 +325,8 @@ supp-tree-bd-non-empty zero T true = fromPath-non-empty (last-path T)
 supp-tree-bd-non-empty (suc d) Sing b = tt
 supp-tree-bd-non-empty (suc d) (Join S T) b = tt
 
-supp-compat′ : (d : ℕ) → (T : Tree n) → (b : Bool) → toVarSet (supp-tree-bd d T b) ≡ pd-bd-supp d (tree-to-ctx T) ⦃ tree-to-pd T ⦄ b
-supp-compat′ zero T false = trans (fromPath-PHere T) (lem (tree-to-ctx T) ⦃ pd-to-pdb (tree-to-pd T) ⦄)
+supp-compat′ : (d : ℕ) → (T : Tree n) → (b : Bool) → toVarSet (supp-tree-bd d T b) ≡ pd-bd-supp d ⌊ T ⌋ ⦃ tree-to-pd T ⦄ b
+supp-compat′ zero T false = trans (fromPath-PHere T) (lem ⌊ T ⌋ ⦃ pd-to-pdb (tree-to-pd T) ⦄)
   where
     lem : (Γ : Ctx (suc m)) → .⦃ pdb : Γ ⊢pdb ⦄ → trueAt (fromℕ m) ≡ pdb-bd-supp zero Γ false
     lem (∅ , A) = refl
@@ -344,8 +344,8 @@ supp-compat′ zero T true = let
   FVTm (pd-focus-tm (tree-to-pd T))
     ≡˘⟨ FVTm-≃ (pd-right-base it) ⟩
   FVTm (pdb-right-base (pd-to-pdb it))
-    ≡⟨ lem (tree-to-ctx T) (pd-to-pdb it) ⟩
-  pd-bd-supp zero (tree-to-ctx T) true ∎
+    ≡⟨ lem ⌊ T ⌋ (pd-to-pdb it) ⟩
+  pd-bd-supp zero ⌊ T ⌋ true ∎
    where
     open ≡-Reasoning
 
@@ -381,9 +381,9 @@ supp-compat′ (suc d) (Join S T) b rewrite Truth-prop (supp-tree-bd-non-empty d
   in begin
   connect-susp-supp (suspSupp (toVarSet (supp-tree-bd d S b))) (toVarSet (supp-tree-bd (suc d) T b))
     ≡⟨ cong₂ connect-susp-supp (cong suspSupp (supp-compat′ d S b)) (supp-compat′ (suc d) T b) ⟩
-  connect-susp-supp (suspSupp (pd-bd-supp d (tree-to-ctx S) b)) (pd-bd-supp (suc d) (tree-to-ctx T) b)
-    ≡⟨ connect-susp-pdb-bd-compat d (tree-to-ctx S) (tree-to-ctx T) ⦃ pd-to-pdb it ⦄ b ⟩
-  pd-bd-supp (suc d) (connect-susp (tree-to-ctx S) (tree-to-ctx T)) b ∎
+  connect-susp-supp (suspSupp (pd-bd-supp d ⌊ S ⌋ b)) (pd-bd-supp (suc d) ⌊ T ⌋ b)
+    ≡⟨ connect-susp-pdb-bd-compat d ⌊ S ⌋ ⌊ T ⌋ ⦃ pd-to-pdb it ⦄ b ⟩
+  pd-bd-supp (suc d) (connect-susp ⌊ S ⌋ ⌊ T ⌋) b ∎
   where
     open ≡-Reasoning
 

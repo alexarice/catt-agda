@@ -86,13 +86,9 @@ extend-tree-eq {d = zero} (Join≃ p q) = Join≃ p (extend-tree-eq q)
 extend-tree-eq {d = suc d} (Join≃ p Sing≃) = Join≃ (extend-tree-eq p) Sing≃
 extend-tree-eq {d = suc d} (Join≃ p q@(Join≃ _ _)) = Join≃ p (extend-tree-eq q)
 
-connect-tree-unit-right : (T : Tree n) → T ≃ connect-tree T Sing
-connect-tree-unit-right Sing = refl≃
-connect-tree-unit-right (Join S T) = Join≃ refl≃ (connect-tree-unit-right T)
-
-connect-tree-is-extendable : (n : ℕ) → (S : Tree m) → (T : Tree m′) → ⦃ _ : n-extendable n T ⦄ → n-extendable n (connect-tree S T)
-connect-tree-is-extendable n Sing T = it
-connect-tree-is-extendable n (Join S S′) T = join-tree-preserves-extendable n S (connect-tree S′ T) ⦃ connect-tree-is-extendable n S′ T ⦄
+++t-is-extendable : (n : ℕ) → (S : Tree m) → (T : Tree m′) → ⦃ _ : n-extendable n T ⦄ → n-extendable n (S ++t T)
+++t-is-extendable n Sing T = it
+++t-is-extendable n (Join S S′) T = join-tree-preserves-extendable n S (S′ ++t T) ⦃ ++t-is-extendable n S′ T ⦄
 
 join-extend-tree : (S : Tree m)
                  → (T : Tree m′)
@@ -106,16 +102,16 @@ join-extend-tree {n = suc n} S (Join T (Join _ _)) = refl≃
 extend-connect-tree : (S : Tree m)
                     → (T : Tree m′)
                     → .⦃ _ : n-extendable n T ⦄
-                    → extend-tree n (connect-tree S T) ⦃ connect-tree-is-extendable n S T ⦄
-                      ≃ connect-tree S (extend-tree n T)
+                    → extend-tree n (S ++t T) ⦃ ++t-is-extendable n S T ⦄
+                      ≃ S ++t (extend-tree n T)
 extend-connect-tree Sing T = refl≃
 extend-connect-tree {n = n} (Join S S′) T ⦃ ex ⦄ = let
-  instance _ = connect-tree-is-extendable n S′ T
-  in trans≃ (join-extend-tree S (connect-tree S′ T))
+  instance _ = ++t-is-extendable n S′ T
+  in trans≃ (join-extend-tree S (S′ ++t T))
             (Join≃ refl≃ (extend-connect-tree S′ T))
 
-connect-dyck-tree : (dy : Dyck n 0) → (ey : Dyck m d) → dyck-to-tree (connect-dyck dy ey) ≃ connect-tree (dyck-to-tree dy) (dyck-to-tree ey)
-connect-dyck-tree dy End = connect-tree-unit-right (dyck-to-tree dy)
+connect-dyck-tree : (dy : Dyck n 0) → (ey : Dyck m d) → dyck-to-tree (connect-dyck dy ey) ≃ dyck-to-tree dy ++t dyck-to-tree ey
+connect-dyck-tree dy End = ≃′-to-≃ (sym≃′ (++t-right-unit (dyck-to-tree dy)))
 connect-dyck-tree dy (⇑ ey) = let
   instance _ = dyck-to-tree-is-n-extendable (connect-dyck dy ey)
   instance _ = dyck-to-tree-is-n-extendable ey
@@ -134,9 +130,9 @@ tree-to-dyck-to-tree Sing = Sing≃
 tree-to-dyck-to-tree (Join S T) = begin
   < dyck-to-tree (connect-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T)) >t
     ≈⟨ connect-dyck-tree (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T) ⟩
-  < connect-tree (dyck-to-tree (⇓ (susp-dyck (tree-to-dyck zero S)))) (dyck-to-tree (tree-to-dyck zero T)) >t
-    ≈⟨ connect-tree-≃ (trans≃ (susp-dyck-tree (tree-to-dyck 0 S)) (Susp-≃ (tree-to-dyck-to-tree S))) (tree-to-dyck-to-tree T) ⟩
-  < connect-tree (Susp S) T >t
+  < dyck-to-tree (⇓ (susp-dyck (tree-to-dyck zero S))) ++t dyck-to-tree (tree-to-dyck zero T) >t
+    ≈⟨ ++t-≃ (trans≃ (susp-dyck-tree (tree-to-dyck 0 S)) (Susp-≃ (tree-to-dyck-to-tree S))) (tree-to-dyck-to-tree T) ⟩
+  < Susp S ++t T >t
     ≡⟨⟩
   < Join S T >t ∎
   where

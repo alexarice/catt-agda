@@ -8,7 +8,7 @@ open import Data.Product renaming (_,_ to _,,_) hiding (map) public
 open import Relation.Binary.Definitions hiding (Irrelevant) public
 open import Data.Empty using (⊥) public
 open import Data.Unit using (⊤; tt) public
-open import Relation.Nullary public
+open import Relation.Nullary hiding (⌊_⌋) public
 open import Data.Fin.Patterns public
 open import Data.Wrap public
 open import Function using (it; _∘_) public

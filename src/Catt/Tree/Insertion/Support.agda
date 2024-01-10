@@ -55,7 +55,7 @@ exterior-sub-full : (S : Tree n)
                   → .⦃ _ : has-trunk-height d T ⦄
                   → DCT (FVLabel (exterior-label S p T)) ≡ tFull
 exterior-sub-full (Join S₁ S₂) BPHere T
-  = label-between-connect-trees-full
+  = label-between-++t-full
       (replace-label (canonical-label (Susp S₁) T) SHere)
       SPath
       (reflexive≈stm (canonical-label-last (Susp S₁) T))

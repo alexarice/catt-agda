@@ -23,7 +23,7 @@ open import Catt.Suspension.Typing rule lift-rule susp-rule
 open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
 
 
-tree-to-ctx-Ty : (T : Tree n) → Typing-Ctx (tree-to-ctx T)
+tree-to-ctx-Ty : (T : Tree n) → Typing-Ctx ⌊ T ⌋
 tree-to-ctx-Ty Sing = TyAdd TyEmp TyStar
 tree-to-ctx-Ty (Join S T) = connect-susp-Ty (tree-to-ctx-Ty S) (tree-to-ctx-Ty T)
 
@@ -32,6 +32,6 @@ fst-var-Ty (∅ , ⋆) = TyVar zero
 fst-var-Ty (∅ , s ─⟨ A ⟩⟶ t) = ⊥-elim (no-term-in-empty-context s)
 fst-var-Ty (Γ , B , A) = lift-tm-typing (fst-var-Ty (Γ , B))
 
-tree-last-var-Ty : (T : Tree n) → Typing-Tm (tree-to-ctx T) (tree-last-var T) ⋆
+tree-last-var-Ty : (T : Tree n) → Typing-Tm ⌊ T ⌋ (tree-last-var T) ⋆
 tree-last-var-Ty Sing = TyVar zero
-tree-last-var-Ty (Join S T) = apply-sub-tm-typing (tree-last-var-Ty T) (connect-susp-inc-right-Ty (tree-to-ctx S))
+tree-last-var-Ty (Join S T) = apply-sub-tm-typing (tree-last-var-Ty T) (connect-susp-inc-right-Ty ⌊ S ⌋)

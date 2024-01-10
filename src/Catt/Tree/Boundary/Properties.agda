@@ -37,18 +37,18 @@ tree-inc-not-here (suc d) Sing b PHere = ⊥-elim it
 tree-inc-not-here (suc d) (Join S T) b (PExt Z) = tt
 tree-inc-not-here (suc d) (Join S T) b (PShift Z) = tt
 
-connect-tree-bd : (d : ℕ)
+++t-bd : (d : ℕ)
                 → (S : Tree n)
                 → (T : Tree m)
-                → connect-tree (tree-bd (suc d) S) (tree-bd (suc d) T)
-                ≃′ tree-bd (suc d) (connect-tree S T)
-connect-tree-bd d Sing T = refl≃′
-connect-tree-bd d (Join S₁ S₂) T = Join≃′ refl≃′ (connect-tree-bd d S₂ T)
+                → tree-bd (suc d) S ++t tree-bd (suc d) T
+                ≃′ tree-bd (suc d) (S ++t T)
+++t-bd d Sing T = refl≃′
+++t-bd d (Join S₁ S₂) T = Join≃′ refl≃′ (++t-bd d S₂ T)
 
 tree-inc-inc-left : (d : ℕ) → (S : Tree n) → (T : Tree m) → (b : Bool)
                   → (Z : Path (tree-bd (suc d) S))
-                  → connect-tree-inc-left′ S T (tree-inc-label′ (suc d) S b Z)
-                  ≃p tree-inc-label′ (suc d) (connect-tree S T) b (ppath-≃ (connect-tree-bd d S T) (connect-tree-inc-left′ (tree-bd (suc d) S) (tree-bd (suc d) T) Z))
+                  → ++t-inc-left′ S T (tree-inc-label′ (suc d) S b Z)
+                  ≃p tree-inc-label′ (suc d) (S ++t T) b (ppath-≃ (++t-bd d S T) (++t-inc-left′ (tree-bd (suc d) S) (tree-bd (suc d) T) Z))
 tree-inc-inc-left d Sing T b Z = sym≃p (tree-inc-label-phere d T b)
 tree-inc-inc-left d (Join S₁ S₂) T b PHere = refl≃p
 tree-inc-inc-left d (Join S₁ S₂) T b (PExt Z) = refl≃p
@@ -56,8 +56,8 @@ tree-inc-inc-left d (Join S₁ S₂) T b (PShift Z) = Shift≃ refl≃ (tree-inc
 
 tree-inc-inc-right : (d : ℕ) → (S : Tree n) → (T : Tree m) → (b : Bool)
                    → (Z : Path (tree-bd (suc d) T))
-                   → connect-tree-inc-right′ S T (tree-inc-label′ (suc d) T b Z)
-                   ≃p tree-inc-label′ (suc d) (connect-tree S T) b (ppath-≃ (connect-tree-bd d S T) (connect-tree-inc-right′ (tree-bd (suc d) S) (tree-bd (suc d) T) Z))
+                   → ++t-inc-right′ S T (tree-inc-label′ (suc d) T b Z)
+                   ≃p tree-inc-label′ (suc d) (S ++t T) b (ppath-≃ (++t-bd d S T) (++t-inc-right′ (tree-bd (suc d) S) (tree-bd (suc d) T) Z))
 tree-inc-inc-right d Sing T b Z = refl≃p
 tree-inc-inc-right d (Join S₁ S₂) T b Z = Shift≃ refl≃ (tree-inc-inc-right d S₂ T b Z)
 

@@ -17,6 +17,7 @@ no-term-in-empty-context (Coh S A ⟨ σ , t ⟩) = no-term-in-empty-context t
 n-to-0-sub-impossible : ¬ (Sub (suc n) 0 A)
 n-to-0-sub-impossible ⟨ μ , t ⟩ = no-term-in-empty-context t
 
+infix 4 _≃c_ _≃ty_ _≃tm_ _≃s_
 data _≃c_ : Ctx n → Ctx m → Set
 data _≃ty_ : Ty n → Ty m → Set
 data _≃tm_ : Tm n → Tm m → Set

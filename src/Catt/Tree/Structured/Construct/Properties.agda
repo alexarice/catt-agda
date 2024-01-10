@@ -436,7 +436,7 @@ stm-to-label-to-sub (Join S Sing) a (SArr s As t) = begin
     open Reasoning sub-setoid
 
 sty-to-coh-≃ : {As : STy (someTree S)} → {Bs : STy (someTree T)} → S ≃ T → As ≃sty Bs → sty-to-coh As ≃stm sty-to-coh Bs
-sty-to-coh-≃ {S = S} {T = T} p [ q ] = [ (Coh≃ (⌊_⌋-≃ p) q lem) ]
+sty-to-coh-≃ {S = S} {T = T} p [ q ] = [ (Coh≃ (⌊⌋-≃ p) q lem) ]
   where
     lem : label-to-sub (id-label-wt S) ● idSub ≃s label-to-sub (id-label-wt T) ● idSub
     lem = begin

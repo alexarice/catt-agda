@@ -22,9 +22,9 @@ open import Catt.Globular.Typing rule lift-rule
 open import Catt.Suspension.Typing rule lift-rule susp-rule
 open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
 
-⌊_⌋-Ty : (T : Tree n) → Typing-Ctx ⌊ T ⌋
-⌊_⌋-Ty Sing = TyAdd TyEmp TyStar
-⌊_⌋-Ty (Join S T) = connect-susp-Ty (⌊_⌋-Ty S) (⌊_⌋-Ty T)
+⌊⌋-Ty : (T : Tree n) → Typing-Ctx ⌊ T ⌋
+⌊⌋-Ty Sing = TyAdd TyEmp TyStar
+⌊⌋-Ty (Join S T) = connect-susp-Ty (⌊⌋-Ty S) (⌊⌋-Ty T)
 
 fst-var-Ty : (Γ : Ctx (suc n)) → Typing-Tm Γ (Var (fromℕ _)) ⋆
 fst-var-Ty (∅ , ⋆) = TyVar zero

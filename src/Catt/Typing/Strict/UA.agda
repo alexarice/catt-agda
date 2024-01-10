@@ -26,11 +26,11 @@ data Index : Set where
          → (S : Tree n)
          → (As : STy (someTree S))
          → (L : Label (Other m) S)
-         → (P : BranchingPoint S l)
+         → (P : Branch S l)
          → (T : Tree n′)
          → .⦃ _ : has-trunk-height l T ⦄
          → (M : Label (Other m) T)
-         → L (branching-path-to-path P) ≃stm canonical-comp′ (height-of-branching P) T >>= (M ,, S⋆)
+         → L ⌊ P ⌋p ≃stm canonical-comp′ (ih P) T >>= (M ,, S⋆)
          → Index
 
 module _ where
@@ -63,26 +63,26 @@ hasInsertion {l = l} {S = S} As L P {T = T} M p [ tty ] = [ begin
     ≈˘⟨ reflexive≈tm (stm-to-other-prop (SCoh S As (L ,, S⋆)) .get) ⟩
   stm-to-term (SCoh S As (label-to-other L ,, S⋆))
     ≈⟨ Rule≈ (Insert _ S As (label-to-other L) P T (label-to-other M) lem) (transport-typing tty (sym≃tm (stm-to-other-prop (SCoh S As (L ,, S⋆)) .get))) ⟩
-  stm-to-term (SCoh (insertion-tree S P T) (As >>=′ (exterior-label S P T ,, S⋆)) ((label-from-insertion S P T (label-to-other L) (label-to-other M)) ,, S⋆))
-    ≈˘⟨ reflexive≈tm (SCoh≃ (insertion-tree S P T) (refl≃sty {A = As >>=′ (exterior-label S P T ,, S⋆)}) (label-from-insertion-map stm-to-other S P T L M) (refl≃sty {A = S⋆}) .get) ⟩
+  stm-to-term (SCoh (insertion-tree S P T) (As >>=′ (κ S P T ,, S⋆)) ((label-from-insertion S P T (label-to-other L) (label-to-other M)) ,, S⋆))
+    ≈˘⟨ reflexive≈tm (SCoh≃ (insertion-tree S P T) (refl≃sty {A = As >>=′ (κ S P T ,, S⋆)}) (label-from-insertion-map stm-to-other S P T L M) (refl≃sty {A = S⋆}) .get) ⟩
   stm-to-term
     (SCoh (insertion-tree S P T)
-     (As >>=′ (exterior-label S P T ,, S⋆))
+     (As >>=′ (κ S P T ,, S⋆))
      (label-to-other (label-from-insertion S P T L M) ,, S⋆))
-    ≈⟨ reflexive≈tm (stm-to-other-prop (SCoh (insertion-tree S P T) (As >>=′ (exterior-label S P T ,, S⋆)) (label-from-insertion S P T L M ,, S⋆)) .get) ⟩
-  stm-to-term (SCoh (insertion-tree S P T) (As >>=′ (exterior-label S P T ,, S⋆)) (label-from-insertion S P T L M ,, S⋆)) ∎ ]
+    ≈⟨ reflexive≈tm (stm-to-other-prop (SCoh (insertion-tree S P T) (As >>=′ (κ S P T ,, S⋆)) (label-from-insertion S P T L M ,, S⋆)) .get) ⟩
+  stm-to-term (SCoh (insertion-tree S P T) (As >>=′ (κ S P T ,, S⋆)) (label-from-insertion S P T L M ,, S⋆)) ∎ ]
   where
-    lem : label-to-other L (branching-path-to-path P)
+    lem : label-to-other L ⌊ P ⌋p
           ≃stm
-          canonical-comp′ (height-of-branching P) T >>= (label-to-other M ,, S⋆)
+          canonical-comp′ (ih P) T >>= (label-to-other M ,, S⋆)
     lem = begin
-      < label-to-other L (branching-path-to-path P) >stm
+      < label-to-other L ⌊ P ⌋p >stm
         ≈⟨ ap-≃ (label-to-other-prop L) refl≃p ⟩
-      < L (branching-path-to-path P) >stm
+      < L ⌊ P ⌋p >stm
         ≈⟨ p ⟩
-      < canonical-comp′ (height-of-branching P) T >>= (M ,, S⋆) >stm
-        ≈˘⟨ >>=-≃ (refl≃stm {a = canonical-comp′ (height-of-branching P) T}) (label-to-other-prop M) (sty-to-other-prop S⋆) ⟩
-      < canonical-comp′ (height-of-branching P) T >>= (label-to-other M ,, S⋆) >stm ∎
+      < canonical-comp′ (ih P) T >>= (M ,, S⋆) >stm
+        ≈˘⟨ >>=-≃ (refl≃stm {a = canonical-comp′ (ih P) T}) (label-to-other-prop M) (sty-to-other-prop S⋆) ⟩
+      < canonical-comp′ (ih P) T >>= (label-to-other M ,, S⋆) >stm ∎
       where
         open Reasoning stm-setoid
 

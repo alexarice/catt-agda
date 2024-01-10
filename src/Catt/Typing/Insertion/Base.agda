@@ -16,7 +16,7 @@ Insertion : (Γ : Ctx m)
           → (S : Tree n)
           → (As : STy (someTree S))
           → (L : Label (Other m) S)
-          → (P : BranchingPoint S l)
+          → (P : Branch S l)
           → (T : Tree n′)
           → .⦃ _ : has-trunk-height l T ⦄
           → (M : Label (Other m) T)
@@ -26,5 +26,5 @@ Insertion Γ S As L P T M .tgtCtx = Γ
 Insertion Γ S As L P T M .lhs = stm-to-term (SCoh S As (L ,, S⋆))
 Insertion Γ S As L P T M .rhs
   = stm-to-term (SCoh (insertion-tree S P T)
-                      (As >>=′ (exterior-label S P T ,, S⋆))
+                      (As >>=′ (κ S P T ,, S⋆))
                       (label-from-insertion S P T L M ,, S⋆))

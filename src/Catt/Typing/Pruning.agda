@@ -64,9 +64,9 @@ module Conditions (prune : HasPruning) where
   susp-rule : (p : Peak dy) → {B : Ty (ctxLength Γ)} → (pf : peak-term p [ σ ]tm ≃tm identity-term B t) → SuspRule (Pruning Γ dy A p σ)
   susp-rule {dy = dy}  {Γ = Γ} {σ = σ} {t = t}{A = A} p {B} pf tty = begin
     Coh (susp-ctx ⌊ dy ⌋d) (susp-ty A) (susp-sub σ)
-      ≈˘⟨ reflexive≈tm (Coh≃ (susp-⌊_⌋d dy) refl≃ty refl≃s) ⟩
+      ≈˘⟨ reflexive≈tm (Coh≃ (susp-⌊⌋d dy) refl≃ty refl≃s) ⟩
     Coh ⌊ susp-dyck dy ⌋d (susp-ty A) (susp-sub σ)
-      ≈⟨ prune (⇓pk (susp-peak p)) lem (transport-typing tty (Coh≃ (sym≃c (susp-⌊_⌋d dy)) refl≃ty refl≃s)) ⟩
+      ≈⟨ prune (⇓pk (susp-peak p)) lem (transport-typing tty (Coh≃ (sym≃c (susp-⌊⌋d dy)) refl≃ty refl≃s)) ⟩
     Coh ⌊ prune-peak (susp-peak p) ⌋d
         (susp-ty A [ prune-project (susp-peak p) ]ty)
         (prune-sub (susp-peak p) (susp-sub σ))
@@ -79,9 +79,9 @@ module Conditions (prune : HasPruning) where
             susp-ctx ⌊ prune-peak p ⌋d
       l1 = begin
         < ⌊ prune-peak (susp-peak p) ⌋d >c
-          ≈⟨ ⌊_⌋d-≃ (prune-susp-peak p) ⟩
+          ≈⟨ ⌊⌋d-≃ (prune-susp-peak p) ⟩
         < ⌊ susp-dyck (prune-peak p) ⌋d >c
-          ≈⟨ susp-⌊_⌋d (prune-peak p) ⟩
+          ≈⟨ susp-⌊⌋d (prune-peak p) ⟩
         < susp-ctx ⌊ prune-peak p ⌋d >c ∎
         where
           open Reasoning ctx-setoid

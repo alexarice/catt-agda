@@ -145,9 +145,9 @@ Susp-≃ p = Join≃ p Sing≃
   where
     open Reasoning ctx-setoid
 
-⌊_⌋-≃ : S ≃ T → ⌊ S ⌋ ≃c ⌊ T ⌋
-⌊_⌋-≃ Sing≃ = refl≃c
-⌊_⌋-≃ (Join≃ p q) = connect-susp-≃ (⌊_⌋-≃ p) (⌊_⌋-≃ q)
+⌊⌋-≃ : S ≃ T → ⌊ S ⌋ ≃c ⌊ T ⌋
+⌊⌋-≃ Sing≃ = refl≃c
+⌊⌋-≃ (Join≃ p q) = connect-susp-≃ (⌊⌋-≃ p) (⌊⌋-≃ q)
 
 tree-last-var-is-var : (T : Tree n) → isVar (tree-last-var T)
 tree-last-var-is-var Sing = tt
@@ -275,9 +275,9 @@ linear-tree-dim (Join S Sing) = begin
 ++t-right-unit Sing = Refl≃′
 ++t-right-unit (Join S T) = Join≃′ Refl≃′ (++t-right-unit T)
 
-⌊_⌋-glob : (S : Tree n) → ctx-is-globular ⌊ S ⌋
-⌊_⌋-glob Sing = tt ,, tt
-⌊_⌋-glob (Join S T) = connect-susp-glob ⌊ S ⌋ ⦃ ⌊_⌋-glob S ⦄ ⌊ T ⌋ ⦃ ⌊_⌋-glob T ⦄
+⌊⌋-glob : (S : Tree n) → ctx-is-globular ⌊ S ⌋
+⌊⌋-glob Sing = tt ,, tt
+⌊⌋-glob (Join S T) = connect-susp-glob ⌊ S ⌋ ⦃ ⌊⌋-glob S ⦄ ⌊ T ⌋ ⦃ ⌊⌋-glob T ⦄
 
 susp-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → susp-ctx ⌊ S ⌋ ≃c ⌊ S ⌋ , ⌊ S ⌋ ‼ zero , 1V ─⟨ (lift-ty (⌊ S ⌋ ‼ zero)) ⟩⟶ 0V
 susp-lin-tree Sing = refl≃c

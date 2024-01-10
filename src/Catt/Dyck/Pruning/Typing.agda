@@ -24,7 +24,7 @@ open import Catt.Globular.Typing rule lift-rule
 open import Catt.Discs.Typing rule lift-rule
 open import Catt.Dyck.Typing rule lift-rule sub-rule
 
-prune-project-Ty : (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) (dyck-to-ctx (prune-peak p)) (prune-project p)
+prune-project-Ty : (p : Peak dy) → Typing-Sub ⌊ dy ⌋d ⌊ prune-peak p ⌋d (prune-project p)
 prune-project-Ty (⇕pk dy)
   = TyExt (TyExt id-Ty
                  (TyConv (dyck-term-Ty dy) (reflexive≈ty (sym≃ty (id-on-ty (dyck-type dy))))))
@@ -52,7 +52,7 @@ prune-project-Ty (⇑pk {dy = dy} p)
 prune-project-Ty (⇓pk p) = prune-project-Ty p
 
 
-prune-Eq : {Γ : Ctx n} → (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) Γ σ → {t : Tm n} → {A : Ty n} → peak-term p [ σ ]tm ≃tm identity-term A t → σ ≈[ Γ ]s prune-sub p σ ● prune-project p
+prune-Eq : {Γ : Ctx n} → (p : Peak dy) → Typing-Sub ⌊ dy ⌋d Γ σ → {t : Tm n} → {A : Ty n} → peak-term p [ σ ]tm ≃tm identity-term A t → σ ≈[ Γ ]s prune-sub p σ ● prune-project p
 prune-Eq {Γ = Γ} (⇕pk dy) (TyExt {t = u} (TyExt {σ = σ} {t = s} σty sty) tty) {t} {A} q = Ext≈ (Ext≈ (reflexive≈s (sym≃s (id-right-unit σ))) l1) l2
   where
     ity : Typing-Tm Γ (identity-term A t) _
@@ -126,7 +126,7 @@ prune-Eq (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty sty) tty) {t
 
 prune-Eq (⇓pk p) σty q = prune-Eq p σty q
 
-prune-sub-Ty : {Γ : Ctx n} → (p : Peak dy) → Typing-Sub (dyck-to-ctx dy) Γ σ → {t : Tm n} → {A : Ty n} → peak-term p [ σ ]tm ≃tm identity-term A t → Typing-Sub (dyck-to-ctx (prune-peak p)) Γ (prune-sub p σ)
+prune-sub-Ty : {Γ : Ctx n} → (p : Peak dy) → Typing-Sub ⌊ dy ⌋d Γ σ → {t : Tm n} → {A : Ty n} → peak-term p [ σ ]tm ≃tm identity-term A t → Typing-Sub ⌊ prune-peak p ⌋d Γ (prune-sub p σ)
 prune-sub-Ty (⇕pk dy) (TyExt (TyExt σty sty) tty) q = σty
 prune-sub-Ty (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty sty) tty) {t} {A} q = TyExt (TyExt (prune-sub-Ty p σty l4) (TyConv sty l1)) (TyConv tty (Arr≈ l2 l3 refl≈tm))
   where

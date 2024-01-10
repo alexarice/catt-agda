@@ -15,14 +15,14 @@ data Dyck where
 variable
   dy ey fy : Dyck n d
 
-dyck-to-ctx : Dyck n d → Ctx (suc (n * 2))
+⌊_⌋d : Dyck n d → Ctx (suc (n * 2))
 dyck-pre-type : Dyck n d → Ty (n * 2)
 dyck-type : Dyck n d → Ty (suc (n * 2))
 dyck-term : Dyck n d → Tm (suc (n * 2))
 
-dyck-to-ctx End = ∅ , ⋆
-dyck-to-ctx (⇑ d) = dyck-to-ctx d , dyck-type d , dyck-pre-type (⇑ d)
-dyck-to-ctx (⇓ d) = dyck-to-ctx d
+⌊ End ⌋d = ∅ , ⋆
+⌊ ⇑ d ⌋d = ⌊ d ⌋d , dyck-type d , dyck-pre-type (⇑ d)
+⌊ ⇓ d ⌋d = ⌊ d ⌋d
 
 dyck-pre-type End = ⋆
 dyck-pre-type (⇑ d) = (lift-tm (dyck-term d)) ─⟨ (lift-ty (dyck-type d)) ⟩⟶ 0V

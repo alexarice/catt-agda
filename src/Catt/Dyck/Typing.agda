@@ -18,16 +18,16 @@ open import Catt.Typing.Properties.Base rule
 open import Catt.Typing.Properties.Lifting rule lift-rule
 open import Catt.Globular.Typing rule lift-rule
 
-dyck-to-ctx-Ty : (dy : Dyck n d) → Typing-Ctx (dyck-to-ctx dy)
-dyck-type-Ty : (dy : Dyck n d) → Typing-Ty (dyck-to-ctx dy) (dyck-type dy)
-dyck-term-Ty : (dy : Dyck n d) → Typing-Tm (dyck-to-ctx dy) (dyck-term dy) (dyck-type dy)
-dyck-pre-type-Ty : (dy : Dyck n d) → Typing-Ty (dyck-to-ctx dy , dyck-type dy)
+⌊_⌋d-Ty : (dy : Dyck n d) → Typing-Ctx ⌊ dy ⌋d
+dyck-type-Ty : (dy : Dyck n d) → Typing-Ty ⌊ dy ⌋d (dyck-type dy)
+dyck-term-Ty : (dy : Dyck n d) → Typing-Tm ⌊ dy ⌋d (dyck-term dy) (dyck-type dy)
+dyck-pre-type-Ty : (dy : Dyck n d) → Typing-Ty (⌊ dy ⌋d , dyck-type dy)
       (lift-tm (dyck-term dy) ─⟨ lift-ty (dyck-type dy) ⟩⟶ 0V)
 dyck-pre-type-Ty dy = TyArr (lift-tm-typing (dyck-term-Ty dy)) (lift-ty-typing (dyck-type-Ty dy)) (TyVar zero)
 
-dyck-to-ctx-Ty End = TyAdd TyEmp TyStar
-dyck-to-ctx-Ty (⇑ dy) = TyAdd (TyAdd (dyck-to-ctx-Ty dy) (dyck-type-Ty dy)) (dyck-pre-type-Ty dy)
-dyck-to-ctx-Ty (⇓ dy) = dyck-to-ctx-Ty dy
+⌊_⌋d-Ty End = TyAdd TyEmp TyStar
+⌊_⌋d-Ty (⇑ dy) = TyAdd (TyAdd (⌊_⌋d-Ty dy) (dyck-type-Ty dy)) (dyck-pre-type-Ty dy)
+⌊_⌋d-Ty (⇓ dy) = ⌊_⌋d-Ty dy
 
 dyck-type-Ty End = TyStar
 dyck-type-Ty (⇑ dy) = lift-ty-typing (TyArr (lift-tm-typing (dyck-term-Ty dy)) (lift-ty-typing (dyck-type-Ty dy)) (TyVar zero))

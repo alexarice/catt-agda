@@ -101,10 +101,10 @@ dyck-term-≃ End≃ = refl≃tm
 dyck-term-≃ (⇑≃ p) = Var≃ (cong (λ - → 3 + - * 2) (≃d-to-same-n p)) refl
 dyck-term-≃ (⇓≃ p) = ty-tgt′-≃ (dyck-type-≃ p)
 
-dyck-to-ctx-≃ : dy ≃d ey → dyck-to-ctx dy ≃c dyck-to-ctx ey
-dyck-to-ctx-≃ End≃ = refl≃c
-dyck-to-ctx-≃ (⇑≃ p) = Add≃ (Add≃ (dyck-to-ctx-≃ p) (dyck-type-≃ p)) (dyck-pre-type-≃ (⇑≃ p))
-dyck-to-ctx-≃ (⇓≃ p) = dyck-to-ctx-≃ p
+⌊_⌋d-≃ : dy ≃d ey → ⌊ dy ⌋d ≃c ⌊ ey ⌋d
+⌊_⌋d-≃ End≃ = refl≃c
+⌊_⌋d-≃ (⇑≃ p) = Add≃ (Add≃ (⌊_⌋d-≃ p) (dyck-type-≃ p)) (dyck-pre-type-≃ (⇑≃ p))
+⌊_⌋d-≃ (⇓≃ p) = ⌊_⌋d-≃ p
 
 susp-dyck-pre-type : (d : Dyck n d) → dyck-pre-type (susp-dyck d) ≃ty susp-ty (dyck-pre-type d)
 susp-dyck-type : (d : Dyck n d) → dyck-type (susp-dyck d) ≃ty susp-ty (dyck-type d)
@@ -130,12 +130,12 @@ susp-dyck-term End = refl≃tm
 susp-dyck-term (⇑ d) = refl≃tm
 susp-dyck-term (⇓ d) = trans≃tm (ty-tgt′-≃ (susp-dyck-type d)) (ty-tgt′-susp (dyck-type d) ⦃ NonZero-subst (sym (dyck-type-dim d)) it ⦄)
 
-susp-dyck-to-ctx : (d : Dyck n d) → dyck-to-ctx (susp-dyck d) ≃c susp-ctx (dyck-to-ctx d)
-susp-dyck-to-ctx End = refl≃c
-susp-dyck-to-ctx (⇑ d)
-  = Add≃ (Add≃ (susp-dyck-to-ctx d) (susp-dyck-type d))
+susp-⌊_⌋d : (d : Dyck n d) → ⌊ susp-dyck d ⌋d ≃c susp-ctx ⌊ d ⌋d
+susp-⌊_⌋d End = refl≃c
+susp-⌊_⌋d (⇑ d)
+  = Add≃ (Add≃ (susp-⌊_⌋d d) (susp-dyck-type d))
          (susp-dyck-pre-type (⇑ d))
-susp-dyck-to-ctx (⇓ d) = susp-dyck-to-ctx d
+susp-⌊_⌋d (⇓ d) = susp-⌊_⌋d d
 
 susp-peak-term : (p : Peak dy) → peak-term (susp-peak p) ≃tm susp-tm (peak-term p)
 susp-peak-term (⇕pk dy) = refl≃tm

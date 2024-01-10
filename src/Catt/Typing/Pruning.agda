@@ -33,19 +33,19 @@ HasPruning = ∀ {m n}
            → {t : Tm m}
            → (peak-term p [ σ ]tm ≃tm identity-term B t)
            → {C : Ty m}
-           → Typing-Tm Γ (Coh (dyck-to-ctx dy) A σ) C
-           → Coh (dyck-to-ctx dy) A σ ≈[ Γ ]tm Coh (dyck-to-ctx (prune-peak p)) (A [ prune-project p ]ty) (prune-sub p σ)
+           → Typing-Tm Γ (Coh ⌊ dy ⌋d A σ) C
+           → Coh ⌊ dy ⌋d A σ ≈[ Γ ]tm Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (prune-sub p σ)
 
 module Conditions (prune : HasPruning) where
   open import Catt.Typing.Rule rule
 
   lift-rule : (p : Peak dy) → {B : Ty (ctxLength Γ)} → (pf : peak-term p [ σ ]tm ≃tm identity-term B t) → LiftRule (Pruning Γ dy A p σ)
   lift-rule {dy = dy} {Γ = Γ} {σ = σ} {t = t} {A = A} p {B} pf {A = C} tty = begin
-    Coh (dyck-to-ctx dy) A (lift-sub σ)
+    Coh ⌊ dy ⌋d A (lift-sub σ)
       ≈⟨ prune {Γ = (Γ , C)} p lem {lift-ty _} tty ⟩
-    Coh (dyck-to-ctx (prune-peak p)) (A [ prune-project p ]ty) (prune-sub p (lift-sub σ))
+    Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (prune-sub p (lift-sub σ))
       ≈⟨ Coh≈ refl≈ty (reflexive≈s (lift-prune-sub p σ)) ⟩
-    Coh (dyck-to-ctx (prune-peak p)) (A [ prune-project p ]ty) (lift-sub (prune-sub p σ)) ∎
+    Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (lift-sub (prune-sub p σ)) ∎
     where
       lem : (peak-term p [ lift-sub σ ]tm) ≃tm identity-term (lift-ty B) (lift-tm t)
       lem = begin
@@ -63,26 +63,26 @@ module Conditions (prune : HasPruning) where
 
   susp-rule : (p : Peak dy) → {B : Ty (ctxLength Γ)} → (pf : peak-term p [ σ ]tm ≃tm identity-term B t) → SuspRule (Pruning Γ dy A p σ)
   susp-rule {dy = dy}  {Γ = Γ} {σ = σ} {t = t}{A = A} p {B} pf tty = begin
-    Coh (susp-ctx (dyck-to-ctx dy)) (susp-ty A) (susp-sub σ)
-      ≈˘⟨ reflexive≈tm (Coh≃ (susp-dyck-to-ctx dy) refl≃ty refl≃s) ⟩
-    Coh (dyck-to-ctx (susp-dyck dy)) (susp-ty A) (susp-sub σ)
-      ≈⟨ prune (⇓pk (susp-peak p)) lem (transport-typing tty (Coh≃ (sym≃c (susp-dyck-to-ctx dy)) refl≃ty refl≃s)) ⟩
-    Coh (dyck-to-ctx (prune-peak (susp-peak p)))
+    Coh (susp-ctx ⌊ dy ⌋d) (susp-ty A) (susp-sub σ)
+      ≈˘⟨ reflexive≈tm (Coh≃ (susp-⌊_⌋d dy) refl≃ty refl≃s) ⟩
+    Coh ⌊ susp-dyck dy ⌋d (susp-ty A) (susp-sub σ)
+      ≈⟨ prune (⇓pk (susp-peak p)) lem (transport-typing tty (Coh≃ (sym≃c (susp-⌊_⌋d dy)) refl≃ty refl≃s)) ⟩
+    Coh ⌊ prune-peak (susp-peak p) ⌋d
         (susp-ty A [ prune-project (susp-peak p) ]ty)
         (prune-sub (susp-peak p) (susp-sub σ))
       ≈⟨ reflexive≈tm (Coh≃ l1 l2 (susp-prune-sub p σ)) ⟩
-    Coh (susp-ctx (dyck-to-ctx (prune-peak p)))
+    Coh (susp-ctx ⌊ prune-peak p ⌋d)
         (susp-ty (A [ prune-project p ]ty))
         (susp-sub (prune-sub p σ)) ∎
     where
-      l1 : dyck-to-ctx (prune-peak (susp-peak p)) ≃c
-            susp-ctx (dyck-to-ctx (prune-peak p))
+      l1 : ⌊ prune-peak (susp-peak p) ⌋d ≃c
+            susp-ctx ⌊ prune-peak p ⌋d
       l1 = begin
-        < dyck-to-ctx (prune-peak (susp-peak p)) >c
-          ≈⟨ dyck-to-ctx-≃ (prune-susp-peak p) ⟩
-        < dyck-to-ctx (susp-dyck (prune-peak p)) >c
-          ≈⟨ susp-dyck-to-ctx (prune-peak p) ⟩
-        < susp-ctx (dyck-to-ctx (prune-peak p)) >c ∎
+        < ⌊ prune-peak (susp-peak p) ⌋d >c
+          ≈⟨ ⌊_⌋d-≃ (prune-susp-peak p) ⟩
+        < ⌊ susp-dyck (prune-peak p) ⌋d >c
+          ≈⟨ susp-⌊_⌋d (prune-peak p) ⟩
+        < susp-ctx ⌊ prune-peak p ⌋d >c ∎
         where
           open Reasoning ctx-setoid
 
@@ -114,11 +114,11 @@ module Conditions (prune : HasPruning) where
 
   sub-rule : (p : Peak dy) → {B : Ty (ctxLength Γ)} → (pf : peak-term p [ σ ]tm ≃tm identity-term B t) → SubRule (Pruning Γ dy A p σ)
   sub-rule {dy = dy} {σ = σ} {t = t} {A = A} p {B} pf {σ = τ} σty tty = begin
-    Coh (dyck-to-ctx dy) A (τ ● σ)
+    Coh ⌊ dy ⌋d A (τ ● σ)
       ≈⟨ prune p lem tty ⟩
-    Coh (dyck-to-ctx (prune-peak p)) (A [ prune-project p ]ty) (prune-sub p (τ ● σ))
+    Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (prune-sub p (τ ● σ))
       ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (prune-sub-sub p σ τ)) ⟩
-    Coh (dyck-to-ctx (prune-peak p)) (A [ prune-project p ]ty) (τ ● prune-sub p σ) ∎
+    Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (τ ● prune-sub p σ) ∎
     where
       lem : (peak-term p [ τ ● σ ]tm) ≃tm identity-term (B [ τ ]ty) (t [ τ ]tm)
       lem = begin

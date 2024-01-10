@@ -28,7 +28,7 @@ bh : Branch S d → ℕ
 bh {d = d} p = d
 
 ih′ : {T : Tree n} → (p : Branch T d) → ℕ
-ih′ {T = Join S T} (BHere) = tree-dim S
+ih′ {T = Join S T} BHere = tree-dim S
 ih′ (BExt P) = suc (ih′ P)
 ih′ (BShift P) = ih′ P
 
@@ -41,18 +41,18 @@ ih p = suc (ih′ p)
 ⌊_⌋p {T = Join S T} (BShift p) = PShift ⌊ p ⌋p
 
 branch-type : (T : Tree n) → (P : Branch T d) → STy (someTree T)
-branch-type (Join S T) (BHere) = map-sty-ext (disc-sty S)
+branch-type (Join S T) BHere = map-sty-ext (disc-sty S)
 branch-type (Join S T) (BExt P) = map-sty-ext (branch-type S P)
 branch-type (Join S T) (BShift P) = map-sty-shift (branch-type T P)
 
 insertion-tree-size :  (S : Tree n) → (p : Branch S d) → (T : Tree m) → .⦃ has-trunk-height d T ⦄ → ℕ
 insertion-tree : (S : Tree n) → (p : Branch S d) → (T : Tree m) → .⦃ _ : has-trunk-height d T ⦄ → Tree (insertion-tree-size S p T)
 
-insertion-tree-size {m = m} (Join S₁ S₂) (BHere) T = ++t-length T S₂
+insertion-tree-size {m = m} (Join S₁ S₂) BHere T = ++t-length T S₂
 insertion-tree-size (Join {m = m} S₁ S₂) (BExt P) (Susp T) = m + suc (suc (insertion-tree-size S₁ P T))
 insertion-tree-size (Join {n = n} S₁ S₂) (BShift P) T = insertion-tree-size S₂ P T + suc (suc n)
 
-insertion-tree (Join S₁ S₂) (BHere) T = T ++t S₂
+insertion-tree (Join S₁ S₂) BHere T = T ++t S₂
 insertion-tree (Join S₁ S₂) (BExt P) (Susp T) = Join (insertion-tree S₁ P T) S₂
 insertion-tree (Join S₁ S₂) (BShift P) T = Join S₁ (insertion-tree S₂ P T)
 

@@ -61,12 +61,6 @@ NonZero-≤ {suc n} {suc m} p x = it
 ⊔-lem n zero = refl
 ⊔-lem n (suc m) = cong suc (⊔-comm n m)
 
--- proof-≡ : {I : Set} → {P : I → Set} → (c : Cases P) → {i : I} → doesC c ≡ i → P i
--- proof-≡ {P = P} (case _ proof) refl = proof
-
--- cases-≡ : {I A : Set} → {P : I → Set} → (c : Cases P) → (f : ∀ i (p : P i) → A) → {i : I} → (p : doesC c ≡ i) → cases c f ≡ f i (proof-≡ c p)
--- cases-≡ (case doesC₁ proofC₁) f refl = refl
-
 Truth-left : (b b′ : Bool) → Truth b → Truth (b ∨ b′)
 Truth-left true b′ p = tt
 
@@ -109,25 +103,3 @@ if-lem-const true x = refl
 
 ≡-to-≃n : n ≡ m → n ≃n m
 ≡-to-≃n refl = refl≃n
-
--- ≤t-refl : n ≤t n
--- ≤t-refl {zero} = tt
--- ≤t-refl {suc n} = ≤t-refl {n}
-
--- ≤t-reflexive : n ≡ m → n ≤t m
--- ≤t-reflexive {n} refl = ≤t-refl {n}
-
--- ≤t-trans : n ≤t m → m ≤t l → n ≤t l
--- ≤t-trans {zero} {m} {l} p q = tt
--- ≤t-trans {suc n} {suc m} {suc l} p q = ≤t-trans {n} {m} {l} p q
-
--- ≤t-antisym : n ≤t m → m ≤t n → n ≡ m
--- ≤t-antisym {zero} {zero} p q = refl
--- ≤t-antisym {suc n} {suc m} p q = cong suc (≤t-antisym p q)
-
--- ≤t-isPreorder : Relation.Binary.IsPreorder _≡_ _≤t_
--- ≤t-isPreorder = record
---   { isEquivalence = isEquivalence
---   ; reflexive     = ≤t-reflexive
---   ; trans         = ≤t-trans
---   }

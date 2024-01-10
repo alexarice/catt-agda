@@ -147,10 +147,10 @@ extend-disc-label-bd-< : (L : Label X S)
                        → (d : ℕ)
                        → (d < tree-dim S)
                        → (b : Bool)
-                       → extend-disc-label L t a (disc-inc d (susp S) b) ≃stm L (disc-inc d S b)
-extend-disc-label-bd-< {S = susp S} L t a zero q false = refl≃stm
-extend-disc-label-bd-< {S = susp S} L t a zero q true = refl≃stm
-extend-disc-label-bd-< {S = susp S} L t a (suc d) q b = extend-disc-label-bd-< (L ∘ PExt) t a d (≤-pred q) b
+                       → extend-disc-label L t a (disc-inc d (Susp S) b) ≃stm L (disc-inc d S b)
+extend-disc-label-bd-< {S = Susp S} L t a zero q false = refl≃stm
+extend-disc-label-bd-< {S = Susp S} L t a zero q true = refl≃stm
+extend-disc-label-bd-< {S = Susp S} L t a (suc d) q b = extend-disc-label-bd-< (L ∘ PExt) t a d (≤-pred q) b
 
 extend-disc-label-bd-≡ : (L : Label X S)
                        → .⦃ _ : is-linear S ⦄
@@ -159,12 +159,12 @@ extend-disc-label-bd-≡ : (L : Label X S)
                        → (d : ℕ)
                        → (d ≡ tree-dim S)
                        → (b : Bool)
-                       → extend-disc-label L t a (disc-inc d (susp S) b)
+                       → extend-disc-label L t a (disc-inc d (Susp S) b)
                          ≃stm
                          (if b then t else L (is-linear-max-path S))
 extend-disc-label-bd-≡ {S = Sing} L t a zero p false = refl≃stm
 extend-disc-label-bd-≡ {S = Sing} L t a zero p true = refl≃stm
-extend-disc-label-bd-≡ {S = susp S} L t a (suc d) p b = extend-disc-label-bd-≡ (L ∘ PExt) t a d (cong pred p) b
+extend-disc-label-bd-≡ {S = Susp S} L t a (suc d) p b = extend-disc-label-bd-≡ (L ∘ PExt) t a d (cong pred p) b
 
 module _ where
   open Reasoning stm-setoid
@@ -178,7 +178,7 @@ module _ where
                            → stm-to-label S a (canonical-type (tree-dim S) T) (disc-inc d S b)
                              ≃stm
                              canonical-stm d (tree-bd d T) >>= tree-inc-label d T b
-  canonical-label-bd-<-lem (susp S) T d b q a with <-cmp d (tree-dim S)
+  canonical-label-bd-<-lem (Susp S) T d b q a with <-cmp d (tree-dim S)
   ... | tri< x _ _ = begin
     < extend-disc-label
       (stm-to-label S
@@ -188,7 +188,7 @@ module _ where
       (canonical-stm (tree-dim S) (tree-bd (tree-dim S) T) >>=
        (tree-inc-label (tree-dim S) T true))
       a
-      (disc-inc d (susp S) b) >stm
+      (disc-inc d (Susp S) b) >stm
       ≈⟨ extend-disc-label-bd-< _ _ a d x b ⟩
     < stm-to-label S
       (canonical-stm (tree-dim S) (tree-bd (tree-dim S) T) >>=
@@ -207,7 +207,7 @@ module _ where
       (canonical-stm (tree-dim S) (tree-bd (tree-dim S) T) >>=
        (tree-inc-label (tree-dim S) T true))
       a
-      (disc-inc d (susp S) false) >stm
+      (disc-inc d (Susp S) false) >stm
       ≈⟨ extend-disc-label-bd-≡ _ _ a d refl false ⟩
     < stm-to-label S (canonical-stm (tree-dim S) (tree-bd (tree-dim S) T) >>= tree-inc-label (tree-dim S) T false)  (canonical-type (tree-dim S) T) (is-linear-max-path S)
      >stm
@@ -367,41 +367,41 @@ module _ where
 --   lfltu->-trunk-height (Join S Sing) T (suc d₁) zero p q r true PHere
 --     = >>=-≃ (canonical-stm-bd-non-linear (suc d₁) T (<-≤-trans q (s≤s (≤-reflexive (+-identityʳ d₁))))) refl≃l refl≃sty
 
-canonical-type-susp-lem : (d : ℕ) → (T : Tree n) → susp-sty (canonical-type d T) ≃sty canonical-type (suc d) (susp-tree T)
-canonical-comp-susp-lem : (d : ℕ) → (T : Tree n) → SExt {T = Sing} (canonical-comp d T) ≃stm canonical-comp (suc d) (susp-tree T)
+canonical-type-susp-lem : (d : ℕ) → (T : Tree n) → susp-sty (canonical-type d T) ≃sty canonical-type (suc d) (Susp T)
+canonical-comp-susp-lem : (d : ℕ) → (T : Tree n) → SExt {T = Sing} (canonical-comp d T) ≃stm canonical-comp (suc d) (Susp T)
 
 canonical-type-susp-lem zero T = SArr≃ [ refl≃tm ] refl≃sty [ refl≃tm ]
 canonical-type-susp-lem (suc d) T = SArr≃ (lem false) (canonical-type-susp-lem d T) (lem true)
   where
     open Reasoning stm-setoid
-    lem : (b : Bool) → susp-stm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b) ≃stm (canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b))
+    lem : (b : Bool) → susp-stm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b) ≃stm (canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (Susp T) b))
     lem b = begin
       < SExt (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b) >stm
         ≈˘⟨ >>=-ext (canonical-stm d (tree-bd d T)) (tree-inc-label d T b) ⟩
       < canonical-stm d (tree-bd d T) >>= map-ext (tree-inc-label d T b) >stm
         ≈⟨ >>=-≃ (refl≃stm {a = canonical-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
-      < canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b) >stm ∎
+      < canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (Susp T) b) >stm ∎
 
 canonical-comp-susp-lem d T = begin
   < SExt (canonical-comp d T) >stm
     ≈˘⟨ SCoh-ext T (canonical-type d T) (id-label-wt T) ⟩
   < SCoh T (canonical-type d T) (map-ext (id-label-wt T)) >stm
     ≈⟨ SCoh-unrestrict T (canonical-type d T) (map-ext (id-label-wt T)) ⟩
-  < SCoh (susp-tree T) (susp-sty (canonical-type d T)) (susp-label-full (id-label T) ,, S⋆) >stm
-    ≈⟨ SCoh≃ (susp-tree T) (canonical-type-susp-lem d T) (id-label-susp-full T) refl≃sty ⟩
-  < canonical-comp (suc d) (susp-tree T) >stm ∎
+  < SCoh (Susp T) (susp-sty (canonical-type d T)) (susp-label-full (id-label T) ,, S⋆) >stm
+    ≈⟨ SCoh≃ (Susp T) (canonical-type-susp-lem d T) (id-label-susp-full T) refl≃sty ⟩
+  < canonical-comp (suc d) (Susp T) >stm ∎
   where
     open Reasoning stm-setoid
 
 canonical-label-susp-lem : (S : Tree m)
                          → .⦃ _ : is-linear S ⦄
                          → (T : Tree n)
-                         → canonical-label (susp S) (susp T) ≃l susp-label-full (canonical-label S T)
+                         → canonical-label (Susp S) (Susp T) ≃l susp-label-full (canonical-label S T)
 canonical-label-susp-lem S ⦃ lin ⦄ T = begin
-  < canonical-label (susp S) (susp T) >l
-    ≈⟨ stm-to-label-≃ (susp S) refl≃stm
+  < canonical-label (Susp S) (Susp T) >l
+    ≈⟨ stm-to-label-≃ (Susp S) refl≃stm
                       (sym≃sty (canonical-type-susp-lem (tree-dim S) T)) ⦃ inst ⦄ ⟩
-  < stm-to-label (susp S)
+  < stm-to-label (Susp S)
                  (susp-stm (canonical-comp′ (tree-dim S) T))
                  (susp-sty (canonical-type (tree-dim S) T))
                  ⦃ trans≃n inst (≡-to-≃n (sym (susp-sty-dim (canonical-type (tree-dim S) T)))) ⦄
@@ -409,7 +409,7 @@ canonical-label-susp-lem S ⦃ lin ⦄ T = begin
     ≈⟨ stm-to-label-susp S (canonical-comp′ (tree-dim S) T) (canonical-type (tree-dim S) T) ⟩
   < susp-label-full (canonical-label S T) >l ∎
   where
-    open Reasoning (label-setoid (susp S))
+    open Reasoning (label-setoid (Susp S))
 
 canonical-comp′-compat : (d : ℕ) → (T : Tree n) → canonical-comp′ d T ≃stm canonical-comp d T
 canonical-comp′-compat zero T = refl≃stm
@@ -426,14 +426,14 @@ canonical-comp′-compat (suc d) T@(Join _ (Join _ _)) = refl≃stm
 
 disc-sty-is-canonical : (S : Tree n) → .⦃ _ : is-linear S ⦄ → disc-sty S ≃sty canonical-type (tree-dim S) S
 disc-sty-is-canonical Sing = refl≃sty
-disc-sty-is-canonical (susp S) = begin
-  < disc-sty (susp S) >sty
+disc-sty-is-canonical (Susp S) = begin
+  < disc-sty (Susp S) >sty
     ≈⟨ map-sty-ext-susp-compat (disc-sty S) ⟩
   < susp-sty (disc-sty S) >sty
     ≈⟨ susp-sty-≃ (disc-sty-is-canonical S) ⟩
   < susp-sty (canonical-type (tree-dim S) S) >sty
     ≈⟨ canonical-type-susp-lem (tree-dim S) S ⟩
-  < canonical-type (tree-dim (susp S)) (susp S) >sty ∎
+  < canonical-type (tree-dim (Susp S)) (Susp S) >sty ∎
   where
     open Reasoning sty-setoid
 
@@ -455,7 +455,7 @@ identity-stm-is-canonical S = SCoh≃ S (SArr≃ (lem false) (disc-sty-is-canoni
       < canonical-stm (tree-dim S) (tree-bd (tree-dim S) S) >>= tree-inc-label (tree-dim S) S b >stm ∎
 
 
--- lfltu-susp : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → (label-from-linear-tree-canonical S (susp-tree T) (suc d)) ≃l (SExt {T = Sing} ∘ label-from-linear-tree-canonical S T d)
+-- lfltu-Susp : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → (d : ℕ) → (label-from-linear-tree-canonical S (susp-tree T) (suc d)) ≃l (SExt {T = Sing} ∘ label-from-linear-tree-canonical S T d)
 -- lfltu-susp Sing T d .get PHere = refl≃stm
 -- lfltu-susp (Join S Sing) T d .get PHere = begin
 --   < canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) false) >stm

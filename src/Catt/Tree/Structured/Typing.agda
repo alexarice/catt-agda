@@ -259,9 +259,9 @@ extend-disc-label-≈ : {L M : Label X S}
 extend-disc-label-≈ {S = Sing} p q r .get PHere = p .get PHere
 extend-disc-label-≈ {S = Sing} p q r .get (PExt PHere) = r
 extend-disc-label-≈ {S = Sing} p q r .get (PShift PHere) = q
-extend-disc-label-≈ {S = susp S} p q r .get PHere = p .get PHere
-extend-disc-label-≈ {S = susp S} p q r .get (PExt Z) = extend-disc-label-≈ [ (λ Q → p .get (PExt Q)) ] q r .get Z
-extend-disc-label-≈ {S = susp S} p q r .get (PShift PHere) = p .get (PShift PHere)
+extend-disc-label-≈ {S = Susp S} p q r .get PHere = p .get PHere
+extend-disc-label-≈ {S = Susp S} p q r .get (PExt Z) = extend-disc-label-≈ [ (λ Q → p .get (PExt Q)) ] q r .get Z
+extend-disc-label-≈ {S = Susp S} p q r .get (PShift PHere) = p .get (PShift PHere)
 
 stm-to-label-≈ : (S : Tree n)
                → .⦃ _ : is-linear S ⦄
@@ -273,5 +273,5 @@ stm-to-label-≈ : (S : Tree n)
                → .⦃ _ : has-dim (tree-dim S) As ⦄
                → stm-to-label S a As ≈[ Γ ]l stm-to-label S b Bs ⦃ trans≃n it (≡-to-≃n (sty-dim-≈ q)) ⦄
 stm-to-label-≈ Sing p q .get Z = p
-stm-to-label-≈ (susp S) p {SArr s As t} {SArr s₁ Bs t₁} q
+stm-to-label-≈ (Susp S) p {SArr s As t} {SArr s₁ Bs t₁} q
   = extend-disc-label-≈ (stm-to-label-≈ S (sty-src-≈ q) (sty-base-≈ q)) (sty-tgt-≈ q) p

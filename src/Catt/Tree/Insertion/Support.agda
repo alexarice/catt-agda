@@ -56,21 +56,21 @@ exterior-sub-full : (S : Tree n)
                   → DCT (FVLabel (exterior-label S p T)) ≡ tFull
 exterior-sub-full (Join S₁ S₂) BPHere T
   = label-between-connect-trees-full
-      (replace-label (canonical-label (susp S₁) T) SHere)
+      (replace-label (canonical-label (Susp S₁) T) SHere)
       SPath
-      (reflexive≈stm (canonical-label-last (susp S₁) T))
+      (reflexive≈stm (canonical-label-last (Susp S₁) T))
       refl≈stm
       lem
       (trans (cong DCT (id-label-full S₂)) DCT-full)
   where
     open ≡-Reasoning
 
-    lem : DCT (FVLabel (replace-label (canonical-label (susp S₁) T) SHere)) ≡ tFull
+    lem : DCT (FVLabel (replace-label (canonical-label (Susp S₁) T) SHere)) ≡ tFull
     lem = begin
-      DCT (FVLabel (replace-label (canonical-label (susp S₁) T) SHere))
-        ≡⟨ replace-label-supp (canonical-label (susp S₁) T) SHere (reflexive≈stm (sym≃stm (canonical-label-fst (susp S₁) T))) ⟩
-      DCT (FVSTm SHere) ∪m DCT (FVLabel (canonical-label (susp S₁) T))
-        ≡⟨ cong (DCT (FVSTm SHere) ∪m_) (canonical-label-full (susp S₁) T) ⟩
+      DCT (FVLabel (replace-label (canonical-label (Susp S₁) T) SHere))
+        ≡⟨ replace-label-supp (canonical-label (Susp S₁) T) SHere (reflexive≈stm (sym≃stm (canonical-label-fst (Susp S₁) T))) ⟩
+      DCT (FVSTm SHere) ∪m DCT (FVLabel (canonical-label (Susp S₁) T))
+        ≡⟨ cong (DCT (FVSTm SHere) ∪m_) (canonical-label-full (Susp S₁) T) ⟩
       DCT (FVSTm SHere) ∪m tFull
         ≡⟨ ∪t-right-zero (DCT (fromPath PHere)) ⟩
       tFull ∎

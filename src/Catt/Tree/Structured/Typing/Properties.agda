@@ -46,7 +46,7 @@ open import Catt.Tree.Structured.Typing rule
 ≈SPath : P ≃p Q → SPath P ≃stm SPath Q
 ≈SPath p = [ path-to-term-≃ p ]
 
-susp-sty-tree-≈ : {As Bs : STy (someTree S)} → As ≈[ tree-to-ctx S ]sty Bs → susp-sty As ≈[ tree-to-ctx (susp-tree S) ]sty susp-sty Bs
+susp-sty-tree-≈ : {As Bs : STy (someTree S)} → As ≈[ tree-to-ctx S ]sty Bs → susp-sty As ≈[ tree-to-ctx (Susp S) ]sty susp-sty Bs
 susp-sty-tree-≈ {As = S⋆} {Bs = S⋆} p = refl≈sty
 susp-sty-tree-≈ {As = SArr s As t} {Bs = SArr s′ Bs t′} [ Arr≈ x p x′ ] = ≈SArr (≈SExt [ x ]) (susp-sty-tree-≈ [ p ]) (≈SExt [ x′ ])
 
@@ -110,9 +110,9 @@ label-equality-to-sub {S = Join S T} L M [ p ] q
 ≈SCoh S {As} {Bs} p {L} {M} q {SArr s Cs t} {SArr s′ Cs′ t′} r = begin
   SCoh S As (L ,, SArr s Cs t)
     ≈⟨ reflexive≈stm (SCoh-unrestrict S As (L ,, SArr s Cs t)) ⟩
-  SCoh (susp-tree S) (susp-sty As) (unrestrict-label (L ,, SArr s Cs t) ,, Cs)
-    ≈⟨ ≈SCoh (susp-tree S) (susp-sty-tree-≈ p) (unrestrict-label-≈ q r) {Cs} {Cs′} (sty-base-≈ r) ⟩
-  SCoh (susp-tree S) (susp-sty Bs)
+  SCoh (Susp S) (susp-sty As) (unrestrict-label (L ,, SArr s Cs t) ,, Cs)
+    ≈⟨ ≈SCoh (Susp S) (susp-sty-tree-≈ p) (unrestrict-label-≈ q r) {Cs} {Cs′} (sty-base-≈ r) ⟩
+  SCoh (Susp S) (susp-sty Bs)
     (unrestrict-label (M ,, SArr s′ Cs′ t′) ,, Cs′)
     ≈˘⟨ reflexive≈stm (SCoh-unrestrict S Bs (M ,, SArr s′ Cs′ t′)) ⟩
   SCoh S Bs (M ,, SArr s′ Cs′ t′) ∎

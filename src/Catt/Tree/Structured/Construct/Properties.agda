@@ -304,7 +304,7 @@ unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q 
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get (PExt Z) = p .get Z
 unrestrict-label-≃ (L ,, SArr s As t) (M ,, SArr s′ Bs t′) p [ Arr≃ x q y ] .get (PShift PHere) = [ y ]
 
-unrestrict-label-prop : (M : Label-WT X (susp-tree S)) → ap M ≃l unrestrict-label (label₁ M)
+unrestrict-label-prop : (M : Label-WT X (Susp S)) → ap M ≃l unrestrict-label (label₁ M)
 unrestrict-label-prop M .get PHere = refl≃stm
 unrestrict-label-prop M .get (PExt Z) = refl≃stm
 unrestrict-label-prop M .get (PShift PHere) = refl≃stm
@@ -338,7 +338,7 @@ extend-disc-label-max : (L : Label X S)
                       → .⦃ _ : is-linear S ⦄
                       → (t : STm X)
                       → (a : STm X)
-                      → (Z : Path (susp-tree S))
+                      → (Z : Path (Susp S))
                       → .⦃ is-maximal Z ⦄
                       → extend-disc-label L t a Z ≃stm a
 extend-disc-label-max {S = Sing} L t a (PExt PHere) = refl≃stm
@@ -351,13 +351,13 @@ extend-disc-label-disc-sty : (L : Label X S)
                             → (t : STm X)
                             → (a : STm X)
                             → (As : STy X)
-                            → disc-sty (susp-tree S) >>=′ (extend-disc-label L t a ,, As)
+                            → disc-sty (Susp S) >>=′ (extend-disc-label L t a ,, As)
                               ≃sty SArr (L (is-linear-max-path S)) (disc-sty S >>=′ (L ,, As)) t
 extend-disc-label-disc-sty {S = Sing} L t a As = refl≃sty
 extend-disc-label-disc-sty {S = Join S Sing} L t a As = begin
-  < disc-sty (susp-tree (susp-tree S)) >>=′ (extend-disc-label L t a ,, As) >sty
-    ≈⟨ map-sty-ext-label (disc-sty (susp-tree S)) (extend-disc-label L t a ,, As) ⟩
-  < disc-sty (susp-tree S) >>=′ (extend-disc-label (L ∘ PExt) t a ,, SArr (L PHere) As (L (PShift PHere))) >sty
+  < disc-sty (Susp (Susp S)) >>=′ (extend-disc-label L t a ,, As) >sty
+    ≈⟨ map-sty-ext-label (disc-sty (Susp S)) (extend-disc-label L t a ,, As) ⟩
+  < disc-sty (Susp S) >>=′ (extend-disc-label (L ∘ PExt) t a ,, SArr (L PHere) As (L (PShift PHere))) >sty
     ≈⟨ extend-disc-label-disc-sty (L ∘ PExt) t a (SArr (L PHere) As (L (PShift PHere))) ⟩
   < SArr (L (PExt (is-linear-max-path S)))
          (disc-sty S >>=′ (L ∘ PExt ,, SArr (L PHere) As (L (PShift PHere))))
@@ -365,8 +365,8 @@ extend-disc-label-disc-sty {S = Join S Sing} L t a As = begin
     ≈˘⟨ SArr≃ refl≃stm
               (map-sty-ext-label (disc-sty S) (L ,, As))
               refl≃stm ⟩
-  < SArr (L (is-linear-max-path (susp-tree S)))
-         (disc-sty (susp-tree S) >>=′ (L ,, As))
+  < SArr (L (is-linear-max-path (Susp S)))
+         (disc-sty (Susp S) >>=′ (L ,, As))
          t >sty ∎
   where
     open Reasoning sty-setoid
@@ -390,7 +390,7 @@ stm-to-label-disc-sty : (S : Tree n)
                       → disc-sty S >>=′ (stm-to-label S a As ,, S⋆) ≃sty As
 stm-to-label-disc-sty Sing a S⋆ = refl≃sty
 stm-to-label-disc-sty (Join S Sing) a (SArr s As t) = begin
-  < disc-sty (susp-tree S) >>=′ (extend-disc-label (stm-to-label S s As) t a ,, S⋆) >sty
+  < disc-sty (Susp S) >>=′ (extend-disc-label (stm-to-label S s As) t a ,, S⋆) >sty
     ≈⟨ extend-disc-label-disc-sty (stm-to-label S s As) t a S⋆ ⟩
   < SArr (stm-to-label S s As (is-linear-max-path S))
          (disc-sty S >>=′ (stm-to-label S s As ,, S⋆))
@@ -482,9 +482,9 @@ sty-to-coh-≃ {S = S} {T = T} p [ q ] = [ (Coh≃ (tree-to-ctx-≃ p) q lem) ]
 
 sty-to-coh-map-ext : (As : STy (someTree S)) → sty-to-coh (map-sty-ext {T = Sing} As) ≃stm SExt {T = Sing} (sty-to-coh As)
 sty-to-coh-map-ext {S = S} As = begin
-  < SCoh (susp S) (map-sty-ext As) (id-label-wt (susp S)) >stm
-    ≈⟨ SCoh≃ (susp S) (map-sty-ext-susp-compat As) (sym≃l (id-label-susp-full S)) refl≃sty ⟩
-  < SCoh (susp S) (susp-sty As) (susp-label-full (id-label S) ,, S⋆) >stm
+  < SCoh (Susp S) (map-sty-ext As) (id-label-wt (Susp S)) >stm
+    ≈⟨ SCoh≃ (Susp S) (map-sty-ext-susp-compat As) (sym≃l (id-label-susp-full S)) refl≃sty ⟩
+  < SCoh (Susp S) (susp-sty As) (susp-label-full (id-label S) ,, S⋆) >stm
     ≈˘⟨ SCoh-unrestrict S As (susp-label (id-label-wt S)) ⟩
   < SCoh S As (susp-label (id-label-wt S)) >stm
     ≈˘⟨ susp-stm-SCoh S As (id-label-wt S) ⟩
@@ -503,7 +503,7 @@ map-sty-ext-dim (SArr s As t) = cong suc (map-sty-ext-dim As)
 
 disc-sty-dim : (T : Tree n) → .⦃ _ : is-linear T ⦄ → sty-dim (disc-sty T) ≡ tree-dim T
 disc-sty-dim Sing = refl
-disc-sty-dim (susp T) = trans (map-sty-ext-dim (disc-sty T)) (cong suc (disc-sty-dim T))
+disc-sty-dim (Susp T) = trans (map-sty-ext-dim (disc-sty T)) (cong suc (disc-sty-dim T))
 
 map-sty-ext-to-type : (As : STy (someTree S)) → sty-to-type (map-sty-ext {T = Sing} As) ≃ty susp-ty (sty-to-type As)
 map-sty-ext-to-type S⋆ = refl≃ty
@@ -511,7 +511,7 @@ map-sty-ext-to-type (SArr s As t) = Arr≃ (id-on-tm (susp-tm (stm-to-term s))) 
 
 disc-sty-to-type : (S : Tree n) → .⦃ _ : is-linear S ⦄ → sty-to-type (disc-sty S) ≃ty lift-ty (sphere-type (tree-dim S))
 disc-sty-to-type Sing = refl≃ty
-disc-sty-to-type (susp S) = begin
+disc-sty-to-type (Susp S) = begin
   < sty-to-type (map-sty-ext (disc-sty S)) >ty
     ≈⟨ map-sty-ext-to-type (disc-sty S) ⟩
   < susp-ty (sty-to-type (disc-sty S)) >ty
@@ -550,7 +550,7 @@ sty-dim-resuspend : (l : ℕ)
                   → (As : STy (someTree (chop-trunk l T)))
                   → sty-dim (resuspend l As) ≡ l + sty-dim As
 sty-dim-resuspend zero T As = refl
-sty-dim-resuspend (suc l) (susp T) As = begin
+sty-dim-resuspend (suc l) (Susp T) As = begin
   sty-dim (map-sty-ext (resuspend l As))
     ≡⟨ map-sty-ext-dim (resuspend l As) ⟩
   suc (sty-dim (resuspend l As))
@@ -571,10 +571,10 @@ extend-disc-label-≃ : {L : Label X S}
 extend-disc-label-≃ {S = Sing} p q r .get PHere = p .get PHere
 extend-disc-label-≃ {S = Sing} p q r .get (PExt PHere) = r
 extend-disc-label-≃ {S = Sing} p q r .get (PShift PHere) = q
-extend-disc-label-≃ {S = susp S} p q r .get PHere = p .get PHere
-extend-disc-label-≃ {S = susp S} p q r .get (PExt Z)
+extend-disc-label-≃ {S = Susp S} p q r .get PHere = p .get PHere
+extend-disc-label-≃ {S = Susp S} p q r .get (PExt Z)
   = extend-disc-label-≃ [ (λ P → p .get (PExt P)) ] q r .get Z
-extend-disc-label-≃ {S = susp S} p q r .get (PShift PHere) = p .get (PShift PHere)
+extend-disc-label-≃ {S = Susp S} p q r .get (PShift PHere) = p .get (PShift PHere)
 
 stm-to-label-≃ : {X : MaybeTree m}
                → {Y : MaybeTree m′}
@@ -589,7 +589,7 @@ stm-to-label-≃ : {X : MaybeTree m}
                → .⦃ _ : has-dim (tree-dim S) As ⦄
                → stm-to-label S a As ≃l stm-to-label S b Bs ⦃ trans≃n it (≡-to-≃n (sty-dim-≃ q)) ⦄
 stm-to-label-≃ Sing p q .get Z = p
-stm-to-label-≃ (susp S) p {SArr _ _ _} {SArr _ _ _} q
+stm-to-label-≃ (Susp S) p {SArr _ _ _} {SArr _ _ _} q
   = extend-disc-label-≃ (stm-to-label-≃ S (SArr≃-proj₁ q) (SArr≃-proj₂ q)) (SArr≃-proj₃ q) p
 
 extend-disc-label-susp : (L : Label X S)
@@ -602,10 +602,10 @@ extend-disc-label-susp : (L : Label X S)
 extend-disc-label-susp {S = Sing} L t a .get PHere = refl≃stm
 extend-disc-label-susp {S = Sing} L t a .get (PExt PHere) = refl≃stm
 extend-disc-label-susp {S = Sing} L t a .get (PShift PHere) = refl≃stm
-extend-disc-label-susp {S = susp S} L t a .get PHere = refl≃stm
-extend-disc-label-susp {S = susp S} L t a .get (PExt Z)
+extend-disc-label-susp {S = Susp S} L t a .get PHere = refl≃stm
+extend-disc-label-susp {S = Susp S} L t a .get (PExt Z)
   = extend-disc-label-susp (L ∘ PExt) t a .get Z
-extend-disc-label-susp {S = susp S} L t a .get (PShift PHere) = refl≃stm
+extend-disc-label-susp {S = Susp S} L t a .get (PShift PHere) = refl≃stm
 
 extend-disc-label-susp-full : (L : Label X S)
                             → .⦃ _ : is-linear S ⦄
@@ -624,16 +624,16 @@ stm-to-label-susp : (S : Tree n)
                   → (a : STm X)
                   → (As : STy X)
                   → .⦃ _ : has-dim (tree-dim S) As ⦄
-                  → stm-to-label (susp S) (susp-stm a) (susp-sty As)
+                  → stm-to-label (Susp S) (susp-stm a) (susp-sty As)
                     ⦃ trans≃n inst (≡-to-≃n (sym (susp-sty-dim As))) ⦄
                     ≃l
                     susp-label-full (stm-to-label S a As)
 stm-to-label-susp Sing a S⋆ .get PHere = refl≃stm
 stm-to-label-susp Sing a S⋆ .get (PExt PHere) = refl≃stm
 stm-to-label-susp Sing a S⋆ .get (PShift PHere) = refl≃stm
-stm-to-label-susp (susp S) a (SArr s As t) = begin
+stm-to-label-susp (Susp S) a (SArr s As t) = begin
   < extend-disc-label
-      (stm-to-label (susp S) (susp-stm s) (susp-sty As) ⦃ _ ⦄)
+      (stm-to-label (Susp S) (susp-stm s) (susp-sty As) ⦃ _ ⦄)
       (susp-stm t)
       (susp-stm a) >l
     ≈⟨ extend-disc-label-≃ (stm-to-label-susp S s As) refl≃stm refl≃stm ⟩
@@ -643,4 +643,4 @@ stm-to-label-susp (susp S) a (SArr s As t) = begin
     ≈⟨ extend-disc-label-susp-full (stm-to-label S s As) t a ⟩
   < susp-label-full (extend-disc-label (stm-to-label S s As) t a) >l ∎
   where
-    open Reasoning (label-setoid (susp (susp S)))
+    open Reasoning (label-setoid (Susp (Susp S)))

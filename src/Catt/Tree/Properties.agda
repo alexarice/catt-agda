@@ -107,8 +107,8 @@ tree′-setoid = record { Carrier = TREE
     γ Sing≃ = refl
     γ (Join≃ q r) = trans (subst-Tree (≃-to-same-n q) (≃-to-same-n r) _ _) (cong₂ Join (γ q) (γ r))
 
-susp-tree-≃ : S ≃ T → susp-tree S ≃ susp-tree T
-susp-tree-≃ p = Join≃ p Sing≃
+Susp-≃ : S ≃ T → Susp S ≃ Susp T
+Susp-≃ p = Join≃ p Sing≃
 
 ≃-dec : (S : Tree n) → (T : Tree m) → Dec (S ≃ T)
 ≃-dec Sing Sing = yes Sing≃
@@ -331,20 +331,20 @@ susp-tree-n-linear (suc n) S = inst ⦃ susp-tree-n-linear n S ⦄
 
 has-trunk-height-≤ : (m ≤ n) → (T : Tree l) → ⦃ has-trunk-height n T ⦄ → has-trunk-height m T
 has-trunk-height-≤ z≤n T = tt
-has-trunk-height-≤ (s≤s p) (susp T) = inst ⦃ has-trunk-height-≤ p T ⦄
+has-trunk-height-≤ (s≤s p) (Susp T) = inst ⦃ has-trunk-height-≤ p T ⦄
 
 has-trunk-height-n-disc : (m ≤ n) → has-trunk-height m (n-disc n)
 has-trunk-height-n-disc {n = n} p = has-trunk-height-≤ (≤-trans p (≤-reflexive (sym (≃n-to-≡ (tree-dim-n-disc {n = n}))))) (n-disc n)
 
 has-trunk-height-prop : (d : ℕ) → (T : Tree n) → .⦃ has-trunk-height d T ⦄ → d ≤ trunk-height T
 has-trunk-height-prop zero T = z≤n
-has-trunk-height-prop (suc d) (susp T) = s≤s (has-trunk-height-prop d T)
+has-trunk-height-prop (suc d) (Susp T) = s≤s (has-trunk-height-prop d T)
 
 chop-trunk-linear : (T : Tree n) → ⦃ _ : is-linear T ⦄ → {l : ℕ} → (p : l ≤ tree-dim T) → is-linear (chop-trunk l T ⦃ has-trunk-height-≤ p T ⦄)
 chop-trunk-linear Sing z≤n = it
-chop-trunk-linear (susp T) z≤n = inst
-chop-trunk-linear (susp T) (s≤s p) = chop-trunk-linear T p
+chop-trunk-linear (Susp T) z≤n = inst
+chop-trunk-linear (Susp T) (s≤s p) = chop-trunk-linear T p
 
 chop-trunk-dim : (l : ℕ) → (T : Tree n) → .⦃ _ : has-trunk-height l T ⦄ → tree-dim (chop-trunk l T) ≡ tree-dim T ∸ l
 chop-trunk-dim zero T = refl
-chop-trunk-dim (suc l) (susp T) = chop-trunk-dim l T
+chop-trunk-dim (suc l) (Susp T) = chop-trunk-dim l T

@@ -120,7 +120,7 @@ module Conditions (ins : HasInsertion) where
                                (As >>=′ (exterior-label S P T ,, S⋆))
                                (label-from-insertion S P T L M ,, S⋆))) ∎
     where
-      instance .x : has-trunk-height (suc l) (susp T)
+      instance .x : has-trunk-height (suc l) (Susp T)
       x = inst
 
       l1 : susp-label-full L (PExt (branching-path-to-path P))
@@ -134,17 +134,17 @@ module Conditions (ins : HasInsertion) where
         < SExt (canonical-comp′ (height-of-branching P) T) >>= (susp-label-full M ,, S⋆) >stm ∎
         where open Reasoning stm-setoid
 
-      l4 : exterior-label (susp S) (BPExt P) (susp T) ≃l
+      l4 : exterior-label (Susp S) (BPExt P) (Susp T) ≃l
               susp-label-full (exterior-label S P T)
       l4 .get PHere = refl≃stm
       l4 .get (PExt Z) = refl≃stm
       l4 .get (PShift PHere) = refl≃stm
 
-      l2 : susp-sty As >>=′ (exterior-label (susp S) (BPExt P) (susp T) ,, S⋆)
+      l2 : susp-sty As >>=′ (exterior-label (Susp S) (BPExt P) (Susp T) ,, S⋆)
            ≃sty
            susp-sty (As >>=′ (exterior-label S P T ,, S⋆))
       l2 = begin
-        < susp-sty As >>=′ (exterior-label (susp-tree S) (BPExt P) (susp T) ,, S⋆) >sty
+        < susp-sty As >>=′ (exterior-label (Susp S) (BPExt P) (Susp T) ,, S⋆) >sty
           ≈⟨ >>=′-≃ (refl≃sty {A = susp-sty As}) l4 refl≃sty ⟩
         < susp-sty As >>=′ (susp-label-full (exterior-label S P T) ,, S⋆) >sty
           ≈˘⟨ susp-sty-functorial As (exterior-label S P T) ⟩
@@ -152,7 +152,7 @@ module Conditions (ins : HasInsertion) where
         where
           open Reasoning sty-setoid
 
-      l3 : ap (label-from-insertion (susp S) (BPExt P) (susp T) ⦃ _ ⦄ (susp-label-full L) (susp-label-full M) ,, S⋆)
+      l3 : ap (label-from-insertion (Susp S) (BPExt P) (Susp T) ⦃ _ ⦄ (susp-label-full L) (susp-label-full M) ,, S⋆)
            ≃l
            ap (susp-label-full (label-from-insertion S P T L M) ,, S⋆)
       l3 .get PHere = refl≃stm
@@ -167,7 +167,7 @@ module Conditions (ins : HasInsertion) where
       lem = begin
         SCoh S As (susp-label (L ,, S⋆))
           ≈⟨ reflexive≈stm (SCoh-unrestrict S As (susp-label (L ,, S⋆))) ⟩
-        SCoh (susp-tree S) (susp-sty As) (susp-label-full L ,, S⋆)
+        SCoh (Susp S) (susp-sty As) (susp-label-full L ,, S⋆)
           ≈⟨ ins (susp-sty As)
                  (susp-label-full L)
                  (BPExt P)
@@ -177,11 +177,11 @@ module Conditions (ins : HasInsertion) where
                                           (trans≃tm (sym≃tm (susp-stm-to-term (SCoh S As (L ,, S⋆))))
                                                     (SCoh-unrestrict S As (susp-label (L ,, S⋆)) .get) )
                                           (sym≃ty (to-sty-to-type (susp-ty C)))) ] ⟩
-        SCoh (susp-tree (insertion-tree S P T ⦃ _ ⦄))
-             (susp-sty As >>=′ (exterior-label (susp-tree S) (BPExt P) (susp T) ⦃ _ ⦄ ,, S⋆))
-             (label-from-insertion (susp S) (BPExt P) (susp T) ⦃ it ⦄ (susp-label-full L) (susp-label-full M) ,, S⋆)
-          ≈⟨ reflexive≈stm (SCoh≃ (susp (insertion-tree S P T ⦃ it ⦄)) l2 l3 refl≃sty) ⟩
-        SCoh (susp-tree (insertion-tree S P T))
+        SCoh (Susp (insertion-tree S P T ⦃ _ ⦄))
+             (susp-sty As >>=′ (exterior-label (Susp S) (BPExt P) (Susp T) ⦃ _ ⦄ ,, S⋆))
+             (label-from-insertion (Susp S) (BPExt P) (Susp T) ⦃ it ⦄ (susp-label-full L) (susp-label-full M) ,, S⋆)
+          ≈⟨ reflexive≈stm (SCoh≃ (Susp (insertion-tree S P T ⦃ it ⦄)) l2 l3 refl≃sty) ⟩
+        SCoh (Susp (insertion-tree S P T))
              (susp-sty (As >>=′ (exterior-label S P T ,, S⋆)))
              (susp-label-full (label-from-insertion S P T L M) ,, S⋆)
           ≈˘⟨ reflexive≈stm (SCoh-unrestrict (insertion-tree S P T)

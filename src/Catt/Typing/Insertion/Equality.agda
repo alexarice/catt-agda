@@ -120,7 +120,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
                                ●l (exterior-label (prune-tree S p) (pruned-bp S p q) T ,, S⋆)
                              ≈[ (tree-to-ctx (insertion-tree (prune-tree S p) (pruned-bp S p q) T)) ]lm
                              ≃-label (sym≃′ (insertion-tree-pruned-bp S p T q)) (exterior-label S p T)
-  pruned-bp-exterior-label (Join S₁ S₂) (BPExt p) (susp T) q x .get (PExt Z) = begin
+  pruned-bp-exterior-label (Join S₁ S₂) (BPExt p) (Susp T) q x .get (PExt Z) = begin
     prune-label S₁ p Z >>=
           (SExt ∘ exterior-label (prune-tree S₁ p) (pruned-bp S₁ p _) T
           ,, SArr (SPath PHere) S⋆ (SShift (SPath PHere)))
@@ -134,7 +134,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
     SExt (≃-label (sym≃′ (insertion-tree-pruned-bp S₁ p T _)) (exterior-label S₁ p T) Z) ∎
     where
       open Reasoning stm-setoid-≈
-  pruned-bp-exterior-label (Join S₁ S₂) (BPExt p) (susp T) q x .get (PShift Z) = refl≈stm
+  pruned-bp-exterior-label (Join S₁ S₂) (BPExt p) (Susp T) q x .get (PShift Z) = refl≈stm
   pruned-bp-exterior-label (Join S₁ S₂) (BPShift p) T q x .get (PExt Z) = refl≈stm
   pruned-bp-exterior-label (Join S₁ S₂) (BPShift p) T q x .get (PShift Z) = begin
     (prune-label S₂ p Z
@@ -150,25 +150,25 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
                     (exterior-label S₂ p T) Z) ∎
     where
       open Reasoning stm-setoid-≈
-  pruned-bp-exterior-label (Join (susp S₁) S₂) BPHere T q x .get (PExt Z) = begin
-    canonical-label (susp (susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z)
+  pruned-bp-exterior-label (Join (Susp S₁) S₂) BPHere T q x .get (PExt Z) = begin
+    canonical-label (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z)
       >>= connect-tree-inc-left (Join (n-disc (tree-dim S₁)) Sing) S₂
       >>= (connect-label′ (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
                             ●l (connect-tree-inc-left T S₂))
                           (ap (connect-tree-inc-right T S₂)) ,, S⋆)
       ≈⟨ reflexive≈stm (>>=-≃ (>>=-≃ l1 refl≃l refl≃sty) refl≃l refl≃sty) ⟩
     identity-stm (n-disc (suc (tree-dim S₁)))
-      >>= connect-tree-inc-left (susp (n-disc (tree-dim S₁))) S₂
+      >>= connect-tree-inc-left (Susp (n-disc (tree-dim S₁))) S₂
       >>= (connect-label′ (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
                             ●l (connect-tree-inc-left T S₂))
                           (ap (connect-tree-inc-right T S₂)) ,, S⋆)
       ≈⟨ reflexive≈stm (>>=-assoc (identity-stm (n-disc (suc (tree-dim S₁))))
-                                  (connect-tree-inc-left (susp (n-disc (tree-dim S₁))) S₂)
+                                  (connect-tree-inc-left (Susp (n-disc (tree-dim S₁))) S₂)
                                   (connect-label′ (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
                                                     ●l (connect-tree-inc-left T S₂))
                                                   (ap (connect-tree-inc-right T S₂)) ,, S⋆)) ⟩
     identity-stm (n-disc (suc (tree-dim S₁)))
-      >>= connect-tree-inc-left (susp (n-disc (tree-dim S₁))) S₂
+      >>= connect-tree-inc-left (Susp (n-disc (tree-dim S₁))) S₂
           ●lt (connect-label′ (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
                                 ●l (connect-tree-inc-left T S₂))
                               (ap (connect-tree-inc-right T S₂)) ,, S⋆)
@@ -199,16 +199,16 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
     canonical-comp (2+ (tree-dim S₁)) T >>= connect-tree-inc-left T S₂
       ≈˘⟨ reflexive≈stm (>>=-≃ (canonical-comp′-compat (2+ (tree-dim S₁)) T) refl≃l refl≃sty) ⟩
     canonical-comp′ (2+ (tree-dim S₁)) T >>= connect-tree-inc-left T S₂
-      ≈˘⟨ reflexive≈stm (>>=-≃ (canonical-label-max (susp (susp S₁)) T (PExt Z)) refl≃l refl≃sty) ⟩
-    canonical-label (susp (susp S₁)) T (PExt Z) >>= connect-tree-inc-left T S₂ ∎
+      ≈˘⟨ reflexive≈stm (>>=-≃ (canonical-label-max (Susp (Susp S₁)) T (PExt Z)) refl≃l refl≃sty) ⟩
+    canonical-label (Susp (Susp S₁)) T (PExt Z) >>= connect-tree-inc-left T S₂ ∎
     where
-      l1 : canonical-label (susp (susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z)
+      l1 : canonical-label (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z)
            ≃stm
            identity-stm (n-disc (suc (tree-dim S₁)))
       l1 = begin
-        < canonical-label (susp (susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z) >stm
-          ≈⟨ canonical-label-max (susp (susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z) ⟩
-        < canonical-comp′ (tree-dim (susp (susp S₁))) (n-disc (suc (tree-dim S₁))) >stm
+        < canonical-label (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z) >stm
+          ≈⟨ canonical-label-max (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z) ⟩
+        < canonical-comp′ (tree-dim (Susp (Susp S₁))) (n-disc (suc (tree-dim S₁))) >stm
           ≈⟨ canonical-comp′-compat (2+ (tree-dim S₁)) (n-disc (suc (tree-dim S₁))) ⟩
         < canonical-comp (2+ (tree-dim S₁)) (n-disc (suc (tree-dim S₁))) >stm
           ≈˘⟨ canonical-comp-≃ (≃n-to-≡ (tree-dim-n-disc {suc (suc (tree-dim S₁))})) refl≃ ⟩
@@ -242,12 +242,12 @@ module _ (disc-rem : HasDiscRemoval) where
                   ≈[ tree-to-ctx (insertion-tree S p (n-disc (height-of-branching p)) ⦃ _ ⦄) ]lm
                   ≃-label (sym≃′ (insertion-disc S p)) (id-label S)
   exterior-disc (Join S T) BPHere .get (PExt Z) = begin
-    canonical-label (susp S) (n-disc (suc (tree-dim S))) (PExt Z)
+    canonical-label (Susp S) (n-disc (suc (tree-dim S))) (PExt Z)
       >>= connect-tree-inc-left (n-disc (suc (tree-dim S))) T
-      ≈⟨ reflexive≈stm (>>=-≃ (canonical-label-max (susp S) (n-disc (suc (tree-dim S))) (PExt Z))
+      ≈⟨ reflexive≈stm (>>=-≃ (canonical-label-max (Susp S) (n-disc (suc (tree-dim S))) (PExt Z))
                               refl≃l
                               refl≃sty) ⟩
-    canonical-comp′ (tree-dim (susp S)) (n-disc (suc (tree-dim S)))
+    canonical-comp′ (tree-dim (Susp S)) (n-disc (suc (tree-dim S)))
       >>= connect-tree-inc-left (n-disc (suc (tree-dim S))) T
       ≈˘⟨ reflexive≈stm (>>=-≃ (canonical-comp′-≃ (≃n-to-≡ (tree-dim-n-disc {n = suc (tree-dim S)}))
                                                   (refl≃ {T = n-disc (suc (tree-dim S))}))
@@ -264,11 +264,11 @@ module _ (disc-rem : HasDiscRemoval) where
       ≈˘⟨ reflexive≈stm (>>=-≃ (disc-stm-is-canonical (n-disc (suc (tree-dim S))))
                                (refl≃l {L = ap (connect-tree-inc-left (n-disc (suc (tree-dim S))) T)})
                                refl≃sty) ⟩
-    disc-stm (n-disc (suc (tree-dim S))) >>= connect-tree-inc-left (susp (n-disc (tree-dim S))) T
+    disc-stm (n-disc (suc (tree-dim S))) >>= connect-tree-inc-left (Susp (n-disc (tree-dim S))) T
       ≈⟨ disc-rem-stm (n-disc (suc (tree-dim S)))
-                      (ap (connect-tree-inc-left (susp (n-disc (tree-dim S))) T))
+                      (ap (connect-tree-inc-left (Susp (n-disc (tree-dim S))) T))
                       (connect-tree-inc-left-Ty (n-disc (suc (tree-dim S))) T) ⟩
-    ap (connect-tree-inc-left (susp (n-disc (tree-dim S))) T) (is-linear-max-path (n-disc (suc (tree-dim S))))
+    ap (connect-tree-inc-left (Susp (n-disc (tree-dim S))) T) (is-linear-max-path (n-disc (suc (tree-dim S))))
       ≡⟨⟩
     SPath (PExt (is-linear-max-path (n-disc (tree-dim S))))
       ≈⟨ reflexive≈stm (SPath≃ (Ext≃ (trans≃p (max-path-lin-tree (n-disc (tree-dim S))
@@ -471,13 +471,13 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                        ≈[ tree-to-ctx (insertion-tree (insertion-tree S P T) (inserted-bp S P T Q) U) ]lm
                        ≃-label (sym≃′ (insertion-tree-inserted-bp S P T Q U)) (exterior-label S P (insertion-tree T Q U) ⦃ insertion-trunk-height T Q U l ⦄)
   exterior-inserted-bp (Join S₁ S₂) BPHere T Q U q .get (PExt Z) = begin
-    canonical-label (susp S₁) T (PExt Z)
+    canonical-label (Susp S₁) T (PExt Z)
       >>= connect-tree-inc-left T S₂
       >>= (exterior-label (connect-tree T S₂) (connect-bp-left T S₂ Q) U ,, S⋆)
-      ≈⟨ reflexive≈stm (>>=-assoc (canonical-label (susp S₁) T (PExt Z)) _ _) ⟩
-    canonical-label (susp S₁) T (PExt Z)
+      ≈⟨ reflexive≈stm (>>=-assoc (canonical-label (Susp S₁) T (PExt Z)) _ _) ⟩
+    canonical-label (Susp S₁) T (PExt Z)
       >>= connect-tree-inc-left T S₂ ●lt (exterior-label (connect-tree T S₂) (connect-bp-left T S₂ Q) U ,, S⋆)
-      ≈⟨ fixup-reflexive≈stm (>>=-≃ (canonical-label-max (susp S₁) T (PExt Z))
+      ≈⟨ fixup-reflexive≈stm (>>=-≃ (canonical-label-max (Susp S₁) T (PExt Z))
                                     (exterior-bp-left-inc-left T S₂ Q U)
                                     (S⋆-≃ (≃′-to-≃ (insertion-bp-left T S₂ Q U))))
                              (insertion-bp-left T S₂ Q U) ⟩
@@ -492,16 +492,16 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
     stm-≃ (sym≃′ (insertion-bp-left T S₂ Q U))
       (canonical-comp′ (1 + tree-dim S₁) (insertion-tree T Q U)
         >>= connect-tree-inc-left (insertion-tree T Q U) S₂)
-      ≈˘⟨ stm-≃-≈ (sym≃′ (insertion-bp-left T S₂ Q U)) (reflexive≈stm (>>=-≃ (canonical-label-max (susp S₁) (insertion-tree T Q U) (PExt Z)) refl≃l refl≃sty)) ⟩
+      ≈˘⟨ stm-≃-≈ (sym≃′ (insertion-bp-left T S₂ Q U)) (reflexive≈stm (>>=-≃ (canonical-label-max (Susp S₁) (insertion-tree T Q U) (PExt Z)) refl≃l refl≃sty)) ⟩
     stm-≃ (sym≃′ (insertion-bp-left T S₂ Q U))
-         (canonical-label (susp S₁) (insertion-tree T Q U) (PExt Z)
+         (canonical-label (Susp S₁) (insertion-tree T Q U) (PExt Z)
            >>= connect-tree-inc-left (insertion-tree T Q U) S₂) ∎
     where
       open Reasoning stm-setoid-≈
   exterior-inserted-bp (Join S₁ S₂) BPHere T Q U q .get (PShift Z)
     = fixup-reflexive≈stm (exterior-bp-left-inc-right T S₂ Q U .get Z) (insertion-bp-left T S₂ Q U)
-  exterior-inserted-bp (Join S₁ S₂) (BPExt P) (susp T) BPHere U q = ⊥-elim (linear-non-linear T)
-  exterior-inserted-bp (Join S₁ S₂) (BPExt P) (susp T) (BPExt Q) (Join U Sing) q .get (PExt Z) = begin
+  exterior-inserted-bp (Join S₁ S₂) (BPExt P) (Susp T) BPHere U q = ⊥-elim (linear-non-linear T)
+  exterior-inserted-bp (Join S₁ S₂) (BPExt P) (Susp T) (BPExt Q) (Join U Sing) q .get (PExt Z) = begin
     (exterior-label S₁ P T Z >>= map-ext (exterior-label (insertion-tree S₁ P T) (inserted-bp S₁ P T Q) U ,, S⋆))
       ≈⟨ reflexive≈stm (>>=-ext (exterior-label S₁ P T Z) (exterior-label (insertion-tree S₁ P T) (inserted-bp S₁ P T Q) U ,, S⋆)) ⟩
     SExt (exterior-label S₁ P T Z >>= (exterior-label (insertion-tree S₁ P T) (inserted-bp S₁ P T Q) U ,, S⋆))
@@ -509,7 +509,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
     SExt (stm-≃ (sym≃′ (insertion-tree-inserted-bp S₁ P T Q U)) (exterior-label S₁ P (insertion-tree T Q U) ⦃ insertion-trunk-height T Q U (bp-height P) ⦄ Z)) ∎
     where
       open Reasoning stm-setoid-≈
-  exterior-inserted-bp (Join S₁ S₂) (BPExt P) (susp T) (BPExt Q) (Join U Sing) q .get (PShift Z) = ≈SShift refl≈stm
+  exterior-inserted-bp (Join S₁ S₂) (BPExt P) (Susp T) (BPExt Q) (Join U Sing) q .get (PShift Z) = ≈SShift refl≈stm
   exterior-inserted-bp (Join S₁ S₂) (BPShift P) T Q U q .get (PExt Z) = ≈SExt refl≈stm
   exterior-inserted-bp (Join S₁ S₂) (BPShift P) T Q U q .get (PShift Z) = begin
     (exterior-label S₂ P T Z

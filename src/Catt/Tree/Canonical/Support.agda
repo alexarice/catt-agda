@@ -41,8 +41,8 @@ supp-canonical-lem zero (Join S T) false rewrite tEmp-empty S = cong₂ (VSJoin 
 supp-canonical-lem zero (Join S T) true rewrite tEmp-empty S = cong₂ (VSJoin false) DCT-emp (DCT-last-path T)
 supp-canonical-lem (suc d) Sing b = refl
 supp-canonical-lem (suc d) (Join T Sing) b = begin
-  DCT (FVSTm (canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b)))
-    ≡⟨ FVSTm-≃ {a = canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b)}
+  DCT (FVSTm (canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (Susp T) b)))
+    ≡⟨ FVSTm-≃ {a = canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (Susp T) b)}
                {b = susp-stm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b)}
                l1 ⟩
   DCT (FVSTm (susp-stm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b)))
@@ -52,11 +52,11 @@ supp-canonical-lem (suc d) (Join T Sing) b = begin
   supp-tvarset (supp-tree-bd d T b) ∎
   where
     l1 : (canonical-stm d (tree-bd d T) >>=
-            label₁ (tree-inc-label (suc d) (susp-tree T) b))
+            label₁ (tree-inc-label (suc d) (Susp T) b))
            ≃stm
            susp-stm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b)
     l1 = begin
-      < canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (susp-tree T) b) >stm
+      < canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (Susp T) b) >stm
         ≈⟨ >>=-≃ (refl≃stm {a = canonical-stm d (tree-bd d T)}) [ (λ P → compute-≃ refl≃stm) ] [ refl≃ty ] ⟩
       < canonical-stm d (tree-bd d T) >>= susp-label (tree-inc-label d T b) >stm
         ≈˘⟨ >>=-susp-label (canonical-stm d (tree-bd d T)) (tree-inc-label d T b) ⟩

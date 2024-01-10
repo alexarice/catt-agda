@@ -60,7 +60,7 @@ canonical-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
     ≈⟨ compute-≈ refl≈stm ⟩
   SPath (is-linear-max-path (Join Sing Sing))
     ≈˘⟨ disc-rem-stm (Join Sing Sing) SPath (id-label-Ty (Join Sing Sing)) ⟩
-  disc-stm (susp Sing) >>= id-label-wt (susp Sing)
+  disc-stm (Susp Sing) >>= id-label-wt (Susp Sing)
     ≈⟨ [ refl≈tm ] ⟩
   SExt (SCoh Sing S⋆ (SPath ,, S⋆)) ∎
   where

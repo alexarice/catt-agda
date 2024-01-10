@@ -29,7 +29,7 @@ extend-disc-label-supp {S = Sing} L t a
             (FVSTm (L PHere) ∷ FVSTm a ∷ FVSTm t ∷ emp)
   where
     open Solver ∪m-idempotentCommutativeMonoid
-extend-disc-label-supp {S = susp S} L t a = begin
+extend-disc-label-supp {S = Susp S} L t a = begin
   FVSTm (L PHere) ∪m FVLabel (extend-disc-label (L ∘ PExt) t a) ∪m FVSTm (L (PShift PHere))
     ≡⟨ cong (λ - → FVSTm (L PHere) ∪m - ∪m FVSTm (L (PShift PHere))) (extend-disc-label-supp (L ∘ PExt) t a) ⟩
   FVSTm (L PHere) ∪m (FVLabel (L ∘ PExt) ∪m FVSTm t ∪m FVSTm a) ∪m FVSTm (L (PShift PHere))
@@ -48,7 +48,7 @@ stm-to-label-supp : {X : MaybeTree m}
                   → .⦃ _ : has-dim (tree-dim S) As ⦄
                   → FVLabel (stm-to-label S a As) ≡ FVSTy As ∪m FVSTm a
 stm-to-label-supp Sing a S⋆ = sym (∪m-left-unit (FVSTm a))
-stm-to-label-supp (susp S) a (SArr s As t) = begin
+stm-to-label-supp (Susp S) a (SArr s As t) = begin
   FVLabel (extend-disc-label (stm-to-label S s As) t a)
     ≡⟨ extend-disc-label-supp (stm-to-label S s As) t a ⟩
   FVLabel (stm-to-label S s As) ∪m FVSTm t ∪m FVSTm a

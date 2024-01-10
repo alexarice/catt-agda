@@ -122,7 +122,7 @@ connect-dyck-tree dy (⇑ ey) = let
   in trans≃ (extend-tree-eq (connect-dyck-tree dy ey)) (extend-connect-tree (dyck-to-tree dy) (dyck-to-tree ey))
 connect-dyck-tree dy (⇓ ey) = connect-dyck-tree dy ey
 
-susp-dyck-tree : (dy : Dyck n d) → dyck-to-tree (susp-dyck dy) ≃ susp-tree (dyck-to-tree dy)
+susp-dyck-tree : (dy : Dyck n d) → dyck-to-tree (susp-dyck dy) ≃ Susp (dyck-to-tree dy)
 susp-dyck-tree End = refl≃
 susp-dyck-tree (⇑ dy) = let
   instance _ = dyck-to-tree-is-n-extendable (susp-dyck dy)
@@ -135,8 +135,8 @@ tree-to-dyck-to-tree (Join S T) = begin
   < dyck-to-tree (connect-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T)) >t
     ≈⟨ connect-dyck-tree (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T) ⟩
   < connect-tree (dyck-to-tree (⇓ (susp-dyck (tree-to-dyck zero S)))) (dyck-to-tree (tree-to-dyck zero T)) >t
-    ≈⟨ connect-tree-≃ (trans≃ (susp-dyck-tree (tree-to-dyck 0 S)) (susp-tree-≃ (tree-to-dyck-to-tree S))) (tree-to-dyck-to-tree T) ⟩
-  < connect-tree (susp-tree S) T >t
+    ≈⟨ connect-tree-≃ (trans≃ (susp-dyck-tree (tree-to-dyck 0 S)) (Susp-≃ (tree-to-dyck-to-tree S))) (tree-to-dyck-to-tree T) ⟩
+  < connect-tree (Susp S) T >t
     ≡⟨⟩
   < Join S T >t ∎
   where

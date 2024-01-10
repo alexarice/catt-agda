@@ -16,7 +16,7 @@ maybe-tree-size : (X : MaybeTree n) → ℕ
 maybe-tree-size {n} X = n
 
 susp-maybe-tree : MaybeTree n → MaybeTree (2 + n)
-susp-maybe-tree (someTree x) = someTree (susp-tree x)
+susp-maybe-tree (someTree x) = someTree (Susp x)
 susp-maybe-tree (Other _) = Other (2 + _)
 
 susp-maybe-tree-n : (d : ℕ) → MaybeTree n → MaybeTree (d * 2 + n)

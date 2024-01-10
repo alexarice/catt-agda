@@ -45,14 +45,11 @@ connect-tree : (S : Tree n) → (T : Tree m) → Tree (connect-tree-length S T)
 connect-tree Sing T = T
 connect-tree (Join S S′) T = Join S (connect-tree S′ T)
 
-susp-tree : Tree n → Tree (2 + n)
-susp-tree T = Join T Sing
-
-pattern susp T = Join T Sing
+pattern Susp T = Join T Sing
 
 susp-tree-n : (d : ℕ) → Tree n → Tree (d * 2 + n)
 susp-tree-n zero T = T
-susp-tree-n (suc d) T = susp-tree (susp-tree-n d T)
+susp-tree-n (suc d) T = Susp (susp-tree-n d T)
 
 tree-dim : Tree n → ℕ
 tree-dim Sing = 0
@@ -92,7 +89,7 @@ instance
   n-disc-is-linear {zero} = tt
   n-disc-is-linear {suc n} = inst
 
-  is-linear-susp : ∀ {T : Tree n} → ⦃ is-linear T ⦄ → is-linear (susp-tree T)
+  is-linear-susp : ∀ {T : Tree n} → ⦃ is-linear T ⦄ → is-linear (Susp T)
   is-linear-susp = inst
 
 is-join : Tree n → Set

@@ -31,7 +31,7 @@ stm-fst {X = Other _} = SOther get-fst
 stm-snd {X = someTree x} = SShift (SPath PHere)
 stm-snd {X = Other _} = SOther get-snd
 
-unrestrict-label : (L : Label-WT X S) → .⦃ NonZero (sty-dim (lty L)) ⦄ → Label X (susp-tree S)
+unrestrict-label : (L : Label-WT X S) → .⦃ NonZero (sty-dim (lty L)) ⦄ → Label X (Susp S)
 unrestrict-label {X = X} {S = S} (L ,, As) PHere = sty-src As
 unrestrict-label {X = X} {S = S} (L ,, As) (PExt P) = L P
 unrestrict-label {X = X} {S = S} (L ,, As) (PShift P) = sty-tgt As
@@ -39,7 +39,7 @@ unrestrict-label {X = X} {S = S} (L ,, As) (PShift P) = sty-tgt As
 susp-stm : STm X → STm (susp-maybe-tree X)
 susp-sty : STy X → STy (susp-maybe-tree X)
 susp-label : Label-WT X S → Label-WT (susp-maybe-tree X) S
-susp-label-full : Label X S → Label (susp-maybe-tree X) (susp-tree S)
+susp-label-full : Label X S → Label (susp-maybe-tree X) (Susp S)
 
 susp-stm {X = someTree x} s = SExt s
 susp-stm {X = Other _} (SCoh S A L) = SCoh S A (susp-label L)
@@ -72,11 +72,11 @@ map-shift L = SShift ∘ ap L ,, map-sty-shift (lty L)
 
 resuspend-stm : {S : Tree n} → (d : ℕ) → .⦃ _ : has-trunk-height d S ⦄ → STm (someTree (chop-trunk d S)) → STm (someTree S)
 resuspend-stm zero s = s
-resuspend-stm {S = susp S} (suc d) s = SExt (resuspend-stm d s)
+resuspend-stm {S = Susp S} (suc d) s = SExt (resuspend-stm d s)
 
 resuspend : {S : Tree n} → (d : ℕ) → .⦃ _ : has-trunk-height d S ⦄ → STy (someTree (chop-trunk d S)) → STy (someTree S)
 resuspend zero As = As
-resuspend {S = susp S} (suc d) As = map-sty-ext (resuspend d As)
+resuspend {S = Susp S} (suc d) As = map-sty-ext (resuspend d As)
 
 replace-label : Label X S → STm X → Label X S
 replace-label L P PHere = P
@@ -143,7 +143,7 @@ sty-≃ p (SArr s A t) = SArr (stm-≃ p s) (sty-≃ p A) (stm-≃ p t)
 
 disc-sty : (S : Tree n) → .⦃ is-linear S ⦄ → STy (someTree S)
 disc-sty Sing = S⋆
-disc-sty (susp S) = map-sty-ext (disc-sty S)
+disc-sty (Susp S) = map-sty-ext (disc-sty S)
 
 sty-to-coh : (As : STy (someTree T)) → STm (someTree T)
 sty-to-coh {T = T} As = SCoh T As (id-label-wt T)
@@ -158,13 +158,13 @@ extend-disc-label : Label X S
                   → .⦃ is-linear S ⦄
                   → (t : STm X)
                   → (a : STm X)
-                  → Label X (susp-tree S)
+                  → Label X (Susp S)
 extend-disc-label {S = Sing} L t a PHere = L PHere
 extend-disc-label {S = Sing} L t a (PExt PHere) = a
 extend-disc-label {S = Sing} L t a (PShift PHere) = t
-extend-disc-label {S = susp S} L t a PHere = L PHere
-extend-disc-label {S = susp S} L t a (PExt P) = extend-disc-label (L ∘ PExt) t a P
-extend-disc-label {S = susp S} L t a (PShift PHere) = L (PShift PHere)
+extend-disc-label {S = Susp S} L t a PHere = L PHere
+extend-disc-label {S = Susp S} L t a (PExt P) = extend-disc-label (L ∘ PExt) t a P
+extend-disc-label {S = Susp S} L t a (PShift PHere) = L (PShift PHere)
 
 stm-to-label : (S : Tree n)
              → .⦃ is-linear S ⦄
@@ -173,4 +173,4 @@ stm-to-label : (S : Tree n)
              → .⦃ has-dim (tree-dim S) As ⦄
              → Label X S
 stm-to-label Sing a As P = a
-stm-to-label (susp S) a (SArr s As t) = extend-disc-label (stm-to-label S s As) t a
+stm-to-label (Susp S) a (SArr s As t) = extend-disc-label (stm-to-label S s As) t a

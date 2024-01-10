@@ -94,24 +94,6 @@ identity-Ty n σty = TyCoh ⦃ disc-pd n ⦄
   where
     open ≡-Reasoning
 
-    -- lem : FVTy (lift-ty (sphere-type n)) ∪ ewt empty ∪ ewt empty ≡ full
-    -- lem = begin
-    --   FVTy (lift-ty (sphere-type n)) ∪ ewt empty ∪ ewt empty
-    --     ≡⟨ cong (λ - → - ∪ ewt empty ∪ ewt empty) (supp-lift-ty (sphere-type n)) ⟩
-    --   ewt (FVTy (sphere-type n) ∪ empty ∪ empty)
-    --     ≡⟨ cong ewt (solve (∪-monoid {n = sphere-size n})) ⟩
-    --   ewt (FVTy (sphere-type n))
-    --     ≡⟨ cong ewt (sphere-supp n) ⟩
-    --   full ∎
-
-    -- lem2 : SuppTy (Disc n) (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F) ≡ full
-    -- lem2 = begin
-    --   SuppTy (Disc n) (Var 0F ─⟨ lift-ty (sphere-type n) ⟩⟶ Var 0F)
-    --     ≡⟨ cong (DC (Disc n)) lem ⟩
-    --   DC (Disc n) full
-    --     ≡⟨ DC-full (Disc n) ⟩
-    --   full ∎
-
 identity-term-Ty : Typing-Ty Γ A → Typing-Tm Γ t A → Typing-Tm Γ (identity-term A t) (t ─⟨ A ⟩⟶ t)
 identity-term-Ty {A = A} Aty tty
   = TyConv (identity-Ty (ty-dim A) (sub-from-disc-Ty (ty-dim A) Aty refl tty))

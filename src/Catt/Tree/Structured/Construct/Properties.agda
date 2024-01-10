@@ -309,31 +309,6 @@ unrestrict-label-prop M .get PHere = refl≃stm
 unrestrict-label-prop M .get (PExt Z) = refl≃stm
 unrestrict-label-prop M .get (PShift PHere) = refl≃stm
 
--- label-from-linear-tree-dim : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (As : STy X) → sty-dim (label-from-linear-tree-type S As) ≡ sty-dim As ∸ tree-dim S
--- label-from-linear-tree-dim Sing As = refl
--- label-from-linear-tree-dim (Join S Sing) As = begin
---   sty-dim
---       (label-from-linear-tree-type S (sty-base As))
---     ≡⟨ label-from-linear-tree-dim S (sty-base As) ⟩
---   sty-dim (sty-base As) ∸ tree-dim S
---     ≡⟨ cong (_∸ tree-dim S) (sty-base-dim As) ⟩
---   sty-dim As ∸ 1 ∸ tree-dim S
---     ≡⟨ ∸-+-assoc (sty-dim As) 1 (tree-dim S) ⟩
---   sty-dim As ∸ suc (tree-dim S) ∎
---   where
---     open ≡-Reasoning
-
--- label-from-linear-tree-≃ : (S : Tree n)
---                          → .⦃ _ : is-linear S ⦄
---                          → (a ≃stm b)
---                          → (q : As ≃sty Bs) → .(r : tree-dim S ≤ sty-dim As) → label-from-linear-tree S a As r ≃l label-from-linear-tree S b Bs (≤-trans r (≤-reflexive (sty-dim-≃ q)))
--- label-from-linear-tree-≃ Sing p q r .get P = p
--- label-from-linear-tree-≃ (Join S Sing) p q r = unrestrict-label-≃ (label-from-linear-tree S _ _ _ ,, truncate-sty′ (tree-dim S) _)
---                                                                    (label-from-linear-tree S _ _ _ ,, truncate-sty′ (tree-dim S) _)
---                                                                    ⦃ _ ⦄
---                                                                    (label-from-linear-tree-≃ S p q (≤-step′ r))
---                                                                    (truncate-sty′-≃ {d = tree-dim S} refl q)
-
 extend-disc-label-max : (L : Label X S)
                       → .⦃ _ : is-linear S ⦄
                       → (t : STm X)

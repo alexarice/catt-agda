@@ -761,50 +761,6 @@ id-label-susp-full T .get PHere = refl≃stm
 id-label-susp-full T .get (PExt Z) = compute-≃ refl≃stm
 id-label-susp-full T .get (PShift PHere) = compute-≃ refl≃stm
 
--- extend-map-shift : (a : STm (someTree S)) → (L : Label-WT (someTree T) S) → (a >>= map-pshift {S = U} L) ≃stm SShift {S = U} (a >>= L)
--- label-on-sty-pshift : (A : STy (someTree S)) → (L : Label-WT (someTree T) S) → (label-on-sty A (map-pshift {S = U} L)) ≃sty map-sty-pshift {S = U} (label-on-sty A L)
--- map-pshift-comp : (L : Label (someTree T) S) → (M : Label-WT (someTree U) T)
---                 → label-comp L (map-pshift {S = U′} M) ≃l (SShift {S = U′} ∘ label-comp L M)
--- map-pshift-comp L M .get Z = extend-map-pshift (L Z) M
-
--- extend-map-pshift (SExt a) L = extend-map-pshift a (label₁ L)
--- extend-map-pshift (SShift a) L = extend-map-pshift a (label₂ L)
--- extend-map-pshift (SPath P) l = refl≃stm
--- extend-map-pshift {U = U} (SCoh S A M) L = begin
---   < SCoh S A (label-wt-comp M (map-pshift L)) >stm
---     ≈⟨ ≃SCoh S refl≃sty (map-pshift-comp (ap M) L) (label-on-sty-pshift (lty M) L) ⟩
---   < SCoh S A (map-pshift (label-wt-comp M L)) >stm
---     ≈⟨ SCoh-shift S A (label-wt-comp M L) ⟩
---   < SShift (SCoh S A (label-wt-comp M L)) >stm ∎
---   where
---     open Reasoning stm-setoid
-
--- label-on-sty-pshift S⋆ L = refl≃sty
--- label-on-sty-pshift (SArr s A t) L = ≃SArr (extend-map-pshift s L) (label-on-sty-pshift A L) (extend-map-pshift t L)
-
-
--- extend-map-pext : (a : STm (someTree S)) → (L : Label-WT (someTree T) S) → (a >>= map-pext {T = U} L) ≃stm SExt {T = U} (a >>= L)
--- label-on-sty-pext : (A : STy (someTree S)) → (L : Label-WT (someTree T) S) → (label-on-sty A (map-pext {T = U} L)) ≃sty map-sty-pext {T = U} (label-on-sty A L)
--- map-pext-comp : (L : Label (someTree T) S) → (M : Label-WT (someTree U) T)
---                 → label-comp L (map-pext {T = U′} M) ≃l (SExt {T = U′} ∘ label-comp L M)
--- map-pext-comp L M .get Z = extend-map-pext (L Z) M
-
--- extend-map-pext (SExt a) L = extend-map-pext a (label₁ L)
--- extend-map-pext (SShift a) L = extend-map-pext a (label₂ L)
--- extend-map-pext (SPath a) L = refl≃stm
--- extend-map-pext {U = U} (SCoh S A M) L = begin
---   < SCoh S A (label-wt-comp M (map-pext L)) >stm
---     ≈⟨ ≃SCoh S refl≃sty (map-pext-comp (ap M) L) (label-on-sty-pext (lty M) L) ⟩
---   < SCoh S A (map-pext (label-wt-comp M L)) >stm
---     ≈⟨ SCoh-ext S A (label-wt-comp M L) ⟩
---   < SExt (SCoh S A (label-wt-comp M L)) >stm ∎
---   where
---     open Reasoning stm-setoid
-
--- label-on-sty-pext S⋆ L = refl≃sty
--- label-on-sty-pext (SArr s A t) L = ≃SArr (extend-map-pext s L) (label-on-sty-pext A L) (extend-map-pext t L)
-
-
 >>=-lift : (a : STm (someTree S)) → (L : Label-WT (Other n) S) → (a >>= lift-label L) ≃stm lift-stm (a >>= L)
 >>=′-lift : (As : STy (someTree S)) → (L : Label-WT (Other n) S) → As >>=′ lift-label L ≃sty lift-sty (As >>=′ L)
 comp-lift : (L : Label (someTree S) U) → (M : Label-WT (Other n) S) → L ●l lift-label M ≃l (lift-stm ∘ L ●l M)
@@ -867,9 +823,6 @@ stm-sub->>= a L σ .get = begin
 
 stm-sub-≃ : a ≃stm b → (σ : Sub n m A) → a [ σ ]stm ≃stm b [ σ ]stm
 stm-sub-≃ {a = a} {b = b} [ p ] σ .get = sub-action-≃-tm p refl≃s
-
--- label-sub-comp : (M : Label (someTree S) T) → (L : Label-WT (Other m) S) → (σ : Sub m n A) → ((λ a → a [ σ ]stm) ∘ M ●l L) ≃l M ●l (L [ σ ]l)
--- label-sub-comp M L σ .get Z = stm-sub->>= (M Z) L σ
 
 label-linear-0V : (L : Label-WT X S) → .⦃ _ : is-linear S ⦄ → stm-to-term (ap L (is-linear-max-path S)) ≃tm 0V [ label-to-sub L ]tm
 label-linear-0V {S = S} L = begin

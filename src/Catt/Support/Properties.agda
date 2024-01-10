@@ -1,5 +1,3 @@
-{-# OPTIONS --without-K --safe --exact-split #-}
-
 module Catt.Support.Properties where
 
 open import Catt.Prelude
@@ -180,7 +178,7 @@ TransportVarSet-tm (Var zero) ⟨ σ , t ⟩ = trans (cong (_∪ FVTm t) (Transp
 TransportVarSet-tm (Var (suc i)) ⟨ σ , t ⟩ = TransportVarSet-tm (Var i) σ
 TransportVarSet-tm (Coh S A τ) σ = TransportVarSet-sub τ σ
 
-TransportVarSet-sub {A = A} ⟨⟩ σ = TransportVarSet-ty A σ -- TransportVarSet-empty σ
+TransportVarSet-sub {A = A} ⟨⟩ σ = TransportVarSet-ty A σ
 TransportVarSet-sub ⟨ τ , t ⟩ σ = trans (TransportVarSet-∪ (FVSub τ) (FVTm t) σ) (cong₂ _∪_ (TransportVarSet-sub τ σ) (TransportVarSet-tm t σ))
 
 supp-lift-ty : (A : Ty n) → FVTy (lift-ty A) ≡ ewf (FVTy A)
@@ -359,16 +357,6 @@ sub-type-⊆ ⟨ σ , t ⟩ = ⊆-trans (sub-type-⊆ σ) (∪-⊆-1 (FVSub σ) 
   zs ∪ (xs ∪ ys) ∎
   where
     open ≡-Reasoning
-
--- subbed-ty-⊆ : (B : Ty n) → (σ : Sub n m A) → FVTy (B [ σ ]ty) ⊆ FVSub σ
--- subbed-tm-⊆ : (t : Tm n) → (σ : Sub n m A) → FVTm (t [ σ ]tm) ⊆ FVSub σ
-
--- subbed-ty-⊆ ⋆ σ = sub-type-⊆ σ
--- subbed-ty-⊆ (s ─⟨ B ⟩⟶ t) σ = ∪-⊆ (∪-⊆ (subbed-ty-⊆ B σ) (subbed-tm-⊆ s σ)) (subbed-tm-⊆ t σ)
-
--- subbed-tm-⊆ (Var zero) ⟨ σ , t ⟩ = ∪-⊆-2 (FVSub σ) (FVTm t)
--- subbed-tm-⊆ (Var (suc i)) ⟨ σ , t ⟩ = ⊆-trans (subbed-tm-⊆ (Var i) σ) (∪-⊆-1 (FVSub σ) (FVTm t))
--- subbed-tm-⊆ (Coh S A τ) σ = {!!}
 
 DC-⊆ : (Γ : Ctx n) → (xs : VarSet n) → xs ⊆ DC Γ xs
 DC-⊆ ∅ emp = ⊆-refl

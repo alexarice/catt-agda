@@ -93,19 +93,3 @@ ppath-≃ Refl≃′ P = P
 ppath-≃ (Join≃′ p q) PHere = PHere
 ppath-≃ (Join≃′ p q) (PExt Z) = PExt (ppath-≃ p Z)
 ppath-≃ (Join≃′ p q) (PShift Z) = PShift (ppath-≃ q Z)
-
--- path-inc-left : (P : Path S) → .⦃ is-Path P ⦄ → (T : Tree n) → Path (connect-tree S T)
--- path-inc-left PHere T = PHere
--- path-inc-left (PExt P) T = PExt P
--- path-inc-left (PShift P) T = PShift (path-inc-left P T)
-
--- path-inc-right : (S : Tree n) → (P : Path T) → Path (connect-tree S T)
--- path-inc-right Sing P = P
--- path-inc-right (Join S₁ S₂) P = PShift (path-inc-right S₂ P)
-
--- path-func : Set → (S : Tree n) → Set
--- path-func X S = ∀ (P : Path S) → .⦃ is-maximal P ⦄ → X
-
--- susp-path : Path X → Path (suspMaybeTree X)
--- susp-path {X = someTree x} P = PExt P
--- susp-path {X = Other _} (POther x) = POther (susp-tm x)

@@ -101,33 +101,6 @@ proj-ext (Ext≃ p _) = p
 proj-shift : PShift {S = S} P ≃p PShift {S = T} Q → P ≃p Q
 proj-shift (Shift≃ _ p) = p
 
--- susp-path-to-term : (P : Path X) → path-to-term (susp-path P) ≃tm susp-tm (path-to-term P)
--- susp-path-to-term {X = someTree x} P = id-on-tm (susp-tm (path-to-term P))
--- susp-path-to-term {X = Other _} (POther x) = refl≃tm
-
--- var-to-path-is-path : (S : Tree n) → (t : Tm (suc n)) → .⦃ _ : isVar t ⦄ → is-Path (var-to-path S t)
--- var-to-path-helper-is-path : (S : Tree n) → (T : Tree m) → (i : Fin (m + ((suc n) + 2))) → is-Path (var-to-path-helper S T i)
--- var-to-path-helper-1-is-path : (S : Tree n) → (T : Tree m) → (i : Fin (suc n + 2)) → is-Path (var-to-path-helper-1 S T i)
--- var-to-path-helper-2-is-path : (S : Tree n) → (T : Tree m) → (i : Fin 2) → is-Path (var-to-path-helper-2 S T i)
-
--- [,]′-prop : ∀ {A B C : Set} → (f : A → C) → (g : B → C) → (P : C → Set) → (∀ x → P (f x)) → (∀ x → P (g x)) → ∀ x → P ([ f , g ]′ x)
--- [,]′-prop f g P a b (inj₁ x) = a x
--- [,]′-prop f g P a b (inj₂ y) = b y
-
--- var-to-path-is-path Sing t = tt
--- var-to-path-is-path (Join S₁ S₂) t = var-to-path-helper-is-path S₁ S₂ (cast _ (getVarFin t))
-
--- var-to-path-helper-is-path S T i with splitAt (tree-size T) i
--- ... | inj₁ x = var-to-path-is-path T (Var (inject₁ x))
--- ... | inj₂ y = var-to-path-helper-1-is-path S T y
-
--- var-to-path-helper-1-is-path S T i with splitAt (suc (tree-size S)) i
--- ... | inj₁ x = var-to-path-is-path S (Var x)
--- ... | inj₂ y = var-to-path-helper-2-is-path S T y
-
--- var-to-path-helper-2-is-path S T 0F = tt
--- var-to-path-helper-2-is-path S T 1F = tt
-
 var-connect-susp-inc-left : (i : Fin (3 + m)) → (n : ℕ) → Var i [ connect-susp-inc-left m n ]tm ≃tm Var (n ↑ʳ i)
 var-connect-susp-inc-left i zero = id-on-tm (Var i)
 var-connect-susp-inc-left i (suc n) = begin

@@ -66,37 +66,6 @@ tree-bd-≃ {d = zero} refl p = Sing≃
 tree-bd-≃ {d = suc d} refl Sing≃ = Sing≃
 tree-bd-≃ {d = suc d} refl (Join≃ p q) = Join≃ (tree-bd-≃ refl p) (tree-bd-≃ refl q)
 
--- tree-inc-preserve-fst-var : (d : ℕ) → (T : Tree n) → (b : Bool) → Var (fromℕ _) [ tree-inc (suc d) T b ]tm ≃tm Var {suc (tree-size T)} (fromℕ _)
--- tree-inc-preserve-fst-var d Sing b = refl≃tm
--- tree-inc-preserve-fst-var d (Join S T) b = sub-between-connect-susps-fst-var (tree-inc d S b) (tree-inc (suc d) T b)
-
--- tree-inc-preserve-last-var : (d : ℕ) → (T : Tree n) → (b : Bool) → tree-last-var (tree-bd (suc d) T) [ tree-inc (suc d) T b ]tm ≃tm tree-last-var T
--- tree-inc-preserve-last-var d Sing b = refl≃tm
--- tree-inc-preserve-last-var d (Join S T) b = begin
---   < tree-last-var (tree-bd (suc d) T)
---     [ connect-susp-inc-right (tree-bd-len d S) (tree-bd-len (suc d) T) ]tm
---     [ sub-between-connect-susps (tree-inc d S b)
---                                 (tree-inc (suc d) T b) ]tm >tm
---     ≈˘⟨ assoc-tm _ _ (tree-last-var (tree-bd (suc d) T)) ⟩
---   < tree-last-var (tree-bd (suc d) T)
---     [ sub-between-connect-susps (tree-inc d S b)
---                                 (tree-inc (suc d) T b)
---       ∘ connect-susp-inc-right (tree-bd-len d S) (tree-bd-len (suc d) T) ]tm >tm
---     ≈⟨ sub-action-≃-tm (refl≃tm {s = tree-last-var (tree-bd (suc d) T)})
---        (sub-between-connect-susps-inc-right (tree-inc d S b)
---                                             (tree-inc (suc d) T b)
---                                             (tree-inc-preserve-fst-var d T b)) ⟩
---   < tree-last-var (tree-bd (suc d) T)
---     [ connect-susp-inc-right (tree-size S) (tree-size T) ∘ tree-inc (suc d) T b ]tm >tm
---     ≈⟨ assoc-tm _ _ (tree-last-var (tree-bd (suc d) T)) ⟩
---   < tree-last-var (tree-bd (suc d) T)
---     [ tree-inc (suc d) T b ]tm
---     [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm >tm
---     ≈⟨ sub-action-≃-tm (tree-inc-preserve-last-var d T b) refl≃s ⟩
---   < tree-last-var T [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm >tm ∎
---   where
---     open Reasoning tm-setoid
-
 tree-bd-glob : (d₁ d₂ : ℕ) → (T : Tree n) → d₁ < d₂ → tree-bd d₁ (tree-bd d₂ T) ≃′ tree-bd d₁ T
 tree-bd-glob zero d₂ T p = Refl≃′
 tree-bd-glob (suc d₁) (suc d₂) Sing p = Refl≃′
@@ -114,7 +83,7 @@ tree-inc-label-glob zero (suc d₂) T false b₂ p .get P = tree-inc-label-phere
 tree-inc-label-glob zero (suc d₂) T true b₂ p .get P = tree-inc-label-last-path d₂ T b₂
 tree-inc-label-glob (suc d₁) (suc d₂) Sing b₁ b₂ p .get PHere = refl≃p
 tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p .get PHere = refl≃p
-tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ (s≤s p) .get (PExt P) = Ext≃ (tree-inc-label-glob d₁ d₂ S b₁ b₂ p .get P) refl≃ -- ≃SExt (≃SPath (tree-inc-label-glob d₁ d₂ S b₁ b₂ p .get P)) refl≃
+tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ (s≤s p) .get (PExt P) = Ext≃ (tree-inc-label-glob d₁ d₂ S b₁ b₂ p .get P) refl≃
 tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p .get (PShift P) = Shift≃ refl≃ (tree-inc-label-glob (suc d₁) (suc d₂) T b₁ b₂ p .get P)
 
 tree-inc-glob : (d₁ d₂ : ℕ) → (T : Tree n) → (b₁ b₂ : Bool) → d₁ < d₂ → tree-inc d₂ T b₂ ● tree-inc d₁ (tree-bd d₂ T) b₁ ≃s tree-inc d₁ T b₁
@@ -126,45 +95,6 @@ tree-inc-glob d₁ d₂ T b₁ b₂ p = begin
   < tree-inc d₁ T b₁ >s ∎
   where
     open Reasoning sub-setoid
-
--- tree-inc-glob : (d₁ d₂ : ℕ) → (T : Tree n) → (b₁ b₂ : Bool) → d₁ < d₂ → tree-inc d₂ T b₂ ∘ tree-inc d₁ (tree-bd d₂ T) b₁ ≃s tree-inc d₁ T b₁
--- tree-inc-glob zero (suc d₂) T false b₂ p = Ext≃ refl≃s (tree-inc-preserve-fst-var d₂ T b₂)
--- tree-inc-glob zero (suc d₂) T true b₂ p = Ext≃ refl≃s (tree-inc-preserve-last-var d₂ T b₂)
--- tree-inc-glob (suc d₁) (suc d₂) Sing b₁ b₂ p = refl≃s
--- tree-inc-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p = begin
---   < sub-between-connect-susps (tree-inc d₂ S b₂) (tree-inc (suc d₂) T b₂)
---     ∘ sub-between-connect-susps (tree-inc d₁ (tree-bd d₂ S) b₁) (tree-inc (suc d₁) (tree-bd (suc d₂) T) b₁) >s
---     ≈⟨ sub-between-connect-susps-comp (tree-inc d₁ (tree-bd d₂ S) b₁) (tree-inc (suc d₁) (tree-bd (suc d₂) T) b₁) (tree-inc d₂ S b₂) (tree-inc (suc d₂) T b₂) (tree-inc-preserve-fst-var d₂ T b₂) ⟩
---   < sub-between-connect-susps
---     (tree-inc d₂ S b₂ ∘ tree-inc d₁ (tree-bd d₂ S) b₁)
---     (tree-inc (suc d₂) T b₂ ∘ tree-inc (suc d₁) (tree-bd (suc d₂) T) b₁)
---     >s
---     ≈⟨ sub-between-connect-susps-≃ (tree-inc d₂ S b₂ ∘ tree-inc d₁ (tree-bd d₂ S) b₁)
---                                    (tree-inc d₁ S b₁)
---                                    (tree-inc (suc d₂) T b₂ ∘ tree-inc (suc d₁) (tree-bd (suc d₂) T) b₁)
---                                    (tree-inc (suc d₁) T b₁)
---                                    (≃-to-same-n (tree-bd-glob d₁ d₂ S (≤-pred p)))
---                                    (≃-to-same-n (tree-bd-glob (suc d₁) (suc d₂) T p))
---                                    (tree-inc-glob d₁ d₂ S b₁ b₂ (≤-pred p))
---                                    (tree-inc-glob (suc d₁) (suc d₂) T b₁ b₂ p) ⟩
---   < sub-between-connect-susps (tree-inc d₁ S b₁)
---       (tree-inc (suc d₁) T b₁) >s ∎
---   where
---     open Reasoning sub-setoid
-
--- tree-inc-full : (d : ℕ) → (T : Tree n) → (b : Bool) → (p : tree-dim T ≤ d) → tree-inc d T b ≃s idSub {suc (tree-size T)}
--- tree-inc-full zero Sing false p = refl≃s
--- tree-inc-full zero Sing true p = refl≃s
--- tree-inc-full zero (Join S T) b ()
--- tree-inc-full (suc d) Sing b p = refl≃s
--- tree-inc-full (suc d) (Join S T) b p = begin
---   < sub-between-connect-susps (tree-inc d S b) (tree-inc (suc d) T b) >s
---     ≈⟨ sub-between-connect-susps-≃ (tree-inc d S b) idSub (tree-inc (suc d) T b) idSub (≃-to-same-n (tree-bd-full d S (m⊔n≤o⇒n≤o (pred (tree-dim T)) (tree-dim S) (≤-pred p)))) (≃-to-same-n (tree-bd-full (suc d) T (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p))) (tree-inc-full d S b (m⊔n≤o⇒n≤o (pred (tree-dim T)) (tree-dim S) (≤-pred p))) (tree-inc-full (suc d) T b (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p)) ⟩
---   < sub-between-connect-susps idSub idSub >s
---     ≈⟨ sub-between-connect-susps-id _ _ ⟩
---   < idSub >s ∎
---   where
---     open Reasoning sub-setoid
 
 tree-inc-label-full : (d : ℕ) → (T : Tree n) → (b : Bool) → .(p : tree-dim T ≤ d) → tree-inc-label′ d T b ≃lp ppath-≃ (tree-bd-full d T p)
 tree-inc-label-full zero Sing false p .get PHere = refl≃p
@@ -221,12 +151,6 @@ tree-dim-bd′ d T p = trans (tree-dim-bd d T) (m≤n⇒m⊓n≡m p)
 
 tree-dim-bd″ : (d : ℕ) → (T : Tree n) → tree-dim (tree-bd d T) ≤ d
 tree-dim-bd″ d T = ≤-trans (≤-reflexive (tree-dim-bd d T)) (m⊓n≤m d (tree-dim T))
-
--- tree-inc-susp-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → susp-sub (tree-inc d T b) ≃s tree-inc (suc d) (suspTree T) b
--- tree-inc-susp-lem zero T false = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , get-fst ⟩ , get-snd ⟩ , susp-tm (Var (fromℕ _)) ⟩)
--- tree-inc-susp-lem zero T true = sym≃s (id-left-unit ⟨ ⟨ ⟨ ⟨⟩ , get-fst ⟩ , get-snd ⟩ , susp-tm (tree-last-var T) ⟩)
--- tree-inc-susp-lem (suc d) Sing b = refl≃s
--- tree-inc-susp-lem (suc d) (Join S T) b = sym≃s (id-left-unit _)
 
 bd-trunk-height : (d : ℕ) → (T : Tree n) → .(d ≤ trunk-height T) → is-linear (tree-bd d T)
 bd-trunk-height zero T p = tt

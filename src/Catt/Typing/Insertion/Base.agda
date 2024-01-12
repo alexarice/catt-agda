@@ -25,6 +25,6 @@ Insertion Γ S As L P T M .len = _
 Insertion Γ S As L P T M .tgtCtx = Γ
 Insertion Γ S As L P T M .lhs = stm-to-term (SCoh S As (L ,, S⋆))
 Insertion Γ S As L P T M .rhs
-  = stm-to-term (SCoh (insertion-tree S P T)
+  = stm-to-term (SCoh (S >>[ P ] T)
                       (As >>=′ (κ S P T ,, S⋆))
-                      (label-from-insertion S P T L M ,, S⋆))
+                      (L >>l[ P ] M ,, S⋆))

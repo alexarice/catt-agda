@@ -31,17 +31,17 @@ open import Catt.Tree.Canonical.Typing rule lift-rule susp-rule sub-rule
      → (p : Branch S d)
      → (T : Tree m)
      → .⦃ _ : has-trunk-height d T ⦄
-     → Typing-Label ⌊ insertion-tree S p T ⌋ (ι S p T ,, S⋆)
+     → Typing-Label ⌊ S >>[ p ] T ⌋ (ι S p T ,, S⋆)
 ι-Ty (Join S₁ S₂) BHere T = ++t-inc-left-Ty T S₂
 ι-Ty (Join S₁ S₂) (BExt p) (Susp T)
   = unrestrict-label-Ty (map-ext-Ty (ι-Ty S₁ p T)) (map-sty-ext-Ty TySStar)
 ι-Ty (Join S₁ S₂) (BShift p) T = map-shift-Ty (ι-Ty S₂ p T)
 
 κ-Ty : (S : Tree n)
-                  → (p : Branch S d)
-                  → (T : Tree m)
-                  → .⦃ _ : has-trunk-height d T ⦄
-                  → Typing-Label ⌊ insertion-tree S p T ⌋ (κ S p T ,, S⋆)
+     → (P : Branch S d)
+     → (T : Tree m)
+     → .⦃ _ : has-trunk-height d T ⦄
+     → Typing-Label ⌊ S >>[ P ] T ⌋ (κ S P T ,, S⋆)
 κ-Ty (Join S₁ S₂) BHere T
   = label-between-++t-Ty (replace-label-Ty (canonical-label-Ty (Susp S₁) T)
                                                      (TySPath PHere)
@@ -85,17 +85,16 @@ label-from-insertion-lem {Cs = Cs} S₁ S₂ T As L M d p = begin
   where
     open Reasoning sty-setoid-≈
 
-label-from-insertion-phere : (S : Tree n)
+label-from-insertion-phere : (L : Label X S)
                            → (P : Branch S l)
-                           → (T : Tree m)
-                           → .⦃ _ : has-trunk-height l T ⦄
-                           → (L : Label X S)
+                           → {T : Tree m}
                            → (M : Label X T)
+                           → .⦃ _ : has-trunk-height l T ⦄
                            → (d : ℕ)
                            → .⦃ NonZero d ⦄
                            → branch-type S P >>=′ (L ,, Bs) ≈[ Γ ]sty canonical-type d T >>=′ (M ,, Bs)
-                           → label-from-insertion S P T L M PHere ≈[ Γ ]stm L PHere
-label-from-insertion-phere {Bs = Bs} (Join S₁ S₂) BHere T L M d p = begin
+                           → (L >>l[ P ] M) PHere ≈[ Γ ]stm L PHere
+label-from-insertion-phere {S = Join S₁ S₂} {Bs = Bs} L BHere {T} M d p = begin
   (M ++l L ∘ PShift) PHere
     ≈⟨ reflexive≈stm (++l-phere M (L ∘ PShift)) ⟩
   M PHere
@@ -117,31 +116,30 @@ label-from-insertion-phere {Bs = Bs} (Join S₁ S₂) BHere T L M d p = begin
 
     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, Bs) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, Bs)
     lem = label-from-insertion-lem S₁ S₂ T (canonical-type (tree-dim S₁) S₁) L M d l2
-label-from-insertion-phere (Join S₁ S₂) (BExt P) (Susp T) L M d p = sym≈stm (≈SArr-proj₁ lem)
+label-from-insertion-phere {S = Join S₁ S₂} L (BExt P) {Susp T} M d p = sym≈stm (≈SArr-proj₁ lem)
   where
     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, _) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path (Susp T))) >>=′ (M ,, _)
     lem = label-from-insertion-lem S₁ S₂ (Susp T) (branch-type S₁ P) L M d p
-label-from-insertion-phere (Join S₁ S₂) (BShift P) T L M d p = refl≈stm
+label-from-insertion-phere L (BShift P) M d p = refl≈stm
 
-label-from-insertion-Ty : (S : Tree n)
-                        → (P : Branch S l)
-                        → (T : Tree m)
-                        → .⦃ _ : has-trunk-height l T ⦄
-                        → {L : Label X S}
+label-from-insertion-Ty : {L : Label X S}
                         → Typing-Label Γ (L ,, As)
+                        → (P : Branch S l)
+                        → {T : Tree m}
                         → {M : Label X T}
                         → Typing-Label Γ (M ,, As)
+                        → .⦃ _ : has-trunk-height l T ⦄
                         → branch-type S P >>=′ (L ,, As)
                           ≈[ Γ ]sty
                           canonical-type (ih P) T >>=′ (M ,, As)
-                        → Typing-Label Γ (label-from-insertion S P T L M ,, As)
-label-from-insertion-Ty {As = As} (Join S₁ S₂) BHere T {L} (TyJoin x Lty Lty′) {M} Mty p
+                        → Typing-Label Γ (L >>l[ P ] M ,, As)
+label-from-insertion-Ty {S = Join S₁ S₂} {As = As} {L = L} (TyJoin x Lty Lty′) BHere {T} {M} Mty p
   = ++l-Ty Mty Lty′ (sym≈stm (≈SArr-proj₃ lem))
   where
     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, As) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, As)
     lem = label-from-insertion-lem S₁ S₂ T (disc-sty S₁) L M (suc (tree-dim S₁)) p
-label-from-insertion-Ty {As = As} (Join S₁ S₂) (BExt {n = n} P) (Susp T) {L} (TyJoin x LTy LTy′) {M} (TyJoin y MTy (TySing z)) p
-  = TyJoin y (label-from-insertion-Ty S₁ P T (label-typing-conv LTy lem) MTy lem2) (replace-label-Ty LTy′ z (≈SArr-proj₃ lem))
+label-from-insertion-Ty {S = Join S₁ S₂} {As = As} {L = L} (TyJoin x LTy LTy′) (BExt {n = n} P) {Susp T} {M} (TyJoin y MTy (TySing z)) p
+  = TyJoin y (label-from-insertion-Ty (label-typing-conv LTy lem) P MTy lem2) (replace-label-Ty LTy′ z (≈SArr-proj₃ lem))
   where
     lem : (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, As)) ≈[ _ ]sty
             (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
@@ -170,11 +168,11 @@ label-from-insertion-Ty {As = As} (Join S₁ S₂) (BExt {n = n} P) (Susp T) {L}
         ≈⟨ reflexive≈sty (map-sty-ext-label (canonical-type (ih P) T) (M ,, As)) ⟩
       canonical-type (ih P) T >>=′ (label₁ (M ,, As)) ∎
 
-label-from-insertion-Ty {As = As} (Join S₁ S₂) (BShift {n = n} P) T {L} (TyJoin x Lty Lty′) {M} Mty p
+label-from-insertion-Ty {S = Join S₁ S₂} {As = As} {L = L} (TyJoin x Lty Lty′) (BShift {n = n} P) {T} {M} Mty p
   = TyJoin x (label-typing-conv Lty (≈SArr refl≈stm
                                            refl≈sty
-                                           (sym≈stm (label-from-insertion-phere S₂ P T (L ∘ PShift) M (ih P) lem))))
-             (label-from-insertion-Ty S₂ P T Lty′ Mty lem)
+                                           (sym≈stm (label-from-insertion-phere (L ∘ PShift) P M (ih P) lem))))
+             (label-from-insertion-Ty Lty′ P Mty lem)
 
   where
     open Reasoning sty-setoid-≈
@@ -188,15 +186,14 @@ label-from-insertion-Ty {As = As} (Join S₁ S₂) (BShift {n = n} P) T {L} (TyJ
         ≈⟨ p ⟩
       canonical-type (ih P) T >>=′ (M ,, As) ∎
 
-label-from-insertion-eq : (S : Tree n)
+label-from-insertion-eq : (L : Label X S)
                         → (P : Branch S l)
-                        → (T : Tree m)
-                        → .⦃ _ : has-trunk-height l T ⦄
-                        → (L : Label X S)
+                        → {T : Tree m}
                         → (M : Label X T)
+                        → .⦃ _ : has-trunk-height l T ⦄
                         → branch-type S P >>=′ (L ,, As) ≈[ Γ ]sty canonical-type (ih P) T >>=′ (M ,, As)
-                        → label-from-insertion S P T L M ≈[ Γ ]l label-from-insertion′ S P T L M
-label-from-insertion-eq (Join S₁ S₂) BHere T L M p
+                        → L >>l[ P ] M ≈[ Γ ]l L >>l′[ P ] M
+label-from-insertion-eq {S = Join S₁ S₂} L BHere {T} M p
   = trans≈l (++l-eq M (L ∘ PShift) (sym≈stm (≈SArr-proj₃ lem)))
             (sym≈l (replace-label-eq (M ++l′ L ∘ PShift)
                                      (L PHere)
@@ -204,7 +201,7 @@ label-from-insertion-eq (Join S₁ S₂) BHere T L M p
   where
     lem : SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, _) ≈[ _ ]sty SArr SHere S⋆ (SPath (last-path T)) >>=′ (M ,, _)
     lem = label-from-insertion-lem S₁ S₂ T (disc-sty S₁) L M (suc (tree-dim S₁)) p
-label-from-insertion-eq {As = As} (Join S₁ S₂) (BExt {n = n} P) (Susp T) L M p = γ
+label-from-insertion-eq {S = Join S₁ S₂} {As = As} L (BExt {n = n} P) {Susp T} M p = γ
   where
     lem : (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
           ≈[ _ ]sty
@@ -234,17 +231,17 @@ label-from-insertion-eq {As = As} (Join S₁ S₂) (BExt {n = n} P) (Susp T) L M
         ≈⟨ reflexive≈sty (map-sty-ext-label (canonical-type (ih P) T) (M ,, As)) ⟩
       canonical-type (ih P) T >>=′ (label₁ (M ,, As)) ∎
 
-    γ : label-from-insertion (Join S₁ S₂) (BExt P) (Susp T) L M
+    γ : L >>l[ BExt P ] M
         ≈[ _ ]l
-        label-from-insertion′ (Join S₁ S₂) (BExt P) (Susp T) L M
+        L >>l′[ BExt P ] M
     γ .get PHere = ≈SArr-proj₁ lem
-    γ .get (PExt Z) = label-from-insertion-eq S₁ P T (L ∘ PExt) (M ∘ PExt) lem2 .get Z
+    γ .get (PExt Z) = label-from-insertion-eq (L ∘ PExt) P (M ∘ PExt) lem2 .get Z
     γ .get (PShift Z) = replace-label-eq (L ∘ PShift) (M (PShift PHere)) (≈SArr-proj₃ lem) .get Z
 
-label-from-insertion-eq (Join S₁ S₂) (BShift P) T L M p .get PHere = refl≈stm
-label-from-insertion-eq (Join S₁ S₂) (BShift P) T L M p .get (PExt Z) = refl≈stm
-label-from-insertion-eq {As = As} (Join S₁ S₂) (BShift {n = n} P) T L M p .get (PShift Z)
-  = label-from-insertion-eq S₂ P T (L ∘ PShift) M lem .get Z
+label-from-insertion-eq L (BShift P) M p .get PHere = refl≈stm
+label-from-insertion-eq L (BShift P) M p .get (PExt Z) = refl≈stm
+label-from-insertion-eq {S = Join S₁ S₂} {As = As} L (BShift {n = n} P) {T} M p .get (PShift Z)
+  = label-from-insertion-eq (L ∘ PShift) P M lem .get Z
   where
     open Reasoning sty-setoid-≈
     lem : branch-type S₂ P >>=′ ((L ∘ PShift) ,, As)

@@ -12,6 +12,7 @@ open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Dyck
 
+infix 4 _≃d_
 data _≃d_ : Dyck n d → Dyck n′ d′ → Set where
   End≃ : End ≃d End
   ⇑≃ : dy ≃d ey → ⇑ dy ≃d ⇑ ey

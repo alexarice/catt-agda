@@ -62,15 +62,16 @@ hasInsertion {l = l} {S = S} As L P {T = T} M p [ tty ] = [ begin
   stm-to-term (SCoh S As (L ,, S⋆))
     ≈˘⟨ reflexive≈tm (stm-to-other-prop (SCoh S As (L ,, S⋆)) .get) ⟩
   stm-to-term (SCoh S As (label-to-other L ,, S⋆))
-    ≈⟨ Rule≈ (Insert _ S As (label-to-other L) P T (label-to-other M) lem) (transport-typing tty (sym≃tm (stm-to-other-prop (SCoh S As (L ,, S⋆)) .get))) ⟩
-  stm-to-term (SCoh (insertion-tree S P T) (As >>=′ (κ S P T ,, S⋆)) ((label-from-insertion S P T (label-to-other L) (label-to-other M)) ,, S⋆))
-    ≈˘⟨ reflexive≈tm (SCoh≃ (insertion-tree S P T) (refl≃sty {A = As >>=′ (κ S P T ,, S⋆)}) (label-from-insertion-map stm-to-other S P T L M) (refl≃sty {A = S⋆}) .get) ⟩
-  stm-to-term
-    (SCoh (insertion-tree S P T)
-     (As >>=′ (κ S P T ,, S⋆))
-     (label-to-other (label-from-insertion S P T L M) ,, S⋆))
-    ≈⟨ reflexive≈tm (stm-to-other-prop (SCoh (insertion-tree S P T) (As >>=′ (κ S P T ,, S⋆)) (label-from-insertion S P T L M ,, S⋆)) .get) ⟩
-  stm-to-term (SCoh (insertion-tree S P T) (As >>=′ (κ S P T ,, S⋆)) (label-from-insertion S P T L M ,, S⋆)) ∎ ]
+    ≈⟨ Rule≈ (Insert _ S As (label-to-other L) P T (label-to-other M) lem)
+             (transport-typing tty (sym≃tm (stm-to-other-prop (SCoh S As (L ,, S⋆)) .get))) ⟩
+  stm-to-term (SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (label-to-other L >>l[ P ] label-to-other M ,, S⋆))
+    ≈˘⟨ reflexive≈tm (SCoh≃ (S >>[ P ] T)
+                            (refl≃sty {A = As >>=′ (κ S P T ,, S⋆)})
+                            (label-from-insertion-map stm-to-other L P M)
+                            (refl≃sty {A = S⋆}) .get) ⟩
+  stm-to-term (SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (label-to-other (L >>l[ P ] M) ,, S⋆))
+    ≈⟨ reflexive≈tm (stm-to-other-prop (SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (L >>l[ P ] M ,, S⋆)) .get) ⟩
+  stm-to-term (SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (L >>l[ P ] M ,, S⋆)) ∎ ]
   where
     lem : label-to-other L ⌊ P ⌋p
           ≃stm

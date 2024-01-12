@@ -45,109 +45,104 @@ branch-type (Join S T) BHere = map-sty-ext (disc-sty S)
 branch-type (Join S T) (BExt P) = map-sty-ext (branch-type S P)
 branch-type (Join S T) (BShift P) = map-sty-shift (branch-type T P)
 
-insertion-tree-size :  (S : Tree n) → (p : Branch S d) → (T : Tree m) → .⦃ has-trunk-height d T ⦄ → ℕ
-insertion-tree : (S : Tree n) → (p : Branch S d) → (T : Tree m) → .⦃ _ : has-trunk-height d T ⦄ → Tree (insertion-tree-size S p T)
+infix 5 _>>[_]_
+insertion-size :  (S : Tree n) → (p : Branch S d) → (T : Tree m) → .⦃ has-trunk-height d T ⦄ → ℕ
+_>>[_]_ : (S : Tree n) → (p : Branch S d) → (T : Tree m) → .⦃ _ : has-trunk-height d T ⦄ → Tree (insertion-size S p T)
 
-insertion-tree-size {m = m} (Join S₁ S₂) BHere T = ++t-length T S₂
-insertion-tree-size (Join {m = m} S₁ S₂) (BExt P) (Susp T) = m + suc (suc (insertion-tree-size S₁ P T))
-insertion-tree-size (Join {n = n} S₁ S₂) (BShift P) T = insertion-tree-size S₂ P T + suc (suc n)
+insertion-size {m = m} (Join S₁ S₂) BHere T = ++t-length T S₂
+insertion-size (Join {m = m} S₁ S₂) (BExt P) (Susp T) = m + suc (suc (insertion-size S₁ P T))
+insertion-size (Join {n = n} S₁ S₂) (BShift P) T = insertion-size S₂ P T + suc (suc n)
 
-insertion-tree (Join S₁ S₂) BHere T = T ++t S₂
-insertion-tree (Join S₁ S₂) (BExt P) (Susp T) = Join (insertion-tree S₁ P T) S₂
-insertion-tree (Join S₁ S₂) (BShift P) T = Join S₁ (insertion-tree S₂ P T)
+Join S₁ S₂ >>[ BHere ] T = T ++t S₂
+Join S₁ S₂ >>[ BExt P ] (Susp T) = Join (S₁ >>[ P ] T) S₂
+Join S₁ S₂ >>[ BShift P ] T = Join S₁ (S₂ >>[ P ] T)
 
 ι : (S : Tree n)
-               → (p : Branch S d)
-               → (T : Tree m)
-               → .⦃ _ : has-trunk-height d T ⦄
-               → Label (someTree (insertion-tree S p T)) T
+  → (P : Branch S d)
+  → (T : Tree m)
+  → .⦃ _ : has-trunk-height d T ⦄
+  → Label (someTree (S >>[ P ] T)) T
 ι (Join S₁ S₂) BHere T = ap (++t-inc-left T S₂)
-ι (Join S₁ S₂) (BExt p) (Susp T) = unrestrict-label (map-ext (ι S₁ p T ,, S⋆))
-ι (Join S₁ S₂) (BShift p) T P = SShift (ι S₂ p T P)
+ι (Join S₁ S₂) (BExt P) (Susp T) = unrestrict-label (map-ext (ι S₁ P T ,, S⋆))
+ι (Join S₁ S₂) (BShift P) T Z = SShift (ι S₂ P T Z)
 
 κ′ : (S : Tree n)
-                → (p : Branch S d)
-                → (T : Tree m)
-                → .⦃ _ : has-trunk-height d T ⦄
-                → (As : STy (someTree (chop-trunk d T)))
-                → .⦃ has-dim (ih p ∸ d) As ⦄
-                → Label (someTree (insertion-tree S p T)) S
+   → (P : Branch S d)
+   → (T : Tree m)
+   → .⦃ _ : has-trunk-height d T ⦄
+   → (As : STy (someTree (chop-trunk d T)))
+   → .⦃ has-dim (ih P ∸ d) As ⦄
+   → Label (someTree (S >>[ P ] T)) S
 κ′ (Join S₁ S₂) BHere T As
   = label-between-++t (replace-label (stm-to-label (Susp S₁) (sty-to-coh As) As) SHere) SPath
-κ′ (Join S₁ S₂) (BExt p) (Susp T) As
-  = label-between-joins (κ′ S₁ p T As) SPath
-κ′ (Join S₁ S₂) (BShift p) T A
-  = label-between-joins SPath (κ′ S₂ p T A)
+κ′ (Join S₁ S₂) (BExt P) (Susp T) As
+  = label-between-joins (κ′ S₁ P T As) SPath
+κ′ (Join S₁ S₂) (BShift P) T A
+  = label-between-joins SPath (κ′ S₂ P T A)
 
 κ : (S : Tree n)
-               → (p : Branch S d)
-               → (T : Tree m)
-               → .⦃ _ : has-trunk-height d T ⦄
-               → Label (someTree (insertion-tree S p T)) S
+  → (P : Branch S d)
+  → (T : Tree m)
+  → .⦃ _ : has-trunk-height d T ⦄
+  → Label (someTree (S >>[ P ] T)) S
 κ (Join S₁ S₂) BHere T
   = label-between-++t (replace-label (canonical-label (Susp S₁) T) SHere) SPath
-κ (Join S₁ S₂) (BExt p) (Susp T)
-  = label-between-joins (κ S₁ p T) SPath
-κ (Join S₁ S₂) (BShift p) T
-  = label-between-joins SPath (κ S₂ p T)
+κ (Join S₁ S₂) (BExt P) (Susp T)
+  = label-between-joins (κ S₁ P T) SPath
+κ (Join S₁ S₂) (BShift P) T
+  = label-between-joins SPath (κ S₂ P T)
 
-label-from-insertion : (S : Tree n)
-                     → (p : Branch S d)
-                     → (T : Tree m)
-                     → .⦃ _ : has-trunk-height d T ⦄
-                     → (L : Label X S)
-                     → (M : Label X T)
-                     → Label X (insertion-tree S p T)
-label-from-insertion (Join S₁ S₂) BHere T L M = M ++l (L ∘ PShift)
-label-from-insertion (Join S₁ S₂) (BExt p) (Susp T) L M PHere = M PHere
-label-from-insertion (Join S₁ S₂) (BExt p) (Susp T) L M (PExt Z) = label-from-insertion S₁ p T (L ∘ PExt) (M ∘ PExt) Z
-label-from-insertion (Join S₁ S₂) (BExt p) (Susp T) L M (PShift Z) = replace-label (L ∘ PShift) (M (PShift PHere)) Z
-label-from-insertion (Join S₁ S₂) (BShift p) T L M PHere = L PHere
-label-from-insertion (Join S₁ S₂) (BShift p) T L M (PExt Z) = L (PExt Z)
-label-from-insertion (Join S₁ S₂) (BShift p) T L M (PShift Z) = label-from-insertion S₂ p T (L ∘ PShift) M Z
+infix 5 _>>l[_]_ _>>l′[_]_
+_>>l[_]_ : (L : Label X S)
+         → (p : Branch S d)
+         → (M : Label X T)
+         → .⦃ _ : has-trunk-height d T ⦄
+         → Label X (S >>[ p ] T)
+_>>l[_]_ L BHere M = M ++l (L ∘ PShift)
+_>>l[_]_ {T = Susp T} L (BExt P) M PHere = M PHere
+_>>l[_]_ {T = Susp T} L (BExt P) M (PExt Z) = (L ∘ PExt >>l[ P ] M ∘ PExt) Z
+_>>l[_]_ {T = Susp T} L (BExt P) M (PShift Z) = replace-label (L ∘ PShift) (M (PShift PHere)) Z
+_>>l[_]_ L (BShift P) M PHere = L PHere
+_>>l[_]_ L (BShift P) M (PExt Z) = L (PExt Z)
+_>>l[_]_ L (BShift P) M (PShift Z) = (L ∘ PShift >>l[ P ] M) Z
 
-label-from-insertion′ : (S : Tree n)
-                      → (p : Branch S d)
-                      → (T : Tree m)
-                      → .⦃ _ : has-trunk-height d T ⦄
-                      → (L : Label X S)
-                      → (M : Label X T)
-                      → Label X (insertion-tree S p T)
-label-from-insertion′ (Join S₁ S₂) BHere T L M = replace-label (M ++l′ (L ∘ PShift)) (L PHere)
-label-from-insertion′ (Join S₁ S₂) (BExt p) (Susp T) L M PHere = L PHere
-label-from-insertion′ (Join S₁ S₂) (BExt p) (Susp T) L M (PExt Z) = label-from-insertion′ S₁ p T (L ∘ PExt) (M ∘ PExt) Z
-label-from-insertion′ (Join S₁ S₂) (BExt p) (Susp T) L M (PShift Z) = L (PShift Z)
-label-from-insertion′ (Join S₁ S₂) (BShift p) T L M PHere = L PHere
-label-from-insertion′ (Join S₁ S₂) (BShift p) T L M (PExt Z) = L (PExt Z)
-label-from-insertion′ (Join S₁ S₂) (BShift p) T L M (PShift Z) = label-from-insertion′ S₂ p T (L ∘ PShift) M Z
+_>>l′[_]_ : (L : Label X S)
+          → (P : Branch S d)
+          → (M : Label X T)
+          → .⦃ _ : has-trunk-height d T ⦄
+          → Label X (S >>[ P ] T)
+_>>l′[_]_ L BHere M = replace-label (M ++l′ (L ∘ PShift)) (L PHere)
+_>>l′[_]_ {T = Susp T} L (BExt P) M PHere = L PHere
+_>>l′[_]_ {T = Susp T} L (BExt P) M (PExt Z) = (L ∘ PExt >>l′[ P ] M ∘ PExt) Z
+_>>l′[_]_ {T = Susp T} L (BExt P) M (PShift Z) = L (PShift Z)
+_>>l′[_]_ L (BShift P) M PHere = L PHere
+_>>l′[_]_ L (BShift P) M (PExt Z) = L (PExt Z)
+_>>l′[_]_ L (BShift P) M (PShift Z) = (L ∘ PShift >>l′[ P ] M) Z
 
 bh-<-ih : (p : Branch S d) → d < ih p
 bh-<-ih BHere = s≤s z≤n
 bh-<-ih (BExt p) = s≤s (bh-<-ih p)
 bh-<-ih (BShift p) = bh-<-ih p
 
-prune-tree-lem : (S : Tree n)
-               → (p : Branch S d)
-               → has-trunk-height d (n-disc (pred (ih p)))
-prune-tree-lem S p = has-trunk-height-n-disc (≤-pred (bh-<-ih p))
+prune-lem : (P : Branch S d)
+          → has-trunk-height d (n-disc (pred (ih P)))
+prune-lem P = has-trunk-height-n-disc (≤-pred (bh-<-ih P))
 
-prune-tree : (S : Tree n)
-           → (p : Branch S d)
-           → Tree (insertion-tree-size S p (n-disc (pred (ih p))) ⦃ prune-tree-lem S p ⦄)
-prune-tree S p = insertion-tree S p (n-disc (pred (ih p))) ⦃ prune-tree-lem S p ⦄
+infix 5 _//t_
+_//t_ : (S : Tree n)
+      → (P : Branch S d)
+      → Tree (insertion-size S P (n-disc (pred (ih P))) ⦃ prune-lem P ⦄)
+S //t p = (S >>[ p ] (n-disc (pred (ih p)))) ⦃ prune-lem p ⦄
 
-label-from-prune : (S : Tree n)
-                 → (p : Branch S d)
-                 → (L : Label X S)
-                 → (M : Label X (n-disc (pred (ih p))))
-                 → Label X (prune-tree S p)
-label-from-prune S p L M = label-from-insertion S p (n-disc (pred (ih p))) ⦃ prune-tree-lem S p ⦄ L M
+infix 5 _>>p[_]_
+_>>p[_]_ : (L : Label X S)
+         → (P : Branch S d)
+         → (M : Label X (n-disc (pred (ih P))))
+         → Label X (S //t P)
+L >>p[ P ] M = (L >>l[ P ] M) ⦃ prune-lem P ⦄
 
-module _ where
-  open ≡-Reasoning
-  κ-prune : (S : Tree n)
-              → (p : Branch S d)
-              → Label (someTree (prune-tree S p)) S
-  κ-prune {d = d} S p = let
-    instance _ = prune-tree-lem S p
-    in κ S p (n-disc (pred (ih p)))
+πt : (P : Branch S d)
+   → Label (someTree (S //t P)) S
+πt P = let
+  instance _ = prune-lem P
+  in κ _ P (n-disc (pred (ih P)))

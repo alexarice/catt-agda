@@ -9,6 +9,7 @@ open import Catt.Pasting
 
 open Rule
 
+infix 4 _≈[_]tm_ _≈[_]ty_ _≈[_]s_
 data _≈[_]tm_ : Tm n → Ctx n → Tm n → Set
 data _≈[_]ty_ : Ty n → Ctx n → Ty n → Set
 data _≈[_]s_ : (σ : Sub n m A) → Ctx m → (τ : Sub n′ m B) → Set

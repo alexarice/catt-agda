@@ -34,7 +34,7 @@ HasPruning = ∀ {m n}
            → (peak-term p [ σ ]tm ≃tm identity-term B t)
            → {C : Ty m}
            → Typing-Tm Γ (Coh ⌊ dy ⌋d A σ) C
-           → Coh ⌊ dy ⌋d A σ ≈[ Γ ]tm Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (prune-sub p σ)
+           → Coh ⌊ dy ⌋d A σ ≈[ Γ ]tm Coh ⌊ dy // p ⌋d (A [ π p ]ty) (σ //s p)
 
 module Conditions (prune : HasPruning) where
   open import Catt.Typing.Rule rule
@@ -43,9 +43,9 @@ module Conditions (prune : HasPruning) where
   lift-rule {dy = dy} {Γ = Γ} {σ = σ} {t = t} {A = A} p {B} pf {A = C} tty = begin
     Coh ⌊ dy ⌋d A (lift-sub σ)
       ≈⟨ prune {Γ = (Γ , C)} p lem {lift-ty _} tty ⟩
-    Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (prune-sub p (lift-sub σ))
-      ≈⟨ Coh≈ refl≈ty (reflexive≈s (lift-prune-sub p σ)) ⟩
-    Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (lift-sub (prune-sub p σ)) ∎
+    Coh ⌊ dy // p ⌋d (A [ π p ]ty) (lift-sub σ //s p)
+      ≈⟨ Coh≈ refl≈ty (reflexive≈s (lift-//s p σ)) ⟩
+    Coh ⌊ dy // p ⌋d (A [ π p ]ty) (lift-sub (σ //s p)) ∎
     where
       lem : (peak-term p [ lift-sub σ ]tm) ≃tm identity-term (lift-ty B) (lift-tm t)
       lem = begin
@@ -67,33 +67,33 @@ module Conditions (prune : HasPruning) where
       ≈˘⟨ reflexive≈tm (Coh≃ (susp-⌊⌋d dy) refl≃ty refl≃s) ⟩
     Coh ⌊ susp-dyck dy ⌋d (susp-ty A) (susp-sub σ)
       ≈⟨ prune (⇓pk (susp-peak p)) lem (transport-typing tty (Coh≃ (sym≃c (susp-⌊⌋d dy)) refl≃ty refl≃s)) ⟩
-    Coh ⌊ prune-peak (susp-peak p) ⌋d
-        (susp-ty A [ prune-project (susp-peak p) ]ty)
-        (prune-sub (susp-peak p) (susp-sub σ))
-      ≈⟨ reflexive≈tm (Coh≃ l1 l2 (susp-prune-sub p σ)) ⟩
-    Coh (susp-ctx ⌊ prune-peak p ⌋d)
-        (susp-ty (A [ prune-project p ]ty))
-        (susp-sub (prune-sub p σ)) ∎
+    Coh ⌊ susp-dyck dy // (susp-peak p) ⌋d
+        (susp-ty A [ π (susp-peak p) ]ty)
+        (susp-sub σ //s susp-peak p)
+      ≈⟨ reflexive≈tm (Coh≃ l1 l2 (susp-//s p σ)) ⟩
+    Coh (susp-ctx ⌊ dy // p ⌋d)
+        (susp-ty (A [ π p ]ty))
+        (susp-sub (σ //s p)) ∎
     where
-      l1 : ⌊ prune-peak (susp-peak p) ⌋d ≃c
-            susp-ctx ⌊ prune-peak p ⌋d
+      l1 : ⌊ susp-dyck dy // (susp-peak p) ⌋d ≃c
+            susp-ctx ⌊ dy // p ⌋d
       l1 = begin
-        < ⌊ prune-peak (susp-peak p) ⌋d >c
+        < ⌊ susp-dyck dy // (susp-peak p) ⌋d >c
           ≈⟨ ⌊⌋d-≃ (prune-susp-peak p) ⟩
-        < ⌊ susp-dyck (prune-peak p) ⌋d >c
-          ≈⟨ susp-⌊⌋d (prune-peak p) ⟩
-        < susp-ctx ⌊ prune-peak p ⌋d >c ∎
+        < ⌊ susp-dyck (dy // p) ⌋d >c
+          ≈⟨ susp-⌊⌋d (dy // p) ⟩
+        < susp-ctx ⌊ dy // p ⌋d >c ∎
         where
           open Reasoning ctx-setoid
 
-      l2 : (susp-ty A [ prune-project (susp-peak p) ]ty) ≃ty
-            susp-ty (A [ prune-project p ]ty)
+      l2 : (susp-ty A [ π (susp-peak p) ]ty) ≃ty
+            susp-ty (A [ π p ]ty)
       l2 = begin
-        < susp-ty A [ prune-project (susp-peak p) ]ty >ty
-          ≈⟨ sub-action-≃-ty refl≃ty (susp-prune-project p) ⟩
-        < susp-ty A [ susp-sub (prune-project p) ]ty >ty
-          ≈˘⟨ susp-functorial-ty (prune-project p) A ⟩
-        < susp-ty (A [ prune-project p ]ty) >ty ∎
+        < susp-ty A [ π (susp-peak p) ]ty >ty
+          ≈⟨ sub-action-≃-ty refl≃ty (susp-π p) ⟩
+        < susp-ty A [ susp-sub (π p) ]ty >ty
+          ≈˘⟨ susp-functorial-ty (π p) A ⟩
+        < susp-ty (A [ π p ]ty) >ty ∎
         where
           open Reasoning ty-setoid
 
@@ -116,9 +116,9 @@ module Conditions (prune : HasPruning) where
   sub-rule {dy = dy} {σ = σ} {t = t} {A = A} p {B} pf {σ = τ} σty tty = begin
     Coh ⌊ dy ⌋d A (τ ● σ)
       ≈⟨ prune p lem tty ⟩
-    Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (prune-sub p (τ ● σ))
-      ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (prune-sub-sub p σ τ)) ⟩
-    Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (τ ● prune-sub p σ) ∎
+    Coh ⌊ dy // p ⌋d (A [ π p ]ty) (τ ● σ //s p)
+      ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (//s-sub p σ τ)) ⟩
+    Coh ⌊ dy // p ⌋d (A [ π p ]ty) (τ ● (σ //s p)) ∎
     where
       lem : (peak-term p [ τ ● σ ]tm) ≃tm identity-term (B [ τ ]ty) (t [ τ ]tm)
       lem = begin

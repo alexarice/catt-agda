@@ -19,4 +19,4 @@ Pruning : (Γ : Ctx m)
 Pruning Γ dy A p σ .len = _
 Pruning Γ dy A p σ .tgtCtx = Γ
 Pruning Γ dy A p σ .lhs = Coh ⌊ dy ⌋d A σ
-Pruning Γ dy A p σ .rhs = Coh ⌊ prune-peak p ⌋d (A [ prune-project p ]ty) (prune-sub p σ)
+Pruning Γ dy A p σ .rhs = Coh ⌊ dy // p ⌋d (A [ π p ]ty) (σ //s p)

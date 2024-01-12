@@ -83,7 +83,7 @@ replace-label L P PHere = P
 replace-label L P (PExt Z) = L (PExt Z)
 replace-label L P (PShift Z) = L (PShift Z)
 
-infixr 5 _++l_ _++l′_
+infixr 6 _++l_ _++l′_
 _++l_ : Label X S
       → Label X T
       → Label X (S ++t T)

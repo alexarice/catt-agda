@@ -41,7 +41,7 @@ trunk-height (Join T (Join T₁ T₂)) = 0
 ++t-length {m = m} Sing T = m
 ++t-length (Join {x} S S′) T = ++t-length S′ T + (2 + x)
 
-infixr 5 _++t_
+infixr 6 _++t_
 _++t_ : (S : Tree n) → (T : Tree m) → Tree (++t-length S T)
 Sing ++t T = T
 Join S S′ ++t T = Join S (S′ ++t T)

@@ -43,7 +43,7 @@ HasInsertion = ∀ {m n l n′}
              → Typing-STm Γ (SCoh S As (L ,, S⋆)) Cs
              → (SCoh S As (L ,, S⋆))
                ≈[ Γ ]stm
-               SCoh (insertion-tree S P T) (As >>=′ (κ S P T ,, S⋆)) (label-from-insertion S P T L M ,, S⋆)
+               SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (L >>l[ P ] M ,, S⋆)
 
 module Conditions (ins : HasInsertion) where
   open import Catt.Typing.Rule rule
@@ -57,15 +57,15 @@ module Conditions (ins : HasInsertion) where
       ≈˘⟨ reflexive≈tm (lift-stm-to-term (SCoh S As (L ,, S⋆))) ⟩
     stm-to-term (SCoh S As (lift-label (L ,, S⋆)))
       ≈⟨ lem .get ⟩
-    stm-to-term (SCoh (insertion-tree S P T)
+    stm-to-term (SCoh (S >>[ P ] T)
                       (As >>=′ (κ S P T ,, S⋆))
-                      (lift-label (label-from-insertion S P T L M ,, S⋆)))
-      ≈⟨ reflexive≈tm (lift-stm-to-term (SCoh (insertion-tree S P T)
+                      (lift-label (L >>l[ P ] M ,, S⋆)))
+      ≈⟨ reflexive≈tm (lift-stm-to-term (SCoh (S >>[ P ] T)
                                               (As >>=′ (κ S P T ,, S⋆))
-                                              (label-from-insertion S P T L M ,, S⋆))) ⟩
-    lift-tm (stm-to-term (SCoh (insertion-tree S P T)
+                                              (L >>l[ P ] M ,, S⋆))) ⟩
+    lift-tm (stm-to-term (SCoh (S >>[ P ] T)
                                (As >>=′ (κ S P T ,, S⋆))
-                               (label-from-insertion S P T L M ,, S⋆))) ∎
+                               (L >>l[ P ] M ,, S⋆))) ∎
     where
       l1 : lift-stm (L ⌊ P ⌋p)
            ≃stm
@@ -81,22 +81,22 @@ module Conditions (ins : HasInsertion) where
 
       lem : SCoh S As (lift-label (L ,, S⋆))
             ≈[ Γ , A ]stm
-            SCoh (insertion-tree S P T)
+            SCoh (S >>[ P ] T)
                  (As >>=′ (κ S P T ,, S⋆))
-                 (lift-label (label-from-insertion S P T L M ,, S⋆))
+                 (lift-label (L >>l[ P ] M ,, S⋆))
       lem = begin
         SCoh S As (lift-label (L ,, S⋆))
           ≈⟨ ins As (lift-stm ∘ L) P (lift-stm ∘ M) l1
                  [ (transport-typing-full tty
                                           (sym≃tm (lift-stm-to-term (SCoh S As (L ,, S⋆))))
                                           (sym≃ty (to-sty-to-type (lift-ty C)))) ] ⟩
-        SCoh (insertion-tree S P T)
+        SCoh (S >>[ P ] T)
              (As >>=′ (κ S P T ,, S⋆))
-             (label-from-insertion S P T (lift-stm ∘ L) (lift-stm ∘ M) ,, S⋆)
-          ≈˘⟨ reflexive≈stm (SCoh≃ (insertion-tree S P T) refl≃sty (label-from-insertion-map lift-stm S P T L M) refl≃sty) ⟩
-        SCoh (insertion-tree S P T)
+             (lift-stm ∘ L >>l[ P ] lift-stm ∘ M ,, S⋆)
+          ≈˘⟨ reflexive≈stm (SCoh≃ (S >>[ P ] T) refl≃sty (label-from-insertion-map lift-stm L P M) refl≃sty) ⟩
+        SCoh (S >>[ P ] T)
              (As >>=′ (κ S P T ,, S⋆))
-             (lift-label (label-from-insertion S P T L M ,, S⋆)) ∎
+             (lift-label (L >>l[ P ] M ,, S⋆)) ∎
         where
           open Reasoning stm-setoid-≈
       open Reasoning (tm-setoid-≈ _)
@@ -110,15 +110,15 @@ module Conditions (ins : HasInsertion) where
       ≈˘⟨ reflexive≈tm (susp-stm-to-term (SCoh S As (L ,, S⋆))) ⟩
     stm-to-term (susp-stm (SCoh S As (L ,, S⋆)))
       ≈⟨ lem .get ⟩
-    stm-to-term (susp-stm (SCoh (insertion-tree S P T)
+    stm-to-term (susp-stm (SCoh (S >>[ P ] T)
                                 (As >>=′ (κ S P T ,, S⋆))
-                                (label-from-insertion S P T L M ,, S⋆)))
-      ≈⟨ reflexive≈tm (susp-stm-to-term (SCoh (insertion-tree S P T)
+                                (L >>l[ P ] M ,, S⋆)))
+      ≈⟨ reflexive≈tm (susp-stm-to-term (SCoh (S >>[ P ] T)
                                               (As >>=′ (κ S P T ,, S⋆))
-                                              (label-from-insertion S P T L M ,, S⋆))) ⟩
-    susp-tm (stm-to-term (SCoh (insertion-tree S P T)
+                                              (L >>l[ P ] M ,, S⋆))) ⟩
+    susp-tm (stm-to-term (SCoh (S >>[ P ] T)
                                (As >>=′ (κ S P T ,, S⋆))
-                               (label-from-insertion S P T L M ,, S⋆))) ∎
+                               (L >>l[ P ] M ,, S⋆))) ∎
     where
       instance .x : has-trunk-height (suc l) (Susp T)
       x = inst
@@ -152,18 +152,18 @@ module Conditions (ins : HasInsertion) where
         where
           open Reasoning sty-setoid
 
-      l3 : ap (label-from-insertion (Susp S) (BExt P) (Susp T) ⦃ _ ⦄ (susp-label-full L) (susp-label-full M) ,, S⋆)
+      l3 : ap (susp-label-full L >>l[ BExt P ] susp-label-full M ,, S⋆)
            ≃l
-           ap (susp-label-full (label-from-insertion S P T L M) ,, S⋆)
+           ap (susp-label-full ((L >>l[ P ] M) ⦃ it ⦄) ,, S⋆)
       l3 .get PHere = refl≃stm
-      l3 .get (PExt Z) = sym≃stm (label-from-insertion-map susp-stm S P T L M .get Z)
+      l3 .get (PExt Z) = sym≃stm (label-from-insertion-map susp-stm L P M ⦃ it ⦄ .get Z)
       l3 .get (PShift PHere) = refl≃stm
 
       lem : susp-stm (SCoh S As (L ,, S⋆))
             ≈[ susp-ctx Γ ]stm
-            susp-stm (SCoh (insertion-tree S P T)
+            susp-stm (SCoh (S >>[ P ] T)
                            (As >>=′ (κ S P T ,, S⋆))
-                           (label-from-insertion S P T L M ,, S⋆))
+                           (L >>l[ P ] M ,, S⋆))
       lem = begin
         SCoh S As (susp-label (L ,, S⋆))
           ≈⟨ reflexive≈stm (SCoh-unrestrict S As (susp-label (L ,, S⋆))) ⟩
@@ -177,17 +177,17 @@ module Conditions (ins : HasInsertion) where
                                           (trans≃tm (sym≃tm (susp-stm-to-term (SCoh S As (L ,, S⋆))))
                                                     (SCoh-unrestrict S As (susp-label (L ,, S⋆)) .get) )
                                           (sym≃ty (to-sty-to-type (susp-ty C)))) ] ⟩
-        SCoh (Susp (insertion-tree S P T ⦃ _ ⦄))
+        SCoh (Susp ((S >>[ P ] T) ⦃ _ ⦄))
              (susp-sty As >>=′ (κ (Susp S) (BExt P) (Susp T) ⦃ _ ⦄ ,, S⋆))
-             (label-from-insertion (Susp S) (BExt P) (Susp T) ⦃ it ⦄ (susp-label-full L) (susp-label-full M) ,, S⋆)
-          ≈⟨ reflexive≈stm (SCoh≃ (Susp (insertion-tree S P T ⦃ it ⦄)) l2 l3 refl≃sty) ⟩
-        SCoh (Susp (insertion-tree S P T))
+             (susp-label-full L >>l[ BExt P ] susp-label-full M ,, S⋆)
+          ≈⟨ reflexive≈stm (SCoh≃ (Susp ((S >>[ P ] T) ⦃ it ⦄)) l2 l3 refl≃sty) ⟩
+        SCoh (Susp (S >>[ P ] T))
              (susp-sty (As >>=′ (κ S P T ,, S⋆)))
-             (susp-label-full (label-from-insertion S P T L M) ,, S⋆)
-          ≈˘⟨ reflexive≈stm (SCoh-unrestrict (insertion-tree S P T)
+             (susp-label-full (L >>l[ P ] M) ,, S⋆)
+          ≈˘⟨ reflexive≈stm (SCoh-unrestrict (S >>[ P ] T)
                                              (As >>=′ (κ S P T ,, S⋆))
-                                             (susp-label (label-from-insertion S P T L M ,, S⋆))) ⟩
-        SCoh (insertion-tree S P T) (As >>=′ (κ S P T ,, S⋆)) (susp-label (label-from-insertion S P T L M ,, S⋆)) ∎
+                                             (susp-label (L >>l[ P ] M ,, S⋆))) ⟩
+        SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (susp-label (L >>l[ P ] M ,, S⋆)) ∎
         where
           open Reasoning stm-setoid-≈
 
@@ -213,9 +213,9 @@ module Conditions (ins : HasInsertion) where
 
       lem : SCoh S As (L ,, S⋆) [ σ ]stm
             ≈[ Δ ]stm
-            SCoh (insertion-tree S P T)
+            SCoh (S >>[ P ] T)
                  (As >>=′ (κ S P T ,, S⋆))
-                 (label-from-insertion S P T L M ,, S⋆) [ σ ]stm
+                 (L >>l[ P ] M ,, S⋆) [ σ ]stm
       lem = begin
         SCoh S As (L ,, S⋆) [ σ ]stm
           ≈⟨ reflexive≈stm (stm-sub-SCoh S As (L ,, S⋆) σ) ⟩
@@ -226,21 +226,21 @@ module Conditions (ins : HasInsertion) where
                  (_[ σ ]stm ∘ M)
                  l1
                  [ (transport-typing-full tty (stm-sub-SCoh S As (L ,, S⋆) σ .get) (sym≃ty (to-sty-to-type (C [ σ ]ty)))) ] ⟩
-        SCoh (insertion-tree S P T)
+        SCoh (S >>[ P ] T)
              (As >>=′ (κ S P T ,, S⋆))
-             (label-from-insertion S P T (λ x → (L x) [ σ ]stm) (λ x → (M x) [ σ ]stm) ,, S⋆)
-          ≈˘⟨ reflexive≈stm (SCoh≃ (insertion-tree S P T)
+             ((λ x → (L x) [ σ ]stm) >>l[ P ] (λ x → (M x) [ σ ]stm) ,, S⋆)
+          ≈˘⟨ reflexive≈stm (SCoh≃ (S >>[ P ] T)
                            refl≃sty
-                           (label-from-insertion-map (λ x → x [ σ ]stm) S P T L M)
+                           (label-from-insertion-map (_[ σ ]stm) L P M)
                            refl≃sty) ⟩
-        SCoh (insertion-tree S P T)
+        SCoh (S >>[ P ] T)
              (As >>=′ (κ S P T ,, S⋆))
-             ((label-from-insertion S P T L M ,, S⋆) [ σ ]l)
-          ≈˘⟨ reflexive≈stm (stm-sub-SCoh (insertion-tree S P T)
+             ((L >>l[ P ] M ,, S⋆) [ σ ]l)
+          ≈˘⟨ reflexive≈stm (stm-sub-SCoh (S >>[ P ] T)
                                           (As >>=′ (κ S P T ,, S⋆))
-                                          (label-from-insertion S P T L M ,, S⋆) σ) ⟩
-        SCoh (insertion-tree S P T)
+                                          (L >>l[ P ] M ,, S⋆) σ) ⟩
+        SCoh (S >>[ P ] T)
              (As >>=′ (κ S P T ,, S⋆))
-             (label-from-insertion S P T L M ,, S⋆) [ σ ]stm ∎
+             (L >>l[ P ] M ,, S⋆) [ σ ]stm ∎
         where
           open Reasoning stm-setoid-≈

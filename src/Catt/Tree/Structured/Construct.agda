@@ -4,11 +4,13 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Suspension
+open import Catt.Globular
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Globular
+open import Catt.Tree.Structured.ToTerm
 
 lift-stm : STm (Other n) → STm (Other (suc n))
 lift-sty : STy (Other n) → STy (Other (suc n))
@@ -175,3 +177,8 @@ stm-to-label : (S : Tree n)
              → Label X S
 stm-to-label Sing a As P = a
 stm-to-label (Susp S) a (SArr s As t) = extend-disc-label (stm-to-label S s As) t a
+
+getPathType : (P : Path S) → STy (someTree S)
+getPathType PHere = S⋆
+getPathType (PExt P) = map-sty-ext (getPathType P)
+getPathType (PShift P) = map-sty-shift (getPathType P)

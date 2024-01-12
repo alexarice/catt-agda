@@ -80,7 +80,7 @@ canonical-stm-is-comp d S = begin
   where
     open Reasoning stm-setoid-≈
 
-conv-rule : ⦃ NonZero n ⦄
+conv-rule : .⦃ NonZero n ⦄
           → {σ : Sub (disc-size n) m ⋆}
           → ConvRule (DiscRemoval Γ σ)
 conv-rule {n = n} {σ = ⟨ σ , s ⟩} tty with coh-sub-ty tty

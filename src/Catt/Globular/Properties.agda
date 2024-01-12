@@ -166,6 +166,12 @@ ty-base-dim : (A : Ty n) → ty-dim (ty-base A) ≡ pred (ty-dim A)
 ty-base-dim ⋆ = refl
 ty-base-dim (s ─⟨ A ⟩⟶ t) = refl
 
+ty-src′-compat : (A : Ty (suc n)) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-src A ≃tm ty-src′ A
+ty-src′-compat (s ─⟨ A ⟩⟶ t) = refl≃tm
+
+ty-tgt′-compat : (A : Ty (suc n)) → .⦃ _ : NonZero (ty-dim A) ⦄ → ty-tgt A ≃tm ty-tgt′ A
+ty-tgt′-compat (s ─⟨ A ⟩⟶ t) = refl≃tm
+
 truncate-≤ : (d : ℕ) → (A : Ty n) → d ≤ ty-dim A → truncate d (s ─⟨ A ⟩⟶ t) ≃ty truncate d A
 truncate-≤ d A p
   rewrite +-∸-assoc 1 p = refl≃ty

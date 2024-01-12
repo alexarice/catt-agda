@@ -154,7 +154,16 @@ label-comp-≈ L p q .get Z = >>=-≈ (L Z) p q
 >>=′-≈ (SArr s As t) p q = ≈SArr (>>=-≈ s p q) (>>=′-≈ As p q) (>>=-≈ t p q)
 
 >>=-Ty : {L : Label-WT X S} → Typing-STm ⌊ S ⌋ a As → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-STm Γ (a >>= L) (As >>=′ L)
->>=-Ty {a = a} {As = As} {L = L} [ aty ] Lty Ltyty .get = transport-typing-full (apply-sub-tm-typing aty (label-to-sub-Ty Lty Ltyty)) (label-to-sub-stm L a) (label-to-sub-sty L As)
+>>=-Ty {a = a} {As = As} {L = L} [ aty ] Lty Ltyty .get
+  = transport-typing-full (apply-sub-tm-typing aty (label-to-sub-Ty Lty Ltyty))
+                          (label-to-sub-stm L a)
+                          (label-to-sub-sty L As)
+
+>>=′-Ty : {L : Label-WT X S} → Typing-STy ⌊ S ⌋ As → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-STy Γ (As >>=′ L)
+>>=′-Ty {As = As} {L = L} [ Asty ] Lty Ltyty .get
+  = transport-typing-ty (apply-sub-ty-typing Asty (label-to-sub-Ty Lty Ltyty))
+                        refl≃c
+                        (label-to-sub-sty L As)
 
 label-comp-Ty : {L : Label-WT (someTree T) S} {M : Label-WT X T} → Typing-Label ⌊ T ⌋ L → Typing-Label Γ M → Typing-STy Γ (lty M) → Typing-Label Γ (L ●lt M)
 label-comp-Ty (TySing x) MTy AsTy = TySing (>>=-Ty x MTy AsTy)
@@ -351,6 +360,9 @@ SCoh-typing-prop {S = S} {Γ = Γ} {As = As} {L = L} [ tty ] .get = begin
   where
     open Reasoning (ty-setoid-≈ _)
 
+SCoh-Label-Ty : Typing-Tm Γ (stm-to-term (SCoh S As (L ,, S⋆))) B → Typing-Label Γ (L ,, S⋆)
+SCoh-Label-Ty {L = L} aty = Label-ty [ (transport-typing-sub (coh-sub-ty aty) refl≃c refl≃c (id-right-unit (label-to-sub (L ,, S⋆)))) ]
+
 sty-to-coh-Ty : {As : STy (someTree S)} → Typing-STy ⌊ S ⌋ As → Typing-STm ⌊ S ⌋ (sty-to-coh As) As
 sty-to-coh-Ty {S = S} {As = As} AsTy = TySConv (TySCoh S AsTy (id-label-Ty S) TySStar) (reflexive≈sty (>>=′-id As))
 
@@ -362,3 +374,9 @@ sty-to-coh-Ty {S = S} {As = As} AsTy = TySConv (TySCoh S AsTy (id-label-Ty S) Ty
 ++l′-inc-left {S = S} {T = T} L M A p
   = trans≈l (sym≈l (label-comp-≈ (ap (++t-inc-left S T)) (++l-eq L M p) (refl≈sty {As = A})))
             (reflexive≈l (++l-inc-left L M A))
+
+STy-unique : Typing-STm Γ a As → Typing-STm Γ a Bs → As ≈[ Γ ]sty Bs
+STy-unique [ ty1 ] [ ty2 ] .get = Ty-unique ty1 ty2
+
+STy-unique-≃ : a ≃stm b → Typing-STm Γ a As → Typing-STm Γ b Bs → As ≈[ Γ ]sty Bs
+STy-unique-≃ [ p ] [ ty1 ] [ ty2 ] .get = Ty-unique-≃ p ty1 ty2

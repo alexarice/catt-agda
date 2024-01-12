@@ -1,11 +1,11 @@
 open import Catt.Typing.Rule
 
 module Catt.Tree.Structured.Support.Typed {index : Set}
-                                      (rule : index → Rule)
-                                      (lift-rule : ∀ i → LiftRule rule (rule i))
-                                      (susp-rule : ∀ i → SuspRule rule (rule i))
-                                      (sub-rule : ∀ i → SubRule rule (rule i))
-                                      (supp-rule : ∀ i → SupportRule rule (rule i)) where
+                                          (rule : index → Rule)
+                                          (lift-rule : ∀ i → LiftRule rule (rule i))
+                                          (susp-rule : ∀ i → SuspRule rule (rule i))
+                                          (sub-rule : ∀ i → SubRule rule (rule i))
+                                          (supp-rule : ∀ i → SupportRule rule (rule i)) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties

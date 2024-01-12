@@ -65,7 +65,8 @@ prune-Eq : {Γ : Ctx n}
          → {A : Ty n}
          → peak-term p [ σ ]tm
            ≃tm
-           identity-term A t → σ ≈[ Γ ]s (σ //s p) ● π p
+           identity-term A t
+         → σ ≈[ Γ ]s (σ //s p) ● π p
 prune-Eq {Γ = Γ} (⇕pk dy) (TyExt {t = u} (TyExt {σ = σ} {t = s} σty sty) tty) {t} {A} q
   = Ext≈ (Ext≈ (reflexive≈s (sym≃s (id-right-unit σ))) l1) l2
   where

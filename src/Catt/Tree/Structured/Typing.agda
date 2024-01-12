@@ -202,6 +202,9 @@ ap-phere-Ty : {L : Label-WT X S} → Typing-Label Γ L → Typing-STm Γ (ap L P
 ap-phere-Ty (TySing x) = x
 ap-phere-Ty (TyJoin x Lty Mty) = x
 
+stm-to-term-Ty : Typing-STm Γ a As → Typing-Tm Γ (stm-to-term a) (sty-to-type As)
+stm-to-term-Ty [ tty ] = tty
+
 transport-stm-typing : Typing-STm Γ a As → a ≃stm b → As ≃sty Bs → Typing-STm Γ b Bs
 transport-stm-typing [ aty ] [ p ] [ q ] = [ transport-typing-full aty p q ]
 

@@ -618,3 +618,12 @@ stm-to-label-susp (Susp S) a (SArr s As t) = begin
   < susp-label-full (extend-disc-label (stm-to-label S s As) t a) >l ∎
   where
     open Reasoning (label-setoid (Susp (Susp S)))
+
+linear-max-path-type : (S : Tree n)
+                     → .⦃ _ : is-linear S ⦄
+                     → (Z : Path S)
+                     → .⦃ _ : is-maximal Z ⦄
+                     → getPathType Z ≃sty disc-sty S
+linear-max-path-type Sing PHere = refl≃sty
+linear-max-path-type (Susp S) (PExt Z) = map-sty-ext-≃ (linear-max-path-type S Z)
+linear-max-path-type (Susp S) (PShift PHere) = ⊥-elim it

@@ -121,3 +121,24 @@ sua-sub-rule (ECR Γ Δ s A σ) = sub-rule
 sua-sub-rule (Insert Γ S As L P T M p) = sub-rule P p
   where
     open I.Conditions hasInsertion
+
+open import Catt.Typing.DiscRemoval.Properties SUA-Rules
+                                               sua-lift-rule
+                                               sua-susp-rule
+                                               sua-sub-rule
+                                               hasDiscRemoval as DP
+open import Catt.Typing.EndoCoherenceRemoval.Properties SUA-Rules
+                                                        sua-lift-rule
+                                                        sua-susp-rule
+                                                        sua-sub-rule
+                                                        hasEndoCoherenceRemoval as EP
+open import Catt.Typing.Insertion.Properties SUA-Rules
+                                             sua-lift-rule
+                                             sua-susp-rule
+                                             sua-sub-rule
+                                             hasInsertion as IP
+
+sua-conv-rule : (i : Index) → ConvRule (SUA-Rules i)
+sua-conv-rule (DR Γ σ) = DP.conv-rule
+sua-conv-rule (ECR Γ Δ s A σ) = EP.conv-rule
+sua-conv-rule (Insert Γ S As L P T M pf) = IP.conv-rule P pf

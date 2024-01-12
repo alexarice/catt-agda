@@ -40,10 +40,10 @@ instance
   ⌊⌋p-maximal {P = BExt P} = inst
   ⌊⌋p-maximal {P = BShift P} = build
 
-ih-non-zero : (S : Tree n) → (p : Branch S d) → NonZero (ih p)
-ih-non-zero (Join S T) BHere = it
-ih-non-zero (Join S T) (BExt P) = it
-ih-non-zero (Join S T) (BShift P) = ih-non-zero T P
+branch-type-is-path-type : (P : Branch S d) → getPathType ⌊ P ⌋p ≃sty branch-type S P
+branch-type-is-path-type {S = Join S₁ S₂} BHere = map-sty-ext-≃ (linear-max-path-type S₁ (is-linear-max-path S₁))
+branch-type-is-path-type (BExt P) = map-sty-ext-≃ (branch-type-is-path-type P)
+branch-type-is-path-type (BShift P) = map-sty-shift-≃ (branch-type-is-path-type P)
 
 ih-linear : (S : Tree n) → .⦃ is-linear S ⦄ → (P : Branch S l) → ih P ≡ tree-dim S
 ih-linear (Susp S) BHere = refl

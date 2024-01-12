@@ -56,6 +56,7 @@ import Catt.Tree.Insertion.Properties
 
 import Catt.Dyck
 import Catt.Dyck.Properties
+import Catt.Dyck.Pasting
 import Catt.Dyck.Pruning
 import Catt.Dyck.Pruning.Properties
 import Catt.Dyck.FromTree
@@ -85,17 +86,21 @@ import Catt.Tree.Insertion.Typing
 import Catt.Dyck.Typing
 import Catt.Dyck.Pruning.Typing
 
-import Catt.Typing.DiscRemoval
+
 import Catt.Typing.DiscRemoval.Base
+import Catt.Typing.DiscRemoval
 import Catt.Typing.Properties
-import Catt.Typing.EndoCoherenceRemoval
 import Catt.Typing.EndoCoherenceRemoval.Base
+import Catt.Typing.EndoCoherenceRemoval
 import Catt.Typing.EndoCoherenceRemoval.Properties
 import Catt.Typing.Insertion.Base
 import Catt.Typing.Insertion
 import Catt.Typing.Insertion.Equality
-import Catt.Typing.Pruning
+import Catt.Typing.Insertion.Properties
 import Catt.Typing.Pruning.Base
+import Catt.Typing.Pruning
+import Catt.Typing.Pruning.Properties
+
 
 import Catt.Support
 import Catt.Support.Properties

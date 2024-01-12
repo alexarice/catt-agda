@@ -253,3 +253,6 @@ label-from-insertion-eq {S = Join S₁ S₂} {As = As} L (BShift {n = n} P) {T} 
       map-sty-shift (branch-type S₂ P) >>=′ (L ,, As)
         ≈⟨ p ⟩
       canonical-type (ih P) T >>=′ (M ,, As) ∎
+
+⌊⌋p-Ty : (P : Branch S l) → Typing-STm ⌊ S ⌋ (SPath ⌊ P ⌋p) (branch-type S P)
+⌊⌋p-Ty P = TySConv (TySPath ⌊ P ⌋p) (reflexive≈sty (branch-type-is-path-type P))

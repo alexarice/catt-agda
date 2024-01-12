@@ -78,3 +78,23 @@ units-sub-rule (ECR Γ Δ s A σ) = sub-rule
 units-sub-rule (Prune Γ dy A p σ B t pf) = sub-rule p pf
   where
     open P.Conditions hasPruning
+
+open import Catt.Typing.DiscRemoval.Properties Unit-Rules
+                                               units-lift-rule
+                                               units-susp-rule
+                                               units-sub-rule
+                                               hasDiscRemoval as DP
+open import Catt.Typing.EndoCoherenceRemoval.Properties Unit-Rules
+                                                        units-lift-rule
+                                                        units-susp-rule
+                                                        units-sub-rule
+                                                        hasEndoCoherenceRemoval as EP
+open import Catt.Typing.Pruning.Properties Unit-Rules
+                                           units-lift-rule
+                                           units-sub-rule
+                                           hasPruning as PP
+
+units-conv-rule : (i : Index) → ConvRule (Unit-Rules i)
+units-conv-rule (DR Γ σ) = DP.conv-rule
+units-conv-rule (ECR Γ Δ s A σ) = EP.conv-rule
+units-conv-rule (Prune Γ dy A p σ B t pf) = PP.conv-rule p pf

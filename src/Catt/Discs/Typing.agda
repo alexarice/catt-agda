@@ -1,8 +1,7 @@
 open import Catt.Typing.Rule
 
-module Catt.Discs.Typing {index : Set}
-                         (rule : index → Rule)
-                         (lift-rule : ∀ i → LiftRule rule (rule i)) where
+module Catt.Discs.Typing (rules : RuleSet)
+                         (lift-cond : LiftCond rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -13,10 +12,11 @@ open import Catt.Globular
 open import Catt.Discs
 open import Catt.Discs.Properties
 open import Catt.Discs.Pasting
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
-open import Catt.Typing.Properties.Lifting rule lift-rule
-open import Catt.Globular.Typing rule lift-rule
+
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules
+open import Catt.Typing.Properties.Lifting rules lift-cond
+open import Catt.Globular.Typing rules lift-cond
 
 open import Tactic.MonoidSolver
 

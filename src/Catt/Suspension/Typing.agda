@@ -1,9 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Suspension.Typing {index : Set}
-                              (rule : index → Rule)
-                              (lift-rule : ∀ i → LiftRule rule (rule i))
-                              (susp-rule : ∀ i → SuspRule rule (rule i)) where
+module Catt.Suspension.Typing (rules : RuleSet)
+                              (lift-cond : LiftCond rules)
+                              (susp-cond : SuspCond rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -13,9 +12,9 @@ open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Suspension.Pasting
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
-open import Catt.Typing.Properties.Lifting rule lift-rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules
+open import Catt.Typing.Properties.Lifting rules lift-cond
 
 
 susp-ctxTy : Typing-Ctx Γ → Typing-Ctx (susp-ctx Γ)
@@ -63,7 +62,7 @@ susp-tmEq (Var≈ x) = Var≈ (begin
 susp-tmEq (Sym≈ eq) = Sym≈ (susp-tmEq eq)
 susp-tmEq (Trans≈ eq eq′) = Trans≈ (susp-tmEq eq) (susp-tmEq eq′)
 susp-tmEq (Coh≈ q r) = Coh≈ (susp-tyEq q) (susp-subEq r)
-susp-tmEq (Rule≈ i tc) = susp-rule i (susp-tmTy tc)
+susp-tmEq (Rule≈ r p tc) = Rule≈ (susp-rule r) (SuspCond-prop susp-cond p) (susp-tmTy tc)
 
 susp-subEq (Null≈ x) = refl≈s
 susp-subEq (Ext≈ p x) = Ext≈ (susp-subEq p) (susp-tmEq x)

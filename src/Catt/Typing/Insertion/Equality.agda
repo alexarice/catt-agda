@@ -1,10 +1,9 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Insertion.Equality {index : Set}
-                                  (rule : index → Rule)
-                                  (lift-rule : ∀ i → LiftRule rule (rule i))
-                                  (susp-rule : ∀ i → SuspRule rule (rule i))
-                                  (sub-rule : ∀ i → SubRule rule (rule i)) where
+module Catt.Typing.Insertion.Equality (rules : RuleSet)
+                                      (tame : Tame rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -27,24 +26,24 @@ open import Catt.Tree.Canonical.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Suspension.Typing rule lift-rule susp-rule
-open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Structured.Typing rule
-open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Canonical.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Insertion.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Typing.DiscRemoval rule
-open import Catt.Typing.EndoCoherenceRemoval rule
-open import Catt.Typing.Insertion rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties rules tame
+open import Catt.Suspension.Typing rules lift-cond susp-cond
+open import Catt.Connection.Typing rules tame
+open import Catt.Tree.Typing rules tame
+open import Catt.Tree.Boundary.Typing rules tame
+open import Catt.Tree.Structured.Typing rules
+open import Catt.Tree.Structured.Typing.Properties rules tame
+open import Catt.Tree.Canonical.Typing rules tame
+open import Catt.Tree.Insertion.Typing rules tame
+open import Catt.Typing.DiscRemoval rules
+open import Catt.Typing.EndoCoherenceRemoval rules
+open import Catt.Typing.Insertion rules
 
 
 module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
-  open import Catt.Typing.DiscRemoval.Properties rule lift-rule susp-rule sub-rule dr
-  open import Catt.Typing.EndoCoherenceRemoval.Properties rule lift-rule susp-rule sub-rule ecr
+  open import Catt.Typing.DiscRemoval.Properties rules tame dr
+  open import Catt.Typing.EndoCoherenceRemoval.Properties rules tame ecr
 
   canonical-ecr : (d : ℕ)
                 → (T : Tree n)
@@ -242,7 +241,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
   pruned-branch-κ (Join (Join S₁ Sing) S₂) BHere T q x .get (PShift Z) = refl≈stm
 
 module _ (disc-rem : HasDiscRemoval) where
-  open import Catt.Typing.DiscRemoval.Properties rule lift-rule susp-rule sub-rule disc-rem
+  open import Catt.Typing.DiscRemoval.Properties rules tame disc-rem
 
   κ-disc : (S : Tree n)
          → (P : Branch S l)
@@ -295,7 +294,7 @@ module _ (disc-rem : HasDiscRemoval) where
     = compute-≈ (≈SShift (trans≈stm (κ-disc T P .get Z) (reflexive≈stm (stm-≃-spath (sym≃′ (insertion-disc T P)) Z))))
 
 module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
-  open import Catt.Typing.DiscRemoval.Properties rule lift-rule susp-rule sub-rule dr
+  open import Catt.Typing.DiscRemoval.Properties rules tame dr
 
   κ-canonical-type : (S : Tree n)
                    → (P : Branch S l)

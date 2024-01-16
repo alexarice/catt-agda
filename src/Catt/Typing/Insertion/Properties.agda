@@ -1,12 +1,11 @@
-import Catt.Typing.Rule as R
+open import Catt.Typing.Rule
 import Catt.Typing.Insertion as I
 
-module Catt.Typing.Insertion.Properties {index : Set}
-                                        (rule : index → R.Rule)
-                                        (lift-rule : ∀ i → R.LiftRule rule (rule i))
-                                        (susp-rule : ∀ i → R.SuspRule rule (rule i))
-                                        (sub-rule : ∀ i → R.SubRule rule (rule i))
-                                        (ins : I.HasInsertion rule) where
+module Catt.Typing.Insertion.Properties (rules : RuleSet)
+                                        (tame : Tame rules)
+                                        (ins : I.HasInsertion rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -21,17 +20,16 @@ open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Canonical
 open import Catt.Tree.Canonical.Properties
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Globular.Typing rule lift-rule
-open import Catt.Tree.Structured.Typing rule
-open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Canonical.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Insertion.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties rules tame
+open import Catt.Globular.Typing rules lift-cond
+open import Catt.Tree.Structured.Typing rules
+open import Catt.Tree.Structured.Typing.Properties rules tame
+open import Catt.Tree.Canonical.Typing rules tame
+open import Catt.Tree.Insertion.Typing rules tame
 
-open R rule
-open I rule
-
+open I rules
+{-
 conv-rule : (P : Branch S l)
           → .⦃ _ : has-trunk-height l T ⦄
           → L ⌊ P ⌋p ≃stm canonical-comp′ (ih P) T >>= (M ,, S⋆)
@@ -86,3 +84,4 @@ conv-rule {S = S} {T = T} {L = L} {M = M} {Γ = Γ} {As = As} P pf {A} tty
       A ∎
       where
         open Reasoning (ty-setoid-≈ Γ)
+-}

@@ -1,6 +1,6 @@
-open import Catt.Typing.Base
+open import Catt.Typing.Rule
 
-module Catt.Typing {index : Set} (rule : index → Rule) where
+module Catt.Typing (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Syntax
@@ -23,10 +23,11 @@ data _≈[_]tm_ where
   Sym≈ : s ≈[ Γ ]tm t → t ≈[ Γ ]tm s
   Trans≈ : s ≈[ Γ ]tm t → t ≈[ Γ ]tm u → s ≈[ Γ ]tm u
   Coh≈ : A ≈[ Δ ]ty B → σ ≈[ Γ ]s τ → (Coh Δ A σ) ≈[ Γ ]tm (Coh Δ B τ)
-  Rule≈ : (i : index)
-        → {C : Ty (rule i .len)}
-        → Typing-Tm (rule i .tgtCtx) (rule i .lhs) C
-        → (rule i .lhs) ≈[ rule i .tgtCtx ]tm (rule i .rhs)
+  Rule≈ : (r : Rule)
+        → (r ∈r rules)
+        → {C : Ty (r .len)}
+        → Typing-Tm (r .tgtCtx) (r .lhs) C
+        → (r .lhs) ≈[ r .tgtCtx ]tm (r .rhs)
 
 data _≈[_]ty_ where
   Star≈ : (⋆ {n = n}) ≈[ Γ ]ty ⋆

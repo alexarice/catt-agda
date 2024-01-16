@@ -1,12 +1,11 @@
-import Catt.Typing.Rule as R
+open import Catt.Typing.Rule
 import Catt.Typing.EndoCoherenceRemoval as ECR
 
-module Catt.Typing.EndoCoherenceRemoval.Properties {index : Set}
-                                                   (rule : index → R.Rule)
-                                                   (lift-rule : ∀ i → R.LiftRule rule (rule i))
-                                                   (susp-rule : ∀ i → R.SuspRule rule (rule i))
-                                                   (sub-rule : ∀ i → R.SubRule rule (rule i))
-                                                   (ecr : ECR.HasEndoCoherenceRemoval rule) where
+module Catt.Typing.EndoCoherenceRemoval.Properties (rules : RuleSet)
+                                                   (tame : Tame rules)
+                                                   (ecr : ECR.HasEndoCoherenceRemoval rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -29,15 +28,14 @@ open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Structured.Typing rule
-open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Globular.Typing rule lift-rule
-open import Catt.Discs.Typing rule lift-rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties rules tame
+open import Catt.Tree.Structured.Typing rules
+open import Catt.Tree.Structured.Typing.Properties rules tame
+open import Catt.Globular.Typing rules lift-cond
+open import Catt.Discs.Typing rules lift-cond
 
-open ECR rule
-open R rule
+open ECR rules
 
 ecr-stm : HasEndoCoherenceRemoval-STm
 ecr-stm S s As L [ sty ] [ Asty ] Lty .get = begin
@@ -94,6 +92,7 @@ ecr-stm S s As L [ sty ] [ Asty ] Lty .get = begin
         open Reasoning sub-setoid
     open Reasoning (tm-setoid-≈ _)
 
+{-
 conv-rule : ConvRule (EndoCoherenceRemoval Γ Δ s A σ)
 conv-rule {Γ = Γ} {Δ = Δ} {s = s} {A = A} {σ = σ} {A = B} tty
   = TyConv (identity-Ty (ty-dim A) (sub-from-disc-Ty (ty-dim A)
@@ -136,3 +135,4 @@ conv-rule {Γ = Γ} {Δ = Δ} {s = s} {A = A} {σ = σ} {A = B} tty
       B ∎
       where
         open Reasoning (ty-setoid-≈ Γ)
+-}

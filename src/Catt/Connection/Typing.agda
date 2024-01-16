@@ -1,10 +1,9 @@
 open import Catt.Typing.Rule
 
-module Catt.Connection.Typing {index : Set}
-                              (rule : index → Rule)
-                              (lift-rule : ∀ i → LiftRule rule (rule i))
-                              (susp-rule : ∀ i → SuspRule rule (rule i))
-                              (sub-rule : ∀ i → SubRule rule (rule i)) where
+module Catt.Connection.Typing (rules : RuleSet)
+                              (tame : Tame rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -16,9 +15,9 @@ open import Catt.Suspension.Properties
 open import Catt.Connection
 open import Catt.Connection.Properties
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Suspension.Typing rule lift-rule susp-rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties rules tame
+open import Catt.Suspension.Typing rules lift-cond susp-cond
 
 
 connect-Ty : {Γ : Ctx (suc n)} → Typing-Ctx Γ → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → {Δ : Ctx (suc m)} → Typing-Ctx Δ → Typing-Ctx (connect Γ t Δ)

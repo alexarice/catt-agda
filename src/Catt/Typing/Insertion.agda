@@ -1,6 +1,6 @@
-open import Catt.Typing.Base
+open import Catt.Typing.Rule
 
-module Catt.Typing.Insertion {index : Set} (rule : index → Rule) where
+module Catt.Typing.Insertion (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -21,11 +21,11 @@ open import Catt.Tree.Canonical
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
-open import Catt.Tree.Structured.Typing rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules
+open import Catt.Tree.Structured.Typing rules
 
-open import Catt.Typing.Insertion.Base public
+open import Catt.Typing.Insertion.Rule public
 
 HasInsertion : Set
 HasInsertion = ∀ {m n l n′}
@@ -45,6 +45,7 @@ HasInsertion = ∀ {m n l n′}
                ≈[ Γ ]stm
                SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (L >>l[ P ] M ,, S⋆)
 
+{-
 module Conditions (ins : HasInsertion) where
   open import Catt.Typing.Rule rule
 
@@ -244,3 +245,4 @@ module Conditions (ins : HasInsertion) where
              (L >>l[ P ] M ,, S⋆) [ σ ]stm ∎
         where
           open Reasoning stm-setoid-≈
+-}

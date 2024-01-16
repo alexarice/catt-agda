@@ -1,10 +1,7 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Insertion.Typing {index : Set}
-                                  (rule : index → Rule)
-                                  (lift-rule : ∀ i → LiftRule rule (rule i))
-                                  (susp-rule : ∀ i → SuspRule rule (rule i))
-                                  (sub-rule : ∀ i → SubRule rule (rule i)) where
+module Catt.Tree.Insertion.Typing (rules : RuleSet)
+                                  (tame : Tame rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -22,10 +19,10 @@ open import Catt.Tree.Canonical.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
-open import Catt.Typing rule
-open import Catt.Tree.Structured.Typing rule
-open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Canonical.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Typing rules
+open import Catt.Tree.Structured.Typing rules
+open import Catt.Tree.Structured.Typing.Properties rules tame
+open import Catt.Tree.Canonical.Typing rules tame
 
 ι-Ty : (S : Tree n)
      → (p : Branch S d)

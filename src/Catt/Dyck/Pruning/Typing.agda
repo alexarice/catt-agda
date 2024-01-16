@@ -1,9 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Dyck.Pruning.Typing {index : Set}
-                                (rule : index → Rule)
-                                (lift-rule : ∀ i → LiftRule rule (rule i))
-                                (sub-rule : ∀ i → SubRule rule (rule i)) where
+module Catt.Dyck.Pruning.Typing (rules : RuleSet)
+                                (lift-cond : LiftCond rules)
+                                (sub-cond : SubCond rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -16,13 +15,13 @@ open import Catt.Dyck
 open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Properties
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
-open import Catt.Typing.Properties.Lifting rule lift-rule
-open import Catt.Typing.Properties.Substitution rule lift-rule sub-rule
-open import Catt.Globular.Typing rule lift-rule
-open import Catt.Discs.Typing rule lift-rule
-open import Catt.Dyck.Typing rule lift-rule sub-rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules
+open import Catt.Typing.Properties.Lifting rules lift-cond
+open import Catt.Typing.Properties.Substitution rules lift-cond sub-cond
+open import Catt.Globular.Typing rules lift-cond
+open import Catt.Discs.Typing rules lift-cond
+open import Catt.Dyck.Typing rules lift-cond sub-cond
 
 π-Ty : (p : Peak dy) → Typing-Sub ⌊ dy ⌋d ⌊ _ // p ⌋d (π p)
 π-Ty (⇕pk dy)

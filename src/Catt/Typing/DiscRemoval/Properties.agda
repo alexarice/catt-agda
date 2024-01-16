@@ -1,12 +1,11 @@
-import Catt.Typing.Rule as R
+open import Catt.Typing.Rule
 import Catt.Typing.DiscRemoval as DR
 
-module Catt.Typing.DiscRemoval.Properties {index : Set}
-                                          (rule : index → R.Rule)
-                                          (lift-rule : ∀ i → R.LiftRule rule (rule i))
-                                          (susp-rule : ∀ i → R.SuspRule rule (rule i))
-                                          (sub-rule : ∀ i → R.SubRule rule (rule i))
-                                          (disc-rem : DR.HasDiscRemoval rule) where
+module Catt.Typing.DiscRemoval.Properties (rules : RuleSet)
+                                          (tame : Tame rules)
+                                          (disc-rem : DR.HasDiscRemoval rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -25,15 +24,14 @@ open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Canonical
 open import Catt.Tree.Canonical.Properties
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Globular.Typing rule lift-rule
-open import Catt.Discs.Typing rule lift-rule
-open import Catt.Tree.Structured.Typing rule
-open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties rules tame
+open import Catt.Globular.Typing rules lift-cond
+open import Catt.Discs.Typing rules lift-cond
+open import Catt.Tree.Structured.Typing rules
+open import Catt.Tree.Structured.Typing.Properties rules tame
 
-open DR rule
-open R rule
+open DR rules
 
 disc-rem-stm : HasDiscRemoval-STm
 disc-rem-stm S L Lty .get = begin
@@ -80,8 +78,10 @@ canonical-stm-is-comp d S = begin
   where
     open Reasoning stm-setoid-≈
 
+{-
 conv-rule : .⦃ NonZero n ⦄
           → {σ : Sub (disc-size n) m ⋆}
           → ConvRule (DiscRemoval Γ σ)
 conv-rule {n = n} {σ = ⟨ σ , s ⟩} tty with coh-sub-ty tty
 ... | TyExt σty sty = TyConv sty (Ty-unique (disc-term-Ty n (TyExt σty sty)) tty)
+-}

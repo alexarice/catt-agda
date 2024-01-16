@@ -1,10 +1,9 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Structured.Typing.Properties {index : Set}
-                                         (rule : index → Rule)
-                                         (lift-rule : ∀ i → LiftRule rule (rule i))
-                                         (susp-rule : ∀ i → SuspRule rule (rule i))
-                                         (sub-rule : ∀ i → SubRule rule (rule i)) where
+module Catt.Tree.Structured.Typing.Properties (rules : RuleSet)
+                                              (tame : Tame rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -28,14 +27,14 @@ open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Structured.ToTerm
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Globular.Typing rule lift-rule
-open import Catt.Suspension.Typing rule lift-rule susp-rule
-open import Catt.Connection.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Path.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Structured.Typing rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties rules tame
+open import Catt.Globular.Typing rules lift-cond
+open import Catt.Suspension.Typing rules lift-cond susp-cond
+open import Catt.Connection.Typing rules tame
+open import Catt.Tree.Typing rules tame
+open import Catt.Tree.Path.Typing rules tame
+open import Catt.Tree.Structured.Typing rules
 
 ≈SExt : {a b : STm (someTree S)} → a ≈[ ⌊ S ⌋ ]stm b → SExt {T = T} a ≈[ ⌊ Join S T ⌋ ]stm SExt b
 ≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (connect-susp-inc-left-Ty ⌊ T ⌋) (susp-tmEq p)) ]
@@ -156,6 +155,7 @@ label-comp-≈ L p q .get Z = >>=-≈ (L Z) p q
 >>=-Ty : {L : Label-WT X S} → Typing-STm ⌊ S ⌋ a As → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-STm Γ (a >>= L) (As >>=′ L)
 >>=-Ty {a = a} {As = As} {L = L} [ aty ] Lty Ltyty .get
   = transport-typing-full (apply-sub-tm-typing aty (label-to-sub-Ty Lty Ltyty))
+                          refl≃c
                           (label-to-sub-stm L a)
                           (label-to-sub-sty L As)
 

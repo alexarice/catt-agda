@@ -1,9 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Dyck.Typing {index : Set}
-                        (rule : index → Rule)
-                        (lift-rule : ∀ i → LiftRule rule (rule i))
-                        (sub-rule : ∀ i → SubRule rule (rule i)) where
+module Catt.Dyck.Typing (rules : RuleSet)
+                        (lift-cond : LiftCond rules)
+                        (sub-cond : SubCond rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -13,10 +12,10 @@ open import Catt.Globular.Properties
 open import Catt.Dyck
 open import Catt.Dyck.Properties
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
-open import Catt.Typing.Properties.Lifting rule lift-rule
-open import Catt.Globular.Typing rule lift-rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules
+open import Catt.Typing.Properties.Lifting rules lift-cond
+open import Catt.Globular.Typing rules lift-cond
 
 ⌊⌋d-Ty : (dy : Dyck n d) → Typing-Ctx ⌊ dy ⌋d
 dyck-type-Ty : (dy : Dyck n d) → Typing-Ty ⌊ dy ⌋d (dyck-type dy)

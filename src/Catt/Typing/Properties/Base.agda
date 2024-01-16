@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Properties.Base {index : Set} (rule : index → Rule) where
+module Catt.Typing.Properties.Base (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -11,7 +11,7 @@ open import Catt.Variables
 open import Catt.Globular
 open import Catt.Suspension
 
-open import Catt.Typing rule
+open import Catt.Typing rules
 
 refl≈ty : A ≈[ Γ ]ty A
 refl≈tm : t ≈[ Γ ]tm t
@@ -109,14 +109,10 @@ transport-typing : Typing-Tm Γ t A → t ≃tm s → Typing-Tm Γ s A
 transport-typing tty p with ≃tm-to-≡ p
 ... | refl = tty
 
-transport-typing-full : Typing-Tm Γ t A → t ≃tm s → A ≃ty B → Typing-Tm Γ s B
-transport-typing-full tty p q with ≃tm-to-≡ p | ≃ty-to-≡ q
-... | refl | refl = tty
-
-transport-typing-ctx : Typing-Ctx Γ → Γ ≃c Δ → Typing-Ctx Δ
-transport-typing-ctx Γty p with ≃c-preserve-length p
-... | refl with ≃c-to-≡ p
-... | refl = Γty
+transport-typing-full : Typing-Tm Γ t A → Γ ≃c Δ → t ≃tm s → A ≃ty B → Typing-Tm Δ s B
+transport-typing-full tty p q r with ≃c-preserve-length p
+... | refl with ≃c-to-≡ p | ≃tm-to-≡ q | ≃ty-to-≡ r
+... | refl | refl | refl = tty
 
 transport-typing-ty : Typing-Ty Γ A → Γ ≃c Δ → A ≃ty B → Typing-Ty Δ B
 transport-typing-ty Γty p q with ≃c-preserve-length p
@@ -128,6 +124,11 @@ transport-typing-sub σty p q r with ≃c-preserve-length p | ≃c-preserve-leng
 ... | refl | refl with ≃c-to-≡ p | ≃c-to-≡ q | ≃ty-to-≡ (≃s-to-same-ty r)
 ... | refl | refl | refl with ≃s-to-≡ r
 ... | refl = σty
+
+transport-tm-eq : s ≈[ Γ ]tm t → Γ ≃c Δ → s ≃tm s′ → t ≃tm t′ → s′ ≈[ Δ ]tm t′
+transport-tm-eq p q r s with ≃c-preserve-length q
+... | refl with ≃c-to-≡ q | ≃tm-to-≡ r | ≃tm-to-≡ s
+... | refl | refl | refl = p
 
 coh-sub-ty : Typing-Tm Γ (Coh Δ A τ) B → Typing-Sub Δ Γ τ
 coh-sub-ty (TyConv tty p) = coh-sub-ty tty

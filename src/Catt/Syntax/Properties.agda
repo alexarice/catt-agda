@@ -161,6 +161,12 @@ sub-setoid = record { Carrier = SUB
 ≃tm-to-same-length (Var≃ x y) = x
 ≃tm-to-same-length (Coh≃ x y z) = ≃s-to-codomain-≡ z
 
+cast-ty : n ≡ m → Ty n → Ty m
+cast-ty refl A = A
+
+cast-ty-prop : (p : n ≡ m) → (A : Ty n) → A ≃ty cast-ty p A
+cast-ty-prop refl A = refl≃ty
+
 ≃c-to-≡ : Γ ≃c Δ → Γ ≡ Δ
 ≃ty-to-≡ : A ≃ty B → A ≡ B
 ≃tm-to-≡ : s ≃tm t → s ≡ t

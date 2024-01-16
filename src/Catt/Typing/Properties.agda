@@ -1,10 +1,9 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Properties {index : Set}
-                              (rule : index → Rule)
-                              (lift-rule : ∀ i → LiftRule rule (rule i))
-                              (susp-rule : ∀ i → SuspRule rule (rule i))
-                              (sub-rule : ∀ i → SubRule rule (rule i)) where
+module Catt.Typing.Properties (rules : RuleSet)
+                              (tame : Tame rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -14,10 +13,10 @@ open import Catt.Variables
 open import Catt.Globular
 open import Catt.Suspension
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule public
-open import Catt.Typing.Properties.Lifting rule lift-rule public
-open import Catt.Typing.Properties.Substitution.Suspended rule lift-rule susp-rule sub-rule public
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules public
+open import Catt.Typing.Properties.Lifting rules lift-cond public
+open import Catt.Typing.Properties.Substitution.Suspended rules tame public
 
 
 unrestrict-restrict-≈ : (σ : Sub (2 + n) m A) → s ≈[ Δ ]tm get-fst [ σ ]tm → t ≈[ Δ ]tm get-snd [ σ ]tm → unrestrict (restrict σ s t) ≈[ Δ ]s σ

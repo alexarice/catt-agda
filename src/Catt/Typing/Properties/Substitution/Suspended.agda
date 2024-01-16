@@ -1,11 +1,11 @@
 
 open import Catt.Typing.Rule
 
-module Catt.Typing.Properties.Substitution.Suspended {index : Set}
-                              (rule : index → Rule)
-                              (lift-rule : ∀ i → LiftRule rule (rule i))
-                              (susp-rule : ∀ i → SuspRule rule (rule i))
-                              (sub-rule : ∀ i → SubRule rule (rule i)) where
+module Catt.Typing.Properties.Substitution.Suspended
+  (rules : RuleSet)
+  (tame : Tame rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -13,10 +13,10 @@ open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Suspension
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
-open import Catt.Typing.Properties.Substitution rule lift-rule sub-rule as S hiding (apply-sub-ty-typing;apply-sub-tm-typing;apply-sub-sub-typing;apply-sub-ty-eq;apply-sub-tm-eq;apply-sub-sub-eq) public
-open import Catt.Suspension.Typing rule lift-rule susp-rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules
+open import Catt.Typing.Properties.Substitution rules lift-cond sub-cond as S hiding (apply-sub-ty-typing;apply-sub-tm-typing;apply-sub-sub-typing;apply-sub-ty-eq;apply-sub-tm-eq;apply-sub-sub-eq) public
+open import Catt.Suspension.Typing rules lift-cond susp-cond
 
 apply-sub-ty-typing : {σ : Sub n m B} → Typing-Ty Γ A → Typing-Sub Γ Δ σ → Typing-Ty Δ (A [ σ ]ty)
 apply-sub-tm-typing : {σ : Sub n m B} → Typing-Tm Γ t A → Typing-Sub Γ Δ σ → Typing-Tm Δ (t [ σ ]tm) (A [ σ ]ty)
@@ -29,7 +29,7 @@ apply-sub-ty-typing TyStar σty = sub-typing-implies-ty-typing σty
 apply-sub-ty-typing (TyArr sty Aty tty) σty = TyArr (apply-sub-tm-typing sty σty) (apply-sub-ty-typing Aty σty) (apply-sub-tm-typing tty σty)
 
 apply-sub-tm-typing {B = ⋆} tty σty = S.apply-sub-tm-typing tty σty
-apply-sub-tm-typing {B = u ─⟨ B ⟩⟶ v} {t = t} {σ = σ} tty σty = transport-typing-full (apply-sub-tm-typing (susp-tmTy tty) (unrestrictTy σty)) (unrestrict-comp-tm t σ) (unrestrict-comp-ty _ σ)
+apply-sub-tm-typing {B = u ─⟨ B ⟩⟶ v} {t = t} {σ = σ} tty σty = transport-typing-full (apply-sub-tm-typing (susp-tmTy tty) (unrestrictTy σty)) refl≃c (unrestrict-comp-tm t σ) (unrestrict-comp-ty _ σ)
 
 apply-sub-sub-typing (TyNull x) σty = TyNull (apply-sub-ty-typing x σty)
 apply-sub-sub-typing (TyExt {A = A} τty tty) σty = TyExt (apply-sub-sub-typing τty σty) (TyConv (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ A))))

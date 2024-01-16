@@ -1,6 +1,6 @@
-open import Catt.Typing.Base
+open import Catt.Typing.Rule
 
-module Catt.Typing.Pruning {index : Set} (rule : index → Rule) where
+module Catt.Typing.Pruning (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -15,10 +15,10 @@ open import Catt.Dyck.Properties
 open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Properties
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules
 
-open import Catt.Typing.Pruning.Base public
+open import Catt.Typing.Pruning.Rule public
 
 open Rule
 
@@ -35,9 +35,9 @@ HasPruning = ∀ {m n}
            → {C : Ty m}
            → Typing-Tm Γ (Coh ⌊ dy ⌋d A σ) C
            → Coh ⌊ dy ⌋d A σ ≈[ Γ ]tm Coh ⌊ dy // p ⌋d (A [ π p ]ty) (σ //s p)
-
+{-
 module Conditions (prune : HasPruning) where
-  open import Catt.Typing.Rule rule
+  open import Catt.Typing.Rule rules
 
   lift-rule : (p : Peak dy) → {B : Ty (ctxLength Γ)} → (pf : peak-term p [ σ ]tm ≃tm identity-term B t) → LiftRule (Pruning Γ dy A p σ)
   lift-rule {dy = dy} {Γ = Γ} {σ = σ} {t = t} {A = A} p {B} pf {A = C} tty = begin
@@ -132,3 +132,4 @@ module Conditions (prune : HasPruning) where
         where
           open Reasoning tm-setoid
       open Reasoning (tm-setoid-≈ _)
+-}

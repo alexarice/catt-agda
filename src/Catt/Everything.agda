@@ -61,7 +61,6 @@ import Catt.Dyck.Pruning
 import Catt.Dyck.Pruning.Properties
 import Catt.Dyck.FromTree
 
-import Catt.Typing.Base
 import Catt.Typing.Rule
 import Catt.Typing
 import Catt.Typing.Properties.Base
@@ -69,7 +68,7 @@ import Catt.Typing.Properties.Lifting
 import Catt.Typing.Properties.Substitution
 import Catt.Typing.Properties.Substitution.Suspended
 import Catt.Typing.Properties
-import Catt.Typing.Properties.Conversion
+-- import Catt.Typing.Properties.Conversion
 
 import Catt.Globular.Typing
 import Catt.Pasting.Typing
@@ -87,22 +86,24 @@ import Catt.Dyck.Typing
 import Catt.Dyck.Pruning.Typing
 
 
-import Catt.Typing.DiscRemoval.Base
+import Catt.Typing.DiscRemoval.Rule
 import Catt.Typing.DiscRemoval
+import Catt.Typing.DiscRemoval.Properties
 import Catt.Typing.Properties
-import Catt.Typing.EndoCoherenceRemoval.Base
+import Catt.Typing.EndoCoherenceRemoval.Rule
 import Catt.Typing.EndoCoherenceRemoval
 import Catt.Typing.EndoCoherenceRemoval.Properties
-import Catt.Typing.Insertion.Base
+import Catt.Typing.Insertion.Rule
 import Catt.Typing.Insertion
 import Catt.Typing.Insertion.Equality
 import Catt.Typing.Insertion.Properties
-import Catt.Typing.Pruning.Base
+import Catt.Typing.Pruning.Rule
 import Catt.Typing.Pruning
 import Catt.Typing.Pruning.Properties
 
 
 import Catt.Support
+import Catt.Support.Typing
 import Catt.Support.Properties
 import Catt.Support.Context
 
@@ -115,10 +116,10 @@ import Catt.Tree.Structured.Support.Properties
 import Catt.Tree.Boundary.Support
 import Catt.Tree.Canonical.Support
 
-import Catt.Typing.Properties.Support
-import Catt.Tree.Structured.Support.Typed
-import Catt.Tree.Insertion.Support
+-- import Catt.Typing.Properties.Support
+-- import Catt.Tree.Structured.Support.Typed
+-- import Catt.Tree.Insertion.Support
 
-import Catt.Typing.Weak
-import Catt.Typing.Strict.Units
-import Catt.Typing.Strict.UA
+-- import Catt.Typing.Weak
+-- import Catt.Typing.Strict.Units
+-- import Catt.Typing.Strict.UA

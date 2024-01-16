@@ -1,10 +1,7 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Boundary.Typing {index : Set}
-                                 (rule : index → Rule)
-                                 (lift-rule : ∀ i → LiftRule rule (rule i))
-                                 (susp-rule : ∀ i → SuspRule rule (rule i))
-                                 (sub-rule : ∀ i → SubRule rule (rule i)) where
+module Catt.Tree.Boundary.Typing (rules : RuleSet)
+                                 (tame : Tame rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -16,8 +13,8 @@ open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
 
-open import Catt.Tree.Structured.Typing rule
-open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Structured.Typing rules
+open import Catt.Tree.Structured.Typing.Properties rules tame
 
 tree-inc-Ty : (d : ℕ) → (T : Tree n) → (b : Bool) → Typing-Label ⌊ T ⌋ (tree-inc-label d T b)
 tree-inc-Ty zero T false = TySing (TySPath PHere)

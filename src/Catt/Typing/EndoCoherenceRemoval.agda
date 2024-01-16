@@ -1,6 +1,6 @@
-open import Catt.Typing.Base
+open import Catt.Typing.Rule
 
-module Catt.Typing.EndoCoherenceRemoval {index : Set} (rule : index → Rule) where
+module Catt.Typing.EndoCoherenceRemoval (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -21,11 +21,11 @@ open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Path
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
-open import Catt.Tree.Structured.Typing rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules
+open import Catt.Tree.Structured.Typing rules
 
-open import Catt.Typing.EndoCoherenceRemoval.Base public
+open import Catt.Typing.EndoCoherenceRemoval.Rule public
 
 open Rule
 
@@ -56,6 +56,7 @@ HasEndoCoherenceRemoval-STm = ∀ {m n}
                           (identity-stm (n-disc (sty-dim As))
                             >>= (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ●lt (L ,, S⋆))
 
+{-
 module Conditions (ecr : HasEndoCoherenceRemoval) where
   open import Catt.Typing.Rule rule
 
@@ -109,3 +110,4 @@ module Conditions (ecr : HasEndoCoherenceRemoval) where
     identity (ty-dim A) (σ ● sub-from-disc (ty-dim A) (A [ τ ]ty) _ (s [ τ ]tm)) ∎
     where
       open Reasoning (tm-setoid-≈ _)
+-}

@@ -1,11 +1,10 @@
-import Catt.Typing.Rule as R
+open import Catt.Typing.Rule
 import Catt.Typing.Pruning as Pr
 
-module Catt.Typing.Pruning.Properties {index : Set}
-                                      (rule : index → R.Rule)
-                                      (lift-rule : ∀ i → R.LiftRule rule (rule i))
-                                      (sub-rule : ∀ i → R.SubRule rule (rule i))
-                                      (pr : Pr.HasPruning rule) where
+module Catt.Typing.Pruning.Properties (rules : RuleSet)
+                                      (lift-cond : LiftCond rules)
+                                      (sub-cond : SubCond rules)
+                                      (pr : Pr.HasPruning rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -17,15 +16,14 @@ open import Catt.Dyck.Pasting
 open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Properties
 
-open import Catt.Typing rule
-open import Catt.Dyck.Pruning.Typing rule lift-rule sub-rule
-open import Catt.Typing.Properties.Base rule
-open import Catt.Typing.Properties.Substitution rule lift-rule sub-rule
-open import Catt.Globular.Typing rule lift-rule
+open import Catt.Typing rules
+open import Catt.Dyck.Pruning.Typing rules lift-cond sub-cond
+open import Catt.Typing.Properties.Base rules
+open import Catt.Typing.Properties.Substitution rules lift-cond sub-cond
+open import Catt.Globular.Typing rules lift-cond
 
-open R rule
-open Pr rule
-
+open Pr rules
+{-
 conv-rule : {Γ : Ctx n}
           → {dy : Dyck (suc m) 0}
           → (p : Peak dy)
@@ -56,3 +54,4 @@ conv-rule {σ = σ} {A = A} {Γ = Γ} {dy} p pf {C} tty
       C ∎
       where
         open Reasoning (ty-setoid-≈ Γ)
+-}

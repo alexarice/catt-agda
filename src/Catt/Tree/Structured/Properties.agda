@@ -60,16 +60,16 @@ infix 4 _≃sty_
 _≃sty_ : (a : STy X) → (b : STy Y) → Set
 a ≃sty b = Wrap (λ a b → sty-to-type a ≃ty sty-to-type b) a b
 
-refl≃sty : {A : STy X} → A ≃sty A
+refl≃sty : As ≃sty As
 refl≃sty = [ refl≃ty ]
 
-reflexive≃sty : {A : STy X} → {B : STy X} → A ≡ B → A ≃sty B
+reflexive≃sty : As ≡ Bs → As ≃sty Bs
 reflexive≃sty refl = refl≃sty
 
-sym≃sty : {A : STy X} → {B : STy Y} → A ≃sty B → B ≃sty A
+sym≃sty : As ≃sty Bs → Bs ≃sty As
 sym≃sty [ p ] = [ sym≃ty p ]
 
-trans≃sty : {A : STy X} → {B : STy Y} → {C : STy Z} → A ≃sty B → B ≃sty C → A ≃sty C
+trans≃sty : As ≃sty Bs → Bs ≃sty Cs → As ≃sty Cs
 trans≃sty [ p ] [ q ] = [ trans≃ty p q ]
 
 record STY : Set where

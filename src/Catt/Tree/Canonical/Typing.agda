@@ -1,10 +1,7 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Canonical.Typing {index : Set}
-                                 (rule : index → Rule)
-                                 (lift-rule : ∀ i → LiftRule rule (rule i))
-                                 (susp-rule : ∀ i → SuspRule rule (rule i))
-                                 (sub-rule : ∀ i → SubRule rule (rule i)) where
+module Catt.Tree.Canonical.Typing (rules : RuleSet)
+                                  (tame : Tame rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -18,9 +15,9 @@ open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Boundary
 
-open import Catt.Tree.Structured.Typing rule
-open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Structured.Typing rules
+open import Catt.Tree.Structured.Typing.Properties rules tame
+open import Catt.Tree.Boundary.Typing rules tame
 
 canonical-type-Ty : (d : ℕ) → (T : Tree n) → Typing-STy ⌊ T ⌋ (canonical-type d T)
 canonical-stm-Ty : (d : ℕ) → (T : Tree n) → Typing-STm ⌊ T ⌋ (canonical-stm d T) (canonical-type d T)

@@ -1,8 +1,7 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Properties.Lifting {index : Set}
-                                      (rule : index → Rule)
-                                      (lift-rule : ∀ i → LiftRule rule (rule i)) where
+module Catt.Typing.Properties.Lifting (rules : RuleSet)
+                                      (lift-cond : LiftCond rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -10,8 +9,10 @@ open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules
+
+open Rule
 
 lift-ty-typing : Typing-Ty Γ A → Typing-Ty (Γ , B) (lift-ty A)
 lift-tm-typing : Typing-Tm Γ t A → Typing-Tm (Γ , B) (lift-tm t) (lift-ty A)
@@ -39,7 +40,9 @@ lift-tm-equality (Sym≈ eq) = Sym≈ (lift-tm-equality eq)
 lift-tm-equality (Trans≈ eq eq′) = Trans≈ (lift-tm-equality eq) (lift-tm-equality eq′)
 
 lift-tm-equality (Coh≈ r s) = Coh≈ r (lift-sub-equality s)
-lift-tm-equality {A = A} (Rule≈ i tc) = lift-rule i (lift-tm-typing tc)
+lift-tm-equality {A = A} (Rule≈ r p tc) = Rule≈ (lift-rule r A)
+                                                (LiftCond-prop lift-cond p A)
+                                                (lift-tm-typing tc)
 
 lift-sub-equality (Null≈ x) = Null≈ (lift-ty-equality x)
 lift-sub-equality (Ext≈ eq x) = Ext≈ (lift-sub-equality eq) (lift-tm-equality x)

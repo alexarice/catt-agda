@@ -1,7 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Structured.Typing {index : Set}
-                                   (rule : index → Rule) where
+module Catt.Tree.Structured.Typing (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -18,8 +17,8 @@ open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Structured.ToTerm
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties.Base rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties.Base rules
 
 
 stm-eq : {X : MaybeTree n} → (Γ : Ctx n) → STm X → STm X → Set
@@ -206,7 +205,7 @@ stm-to-term-Ty : Typing-STm Γ a As → Typing-Tm Γ (stm-to-term a) (sty-to-typ
 stm-to-term-Ty [ tty ] = tty
 
 transport-stm-typing : Typing-STm Γ a As → a ≃stm b → As ≃sty Bs → Typing-STm Γ b Bs
-transport-stm-typing [ aty ] [ p ] [ q ] = [ transport-typing-full aty p q ]
+transport-stm-typing [ aty ] [ p ] [ q ] = [ transport-typing-full aty refl≃c p q ]
 
 transport-label-typing : {L : Label-WT X S} → {M : Label-WT Y S} → Typing-Label Γ L → proj₁ L ≃l proj₁ M → proj₂ L ≃sty proj₂ M → Typing-Label Γ M
 transport-label-typing (TySing x) [ p ] q = TySing (transport-stm-typing x (p PHere) q)

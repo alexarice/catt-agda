@@ -1,9 +1,8 @@
 open import Catt.Typing.Rule
-open import Catt.Typing.Rule.Typed
 
 module Catt.Tree.Insertion.Support (rules : RuleSet)
                                    (tame : Tame rules)
-                                   (supp-cond : SupportCond rules rules) where
+                                   (supp-cond : SupportCond rules) where
 
 open Tame tame
 

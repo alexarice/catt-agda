@@ -28,9 +28,7 @@ open import Catt.Tree.Structured.Typing.Properties rules tame
 open import Catt.Tree.Canonical.Typing rules tame
 open import Catt.Tree.Insertion.Typing rules tame
 
-open import Catt.Typing.Rule.Typed rules
-
-ins-conv : ConvCond InsertionSet
+ins-conv : ConvCond′ rules InsertionSet
 ins-conv [ Insert Γ S As L P T M pf ] {A = A} tty
   = TyConv (stm-to-term-Ty (TySCoh (S >>[ P ] T) (>>=′-Ty AsTy (κ-Ty S P T) TySStar) (label-from-insertion-Ty Lty P Mty l1) TySStar)) l2
   where

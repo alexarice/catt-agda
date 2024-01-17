@@ -8,8 +8,6 @@ Weak-Rules r = ⊥
 
 open import Catt.Typing Weak-Rules public
 
-open import Catt.Typing.Rule.Typed Weak-Rules
-
 weak-lift : LiftCond Weak-Rules
 weak-lift A ()
 

@@ -1,9 +1,8 @@
 open import Catt.Typing.Rule
-open import Catt.Typing.Rule.Typed
 
 module Catt.Typing.Properties.Conversion (rules : RuleSet)
                                          (tame : Tame rules)
-                                         (conv-rule : ConvCond rules rules) where
+                                         (conv-rule : ConvCond rules) where
 
 open Tame tame
 

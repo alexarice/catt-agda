@@ -12,8 +12,6 @@ open import Catt.Typing.Properties.Base rules
 open import Catt.Globular.Typing rules lift-cond
 open import Catt.Discs.Typing rules lift-cond
 
-open import Catt.Typing.Rule.Typed rules
-
-dr-conv : ConvCond DiscRemovalSet
+dr-conv : ConvCond′ rules DiscRemovalSet
 dr-conv [ DR {n = n} Γ σ ] tty with coh-sub-ty tty
 ... | TyExt σty sty = TyConv sty (Ty-unique (disc-term-Ty n (TyExt σty sty)) tty)

@@ -1,8 +1,7 @@
 open import Catt.Typing.Rule
-open import Catt.Typing.Rule.Typed
 
 module Catt.Typing.Properties.Support (rules : RuleSet)
-                                      (supp-cond : SupportCond rules rules) where
+                                      (supp-cond : SupportCond rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties

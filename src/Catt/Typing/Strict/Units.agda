@@ -12,8 +12,6 @@ open import Catt.Typing.Pruning.Rule
 Unit-Rules : RuleSet
 Unit-Rules = DiscRemovalSet ∪r ECRSet ∪r PruningSet
 
-open import Catt.Typing.Rule.Typed Unit-Rules
-
 open import Catt.Typing Unit-Rules public
 open import Catt.Typing.DiscRemoval Unit-Rules
 open import Catt.Typing.EndoCoherenceRemoval Unit-Rules
@@ -37,10 +35,21 @@ hasPruningRule = ⊆r-trans ⊆r-∪-2 ⊆r-∪-2
 hasPruning : HasPruning
 hasPruning = pruning-from-rule hasPruningRule
 
-units-tame : Tame Unit-Rules
-units-tame = Tame-∪ dr-tame (Tame-∪ ecr-tame pruning-tame)
+units-lift : LiftCond Unit-Rules
+units-lift = LiftCond-∪ dr-lift (LiftCond-∪ ecr-lift pruning-lift)
 
-open Tame units-tame renaming (lift-cond to units-lift; susp-cond to units-susp; sub-cond to units-sub) public
+units-susp : SuspCond Unit-Rules
+units-susp = SuspCond-∪ dr-susp (SuspCond-∪ ecr-susp pruning-susp)
+
+units-sub : SubCond Unit-Rules
+units-sub = SubCond-∪ dr-sub (SubCond-∪ ecr-sub pruning-sub)
+
+open Tame
+
+units-tame : Tame Unit-Rules
+units-tame .lift-cond = units-lift
+units-tame .susp-cond = units-susp
+units-tame .sub-cond = units-sub
 
 open import Catt.Typing.DiscRemoval.Typed Unit-Rules units-lift
 open import Catt.Typing.EndoCoherenceRemoval.Typed Unit-Rules units-lift units-sub

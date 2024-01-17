@@ -181,8 +181,8 @@ ins-susp [ Insert {l = l} Γ S As L P T M p ]
                                    (As >>=′ (κ S P T ,, S⋆))
                                    (L >>l[ P ] M ,, S⋆))) >tm ∎
 
-ins-sub : SubCond InsertionSet
-ins-sub Δ σ [ Insert Γ S As L P T M p ]
+ins-sub : {rules : RuleSet} → SubCond′ rules InsertionSet
+ins-sub Δ {σ = σ} σty [ Insert Γ S As L P T M p ]
   = ∈r-≃ [ Insert Δ S As (_[ σ ]stm ∘ L) P T (_[ σ ]stm ∘ M) lem ] γ
   where
     open Reasoning stm-setoid
@@ -220,10 +220,3 @@ ins-sub Δ σ [ Insert Γ S As L P T M p ]
     γ .ctxeq = refl≃c
     γ .lhseq = sym≃tm (stm-sub-SCoh S As (L ,, S⋆) σ .get)
     γ .rhseq = l1 .get
-
-open Tame
-
-ins-tame : Tame InsertionSet
-ins-tame .lift-cond = ins-lift
-ins-tame .susp-cond = ins-susp
-ins-tame .sub-cond = ins-sub

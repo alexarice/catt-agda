@@ -12,8 +12,6 @@ open import Catt.Typing.Insertion.Rule
 SUA-Rules : RuleSet
 SUA-Rules = DiscRemovalSet ∪r ECRSet ∪r InsertionSet
 
-open import Catt.Typing.Rule.Typed SUA-Rules
-
 open import Catt.Typing SUA-Rules public
 open import Catt.Typing.DiscRemoval SUA-Rules
 open import Catt.Typing.EndoCoherenceRemoval SUA-Rules
@@ -37,10 +35,21 @@ hasInsertionRule = ⊆r-trans ⊆r-∪-2 ⊆r-∪-2
 hasInsertion : HasInsertion
 hasInsertion = ins-from-rule hasInsertionRule
 
-sua-tame : Tame SUA-Rules
-sua-tame = Tame-∪ dr-tame (Tame-∪ ecr-tame ins-tame)
+sua-lift : LiftCond SUA-Rules
+sua-lift = LiftCond-∪ dr-lift (LiftCond-∪ ecr-lift ins-lift)
 
-open Tame sua-tame renaming (lift-cond to sua-lift; susp-cond to sua-susp; sub-cond to sua-sub) public
+sua-susp : SuspCond SUA-Rules
+sua-susp = SuspCond-∪ dr-susp (SuspCond-∪ ecr-susp ins-susp)
+
+sua-sub : SubCond SUA-Rules
+sua-sub = SubCond-∪ dr-sub (SubCond-∪ ecr-sub ins-sub)
+
+open Tame
+
+sua-tame : Tame SUA-Rules
+sua-tame .lift-cond = sua-lift
+sua-tame .susp-cond = sua-susp
+sua-tame .sub-cond = sua-sub
 
 open import Catt.Typing.DiscRemoval.Typed SUA-Rules sua-lift
 open import Catt.Typing.EndoCoherenceRemoval.Typed SUA-Rules sua-lift sua-sub

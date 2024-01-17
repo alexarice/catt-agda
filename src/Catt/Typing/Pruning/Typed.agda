@@ -22,9 +22,7 @@ open import Catt.Typing.Properties.Base rules
 open import Catt.Typing.Properties.Substitution rules lift-cond sub-cond
 open import Catt.Globular.Typing rules lift-cond
 
-open import Catt.Typing.Rule.Typed rules
-
-pruning-conv : ConvCond PruningSet
+pruning-conv : ConvCond′ rules PruningSet
 pruning-conv [ Prune Γ dy A p σ B t pf ] {A = C} tty
   = TyConv (TyCoh ⦃ dyck-to-pd (dy // p) ⦄
                   (apply-sub-ty-typing Aty (π-Ty p))

@@ -36,17 +36,10 @@ dr-susp [ DR {n = n} Γ σ ] = ∈r-≃ [ DR {n = suc n} (susp-ctx Γ) (susp-sub
     γ .lhseq = sym≃tm (disc-term-susp _ σ)
     γ .rhseq = sym≃tm (susp-functorial-tm σ 0V)
 
-dr-sub : SubCond DiscRemovalSet
-dr-sub Γ τ [ DR Δ σ ] = ∈r-≃ [ DR Γ (τ ● σ) ] γ
+dr-sub : {rules : RuleSet} → SubCond′ rules DiscRemovalSet
+dr-sub Γ {σ = τ} τty [ DR Δ σ ] = ∈r-≃ [ DR Γ (τ ● σ) ] γ
   where
     γ : DiscRemoval Γ (τ ● σ) ≃r sub-rule (DiscRemoval Δ σ) Γ τ
     γ .ctxeq = refl≃c
     γ .lhseq = refl≃tm
     γ .rhseq = assoc-tm τ σ 0V
-
-open Tame
-
-dr-tame : Tame DiscRemovalSet
-dr-tame .lift-cond = dr-lift
-dr-tame .susp-cond = dr-susp
-dr-tame .sub-cond = dr-sub

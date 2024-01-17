@@ -113,8 +113,8 @@ pruning-susp [ Prune Γ dy A p σ B t pf ]
     γ .rhseq = Coh≃ l1 l2 (susp-//s p σ)
 
 
-pruning-sub : SubCond PruningSet
-pruning-sub Δ τ [ Prune Γ dy A p σ B t pf ] = ∈r-≃ [ Prune Δ dy A p (τ ● σ) (B [ τ ]ty) (t [ τ ]tm) lem ] γ
+pruning-sub : {rules : RuleSet} → SubCond′ rules PruningSet
+pruning-sub Δ {σ = τ} τty [ Prune Γ dy A p σ B t pf ] = ∈r-≃ [ Prune Δ dy A p (τ ● σ) (B [ τ ]ty) (t [ τ ]tm) lem ] γ
   where
     lem : (peak-term p [ τ ● σ ]tm) ≃tm identity-term (B [ τ ]ty) (t [ τ ]tm)
     lem = begin
@@ -132,10 +132,3 @@ pruning-sub Δ τ [ Prune Γ dy A p σ B t pf ] = ∈r-≃ [ Prune Δ dy A p (τ
     γ .ctxeq = refl≃c
     γ .lhseq = refl≃tm
     γ .rhseq = Coh≃ refl≃c refl≃ty (//s-sub p σ τ)
-
-open Tame
-
-pruning-tame : Tame PruningSet
-pruning-tame .lift-cond = pruning-lift
-pruning-tame .susp-cond = pruning-susp
-pruning-tame .sub-cond = pruning-sub

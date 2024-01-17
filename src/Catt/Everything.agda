@@ -61,9 +61,10 @@ import Catt.Dyck.Pruning
 import Catt.Dyck.Pruning.Properties
 import Catt.Dyck.FromTree
 
-import Catt.Typing.Rule
+import Catt.Typing.Base
 import Catt.Typing
-import Catt.Typing.Rule.Typed
+import Catt.Typing.Rule
+import Catt.Typing.Rule.Properties
 import Catt.Typing.Properties.Base
 import Catt.Typing.Properties.Lifting
 import Catt.Typing.Properties.Substitution

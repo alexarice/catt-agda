@@ -22,9 +22,7 @@ open import Catt.Typing.Properties.Substitution rules lift-cond sub-cond
 open import Catt.Globular.Typing rules lift-cond
 open import Catt.Discs.Typing rules lift-cond
 
-open import Catt.Typing.Rule.Typed rules
-
-ecr-conv : ConvCond ECRSet
+ecr-conv : ConvCond′ rules ECRSet
 ecr-conv [ ECR Γ Δ s A σ ] {A = B} tty
   = TyConv (identity-Ty (ty-dim A) (sub-from-disc-Ty (ty-dim A)
                                                      (apply-sub-ty-typing A_ty σty)

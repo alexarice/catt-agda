@@ -77,11 +77,3 @@ canonical-stm-is-comp d S = begin
   canonical-comp d S ∎
   where
     open Reasoning stm-setoid-≈
-
-{-
-conv-rule : .⦃ NonZero n ⦄
-          → {σ : Sub (disc-size n) m ⋆}
-          → ConvRule (DiscRemoval Γ σ)
-conv-rule {n = n} {σ = ⟨ σ , s ⟩} tty with coh-sub-ty tty
-... | TyExt σty sty = TyConv sty (Ty-unique (disc-term-Ty n (TyExt σty sty)) tty)
--}

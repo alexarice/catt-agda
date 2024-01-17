@@ -1,8 +1,8 @@
 open import Catt.Typing.Rule
+open import Catt.Typing.Rule.Typed
 
-module Catt.Typing.Properties.Support {index : Set}
-                                      (rule : index → Rule)
-                                      (supp-rule : ∀ i → SupportRule rule (rule i)) where
+module Catt.Typing.Properties.Support (rules : RuleSet)
+                                      (supp-cond : SupportCond rules rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -11,7 +11,7 @@ open import Catt.Globular
 open import Catt.Pasting
 open import Catt.Tree
 
-open import Catt.Typing rule
+open import Catt.Typing rules
 
 open import Catt.Support
 open import Catt.Support.Properties
@@ -43,7 +43,7 @@ EqSuppTm (Var≈ x) with toℕ-injective x
 EqSuppTm (Sym≈ p) = sym (EqSuppTm p)
 EqSuppTm (Trans≈ p q) = trans (EqSuppTm p) (EqSuppTm q)
 EqSuppTm (Coh≈ p q) = EqSuppSub q
-EqSuppTm (Rule≈ i x) = supp-rule i x
+EqSuppTm (Rule≈ r p tty) = supp-cond p tty
 
 EqSuppSub (Null≈ x) = EqSuppTy x
 EqSuppSub (Ext≈ {σ = σ} {Δ = Δ} {τ = τ} {s} {t} p x) = begin

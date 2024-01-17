@@ -1,11 +1,11 @@
 open import Catt.Typing.Rule
+open import Catt.Typing.Rule.Typed
 
-module Catt.Tree.Insertion.Support {index : Set}
-                                      (rule : index → Rule)
-                                      (lift-rule : ∀ i → LiftRule rule (rule i))
-                                      (susp-rule : ∀ i → SuspRule rule (rule i))
-                                      (sub-rule : ∀ i → SubRule rule (rule i))
-                                      (supp-rule : ∀ i → SupportRule rule (rule i)) where
+module Catt.Tree.Insertion.Support (rules : RuleSet)
+                                   (tame : Tame rules)
+                                   (supp-cond : SupportCond rules rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -31,11 +31,11 @@ open import Catt.Tree.Canonical
 open import Catt.Tree.Canonical.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
-open import Catt.Tree.Structured.Typing rule
-open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Boundary.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Canonical.Typing rule lift-rule susp-rule sub-rule
-open import Catt.Tree.Insertion.Typing rule lift-rule susp-rule sub-rule
+open import Catt.Tree.Structured.Typing rules
+open import Catt.Tree.Structured.Typing.Properties rules tame
+open import Catt.Tree.Boundary.Typing rules tame
+open import Catt.Tree.Canonical.Typing rules tame
+open import Catt.Tree.Insertion.Typing rules tame
 
 open import Catt.Support
 open import Catt.Support.Properties
@@ -47,7 +47,7 @@ open import Catt.Tree.Structured.Support.Properties
 open import Catt.Tree.Boundary.Support
 open import Catt.Tree.Canonical.Support
 
-open import Catt.Tree.Structured.Support.Typed rule lift-rule susp-rule sub-rule supp-rule
+open import Catt.Tree.Structured.Support.Typed rules tame supp-cond
 
 κ-full : (S : Tree n)
        → (p : Branch S d)

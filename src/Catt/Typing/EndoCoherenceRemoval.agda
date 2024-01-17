@@ -25,7 +25,7 @@ open import Catt.Typing rules
 open import Catt.Typing.Properties.Base rules
 open import Catt.Tree.Structured.Typing rules
 
-open import Catt.Typing.EndoCoherenceRemoval.Rule public
+open import Catt.Typing.EndoCoherenceRemoval.Rule
 
 open Rule
 
@@ -56,58 +56,8 @@ HasEndoCoherenceRemoval-STm = ∀ {m n}
                           (identity-stm (n-disc (sty-dim As))
                             >>= (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ●lt (L ,, S⋆))
 
-{-
-module Conditions (ecr : HasEndoCoherenceRemoval) where
-  open import Catt.Typing.Rule rule
+HasEndoCoherenceRemovalRule : Set
+HasEndoCoherenceRemovalRule = ECRSet ⊆r rules
 
-  lift-rule : LiftRule (EndoCoherenceRemoval Γ Δ s A σ)
-  lift-rule {Δ = Δ} {s = s} {A = A} {σ = σ} tty = begin
-    Coh Δ (s ─⟨ A ⟩⟶ s) (lift-sub σ)
-      ≈⟨ ecr tty ⟩
-    identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ lift-sub σ ]ty) _ (s [ lift-sub σ ]tm))
-      ≈⟨ reflexive≈tm (identity-≃ refl (sub-from-disc-≃ (ty-dim A) (ty-dim A) (apply-lifted-sub-ty-≃ A σ) _ _ (apply-lifted-sub-tm-≃ s σ))) ⟩
-    identity (ty-dim A) (sub-from-disc (ty-dim A) (lift-ty (A [ σ ]ty)) _ (lift-tm (s [ σ ]tm)))
-      ≈˘⟨ reflexive≈tm (identity-≃ refl (lift-sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))) ⟩
-    identity (ty-dim A) (lift-sub (sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm))) ∎
-    where
-      open Reasoning (tm-setoid-≈ _)
-
-  susp-rule : SuspRule (EndoCoherenceRemoval Γ Δ s A σ)
-  susp-rule {Δ = Δ} {s = s} {A = A} {σ = σ} tty = begin
-    Coh (susp-ctx Δ) (susp-tm s ─⟨ susp-ty A ⟩⟶ susp-tm s) (susp-sub σ)
-      ≈⟨ ecr tty ⟩
-    identity (ty-dim (susp-ty A)) (sub-from-disc (ty-dim (susp-ty A)) (susp-ty A [ susp-sub σ ]ty) _
-       (susp-tm s [ susp-sub σ ]tm))
-      ≈˘⟨ reflexive≈tm (identity-≃ (sym (susp-dim A)) (sub-from-disc-≃ (suc (ty-dim A)) (ty-dim (susp-ty A)) (susp-functorial-ty σ A) (trans (susp-dim (A [ σ ]ty)) (cong suc (sym (sub-dim σ A)))) (sym (sub-dim (susp-sub σ) (susp-ty A))) (susp-functorial-tm σ s))) ⟩
-    identity (suc (ty-dim A)) (sub-from-disc (suc (ty-dim A)) (susp-ty (A [ σ ]ty)) _ (susp-tm (s [ σ ]tm)))
-      ≈˘⟨ reflexive≈tm (Coh≃ lem (Arr≃ (Var≃ (≃c-preserve-length lem) refl) lem2 (Var≃ (≃c-preserve-length lem) refl)) (susp-sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))) ⟩
-    susp-tm (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm))) ∎
-    where
-      lem : susp-ctx (Disc (ty-dim A)) ≃c Disc (suc (ty-dim A))
-      lem = disc-susp (ty-dim A)
-
-      lem2 : susp-ty (lift-ty (sphere-type (ty-dim A))) ≃ty
-               lift-ty (sphere-type (suc (ty-dim A)))
-      lem2 = begin
-        < susp-ty (lift-ty (sphere-type (ty-dim A))) >ty
-          ≈⟨ susp-ty-lift (sphere-type (ty-dim A)) ⟩
-        < lift-ty (susp-ty (sphere-type (ty-dim A))) >ty
-          ≈⟨ lift-ty-≃ (sphere-type-susp (ty-dim A)) ⟩
-        < lift-ty (sphere-type (suc (ty-dim A))) >ty ∎
-        where
-          open Reasoning ty-setoid
-      open Reasoning (tm-setoid-≈ _)
-
-  sub-rule : SubRule (EndoCoherenceRemoval Γ Δ s A τ)
-  sub-rule {Δ = Δ} {s = s} {A = A} {τ = τ} {σ = σ} τty tty = begin
-    Coh Δ (s ─⟨ A ⟩⟶ s) (σ ● τ)
-      ≈⟨ ecr tty ⟩
-    identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ● τ ]ty) _ (s [ σ ● τ ]tm))
-      ≈⟨ reflexive≈tm (identity-≃ refl (sub-from-disc-≃ (ty-dim A) (ty-dim A) (assoc-ty σ τ A) (sym (sub-dim (σ ● τ) A)) (trans (sym (sub-dim σ (A [ τ ]ty))) (sym (sub-dim τ A))) (assoc-tm σ τ s))) ⟩
-    identity (ty-dim A)
-      (sub-from-disc (ty-dim A) (A [ τ ]ty [ σ ]ty) _ (s [ τ ]tm [ σ ]tm))
-      ≈⟨ reflexive≈tm (identity-≃ refl (sub-from-disc-sub (ty-dim A) (A [ τ ]ty) (sym (sub-dim τ A)) (s [ τ ]tm) σ)) ⟩
-    identity (ty-dim A) (σ ● sub-from-disc (ty-dim A) (A [ τ ]ty) _ (s [ τ ]tm)) ∎
-    where
-      open Reasoning (tm-setoid-≈ _)
--}
+ecr-from-rule : HasEndoCoherenceRemovalRule → HasEndoCoherenceRemoval
+ecr-from-rule p tty = Rule≈ _ (p [ (ECR _ _ _ _ _) ]) tty

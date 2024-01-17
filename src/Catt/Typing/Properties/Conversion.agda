@@ -1,19 +1,19 @@
 open import Catt.Typing.Rule
+open import Catt.Typing.Rule.Typed
 
-module Catt.Typing.Properties.Conversion {index : Set}
-                                         (rule : index → Rule)
-                                         (lift-rule : ∀ i → LiftRule rule (rule i))
-                                         (susp-rule : ∀ i → SuspRule rule (rule i))
-                                         (sub-rule : ∀ i → SubRule rule (rule i))
-                                         (conv-rule : ∀ i → ConvRule rule (rule i)) where
+module Catt.Typing.Properties.Conversion (rules : RuleSet)
+                                         (tame : Tame rules)
+                                         (conv-rule : ConvCond rules rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 
-open import Catt.Typing rule
-open import Catt.Typing.Properties rule lift-rule susp-rule sub-rule
-open import Catt.Globular.Typing rule lift-rule
+open import Catt.Typing rules
+open import Catt.Typing.Properties rules tame
+open import Catt.Globular.Typing rules lift-cond
 
 open import Function.Bundles
 open import Function.Construct.Identity
@@ -63,15 +63,16 @@ term-conversion′ {A = C} (Coh≈ {A = A} {Δ = Δ} {B = B} {σ = σ} {Γ = Γ}
             ≈⟨ apply-sub-ty-eq τty p ⟩
           B [ τ ]ty ∎
 
-term-conversion′ (Rule≈ i tty) = mk⇔ f g
+term-conversion′ (Rule≈ r p tty) = mk⇔ f g
   where
-    f : Typing-Tm (rule i .Rule.tgtCtx) (rule i .Rule.lhs) _ →
-          Typing-Tm (rule i .Rule.tgtCtx) (rule i .Rule.rhs) _
-    f tty′ = conv-rule i tty′
+    open Rule r
+    f : Typing-Tm tgtCtx lhs _ →
+          Typing-Tm tgtCtx rhs _
+    f tty′ = conv-rule p tty′
 
-    g : Typing-Tm (rule i .Rule.tgtCtx) (rule i .Rule.rhs) _ →
-          Typing-Tm (rule i .Rule.tgtCtx) (rule i .Rule.lhs) _
-    g tty′ = TyConv tty (Ty-unique (conv-rule i tty) tty′)
+    g : Typing-Tm tgtCtx rhs _ →
+          Typing-Tm tgtCtx lhs _
+    g tty′ = TyConv tty (Ty-unique (conv-rule p tty) tty′)
 
 type-conversion′ Star≈ = ⇔-id (Typing-Ty _ ⋆)
 type-conversion′ (Arr≈ p q r) = mk⇔ f g

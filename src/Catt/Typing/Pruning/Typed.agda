@@ -1,10 +1,8 @@
 open import Catt.Typing.Rule
-import Catt.Typing.Pruning as Pr
 
-module Catt.Typing.Pruning.Properties (rules : RuleSet)
-                                      (lift-cond : LiftCond rules)
-                                      (sub-cond : SubCond rules)
-                                      (pr : Pr.HasPruning rules) where
+module Catt.Typing.Pruning.Typed (rules : RuleSet)
+                                 (lift-cond : LiftCond rules)
+                                 (sub-cond : SubCond rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -16,22 +14,18 @@ open import Catt.Dyck.Pasting
 open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Properties
 
+open import Catt.Typing.Pruning.Rule
+
 open import Catt.Typing rules
 open import Catt.Dyck.Pruning.Typing rules lift-cond sub-cond
 open import Catt.Typing.Properties.Base rules
 open import Catt.Typing.Properties.Substitution rules lift-cond sub-cond
 open import Catt.Globular.Typing rules lift-cond
 
-open Pr rules
-{-
-conv-rule : {Γ : Ctx n}
-          → {dy : Dyck (suc m) 0}
-          → (p : Peak dy)
-          → {B : Ty n}
-          → {t : Tm n}
-          → peak-term p [ σ ]tm ≃tm identity-term B t
-          → ConvRule (Pruning Γ dy A p σ)
-conv-rule {σ = σ} {A = A} {Γ = Γ} {dy} p pf {C} tty
+open import Catt.Typing.Rule.Typed rules
+
+pruning-conv : ConvCond PruningSet
+pruning-conv [ Prune Γ dy A p σ B t pf ] {A = C} tty
   = TyConv (TyCoh ⦃ dyck-to-pd (dy // p) ⦄
                   (apply-sub-ty-typing Aty (π-Ty p))
                   (prune-sub-Ty p σty pf))
@@ -54,4 +48,3 @@ conv-rule {σ = σ} {A = A} {Γ = Γ} {dy} p pf {C} tty
       C ∎
       where
         open Reasoning (ty-setoid-≈ Γ)
--}

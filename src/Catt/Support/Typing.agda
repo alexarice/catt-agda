@@ -1,19 +1,15 @@
 open import Catt.Typing.Rule
 
-module Catt.Support.Typing {index : Set}
-                           (rule : index → Rule) where
+module Catt.Support.Typing (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Support
 
-open Rule
-
-rulesWithSuppIndex : Set
-rulesWithSuppIndex = Σ[ i ∈ index ] SuppTm (rule i .tgtCtx) (rule i .lhs) ≡ SuppTm (rule i .tgtCtx) (rule i .rhs)
-
-rulesWithSupp : rulesWithSuppIndex → Rule
-rulesWithSupp (i ,, _) = rule i
+rulesWithSupp : RuleSet
+rulesWithSupp r = rules r × SuppTm tgtCtx lhs ≡ SuppTm tgtCtx rhs
+  where
+    open Rule r
 
 -- module _ where
 --   open import Catt.Typing rulesWithSupp

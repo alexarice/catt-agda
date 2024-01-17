@@ -62,7 +62,7 @@ susp-tmEq (Var≈ x) = Var≈ (begin
 susp-tmEq (Sym≈ eq) = Sym≈ (susp-tmEq eq)
 susp-tmEq (Trans≈ eq eq′) = Trans≈ (susp-tmEq eq) (susp-tmEq eq′)
 susp-tmEq (Coh≈ q r) = Coh≈ (susp-tyEq q) (susp-subEq r)
-susp-tmEq (Rule≈ r p tc) = Rule≈ (susp-rule r) (SuspCond-prop susp-cond p) (susp-tmTy tc)
+susp-tmEq (Rule≈ r p tc) = Rule≈ (susp-rule r) (susp-cond p) (susp-tmTy tc)
 
 susp-subEq (Null≈ x) = refl≈s
 susp-subEq (Ext≈ p x) = Ext≈ (susp-subEq p) (susp-tmEq x)

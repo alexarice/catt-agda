@@ -14,8 +14,6 @@ open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
 
-open import Data.Sum
-
 data _≃p_ : Path S → Path T → Set where
   Here≃ : S ≃ S′ → PHere {S = S} ≃p PHere {S = S′}
   Ext≃ : ∀ {P : Path S} {Q : Path S′} → P ≃p Q → T ≃ T′ → PExt {T = T} P ≃p PExt {T = T′} Q
@@ -57,17 +55,12 @@ open PATH public
 
 path-setoid : Setoid _ _
 path-setoid = record { Carrier = PATH
-                        ; _≈_ = λ x y → path x ≃p path y
-                        ; isEquivalence = record { refl = refl≃p
-                                                 ; sym = sym≃p
-                                                 ; trans = trans≃p
-                                                 }
-                        }
-
--- ppath-≃-≃tm : (p : S ≃ T) → (P : Path S) → ppath-≃ p P ≃p P
--- ppath-≃-≃tm p PHere = Here≃ (sym≃ p)
--- ppath-≃-≃tm (Join≃ p q) (PExt P) = Ext≃ (ppath-≃-≃tm p P) (sym≃ q)
--- ppath-≃-≃tm (Join≃ p q) (PShift P) = Shift≃ (sym≃ p) (ppath-≃-≃tm q P)
+                     ; _≈_ = λ x y → path x ≃p path y
+                     ; isEquivalence = record { refl = refl≃p
+                                              ; sym = sym≃p
+                                              ; trans = trans≃p
+                                              }
+                     }
 
 ppath-≃-≃p : (p : S ≃′ T) → (P : Path S) → P ≃p ppath-≃ p P
 ppath-≃-≃p Refl≃′ P = refl≃p

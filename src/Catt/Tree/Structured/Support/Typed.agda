@@ -1,11 +1,11 @@
 open import Catt.Typing.Rule
+open import Catt.Typing.Rule.Typed
 
-module Catt.Tree.Structured.Support.Typed {index : Set}
-                                          (rule : index → Rule)
-                                          (lift-rule : ∀ i → LiftRule rule (rule i))
-                                          (susp-rule : ∀ i → SuspRule rule (rule i))
-                                          (sub-rule : ∀ i → SubRule rule (rule i))
-                                          (supp-rule : ∀ i → SupportRule rule (rule i)) where
+module Catt.Tree.Structured.Support.Typed (rules : RuleSet)
+                                          (tame : Tame rules)
+                                          (supp-cond : SupportCond rules rules) where
+
+open Tame tame
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -17,10 +17,10 @@ open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.ToTerm
 
-open import Catt.Typing rule
-open import Catt.Tree.Structured.Typing rule
-open import Catt.Typing.Properties.Support rule supp-rule
-open import Catt.Tree.Structured.Typing.Properties rule lift-rule susp-rule sub-rule
+open import Catt.Typing rules
+open import Catt.Tree.Structured.Typing rules
+open import Catt.Typing.Properties.Support rules supp-cond
+open import Catt.Tree.Structured.Typing.Properties rules tame
 
 open import Catt.Support
 open import Catt.Support.Properties

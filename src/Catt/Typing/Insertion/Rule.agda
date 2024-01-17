@@ -39,7 +39,7 @@ Insertion Γ S As L P T M .rhs
                       (As >>=′ (κ S P T ,, S⋆))
                       (L >>l[ P ] M ,, S⋆))
 
-data InsertionIdx : Set where
+data InsertionSet : RuleSet where
   Insert : (Γ : Ctx m)
          → (S : Tree n)
          → (As : STy (someTree S))
@@ -49,15 +49,11 @@ data InsertionIdx : Set where
          → .⦃ _ : has-trunk-height l T ⦄
          → (M : Label (Other m) T)
          → (p : L ⌊ P ⌋p ≃stm canonical-comp′ (ih P) T >>= (M ,, S⋆))
-         → InsertionIdx
-
-InsertionSet : RuleSet
-InsertionSet .proj₁ = InsertionIdx
-InsertionSet .proj₂ (Insert Γ S As L P T M p) = Insertion Γ S As L P T M
+         → InsertionSet (Insertion Γ S As L P T M)
 
 ins-lift : LiftCond InsertionSet
-ins-lift (Insert Γ S As L P T M p) A .proj₁
-  = Insert (Γ , A) S As (lift-stm ∘ L) P T (lift-stm ∘ M) lem
+ins-lift A [ Insert Γ S As L P T M p ]
+  = ∈r-≃ [ Insert (Γ , A) S As (lift-stm ∘ L) P T (lift-stm ∘ M) lem ] γ
   where
     lem : lift-stm (L ⌊ P ⌋p)
           ≃stm
@@ -70,38 +66,35 @@ ins-lift (Insert Γ S As L P T M p) A .proj₁
       < canonical-comp′ (ih P) T >>= lift-label (M ,, S⋆) >stm ∎
       where
         open Reasoning stm-setoid
-ins-lift (Insert Γ S As L P T M p) A .proj₂ .ctxeq = refl≃c
-ins-lift (Insert Γ S As L P T M p) A .proj₂ .lhseq = sym≃tm (lift-stm-to-term (SCoh S As (L ,, S⋆)))
-ins-lift (Insert Γ S As L P T M p) A .proj₂ .rhseq = begin
-  < lift-tm (stm-to-term (SCoh (S >>[ P ] T)
-                               (As >>=′ (κ S P T ,, S⋆))
-                               (L >>l[ P ] M ,, S⋆))) >tm
-    ≈˘⟨ lift-stm-to-term (SCoh (S >>[ P ] T)
-                               (As >>=′ (κ S P T ,, S⋆))
-                               (L >>l[ P ] M ,, S⋆)) ⟩
-  < stm-to-term (SCoh (S >>[ P ] T)
-                      (As >>=′ (κ S P T ,, S⋆))
-                      (lift-label (L >>l[ P ] M ,, S⋆))) >tm
-    ≈⟨ SCoh≃ (S >>[ P ] T)
-             (refl≃sty {As = As >>=′ (κ S P T ,, S⋆)})
-             (label-from-insertion-map lift-stm L P M)
-             (refl≃sty {As = S⋆}) .get ⟩
-  < stm-to-term (SCoh (S >>[ P ] T)
-                      (As >>=′ (κ S P T ,, S⋆))
-                      (lift-stm ∘ L >>l[ P ] lift-stm ∘ M ,, S⋆)) >tm ∎
-  where
-    open Reasoning tm-setoid
+
+    γ : Insertion (Γ , A) S As (lift-stm ∘ L) P T (lift-stm ∘ M)
+        ≃r
+        lift-rule (Insertion Γ S As L P T M) A
+    γ .ctxeq = refl≃c
+    γ .lhseq = lift-stm-to-term (SCoh S As (L ,, S⋆))
+    γ .rhseq = begin
+      < stm-to-term (SCoh (S >>[ P ] T)
+                          (As >>=′ (κ S P T ,, S⋆))
+                          (lift-stm ∘ L >>l[ P ] lift-stm ∘ M ,, S⋆)) >tm
+        ≈˘⟨ SCoh≃ (S >>[ P ] T)
+                 (refl≃sty {As = As >>=′ (κ S P T ,, S⋆)})
+                 (label-from-insertion-map lift-stm L P M)
+                 (refl≃sty {As = S⋆}) .get ⟩
+      < stm-to-term (SCoh (S >>[ P ] T)
+                          (As >>=′ (κ S P T ,, S⋆))
+                          (lift-label (L >>l[ P ] M ,, S⋆))) >tm
+        ≈⟨ lift-stm-to-term (SCoh (S >>[ P ] T)
+                                   (As >>=′ (κ S P T ,, S⋆))
+                                   (L >>l[ P ] M ,, S⋆)) ⟩
+      < lift-tm (stm-to-term (SCoh (S >>[ P ] T)
+                                   (As >>=′ (κ S P T ,, S⋆))
+                                   (L >>l[ P ] M ,, S⋆))) >tm ∎
+      where
+        open Reasoning tm-setoid
 
 ins-susp : SuspCond InsertionSet
-ins-susp (Insert Γ S As L P T M p) .proj₁ = Insert (susp-ctx Γ)
-                                                   (Susp S)
-                                                   (susp-sty As)
-                                                   (susp-label-full L)
-                                                   (BExt P)
-                                                   (Susp T)
-                                                   ⦃ inst ⦄
-                                                   (susp-label-full M)
-                                                   lem
+ins-susp [ Insert {l = l} Γ S As L P T M p ]
+  = ∈r-≃ [ Insert (susp-ctx Γ) (Susp S) (susp-sty As) (susp-label-full L) (BExt P) (Susp T) ⦃ inst ⦄ (susp-label-full M) lem ] γ
   where
     lem : susp-label-full L (PExt ⌊ P ⌋p)
           ≃stm
@@ -114,31 +107,7 @@ ins-susp (Insert Γ S As L P T M p) .proj₁ = Insert (susp-ctx Γ)
       < SExt (canonical-comp′ (ih P) T) >>= (susp-label-full M ,, S⋆) >stm ∎
       where
         open Reasoning stm-setoid
-ins-susp (Insert Γ S As L P T M p) .proj₂ .ctxeq = refl≃c
-ins-susp (Insert Γ S As L P T M p) .proj₂ .lhseq = begin
-  < susp-tm (stm-to-term (SCoh S As (L ,, S⋆))) >tm
-    ≈˘⟨ susp-stm-to-term (SCoh S As (L ,, S⋆)) ⟩
-  < stm-to-term (susp-stm (SCoh S As (L ,, S⋆))) >tm
-    ≈⟨ SCoh-unrestrict S As (susp-label (L ,, S⋆)) .get ⟩
-  < stm-to-term (SCoh (Susp S) (susp-sty As) (susp-label-full L ,, S⋆))
-   >tm ∎
-  where
-    open Reasoning tm-setoid
-ins-susp (Insert {l = l} Γ S As L P T M p) .proj₂ .rhseq = begin
-  < susp-tm (stm-to-term (SCoh (S >>[ P ] T)
-                               (As >>=′ (κ S P T ,, S⋆))
-                               (L >>l[ P ] M ,, S⋆))) >tm
-    ≈˘⟨ susp-stm-to-term (SCoh (S >>[ P ] T)
-                               (As >>=′ (κ S P T ,, S⋆))
-                               (L >>l[ P ] M ,, S⋆)) ⟩
-  < stm-to-term (susp-stm (SCoh (S >>[ P ] T)
-                                (As >>=′ (κ S P T ,, S⋆))
-                                (L >>l[ P ] M ,, S⋆))) >tm
-    ≈⟨ lem .get ⟩
-  < stm-to-term (SCoh (Susp ((S >>[ P ] T) ⦃ _ ⦄))
-                      (susp-sty As >>=′ (κ (Susp S) (BExt P) (Susp T) ⦃ _ ⦄ ,, S⋆))
-                      ((susp-label-full L >>l[ BExt P ] susp-label-full M) ⦃ inst ⦄ ,, S⋆)) >tm ∎
-  where
+
     l4 : κ (Susp S) (BExt P) (Susp T) ⦃ inst ⦄
          ≃l
          susp-label-full (κ S P T)
@@ -165,14 +134,14 @@ ins-susp (Insert {l = l} Γ S As L P T M p) .proj₂ .rhseq = begin
     l3 .get (PExt Z) = sym≃stm (label-from-insertion-map susp-stm L P M ⦃ it ⦄ .get Z)
     l3 .get (PShift PHere) = refl≃stm
 
-    lem : susp-stm (SCoh (S >>[ P ] T)
+    l1 : susp-stm (SCoh (S >>[ P ] T)
                          (As >>=′ (κ S P T ,, S⋆))
                          (L >>l[ P ] M ,, S⋆))
-          ≃stm
-          SCoh (Susp (S >>[ P ] T))
-               (susp-sty As >>=′ (κ (Susp S) (BExt P) (Susp T) ⦃ inst ⦄ ,, S⋆))
-               ((susp-label-full L >>l[ BExt P ] susp-label-full M) ⦃ inst ⦄ ,, S⋆)
-    lem = begin
+         ≃stm
+         SCoh (Susp (S >>[ P ] T))
+              (susp-sty As >>=′ (κ (Susp S) (BExt P) (Susp T) ⦃ inst ⦄ ,, S⋆))
+              ((susp-label-full L >>l[ BExt P ] susp-label-full M) ⦃ inst ⦄ ,, S⋆)
+    l1 = begin
       < SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (susp-label (L >>l[ P ] M ,, S⋆)) >stm
         ≈⟨ SCoh-unrestrict (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (susp-label (L >>l[ P ] M ,, S⋆)) ⟩
       < SCoh (Susp (S >>[ P ] T))
@@ -187,9 +156,34 @@ ins-susp (Insert {l = l} Γ S As L P T M p) .proj₂ .rhseq = begin
 
     open Reasoning tm-setoid
 
+    γ : Insertion (susp-ctx Γ) (Susp S) (susp-sty As) (susp-label-full L) (BExt P) (Susp T) ⦃ inst ⦄ (susp-label-full M)
+        ≃r
+        susp-rule (Insertion Γ S As L P T M)
+    γ .ctxeq = refl≃c
+    γ .lhseq = begin
+      < stm-to-term (SCoh (Susp S) (susp-sty As) (susp-label-full L ,, S⋆)) >tm
+        ≈˘⟨ SCoh-unrestrict S As (susp-label (L ,, S⋆)) .get ⟩
+      < stm-to-term (susp-stm (SCoh S As (L ,, S⋆))) >tm
+        ≈⟨ susp-stm-to-term (SCoh S As (L ,, S⋆)) ⟩
+      < susp-tm (stm-to-term (SCoh S As (L ,, S⋆))) >tm ∎
+    γ .rhseq = begin
+      < stm-to-term (SCoh (Susp ((S >>[ P ] T) ⦃ _ ⦄))
+                          (susp-sty As >>=′ (κ (Susp S) (BExt P) (Susp T) ⦃ _ ⦄ ,, S⋆))
+                          ((susp-label-full L >>l[ BExt P ] susp-label-full M) ⦃ inst ⦄ ,, S⋆)) >tm
+        ≈˘⟨ l1 .get ⟩
+      < stm-to-term (susp-stm (SCoh (S >>[ P ] T)
+                                    (As >>=′ (κ S P T ,, S⋆))
+                                    (L >>l[ P ] M ,, S⋆))) >tm
+        ≈⟨ susp-stm-to-term (SCoh (S >>[ P ] T)
+                                   (As >>=′ (κ S P T ,, S⋆))
+                                   (L >>l[ P ] M ,, S⋆)) ⟩
+      < susp-tm (stm-to-term (SCoh (S >>[ P ] T)
+                                   (As >>=′ (κ S P T ,, S⋆))
+                                   (L >>l[ P ] M ,, S⋆))) >tm ∎
+
 ins-sub : SubCond InsertionSet
-ins-sub (Insert Γ S As L P T M p) Δ σ .proj₁
-  = Insert Δ S As (_[ σ ]stm ∘ L) P T (_[ σ ]stm ∘ M) lem
+ins-sub Δ σ [ Insert Γ S As L P T M p ]
+  = ∈r-≃ [ Insert Δ S As (_[ σ ]stm ∘ L) P T (_[ σ ]stm ∘ M) lem ] γ
   where
     open Reasoning stm-setoid
     lem : L ⌊ P ⌋p [ σ ]stm
@@ -202,30 +196,30 @@ ins-sub (Insert Γ S As L P T M p) Δ σ .proj₁
         ≈⟨ stm-sub->>= (canonical-comp′ (ih P) T) (M ,, S⋆) σ ⟩
       < canonical-comp′ (ih P) T >>= ((M ,, S⋆) [ σ ]l) >stm ∎
 
-ins-sub (Insert Γ S As L P T M p) Δ σ .proj₂ .ctxeq = refl≃c
-ins-sub (Insert Γ S As L P T M p) Δ σ .proj₂ .lhseq = stm-sub-SCoh S As (L ,, S⋆) σ .get
-ins-sub (Insert Γ S As L P T M p) Δ σ .proj₂ .rhseq = lem .get
-  where
-    open Reasoning stm-setoid
-    lem : SCoh (S >>[ P ] T)
+    l1 : SCoh (S >>[ P ] T)
+              (As >>=′ (κ S P T ,, S⋆))
+              ((λ x → (L x) [ σ ]stm) >>l[ P ] (λ x → (M x) [ σ ]stm) ,, S⋆)
+         ≃stm
+         SCoh (S >>[ P ] T)
                (As >>=′ (κ S P T ,, S⋆))
                (L >>l[ P ] M ,, S⋆) [ σ ]stm
-          ≃stm
-          SCoh (S >>[ P ] T)
-               (As >>=′ (κ S P T ,, S⋆))
-               ((λ x → (L x) [ σ ]stm) >>l[ P ] (λ x → (M x) [ σ ]stm) ,, S⋆)
-    lem = begin
-      < SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (L >>l[ P ] M ,, S⋆) [ σ ]stm >stm
-        ≈⟨ stm-sub-SCoh (S >>[ P ] T)
+    l1 = begin
+      < SCoh (S >>[ P ] T)
+             (As >>=′ (κ S P T ,, S⋆))
+             ((_[ σ ]stm ∘ L) >>l[ P ] (_[ σ ]stm ∘ M) ,, S⋆) >stm
+        ≈˘⟨ SCoh≃ (S >>[ P ] T) refl≃sty (label-from-insertion-map (_[ σ ]stm) L P M) refl≃sty ⟩
+      < SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) ((L >>l[ P ] M ,, S⋆) [ σ ]l) >stm
+        ≈˘⟨ stm-sub-SCoh (S >>[ P ] T)
                         (As >>=′ (κ S P T ,, S⋆))
                         (L >>l[ P ] M ,, S⋆)
                         σ ⟩
-      < SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) ((L >>l[ P ] M ,, S⋆) [ σ ]l) >stm
-        ≈⟨ SCoh≃ (S >>[ P ] T) refl≃sty (label-from-insertion-map (_[ σ ]stm) L P M) refl≃sty ⟩
-      < SCoh (S >>[ P ] T)
-             (As >>=′ (κ S P T ,, S⋆))
-             ((_[ σ ]stm ∘ L) >>l[ P ] (_[ σ ]stm ∘ M) ,, S⋆)
-       >stm ∎
+      < SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (L >>l[ P ] M ,, S⋆) [ σ ]stm >stm ∎
+
+    γ : Insertion Δ S As (λ x → L x [ σ ]stm) P T (λ x → M x [ σ ]stm) ≃r
+         sub-rule (Insertion Γ S As L P T M) Δ σ
+    γ .ctxeq = refl≃c
+    γ .lhseq = sym≃tm (stm-sub-SCoh S As (L ,, S⋆) σ .get)
+    γ .rhseq = l1 .get
 
 open Tame
 

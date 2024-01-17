@@ -41,7 +41,7 @@ lift-tm-equality (Trans≈ eq eq′) = Trans≈ (lift-tm-equality eq) (lift-tm-e
 
 lift-tm-equality (Coh≈ r s) = Coh≈ r (lift-sub-equality s)
 lift-tm-equality {A = A} (Rule≈ r p tc) = Rule≈ (lift-rule r A)
-                                                (LiftCond-prop lift-cond p A)
+                                                (lift-cond A p)
                                                 (lift-tm-typing tc)
 
 lift-sub-equality (Null≈ x) = Null≈ (lift-ty-equality x)

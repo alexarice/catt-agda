@@ -1,26 +1,33 @@
 module Catt.Typing.Weak where
 
 open import Catt.Prelude
-open import Catt.Typing.Base
+open import Catt.Typing.Rule
 
-Weak-Rules : ⊥ → Rule
-Weak-Rules ()
+Weak-Rules : RuleSet
+Weak-Rules r = ⊥
 
 open import Catt.Typing Weak-Rules public
 
-open import Catt.Typing.Rule Weak-Rules
+open import Catt.Typing.Rule.Typed Weak-Rules
 
-weak-lift-rule : (x : ⊥) → LiftRule (Weak-Rules x)
-weak-lift-rule ()
+weak-lift : LiftCond Weak-Rules
+weak-lift A ()
 
-weak-susp-rule : (x : ⊥) → SuspRule (Weak-Rules x)
-weak-susp-rule ()
+weak-susp : SuspCond Weak-Rules
+weak-susp ()
 
-weak-sub-rule : (x : ⊥) → SubRule (Weak-Rules x)
-weak-sub-rule ()
+weak-sub : SubCond Weak-Rules
+weak-sub Γ σ ()
 
-weak-conv-rule : (x : ⊥) → ConvRule (Weak-Rules x)
-weak-conv-rule ()
+open Tame
 
-weak-supp-rule : (x : ⊥) → SupportRule (Weak-Rules x)
-weak-supp-rule ()
+weak-tame : Tame Weak-Rules
+weak-tame .lift-cond = weak-lift
+weak-tame .susp-cond = weak-susp
+weak-tame .sub-cond = weak-sub
+
+weak-conv : ConvCond Weak-Rules
+weak-conv ()
+
+weak-supp : SupportCond Weak-Rules
+weak-supp ()

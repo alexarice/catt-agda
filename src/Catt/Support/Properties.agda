@@ -22,7 +22,6 @@ open import Catt.Support
 
 open import Algebra.Bundles
 open import Algebra.Definitions
-open import Data.Sum
 open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise)
 open import Relation.Binary
 open import Relation.Nullary

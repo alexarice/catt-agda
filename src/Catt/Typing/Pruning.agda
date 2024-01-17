@@ -18,7 +18,7 @@ open import Catt.Dyck.Pruning.Properties
 open import Catt.Typing rules
 open import Catt.Typing.Properties.Base rules
 
-open import Catt.Typing.Pruning.Rule public
+open import Catt.Typing.Pruning.Rule
 
 open Rule
 
@@ -35,101 +35,9 @@ HasPruning = ∀ {m n}
            → {C : Ty m}
            → Typing-Tm Γ (Coh ⌊ dy ⌋d A σ) C
            → Coh ⌊ dy ⌋d A σ ≈[ Γ ]tm Coh ⌊ dy // p ⌋d (A [ π p ]ty) (σ //s p)
-{-
-module Conditions (prune : HasPruning) where
-  open import Catt.Typing.Rule rules
 
-  lift-rule : (p : Peak dy) → {B : Ty (ctxLength Γ)} → (pf : peak-term p [ σ ]tm ≃tm identity-term B t) → LiftRule (Pruning Γ dy A p σ)
-  lift-rule {dy = dy} {Γ = Γ} {σ = σ} {t = t} {A = A} p {B} pf {A = C} tty = begin
-    Coh ⌊ dy ⌋d A (lift-sub σ)
-      ≈⟨ prune {Γ = (Γ , C)} p lem {lift-ty _} tty ⟩
-    Coh ⌊ dy // p ⌋d (A [ π p ]ty) (lift-sub σ //s p)
-      ≈⟨ Coh≈ refl≈ty (reflexive≈s (lift-//s p σ)) ⟩
-    Coh ⌊ dy // p ⌋d (A [ π p ]ty) (lift-sub (σ //s p)) ∎
-    where
-      lem : (peak-term p [ lift-sub σ ]tm) ≃tm identity-term (lift-ty B) (lift-tm t)
-      lem = begin
-        < peak-term p [ lift-sub σ ]tm >tm
-          ≈⟨ apply-lifted-sub-tm-≃ (peak-term p) σ ⟩
-        < lift-tm (peak-term p [ σ ]tm) >tm
-          ≈⟨ lift-tm-≃ pf ⟩
-        < lift-tm (identity-term B t) >tm
-          ≈⟨ identity-term-lift B t ⟩
-        < identity-term (lift-ty B) (lift-tm t) >tm ∎
-        where
-          open Reasoning tm-setoid
+HasPruningRule : Set
+HasPruningRule = PruningSet ⊆r rules
 
-      open Reasoning (tm-setoid-≈ _)
-
-  susp-rule : (p : Peak dy) → {B : Ty (ctxLength Γ)} → (pf : peak-term p [ σ ]tm ≃tm identity-term B t) → SuspRule (Pruning Γ dy A p σ)
-  susp-rule {dy = dy}  {Γ = Γ} {σ = σ} {t = t}{A = A} p {B} pf tty = begin
-    Coh (susp-ctx ⌊ dy ⌋d) (susp-ty A) (susp-sub σ)
-      ≈˘⟨ reflexive≈tm (Coh≃ (susp-⌊⌋d dy) refl≃ty refl≃s) ⟩
-    Coh ⌊ susp-dyck dy ⌋d (susp-ty A) (susp-sub σ)
-      ≈⟨ prune (⇓pk (susp-peak p)) lem (transport-typing tty (Coh≃ (sym≃c (susp-⌊⌋d dy)) refl≃ty refl≃s)) ⟩
-    Coh ⌊ susp-dyck dy // (susp-peak p) ⌋d
-        (susp-ty A [ π (susp-peak p) ]ty)
-        (susp-sub σ //s susp-peak p)
-      ≈⟨ reflexive≈tm (Coh≃ l1 l2 (susp-//s p σ)) ⟩
-    Coh (susp-ctx ⌊ dy // p ⌋d)
-        (susp-ty (A [ π p ]ty))
-        (susp-sub (σ //s p)) ∎
-    where
-      l1 : ⌊ susp-dyck dy // (susp-peak p) ⌋d ≃c
-            susp-ctx ⌊ dy // p ⌋d
-      l1 = begin
-        < ⌊ susp-dyck dy // (susp-peak p) ⌋d >c
-          ≈⟨ ⌊⌋d-≃ (prune-susp-peak p) ⟩
-        < ⌊ susp-dyck (dy // p) ⌋d >c
-          ≈⟨ susp-⌊⌋d (dy // p) ⟩
-        < susp-ctx ⌊ dy // p ⌋d >c ∎
-        where
-          open Reasoning ctx-setoid
-
-      l2 : (susp-ty A [ π (susp-peak p) ]ty) ≃ty
-            susp-ty (A [ π p ]ty)
-      l2 = begin
-        < susp-ty A [ π (susp-peak p) ]ty >ty
-          ≈⟨ sub-action-≃-ty refl≃ty (susp-π p) ⟩
-        < susp-ty A [ susp-sub (π p) ]ty >ty
-          ≈˘⟨ susp-functorial-ty (π p) A ⟩
-        < susp-ty (A [ π p ]ty) >ty ∎
-        where
-          open Reasoning ty-setoid
-
-      lem : (peak-term (susp-peak p) [ susp-sub σ ]tm) ≃tm identity-term (susp-ty B) (susp-tm t)
-      lem = begin
-        < peak-term (susp-peak p) [ susp-sub σ ]tm >tm
-          ≈⟨ sub-action-≃-tm (susp-peak-term p) refl≃s ⟩
-        < susp-tm (peak-term p) [ susp-sub σ ]tm >tm
-          ≈˘⟨ susp-functorial-tm σ (peak-term p) ⟩
-        < susp-tm (peak-term p [ σ ]tm) >tm
-          ≈⟨ susp-tm-≃ pf ⟩
-        < susp-tm (identity-term B t) >tm
-          ≈⟨ identity-term-susp B t ⟩
-        < identity-term (susp-ty B) (susp-tm t) >tm ∎
-        where
-          open Reasoning tm-setoid
-      open Reasoning (tm-setoid-≈ _)
-
-  sub-rule : (p : Peak dy) → {B : Ty (ctxLength Γ)} → (pf : peak-term p [ σ ]tm ≃tm identity-term B t) → SubRule (Pruning Γ dy A p σ)
-  sub-rule {dy = dy} {σ = σ} {t = t} {A = A} p {B} pf {σ = τ} σty tty = begin
-    Coh ⌊ dy ⌋d A (τ ● σ)
-      ≈⟨ prune p lem tty ⟩
-    Coh ⌊ dy // p ⌋d (A [ π p ]ty) (τ ● σ //s p)
-      ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (//s-sub p σ τ)) ⟩
-    Coh ⌊ dy // p ⌋d (A [ π p ]ty) (τ ● (σ //s p)) ∎
-    where
-      lem : (peak-term p [ τ ● σ ]tm) ≃tm identity-term (B [ τ ]ty) (t [ τ ]tm)
-      lem = begin
-        < peak-term p [ τ ● σ ]tm >tm
-          ≈⟨ assoc-tm τ σ (peak-term p) ⟩
-        < peak-term p [ σ ]tm [ τ ]tm >tm
-          ≈⟨ sub-action-≃-tm pf refl≃s ⟩
-        < identity-term B t [ τ ]tm >tm
-          ≈⟨ identity-term-sub B t τ ⟩
-        < identity-term (B [ τ ]ty) (t [ τ ]tm) >tm ∎
-        where
-          open Reasoning tm-setoid
-      open Reasoning (tm-setoid-≈ _)
--}
+pruning-from-rule : HasPruningRule → HasPruning
+pruning-from-rule p pk pf tty = Rule≈ _ (p [ Prune _ _ _ pk _ _ _ pf ]) tty

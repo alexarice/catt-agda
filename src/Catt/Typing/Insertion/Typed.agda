@@ -1,9 +1,7 @@
 open import Catt.Typing.Rule
-import Catt.Typing.Insertion as I
 
-module Catt.Typing.Insertion.Properties (rules : RuleSet)
-                                        (tame : Tame rules)
-                                        (ins : I.HasInsertion rules) where
+module Catt.Typing.Insertion.Typed (rules : RuleSet)
+                                   (tame : Tame rules) where
 
 open Tame tame
 
@@ -12,13 +10,15 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Tree
-open import Catt.Tree.Insertion
-open import Catt.Tree.Insertion.Properties
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Canonical
 open import Catt.Tree.Canonical.Properties
+open import Catt.Tree.Insertion
+open import Catt.Tree.Insertion.Properties
+
+open import Catt.Typing.Insertion.Rule
 
 open import Catt.Typing rules
 open import Catt.Typing.Properties rules tame
@@ -28,13 +28,10 @@ open import Catt.Tree.Structured.Typing.Properties rules tame
 open import Catt.Tree.Canonical.Typing rules tame
 open import Catt.Tree.Insertion.Typing rules tame
 
-open I rules
-{-
-conv-rule : (P : Branch S l)
-          → .⦃ _ : has-trunk-height l T ⦄
-          → L ⌊ P ⌋p ≃stm canonical-comp′ (ih P) T >>= (M ,, S⋆)
-          → ConvRule (Insertion Γ S As L P T M)
-conv-rule {S = S} {T = T} {L = L} {M = M} {Γ = Γ} {As = As} P pf {A} tty
+open import Catt.Typing.Rule.Typed rules
+
+ins-conv : ConvCond InsertionSet
+ins-conv [ Insert Γ S As L P T M pf ] {A = A} tty
   = TyConv (stm-to-term-Ty (TySCoh (S >>[ P ] T) (>>=′-Ty AsTy (κ-Ty S P T) TySStar) (label-from-insertion-Ty Lty P Mty l1) TySStar)) l2
   where
     AsTy : Typing-STy ⌊ S ⌋ As
@@ -84,4 +81,3 @@ conv-rule {S = S} {T = T} {L = L} {M = M} {Γ = Γ} {As = As} P pf {A} tty
       A ∎
       where
         open Reasoning (ty-setoid-≈ Γ)
--}

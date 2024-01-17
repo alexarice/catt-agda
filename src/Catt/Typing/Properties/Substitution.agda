@@ -49,9 +49,9 @@ apply-sub-tm-eq σty (Var≈ x) with toℕ-injective x
 apply-sub-tm-eq σty (Sym≈ p) = Sym≈ (apply-sub-tm-eq σty p)
 apply-sub-tm-eq σty (Trans≈ p q) = Trans≈ (apply-sub-tm-eq σty p) (apply-sub-tm-eq σty q)
 apply-sub-tm-eq σty (Coh≈ q r) = Coh≈ q (apply-sub-sub-eq σty r)
-apply-sub-tm-eq σty (Rule≈ r p tc) = Rule≈ (sub-rule r _ _)
-                                           (SubCond-prop sub-cond p _ _)
-                                           (apply-sub-tm-typing tc σty)
+apply-sub-tm-eq {σ = σ} σty (Rule≈ r p tc) = Rule≈ (sub-rule r _ _)
+                                                   (sub-cond _ σ p)
+                                                   (apply-sub-tm-typing tc σty)
 
 apply-sub-sub-eq σty (Null≈ x) = Null≈ (apply-sub-ty-eq σty x)
 apply-sub-sub-eq σty (Ext≈ p x) = Ext≈ (apply-sub-sub-eq σty p) (apply-sub-tm-eq σty x)

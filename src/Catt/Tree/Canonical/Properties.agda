@@ -27,7 +27,6 @@ open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
 open import Catt.Tree.Canonical
-open import Data.Sum
 
 canonical-type-dim : (d : ℕ) → (T : Tree n) → sty-dim (canonical-type d T) ≡ d
 canonical-type-dim zero T = refl

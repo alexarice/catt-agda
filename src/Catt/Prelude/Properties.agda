@@ -35,7 +35,7 @@ refl≃n {n = suc n} = inst ⦃ refl≃n ⦄
 
 sym≃n : n ≃n m → m ≃n n
 sym≃n {n = zero} {m = zero} p = tt
-sym≃n {n = suc n} {m = suc m} p = inst ⦃ sym≃n it ⦄ -- inst ⦃ sym≃n p ⦄
+sym≃n {n = suc n} {m = suc m} p = inst ⦃ sym≃n it ⦄
 
 trans≃n : n ≃n m → m ≃n o → n ≃n o
 trans≃n {n = zero} {m = zero} {o = zero} p q = tt

@@ -27,7 +27,7 @@ Pruning Γ dy A p σ .tgtCtx = Γ
 Pruning Γ dy A p σ .lhs = Coh ⌊ dy ⌋d A σ
 Pruning Γ dy A p σ .rhs = Coh ⌊ dy // p ⌋d (A [ π p ]ty) (σ //s p)
 
-data PruningIdx : Set where
+data PruningSet : RuleSet where
   Prune : (Γ : Ctx m)
         → (dy : Dyck (suc n) 0)
         → (A : Ty (3 + n * 2))
@@ -35,16 +35,12 @@ data PruningIdx : Set where
         → (σ : Sub (3 + n * 2) m ⋆)
         → (B : Ty m)
         → (t : Tm m)
-        → (peak-term p [ σ ]tm ≃tm identity-term B t)
-        → PruningIdx
-
-PruningSet : RuleSet
-PruningSet .proj₁ = PruningIdx
-PruningSet .proj₂ (Prune Γ dy A p σ B t pf) = Pruning Γ dy A p σ
+        → (pf : peak-term p [ σ ]tm ≃tm identity-term B t)
+        → PruningSet (Pruning Γ dy A p σ)
 
 pruning-lift : LiftCond PruningSet
-pruning-lift (Prune Γ dy A p σ B t pf) C .proj₁
-  = Prune (Γ , C) dy A p (lift-sub σ) (lift-ty B) (lift-tm t) lem
+pruning-lift C [ Prune Γ dy A p σ B t pf ]
+  = ∈r-≃ [ Prune (Γ , C) dy A p (lift-sub σ) (lift-ty B) (lift-tm t) lem ] γ
   where
     lem : (peak-term p [ lift-sub σ ]tm) ≃tm identity-term (lift-ty B) (lift-tm t)
     lem = begin
@@ -57,21 +53,23 @@ pruning-lift (Prune Γ dy A p σ B t pf) C .proj₁
       < identity-term (lift-ty B) (lift-tm t) >tm ∎
       where
         open Reasoning tm-setoid
-pruning-lift (Prune Γ dy A p σ B t x) C .proj₂ .ctxeq = refl≃c
-pruning-lift (Prune Γ dy A p σ B t x) C .proj₂ .lhseq = refl≃tm
-pruning-lift (Prune Γ dy A p σ B t x) C .proj₂ .rhseq
-  = sym≃tm (Coh≃ refl≃c refl≃ty (lift-//s p σ))
+
+    γ : Pruning (Γ , C) dy A p (lift-sub σ) ≃r lift-rule (Pruning Γ dy A p σ) C
+    γ .ctxeq = refl≃c
+    γ .lhseq = refl≃tm
+    γ .rhseq = Coh≃ refl≃c refl≃ty (lift-//s p σ)
 
 pruning-susp : SuspCond PruningSet
-pruning-susp (Prune Γ dy A p σ B t pf) .proj₁
-  = Prune (susp-ctx Γ)
-          (⇓ (susp-dyck dy))
-          (susp-ty A)
-          (⇓pk (susp-peak p))
-          (susp-sub σ)
-          (susp-ty B)
-          (susp-tm t)
-          lem
+pruning-susp [ Prune Γ dy A p σ B t pf ]
+  = ∈r-≃ [ Prune (susp-ctx Γ)
+                 (⇓ (susp-dyck dy))
+                 (susp-ty A)
+                 (⇓pk (susp-peak p))
+                 (susp-sub σ)
+                 (susp-ty B)
+                 (susp-tm t)
+                 lem ]
+         γ
   where
     lem : (peak-term (susp-peak p) [ susp-sub σ ]tm) ≃tm identity-term (susp-ty B) (susp-tm t)
     lem = begin
@@ -86,13 +84,8 @@ pruning-susp (Prune Γ dy A p σ B t pf) .proj₁
       < identity-term (susp-ty B) (susp-tm t) >tm ∎
       where
         open Reasoning tm-setoid
-pruning-susp (Prune Γ dy A p σ B t pf) .proj₂ .ctxeq = refl≃c
-pruning-susp (Prune Γ dy A p σ B t pf) .proj₂ .lhseq = Coh≃ (sym≃c (susp-⌊⌋d dy)) refl≃ty refl≃s
-pruning-susp (Prune Γ dy A p σ B t pf) .proj₂ .rhseq
-  = sym≃tm (Coh≃ l1 l2 (susp-//s p σ))
-  where
-    l1 : ⌊ susp-dyck dy // (susp-peak p) ⌋d ≃c
-          susp-ctx ⌊ dy // p ⌋d
+
+    l1 : ⌊ susp-dyck dy // (susp-peak p) ⌋d ≃c susp-ctx ⌊ dy // p ⌋d
     l1 = begin
       < ⌊ susp-dyck dy // (susp-peak p) ⌋d >c
         ≈⟨ ⌊⌋d-≃ (prune-susp-peak p) ⟩
@@ -102,8 +95,7 @@ pruning-susp (Prune Γ dy A p σ B t pf) .proj₂ .rhseq
       where
         open Reasoning ctx-setoid
 
-    l2 : (susp-ty A [ π (susp-peak p) ]ty) ≃ty
-          susp-ty (A [ π p ]ty)
+    l2 : (susp-ty A [ π (susp-peak p) ]ty) ≃ty susp-ty (A [ π p ]ty)
     l2 = begin
       < susp-ty A [ π (susp-peak p) ]ty >ty
         ≈⟨ sub-action-≃-ty refl≃ty (susp-π p) ⟩
@@ -113,8 +105,16 @@ pruning-susp (Prune Γ dy A p σ B t pf) .proj₂ .rhseq
       where
         open Reasoning ty-setoid
 
+    γ : Pruning (susp-ctx Γ) (⇓ (susp-dyck dy)) (susp-ty A) (⇓pk (susp-peak p)) (susp-sub σ)
+        ≃r
+        susp-rule (Pruning Γ dy A p σ)
+    γ .ctxeq = refl≃c
+    γ .lhseq = Coh≃ (susp-⌊⌋d dy) refl≃ty refl≃s
+    γ .rhseq = Coh≃ l1 l2 (susp-//s p σ)
+
+
 pruning-sub : SubCond PruningSet
-pruning-sub (Prune Γ dy A p σ B t pf) Δ τ .proj₁ = Prune Δ dy A p (τ ● σ) (B [ τ ]ty) (t [ τ ]tm) lem
+pruning-sub Δ τ [ Prune Γ dy A p σ B t pf ] = ∈r-≃ [ Prune Δ dy A p (τ ● σ) (B [ τ ]ty) (t [ τ ]tm) lem ] γ
   where
     lem : (peak-term p [ τ ● σ ]tm) ≃tm identity-term (B [ τ ]ty) (t [ τ ]tm)
     lem = begin
@@ -127,9 +127,11 @@ pruning-sub (Prune Γ dy A p σ B t pf) Δ τ .proj₁ = Prune Δ dy A p (τ ●
       < identity-term (B [ τ ]ty) (t [ τ ]tm) >tm ∎
       where
         open Reasoning tm-setoid
-pruning-sub (Prune Γ dy A p σ B t pf) Δ τ .proj₂ .ctxeq = refl≃c
-pruning-sub (Prune Γ dy A p σ B t pf) Δ τ .proj₂ .lhseq = refl≃tm
-pruning-sub (Prune Γ dy A p σ B t pf) Δ τ .proj₂ .rhseq = Coh≃ refl≃c refl≃ty (sym≃s (//s-sub p σ τ))
+
+    γ : Pruning Δ dy A p (τ ● σ) ≃r sub-rule (Pruning Γ dy A p σ) Δ τ
+    γ .ctxeq = refl≃c
+    γ .lhseq = refl≃tm
+    γ .rhseq = Coh≃ refl≃c refl≃ty (//s-sub p σ τ)
 
 open Tame
 

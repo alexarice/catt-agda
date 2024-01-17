@@ -19,12 +19,9 @@ open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Construct
 
 open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
 open import Catt.Tree.Structured.Typing rules
 
-open import Catt.Typing.DiscRemoval.Rule public
-
-open Rule
+open import Catt.Typing.DiscRemoval.Rule
 
 HasDiscRemoval : Set
 HasDiscRemoval = ∀ {m n}
@@ -46,46 +43,8 @@ HasDiscRemoval-STm = ∀ {m n}
                → Typing-Label Γ (L ,, S⋆)
                → disc-stm S >>= (L ,, S⋆) ≈[ Γ ]stm L (is-linear-max-path S)
 
+HasDiscRemovalRule : Set
+HasDiscRemovalRule = DiscRemovalSet ⊆r rules
 
-{-
-module Conditions (dr : HasDiscRemoval) where
-  open import Catt.Typing.Rule rule
-
-  lift-rule : .⦃ NonZero n ⦄
-             → {σ : Sub (disc-size n) m ⋆}
-             → LiftRule (DiscRemoval Γ σ)
-  lift-rule {n = n} {σ = σ} tty = begin
-    disc-term n (lift-sub σ)
-      ≈⟨ dr tty ⟩
-    0V [ lift-sub σ ]tm
-      ≈⟨ reflexive≈tm (apply-lifted-sub-tm-≃ 0V σ) ⟩
-    lift-tm (0V [ σ ]tm) ∎
-    where
-      open Reasoning (tm-setoid-≈ _)
-
-  susp-rule : .⦃ NonZero n ⦄
-            → {σ : Sub (disc-size n) m ⋆}
-            → SuspRule (DiscRemoval Γ σ)
-  susp-rule {n = n} {σ = σ} tty = begin
-    susp-tm (disc-term n σ)
-      ≈⟨ reflexive≈tm (disc-term-susp n σ) ⟩
-    disc-term (suc n) (susp-sub σ)
-      ≈⟨ dr (transport-typing tty (disc-term-susp n σ)) ⟩
-    0V [ susp-sub σ ]tm
-      ≈˘⟨ reflexive≈tm (susp-functorial-tm σ 0V) ⟩
-    susp-tm (0V [ σ ]tm) ∎
-    where
-      open Reasoning (tm-setoid-≈ _)
-
-  sub-rule : .⦃ NonZero n ⦄
-           → {τ : Sub (disc-size n) m ⋆}
-           → SubRule (DiscRemoval Γ τ)
-  sub-rule {n = n} {τ = τ} {σ = σ} σty tty = begin
-    disc-term n (σ ● τ)
-      ≈⟨ dr tty ⟩
-    0V [ σ ● τ ]tm
-      ≈⟨ reflexive≈tm (assoc-tm σ τ 0V) ⟩
-    0V [ τ ]tm [ σ ]tm ∎
-    where
-      open Reasoning (tm-setoid-≈ _)
--}
+dr-from-rule : HasDiscRemovalRule → HasDiscRemoval
+dr-from-rule p tty = Rule≈ _ (p [ (DR _ _) ]) tty

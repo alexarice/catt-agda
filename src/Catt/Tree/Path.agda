@@ -9,8 +9,6 @@ open import Catt.Connection
 open import Catt.Tree
 open import Catt.Tree.Properties
 
-open import Data.Sum
-
 data Path : Tree n → Set where
   PHere : Path S
   PExt : Path S → Path (Join S T)

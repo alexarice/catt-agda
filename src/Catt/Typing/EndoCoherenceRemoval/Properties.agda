@@ -35,14 +35,19 @@ open import Catt.Tree.Structured.Typing.Properties rules tame
 open import Catt.Globular.Typing rules lift-cond
 open import Catt.Discs.Typing rules lift-cond
 
+open import Catt.Support
+open import Catt.Tree.Support
+open import Catt.Tree.Structured.Support
+open import Catt.Tree.Structured.Support.Properties
+
 open ECR rules
 
 ecr-stm : HasEndoCoherenceRemoval-STm
-ecr-stm S s As L [ sty ] [ Asty ] Lty .get = begin
+ecr-stm S s As supp L [ sty ] [ Asty ] Lty .get = begin
   Coh ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (label-to-sub (L ,, S⋆) ● idSub)
     ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (id-right-unit (label-to-sub (L ,, S⋆)))) ⟩
   Coh ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (label-to-sub (L ,, S⋆))
-    ≈⟨ ecr (TyCoh ⦃ tree-to-pd S ⦄ (TyArr sty Asty sty) (label-to-sub-Ty Lty TySStar)) ⟩
+    ≈⟨ ecr supp-lem (TyCoh ⦃ tree-to-pd S ⦄ (TyArr sty Asty sty) (label-to-sub-Ty Lty TySStar)) ⟩
   identity (ty-dim (sty-to-type As))
            (sub-from-disc (ty-dim (sty-to-type As))
                           (sty-to-type As [ label-to-sub (L ,, S⋆) ]ty)
@@ -90,4 +95,19 @@ ecr-stm S s As L [ sty ] [ Asty ] Lty .get = begin
       < label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) >s ∎
       where
         open Reasoning sub-setoid
+
+    supp-lem : SuppTy ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) ≡ full
+    supp-lem = begin
+      SuppTy ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s)
+        ≡˘⟨ FVSTy-to-type (SArr s As s) ⟩
+      MtoVarSet (incTree S) (FVSTy (SArr s As s))
+        ≡˘⟨ DCM-toVarSet (FVSTy (SArr s As s)) ⟩
+      MtoVarSet (incTree S) (DCT (FVSTy (SArr s As s)))
+        ≡⟨ cong (MtoVarSet (incTree S)) supp ⟩
+      MtoVarSet (incTree S) mFull
+        ≡⟨ toVarSet-full S ⟩
+      full ∎
+      where
+        open ≡-Reasoning
+
     open Reasoning (tm-setoid-≈ _)

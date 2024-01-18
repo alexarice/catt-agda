@@ -27,7 +27,7 @@ connect-pdb pd (Extend {Γ = Δ , _} {A = A} {B = B} pdb p q) = Extend (connect-
              ≃tm lift-tm (focus-tm (connect-pdb pd pdb))
     lem3 = begin
       < lift-tm (focus-tm pdb) [ ⟨ lift-sub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]tm >tm
-        ≈⟨ lift-sub-comp-lem-tm (lift-sub (connect-inc-right (pd-focus-tm pd) _)) (focus-tm pdb) ⟩
+        ≈⟨ apply-sub-lifted-tm-≃ (focus-tm pdb) ⟨ lift-sub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ⟩
       < focus-tm pdb [ lift-sub (connect-inc-right (pd-focus-tm pd) _) ]tm >tm
         ≈⟨ apply-lifted-sub-tm-≃ (focus-tm pdb) (connect-inc-right (pd-focus-tm pd) _) ⟩
       < lift-tm (focus-tm pdb [ connect-inc-right (pd-focus-tm pd) _ ]tm) >tm
@@ -50,7 +50,7 @@ connect-pdb pd (Extend {Γ = Δ , _} {A = A} {B = B} pdb p q) = Extend (connect-
              ≃ty lift-ty (focus-ty (connect-pdb pd pdb))
     lem4 = begin
       < lift-ty (focus-ty pdb) [ ⟨ lift-sub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]ty >ty
-        ≈⟨ lift-sub-comp-lem-ty (lift-sub (connect-inc-right (pd-focus-tm pd) _)) (focus-ty pdb) ⟩
+        ≈⟨ apply-sub-lifted-ty-≃ (focus-ty pdb) ⟨ lift-sub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ⟩
       < focus-ty pdb [ lift-sub (connect-inc-right (pd-focus-tm pd) _) ]ty >ty
         ≈⟨ apply-lifted-sub-ty-≃ (focus-ty pdb) (connect-inc-right (pd-focus-tm pd) _) ⟩
       < lift-ty (focus-ty pdb [ connect-inc-right (pd-focus-tm pd) _ ]ty) >ty
@@ -77,7 +77,7 @@ connect-focus-ty pd (Extend {Γ = Δ , A} {B = B} pdb p q) = begin
   < lift-ty (B [ ⟨ lift-sub (connect-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]ty) >ty
     ≈˘⟨ apply-lifted-sub-ty-≃ B _ ⟩
   < B [ ⟨ lift-sub (lift-sub (connect-inc-right (pd-focus-tm pd) _)) , 1V ⟩ ]ty >ty
-    ≈˘⟨ lift-sub-comp-lem-ty _ B ⟩
+    ≈˘⟨ apply-sub-lifted-ty-≃ B _ ⟩
   < lift-ty B [ ⟨ ⟨ lift-sub (lift-sub (connect-inc-right (pd-focus-tm pd) _)) , 1V ⟩ , 0V ⟩ ]ty >ty ∎
   where
     open Reasoning ty-setoid

@@ -29,9 +29,6 @@ open import Catt.Tree.Structured.Support
 open import Catt.Tree.Structured.Support.Properties
 open import Catt.Tree.Structured.Construct.Support
 
-open import Tactic.MonoidSolver
-
-
 supp-canonical-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → DCT (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b)) ≡ supp-tree-bd d T b
 supp-canonical-comp-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → DCT (FVSTm (canonical-comp d (tree-bd d T) >>= tree-inc-label d T b)) ≡ supp-tree-bd d T b
 
@@ -40,16 +37,16 @@ supp-canonical-lem zero Sing true = refl
 supp-canonical-lem zero (Join S T) false rewrite tEmp-empty S = cong₂ (VSJoin true) DCT-emp DCT-emp
 supp-canonical-lem zero (Join S T) true rewrite tEmp-empty S = cong₂ (VSJoin false) DCT-emp (DCT-last-path T)
 supp-canonical-lem (suc d) Sing b = refl
-supp-canonical-lem (suc d) (Join T Sing) b = begin
+supp-canonical-lem (suc d) (Susp T) b = begin
   DCT (FVSTm (canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (Susp T) b)))
     ≡⟨ FVSTm-≃ {a = canonical-stm d (tree-bd d T) >>= label₁ (tree-inc-label (suc d) (Susp T) b)}
                {b = susp-stm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b)}
                l1 ⟩
   DCT (FVSTm (susp-stm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b)))
     ≡˘⟨ FVSTm-susp (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b) ⟩
-  supp-tvarset (DCT (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b)))
-    ≡⟨ cong supp-tvarset (supp-canonical-lem d T b) ⟩
-  supp-tvarset (supp-tree-bd d T b) ∎
+  susp-tvarset (DCT (FVSTm (canonical-stm d (tree-bd d T) >>= tree-inc-label d T b)))
+    ≡⟨ cong susp-tvarset (supp-canonical-lem d T b) ⟩
+  susp-tvarset (supp-tree-bd d T b) ∎
   where
     l1 : (canonical-stm d (tree-bd d T) >>=
             label₁ (tree-inc-label (suc d) (Susp T) b))
@@ -109,6 +106,8 @@ canonical-supp-condition-2 (suc d) T p = begin
         ≡⟨ supp-tree-bd-full d T true (≤-pred p) ⟩
       tFull ∎
 
+open ≡-Reasoning
+
 canonical-label-full : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (T : Tree m) → DCT (FVLabel (canonical-label S T)) ≡ tFull
 canonical-label-full S T = begin
   DCT (FVLabel (canonical-label S T))
@@ -124,5 +123,20 @@ canonical-label-full S T = begin
   DCT (FVSTy (canonical-type (tree-dim S) T)) ∪t tFull
     ≡⟨ ∪t-right-zero (DCT (FVSTy (canonical-type (tree-dim S) T))) ⟩
   tFull ∎
-  where
-    open ≡-Reasoning
+
+
+canonical-stm-full : (d : ℕ) → (T : Tree m) → .(d ≥ tree-dim T) → DCT (FVSTm (canonical-stm d T)) ≡ tFull
+canonical-stm-full zero Sing p = refl
+canonical-stm-full (suc d) Sing p = refl
+canonical-stm-full (suc d) (Susp T) p = begin
+  DCT (FVSTm (susp-stm (canonical-stm d T)))
+    ≡˘⟨ FVSTm-susp (canonical-stm d T) ⟩
+  susp-tvarset (DCT (FVSTm (canonical-stm d T)))
+    ≡⟨ cong susp-tvarset (canonical-stm-full d T (≤-pred p)) ⟩
+  tFull ∎
+canonical-stm-full (suc d) (Join T (Join T₁ T₂)) p = begin
+  DCT (FVLabel-WT (id-label-wt (Join T (Join T₁ T₂))))
+    ≡⟨ cong DCT (id-label-wt-full (Join T (Join T₁ T₂))) ⟩
+  DCT tFull
+    ≡⟨ DCT-full ⟩
+  tFull ∎

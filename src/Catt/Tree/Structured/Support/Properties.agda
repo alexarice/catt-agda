@@ -377,7 +377,7 @@ FVLabel-WT-≃ {ΓS = ΓS} {L = L} {M = M} p q = begin
     ≡˘⟨ DCM-∪ ΓS (FVSTy (lty M)) (FVLabel (ap M)) ⟩
   DCM ΓS (FVSTy (lty M) ∪m FVLabel (ap M)) ∎
 
-FVSTm-susp : (a : STm (someTree S)) → supp-tvarset (DCT (FVSTm a)) ≡ DCT (FVSTm (susp-stm a))
+FVSTm-susp : (a : STm (someTree S)) → susp-tvarset (DCT (FVSTm a)) ≡ DCT (FVSTm (susp-stm a))
 FVSTm-susp {S = S} a rewrite Truth-prop (FVSTm-non-empty a) = refl
 
 id-label-full : (S : Tree n) → FVLabel (id-label S) ≡ tFull

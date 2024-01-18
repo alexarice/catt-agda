@@ -57,3 +57,18 @@ open import Catt.Typing.Pruning.Typed Unit-Rules units-lift units-sub
 
 units-conv : ConvCond Unit-Rules
 units-conv = ConvCond-∪ dr-conv (ConvCond-∪ ecr-conv pruning-conv)
+
+module _ where
+  open import Catt.Support.Typing Unit-Rules
+  open import Catt.Typing.DiscRemoval.Support rulesWithSupp (rulesWithSupp-lift units-lift) rulesWithSupp-supp
+  open import Catt.Typing.EndoCoherenceRemoval.Support rulesWithSupp rulesWithSupp-supp
+  open import Catt.Typing.Pruning.Support rulesWithSupp
+                                          (rulesWithSupp-lift units-lift)
+                                          (rulesWithSupp-sub units-sub)
+                                          rulesWithSupp-supp
+
+  units-supp′ : SupportCond′ rulesWithSupp Unit-Rules
+  units-supp′ = SupportCond-∪ dr-supp (SupportCond-∪ ecr-supp pruning-supp)
+
+  units-supp : SupportCond Unit-Rules
+  units-supp = SupportCond-prop units-supp′

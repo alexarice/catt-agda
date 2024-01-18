@@ -26,7 +26,7 @@ susp-functorial-id {suc n} = Ext≃ (trans≃s (susp-sub-lift idSub) (lift-sub-�
 
 susp-sub-preserve-star : (σ : Sub n m ⋆) → susp-ty ⋆ [ susp-sub σ ]ty ≃ty susp-ty (⋆ {n = m})
 susp-sub-preserve-star ⟨⟩ = refl≃ty
-susp-sub-preserve-star ⟨ σ , t ⟩ = trans≃ty (lift-sub-comp-lem-ty {t = susp-tm t} (susp-sub σ) (get-fst ─⟨ ⋆ ⟩⟶ get-snd)) (susp-sub-preserve-star σ)
+susp-sub-preserve-star ⟨ σ , t ⟩ = trans≃ty (apply-sub-lifted-ty-≃ (get-fst ─⟨ ⋆ ⟩⟶ get-snd) (susp-sub ⟨ σ , t ⟩)) (susp-sub-preserve-star σ)
 
 inject-susp-sub : (σ : Sub n m ⋆) → (i : Fin n) → Var (inject₁ (inject₁ i)) [ susp-sub σ ]tm ≃tm susp-tm (Var i [ σ ]tm)
 inject-susp-sub ⟨ σ , t ⟩ zero = refl≃tm

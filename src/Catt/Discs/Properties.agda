@@ -34,7 +34,19 @@ sphere-type-susp (suc n) = Arr≃ (refl≃tm) (trans≃ty (susp-ty-lift (lift-ty
 
 sub-from-sphere-prop : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → sphere-type d [ sub-from-sphere d A p ]ty ≃ty A
 sub-from-sphere-prop zero ⋆ p = refl≃ty
-sub-from-sphere-prop (suc d) (s ─⟨ A ⟩⟶ t) p = Arr≃ refl≃tm (trans≃ty (lift-sub-comp-lem-ty ⟨ sub-from-sphere d A (cong pred p) , s ⟩ (lift-ty (sphere-type _))) (trans≃ty (lift-sub-comp-lem-ty (sub-from-sphere d A (cong pred p)) (sphere-type _)) (sub-from-sphere-prop d A (cong pred p)))) refl≃tm
+sub-from-sphere-prop (suc d) (s ─⟨ A ⟩⟶ t) p = Arr≃ refl≃tm lem refl≃tm
+  where
+    open Reasoning ty-setoid
+
+    lem : lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ]ty ≃ty A
+    lem = begin
+      < lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ]ty >ty
+        ≈⟨ apply-sub-lifted-ty-≃ (lift-ty (sphere-type d)) ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ⟩
+      < lift-ty (sphere-type d) [ ⟨ sub-from-sphere d A _ , s ⟩ ]ty >ty
+        ≈⟨ apply-sub-lifted-ty-≃ (sphere-type d) ⟨ sub-from-sphere d A _ , s ⟩ ⟩
+      < sphere-type d [ sub-from-sphere d A _ ]ty >ty
+        ≈⟨ sub-from-sphere-prop d A _ ⟩
+      < A >ty ∎
 
 disc-term-susp : (n : ℕ) → (σ : Sub (disc-size n) m ⋆) → susp-tm (disc-term n σ) ≃tm disc-term (suc n) (susp-sub σ)
 disc-term-susp n σ = Coh≃ (disc-susp n) (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n))) refl≃s
@@ -97,6 +109,22 @@ sub-from-sphere-type-unrestrict {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = Arr≃ 
 
 sub-from-disc-type-unrestrict : (σ : Sub (disc-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-disc-type (unrestrict σ) ≃ty sub-from-disc-type σ
 sub-from-disc-type-unrestrict ⟨ σ , t ⟩ = sub-from-sphere-type-unrestrict σ
+
+sub-from-sphere-type-prop : (σ : Sub (sphere-size d) m A) → sphere-type d [ σ ]ty ≃ty sub-from-sphere-type σ
+sub-from-sphere-type-prop {d = zero} σ = refl≃ty
+sub-from-sphere-type-prop {d = suc d} ⟨ ⟨ σ , s ⟩ , t ⟩ = Arr≃ refl≃tm lem refl≃tm
+  where
+    open Reasoning ty-setoid
+
+    lem : lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty ≃ty sub-from-sphere-type σ
+    lem = begin
+      < lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty >ty
+        ≈⟨ apply-sub-lifted-ty-≃ (lift-ty (sphere-type d)) ⟨ ⟨ σ , s ⟩ , t ⟩ ⟩
+      < lift-ty (sphere-type d) [ ⟨ σ , s ⟩ ]ty >ty
+        ≈⟨ apply-sub-lifted-ty-≃ (sphere-type d) ⟨ σ , s ⟩ ⟩
+      < sphere-type d [ σ ]ty >ty
+        ≈⟨ sub-from-sphere-type-prop σ ⟩
+      < sub-from-sphere-type σ >ty ∎
 
 identity-term-sub : (A : Ty m) → (s : Tm m) → (σ : Sub m l ⋆) → identity-term A s [ σ ]tm ≃tm identity-term (A [ σ ]ty) (s [ σ ]tm)
 identity-term-sub A s σ = begin

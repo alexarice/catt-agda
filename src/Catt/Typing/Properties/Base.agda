@@ -138,6 +138,12 @@ coh-ty-ty : Typing-Tm Γ (Coh Δ A τ) B → Typing-Ty Δ A
 coh-ty-ty (TyConv tty p) = coh-ty-ty tty
 coh-ty-ty (TyCoh Aty τty) = Aty
 
+sub-proj₁-Ty : Typing-Sub (Γ , A) Δ σ → Typing-Sub Γ Δ (sub-proj₁ σ)
+sub-proj₁-Ty (TyExt σty x) = σty
+
+sub-proj₂-Ty : Typing-Sub (Γ , A) Δ σ → Typing-Tm Δ (sub-proj₂ σ) (A [ sub-proj₁ σ ]ty)
+sub-proj₂-Ty (TyExt σty x) = x
+
 isVar-Ty : (t : Tm n) → .⦃ _ : isVar t ⦄ → Typing-Tm Γ t (Γ ‼ getVarFin t)
 isVar-Ty (Var i) = TyVar i
 
@@ -145,7 +151,7 @@ fromℕ-Ty : (Γ : Ctx (suc n)) → Typing-Tm Γ (Var (fromℕ _)) ⋆
 fromℕ-Ty Γ = TyConv (TyVar (fromℕ _)) (reflexive≈ty (fromℕ-‼ Γ))
 
 replaceSub-Ty : {Γ : Ctx (suc n)} → Typing-Sub Γ Δ σ → Typing-Tm Δ t (Γ ‼ zero [ σ ]ty) → Typing-Sub Γ Δ (replaceSub σ t)
-replaceSub-Ty (TyExt {σ = σ} {A = A} σty sty) tty = TyExt σty (TyConv tty (reflexive≈ty (lift-sub-comp-lem-ty σ A)))
+replaceSub-Ty (TyExt {σ = σ} {A = A} σty sty) tty = TyExt σty (TyConv tty (reflexive≈ty (apply-sub-lifted-ty-≃ A ⟨ σ , _ ⟩)))
 
 ty-dim-≈ : A ≈[ Γ ]ty B → ty-dim A ≡ ty-dim B
 ty-dim-≈ Star≈ = refl

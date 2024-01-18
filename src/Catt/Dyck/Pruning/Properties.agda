@@ -22,9 +22,9 @@ dyck-type-prune (⇕pk dy) = begin
   < dyck-type dy >ty
     ≈˘⟨ id-on-ty (dyck-type dy) ⟩
   < dyck-type dy [ idSub ]ty >ty
-    ≈˘⟨ lift-sub-comp-lem-ty idSub (dyck-type dy) ⟩
+    ≈˘⟨ apply-sub-lifted-ty-≃ (dyck-type dy) ⟨ idSub , dyck-term dy ⟩ ⟩
   < lift-ty (dyck-type dy) [ ⟨ idSub , dyck-term dy ⟩ ]ty >ty
-    ≈˘⟨ lift-sub-comp-lem-ty ⟨ idSub , dyck-term dy ⟩ (lift-ty (dyck-type dy)) ⟩
+    ≈˘⟨ apply-sub-lifted-ty-≃ (lift-ty (dyck-type dy)) (π (⇕pk dy)) ⟩
   < dyck-type (⇓ (⇑ dy)) [ π (⇕pk dy) ]ty >ty ∎
   where
     open Reasoning ty-setoid
@@ -40,9 +40,9 @@ dyck-type-prune (⇑pk {dy = dy} p) = Arr≃ l1 l2 refl≃tm
       < lift-tm (dyck-term dy [ lift-sub (π p) ]tm) >tm
         ≈˘⟨ apply-lifted-sub-tm-≃ (dyck-term dy) (lift-sub (π p)) ⟩
       < dyck-term dy [ lift-sub (lift-sub (π p)) ]tm >tm
-        ≈˘⟨ lift-sub-comp-lem-tm (lift-sub (lift-sub (π p))) (dyck-term dy) ⟩
+        ≈˘⟨ apply-sub-lifted-tm-≃ (dyck-term dy) ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ ⟩
       < lift-tm (dyck-term dy) [ ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ ]tm >tm
-        ≈˘⟨ lift-sub-comp-lem-tm ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ (lift-tm (dyck-term dy)) ⟩
+        ≈˘⟨ apply-sub-lifted-tm-≃  (lift-tm (dyck-term dy)) ⟨ ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ , 0V ⟩ ⟩
       < lift-tm (lift-tm (dyck-term dy)) [ ⟨ ⟨ (lift-sub (lift-sub (π p))) , 1V ⟩ , 0V ⟩ ]tm >tm ∎
       where
         open Reasoning tm-setoid
@@ -57,9 +57,9 @@ dyck-type-prune (⇑pk {dy = dy} p) = Arr≃ l1 l2 refl≃tm
       < lift-ty (dyck-type dy [ lift-sub (π p) ]ty) >ty
         ≈˘⟨ apply-lifted-sub-ty-≃ (dyck-type dy) (lift-sub (π p)) ⟩
       < dyck-type dy [ lift-sub (lift-sub (π p)) ]ty >ty
-        ≈˘⟨ lift-sub-comp-lem-ty (lift-sub (lift-sub (π p))) (dyck-type dy) ⟩
+        ≈˘⟨ apply-sub-lifted-ty-≃ (dyck-type dy) ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ ⟩
       < lift-ty (dyck-type dy) [ ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ ]ty >ty
-        ≈˘⟨ lift-sub-comp-lem-ty ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ (lift-ty (dyck-type dy)) ⟩
+        ≈˘⟨ apply-sub-lifted-ty-≃ (lift-ty (dyck-type dy)) ⟨ ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ , 0V ⟩ ⟩
       < lift-ty (lift-ty (dyck-type dy)) [ ⟨ ⟨ (lift-sub (lift-sub (π p))) , 1V ⟩ , 0V ⟩ ]ty >ty ∎
       where
         open Reasoning ty-setoid

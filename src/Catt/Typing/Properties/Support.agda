@@ -58,6 +58,7 @@ SuppTyFV : Typing-Ty Γ A → SuppTy Γ A ≡ FVTy A
 SuppSubFV : Typing-Sub Γ Δ σ → SuppSub Δ σ ≡ FVSub σ
 SuppTmChar : Typing-Tm Γ t A → SuppTm Γ t ≡ SuppTy Γ A ∪ FVTm t
 SuppTmChar′ : Typing-Tm Γ t A → Typing-Ty Γ A → SuppTm Γ t ≡ FVTy A ∪ FVTm t
+SuppTmChar″ : Typing-Tm Γ t A → Typing-Ty Γ A → SuppTm Γ t ≡ SuppTy Γ A ∪ SuppTm Γ t
 
 SuppTyFV TyStar = DC-empty _
 SuppTyFV (TyArr {n} {Γ = Γ} {s} {A} {t} sty Aty tty) = begin
@@ -131,6 +132,15 @@ SuppTmChar′ {Γ = Γ} {t = t} {A = A} tty Aty = begin
   SuppTy Γ A ∪ FVTm t
     ≡⟨ cong (_∪ FVTm t) (SuppTyFV Aty) ⟩
   FVTy A ∪ FVTm t ∎
+
+SuppTmChar″ {Γ = Γ} {t = t} {A = A} tty Aty = begin
+  SuppTm Γ t
+    ≡˘⟨ DC-idem Γ (FVTm t) ⟩
+  DC Γ (DC Γ (FVTm t))
+    ≡⟨ cong (DC Γ) (SuppTmChar′ tty Aty) ⟩
+  DC Γ (FVTy A ∪ FVTm t)
+    ≡⟨ DC-∪ Γ (FVTy A) (FVTm t) ⟩
+  SuppTy Γ A ∪ SuppTm Γ t ∎
 
 TransportVarSet-DC : {σ : Sub n m ⋆} → (xs : VarSet n) → Typing-Sub Γ Δ σ → DC Δ (TransportVarSet xs σ) ≡ TransportVarSet (DC Γ xs) σ
 TransportVarSet-DC emp (TyNull x) = DC-empty _

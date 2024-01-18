@@ -18,8 +18,6 @@ open import Catt.Typing.Properties.Base rules
 open import Catt.Typing.Properties.Lifting rules lift-cond
 open import Catt.Globular.Typing rules lift-cond
 
-open import Tactic.MonoidSolver
-
 sphere-type-Ty : (d : ℕ) → Typing-Ty (Sphere d) (sphere-type d)
 sphere-type-Ty zero = TyStar
 sphere-type-Ty (suc d) = TyArr (TyVar (suc zero)) (lift-ty-typing (lift-ty-typing (sphere-type-Ty d))) (TyVar zero)
@@ -49,7 +47,7 @@ sub-from-sphere-Ty (suc d) (TyArr {A = A} sty Aty tty) p
       < A >ty
         ≈˘⟨ sub-from-sphere-prop d A (cong pred p) ⟩
       < sphere-type d [ sub-from-sphere d A (cong pred p) ]ty >ty
-        ≈˘⟨ lift-sub-comp-lem-ty (sub-from-sphere d A _) (sphere-type d) ⟩
+        ≈˘⟨ apply-sub-lifted-ty-≃ (sphere-type d) ⟨ sub-from-sphere d A _ , _ ⟩ ⟩
       < lift-ty (sphere-type d) [ ⟨ sub-from-sphere d A (cong pred p) , _ ⟩ ]ty >ty ∎
 
 sub-from-disc-Ty : (d : ℕ) → Typing-Ty Γ A → .(p : ty-dim A ≡ d) → Typing-Tm Γ t A → Typing-Sub (Disc d) Γ (sub-from-disc d A p t)
@@ -71,15 +69,15 @@ sub-from-sphere-Eq {Γ = Γ} (suc d) (TyExt (TyExt {σ = σ} σty y) x) (TyExt (
     lem : (sphere-type d [ σ ]ty) ≈[ Γ ]ty (sphere-type d [ τ ]ty)
     lem = begin
       sphere-type d [ σ ]ty
-        ≈˘⟨ reflexive≈ty (lift-sub-comp-lem-ty σ (sphere-type d)) ⟩
+        ≈˘⟨ reflexive≈ty (apply-sub-lifted-ty-≃ (sphere-type d) ⟨ σ , _ ⟩) ⟩
       lift-ty (sphere-type d) [ ⟨ σ , _ ⟩ ]ty
-        ≈˘⟨ reflexive≈ty (lift-sub-comp-lem-ty ⟨ σ , _ ⟩ (lift-ty (sphere-type d))) ⟩
+        ≈˘⟨ reflexive≈ty (apply-sub-lifted-ty-≃ (lift-ty (sphere-type d)) ⟨ ⟨ σ , _ ⟩ , _ ⟩) ⟩
       lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ σ , _ ⟩ , _ ⟩ ]ty
         ≈⟨ q ⟩
       lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ τ , _ ⟩ , _ ⟩ ]ty
-        ≈⟨ reflexive≈ty (lift-sub-comp-lem-ty ⟨ τ , _ ⟩ (lift-ty (sphere-type d))) ⟩
+        ≈⟨ reflexive≈ty (apply-sub-lifted-ty-≃ (lift-ty (sphere-type d)) ⟨ ⟨ τ , _ ⟩ , _ ⟩) ⟩
       lift-ty (sphere-type d) [ ⟨ τ , _ ⟩ ]ty
-        ≈⟨ reflexive≈ty (lift-sub-comp-lem-ty τ (sphere-type d)) ⟩
+        ≈⟨ reflexive≈ty (apply-sub-lifted-ty-≃ (sphere-type d) ⟨ τ , _ ⟩) ⟩
       sphere-type d [ τ ]ty ∎
       where
         open Reasoning (ty-setoid-≈ Γ)
@@ -96,8 +94,16 @@ identity-Ty n σty = TyCoh ⦃ disc-pd n ⦄
 
 identity-term-Ty : Typing-Ty Γ A → Typing-Tm Γ t A → Typing-Tm Γ (identity-term A t) (t ─⟨ A ⟩⟶ t)
 identity-term-Ty {A = A} Aty tty
-  = TyConv (identity-Ty (ty-dim A) (sub-from-disc-Ty (ty-dim A) Aty refl tty))
-          (Arr≈ refl≈tm (reflexive≈ty (trans≃ty (lift-sub-comp-lem-ty (sub-from-sphere (ty-dim A) A refl) (sphere-type (ty-dim A))) (sub-from-sphere-prop (ty-dim A) A refl))) refl≈tm)
+  = TyConv (identity-Ty (ty-dim A) (sub-from-disc-Ty (ty-dim A) Aty refl tty)) (Arr≈ refl≈tm (reflexive≈ty lem) refl≈tm)
+  where
+    open Reasoning ty-setoid
+    lem : lift-ty (sphere-type (ty-dim A)) [ sub-from-disc (ty-dim A) A _ _ ]ty ≃ty A
+    lem = begin
+      < lift-ty (sphere-type (ty-dim A)) [ sub-from-disc (ty-dim A) A _ _ ]ty >ty
+        ≈⟨ apply-sub-lifted-ty-≃ (sphere-type (ty-dim A)) (sub-from-disc (ty-dim A) A _ _) ⟩
+      < sphere-type (ty-dim A) [ sub-from-sphere (ty-dim A) A _ ]ty >ty
+        ≈⟨ sub-from-sphere-prop (ty-dim A) A refl ⟩
+      < A >ty ∎
 
 identity-term-≈ : A ≈[ Γ ]ty B → s ≈[ Γ ]tm t → identity-term A s ≈[ Γ ]tm identity-term B t
 identity-term-≈ {A = A} {B = B} {s = s} {t = t} p q = begin
@@ -117,7 +123,22 @@ sub-from-sphere-to-ty-Ty {A = ⋆} zero p σty = TyStar
 sub-from-sphere-to-ty-Ty {A = s ─⟨ A ⟩⟶ t} (suc d) p (TyExt (TyExt σty sty) tty)
   = TyArr (TyConv sty (reflexive≈ty (sub-from-sphere-prop d A (cong pred p))))
           (sub-from-sphere-to-ty-Ty d (cong pred p) σty)
-          (TyConv tty (reflexive≈ty (trans≃ty (lift-sub-comp-lem-ty (sub-from-sphere d A _) (sphere-type d)) (sub-from-sphere-prop d A (cong pred p)))))
+          (TyConv tty (reflexive≈ty (trans≃ty (apply-sub-lifted-ty-≃ (sphere-type d) ⟨ sub-from-sphere d A _ , _ ⟩)
+                                              (sub-from-sphere-prop d A (cong pred p)))))
+
+sub-from-disc-term-Ty : Typing-Sub (Disc d) Γ σ → Typing-Tm Γ (sub-from-disc-term σ) (sub-from-disc-type σ)
+sub-from-disc-term-Ty (TyExt {σ = σ} σty x) = TyConv x (reflexive≈ty (sub-from-sphere-type-prop σ))
+
+sub-from-sphere-type-Ty : Typing-Sub (Sphere d) Γ σ → Typing-Ty Γ (sub-from-sphere-type σ)
+sub-from-sphere-type-Ty {d = zero} (TyNull x) = x
+sub-from-sphere-type-Ty {d = suc d} (TyExt (TyExt {σ = σ} σty sty) tty)
+  = TyArr (TyConv sty (reflexive≈ty (sub-from-sphere-type-prop σ)))
+          (sub-from-sphere-type-Ty σty)
+          (TyConv tty (reflexive≈ty (trans≃ty (apply-sub-lifted-ty-≃ (sphere-type d) ⟨ σ , _ ⟩)
+                                              (sub-from-sphere-type-prop σ))))
+
+sub-from-disc-type-Ty : Typing-Sub (Disc d) Γ σ → Typing-Ty Γ (sub-from-disc-type σ)
+sub-from-disc-type-Ty σty = sub-from-sphere-type-Ty (sub-proj₁-Ty σty)
 
 identity-to-term-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Tm Γ t A
 identity-to-term-Ty (TyConv tty p) = identity-to-term-Ty tty

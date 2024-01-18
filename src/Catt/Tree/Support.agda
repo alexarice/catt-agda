@@ -817,8 +817,8 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
             last-lem rewrite DCT-toVarSet xs
                      rewrite DCT-toVarSet ys = p
 
-supp-tvarset : TVarSet S → TVarSet (Susp S)
-supp-tvarset xs = VSJoin true xs (VSSing true)
+susp-tvarset : TVarSet S → TVarSet (Susp S)
+susp-tvarset xs = VSJoin true xs (VSSing true)
 
-supp-tvarset-DCT : (xs : TVarSet S) → DCT (supp-tvarset xs) ≡ supp-tvarset (DCT xs)
-supp-tvarset-DCT xs = cong (VSJoin true (DCT xs)) (if-lem-const (tvarset-non-empty xs) (set-fst-true (DCT (VSSing true))))
+susp-tvarset-DCT : (xs : TVarSet S) → DCT (susp-tvarset xs) ≡ susp-tvarset (DCT xs)
+susp-tvarset-DCT xs = cong (VSJoin true (DCT xs)) (if-lem-const (tvarset-non-empty xs) (set-fst-true (DCT (VSSing true))))

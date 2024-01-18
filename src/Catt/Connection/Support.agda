@@ -21,7 +21,6 @@ open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Suspension.Support
 
-open import Data.Vec.Relation.Binary.Pointwise.Inductive as P using (Pointwise; Pointwise-≡⇒≡)
 open import Tactic.MonoidSolver
 
 connect-supp : VarSet (suc n) → (t : Tm (suc n)) → VarSet (suc m) → VarSet (suc (m + n))

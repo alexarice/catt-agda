@@ -29,14 +29,14 @@ canonical-term d T = stm-to-term (canonical-stm d T)
 canonical-stm zero Sing = SHere
 canonical-stm zero (Join S T) = canonical-comp zero (Join S T)
 canonical-stm (suc d) Sing = canonical-comp (suc d) Sing
-canonical-stm (suc d) (Join T Sing) = SExt (canonical-stm d T)
+canonical-stm (suc d) (Susp T) = SExt (canonical-stm d T)
 canonical-stm (suc d) (Join T (Join T₁ T₂)) = canonical-comp (suc d) (Join T (Join T₁ T₂))
 
 canonical-comp d T = SCoh T (canonical-type d T) (id-label-wt T)
 
 canonical-comp′ zero T = canonical-comp zero T
 canonical-comp′ (suc d) Sing = canonical-comp (suc d) Sing
-canonical-comp′ (suc d) (Join T Sing) = SExt (canonical-comp′ d T)
+canonical-comp′ (suc d) (Susp T) = SExt (canonical-comp′ d T)
 canonical-comp′ (suc d) T@(Join _ (Join _ _)) = canonical-comp (suc d) T
 
 canonical-comp-term d T = stm-to-term (canonical-comp d T)

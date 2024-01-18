@@ -23,7 +23,7 @@ open import Catt.Globular.Typing rules lift-cond
 open import Catt.Discs.Typing rules lift-cond
 
 ecr-conv : ConvCond′ rules ECRSet
-ecr-conv [ ECR Γ Δ s A σ ] {A = B} tty
+ecr-conv [ ECR Γ Δ s A supp σ ] {A = B} tty
   = TyConv (identity-Ty (ty-dim A) (sub-from-disc-Ty (ty-dim A)
                                                      (apply-sub-ty-typing A_ty σty)
                                                      (sym (sub-dim σ A))
@@ -45,7 +45,7 @@ ecr-conv [ ECR Γ Δ s A σ ] {A = B} tty
          A [ σ ]ty
     l2 = begin
       < lift-ty (sphere-type (ty-dim A)) [ ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ]ty >ty
-        ≈⟨ lift-sub-comp-lem-ty (sub-from-sphere (ty-dim A) (A [ σ ]ty) _) (sphere-type (ty-dim A)) ⟩
+        ≈⟨ apply-sub-lifted-ty-≃ (sphere-type (ty-dim A)) ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ⟩
       < sphere-type (ty-dim A) [ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ ]ty >ty
         ≈⟨ sub-from-sphere-prop (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) ⟩
       < A [ σ ]ty >ty ∎

@@ -1,8 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Insertion.Support (rules : RuleSet)
-                                   (tame : Tame rules)
-                                   (supp-cond : SupportCond rules) where
+module Catt.Typing.Insertion.Support (rules : RuleSet)
+                                     (tame : Tame rules)
+                                     (supp-cond : SupportCond rules) where
 
 open Tame tame
 
@@ -24,6 +24,7 @@ open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Construct
+open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
 open import Catt.Tree.Canonical
@@ -35,6 +36,7 @@ open import Catt.Tree.Structured.Typing.Properties rules tame
 open import Catt.Tree.Boundary.Typing rules tame
 open import Catt.Tree.Canonical.Typing rules tame
 open import Catt.Tree.Insertion.Typing rules tame
+open import Catt.Typing.Insertion.Rule
 
 open import Catt.Support
 open import Catt.Support.Properties
@@ -46,7 +48,7 @@ open import Catt.Tree.Structured.Support.Properties
 open import Catt.Tree.Boundary.Support
 open import Catt.Tree.Canonical.Support
 
-open import Catt.Tree.Structured.Support.Typed rules tame supp-cond
+open import Catt.Typing.Structured.Support rules tame supp-cond
 
 κ-full : (S : Tree n)
        → (p : Branch S d)
@@ -159,3 +161,50 @@ open import Catt.Tree.Structured.Support.Typed rules tame supp-cond
       DCT (supp-tree-bd d (S >>[ p ] T) b)
         ≡⟨ DCT-supp-tree-bd d (S >>[ p ] T) b ⟩
       supp-tree-bd d (S >>[ p ] T) b ∎
+
+ins-supp : SupportCond′ rules InsertionSet
+ins-supp [ Insert Γ S As L P T M p ] tty = begin
+  SuppTm Γ (stm-to-term (SCoh S As (L ,, S⋆)))
+    ≡˘⟨ FVSTm-to-term (SCoh S As (L ,, S⋆)) ⟩
+  MtoVarSet (incCtx Γ) (FVLabel-WT (L ,, S⋆))
+    ≡⟨⟩
+  DC Γ (FVLabel-WT (L ,, S⋆))
+    ≡⟨ cong (DC Γ) (FVLabel-WT-⋆ L) ⟩
+  DC Γ (FVLabel L)
+    ≡˘⟨ EqSuppLabel (label-max-equality-to-equality (κ-comm L P M S⋆ p) (label-comp-Ty (κ-Ty S P T) l2 TySStar) Lty) ⟩
+  DC Γ (FVLabel (κ S P T ●l (L >>l[ P ] M ,, S⋆)))
+    ≡⟨ TransportVarSet-Label-Label (κ S P T) (L >>l[ P ] M) l2 ⟩
+  TransportVarSet-Label {ΓS = incCtx Γ} (FVLabel (κ S P T)) (L >>l[ P ] M)
+    ≡˘⟨ TransportVarSet-Label-DCT {ΓS = incCtx Γ} (FVLabel (κ S P T)) (L >>l[ P ] M) ⟩
+  TransportVarSet-Label {ΓS = incCtx Γ} (DCT (FVLabel (κ S P T))) (L >>l[ P ] M)
+    ≡⟨ cong (λ - → TransportVarSet-Label {ΓS = incCtx Γ} - (L >>l[ P ] M)) (κ-full S P T) ⟩
+  TransportVarSet-Label {ΓS = incCtx Γ} tFull (L >>l[ P ] M)
+    ≡⟨ TransportVarSet-Label-full (L >>l[ P ] M) l2 ⟩
+  DC Γ (FVLabel (L >>l[ P ] M))
+    ≡˘⟨ cong (DC Γ) (FVLabel-WT-⋆ (L >>l[ P ] M)) ⟩
+  DC Γ (FVLabel-WT (L >>l[ P ] M ,, S⋆))
+    ≡⟨⟩
+  MtoVarSet (incCtx Γ) (FVLabel-WT (L >>l[ P ] M ,, S⋆))
+    ≡⟨ FVSTm-to-term (SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (L >>l[ P ] M ,, S⋆)) ⟩
+  SuppTm Γ (stm-to-term (SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (L >>l[ P ] M ,, S⋆))) ∎
+  where
+    open ≡-Reasoning
+
+    Lty : Typing-Label Γ (L ,, S⋆)
+    Lty = SCoh-Label-Ty tty
+
+    lem : Typing-STm Γ (canonical-comp (ih P) T >>= (M ,, S⋆)) _
+    lem = transport-stm-typing (>>=-Ty (TySPath ⌊ P ⌋p) Lty TySStar)
+                               (trans≃stm p (>>=-≃ (canonical-comp′-compat (ih P) T) refl≃l refl≃sty))
+                               refl≃sty
+
+    Mty : Typing-Label Γ (M ,, S⋆)
+    Mty = SCoh-Label-Ty {S = T} {As = canonical-type (ih P) T} {L = M} (stm-to-term-Ty lem)
+
+    l1 : branch-type S P >>=′ (L ,, S⋆)
+         ≈[ Γ ]sty
+         canonical-type (ih P) T >>=′ (M ,, S⋆)
+    l1 = STy-unique-≃ p (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (canonical-comp′-Ty (ih P) T) Mty TySStar)
+
+    l2 : Typing-Label Γ (L >>l[ P ] M ,, S⋆)
+    l2 = label-from-insertion-Ty Lty P Mty l1

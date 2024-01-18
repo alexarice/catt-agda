@@ -57,3 +57,15 @@ open import Catt.Typing.Insertion.Typed SUA-Rules sua-tame
 
 sua-conv : ConvCond SUA-Rules
 sua-conv = ConvCond-∪ dr-conv (ConvCond-∪ ecr-conv ins-conv)
+
+module _ where
+  open import Catt.Support.Typing SUA-Rules
+  open import Catt.Typing.DiscRemoval.Support rulesWithSupp (rulesWithSupp-lift sua-lift) rulesWithSupp-supp
+  open import Catt.Typing.EndoCoherenceRemoval.Support rulesWithSupp rulesWithSupp-supp
+  open import Catt.Typing.Insertion.Support rulesWithSupp (rulesWithSupp-tame sua-tame) rulesWithSupp-supp
+
+  sua-supp′ : SupportCond′ rulesWithSupp SUA-Rules
+  sua-supp′ = SupportCond-∪ dr-supp (SupportCond-∪ ecr-supp ins-supp)
+
+  sua-supp : SupportCond SUA-Rules
+  sua-supp = SupportCond-prop sua-supp′

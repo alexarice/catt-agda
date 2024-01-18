@@ -414,30 +414,9 @@ sub-dec σ τ = map (mk⇔ ≃s-to-≡ reflexive≃s) (≃s-dec σ τ)
 
 -- categorical properties
 
-lift-sub-comp-lem-sub : (σ : Sub n l A) → (τ : Sub m n B) → ⟨ σ , t ⟩ ● lift-sub τ ≃s σ ● τ
-lift-sub-comp-lem-tm : (σ : Sub n l A) → (s : Tm n) → lift-tm s [ ⟨ σ , t ⟩ ]tm ≃tm s [ σ ]tm
-lift-sub-comp-lem-ty : (σ : Sub n l A) → (B : Ty n) → lift-ty B [ ⟨ σ , t ⟩ ]ty ≃ty B [ σ ]ty
-
-lift-sub-comp-lem-sub {B = B} σ ⟨⟩ = Null≃ (lift-sub-comp-lem-ty σ B)
-lift-sub-comp-lem-sub σ ⟨ τ , t ⟩ = Ext≃ (lift-sub-comp-lem-sub σ τ) (lift-sub-comp-lem-tm σ t)
-
-lift-sub-comp-lem-tm σ (Var i) = refl≃tm
-lift-sub-comp-lem-tm {A = ⋆} σ (Coh Δ B τ) = Coh≃ refl≃c refl≃ty (lift-sub-comp-lem-sub σ τ)
-lift-sub-comp-lem-tm {A = s ─⟨ A ⟩⟶ t} {t = u} σ (Coh Δ B τ) = begin
-  < Coh (susp-ctx Δ) (susp-ty B) (susp-sub (lift-sub τ)) [ ⟨ unrestrict σ , u ⟩ ]tm >tm
-    ≈⟨ sub-action-≃-tm {s = Coh (susp-ctx Δ) (susp-ty B) (susp-sub (lift-sub τ))} {t = Coh (susp-ctx Δ) (susp-ty B) (lift-sub (susp-sub τ))} (Coh≃ refl≃c refl≃ty (susp-sub-lift τ)) (refl≃s {σ = ⟨ unrestrict σ , u ⟩}) ⟩
-  < Coh (susp-ctx Δ) (susp-ty B) (lift-sub (susp-sub τ)) [ ⟨ unrestrict σ , u ⟩ ]tm >tm
-    ≈⟨ lift-sub-comp-lem-tm (unrestrict σ) (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) ⟩
-  < Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm >tm ∎
-  where
-    open Reasoning tm-setoid
-
-lift-sub-comp-lem-ty σ ⋆ = refl≃ty
-lift-sub-comp-lem-ty σ (s ─⟨ B ⟩⟶ t) = Arr≃ (lift-sub-comp-lem-tm σ s) (lift-sub-comp-lem-ty σ B) (lift-sub-comp-lem-tm σ t)
-
 id-right-unit : (σ : Sub n m A) → σ ● idSub ≃s σ
 id-right-unit ⟨⟩ = refl≃s
-id-right-unit ⟨ σ , t ⟩ = Ext≃ (trans≃s (lift-sub-comp-lem-sub σ idSub) (id-right-unit σ)) refl≃tm
+id-right-unit ⟨ σ , t ⟩ = Ext≃ (trans≃s (apply-sub-lifted-sub-≃ idSub ⟨ σ , t ⟩) (id-right-unit σ)) refl≃tm
 
 id-left-unit : (σ : Sub m n A) → idSub ● σ ≃s σ
 id-on-ty : (B : Ty m) → B [ idSub ]ty ≃ty B
@@ -570,7 +549,7 @@ idSub≃-on-sub p ⟨ σ , t ⟩ = Ext≃ (idSub≃-on-sub p σ) (idSub≃-on-tm
 
 idSub≃-right-unit : (p : Γ ≃c Δ) → (σ : Sub (ctxLength Δ) n A) → σ ● idSub≃ p ≃s σ
 idSub≃-right-unit Emp≃ ⟨⟩ = refl≃s
-idSub≃-right-unit (Add≃ p x) ⟨ σ , t ⟩ = Ext≃ (trans≃s (lift-sub-comp-lem-sub σ (idSub≃ p)) (idSub≃-right-unit p σ)) refl≃tm
+idSub≃-right-unit (Add≃ p x) ⟨ σ , t ⟩ = Ext≃ (trans≃s (apply-sub-lifted-sub-≃ (idSub≃ p) ⟨ σ , t ⟩) (idSub≃-right-unit p σ)) refl≃tm
 
 idSub≃-functorial : (p : Γ ≃c Δ) → (q : Δ ≃c Υ) → idSub≃ q ● idSub≃ p ≃s idSub≃ (trans≃c p q)
 idSub≃-functorial Emp≃ Emp≃ = refl≃s
@@ -578,7 +557,9 @@ idSub≃-functorial (Add≃ p x) (Add≃ q y) = Ext≃ lem refl≃tm
   where
     lem : (idSub≃ (Add≃ q y) ● lift-sub (idSub≃ p)) ≃s
             lift-sub (idSub≃ (trans≃c p q))
-    lem = trans≃s (lift-sub-comp-lem-sub (lift-sub (idSub≃ q)) (idSub≃ p)) (trans≃s (apply-lifted-sub-sub-≃ (idSub≃ p) (idSub≃ q)) (lift-sub-≃ (idSub≃-functorial p q)))
+    lem = trans≃s (apply-sub-lifted-sub-≃ (idSub≃ p) (idSub≃ (Add≃ q y)))
+                  (trans≃s (apply-lifted-sub-sub-≃ (idSub≃ p) (idSub≃ q))
+                  (lift-sub-≃ (idSub≃-functorial p q)))
 
 idSub≃-fst-var : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (p : Γ ≃c Δ) → Var (fromℕ n) [ idSub≃ p ]tm ≃tm Var (fromℕ m)
 idSub≃-fst-var (Add≃ Emp≃ x) = refl≃tm
@@ -622,9 +603,9 @@ replaceSub-lift ⟨ σ , _ ⟩ t = refl≃s
 apply-replaceSub-lift-ty : (A : Ty n) → (σ : Sub (1 + n) m B) → (t : Tm m) → lift-ty A [ replaceSub σ t ]ty ≃ty lift-ty A [ σ ]ty
 apply-replaceSub-lift-ty A ⟨ σ , s ⟩ t = begin
   < lift-ty A [ ⟨ σ , t ⟩ ]ty >ty
-    ≈⟨ lift-sub-comp-lem-ty σ A ⟩
+    ≈⟨ apply-sub-lifted-ty-≃ A ⟨ σ , t ⟩ ⟩
   < A [ σ ]ty >ty
-    ≈˘⟨ lift-sub-comp-lem-ty σ A ⟩
+    ≈˘⟨ apply-sub-lifted-ty-≃ A ⟨ σ , s ⟩ ⟩
   < lift-ty A [ ⟨ σ , s ⟩ ]ty >ty ∎
   where
     open Reasoning ty-setoid

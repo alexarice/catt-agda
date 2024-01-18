@@ -7,10 +7,12 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
+open import Catt.Suspension.Support
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Discs
 open import Catt.Discs.Properties
+open import Catt.Support
 open import Catt.Typing.Rule
 
 open Rule
@@ -31,11 +33,12 @@ data ECRSet : RuleSet where
       → (Δ : Ctx (suc n))
       → (s : Tm (suc n))
       → (A : Ty (suc n))
+      → (SuppTy Δ (s ─⟨ A ⟩⟶ s) ≡ full)
       → (σ : Sub (suc n) m ⋆)
       → ECRSet (EndoCoherenceRemoval Γ Δ s A σ)
 
 ecr-lift : LiftCond ECRSet
-ecr-lift B [ ECR Γ Δ s A σ ] = ∈r-≃ [ ECR (Γ , B) Δ s A (lift-sub σ) ] γ
+ecr-lift B [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR (Γ , B) Δ s A supp (lift-sub σ) ] γ
   where
     γ : EndoCoherenceRemoval (Γ , B) Δ s A (lift-sub σ) ≃r lift-rule (EndoCoherenceRemoval Γ Δ s A σ) B
     γ .ctxeq = refl≃c
@@ -49,7 +52,7 @@ ecr-lift B [ ECR Γ Δ s A σ ] = ∈r-≃ [ ECR (Γ , B) Δ s A (lift-sub σ) ]
                                         (sym≃s (lift-sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))))
 
 ecr-susp : SuspCond ECRSet
-ecr-susp [ ECR Γ Δ s A σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ) (susp-tm s) (susp-ty A) (susp-sub σ) ] γ
+ecr-susp [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ) (susp-tm s) (susp-ty A) supp-lem (susp-sub σ) ] γ
   where
     lem : susp-ty (lift-ty (sphere-type (ty-dim A)))
           ≃ty
@@ -62,6 +65,20 @@ ecr-susp [ ECR Γ Δ s A σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ) (susp
       < lift-ty (sphere-type (suc (ty-dim A))) >ty ∎
       where
         open Reasoning ty-setoid
+
+    supp-lem : SuppTy (susp-ctx Δ) (susp-tm s ─⟨ susp-ty A ⟩⟶ susp-tm s) ≡ full
+    supp-lem = begin
+      SuppTy (susp-ctx Δ) (susp-tm s ─⟨ susp-ty A ⟩⟶ susp-tm s)
+        ≡⟨ cong (DC (susp-ctx Δ)) (suspSuppTy (s ─⟨ A ⟩⟶ s)) ⟩
+      DC (susp-ctx Δ) (suspSupp (FVTy (s ─⟨ A ⟩⟶ s)))
+        ≡⟨ DC-suspSupp Δ (FVTy (s ─⟨ A ⟩⟶ s)) ⟩
+      suspSupp (SuppTy Δ (s ─⟨ A ⟩⟶ s))
+        ≡⟨ cong suspSupp supp ⟩
+      suspSupp full
+        ≡⟨ suspSuppFull ⟩
+      full ∎
+      where
+        open ≡-Reasoning
 
     open Reasoning tm-setoid
 
@@ -95,7 +112,7 @@ ecr-susp [ ECR Γ Δ s A σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ) (susp
 
 
 ecr-sub : {rules : RuleSet} → SubCond′ rules ECRSet
-ecr-sub Υ {σ = τ} τty [ ECR Γ Δ s A σ ] = ∈r-≃ [ ECR Υ Δ s A (τ ● σ) ] γ
+ecr-sub Υ {σ = τ} τty [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR Υ Δ s A supp (τ ● σ) ] γ
   where
     γ : EndoCoherenceRemoval Υ Δ s A (τ ● σ) ≃r sub-rule (EndoCoherenceRemoval Γ Δ s A σ) Υ τ
     γ .ctxeq = refl≃c

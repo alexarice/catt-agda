@@ -40,6 +40,10 @@ open import Catt.Typing.DiscRemoval rules
 open import Catt.Typing.EndoCoherenceRemoval rules
 open import Catt.Typing.Insertion rules
 
+open import Catt.Tree.Support
+open import Catt.Tree.Structured.Support
+open import Catt.Tree.Canonical.Support
+
 
 module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
   open import Catt.Typing.DiscRemoval.Properties rules tame dr
@@ -71,6 +75,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
            (id-label-wt T)
       ≈⟨ ecr-stm T (canonical-stm d T)
                    (canonical-type d T)
+                   supp-lem
                    (id-label T)
                    (canonical-stm-Ty d T)
                    (canonical-type-Ty d T)
@@ -104,6 +109,18 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
       ≈⟨ reflexive≈stm (lem (sty-dim (canonical-type d T)) d (canonical-type-dim d T)) ⟩
     identity-stm (n-disc d) >>= (canonical-label (n-disc d) T ,, S⋆) ∎
     where
+      supp-lem : DCT (FVSTy (SArr (canonical-stm d T) (canonical-type d T) (canonical-stm d T))) ≡ mFull
+      supp-lem = begin
+        DCT (FVSTy (SArr (canonical-stm d T) (canonical-type d T) (canonical-stm d T)))
+          ≡⟨ DCT-∪ (FVSTy (canonical-type d T) ∪t FVSTm (canonical-stm d T)) (FVSTm (canonical-stm d T)) ⟩
+        DCT (FVSTy (canonical-type d T) ∪t FVSTm (canonical-stm d T)) ∪t DCT (FVSTm (canonical-stm d T))
+          ≡⟨ cong (DCT (FVSTy (canonical-type d T) ∪t FVSTm (canonical-stm d T)) ∪t_) (canonical-stm-full d T (≤-pred p)) ⟩
+        DCT (FVSTy (canonical-type d T) ∪t FVSTm (canonical-stm d T)) ∪t tFull
+          ≡⟨ ∪t-right-zero (DCT (FVSTy (canonical-type d T) ∪t FVSTm (canonical-stm d T))) ⟩
+        mFull ∎
+        where
+          open ≡-Reasoning
+
       open Reasoning stm-setoid-≈
 
       l1 : n ≡ m → has-dim (tree-dim (n-disc n)) (canonical-type (tree-dim (n-disc m)) T)

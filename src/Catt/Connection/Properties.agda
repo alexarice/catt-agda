@@ -83,7 +83,7 @@ connect-inc-right-assoc t s (suc n) = Ext≃ lem (Var≃ (cong suc (cong suc (sy
       < lift-sub (connect-inc-right t (n + _) ● connect-inc-right s n) >s
         ≈˘⟨ apply-lifted-sub-sub-≃ (connect-inc-right s n) (connect-inc-right t (n + _)) ⟩
       < lift-sub (connect-inc-right t (n + _)) ● connect-inc-right s n >s
-        ≈˘⟨ lift-sub-comp-lem-sub (lift-sub (connect-inc-right t (n + _))) (connect-inc-right s n) ⟩
+        ≈˘⟨ apply-sub-lifted-sub-≃ (connect-inc-right s n) (connect-inc-right t (suc n + _)) ⟩
       < ⟨ lift-sub (connect-inc-right t (n + _)) , Var zero ⟩ ● lift-sub (connect-inc-right s n) >s ∎
 
 connect-assoc : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → (s : Tm (suc m)) → (Υ : Ctx (suc l))
@@ -107,11 +107,27 @@ connect-susp-assoc Γ Δ s Υ = connect-assoc (susp-ctx Γ) get-snd Δ s Υ
 
 sub-from-connect-inc-left : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → sub-from-connect σ τ ● connect-inc-left t m ≃s σ
 sub-from-connect-inc-left σ t τ@(⟨ ⟨⟩ , s ⟩) = id-right-unit (sub-from-connect σ τ)
-sub-from-connect-inc-left σ t ⟨ ⟨ τ , s ⟩ , u ⟩ = trans≃s (lift-sub-comp-lem-sub (sub-from-connect σ ⟨ τ , s ⟩) (connect-inc-left t _)) (sub-from-connect-inc-left σ t ⟨ τ , s ⟩)
+sub-from-connect-inc-left σ t ⟨ ⟨ τ , s ⟩ , u ⟩ = begin
+  < sub-from-connect σ ⟨ ⟨ τ , s ⟩ , u ⟩ ● connect-inc-left t (suc _) >s
+    ≈⟨ apply-sub-lifted-sub-≃ (connect-inc-left t _) (sub-from-connect σ ⟨ ⟨ τ , s ⟩ , u ⟩) ⟩
+  < sub-from-connect σ ⟨ τ , s ⟩ ● connect-inc-left t _ >s
+    ≈⟨ sub-from-connect-inc-left σ t ⟨ τ , s ⟩ ⟩
+  < σ >s ∎
+  where
+    open Reasoning sub-setoid
 
 sub-from-connect-inc-right : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → (t [ σ ]tm ≃tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ τ ● connect-inc-right t m ≃s τ
 sub-from-connect-inc-right σ t ⟨ ⟨⟩ , s ⟩ p = Ext≃ refl≃s p
-sub-from-connect-inc-right σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≃ (trans≃s (lift-sub-comp-lem-sub (sub-from-connect σ ⟨ τ , s ⟩) (connect-inc-right t _)) (sub-from-connect-inc-right σ t ⟨ τ , s ⟩ p)) refl≃tm
+sub-from-connect-inc-right σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≃ lem refl≃tm
+  where
+    open Reasoning sub-setoid
+    lem : sub-from-connect σ ⟨ ⟨ τ , s ⟩ , u ⟩ ● lift-sub (connect-inc-right t _) ≃s ⟨ τ , s ⟩
+    lem = begin
+      < sub-from-connect σ ⟨ ⟨ τ , s ⟩ , u ⟩ ● lift-sub (connect-inc-right t _) >s
+        ≈⟨ apply-sub-lifted-sub-≃ (connect-inc-right t _) (sub-from-connect σ ⟨ ⟨ τ , s ⟩ , u ⟩) ⟩
+      < sub-from-connect σ ⟨ τ , s ⟩ ● connect-inc-right t _ >s
+        ≈⟨ sub-from-connect-inc-right σ t ⟨ τ , s ⟩ p ⟩
+      < ⟨ τ , s ⟩ >s ∎
 
 sub-between-connects-inc-left : (σ : Sub (suc n) (suc l) ⋆)
                               → (t : Tm (suc n))

@@ -45,7 +45,16 @@ connect-susp-inc-right-Ty Γ = connect-inc-right-Ty get-sndTy
 
 sub-from-connect-inc-right-≈ : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → {Γ : Ctx l} → (t [ σ ]tm ≈[ Γ ]tm Var (fromℕ _) [ τ ]tm) → sub-from-connect σ τ ● connect-inc-right t m ≈[ Γ ]s τ
 sub-from-connect-inc-right-≈ σ t ⟨ ⟨⟩ , s ⟩ p = Ext≈ (Null≈ refl≈ty) p
-sub-from-connect-inc-right-≈ σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≈ (trans≈s (reflexive≈s (lift-sub-comp-lem-sub (sub-from-connect σ ⟨ τ , s ⟩) (connect-inc-right t _))) (sub-from-connect-inc-right-≈ σ t ⟨ τ , s ⟩ p)) refl≈tm
+sub-from-connect-inc-right-≈ σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≈ lem refl≈tm
+  where
+    open Reasoning (sub-setoid-≈ _)
+    lem : sub-from-connect σ ⟨ ⟨ τ , s ⟩ , u ⟩ ● lift-sub (connect-inc-right t _) ≈[ _ ]s ⟨ τ , s ⟩
+    lem = begin
+      < sub-from-connect σ ⟨ ⟨ τ , s ⟩ , u ⟩ ● lift-sub (connect-inc-right t _) >s′
+        ≈⟨ reflexive≈s (apply-sub-lifted-sub-≃ (connect-inc-right t _) (sub-from-connect σ ⟨ ⟨ τ , s ⟩ , u ⟩)) ⟩
+      < sub-from-connect σ ⟨ τ , s ⟩ ● connect-inc-right t _ >s′
+        ≈⟨ sub-from-connect-inc-right-≈ σ t ⟨ τ , s ⟩ p ⟩
+      < ⟨ τ , s ⟩ >s′ ∎
 
 sub-from-connect-Ty : Typing-Sub Γ Υ σ → Typing-Tm Γ t ⋆ → Typing-Sub Δ Υ τ → (t [ σ ]tm ≈[ Υ ]tm Var (fromℕ _) [ τ ]tm) → Typing-Sub (connect Γ t Δ) Υ (sub-from-connect σ τ)
 sub-from-connect-Ty σty tty (TyExt (TyNull y) x) p = σty

@@ -1,8 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Structured.Support.Typed (rules : RuleSet)
-                                          (tame : Tame rules)
-                                          (supp-cond : SupportCond rules) where
+module Catt.Typing.Structured.Support (rules : RuleSet)
+                                      (tame : Tame rules)
+                                      (supp-cond : SupportCond rules) where
 
 open Tame tame
 

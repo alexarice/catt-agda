@@ -25,6 +25,10 @@ open import Catt.Typing rules
 open import Catt.Typing.Properties.Base rules
 open import Catt.Tree.Structured.Typing rules
 
+open import Catt.Support
+open import Catt.Tree.Support
+open import Catt.Tree.Structured.Support
+
 open import Catt.Typing.EndoCoherenceRemoval.Rule
 
 open Rule
@@ -32,10 +36,11 @@ open Rule
 HasEndoCoherenceRemoval : Set
 HasEndoCoherenceRemoval = ∀ {m n}
                         → {Γ : Ctx m}
+                        → {Δ : Ctx (suc n)}
                         → {s : Tm (suc n)}
                         → {A : Ty (suc n)}
+                        → (SuppTy Δ (s ─⟨ A ⟩⟶ s) ≡ full)
                         → {σ : Sub (suc n) m ⋆}
-                        → {Δ : Ctx (suc n)}
                         → {B : Ty m}
                         → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ s) σ) B
                         → Coh Δ (s ─⟨ A ⟩⟶ s) σ ≈[ Γ ]tm identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))
@@ -47,6 +52,7 @@ HasEndoCoherenceRemoval-STm = ∀ {m n}
                         → (S : Tree n)
                         → (s : STm (someTree S))
                         → (As : STy (someTree S))
+                        → (DCT (FVSTy (SArr s As s)) ≡ mFull)
                         → (L : Label X S)
                         → Typing-STm ⌊ S ⌋ s As
                         → Typing-STy ⌊ S ⌋ As
@@ -60,4 +66,4 @@ HasEndoCoherenceRemovalRule : Set
 HasEndoCoherenceRemovalRule = ECRSet ⊆r rules
 
 ecr-from-rule : HasEndoCoherenceRemovalRule → HasEndoCoherenceRemoval
-ecr-from-rule p tty = Rule≈ _ (p [ (ECR _ _ _ _ _) ]) tty
+ecr-from-rule p supp tty = Rule≈ _ (p [ (ECR _ _ _ _ supp _) ]) tty

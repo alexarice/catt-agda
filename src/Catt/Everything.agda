@@ -121,8 +121,11 @@ import Catt.Tree.Boundary.Support
 import Catt.Tree.Canonical.Support
 
 import Catt.Typing.Properties.Support
-import Catt.Tree.Structured.Support.Typed
-import Catt.Tree.Insertion.Support
+import Catt.Typing.Structured.Support
+import Catt.Typing.DiscRemoval.Support
+import Catt.Typing.EndoCoherenceRemoval.Support
+import Catt.Typing.Insertion.Support
+import Catt.Typing.Pruning.Support
 
 import Catt.Typing.Weak
 import Catt.Typing.Strict.Units

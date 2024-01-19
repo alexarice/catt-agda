@@ -21,8 +21,8 @@ open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
-open import Catt.Tree.Canonical
-open import Catt.Tree.Canonical.Properties
+open import Catt.Tree.Standard
+open import Catt.Tree.Standard.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
@@ -34,7 +34,7 @@ open import Catt.Tree.Typing rules tame
 open import Catt.Tree.Boundary.Typing rules tame
 open import Catt.Tree.Structured.Typing rules
 open import Catt.Tree.Structured.Typing.Properties rules tame
-open import Catt.Tree.Canonical.Typing rules tame
+open import Catt.Tree.Standard.Typing rules tame
 open import Catt.Tree.Insertion.Typing rules tame
 open import Catt.Typing.DiscRemoval rules
 open import Catt.Typing.EndoCoherenceRemoval rules
@@ -42,97 +42,97 @@ open import Catt.Typing.Insertion rules
 
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
-open import Catt.Tree.Canonical.Support
+open import Catt.Tree.Standard.Support
 
 
 module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
   open import Catt.Typing.DiscRemoval.Properties rules tame dr
   open import Catt.Typing.EndoCoherenceRemoval.Properties rules tame ecr
 
-  canonical-ecr : (d : ℕ)
+  standard-ecr : (d : ℕ)
                 → (T : Tree n)
                 → (tree-dim T < d)
                 → (1 < d)
-                → canonical-comp d T
+                → standard-comp d T
                   ≈[ ⌊ T ⌋ ]stm
-                  identity-stm (n-disc (pred d)) >>= (canonical-label (n-disc (pred d)) T ,, S⋆)
-  canonical-ecr (suc d) T p q = begin
+                  identity-stm (n-disc (pred d)) >>= (standard-label (n-disc (pred d)) T ,, S⋆)
+  standard-ecr (suc d) T p q = begin
     SCoh T
-         (SArr (canonical-stm d (tree-bd d T) >>=
+         (SArr (standard-stm d (tree-bd d T) >>=
                                (tree-inc-label d T false))
-               (canonical-type d T)
-               (canonical-stm d (tree-bd d T) >>=
+               (standard-type d T)
+               (standard-stm d (tree-bd d T) >>=
                                (tree-inc-label d T true)))
          (id-label-wt T)
-      ≈⟨ reflexive≈stm (SCoh≃ T (SArr≃ (canonical-stm-full-lem d T false (≤-pred p))
+      ≈⟨ reflexive≈stm (SCoh≃ T (SArr≃ (standard-stm-full-lem d T false (≤-pred p))
                                        refl≃sty
-                                       (canonical-stm-full-lem d T true (≤-pred p)))
+                                       (standard-stm-full-lem d T true (≤-pred p)))
                                 refl≃l
                                 refl≃sty) ⟩
-    SCoh T (SArr (canonical-stm d T)
-                 (canonical-type d T)
-                 (canonical-stm d T))
+    SCoh T (SArr (standard-stm d T)
+                 (standard-type d T)
+                 (standard-stm d T))
            (id-label-wt T)
-      ≈⟨ ecr-stm T (canonical-stm d T)
-                   (canonical-type d T)
+      ≈⟨ ecr-stm T (standard-stm d T)
+                   (standard-type d T)
                    supp-lem
                    (id-label T)
-                   (canonical-stm-Ty d T)
-                   (canonical-type-Ty d T)
+                   (standard-stm-Ty d T)
+                   (standard-type-Ty d T)
                    (id-label-Ty T) ⟩
-    identity-stm (n-disc (sty-dim (canonical-type d T)))
+    identity-stm (n-disc (sty-dim (standard-type d T)))
       >>=
-      (stm-to-label (n-disc (sty-dim (canonical-type d T)))
-                    (canonical-stm d T)
-                    (canonical-type d T) ,, S⋆)
+      (stm-to-label (n-disc (sty-dim (standard-type d T)))
+                    (standard-stm d T)
+                    (standard-type d T) ,, S⋆)
       ●lt id-label-wt T
-      ≈⟨ reflexive≈stm (>>=-≃ (refl≃stm {a = identity-stm (n-disc (sty-dim (canonical-type d T)))})
-                              (comp-right-unit (stm-to-label (n-disc (sty-dim (canonical-type d T)))
-                                                             (canonical-stm d T)
-                                                             (canonical-type d T)))
+      ≈⟨ reflexive≈stm (>>=-≃ (refl≃stm {a = identity-stm (n-disc (sty-dim (standard-type d T)))})
+                              (comp-right-unit (stm-to-label (n-disc (sty-dim (standard-type d T)))
+                                                             (standard-stm d T)
+                                                             (standard-type d T)))
                               refl≃sty) ⟩
-    identity-stm (n-disc (sty-dim (canonical-type d T)))
-      >>= (stm-to-label (n-disc (sty-dim (canonical-type d T)))
-                        (canonical-stm d T)
-                        (canonical-type d T) ,, S⋆)
-      ≈⟨ >>=-≈ (identity-stm (n-disc (sty-dim (canonical-type d T))))
-               (stm-to-label-≈ (n-disc (sty-dim (canonical-type d T)))
-                               (trans≈stm (canonical-stm-is-comp′ d ⦃ NonZero-≤ (≤-pred q) it ⦄ T)
-                                          (reflexive≈stm (canonical-comp′-≃ (sym (≃n-to-≡ tree-dim-n-disc)) refl≃)))
-                               (reflexive≈sty (canonical-type-≃ (sym (≃n-to-≡ tree-dim-n-disc)) refl≃)))
+    identity-stm (n-disc (sty-dim (standard-type d T)))
+      >>= (stm-to-label (n-disc (sty-dim (standard-type d T)))
+                        (standard-stm d T)
+                        (standard-type d T) ,, S⋆)
+      ≈⟨ >>=-≈ (identity-stm (n-disc (sty-dim (standard-type d T))))
+               (stm-to-label-≈ (n-disc (sty-dim (standard-type d T)))
+                               (trans≈stm (standard-stm-is-comp′ d ⦃ NonZero-≤ (≤-pred q) it ⦄ T)
+                                          (reflexive≈stm (standard-comp′-≃ (sym (≃n-to-≡ tree-dim-n-disc)) refl≃)))
+                               (reflexive≈sty (standard-type-≃ (sym (≃n-to-≡ tree-dim-n-disc)) refl≃)))
                refl≈sty ⟩
-    identity-stm (n-disc (sty-dim (canonical-type d T)))
-      >>= (stm-to-label (n-disc (sty-dim (canonical-type d T)))
-                        (canonical-comp′ (tree-dim (n-disc d)) T)
-                        (canonical-type (tree-dim (n-disc d)) T)
-                        ⦃ l1 (canonical-type-dim d T) ⦄ ,, S⋆)
-      ≈⟨ reflexive≈stm (lem (sty-dim (canonical-type d T)) d (canonical-type-dim d T)) ⟩
-    identity-stm (n-disc d) >>= (canonical-label (n-disc d) T ,, S⋆) ∎
+    identity-stm (n-disc (sty-dim (standard-type d T)))
+      >>= (stm-to-label (n-disc (sty-dim (standard-type d T)))
+                        (standard-comp′ (tree-dim (n-disc d)) T)
+                        (standard-type (tree-dim (n-disc d)) T)
+                        ⦃ l1 (standard-type-dim d T) ⦄ ,, S⋆)
+      ≈⟨ reflexive≈stm (lem (sty-dim (standard-type d T)) d (standard-type-dim d T)) ⟩
+    identity-stm (n-disc d) >>= (standard-label (n-disc d) T ,, S⋆) ∎
     where
-      supp-lem : DCT (FVSTy (SArr (canonical-stm d T) (canonical-type d T) (canonical-stm d T))) ≡ mFull
+      supp-lem : DCT (FVSTy (SArr (standard-stm d T) (standard-type d T) (standard-stm d T))) ≡ mFull
       supp-lem = begin
-        DCT (FVSTy (SArr (canonical-stm d T) (canonical-type d T) (canonical-stm d T)))
-          ≡⟨ DCT-∪ (FVSTy (canonical-type d T) ∪t FVSTm (canonical-stm d T)) (FVSTm (canonical-stm d T)) ⟩
-        DCT (FVSTy (canonical-type d T) ∪t FVSTm (canonical-stm d T)) ∪t DCT (FVSTm (canonical-stm d T))
-          ≡⟨ cong (DCT (FVSTy (canonical-type d T) ∪t FVSTm (canonical-stm d T)) ∪t_) (canonical-stm-full d T (≤-pred p)) ⟩
-        DCT (FVSTy (canonical-type d T) ∪t FVSTm (canonical-stm d T)) ∪t tFull
-          ≡⟨ ∪t-right-zero (DCT (FVSTy (canonical-type d T) ∪t FVSTm (canonical-stm d T))) ⟩
+        DCT (FVSTy (SArr (standard-stm d T) (standard-type d T) (standard-stm d T)))
+          ≡⟨ DCT-∪ (FVSTy (standard-type d T) ∪t FVSTm (standard-stm d T)) (FVSTm (standard-stm d T)) ⟩
+        DCT (FVSTy (standard-type d T) ∪t FVSTm (standard-stm d T)) ∪t DCT (FVSTm (standard-stm d T))
+          ≡⟨ cong (DCT (FVSTy (standard-type d T) ∪t FVSTm (standard-stm d T)) ∪t_) (standard-stm-full d T (≤-pred p)) ⟩
+        DCT (FVSTy (standard-type d T) ∪t FVSTm (standard-stm d T)) ∪t tFull
+          ≡⟨ ∪t-right-zero (DCT (FVSTy (standard-type d T) ∪t FVSTm (standard-stm d T))) ⟩
         mFull ∎
         where
           open ≡-Reasoning
 
       open Reasoning stm-setoid-≈
 
-      l1 : n ≡ m → has-dim (tree-dim (n-disc n)) (canonical-type (tree-dim (n-disc m)) T)
-      l1 {m = m} refl = ≡-to-≃n (sym (canonical-type-dim (tree-dim (n-disc m)) T))
+      l1 : n ≡ m → has-dim (tree-dim (n-disc n)) (standard-type (tree-dim (n-disc m)) T)
+      l1 {m = m} refl = ≡-to-≃n (sym (standard-type-dim (tree-dim (n-disc m)) T))
 
       lem : (n m : ℕ) → (q : n ≡ m)
           → identity-stm (n-disc n)
               >>= (stm-to-label (n-disc n)
-                                (canonical-comp′ (tree-dim (n-disc m)) T)
-                                (canonical-type (tree-dim (n-disc m)) T) ⦃ l1 q ⦄ ,, S⋆)
+                                (standard-comp′ (tree-dim (n-disc m)) T)
+                                (standard-type (tree-dim (n-disc m)) T) ⦃ l1 q ⦄ ,, S⋆)
             ≃stm
-            identity-stm (n-disc m) >>= (canonical-label (n-disc m) T ,, S⋆)
+            identity-stm (n-disc m) >>= (standard-label (n-disc m) T ,, S⋆)
       lem _ _ refl = refl≃stm
 
   pruned-branch-κ : (S : Tree n)
@@ -175,80 +175,80 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
     where
       open Reasoning stm-setoid-≈
   pruned-branch-κ (Join (Susp S₁) S₂) BHere T q x .get (PExt Z) = begin
-    canonical-label (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z)
+    standard-label (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z)
       >>= ++t-inc-left (Join (n-disc (tree-dim S₁)) Sing) S₂
-      >>= (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+      >>= (replace-label (standard-label (n-disc (suc (tree-dim S₁))) T) SHere
                             ●l (++t-inc-left T S₂)
            ++l′ ap (++t-inc-right T S₂) ,, S⋆)
       ≈⟨ reflexive≈stm (>>=-≃ (>>=-≃ l1 refl≃l refl≃sty) refl≃l refl≃sty) ⟩
     identity-stm (n-disc (suc (tree-dim S₁)))
       >>= ++t-inc-left (Susp (n-disc (tree-dim S₁))) S₂
-      >>= (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+      >>= (replace-label (standard-label (n-disc (suc (tree-dim S₁))) T) SHere
                             ●l (++t-inc-left T S₂)
            ++l′ ap (++t-inc-right T S₂) ,, S⋆)
       ≈⟨ reflexive≈stm (>>=-assoc (identity-stm (n-disc (suc (tree-dim S₁))))
                                   (++t-inc-left (Susp (n-disc (tree-dim S₁))) S₂)
-                                  (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+                                  (replace-label (standard-label (n-disc (suc (tree-dim S₁))) T) SHere
                                                     ●l (++t-inc-left T S₂)
                                    ++l′ ap (++t-inc-right T S₂) ,, S⋆)) ⟩
     identity-stm (n-disc (suc (tree-dim S₁)))
       >>= ++t-inc-left (Susp (n-disc (tree-dim S₁))) S₂
-          ●lt (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+          ●lt (replace-label (standard-label (n-disc (suc (tree-dim S₁))) T) SHere
                                 ●l (++t-inc-left T S₂)
                ++l′ ap (++t-inc-right T S₂) ,, S⋆)
       ≈⟨ >>=-≈ (identity-stm (n-disc (suc (tree-dim S₁))))
-               (++l′-inc-left (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+               (++l′-inc-left (replace-label (standard-label (n-disc (suc (tree-dim S₁))) T) SHere
                                           ●l (++t-inc-left T S₂))
                                         (ap (++t-inc-right T S₂))
                                         S⋆
                                         (reflexive≈stm l2))
                refl≈sty ⟩
     identity-stm (n-disc (suc (tree-dim S₁)))
-      >>= (replace-label (canonical-label (n-disc (suc (tree-dim S₁))) T) SHere
+      >>= (replace-label (standard-label (n-disc (suc (tree-dim S₁))) T) SHere
           ●l (++t-inc-left T S₂) ,, S⋆)
       ≈⟨ >>=-≈ (identity-stm (n-disc (suc (tree-dim S₁))))
-               (≈-label-comp (replace-label-eq (canonical-label (n-disc (suc (tree-dim S₁))) T)
+               (≈-label-comp (replace-label-eq (standard-label (n-disc (suc (tree-dim S₁))) T)
                                                SHere
-                                               (reflexive≈stm (sym≃stm (canonical-label-fst (n-disc (suc (tree-dim S₁))) T))))
+                                               (reflexive≈stm (sym≃stm (standard-label-fst (n-disc (suc (tree-dim S₁))) T))))
                              (++t-inc-left-Ty T S₂)
                              TySStar)
                refl≈sty ⟩
     identity-stm (n-disc (suc (tree-dim S₁)))
-      >>= (canonical-label (n-disc (suc (tree-dim S₁))) T ●l (++t-inc-left T S₂) ,, S⋆)
+      >>= (standard-label (n-disc (suc (tree-dim S₁))) T ●l (++t-inc-left T S₂) ,, S⋆)
       ≈˘⟨ reflexive≈stm (>>=-assoc (identity-stm (n-disc (suc (tree-dim S₁))))
-                                   (canonical-label (n-disc (suc (tree-dim S₁))) T ,, S⋆) _) ⟩
+                                   (standard-label (n-disc (suc (tree-dim S₁))) T ,, S⋆) _) ⟩
     identity-stm (n-disc (suc (tree-dim S₁)))
-      >>= (canonical-label (n-disc (suc (tree-dim S₁))) T ,, S⋆)
+      >>= (standard-label (n-disc (suc (tree-dim S₁))) T ,, S⋆)
       >>= ++t-inc-left T S₂
-      ≈˘⟨ ≈->>= (canonical-ecr (2+ (tree-dim S₁)) T x (s≤s (s≤s z≤n))) (++t-inc-left-Ty T S₂) TySStar ⟩
-    canonical-comp (2+ (tree-dim S₁)) T >>= ++t-inc-left T S₂
-      ≈˘⟨ reflexive≈stm (>>=-≃ (canonical-comp′-compat (2+ (tree-dim S₁)) T) refl≃l refl≃sty) ⟩
-    canonical-comp′ (2+ (tree-dim S₁)) T >>= ++t-inc-left T S₂
-      ≈˘⟨ reflexive≈stm (>>=-≃ (canonical-label-max (Susp (Susp S₁)) T (PExt Z)) refl≃l refl≃sty) ⟩
-    canonical-label (Susp (Susp S₁)) T (PExt Z) >>= ++t-inc-left T S₂ ∎
+      ≈˘⟨ ≈->>= (standard-ecr (2+ (tree-dim S₁)) T x (s≤s (s≤s z≤n))) (++t-inc-left-Ty T S₂) TySStar ⟩
+    standard-comp (2+ (tree-dim S₁)) T >>= ++t-inc-left T S₂
+      ≈˘⟨ reflexive≈stm (>>=-≃ (standard-comp′-compat (2+ (tree-dim S₁)) T) refl≃l refl≃sty) ⟩
+    standard-comp′ (2+ (tree-dim S₁)) T >>= ++t-inc-left T S₂
+      ≈˘⟨ reflexive≈stm (>>=-≃ (standard-label-max (Susp (Susp S₁)) T (PExt Z)) refl≃l refl≃sty) ⟩
+    standard-label (Susp (Susp S₁)) T (PExt Z) >>= ++t-inc-left T S₂ ∎
     where
-      l1 : canonical-label (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z)
+      l1 : standard-label (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z)
            ≃stm
            identity-stm (n-disc (suc (tree-dim S₁)))
       l1 = begin
-        < canonical-label (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z) >stm
-          ≈⟨ canonical-label-max (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z) ⟩
-        < canonical-comp′ (tree-dim (Susp (Susp S₁))) (n-disc (suc (tree-dim S₁))) >stm
-          ≈⟨ canonical-comp′-compat (2+ (tree-dim S₁)) (n-disc (suc (tree-dim S₁))) ⟩
-        < canonical-comp (2+ (tree-dim S₁)) (n-disc (suc (tree-dim S₁))) >stm
-          ≈˘⟨ canonical-comp-≃ (≃n-to-≡ (tree-dim-n-disc {suc (suc (tree-dim S₁))})) refl≃ ⟩
-        < canonical-comp (suc (tree-dim (n-disc (suc (tree-dim S₁))))) (n-disc (suc (tree-dim S₁))) >stm
-          ≈˘⟨ identity-stm-is-canonical (n-disc (suc (tree-dim S₁))) ⟩
+        < standard-label (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z) >stm
+          ≈⟨ standard-label-max (Susp (Susp S₁)) (n-disc (suc (tree-dim S₁))) (PExt Z) ⟩
+        < standard-comp′ (tree-dim (Susp (Susp S₁))) (n-disc (suc (tree-dim S₁))) >stm
+          ≈⟨ standard-comp′-compat (2+ (tree-dim S₁)) (n-disc (suc (tree-dim S₁))) ⟩
+        < standard-comp (2+ (tree-dim S₁)) (n-disc (suc (tree-dim S₁))) >stm
+          ≈˘⟨ standard-comp-≃ (≃n-to-≡ (tree-dim-n-disc {suc (suc (tree-dim S₁))})) refl≃ ⟩
+        < standard-comp (suc (tree-dim (n-disc (suc (tree-dim S₁))))) (n-disc (suc (tree-dim S₁))) >stm
+          ≈˘⟨ identity-stm-is-standard (n-disc (suc (tree-dim S₁))) ⟩
         < identity-stm (n-disc (suc (tree-dim S₁))) >stm ∎
         where
           open Reasoning stm-setoid
 
-      l2 : canonical-label (n-disc (suc (tree-dim S₁))) T (PShift PHere) >>= ++t-inc-left T S₂
+      l2 : standard-label (n-disc (suc (tree-dim S₁))) T (PShift PHere) >>= ++t-inc-left T S₂
            ≃stm
            ap (++t-inc-right T S₂) PHere
       l2 = begin
-        < canonical-label (n-disc (suc (tree-dim S₁))) T (PShift PHere) >>= ++t-inc-left T S₂ >stm
-          ≈⟨ >>=-≃ (canonical-label-last (n-disc (suc (tree-dim S₁))) T) refl≃l refl≃sty ⟩
+        < standard-label (n-disc (suc (tree-dim S₁))) T (PShift PHere) >>= ++t-inc-left T S₂ >stm
+          ≈⟨ >>=-≃ (standard-label-last (n-disc (suc (tree-dim S₁))) T) refl≃l refl≃sty ⟩
         < ap (++t-inc-left T S₂) (last-path T) >stm
           ≈⟨ SPath≃ (++t-inc-phere T S₂) ⟩
         < ap (++t-inc-right T S₂) PHere >stm ∎
@@ -266,26 +266,26 @@ module _ (disc-rem : HasDiscRemoval) where
            ≈[ ⌊ (S >>[ P ] (n-disc (ih P))) ⦃ _ ⦄ ⌋ ]lm
            ≃-label (sym≃′ (insertion-disc S P)) (id-label S)
   κ-disc (Join S T) BHere .get (PExt Z) = begin
-    canonical-label (Susp S) (n-disc (suc (tree-dim S))) (PExt Z)
+    standard-label (Susp S) (n-disc (suc (tree-dim S))) (PExt Z)
       >>= ++t-inc-left (n-disc (suc (tree-dim S))) T
-      ≈⟨ reflexive≈stm (>>=-≃ (canonical-label-max (Susp S) (n-disc (suc (tree-dim S))) (PExt Z))
+      ≈⟨ reflexive≈stm (>>=-≃ (standard-label-max (Susp S) (n-disc (suc (tree-dim S))) (PExt Z))
                               refl≃l
                               refl≃sty) ⟩
-    canonical-comp′ (tree-dim (Susp S)) (n-disc (suc (tree-dim S)))
+    standard-comp′ (tree-dim (Susp S)) (n-disc (suc (tree-dim S)))
       >>= ++t-inc-left (n-disc (suc (tree-dim S))) T
-      ≈˘⟨ reflexive≈stm (>>=-≃ (canonical-comp′-≃ (≃n-to-≡ (tree-dim-n-disc {n = suc (tree-dim S)}))
+      ≈˘⟨ reflexive≈stm (>>=-≃ (standard-comp′-≃ (≃n-to-≡ (tree-dim-n-disc {n = suc (tree-dim S)}))
                                                   (refl≃ {T = n-disc (suc (tree-dim S))}))
                                (refl≃l {L = ap (++t-inc-left (n-disc (suc (tree-dim S))) T)})
                                refl≃sty) ⟩
-    canonical-comp′ (tree-dim (n-disc (suc (tree-dim S)))) (n-disc (suc (tree-dim S)))
+    standard-comp′ (tree-dim (n-disc (suc (tree-dim S)))) (n-disc (suc (tree-dim S)))
       >>= ++t-inc-left (n-disc (suc (tree-dim S))) T
-      ≈⟨ reflexive≈stm (>>=-≃ (canonical-comp′-compat (tree-dim (n-disc (suc (tree-dim S))))
+      ≈⟨ reflexive≈stm (>>=-≃ (standard-comp′-compat (tree-dim (n-disc (suc (tree-dim S))))
                                                       (n-disc (suc (tree-dim S))))
                               (refl≃l {L = ap (++t-inc-left (n-disc (suc (tree-dim S))) T)})
                               refl≃sty) ⟩
-    canonical-comp (tree-dim (n-disc (suc (tree-dim S)))) (n-disc (suc (tree-dim S)))
+    standard-comp (tree-dim (n-disc (suc (tree-dim S)))) (n-disc (suc (tree-dim S)))
       >>= ++t-inc-left (n-disc (suc (tree-dim S))) T
-      ≈˘⟨ reflexive≈stm (>>=-≃ (disc-stm-is-canonical (n-disc (suc (tree-dim S))))
+      ≈˘⟨ reflexive≈stm (>>=-≃ (disc-stm-is-standard (n-disc (suc (tree-dim S))))
                                (refl≃l {L = ap (++t-inc-left (n-disc (suc (tree-dim S))) T)})
                                refl≃sty) ⟩
     disc-stm (n-disc (suc (tree-dim S))) >>= ++t-inc-left (Susp (n-disc (tree-dim S))) T
@@ -313,48 +313,48 @@ module _ (disc-rem : HasDiscRemoval) where
 module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
   open import Catt.Typing.DiscRemoval.Properties rules tame dr
 
-  κ-canonical-type : (S : Tree n)
+  κ-standard-type : (S : Tree n)
                    → (P : Branch S l)
                    → (T : Tree m)
                    → .⦃ _ : has-trunk-height l T ⦄
                    → (d : ℕ)
                    → (tree-dim T ≤ ih P)
-                   → canonical-type d S >>=′ (κ S P T ,, S⋆)
+                   → standard-type d S >>=′ (κ S P T ,, S⋆)
                      ≈[ ⌊ S >>[ P ] T ⌋ ]sty
-                     canonical-type d (S >>[ P ] T)
-  κ-canonical-comp : (S : Tree n)
+                     standard-type d (S >>[ P ] T)
+  κ-standard-comp : (S : Tree n)
                    → (P : Branch S l)
                    → (T : Tree m)
                    → .⦃ _ : has-trunk-height l T ⦄
                    → (d : ℕ)
                    → (tree-dim T ≤ ih P)
-                   → canonical-comp d S >>= (κ S P T ,, S⋆)
+                   → standard-comp d S >>= (κ S P T ,, S⋆)
                      ≈[ ⌊ S >>[ P ] T ⌋ ]stm
-                     canonical-comp d (S >>[ P ] T)
-  κ-canonical-comp′ : (S : Tree n)
+                     standard-comp d (S >>[ P ] T)
+  κ-standard-comp′ : (S : Tree n)
                     → (P : Branch S l)
                     → (T : Tree m)
                     → .⦃ _ : has-trunk-height l T ⦄
                     → (d : ℕ)
                     → (tree-dim T ≤ ih P)
-                    → canonical-comp′ d S >>= (κ S P T ,, S⋆)
+                    → standard-comp′ d S >>= (κ S P T ,, S⋆)
                       ≈[ ⌊ S >>[ P ] T ⌋ ]stm
-                      canonical-comp′ d (S >>[ P ] T)
-  κ-canonical-stm : (S : Tree n)
+                      standard-comp′ d (S >>[ P ] T)
+  κ-standard-stm : (S : Tree n)
                   → (P : Branch S l)
                   → (T : Tree m)
                   → .⦃ _ : has-trunk-height l T ⦄
                   → (d : ℕ)
                   → d ≥ tree-dim S
                   → tree-dim T ≤ ih P
-                  → canonical-stm d S >>= (κ S P T ,, S⋆)
+                  → standard-stm d S >>= (κ S P T ,, S⋆)
                     ≈[ ⌊ S >>[ P ] T ⌋ ]stm
-                    canonical-stm d (S >>[ P ] T)
+                    standard-stm d (S >>[ P ] T)
 
-  κ-canonical-type S P T zero q = refl≈sty
-  κ-canonical-type S P T (suc d) q
+  κ-standard-type S P T zero q = refl≈sty
+  κ-standard-type S P T (suc d) q
     = ≈SArr (lem false)
-            (κ-canonical-type S P T d q)
+            (κ-standard-type S P T d q)
             (lem true)
     where
       open Reasoning stm-setoid-≈
@@ -367,27 +367,27 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
 
       lem2 : (b : Bool)
            → Bd-Conditions d P T
-           → canonical-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
+           → standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
              ≈[ ⌊ S >>[ P ] T ⌋ ]stm
-             canonical-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b
+             standard-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b
       lem2 b (Bd-Cond1 x y) = begin
-        canonical-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
-          ≈⟨ >>=-≈ (canonical-stm d (tree-bd d S))
-                   (label-max-equality-to-equality (canonical-κ-comm-1 S P T d x y q b)
+        standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
+          ≈⟨ >>=-≈ (standard-stm d (tree-bd d S))
+                   (label-max-equality-to-equality (standard-κ-comm-1 S P T d x y q b)
                                                    (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T) TySStar)
                                                    (label-≃-Ty (insertion-bd-1 S P T d y q) (tree-inc-Ty d (S >>[ P ] T) b)))
                    refl≈sty ⟩
-        canonical-stm d (tree-bd d S) >>=
+        standard-stm d (tree-bd d S) >>=
           label-wt-≃ (insertion-bd-1 S P T d y q) (tree-inc-label d (S >>[ P ] T) b)
-          ≈˘⟨ reflexive≈stm (>>=-assoc (canonical-stm d (tree-bd d S)) _ _) ⟩
-        canonical-stm d (tree-bd d S) >>= (SPath ∘ ppath-≃ (insertion-bd-1 S P T d y q) ,, S⋆) >>= tree-inc-label d (S >>[ P ] T) b
-          ≈⟨ reflexive≈stm (>>=-≃ (canonical-stm-≃-prop d (insertion-bd-1 S P T d y q)) refl≃l refl≃sty) ⟩
-        canonical-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b ∎
+          ≈˘⟨ reflexive≈stm (>>=-assoc (standard-stm d (tree-bd d S)) _ _) ⟩
+        standard-stm d (tree-bd d S) >>= (SPath ∘ ppath-≃ (insertion-bd-1 S P T d y q) ,, S⋆) >>= tree-inc-label d (S >>[ P ] T) b
+          ≈⟨ reflexive≈stm (>>=-≃ (standard-stm-≃-prop d (insertion-bd-1 S P T d y q)) refl≃l refl≃sty) ⟩
+        standard-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b ∎
       lem2 b (Bd-Cond2 x) = begin
-        canonical-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
-          ≈⟨ >>=-≈ (canonical-stm d (tree-bd d S))
+        standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
+          ≈⟨ >>=-≈ (standard-stm d (tree-bd d S))
                    (label-max-equality-to-equality
-                     (canonical-κ-comm-2 S P T d b q x)
+                     (standard-κ-comm-2 S P T d b q x)
                      (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T) TySStar)
                      (label-comp-Ty (κ-Ty (tree-bd d S)
                                                        (bd-branch S P d _)
@@ -395,21 +395,21 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                                                        ⦃ _ ⦄)
                                     (label-≃-Ty (insertion-bd-2 S P T d _) (tree-inc-Ty d (S >>[ P ] T) b)) TySStar))
                    refl≈sty ⟩
-        canonical-stm d (tree-bd d S)
+        standard-stm d (tree-bd d S)
           >>= (κ (tree-bd d S)
                               (bd-branch S P d _)
                               (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
           ●lt (label-wt-≃ (insertion-bd-2 S P T d _)
                           (tree-inc-label d (S >>[ P ] T) b))
-          ≈˘⟨ reflexive≈stm (>>=-assoc (canonical-stm d (tree-bd d S))
+          ≈˘⟨ reflexive≈stm (>>=-assoc (standard-stm d (tree-bd d S))
                                        (κ (tree-bd d S)
                                                        (bd-branch S P d _)
                                                        (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
                                        (_ ,, S⋆)) ⟩
-        canonical-stm d (tree-bd d S)
+        standard-stm d (tree-bd d S)
           >>= (κ (tree-bd d S) (bd-branch S P d _) (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
           >>= label-wt-≃ (insertion-bd-2 S P T d _) (tree-inc-label d (S >>[ P ] T) b)
-          ≈⟨ ≈->>= (κ-canonical-stm (tree-bd d S)
+          ≈⟨ ≈->>= (κ-standard-stm (tree-bd d S)
                                            (bd-branch S P d (bd-branch-lem P x))
                                            (tree-bd d T)
                                            ⦃ _ ⦄
@@ -418,67 +418,67 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                                            (lem3 x))
                    (label-≃-Ty (insertion-bd-2 S P T d _) (tree-inc-Ty d (S >>[ P ] T) b))
                    TySStar ⟩
-        canonical-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄)
+        standard-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄)
           >>= label-wt-≃ (insertion-bd-2 S P T d _)
                          (tree-inc-label d (S >>[ P ] T) b)
-          ≈˘⟨ reflexive≈stm (>>=-assoc (canonical-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄))
+          ≈˘⟨ reflexive≈stm (>>=-assoc (standard-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄))
                             (SPath ∘ ppath-≃ (insertion-bd-2 S P T d _) ,, S⋆)
                             (tree-inc-label d (S >>[ P ] T) b)) ⟩
-        canonical-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄)
+        standard-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄)
           >>= ((SPath ∘ ppath-≃ (insertion-bd-2 S P T d _)) ,, S⋆)
           >>= tree-inc-label d (S >>[ P ] T) b
-          ≈⟨ reflexive≈stm (>>=-≃ (canonical-stm-≃-prop d (insertion-bd-2 S P T d _)) refl≃l refl≃sty) ⟩
-        canonical-stm d (tree-bd d (S >>[ P ] T))
+          ≈⟨ reflexive≈stm (>>=-≃ (standard-stm-≃-prop d (insertion-bd-2 S P T d _)) refl≃l refl≃sty) ⟩
+        standard-stm d (tree-bd d (S >>[ P ] T))
           >>= tree-inc-label d (S >>[ P ] T) b ∎
 
       lem : (b : Bool)
-          → canonical-stm d (tree-bd d S) >>= tree-inc-label d S b >>= (κ S P T ,, S⋆)
+          → standard-stm d (tree-bd d S) >>= tree-inc-label d S b >>= (κ S P T ,, S⋆)
             ≈[ ⌊ S >>[ P ] T ⌋ ]stm
-            canonical-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b
+            standard-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b
       lem b = begin
-        canonical-stm d (tree-bd d S) >>= tree-inc-label d S b >>= (κ S P T ,, S⋆)
-          ≈⟨ reflexive≈stm (>>=-assoc (canonical-stm d (tree-bd d S)) _ _) ⟩
-        canonical-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
+        standard-stm d (tree-bd d S) >>= tree-inc-label d S b >>= (κ S P T ,, S⋆)
+          ≈⟨ reflexive≈stm (>>=-assoc (standard-stm d (tree-bd d S)) _ _) ⟩
+        standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
           ≈⟨ lem2 b (Bd-Conditions-one-of d P T) ⟩
-        canonical-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b ∎
+        standard-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b ∎
 
-  κ-canonical-comp S P T d p = begin
-    SCoh S (canonical-type d S) (κ S P T ,, S⋆)
-      ≈⟨ insert (canonical-type d S)
+  κ-standard-comp S P T d p = begin
+    SCoh S (standard-type d S) (κ S P T ,, S⋆)
+      ≈⟨ insert (standard-type d S)
                 (κ S P T)
                 P
                 (ι S P T)
                 (κ-branch-path S P T)
-                (TySCoh S (canonical-type-Ty d S) (κ-Ty S P T) TySStar) ⟩
+                (TySCoh S (standard-type-Ty d S) (κ-Ty S P T) TySStar) ⟩
     SCoh (S >>[ P ] T)
-         (canonical-type d S >>=′ (κ S P T ,, S⋆))
+         (standard-type d S >>=′ (κ S P T ,, S⋆))
          (κ S P T >>l[ P ] ι S P T ,, S⋆)
       ≈⟨ ≈SCoh (S >>[ P ] T)
-               (κ-canonical-type S P T d p)
+               (κ-standard-type S P T d p)
                (reflexive≈l (κ-ι-prop S P T)) refl≈sty ⟩
-    SCoh (S >>[ P ] T) (canonical-type d (S >>[ P ] T)) (id-label-wt _) ∎
+    SCoh (S >>[ P ] T) (standard-type d (S >>[ P ] T)) (id-label-wt _) ∎
     where
       open Reasoning stm-setoid-≈
 
-  κ-canonical-comp′ S P T d p = begin
-    canonical-comp′ d S >>= (κ S P T ,, S⋆)
-      ≈⟨ reflexive≈stm (>>=-≃ (canonical-comp′-compat d S) refl≃l refl≃sty) ⟩
-    canonical-comp d S >>= (κ S P T ,, S⋆)
-      ≈⟨ κ-canonical-comp S P T d p ⟩
-    canonical-comp d (S >>[ P ] T)
-      ≈˘⟨ reflexive≈stm (canonical-comp′-compat d (S >>[ P ] T)) ⟩
-    canonical-comp′ d (S >>[ P ] T) ∎
+  κ-standard-comp′ S P T d p = begin
+    standard-comp′ d S >>= (κ S P T ,, S⋆)
+      ≈⟨ reflexive≈stm (>>=-≃ (standard-comp′-compat d S) refl≃l refl≃sty) ⟩
+    standard-comp d S >>= (κ S P T ,, S⋆)
+      ≈⟨ κ-standard-comp S P T d p ⟩
+    standard-comp d (S >>[ P ] T)
+      ≈˘⟨ reflexive≈stm (standard-comp′-compat d (S >>[ P ] T)) ⟩
+    standard-comp′ d (S >>[ P ] T) ∎
     where
       open Reasoning stm-setoid-≈
 
-  κ-canonical-stm S@(Join _ _) P T d q p = begin
-    canonical-stm d S >>= (κ S P T ,, S⋆)
-      ≈⟨ ≈->>= (canonical-stm-is-comp d ⦃ NonZero-≤ q it ⦄ S) (κ-Ty S P T) TySStar ⟩
-    canonical-comp d S >>= (κ S P T ,, S⋆)
-      ≈⟨ κ-canonical-comp S P T d p ⟩
-    canonical-comp d (S >>[ P ] T)
-      ≈˘⟨ canonical-stm-is-comp d ⦃ NonZero-≤ q it ⦄ (S >>[ P ] T) ⟩
-    canonical-stm d (S >>[ P ] T) ∎
+  κ-standard-stm S@(Join _ _) P T d q p = begin
+    standard-stm d S >>= (κ S P T ,, S⋆)
+      ≈⟨ ≈->>= (standard-stm-is-comp d ⦃ NonZero-≤ q it ⦄ S) (κ-Ty S P T) TySStar ⟩
+    standard-comp d S >>= (κ S P T ,, S⋆)
+      ≈⟨ κ-standard-comp S P T d p ⟩
+    standard-comp d (S >>[ P ] T)
+      ≈˘⟨ standard-stm-is-comp d ⦃ NonZero-≤ q it ⦄ (S >>[ P ] T) ⟩
+    standard-stm d (S >>[ P ] T) ∎
     where
       open Reasoning stm-setoid-≈
 
@@ -496,35 +496,35 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                       ≈[ ⌊ (S >>[ P ] T) >>[ inserted-branch S P T Q ] U ⌋ ]lm
                       ≃-label (sym≃′ (insertion-tree-inserted-branch S P T Q U)) (κ S P (T >>[ Q ] U) ⦃ insertion-trunk-height T Q U l ⦄)
   κ-inserted-branch (Join S₁ S₂) BHere T Q U q .get (PExt Z) = begin
-    canonical-label (Susp S₁) T (PExt Z)
+    standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T S₂
       >>= (κ (T ++t S₂) (connect-branch-left T S₂ Q) U ,, S⋆)
-      ≈⟨ reflexive≈stm (>>=-assoc (canonical-label (Susp S₁) T (PExt Z)) _ _) ⟩
-    canonical-label (Susp S₁) T (PExt Z)
+      ≈⟨ reflexive≈stm (>>=-assoc (standard-label (Susp S₁) T (PExt Z)) _ _) ⟩
+    standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T S₂ ●lt (κ (T ++t S₂) (connect-branch-left T S₂ Q) U ,, S⋆)
-      ≈⟨ fixup-reflexive≈stm (>>=-≃ (canonical-label-max (Susp S₁) T (PExt Z))
+      ≈⟨ fixup-reflexive≈stm (>>=-≃ (standard-label-max (Susp S₁) T (PExt Z))
                                     (κ-branch-left-inc-left T S₂ Q U)
                                     (S⋆-≃ (≃′-to-≃ (insertion-branch-left T S₂ Q U))))
                              (insertion-branch-left T S₂ Q U) ⟩
     stm-≃ (sym≃′ (insertion-branch-left T S₂ Q U))
-      (canonical-comp′ (1 + tree-dim S₁) T
+      (standard-comp′ (1 + tree-dim S₁) T
         >>= (κ T Q U ,, S⋆) ●lt (++t-inc-left (T >>[ Q ] U) S₂))
       ≈˘⟨ reflexive≈stm (stm-≃-≃ (sym≃′ (insertion-branch-left T S₂ Q U))
-                                 (>>=-assoc (canonical-comp′ (1 + tree-dim S₁) T) (κ T Q U ,, S⋆) _)) ⟩
+                                 (>>=-assoc (standard-comp′ (1 + tree-dim S₁) T) (κ T Q U ,, S⋆) _)) ⟩
     stm-≃ (sym≃′ (insertion-branch-left T S₂ Q U))
-      (canonical-comp′ (1 + tree-dim S₁) T >>= (κ T Q U ,, S⋆)
+      (standard-comp′ (1 + tree-dim S₁) T >>= (κ T Q U ,, S⋆)
                                            >>= ++t-inc-left (T >>[ Q ] U) S₂)
       ≈⟨ stm-≃-≈ ((sym≃′ (insertion-branch-left T S₂ Q U)))
-                 (≈->>= (κ-canonical-comp′ T Q U (1 + tree-dim S₁) q)
+                 (≈->>= (κ-standard-comp′ T Q U (1 + tree-dim S₁) q)
                         (++t-inc-left-Ty (T >>[ Q ] U) S₂)
                         TySStar) ⟩
     stm-≃ (sym≃′ (insertion-branch-left T S₂ Q U))
-      (canonical-comp′ (1 + tree-dim S₁) (T >>[ Q ] U)
+      (standard-comp′ (1 + tree-dim S₁) (T >>[ Q ] U)
         >>= ++t-inc-left (T >>[ Q ] U) S₂)
       ≈˘⟨ stm-≃-≈ (sym≃′ (insertion-branch-left T S₂ Q U))
-                  (reflexive≈stm (>>=-≃ (canonical-label-max (Susp S₁) (T >>[ Q ] U) (PExt Z)) refl≃l refl≃sty)) ⟩
+                  (reflexive≈stm (>>=-≃ (standard-label-max (Susp S₁) (T >>[ Q ] U) (PExt Z)) refl≃l refl≃sty)) ⟩
     stm-≃ (sym≃′ (insertion-branch-left T S₂ Q U))
-         (canonical-label (Susp S₁) (T >>[ Q ] U) (PExt Z)
+         (standard-label (Susp S₁) (T >>[ Q ] U) (PExt Z)
            >>= ++t-inc-left (T >>[ Q ] U) S₂) ∎
     where
       open Reasoning stm-setoid-≈

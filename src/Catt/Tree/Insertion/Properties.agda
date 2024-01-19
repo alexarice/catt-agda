@@ -14,8 +14,8 @@ open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
-open import Catt.Tree.Canonical
-open import Catt.Tree.Canonical.Properties
+open import Catt.Tree.Standard
+open import Catt.Tree.Standard.Properties
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
 open import Catt.Tree.Boundary
@@ -100,20 +100,20 @@ module _ where
          → (M : Label X T)
          → .⦃ _ : has-trunk-height d T ⦄
          → (Bs : STy X)
-         → L ⌊ P ⌋p ≃stm canonical-comp′ (ih P) T >>= (M ,, Bs)
+         → L ⌊ P ⌋p ≃stm standard-comp′ (ih P) T >>= (M ,, Bs)
          → κ S P T ●l (L >>l[ P ] M ,, Bs) ≃lm L
   κ-comm {S = Join S₁ S₂} {T = T} L BHere M Bs q .get (PExt Z) = begin
-    < canonical-label (Susp S₁) T (PExt Z)
+    < standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T S₂
       >>= (M ++l (L ∘ PShift) ,, Bs) >stm
-      ≈⟨ >>=-assoc (canonical-label (Susp S₁) T (PExt Z))
+      ≈⟨ >>=-assoc (standard-label (Susp S₁) T (PExt Z))
                    (++t-inc-left T S₂)
                    ((M ++l L ∘ PShift ,, Bs)) ⟩
-    < canonical-label (Susp S₁) T (PExt Z)
+    < standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T S₂ ●lt (M ++l L ∘ PShift ,, Bs) >stm
-      ≈⟨ >>=-≃ (canonical-label-max (Susp S₁) T (PExt Z))
+      ≈⟨ >>=-≃ (standard-label-max (Susp S₁) T (PExt Z))
                (++l-inc-left M (L ∘ PShift) Bs) refl≃sty ⟩
-    < canonical-comp′ (suc (tree-dim S₁)) T >>= (M ,, Bs) >stm
+    < standard-comp′ (suc (tree-dim S₁)) T >>= (M ,, Bs) >stm
       ≈˘⟨ q ⟩
     < L (PExt (is-linear-max-path S₁)) >stm
       ≈⟨ ap-≃ (refl≃l {L = L ∘ PExt}) (max-path-lin-tree S₁ Z refl≃) ⟩
@@ -237,25 +237,25 @@ label-from-insertion-map f L (BShift P) M .get (PShift Z) = label-from-insertion
               → .⦃ _ : has-trunk-height l T ⦄
               → κ S P T ⌊ P ⌋p
                 ≃stm
-                canonical-comp′ (ih P) T >>= (ι S P T ,, S⋆)
+                standard-comp′ (ih P) T >>= (ι S P T ,, S⋆)
 κ-branch-path (Join S₁ S₂) BHere T
-  = >>=-≃ (canonical-label-max (Susp S₁) T (is-linear-max-path (Susp S₁)) ⦃ inst ⦄)
+  = >>=-≃ (standard-label-max (Susp S₁) T (is-linear-max-path (Susp S₁)) ⦃ inst ⦄)
           refl≃l
           refl≃sty
 κ-branch-path (Join S₁ S₂) (BExt {n = n} P) (Susp T) = begin
   < SExt (κ S₁ P T ⌊ P ⌋p) >stm
     ≈⟨ SExt≃ (κ-branch-path S₁ P T) refl≃ ⟩
-  < SExt (canonical-comp′ (ih P) T >>= (ι S₁ P T ,, S⋆)) >stm
-   ≈˘⟨ >>=-ext (canonical-comp′ (ih P) T) (ι S₁ P T ,, S⋆) ⟩
-  < canonical-comp′ (ih P) T >>= map-ext (ι S₁ P T ,, S⋆) >stm ∎
+  < SExt (standard-comp′ (ih P) T >>= (ι S₁ P T ,, S⋆)) >stm
+   ≈˘⟨ >>=-ext (standard-comp′ (ih P) T) (ι S₁ P T ,, S⋆) ⟩
+  < standard-comp′ (ih P) T >>= map-ext (ι S₁ P T ,, S⋆) >stm ∎
   where
     open Reasoning stm-setoid
 κ-branch-path (Join S₁ S₂) (BShift {n = n} P) T = begin
   < SShift (κ S₂ P T ⌊ P ⌋p) >stm
     ≈⟨ SShift≃ refl≃ (κ-branch-path S₂ P T) ⟩
-  < SShift (canonical-comp′ (ih P) T >>= (ι S₂ P T ,, S⋆)) >stm
-    ≈˘⟨ >>=-shift (canonical-comp′ (ih P) T) (ι S₂ P T ,, S⋆) ⟩
-  < canonical-comp′ (ih P) T >>= map-shift (ι S₂ P T ,, S⋆) >stm ∎
+  < SShift (standard-comp′ (ih P) T >>= (ι S₂ P T ,, S⋆)) >stm
+    ≈˘⟨ >>=-shift (standard-comp′ (ih P) T) (ι S₂ P T ,, S⋆) ⟩
+  < standard-comp′ (ih P) T >>= map-shift (ι S₂ P T ,, S⋆) >stm ∎
   where
     open Reasoning stm-setoid
 
@@ -283,19 +283,19 @@ insertion-parallel (Join S₁ S₂) (BShift P) (BShift Q) T p = Join≃′ Refl�
              → κ S P T ≃lm κ S Q T
 κ-parallel (Join S₁ S₂) BHere BHere T p = refl≃lm
 κ-parallel (Join S₁ S₂) BHere (BExt {n = n} Q) (Susp T) p .get (PExt Z) = begin
-  < canonical-label (Susp S₁) (Susp T) (PExt Z) >>= ++t-inc-left (Susp T) S₂ >stm
-    ≈⟨ >>=-≃ (canonical-label-max (Susp S₁) (Susp T) (PExt Z)) refl≃l refl≃sty ⟩
-  < canonical-comp′ (tree-dim S₁) T >>= label₁ (++t-inc-left (Susp T) S₂) >stm
-    ≈˘⟨ >>=-≃ (canonical-comp′-≃ (ih-linear _ Q) (refl≃ {T = T}))
+  < standard-label (Susp S₁) (Susp T) (PExt Z) >>= ++t-inc-left (Susp T) S₂ >stm
+    ≈⟨ >>=-≃ (standard-label-max (Susp S₁) (Susp T) (PExt Z)) refl≃l refl≃sty ⟩
+  < standard-comp′ (tree-dim S₁) T >>= label₁ (++t-inc-left (Susp T) S₂) >stm
+    ≈˘⟨ >>=-≃ (standard-comp′-≃ (ih-linear _ Q) (refl≃ {T = T}))
               [ (λ P → compute-≃ refl≃stm) ]
               (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
-  < canonical-comp′ (ih Q) T >>= map-ext (id-label-wt T) >stm
-    ≈⟨ >>=-ext (canonical-comp′ (ih Q) T) (id-label-wt T) ⟩
-  < SExt (canonical-comp′ (ih Q) T >>= id-label-wt T) >stm
-    ≈˘⟨ SExt≃ (>>=-≃ (refl≃stm {a = canonical-comp′ (ih Q) T})
+  < standard-comp′ (ih Q) T >>= map-ext (id-label-wt T) >stm
+    ≈⟨ >>=-ext (standard-comp′ (ih Q) T) (id-label-wt T) ⟩
+  < SExt (standard-comp′ (ih Q) T >>= id-label-wt T) >stm
+    ≈˘⟨ SExt≃ (>>=-≃ (refl≃stm {a = standard-comp′ (ih Q) T})
                      (disc-ι S₁ Q T)
                      (S⋆-≃ (≃′-to-≃ (disc-insertion S₁ Q T)))) refl≃ ⟩
-  < SExt (canonical-comp′ (ih Q) T >>= (ι S₁ Q T ,, S⋆)) >stm
+  < SExt (standard-comp′ (ih Q) T >>= (ι S₁ Q T ,, S⋆)) >stm
     ≈˘⟨ SExt≃ (κ-branch-path S₁ Q T) refl≃ ⟩
   < SExt (κ S₁ Q T ⌊ Q ⌋p) >stm
     ≈⟨ SExt≃ (ap-≃ (refl≃l {L = κ S₁ Q T})
@@ -420,14 +420,14 @@ insertion-branch-left (Join S₁ S₂) T (BShift P) U = Join≃′ refl≃′ (i
   where
     open Reasoning path-setoid
 κ-branch-left-inc-left (Join S₁ S₂) T BHere U .get (PExt Z) = begin
-  < canonical-label (Susp S₁) U (PExt Z) >>= ++t-inc-left U (S₂ ++t T) >stm
-    ≈˘⟨ >>=-≃ (refl≃stm {a = canonical-label (Susp S₁) U (PExt Z)})
+  < standard-label (Susp S₁) U (PExt Z) >>= ++t-inc-left U (S₂ ++t T) >stm
+    ≈˘⟨ >>=-≃ (refl≃stm {a = standard-label (Susp S₁) U (PExt Z)})
               [ (λ P → SPath≃ (++t-inc-left-assoc U S₂ T .get P)) ]
               (S⋆-≃ (≃′-to-≃ (sym≃′ (++t-assoc U S₂ T)))) ⟩
-  < canonical-label (Susp S₁) U (PExt Z)
+  < standard-label (Susp S₁) U (PExt Z)
     >>= ++t-inc-left U S₂ ●lt ++t-inc-left (U ++t S₂) T >stm
-    ≈˘⟨ >>=-assoc (canonical-label (Susp S₁) U (PExt Z)) _ _ ⟩
-  < canonical-label (Susp S₁) U (PExt Z)
+    ≈˘⟨ >>=-assoc (standard-label (Susp S₁) U (PExt Z)) _ _ ⟩
+  < standard-label (Susp S₁) U (PExt Z)
     >>= ++t-inc-left U S₂
     >>= ++t-inc-left (U ++t S₂) T >stm ∎
   where
@@ -653,14 +653,14 @@ module _ where
              ≃lm
              κ S Q U ●l (κ (S >>[ Q ] U) (orthog-branch Q P ⦃ Orthogonal-sym P Q ⦄ U) T ,, S⋆)
   κ-orthog (Join S₁ S₂) BHere T (BShift Q) U .get (PExt Z) = begin
-    < canonical-label (Susp S₁) T (PExt Z)
+    < standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T S₂
       >>= (κ (T ++t S₂) (connect-branch-right T S₂ Q) U ,, S⋆) >stm
-      ≈⟨ >>=-assoc (canonical-label (Susp S₁) T (PExt Z)) (++t-inc-left T S₂) _ ⟩
-    < canonical-label (Susp S₁) T (PExt Z)
+      ≈⟨ >>=-assoc (standard-label (Susp S₁) T (PExt Z)) (++t-inc-left T S₂) _ ⟩
+    < standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T S₂ ●lt (κ (T ++t S₂) (connect-branch-right T S₂ Q) U ,, S⋆) >stm
-      ≈⟨ >>=-≃ (refl≃stm {a = canonical-label (Susp S₁) T (PExt Z)}) (κ-branch-right-inc-left T S₂ Q U) (S⋆-≃ (≃′-to-≃ (insertion-branch-right T S₂ Q U))) ⟩
-    < canonical-label (Susp S₁) T (PExt Z)
+      ≈⟨ >>=-≃ (refl≃stm {a = standard-label (Susp S₁) T (PExt Z)}) (κ-branch-right-inc-left T S₂ Q U) (S⋆-≃ (≃′-to-≃ (insertion-branch-right T S₂ Q U))) ⟩
+    < standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T (S₂ >>[ Q ] U) >stm ∎
   κ-orthog (Join S₁ S₂) BHere T (BShift Q) U .get (PShift Z) = κ-branch-right-inc-right T S₂ Q U .get Z
   κ-orthog (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) (Susp U) .get (PExt Z) = let
@@ -791,7 +791,7 @@ insertion-bd-1 (Join S₁ S₂) BHere (Susp T) (suc d) q r = let
 insertion-bd-1 (Join S₁ S₂) (BExt P) (Susp T) (suc d) q r = Join≃′ (insertion-bd-1 S₁ P T d (≤-pred q) (≤-pred r)) refl≃′
 insertion-bd-1 (Join S₁ S₂) (BShift P) T (suc d) q r = Join≃′ refl≃′ (insertion-bd-1 S₂ P T (suc d) q r)
 
-canonical-κ-comm-1 : (S : Tree n)
+standard-κ-comm-1 : (S : Tree n)
                    → (P : Branch S l)
                    → (T : Tree m)
                    → .⦃ _ : has-trunk-height (bh P) T ⦄
@@ -803,10 +803,10 @@ canonical-κ-comm-1 : (S : Tree n)
                    → ap (tree-inc-label d S b) ●l (κ S P T ,, S⋆)
                      ≃lm
                      label-≃ (insertion-bd-1 S P T d q r) (ap (tree-inc-label d (S >>[ P ] T) b))
-canonical-κ-comm-1 S P T zero p q r false .get Z = κ-phere S P T
-canonical-κ-comm-1 S P T zero p q r true .get Z = κ-last-path S P T
-canonical-κ-comm-1 (Join S₁ S₂) (BHere ⦃ l ⦄) (Susp T) (suc d) P q r b .get (PExt Z) = begin
-  < canonical-label (Susp S₁) (Susp T) (PExt (tree-inc-label′ d S₁ b Z))
+standard-κ-comm-1 S P T zero p q r false .get Z = κ-phere S P T
+standard-κ-comm-1 S P T zero p q r true .get Z = κ-last-path S P T
+standard-κ-comm-1 (Join S₁ S₂) (BHere ⦃ l ⦄) (Susp T) (suc d) P q r b .get (PExt Z) = begin
+  < standard-label (Susp S₁) (Susp T) (PExt (tree-inc-label′ d S₁ b Z))
         >>= ++t-inc-left (Susp T) S₂ >stm
     ≈⟨ >>=-≃ lem2 refl≃l refl≃sty ⟩
   < SPath (PExt (tree-inc-label′ d T b (is-linear-max-path (tree-bd d T)))) >stm
@@ -832,29 +832,29 @@ canonical-κ-comm-1 (Join S₁ S₂) (BHere ⦃ l ⦄) (Susp T) (suc d) P q r b 
         open Reasoning path-setoid
     open Reasoning stm-setoid
 
-    lem2 : canonical-label (Susp S₁) (Susp T) (PExt (tree-inc-label′ d S₁ b Z))
+    lem2 : standard-label (Susp S₁) (Susp T) (PExt (tree-inc-label′ d S₁ b Z))
            ≃stm
            SPath (PExt (tree-inc-label′ d T b (is-linear-max-path (tree-bd d T))))
     lem2 = begin
-      < canonical-label (Susp S₁) (Susp T) (PExt (tree-inc-label′ d S₁ b Z)) >stm
-        ≈⟨ canonical-label-bd-< (Susp S₁) (Susp T) (suc d) b P (PExt Z) ⟩
-      < canonical-stm (suc d) (tree-bd (suc d) (Susp T)) >>= tree-inc-label (suc d) (Susp T) b >stm
-        ≈⟨ >>=-≃ (canonical-stm-linear (suc d)
+      < standard-label (Susp S₁) (Susp T) (PExt (tree-inc-label′ d S₁ b Z)) >stm
+        ≈⟨ standard-label-bd-< (Susp S₁) (Susp T) (suc d) b P (PExt Z) ⟩
+      < standard-stm (suc d) (tree-bd (suc d) (Susp T)) >>= tree-inc-label (suc d) (Susp T) b >stm
+        ≈⟨ >>=-≃ (standard-stm-linear (suc d)
                                        (tree-bd (suc d) (Susp T))
                                        (cong suc (sym (tree-dim-bd′ d T (≤-trans (≤-pred q) (trunk-height-dim T))))))
                  (refl≃l {L = ap (tree-inc-label (suc d) (Susp T) b)}) refl≃sty ⟩
       < SPath (is-linear-max-path (tree-bd (suc d) (Susp T))) >>= (tree-inc-label (suc d) (Susp T) b) >stm
         ≡⟨⟩
       < SPath (PExt (tree-inc-label′ d T b (is-linear-max-path (tree-bd d T)))) >stm ∎
-canonical-κ-comm-1 (Join S₁ S₂) BHere (Susp T) (suc d) p q r b .get (PShift Z) = refl≃stm
-canonical-κ-comm-1 (Join S₁ S₂) (BExt P) (Susp T) (suc d) p q r b .get (PExt Z)
-  = compute-≃ (SExt≃ (canonical-κ-comm-1 S₁ P T d (≤-pred p) (≤-pred q) (≤-pred r) b .get Z) refl≃)
-canonical-κ-comm-1 (Join S₁ S₂) (BExt P) (Susp T) (suc d) p q r b .get (PShift Z)
+standard-κ-comm-1 (Join S₁ S₂) BHere (Susp T) (suc d) p q r b .get (PShift Z) = refl≃stm
+standard-κ-comm-1 (Join S₁ S₂) (BExt P) (Susp T) (suc d) p q r b .get (PExt Z)
+  = compute-≃ (SExt≃ (standard-κ-comm-1 S₁ P T d (≤-pred p) (≤-pred q) (≤-pred r) b .get Z) refl≃)
+standard-κ-comm-1 (Join S₁ S₂) (BExt P) (Susp T) (suc d) p q r b .get (PShift Z)
   = compute-≃ refl≃stm
-canonical-κ-comm-1 (Join S₁ S₂) (BShift P) T (suc d) p q r b .get (PExt Z)
+standard-κ-comm-1 (Join S₁ S₂) (BShift P) T (suc d) p q r b .get (PExt Z)
   = compute-≃ refl≃stm
-canonical-κ-comm-1 (Join S₁ S₂) (BShift P) T (suc d) p q r b .get (PShift Z)
-  = compute-≃ (SShift≃ refl≃ (canonical-κ-comm-1 S₂ P T (suc d) p q r b .get Z))
+standard-κ-comm-1 (Join S₁ S₂) (BShift P) T (suc d) p q r b .get (PShift Z)
+  = compute-≃ (SShift≃ refl≃ (standard-κ-comm-1 S₂ P T (suc d) p q r b .get Z))
 
 data Condition (d : ℕ) (T : Tree n) (m : ℕ) : Set where
   Cond1 : d > (trunk-height T) → d ≤ m → Condition d T m
@@ -915,7 +915,7 @@ insertion-bd-2 (Join S₁ S₂) (BShift P) T (suc d) q
 module _ where
   open Reasoning stm-setoid
 
-  canonical-κ-comm-2 : (S : Tree n)
+  standard-κ-comm-2 : (S : Tree n)
                      → (P : Branch S l)
                      → (T : Tree m)
                      → .⦃ _ : has-trunk-height (bh P) T ⦄
@@ -930,70 +930,70 @@ module _ where
                          (tree-bd d T)
                          ⦃ bd-has-trunk-height d l T (bd-branch-lem P c) ⦄
                          ●l (label-wt-≃ (insertion-bd-2 S P T d (bd-branch-lem P c)) (tree-inc-label d (S >>[ P ] T) b))
-  canonical-κ-comm-2 S P T zero b r (Cond1 () x)
-  canonical-κ-comm-2 S P T zero b r (Cond2 ())
-  canonical-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r c .get (PShift Z)
+  standard-κ-comm-2 S P T zero b r (Cond1 () x)
+  standard-κ-comm-2 S P T zero b r (Cond2 ())
+  standard-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r c .get (PShift Z)
     = SPath≃ (tree-inc-inc-right d T S₂ b Z)
-  canonical-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r (Cond1 q r′) .get (PExt Z) = let
+  standard-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r (Cond1 q r′) .get (PExt Z) = let
     instance _ = is-linear-bd d S₁
     in begin
-    < canonical-label (Susp S₁) T (PExt (tree-inc-label′ d S₁ b Z))
+    < standard-label (Susp S₁) T (PExt (tree-inc-label′ d S₁ b Z))
         >>= ++t-inc-left T S₂ >stm
-      ≈⟨ >>=-≃ (canonical-label-bd->-trunk-height (Susp S₁) T (suc d) b r′ q r (PExt Z)) refl≃l refl≃sty ⟩
-    < canonical-comp′ (1 + d) (tree-bd (1 + d) T) >>= tree-inc-label (1 + d) T b >>= ++t-inc-left T S₂ >stm
-      ≈˘⟨ reflexive≃stm (cong (λ - → canonical-comp′ (1 + -) (tree-bd (1 + d) T) >>= tree-inc-label (1 + d) T b >>= ++t-inc-left T S₂)
+      ≈⟨ >>=-≃ (standard-label-bd->-trunk-height (Susp S₁) T (suc d) b r′ q r (PExt Z)) refl≃l refl≃sty ⟩
+    < standard-comp′ (1 + d) (tree-bd (1 + d) T) >>= tree-inc-label (1 + d) T b >>= ++t-inc-left T S₂ >stm
+      ≈˘⟨ reflexive≃stm (cong (λ - → standard-comp′ (1 + -) (tree-bd (1 + d) T) >>= tree-inc-label (1 + d) T b >>= ++t-inc-left T S₂)
                         (trans (tree-dim-bd d S₁) (m≤n⇒m⊓n≡m (≤-pred r′)))) ⟩
-    < canonical-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T) >>= tree-inc-label (suc d) T b >>= ++t-inc-left T S₂ >stm
-      ≈⟨ >>=-assoc (canonical-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)) (tree-inc-label (suc d) T b) (++t-inc-left T S₂) ⟩
-    < canonical-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)
+    < standard-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T) >>= tree-inc-label (suc d) T b >>= ++t-inc-left T S₂ >stm
+      ≈⟨ >>=-assoc (standard-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)) (tree-inc-label (suc d) T b) (++t-inc-left T S₂) ⟩
+    < standard-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)
       >>= tree-inc-label (suc d) T b ●lt ++t-inc-left T S₂ >stm
-      ≈⟨ >>=-≃ (sym≃stm (canonical-label-max (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)))
+      ≈⟨ >>=-≃ (sym≃stm (standard-label-max (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)))
                [ (λ P → SPath≃ (tree-inc-inc-left d T S₂ b P)) ]
                refl≃sty ⟩
-    < canonical-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)
+    < standard-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)
       >>= ++t-inc-left (tree-bd (suc d) T) (tree-bd (suc d) S₂)
           ●lt (label-wt-≃ (++t-bd d T S₂) (tree-inc-label (suc d) (T ++t S₂) b)) >stm
-      ≈˘⟨ >>=-assoc (canonical-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)) _ _ ⟩
-    < canonical-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)
+      ≈˘⟨ >>=-assoc (standard-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)) _ _ ⟩
+    < standard-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)
         >>=
         ++t-inc-left (tree-bd (suc d) T) (tree-bd (suc d) S₂)
         >>=
         label-wt-≃ (++t-bd d T S₂) (tree-inc-label (suc d) (T ++t S₂) b) >stm ∎
-  canonical-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r (Cond2 q) .get (PExt Z) = let
+  standard-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r (Cond2 q) .get (PExt Z) = let
     instance _ = is-linear-bd d S₁
     in begin
-    < canonical-label (Susp S₁) T (PExt (tree-inc-label′ d S₁ b Z))
+    < standard-label (Susp S₁) T (PExt (tree-inc-label′ d S₁ b Z))
         >>= ++t-inc-left T S₂ >stm
-      ≈⟨ >>=-≃ (canonical-label-max (Susp S₁) T (PExt (tree-inc-label′ d S₁ b Z))
+      ≈⟨ >>=-≃ (standard-label-max (Susp S₁) T (PExt (tree-inc-label′ d S₁ b Z))
                                                 ⦃ inst ⦃ tree-inc-full-preserve-max d S₁ b (≤-pred q) Z ⦄ ⦄)
                refl≃l
                refl≃sty ⟩
-    < canonical-comp′ (1 + tree-dim S₁) T >>= ++t-inc-left T S₂ >stm
-      ≈˘⟨ >>=-≃′ (canonical-comp′-≃ (cong suc (tree-dim-≃ (≃′-to-≃ (tree-bd-full d S₁ (≤-pred q)))))
+    < standard-comp′ (1 + tree-dim S₁) T >>= ++t-inc-left T S₂ >stm
+      ≈˘⟨ >>=-≃′ (standard-comp′-≃ (cong suc (tree-dim-≃ (≃′-to-≃ (tree-bd-full d S₁ (≤-pred q)))))
                                     (≃′-to-≃ (tree-bd-full (suc d) T (≤-trans r q))))
                  ((tree-bd-full (suc d) T (≤-trans r q))
                    ,, [ (λ P → SPath≃ (ap′-≃ (++t-inc-left′ T S₂) (tree-inc-label-full (suc d) T b (≤-trans r q) .get P))) ])
                  refl≃sty ⟩
-    < canonical-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)
+    < standard-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)
       >>= tree-inc-label (suc d) T b ●lt ++t-inc-left T S₂ >stm
-      ≈⟨ >>=-≃ (sym≃stm (canonical-label-max (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)))
+      ≈⟨ >>=-≃ (sym≃stm (standard-label-max (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)))
                [ (λ P → SPath≃ (tree-inc-inc-left d T S₂ b P)) ]
                refl≃sty ⟩
-    < canonical-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)
+    < standard-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)
       >>= ++t-inc-left (tree-bd (suc d) T) (tree-bd (suc d) S₂)
           ●lt (label-wt-≃ (++t-bd d T S₂) (tree-inc-label (suc d) (T ++t S₂) b)) >stm
-      ≈˘⟨ >>=-assoc (canonical-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)) _ _ ⟩
-    < canonical-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)
+      ≈˘⟨ >>=-assoc (standard-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)) _ _ ⟩
+    < standard-label (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)
         >>=
         ++t-inc-left (tree-bd (suc d) T) (tree-bd (suc d) S₂)
         >>=
         label-wt-≃ (++t-bd d T S₂) (tree-inc-label (suc d) (T ++t S₂) b) >stm ∎
 
-  canonical-κ-comm-2 (Join S₁ S₂) (BExt P) (Susp T) (suc d) b r c .get (PExt Z) = let
+  standard-κ-comm-2 (Join S₁ S₂) (BExt P) (Susp T) (suc d) b r c .get (PExt Z) = let
     instance _ = bd-has-trunk-height d (bh P) T (bd-branch-lem P (cond-pred c))
     in begin
     < SExt (κ S₁ P T (tree-inc-label′ d S₁ b Z)) >stm
-      ≈⟨ SExt≃ (canonical-κ-comm-2 S₁ P T d b (≤-pred r) (cond-pred c) .get Z) refl≃ ⟩
+      ≈⟨ SExt≃ (standard-κ-comm-2 S₁ P T d b (≤-pred r) (cond-pred c) .get Z) refl≃ ⟩
     < SExt ((κ (tree-bd d S₁)
                                (bd-branch S₁ P d (bd-branch-lem P (cond-pred c)))
                                (tree-bd d T)
@@ -1009,15 +1009,15 @@ module _ where
     < κ (tree-bd d S₁) (bd-branch S₁ P d (bd-branch-lem P (cond-pred c))) (tree-bd d T) Z
        >>= label₁ (label-wt-≃ (Join≃′ (insertion-bd-2 S₁ P T d (bd-branch-lem P (cond-pred c))) refl≃′)
                               (tree-inc-label (suc d) (Join (S₁ >>[ P ] T) S₂) b)) >stm ∎
-  canonical-κ-comm-2 (Join S₁ S₂) (BExt P) (Susp T) (suc d) b r c .get (PShift Z)
+  standard-κ-comm-2 (Join S₁ S₂) (BExt P) (Susp T) (suc d) b r c .get (PShift Z)
     = compute-≃ refl≃stm
-  canonical-κ-comm-2 (Join S₁ S₂) (BShift P) T (suc d) b r c .get (PExt Z)
+  standard-κ-comm-2 (Join S₁ S₂) (BShift P) T (suc d) b r c .get (PExt Z)
     = compute-≃ refl≃stm
-  canonical-κ-comm-2 (Join S₁ S₂) (BShift P) T (suc d) b r c .get (PShift Z) = let
+  standard-κ-comm-2 (Join S₁ S₂) (BShift P) T (suc d) b r c .get (PShift Z) = let
     instance _ = bd-has-trunk-height (suc d) (bh P) T (bd-branch-lem P c)
     in begin
     < SShift (κ S₂ P T (tree-inc-label′ (suc d) S₂ b Z)) >stm
-      ≈⟨ SShift≃ refl≃ (canonical-κ-comm-2 S₂ P T (suc d) b r c .get Z) ⟩
+      ≈⟨ SShift≃ refl≃ (standard-κ-comm-2 S₂ P T (suc d) b r c .get Z) ⟩
     < SShift (κ (tree-bd (suc d) S₂) (bd-branch S₂ P (suc d) (bd-branch-lem P c)) (tree-bd (suc d) T) Z
         >>= label-wt-≃ (insertion-bd-2 S₂ P T (suc d) (bd-branch-lem P c)) (tree-inc-label (suc d) (S₂ >>[ P ] T) b)) >stm
       ≈˘⟨ >>=-shift (κ (tree-bd (suc d) S₂) (bd-branch S₂ P (suc d) (bd-branch-lem P c)) (tree-bd (suc d) T) Z)
@@ -1100,23 +1100,23 @@ label-from-pruned-branch : (L : Label X S)
                          → (M : Label-WT X T)
                          → .⦃ _ : has-trunk-height l T ⦄
                          → .(q : bh P < pred (ih P))
-                         → L ⌊ P ⌋p ≃stm canonical-comp′ (ih P) T >>= M
-                         → (L >>p[ P ] canonical-label (n-disc (pred (ih P))) T ●l M) >>l[ pruned-branch S P q ] (ap M)
+                         → L ⌊ P ⌋p ≃stm standard-comp′ (ih P) T >>= M
+                         → (L >>p[ P ] standard-label (n-disc (pred (ih P))) T ●l M) >>l[ pruned-branch S P q ] (ap M)
                            ≃lm
                            label-≃ (insertion-tree-pruned-branch S P T q)
                                    (L >>l[ P ] (ap M))
 label-from-pruned-branch {S = Join S₁ S₂} L (BExt {n = n} P) {T = Susp T} M q pf .get (PExt Z) = begin
-  < ((L ∘ PExt >>p[ P ] (canonical-label (n-disc (ih P)) (Susp T) ●l M) ∘ PExt)
+  < ((L ∘ PExt >>p[ P ] (standard-label (n-disc (ih P)) (Susp T) ●l M) ∘ PExt)
     >>l[ pruned-branch S₁ P _ ] ap M ∘ PExt) Z >stm
     ≈⟨ label-from-insertion-≃
          (label-from-prune-≃ refl≃l P
-           (label-comp-≃ [ (λ Z → canonical-label-susp-lem (n-disc (pred (ih P))) T .get (PExt Z)) ]
+           (label-comp-≃ [ (λ Z → standard-label-susp-lem (n-disc (pred (ih P))) T .get (PExt Z)) ]
                          refl≃l
                          refl≃sty))
          (pruned-branch S₁ P _)
          refl≃l
          .get Z ⟩
-  < ((L ∘ PExt >>p[ P ] (canonical-label (n-disc (pred (ih P))) T ●l label₁ M))
+  < ((L ∘ PExt >>p[ P ] (standard-label (n-disc (pred (ih P))) T ●l label₁ M))
     >>l[ (pruned-branch S₁ P _) ] (ap M ∘ PExt)) Z >stm
     ≈⟨ label-from-pruned-branch (L ∘ PExt) P (label₁ M) (≤-pred q) pf .get Z ⟩
   < label-≃ (insertion-tree-pruned-branch S₁ P T _)
@@ -1125,10 +1125,10 @@ label-from-pruned-branch {S = Join S₁ S₂} L (BExt {n = n} P) {T = Susp T} M 
     open Reasoning stm-setoid
 label-from-pruned-branch {S = Join S₁ S₂} L (BExt {n = n} P) {T = Susp T} M q pf .get (PShift Z) = begin
   < replace-label
-      ((L >>p[ BExt {n = n} P ] canonical-label (Susp (n-disc (ih′ P))) (Susp T) ●l M) ∘ PShift)
+      ((L >>p[ BExt {n = n} P ] standard-label (Susp (n-disc (ih′ P))) (Susp T) ●l M) ∘ PShift)
       (ap M (PShift PHere)) Z >stm
     ≈⟨ replace-not-here _ (ap M (PShift PHere)) Z ⟩
-  < (L >>p[ BExt P ] (canonical-label (n-disc (ih P)) (Susp T) ●l M)) (PShift Z) >stm
+  < (L >>p[ BExt P ] (standard-label (n-disc (ih P)) (Susp T) ●l M)) (PShift Z) >stm
     ≈⟨ replace-not-here (L ∘ PShift) _ Z ⟩
   < L (PShift Z) >stm
     ≈˘⟨ replace-not-here (L ∘ PShift) (ap M (PShift PHere)) Z ⟩

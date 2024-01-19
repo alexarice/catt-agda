@@ -18,7 +18,7 @@ open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Structured.ToTerm
-open import Catt.Tree.Canonical
+open import Catt.Tree.Standard
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
@@ -39,7 +39,7 @@ HasInsertion = ∀ {m n l n′}
              → {T : Tree n′}
              → .⦃ _ : has-trunk-height l T ⦄
              → (M : Label X T)
-             → L ⌊ P ⌋p ≃stm (canonical-comp′ (ih P) T >>= (M ,, S⋆))
+             → L ⌊ P ⌋p ≃stm (standard-comp′ (ih P) T >>= (M ,, S⋆))
              → {Cs : STy X}
              → Typing-STm Γ (SCoh S As (L ,, S⋆)) Cs
              → (SCoh S As (L ,, S⋆))
@@ -67,15 +67,15 @@ ins-from-rule p {S = S} As L P {T = T} M pf [ tty ] .get = begin
   where
     lem : label-to-other L ⌊ P ⌋p
           ≃stm
-          canonical-comp′ (ih P) T >>= (label-to-other M ,, S⋆)
+          standard-comp′ (ih P) T >>= (label-to-other M ,, S⋆)
     lem = begin
       < label-to-other L ⌊ P ⌋p >stm
         ≈⟨ ap-≃ (label-to-other-prop L) refl≃p ⟩
       < L ⌊ P ⌋p >stm
         ≈⟨ pf ⟩
-      < canonical-comp′ (ih P) T >>= (M ,, S⋆) >stm
-        ≈˘⟨ >>=-≃ (refl≃stm {a = canonical-comp′ (ih P) T}) (label-to-other-prop M) (sty-to-other-prop S⋆) ⟩
-      < canonical-comp′ (ih P) T >>= (label-to-other M ,, S⋆) >stm ∎
+      < standard-comp′ (ih P) T >>= (M ,, S⋆) >stm
+        ≈˘⟨ >>=-≃ (refl≃stm {a = standard-comp′ (ih P) T}) (label-to-other-prop M) (sty-to-other-prop S⋆) ⟩
+      < standard-comp′ (ih P) T >>= (label-to-other M ,, S⋆) >stm ∎
       where
         open Reasoning stm-setoid
 

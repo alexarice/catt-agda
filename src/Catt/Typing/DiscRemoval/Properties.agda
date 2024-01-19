@@ -21,8 +21,8 @@ open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
-open import Catt.Tree.Canonical
-open import Catt.Tree.Canonical.Properties
+open import Catt.Tree.Standard
+open import Catt.Tree.Standard.Properties
 
 open import Catt.Typing rules
 open import Catt.Typing.Properties rules tame
@@ -50,10 +50,10 @@ disc-rem-stm S L Lty .get = begin
   where
     open Reasoning (tm-setoid-≈ _)
 
-canonical-stm-is-comp′ : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → canonical-stm d S ≈[ ⌊ S ⌋ ]stm canonical-comp′ d S
-canonical-stm-is-comp′ (suc zero) Sing = refl≈stm
-canonical-stm-is-comp′ (suc zero) (Join S (Join T₁ T₂)) = refl≈stm
-canonical-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
+standard-stm-is-comp′ : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → standard-stm d S ≈[ ⌊ S ⌋ ]stm standard-comp′ d S
+standard-stm-is-comp′ (suc zero) Sing = refl≈stm
+standard-stm-is-comp′ (suc zero) (Join S (Join T₁ T₂)) = refl≈stm
+standard-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
   SExt (SPath PHere)
     ≈⟨ compute-≈ refl≈stm ⟩
   SPath (is-linear-max-path (Join Sing Sing))
@@ -63,17 +63,17 @@ canonical-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
   SExt (SCoh Sing S⋆ (SPath ,, S⋆)) ∎
   where
     open Reasoning stm-setoid-≈
-canonical-stm-is-comp′ (suc zero) (Join (Join S S₁) Sing) = refl≈stm
-canonical-stm-is-comp′ (suc (suc d)) Sing = refl≈stm
-canonical-stm-is-comp′ (suc (suc d)) (Join S Sing) = ≈SExt (canonical-stm-is-comp′ (suc d) S)
-canonical-stm-is-comp′ (suc (suc d)) (Join S (Join S₁ S₂)) = refl≈stm
+standard-stm-is-comp′ (suc zero) (Join (Join S S₁) Sing) = refl≈stm
+standard-stm-is-comp′ (suc (suc d)) Sing = refl≈stm
+standard-stm-is-comp′ (suc (suc d)) (Join S Sing) = ≈SExt (standard-stm-is-comp′ (suc d) S)
+standard-stm-is-comp′ (suc (suc d)) (Join S (Join S₁ S₂)) = refl≈stm
 
-canonical-stm-is-comp : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → canonical-stm d S ≈[ ⌊ S ⌋ ]stm canonical-comp d S
-canonical-stm-is-comp d S = begin
-  canonical-stm d S
-    ≈⟨ canonical-stm-is-comp′ d S ⟩
-  canonical-comp′ d S
-    ≈⟨ reflexive≈stm (canonical-comp′-compat d S) ⟩
-  canonical-comp d S ∎
+standard-stm-is-comp : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → standard-stm d S ≈[ ⌊ S ⌋ ]stm standard-comp d S
+standard-stm-is-comp d S = begin
+  standard-stm d S
+    ≈⟨ standard-stm-is-comp′ d S ⟩
+  standard-comp′ d S
+    ≈⟨ reflexive≈stm (standard-comp′-compat d S) ⟩
+  standard-comp d S ∎
   where
     open Reasoning stm-setoid-≈

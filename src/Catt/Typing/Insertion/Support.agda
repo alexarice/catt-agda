@@ -27,14 +27,14 @@ open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
-open import Catt.Tree.Canonical
-open import Catt.Tree.Canonical.Properties
+open import Catt.Tree.Standard
+open import Catt.Tree.Standard.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 open import Catt.Tree.Structured.Typing rules
 open import Catt.Tree.Structured.Typing.Properties rules tame
 open import Catt.Tree.Boundary.Typing rules tame
-open import Catt.Tree.Canonical.Typing rules tame
+open import Catt.Tree.Standard.Typing rules tame
 open import Catt.Tree.Insertion.Typing rules tame
 open import Catt.Typing.Insertion.Rule
 
@@ -46,7 +46,7 @@ open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
 open import Catt.Tree.Structured.Support.Properties
 open import Catt.Tree.Boundary.Support
-open import Catt.Tree.Canonical.Support
+open import Catt.Tree.Standard.Support
 
 open import Catt.Typing.Structured.Support rules tame supp-cond
 
@@ -57,21 +57,21 @@ open import Catt.Typing.Structured.Support rules tame supp-cond
        → DCT (FVLabel (κ S p T)) ≡ tFull
 κ-full (Join S₁ S₂) BHere T
   = label-between-++t-full
-      (replace-label (canonical-label (Susp S₁) T) SHere)
+      (replace-label (standard-label (Susp S₁) T) SHere)
       SPath
-      (reflexive≈stm (canonical-label-last (Susp S₁) T))
+      (reflexive≈stm (standard-label-last (Susp S₁) T))
       refl≈stm
       lem
       (trans (cong DCT (id-label-full S₂)) DCT-full)
   where
     open ≡-Reasoning
 
-    lem : DCT (FVLabel (replace-label (canonical-label (Susp S₁) T) SHere)) ≡ tFull
+    lem : DCT (FVLabel (replace-label (standard-label (Susp S₁) T) SHere)) ≡ tFull
     lem = begin
-      DCT (FVLabel (replace-label (canonical-label (Susp S₁) T) SHere))
-        ≡⟨ replace-label-supp (canonical-label (Susp S₁) T) SHere (reflexive≈stm (sym≃stm (canonical-label-fst (Susp S₁) T))) ⟩
-      DCT (FVSTm SHere) ∪m DCT (FVLabel (canonical-label (Susp S₁) T))
-        ≡⟨ cong (DCT (FVSTm SHere) ∪m_) (canonical-label-full (Susp S₁) T) ⟩
+      DCT (FVLabel (replace-label (standard-label (Susp S₁) T) SHere))
+        ≡⟨ replace-label-supp (standard-label (Susp S₁) T) SHere (reflexive≈stm (sym≃stm (standard-label-fst (Susp S₁) T))) ⟩
+      DCT (FVSTm SHere) ∪m DCT (FVLabel (standard-label (Susp S₁) T))
+        ≡⟨ cong (DCT (FVSTm SHere) ∪m_) (standard-label-full (Susp S₁) T) ⟩
       DCT (FVSTm SHere) ∪m tFull
         ≡⟨ ∪t-right-zero (DCT (fromPath PHere)) ⟩
       tFull ∎
@@ -113,7 +113,7 @@ open import Catt.Typing.Structured.Support rules tame supp-cond
       DCT
         (FVLabel
          (ap (tree-inc-label d S b) ●l (κ S p T ,, S⋆)))
-        ≡⟨ EqSuppLabel (label-max-equality-to-equality (canonical-κ-comm-1 S p T d x y q b)
+        ≡⟨ EqSuppLabel (label-max-equality-to-equality (standard-κ-comm-1 S p T d x y q b)
                                                        (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S p T) TySStar)
                                                        (label-≃-Ty (insertion-bd-1 S p T d y q) (tree-inc-Ty d (S >>[ p ] T) b))) ⟩
       DCT (FVLabel (label-≃ (insertion-bd-1 S p T d y q) (ap (tree-inc-label d (S >>[ p ] T) b))))
@@ -131,7 +131,7 @@ open import Catt.Typing.Structured.Support rules tame supp-cond
     lem (Bd-Cond2 x) = begin
       DCT (FVLabel (ap (tree-inc-label d S b) ●l (κ S p T ,, S⋆)))
         ≡⟨ EqSuppLabel (label-max-equality-to-equality
-                         (canonical-κ-comm-2 S p T d b q x)
+                         (standard-κ-comm-2 S p T d b q x)
                          (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S p T) TySStar)
                          (label-comp-Ty (κ-Ty (tree-bd d S) (bd-branch S p d _) (tree-bd d T) ⦃ _ ⦄)
                                         (label-≃-Ty (insertion-bd-2 S p T d (bd-branch-lem p x)) (tree-inc-Ty d (S >>[ p ] T) b)) TySStar)) ⟩
@@ -193,18 +193,18 @@ ins-supp [ Insert Γ S As L P T M p ] tty = begin
     Lty : Typing-Label Γ (L ,, S⋆)
     Lty = SCoh-Label-Ty tty
 
-    lem : Typing-STm Γ (canonical-comp (ih P) T >>= (M ,, S⋆)) _
+    lem : Typing-STm Γ (standard-comp (ih P) T >>= (M ,, S⋆)) _
     lem = transport-stm-typing (>>=-Ty (TySPath ⌊ P ⌋p) Lty TySStar)
-                               (trans≃stm p (>>=-≃ (canonical-comp′-compat (ih P) T) refl≃l refl≃sty))
+                               (trans≃stm p (>>=-≃ (standard-comp′-compat (ih P) T) refl≃l refl≃sty))
                                refl≃sty
 
     Mty : Typing-Label Γ (M ,, S⋆)
-    Mty = SCoh-Label-Ty {S = T} {As = canonical-type (ih P) T} {L = M} (stm-to-term-Ty lem)
+    Mty = SCoh-Label-Ty {S = T} {As = standard-type (ih P) T} {L = M} (stm-to-term-Ty lem)
 
     l1 : branch-type S P >>=′ (L ,, S⋆)
          ≈[ Γ ]sty
-         canonical-type (ih P) T >>=′ (M ,, S⋆)
-    l1 = STy-unique-≃ p (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (canonical-comp′-Ty (ih P) T) Mty TySStar)
+         standard-type (ih P) T >>=′ (M ,, S⋆)
+    l1 = STy-unique-≃ p (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (standard-comp′-Ty (ih P) T) Mty TySStar)
 
     l2 : Typing-Label Γ (L >>l[ P ] M ,, S⋆)
     l2 = label-from-insertion-Ty Lty P Mty l1

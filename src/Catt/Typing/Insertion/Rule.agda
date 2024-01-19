@@ -15,7 +15,7 @@ open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
-open import Catt.Tree.Canonical
+open import Catt.Tree.Standard
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 open import Catt.Typing.Rule
@@ -48,7 +48,7 @@ data InsertionSet : RuleSet where
          → (T : Tree n′)
          → .⦃ _ : has-trunk-height l T ⦄
          → (M : Label (Other m) T)
-         → (p : L ⌊ P ⌋p ≃stm canonical-comp′ (ih P) T >>= (M ,, S⋆))
+         → (p : L ⌊ P ⌋p ≃stm standard-comp′ (ih P) T >>= (M ,, S⋆))
          → InsertionSet (Insertion Γ S As L P T M)
 
 ins-lift : LiftCond InsertionSet
@@ -57,13 +57,13 @@ ins-lift A [ Insert Γ S As L P T M p ]
   where
     lem : lift-stm (L ⌊ P ⌋p)
           ≃stm
-          canonical-comp′ (ih P) T >>= lift-label (M ,, S⋆)
+          standard-comp′ (ih P) T >>= lift-label (M ,, S⋆)
     lem = begin
       < lift-stm (L ⌊ P ⌋p) >stm
         ≈⟨ lift-stm-≃ p ⟩
-      < lift-stm (canonical-comp′ (ih P) T >>= (M ,, S⋆)) >stm
-        ≈˘⟨ >>=-lift (canonical-comp′ (ih P) T) (M ,, S⋆) ⟩
-      < canonical-comp′ (ih P) T >>= lift-label (M ,, S⋆) >stm ∎
+      < lift-stm (standard-comp′ (ih P) T >>= (M ,, S⋆)) >stm
+        ≈˘⟨ >>=-lift (standard-comp′ (ih P) T) (M ,, S⋆) ⟩
+      < standard-comp′ (ih P) T >>= lift-label (M ,, S⋆) >stm ∎
       where
         open Reasoning stm-setoid
 
@@ -98,13 +98,13 @@ ins-susp [ Insert {l = l} Γ S As L P T M p ]
   where
     lem : susp-label-full L (PExt ⌊ P ⌋p)
           ≃stm
-          SExt (canonical-comp′ (ih P) T) >>= (susp-label-full M ,, S⋆)
+          SExt (standard-comp′ (ih P) T) >>= (susp-label-full M ,, S⋆)
     lem = begin
       < susp-stm (L ⌊ P ⌋p) >stm
         ≈⟨ susp-stm-≃ p ⟩
-      < susp-stm (canonical-comp′ (ih P) T >>= (M ,, S⋆)) >stm
-        ≈⟨ susp-stm-functorial (canonical-comp′ (ih P) T) M ⟩
-      < SExt (canonical-comp′ (ih P) T) >>= (susp-label-full M ,, S⋆) >stm ∎
+      < susp-stm (standard-comp′ (ih P) T >>= (M ,, S⋆)) >stm
+        ≈⟨ susp-stm-functorial (standard-comp′ (ih P) T) M ⟩
+      < SExt (standard-comp′ (ih P) T) >>= (susp-label-full M ,, S⋆) >stm ∎
       where
         open Reasoning stm-setoid
 
@@ -188,13 +188,13 @@ ins-sub Δ {σ = σ} σty [ Insert Γ S As L P T M p ]
     open Reasoning stm-setoid
     lem : L ⌊ P ⌋p [ σ ]stm
           ≃stm
-          canonical-comp′ (ih P) T >>= ((_[ σ ]stm ∘ M) ,, S⋆)
+          standard-comp′ (ih P) T >>= ((_[ σ ]stm ∘ M) ,, S⋆)
     lem = begin
       < L ⌊ P ⌋p [ σ ]stm >stm
         ≈⟨ stm-sub-≃ p σ ⟩
-      < (canonical-comp′ (ih P) T >>= (M ,, S⋆)) [ σ ]stm >stm
-        ≈⟨ stm-sub->>= (canonical-comp′ (ih P) T) (M ,, S⋆) σ ⟩
-      < canonical-comp′ (ih P) T >>= ((M ,, S⋆) [ σ ]l) >stm ∎
+      < (standard-comp′ (ih P) T >>= (M ,, S⋆)) [ σ ]stm >stm
+        ≈⟨ stm-sub->>= (standard-comp′ (ih P) T) (M ,, S⋆) σ ⟩
+      < standard-comp′ (ih P) T >>= ((M ,, S⋆) [ σ ]l) >stm ∎
 
     l1 : SCoh (S >>[ P ] T)
               (As >>=′ (κ S P T ,, S⋆))

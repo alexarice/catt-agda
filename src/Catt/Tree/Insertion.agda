@@ -11,7 +11,7 @@ open import Catt.Connection
 open import Catt.Connection.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
-open import Catt.Tree.Canonical
+open import Catt.Tree.Standard
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Globular
@@ -86,7 +86,7 @@ Join S₁ S₂ >>[ BShift P ] T = Join S₁ (S₂ >>[ P ] T)
   → .⦃ _ : has-trunk-height d T ⦄
   → Label (someTree (S >>[ P ] T)) S
 κ (Join S₁ S₂) BHere T
-  = label-between-++t (replace-label (canonical-label (Susp S₁) T) SHere) SPath
+  = label-between-++t (replace-label (standard-label (Susp S₁) T) SHere) SPath
 κ (Join S₁ S₂) (BExt P) (Susp T)
   = label-between-joins (κ S₁ P T) SPath
 κ (Join S₁ S₂) (BShift P) T

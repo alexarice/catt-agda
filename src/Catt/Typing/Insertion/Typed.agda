@@ -13,8 +13,8 @@ open import Catt.Tree
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.ToTerm
-open import Catt.Tree.Canonical
-open import Catt.Tree.Canonical.Properties
+open import Catt.Tree.Standard
+open import Catt.Tree.Standard.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
@@ -25,7 +25,7 @@ open import Catt.Typing.Properties rules tame
 open import Catt.Globular.Typing rules lift-cond
 open import Catt.Tree.Structured.Typing rules
 open import Catt.Tree.Structured.Typing.Properties rules tame
-open import Catt.Tree.Canonical.Typing rules tame
+open import Catt.Tree.Standard.Typing rules tame
 open import Catt.Tree.Insertion.Typing rules tame
 
 ins-conv : ConvCond′ rules InsertionSet
@@ -38,18 +38,18 @@ ins-conv [ Insert Γ S As L P T M pf ] {A = A} tty
     Lty : Typing-Label Γ (L ,, S⋆)
     Lty = SCoh-Label-Ty tty
 
-    lem : Typing-STm Γ (canonical-comp (ih P) T >>= (M ,, S⋆)) _
+    lem : Typing-STm Γ (standard-comp (ih P) T >>= (M ,, S⋆)) _
     lem = transport-stm-typing (>>=-Ty (TySPath ⌊ P ⌋p) Lty TySStar)
-                               (trans≃stm pf (>>=-≃ (canonical-comp′-compat (ih P) T) refl≃l refl≃sty))
+                               (trans≃stm pf (>>=-≃ (standard-comp′-compat (ih P) T) refl≃l refl≃sty))
                                refl≃sty
 
     Mty : Typing-Label Γ (M ,, S⋆)
-    Mty = SCoh-Label-Ty {S = T} {As = canonical-type (ih P) T} {L = M} (stm-to-term-Ty lem)
+    Mty = SCoh-Label-Ty {S = T} {As = standard-type (ih P) T} {L = M} (stm-to-term-Ty lem)
 
     l1 : branch-type S P >>=′ (L ,, S⋆)
          ≈[ Γ ]sty
-         canonical-type (ih P) T >>=′ (M ,, S⋆)
-    l1 = STy-unique-≃ pf (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (canonical-comp′-Ty (ih P) T) Mty TySStar)
+         standard-type (ih P) T >>=′ (M ,, S⋆)
+    l1 = STy-unique-≃ pf (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (standard-comp′-Ty (ih P) T) Mty TySStar)
 
     l3 : As >>=′ (κ S P T ,, S⋆) >>=′ (L >>l[ P ] M ,, S⋆)
          ≈[ Γ ]sty

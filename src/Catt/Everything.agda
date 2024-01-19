@@ -48,8 +48,8 @@ import Catt.Tree.Structured.ToTerm
 import Catt.Tree.Boundary
 import Catt.Tree.Boundary.Properties
 
-import Catt.Tree.Canonical
-import Catt.Tree.Canonical.Properties
+import Catt.Tree.Standard
+import Catt.Tree.Standard.Properties
 
 import Catt.Tree.Insertion
 import Catt.Tree.Insertion.Properties
@@ -82,7 +82,7 @@ import Catt.Tree.Path.Typing
 import Catt.Tree.Structured.Typing
 import Catt.Tree.Structured.Typing.Properties
 import Catt.Tree.Boundary.Typing
-import Catt.Tree.Canonical.Typing
+import Catt.Tree.Standard.Typing
 import Catt.Tree.Insertion.Typing
 import Catt.Dyck.Typing
 import Catt.Dyck.Pruning.Typing
@@ -118,7 +118,7 @@ import Catt.Tree.Support
 import Catt.Tree.Structured.Support
 import Catt.Tree.Structured.Support.Properties
 import Catt.Tree.Boundary.Support
-import Catt.Tree.Canonical.Support
+import Catt.Tree.Standard.Support
 
 import Catt.Typing.Properties.Support
 import Catt.Typing.Structured.Support

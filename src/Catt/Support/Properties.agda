@@ -547,3 +547,23 @@ trueAt-non-empty (suc i) = trueAt-non-empty i
 empty-is-empty : {n : ℕ} → varset-non-empty (empty {n = n}) ≡ false
 empty-is-empty {n = zero} = refl
 empty-is-empty {n = suc n} = empty-is-empty {n = n}
+
+SupportedTm-lift : (t : Tm n) → SupportedTm t → SupportedTm (lift-tm t)
+SupportedTy-lift : (A : Ty n) → SupportedTy A → SupportedTy (lift-ty A)
+SupportedSub-lift : (σ : Sub n m A) → SupportedSub σ → SupportedSub (lift-sub σ)
+
+SupportedTm-lift (Var i) tsupp = tt
+SupportedTm-lift (Coh Δ A σ) (Asupp ,, σsupp ,, cond)
+  = Asupp ,, SupportedSub-lift σ σsupp ,, cond
+
+SupportedTy-lift ⋆ Asupp = tt
+SupportedTy-lift (s ─⟨ A ⟩⟶ t) (ssupp ,, Asupp ,, tsupp)
+  = SupportedTm-lift s ssupp ,, SupportedTy-lift A Asupp ,, SupportedTm-lift t tsupp
+
+SupportedSub-lift ⟨⟩ σsupp = SupportedTy-lift _ σsupp
+SupportedSub-lift ⟨ σ , t ⟩ (σsupp ,, tsupp)
+  = SupportedSub-lift σ σsupp ,, SupportedTm-lift t tsupp
+
+idSub-supported : SupportedSub (idSub {n = n})
+idSub-supported {n = zero} = tt
+idSub-supported {n = suc n} = SupportedSub-lift (idSub {n = n}) (idSub-supported {n = n}) ,, tt

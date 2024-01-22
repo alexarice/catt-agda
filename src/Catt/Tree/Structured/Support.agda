@@ -4,6 +4,7 @@ open import Catt.Prelude
 open import Catt.Tree
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
+open import Catt.Tree.Structured.ToTerm
 
 open import Catt.Support
 open import Catt.Support.Properties
@@ -128,3 +129,12 @@ supp-condition-s true S (SArr s As t) = NonZero (tree-dim S)
 MtoVarSet : (ΓS : CtxOrTree n) → MVarSet (COT-to-MT ΓS) → VarSet n
 MtoVarSet (incTree _) xs = toVarSet xs
 MtoVarSet (incCtx Γ) xs = DC Γ xs
+
+SupportedSTm : STm X → Set
+SupportedSTm = Wrap (λ a → SupportedTm (stm-to-term a))
+
+SupportedSTy : STy X → Set
+SupportedSTy = Wrap (λ As → SupportedTy (sty-to-type As))
+
+SupportedLabel : Label-WT X S → Set
+SupportedLabel = Wrap (λ L → SupportedSub (label-to-sub L))

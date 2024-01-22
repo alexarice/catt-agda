@@ -119,5 +119,5 @@ SupportedTm (Coh Δ A σ) = SupportedTy A × SupportedSub σ × Σ[ b ∈ Bool ]
 SupportedTy ⋆ = ⊤
 SupportedTy (s ─⟨ A ⟩⟶ t) = SupportedTm s × SupportedTy A × SupportedTm t
 
-SupportedSub ⟨⟩ = ⊤
+SupportedSub {A = A} ⟨⟩ = SupportedTy A
 SupportedSub ⟨ σ , t ⟩ = SupportedSub σ × SupportedTm t

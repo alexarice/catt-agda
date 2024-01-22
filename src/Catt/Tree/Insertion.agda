@@ -94,10 +94,10 @@ Join S₁ S₂ >>[ BShift P ] T = Join S₁ (S₂ >>[ P ] T)
 
 infix 5 _>>l[_]_ _>>l′[_]_
 _>>l[_]_ : (L : Label X S)
-         → (p : Branch S d)
+         → (P : Branch S d)
          → (M : Label X T)
          → .⦃ _ : has-trunk-height d T ⦄
-         → Label X (S >>[ p ] T)
+         → Label X (S >>[ P ] T)
 _>>l[_]_ L BHere M = M ++l (L ∘ PShift)
 _>>l[_]_ {T = Susp T} L (BExt P) M PHere = M PHere
 _>>l[_]_ {T = Susp T} L (BExt P) M (PExt Z) = (L ∘ PExt >>l[ P ] M ∘ PExt) Z

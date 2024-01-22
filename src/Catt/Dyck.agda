@@ -54,7 +54,7 @@ susp-peak (⇕pk dy) = ⇕pk (susp-dyck dy)
 susp-peak (⇑pk p) = ⇑pk (susp-peak p)
 susp-peak (⇓pk p) = ⇓pk (susp-peak p)
 
-connect-dyck : (dy : Dyck n 0) → Dyck m d → Dyck (m + n) d
-connect-dyck d End = d
-connect-dyck d (⇑ e) = ⇑ (connect-dyck d e)
-connect-dyck d (⇓ e) = ⇓ (connect-dyck d e)
+wedge-dyck : (dy : Dyck n 0) → Dyck m d → Dyck (m + n) d
+wedge-dyck d End = d
+wedge-dyck d (⇑ e) = ⇑ (wedge-dyck d e)
+wedge-dyck d (⇓ e) = ⇓ (wedge-dyck d e)

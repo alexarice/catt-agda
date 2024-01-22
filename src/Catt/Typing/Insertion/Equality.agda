@@ -498,10 +498,10 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
   κ-inserted-branch (Join S₁ S₂) BHere T Q U q .get (PExt Z) = begin
     standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T S₂
-      >>= (κ (T ++t S₂) (connect-branch-left T S₂ Q) U ,, S⋆)
+      >>= (κ (T ++t S₂) (wedge-branch-left T S₂ Q) U ,, S⋆)
       ≈⟨ reflexive≈stm (>>=-assoc (standard-label (Susp S₁) T (PExt Z)) _ _) ⟩
     standard-label (Susp S₁) T (PExt Z)
-      >>= ++t-inc-left T S₂ ●lt (κ (T ++t S₂) (connect-branch-left T S₂ Q) U ,, S⋆)
+      >>= ++t-inc-left T S₂ ●lt (κ (T ++t S₂) (wedge-branch-left T S₂ Q) U ,, S⋆)
       ≈⟨ fixup-reflexive≈stm (>>=-≃ (standard-label-max (Susp S₁) T (PExt Z))
                                     (κ-branch-left-inc-left T S₂ Q U)
                                     (S⋆-≃ (≃′-to-≃ (insertion-branch-left T S₂ Q U))))

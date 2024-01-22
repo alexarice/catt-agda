@@ -64,11 +64,11 @@ tree-to-dyck-len (suc d) (Join S T@(Join _ _)) = tree-to-dyck-len (suc d) T + su
 
 tree-to-dyck : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄ → Dyck (tree-to-dyck-len d T) d
 tree-to-dyck zero Sing = End
-tree-to-dyck zero (Join S T) = connect-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T)
+tree-to-dyck zero (Join S T) = wedge-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T)
 tree-to-dyck (suc d) (Join S Sing) = susp-dyck (tree-to-dyck d S)
-tree-to-dyck (suc d) (Join S T@(Join _ _)) = connect-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck (suc d) T)
+tree-to-dyck (suc d) (Join S T@(Join _ _)) = wedge-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck (suc d) T)
 
-tree-to-dyck-join : (d : ℕ) → (S : Tree m) → (T : Tree n) → .⦃ is-join T ⦄ → .⦃ _ : n-extendable d T ⦄ → tree-to-dyck d (Join S T) ⦃ join-tree-preserves-extendable d S T ⦄ ≃d connect-dyck (⇓ (susp-dyck (tree-to-dyck 0 S))) (tree-to-dyck d T)
+tree-to-dyck-join : (d : ℕ) → (S : Tree m) → (T : Tree n) → .⦃ is-join T ⦄ → .⦃ _ : n-extendable d T ⦄ → tree-to-dyck d (Join S T) ⦃ join-tree-preserves-extendable d S T ⦄ ≃d wedge-dyck (⇓ (susp-dyck (tree-to-dyck 0 S))) (tree-to-dyck d T)
 tree-to-dyck-join zero S T = refl≃d
 tree-to-dyck-join (suc d) S (Join T₁ T₂) = refl≃d
 
@@ -99,24 +99,24 @@ join-extend-tree {n = zero} S (Join _ _) = refl≃
 join-extend-tree {n = suc n} S (Join T Sing) = refl≃
 join-extend-tree {n = suc n} S (Join T (Join _ _)) = refl≃
 
-extend-connect-tree : (S : Tree m)
+extend-wedge-tree : (S : Tree m)
                     → (T : Tree m′)
                     → .⦃ _ : n-extendable n T ⦄
                     → extend-tree n (S ++t T) ⦃ ++t-is-extendable n S T ⦄
                       ≃ S ++t (extend-tree n T)
-extend-connect-tree Sing T = refl≃
-extend-connect-tree {n = n} (Join S S′) T ⦃ ex ⦄ = let
+extend-wedge-tree Sing T = refl≃
+extend-wedge-tree {n = n} (Join S S′) T ⦃ ex ⦄ = let
   instance _ = ++t-is-extendable n S′ T
   in trans≃ (join-extend-tree S (S′ ++t T))
-            (Join≃ refl≃ (extend-connect-tree S′ T))
+            (Join≃ refl≃ (extend-wedge-tree S′ T))
 
-connect-dyck-tree : (dy : Dyck n 0) → (ey : Dyck m d) → dyck-to-tree (connect-dyck dy ey) ≃ dyck-to-tree dy ++t dyck-to-tree ey
-connect-dyck-tree dy End = ≃′-to-≃ (sym≃′ (++t-right-unit (dyck-to-tree dy)))
-connect-dyck-tree dy (⇑ ey) = let
-  instance _ = dyck-to-tree-is-n-extendable (connect-dyck dy ey)
+wedge-dyck-tree : (dy : Dyck n 0) → (ey : Dyck m d) → dyck-to-tree (wedge-dyck dy ey) ≃ dyck-to-tree dy ++t dyck-to-tree ey
+wedge-dyck-tree dy End = ≃′-to-≃ (sym≃′ (++t-right-unit (dyck-to-tree dy)))
+wedge-dyck-tree dy (⇑ ey) = let
+  instance _ = dyck-to-tree-is-n-extendable (wedge-dyck dy ey)
   instance _ = dyck-to-tree-is-n-extendable ey
-  in trans≃ (extend-tree-eq (connect-dyck-tree dy ey)) (extend-connect-tree (dyck-to-tree dy) (dyck-to-tree ey))
-connect-dyck-tree dy (⇓ ey) = connect-dyck-tree dy ey
+  in trans≃ (extend-tree-eq (wedge-dyck-tree dy ey)) (extend-wedge-tree (dyck-to-tree dy) (dyck-to-tree ey))
+wedge-dyck-tree dy (⇓ ey) = wedge-dyck-tree dy ey
 
 susp-dyck-tree : (dy : Dyck n d) → dyck-to-tree (susp-dyck dy) ≃ Susp (dyck-to-tree dy)
 susp-dyck-tree End = refl≃
@@ -128,8 +128,8 @@ susp-dyck-tree (⇓ dy) = susp-dyck-tree dy
 tree-to-dyck-to-tree : (T : Tree n) → dyck-to-tree (tree-to-dyck 0 T) ≃ T
 tree-to-dyck-to-tree Sing = Sing≃
 tree-to-dyck-to-tree (Join S T) = begin
-  < dyck-to-tree (connect-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T)) >t
-    ≈⟨ connect-dyck-tree (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T) ⟩
+  < dyck-to-tree (wedge-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T)) >t
+    ≈⟨ wedge-dyck-tree (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T) ⟩
   < dyck-to-tree (⇓ (susp-dyck (tree-to-dyck zero S))) ++t dyck-to-tree (tree-to-dyck zero T) >t
     ≈⟨ ++t-≃ (trans≃ (susp-dyck-tree (tree-to-dyck 0 S)) (Susp-≃ (tree-to-dyck-to-tree S))) (tree-to-dyck-to-tree T) ⟩
   < Susp S ++t T >t
@@ -143,17 +143,17 @@ tree-to-dyck-to-tree (Join S T) = begin
 tree-to-dyck-extend-tree : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄ → tree-to-dyck (suc d) (extend-tree d T) ⦃ extended-tree-is-more-extendable d T ⦄ ≃d ⇑ (tree-to-dyck d T)
 tree-to-dyck-extend-tree zero Sing = refl≃d
 tree-to-dyck-extend-tree zero (Join S Sing) = refl≃d
-tree-to-dyck-extend-tree zero (Join S (Join T₁ T₂)) = connect-dyck-≃ refl≃d (tree-to-dyck-extend-tree 0 (Join T₁ T₂))
+tree-to-dyck-extend-tree zero (Join S (Join T₁ T₂)) = wedge-dyck-≃ refl≃d (tree-to-dyck-extend-tree 0 (Join T₁ T₂))
 tree-to-dyck-extend-tree (suc d) (Join S Sing) = susp-dyck-≃ (tree-to-dyck-extend-tree d S)
-tree-to-dyck-extend-tree (suc d) (Join S (Join T₁ T₂)) = trans≃d (tree-to-dyck-join (2 + d) S (extend-tree (suc d) (Join T₁ T₂)) ⦃ extend-tree-is-join (suc d) (Join T₁ T₂) ⦄ ⦃ extended-tree-is-more-extendable (suc d) (Join T₁ T₂) ⦄) (connect-dyck-≃ refl≃d (tree-to-dyck-extend-tree (suc d) (Join T₁ T₂)))
+tree-to-dyck-extend-tree (suc d) (Join S (Join T₁ T₂)) = trans≃d (tree-to-dyck-join (2 + d) S (extend-tree (suc d) (Join T₁ T₂)) ⦃ extend-tree-is-join (suc d) (Join T₁ T₂) ⦄ ⦃ extended-tree-is-more-extendable (suc d) (Join T₁ T₂) ⦄) (wedge-dyck-≃ refl≃d (tree-to-dyck-extend-tree (suc d) (Join T₁ T₂)))
 
 tree-to-dyck-restrict : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable (suc d) T ⦄ → tree-to-dyck d T ⦃ pred-n-extendable d T ⦄ ≃d ⇓ (tree-to-dyck (suc d) T)
 tree-to-dyck-restrict zero (Join S Sing) = refl≃d
-tree-to-dyck-restrict zero (Join S T@(Join _ _)) = connect-dyck-≃ refl≃d (tree-to-dyck-restrict zero T)
+tree-to-dyck-restrict zero (Join S T@(Join _ _)) = wedge-dyck-≃ refl≃d (tree-to-dyck-restrict zero T)
 tree-to-dyck-restrict (suc d) (Join S Sing) = susp-dyck-≃ (tree-to-dyck-restrict d S)
 tree-to-dyck-restrict (suc d) (Join S T@(Join _ _)) = let
   instance _ = pred-n-extendable (suc d) T
-  in connect-dyck-≃ refl≃d (tree-to-dyck-restrict (suc d) T)
+  in wedge-dyck-≃ refl≃d (tree-to-dyck-restrict (suc d) T)
 
 dyck-to-tree-to-dyck : (dy : Dyck n d) → tree-to-dyck d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄ ≃d dy
 dyck-to-tree-to-dyck End = refl≃d

@@ -61,10 +61,10 @@ dyck-setoid = record { Carrier = DYCK
                      }
 
 
-connect-dyck-≃ : {gy : Dyck n d} → (p : dy ≃d ey) → fy ≃d gy → connect-dyck dy fy ≃d connect-dyck ey gy
-connect-dyck-≃ p End≃ = p
-connect-dyck-≃ p (⇑≃ q) = ⇑≃ (connect-dyck-≃ p q)
-connect-dyck-≃ p (⇓≃ q) = ⇓≃ (connect-dyck-≃ p q)
+wedge-dyck-≃ : {gy : Dyck n d} → (p : dy ≃d ey) → fy ≃d gy → wedge-dyck dy fy ≃d wedge-dyck ey gy
+wedge-dyck-≃ p End≃ = p
+wedge-dyck-≃ p (⇑≃ q) = ⇑≃ (wedge-dyck-≃ p q)
+wedge-dyck-≃ p (⇓≃ q) = ⇓≃ (wedge-dyck-≃ p q)
 
 susp-dyck-≃ : dy ≃d ey → susp-dyck dy ≃d susp-dyck ey
 susp-dyck-≃ End≃ = refl≃d

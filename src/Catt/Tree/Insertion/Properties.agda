@@ -363,37 +363,37 @@ label-from-prune-≃ : {L : Label X S}
                    → L >>p[ P ] M ≃l L′ >>p[ P ] M′
 label-from-prune-≃ p P q = label-from-insertion-≃ p P q ⦃ prune-lem P ⦄
 
-connect-branch-left : (S : Tree n)
+wedge-branch-left : (S : Tree n)
                     → (T : Tree m)
                     → (P : Branch S l)
                     → Branch (S ++t T) l
-connect-branch-left (Join S₁ S₂) T BHere = BHere
-connect-branch-left (Join S₁ S₂) T (BExt P) = BExt P
-connect-branch-left (Join S₁ S₂) T (BShift P) = BShift (connect-branch-left S₂ T P)
+wedge-branch-left (Join S₁ S₂) T BHere = BHere
+wedge-branch-left (Join S₁ S₂) T (BExt P) = BExt P
+wedge-branch-left (Join S₁ S₂) T (BShift P) = BShift (wedge-branch-left S₂ T P)
 
-connect-branch-left-prop : (S : Tree n)
+wedge-branch-left-prop : (S : Tree n)
                          → (T : Tree m)
                          → (P : Branch S l)
-                         → SPath (⌊ connect-branch-left S T P ⌋p)
+                         → SPath (⌊ wedge-branch-left S T P ⌋p)
                            ≃stm ap (++t-inc-left S T) ⌊ P ⌋p
-connect-branch-left-prop (Join S₁ S₂) T BHere = refl≃stm
-connect-branch-left-prop (Join S₁ S₂) T (BExt P) = refl≃stm
-connect-branch-left-prop (Join S₁ S₂) T (BShift P) = compute-≃ (SShift≃ refl≃ (connect-branch-left-prop S₂ T P))
+wedge-branch-left-prop (Join S₁ S₂) T BHere = refl≃stm
+wedge-branch-left-prop (Join S₁ S₂) T (BExt P) = refl≃stm
+wedge-branch-left-prop (Join S₁ S₂) T (BShift P) = compute-≃ (SShift≃ refl≃ (wedge-branch-left-prop S₂ T P))
 
-connect-branch-left-height : (S : Tree n)
+wedge-branch-left-height : (S : Tree n)
                            → (T : Tree m)
                            → (P : Branch S l)
-                           → lh (connect-branch-left S T P) ≃n lh P
-connect-branch-left-height (Join S₁ S₂) T BHere = refl≃n
-connect-branch-left-height (Join S₁ S₂) T (BExt P) = refl≃n
-connect-branch-left-height (Join S₁ S₂) T (BShift P) = connect-branch-left-height S₂ T P
+                           → lh (wedge-branch-left S T P) ≃n lh P
+wedge-branch-left-height (Join S₁ S₂) T BHere = refl≃n
+wedge-branch-left-height (Join S₁ S₂) T (BExt P) = refl≃n
+wedge-branch-left-height (Join S₁ S₂) T (BShift P) = wedge-branch-left-height S₂ T P
 
 insertion-branch-left : (S : Tree n)
                       → (T : Tree m)
                       → (P : Branch S l)
                       → (U : Tree n′)
                       → .⦃ _ : has-trunk-height l U ⦄
-                      → S ++t T >>[ connect-branch-left S T P ] U ≃′ (S >>[ P ] U) ++t T
+                      → S ++t T >>[ wedge-branch-left S T P ] U ≃′ (S >>[ P ] U) ++t T
 insertion-branch-left (Join S₁ S₂) T BHere U = ++t-assoc U S₂ T
 insertion-branch-left (Join S₁ S₂) T (BExt P) (Susp U) = refl≃′
 insertion-branch-left (Join S₁ S₂) T (BShift P) U = Join≃′ refl≃′ (insertion-branch-left S₂ T P U)
@@ -403,7 +403,7 @@ insertion-branch-left (Join S₁ S₂) T (BShift P) U = Join≃′ refl≃′ (i
                        → (P : Branch S l)
                        → (U : Tree n′)
                        → .⦃ _ : has-trunk-height l U ⦄
-                       → ap (++t-inc-left S T) ●l (κ (S ++t T) (connect-branch-left S T P) U ,, S⋆)
+                       → ap (++t-inc-left S T) ●l (κ (S ++t T) (wedge-branch-left S T P) U ,, S⋆)
                          ≃l
                          κ S P U ●l (++t-inc-left (S >>[ P ] U) T)
 κ-branch-left-inc-left (Join S₁ S₂) T BHere U .get PHere = SPath≃ (begin
@@ -448,7 +448,7 @@ insertion-branch-left (Join S₁ S₂) T (BShift P) U = Join≃′ refl≃′ (i
 κ-branch-left-inc-left (Join S₁ S₂) T (BShift P) U .get PHere = SPath≃ (Here≃ (≃′-to-≃ (insertion-branch-left (Join S₁ S₂) T (BShift P) U)))
 κ-branch-left-inc-left (Join S₁ S₂) T (BShift P) U .get (PExt Z) = compute-≃ (SExt≃ refl≃stm (≃′-to-≃ (insertion-branch-left S₂ T P U)))
 κ-branch-left-inc-left (Join S₁ S₂) T (BShift P) U .get (PShift Z) = begin
-  < SShift (κ (S₂ ++t T) (connect-branch-left S₂ T P) U ⦃ _ ⦄ (++t-inc-left′ S₂ T Z)) >stm
+  < SShift (κ (S₂ ++t T) (wedge-branch-left S₂ T P) U ⦃ _ ⦄ (++t-inc-left′ S₂ T Z)) >stm
     ≈⟨ SShift≃ refl≃ (κ-branch-left-inc-left S₂ T P U .get Z) ⟩
   < SShift (κ S₂ P U Z >>= ++t-inc-left (S₂ >>[ P ] U) T) >stm
     ≈˘⟨ >>=-shift (κ S₂ P U Z) (++t-inc-left (S₂ >>[ P ] U) T) ⟩
@@ -463,7 +463,7 @@ insertion-branch-left (Join S₁ S₂) T (BShift P) U = Join≃′ refl≃′ (i
                         → (U : Tree n′)
                         → .⦃ _ : has-trunk-height l U ⦄
                         → ap (++t-inc-right S T)
-                          ●l (κ (S ++t T) (connect-branch-left S T P) U ,, S⋆)
+                          ●l (κ (S ++t T) (wedge-branch-left S T P) U ,, S⋆)
                           ≃l
                           ap (++t-inc-right (S >>[ P ] U) T)
 κ-branch-left-inc-right (Join S₁ S₂) T BHere U .get Z = SPath≃ (++t-inc-right-assoc U S₂ T .get Z)
@@ -476,7 +476,7 @@ label-from-branch-left : (L : Label X S)
                        → {U : Tree n}
                        → (N : Label X U)
                        → .⦃ _ : has-trunk-height l U ⦄
-                       → L ++l M >>l[ connect-branch-left S T P ] N
+                       → L ++l M >>l[ wedge-branch-left S T P ] N
                          ≃lm
                          label-≃ (insertion-branch-left S T P U) ((L >>l[ P ] N) ++l M)
 label-from-branch-left L M BHere N .get Z = ++l-assoc N (L ∘ PShift) M .get Z
@@ -485,35 +485,35 @@ label-from-branch-left L M (BExt P) {Susp U} N .get (PShift Z) = replace-++l (L 
 label-from-branch-left L M (BShift P) N .get (PExt Z) = refl≃stm
 label-from-branch-left L M (BShift P) N .get (PShift Z) = label-from-branch-left (L ∘ PShift) M P N .get Z
 
-connect-branch-right : (S : Tree n)
+wedge-branch-right : (S : Tree n)
                      → (T : Tree m)
                      → (P : Branch T l)
                      → Branch (S ++t T) l
-connect-branch-right Sing T P = P
-connect-branch-right (Join S₁ S₂) T P = BShift (connect-branch-right S₂ T P)
+wedge-branch-right Sing T P = P
+wedge-branch-right (Join S₁ S₂) T P = BShift (wedge-branch-right S₂ T P)
 
-connect-branch-right-prop : (S : Tree n)
+wedge-branch-right-prop : (S : Tree n)
                           → (T : Tree m)
                           → (P : Branch T l)
-                          → SPath ⌊ connect-branch-right S T P ⌋p
+                          → SPath ⌊ wedge-branch-right S T P ⌋p
                             ≃stm
                             ap (++t-inc-right S T) ⌊ P ⌋p
-connect-branch-right-prop Sing T P = refl≃stm
-connect-branch-right-prop (Join S₁ S₂) T P = compute-≃ (SShift≃ refl≃ (connect-branch-right-prop S₂ T P))
+wedge-branch-right-prop Sing T P = refl≃stm
+wedge-branch-right-prop (Join S₁ S₂) T P = compute-≃ (SShift≃ refl≃ (wedge-branch-right-prop S₂ T P))
 
-connect-branch-right-height : (S : Tree n)
+wedge-branch-right-height : (S : Tree n)
                             → (T : Tree m)
                             → (P : Branch T l)
-                            → lh (connect-branch-right S T P) ≃n lh P
-connect-branch-right-height Sing T P = refl≃n
-connect-branch-right-height (Join S₁ S₂) T P = connect-branch-right-height S₂ T P
+                            → lh (wedge-branch-right S T P) ≃n lh P
+wedge-branch-right-height Sing T P = refl≃n
+wedge-branch-right-height (Join S₁ S₂) T P = wedge-branch-right-height S₂ T P
 
 insertion-branch-right : (S : Tree n)
                        → (T : Tree m)
                        → (P : Branch T l)
                        → (U : Tree n′)
                        → .⦃ _ : has-trunk-height l U ⦄
-                       → S ++t T >>[ connect-branch-right S T P ] U ≃′ S ++t (T >>[ P ] U)
+                       → S ++t T >>[ wedge-branch-right S T P ] U ≃′ S ++t (T >>[ P ] U)
 insertion-branch-right Sing T P U = refl≃′
 insertion-branch-right (Join S₁ S₂) T P U = Join≃′ refl≃′ (insertion-branch-right S₂ T P U)
 
@@ -522,7 +522,7 @@ insertion-branch-right (Join S₁ S₂) T P U = Join≃′ refl≃′ (insertion
                         → (P : Branch T l)
                         → (U : Tree n′)
                         → .⦃ _ : has-trunk-height l U ⦄
-                        → ap (++t-inc-left S T) ●l (κ (S ++t T) (connect-branch-right S T P) U ,, S⋆)
+                        → ap (++t-inc-left S T) ●l (κ (S ++t T) (wedge-branch-right S T P) U ,, S⋆)
                           ≃l
                           ap (++t-inc-left S (T >>[ P ] U))
 κ-branch-right-inc-left Sing T P U .get PHere = κ-phere T P U ⦃ it ⦄
@@ -535,12 +535,12 @@ insertion-branch-right (Join S₁ S₂) T P U = Join≃′ refl≃′ (insertion
                          → (P : Branch T l)
                          → (U : Tree n′)
                          → .⦃ _ : has-trunk-height l U ⦄
-                         → ap (++t-inc-right S T) ●l (κ (S ++t T) (connect-branch-right S T P) U ,, S⋆)
+                         → ap (++t-inc-right S T) ●l (κ (S ++t T) (wedge-branch-right S T P) U ,, S⋆)
                            ≃l
                            κ T P U ●l (++t-inc-right S (T >>[ P ] U))
 κ-branch-right-inc-right Sing T P U = sym≃l (comp-right-unit (κ T P U))
 κ-branch-right-inc-right (Join S₁ S₂) T P U = begin
-  < SShift ∘ (ap (++t-inc-right S₂ T) ●l (κ (S₂ ++t T) (connect-branch-right S₂ T P) U  ,, S⋆)) >l
+  < SShift ∘ (ap (++t-inc-right S₂ T) ●l (κ (S₂ ++t T) (wedge-branch-right S₂ T P) U  ,, S⋆)) >l
     ≈⟨ [ (λ Z → SShift≃ refl≃ (κ-branch-right-inc-right S₂ T P U .get Z)) ] ⟩
   < SShift ∘ κ T P U ●l ++t-inc-right S₂ (T >>[ P ] U) >l
     ≈˘⟨ comp-shift (κ T P U) (++t-inc-right S₂ (T >>[ P ] U)) ⟩
@@ -555,7 +555,7 @@ label-from-branch-right : (L : Label X S)
                         → (P : Branch T l)
                         → (N : Label X U)
                         → .⦃ _ : has-trunk-height l U ⦄
-                        → L ++l′ M >>l′[ connect-branch-right S T P ] N
+                        → L ++l′ M >>l′[ wedge-branch-right S T P ] N
                           ≃lm
                           label-≃ (insertion-branch-right S T P U) (L ++l′ (M >>l′[ P ] N))
 label-from-branch-right {S = Sing} L M P N .get Z = refl≃stm
@@ -587,7 +587,7 @@ orthog-branch : (P : Branch S l)
               → (T : Tree m)
               → .⦃ _ : has-trunk-height (bh P) T ⦄
               → Branch (S >>[ P ] T) l′
-orthog-branch BHere (BShift Q) T = connect-branch-right T _ Q
+orthog-branch BHere (BShift Q) T = wedge-branch-right T _ Q
 orthog-branch (BExt P) (BExt Q) (Susp T) = BExt (orthog-branch P Q T)
 orthog-branch (BExt P) (BShift Q) (Susp T) = BShift Q
 orthog-branch (BShift P) BHere T = BHere
@@ -603,7 +603,7 @@ orthog-branch-prop : (S : Tree n)
                    → SPath ⌊ orthog-branch P Q T ⌋p
                      ≃stm
                      κ S P T ⌊ Q ⌋p
-orthog-branch-prop (Join S₁ S₂) BHere (BShift Q) T = connect-branch-right-prop T S₂ Q
+orthog-branch-prop (Join S₁ S₂) BHere (BShift Q) T = wedge-branch-right-prop T S₂ Q
 orthog-branch-prop (Join S₁ S₂) (BExt P) (BExt Q) (Susp T) = compute-≃ (SExt≃ (orthog-branch-prop S₁ P Q T) refl≃)
 orthog-branch-prop (Join S₁ S₂) (BExt P) (BShift Q) (Susp T) = compute-≃ refl≃stm
 orthog-branch-prop (Join S₁ S₂) (BShift P) BHere T = compute-≃ refl≃stm
@@ -616,7 +616,7 @@ orthog-lh : (P : Branch S l)
           → (T : Tree m)
           → .⦃ _ : has-trunk-height (bh P) T ⦄
           → lh (orthog-branch P Q T) ≃n lh Q
-orthog-lh BHere (BShift Q) T = connect-branch-right-height T _ Q
+orthog-lh BHere (BShift Q) T = wedge-branch-right-height T _ Q
 orthog-lh (BExt P) (BExt Q) (Susp T) = inst ⦃ orthog-lh P Q T ⦄
 orthog-lh (BExt P) (BShift Q) (Susp T) = refl≃n
 orthog-lh (BShift P) BHere T = refl≃n
@@ -655,10 +655,10 @@ module _ where
   κ-orthog (Join S₁ S₂) BHere T (BShift Q) U .get (PExt Z) = begin
     < standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T S₂
-      >>= (κ (T ++t S₂) (connect-branch-right T S₂ Q) U ,, S⋆) >stm
+      >>= (κ (T ++t S₂) (wedge-branch-right T S₂ Q) U ,, S⋆) >stm
       ≈⟨ >>=-assoc (standard-label (Susp S₁) T (PExt Z)) (++t-inc-left T S₂) _ ⟩
     < standard-label (Susp S₁) T (PExt Z)
-      >>= ++t-inc-left T S₂ ●lt (κ (T ++t S₂) (connect-branch-right T S₂ Q) U ,, S⋆) >stm
+      >>= ++t-inc-left T S₂ ●lt (κ (T ++t S₂) (wedge-branch-right T S₂ Q) U ,, S⋆) >stm
       ≈⟨ >>=-≃ (refl≃stm {a = standard-label (Susp S₁) T (PExt Z)}) (κ-branch-right-inc-left T S₂ Q U) (S⋆-≃ (≃′-to-≃ (insertion-branch-right T S₂ Q U))) ⟩
     < standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T (S₂ >>[ Q ] U) >stm ∎
@@ -737,7 +737,7 @@ module _ where
                         → (Q : Branch S₂ l′)
                         → (N : Label X U)
                         → .⦃ _ : has-trunk-height (bh Q) U ⦄
-                        → replace-label (M ++l′ L ∘ PShift) (L PHere) >>l′[ connect-branch-right T S₂ Q ] N
+                        → replace-label (M ++l′ L ∘ PShift) (L PHere) >>l′[ wedge-branch-right T S₂ Q ] N
                           ≃lm
                           label-≃ (insertion-branch-right T S₂ Q U) (replace-label (M ++l′ (L ∘ PShift >>l′[ Q ] N)) (L PHere))
   label-from-orthog-lem {T = Sing} L M Q N .get Z = label-from-insertion′-replace (L ∘ PShift) Q N (L PHere) .get Z
@@ -1161,7 +1161,7 @@ inserted-branch : (S : Tree n)
                 → .⦃ _ : non-linear T ⦄
                 → (Q : Branch T l′)
                 → Branch (S >>[ P ] T) l′
-inserted-branch (Join S₁ S₂) BHere T Q = connect-branch-left T S₂ Q
+inserted-branch (Join S₁ S₂) BHere T Q = wedge-branch-left T S₂ Q
 inserted-branch (Join S₁ S₂) (BExt P) (Susp T) BHere = ⊥-elim (linear-non-linear T)
 inserted-branch (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) = BExt (inserted-branch S₁ P T Q)
 inserted-branch (Join S₁ S₂) (BShift P) T Q = BShift (inserted-branch S₂ P T Q)
@@ -1175,7 +1175,7 @@ inserted-branch-prop : (S : Tree n)
                      → SPath ⌊ inserted-branch S P T Q ⌋p
                        ≃stm
                        ι S P T ⌊ Q ⌋p
-inserted-branch-prop (Join S₁ S₂) BHere T Q = connect-branch-left-prop T S₂ Q
+inserted-branch-prop (Join S₁ S₂) BHere T Q = wedge-branch-left-prop T S₂ Q
 inserted-branch-prop (Join S₁ S₂) (BExt P) (Susp T) BHere = ⊥-elim (linear-non-linear T)
 inserted-branch-prop (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) = compute-≃ (SExt≃ (inserted-branch-prop S₁ P T Q) refl≃)
 inserted-branch-prop (Join S₁ S₂) (BShift P) T Q = compute-≃ (SShift≃ refl≃ (inserted-branch-prop S₂ P T Q))

@@ -7,8 +7,8 @@ open import Catt.Syntax.Properties
 open import Catt.Variables
 open import Catt.Variables.Properties
 open import Catt.Suspension
-open import Catt.Connection
-open import Catt.Connection.Properties
+open import Catt.Wedge
+open import Catt.Wedge.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Standard

@@ -13,8 +13,8 @@ open import Catt.Pasting.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Suspension.Pasting
-open import Catt.Connection
-open import Catt.Connection.Pasting
+open import Catt.Wedge
+open import Catt.Wedge.Pasting
 open import Catt.Tree
 open import Catt.Tree.Pasting
 

@@ -2,7 +2,7 @@ module Catt.Tree.Boundary where
 
 open import Catt.Prelude
 open import Catt.Syntax
-open import Catt.Connection
+open import Catt.Wedge
 open import Catt.Suspension
 open import Catt.Tree
 open import Catt.Tree.Path

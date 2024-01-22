@@ -3,7 +3,7 @@ module Catt.Tree.Structured.ToTerm where
 open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Suspension
-open import Catt.Connection
+open import Catt.Wedge
 open import Catt.Tree
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
@@ -15,8 +15,8 @@ label-to-sub : {X : MaybeTree n} → (L : Label-WT X S) → Sub (suc (tree-size 
 apt : {X : MaybeTree m} → Label-WT X S → Path S → Tm m
 apt L P = stm-to-term (ap L P)
 
-stm-to-term (SExt s) = susp-tm (stm-to-term s) [ connect-susp-inc-left _ _ ]tm
-stm-to-term (SShift s) = stm-to-term s [ connect-susp-inc-right _ _ ]tm
+stm-to-term (SExt s) = susp-tm (stm-to-term s) [ wedge-susp-inc-left _ _ ]tm
+stm-to-term (SShift s) = stm-to-term s [ wedge-susp-inc-right _ _ ]tm
 stm-to-term (SPath P) = path-to-term P
 stm-to-term (SCoh S A L) = Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm
 stm-to-term (SOther t) = t
@@ -26,7 +26,7 @@ sty-to-type (SArr s A t) = (stm-to-term s) ─⟨ (sty-to-type A) ⟩⟶ (stm-to
 
 label-to-sub′ : ((P : Path S) → Tm n) → (A : Ty n) → Sub (suc (tree-size S)) n A
 label-to-sub′ {S = Sing} f A = ⟨ ⟨⟩ , f PHere ⟩
-label-to-sub′ {S = Join S₁ S₂} f A = sub-from-connect (unrestrict (label-to-sub′ (λ P → f (PExt P)) (f PHere ─⟨ A ⟩⟶ f (PShift PHere)))) (label-to-sub′ (λ P → f (PShift P)) A)
+label-to-sub′ {S = Join S₁ S₂} f A = sub-from-wedge (unrestrict (label-to-sub′ (λ P → f (PExt P)) (f PHere ─⟨ A ⟩⟶ f (PShift PHere)))) (label-to-sub′ (λ P → f (PShift P)) A)
 
 label-to-sub (L ,, A) = label-to-sub′ (λ P → stm-to-term (L P)) (sty-to-type A)
 

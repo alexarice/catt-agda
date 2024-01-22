@@ -6,8 +6,8 @@ open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
 open import Catt.Suspension
-open import Catt.Connection
-open import Catt.Connection.Properties
+open import Catt.Wedge
+open import Catt.Wedge.Properties
 open import Catt.Discs
 open import Catt.Discs.Properties
 open import Catt.Tree
@@ -61,13 +61,13 @@ lift-sty-to-type (SArr s A t) = Arr≃ (lift-stm-to-term s) (lift-sty-to-type A)
 
 lift-label-to-sub′ {S = Sing} L f p = Ext≃ (Null≃ p) (f PHere)
 lift-label-to-sub′ {S = Join S T} L f p = begin
-  < sub-from-connect (unrestrict (label-to-sub (lift-label (label₁ L)))) (label-to-sub (lift-label (label₂ L))) >s
-    ≈⟨ sub-from-connect-≃ (unrestrict-≃ (lift-label-to-sub′ (label₁ L) (λ P → f (PExt P)) (Arr≃ (f PHere) p (f (PShift PHere))))) (lift-label-to-sub′ (label₂ L) (λ P → f (PShift P)) p) ⟩
-  < sub-from-connect (unrestrict (lift-sub (label-to-sub (label₁ L)))) (lift-sub (label-to-sub (label₂ L))) >s
-    ≈⟨ sub-from-connect-≃ (unrestrict-lift (label-to-sub (label₁ L))) (refl≃s {σ = lift-sub (label-to-sub (label₂ L))}) ⟩
-  < sub-from-connect (lift-sub (unrestrict (label-to-sub (label₁ L)))) (lift-sub (label-to-sub (label₂ L))) >s
-    ≈˘⟨ sub-from-connect-lift (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ⟩
-  < lift-sub (sub-from-connect (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L))) >s ∎
+  < sub-from-wedge (unrestrict (label-to-sub (lift-label (label₁ L)))) (label-to-sub (lift-label (label₂ L))) >s
+    ≈⟨ sub-from-wedge-≃ (unrestrict-≃ (lift-label-to-sub′ (label₁ L) (λ P → f (PExt P)) (Arr≃ (f PHere) p (f (PShift PHere))))) (lift-label-to-sub′ (label₂ L) (λ P → f (PShift P)) p) ⟩
+  < sub-from-wedge (unrestrict (lift-sub (label-to-sub (label₁ L)))) (lift-sub (label-to-sub (label₂ L))) >s
+    ≈⟨ sub-from-wedge-≃ (unrestrict-lift (label-to-sub (label₁ L))) (refl≃s {σ = lift-sub (label-to-sub (label₂ L))}) ⟩
+  < sub-from-wedge (lift-sub (unrestrict (label-to-sub (label₁ L)))) (lift-sub (label-to-sub (label₂ L))) >s
+    ≈˘⟨ sub-from-wedge-lift (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ⟩
+  < lift-sub (sub-from-wedge (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L))) >s ∎
   where
     open Reasoning sub-setoid
 

@@ -13,8 +13,8 @@ open import Catt.Syntax.Properties
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Suspension
-open import Catt.Connection
-open import Catt.Connection.Properties
+open import Catt.Wedge
+open import Catt.Wedge.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Pasting
@@ -31,16 +31,16 @@ open import Catt.Typing rules
 open import Catt.Typing.Properties rules tame
 open import Catt.Globular.Typing rules lift-cond
 open import Catt.Suspension.Typing rules lift-cond susp-cond
-open import Catt.Connection.Typing rules tame
+open import Catt.Wedge.Typing rules tame
 open import Catt.Tree.Typing rules tame
 open import Catt.Tree.Path.Typing rules tame
 open import Catt.Tree.Structured.Typing rules
 
 ≈SExt : {a b : STm (someTree S)} → a ≈[ ⌊ S ⌋ ]stm b → SExt {T = T} a ≈[ ⌊ Join S T ⌋ ]stm SExt b
-≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (connect-susp-inc-left-Ty ⌊ T ⌋) (susp-tmEq p)) ]
+≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (wedge-susp-inc-left-Ty ⌊ T ⌋) (susp-tmEq p)) ]
 
 ≈SShift : {a b : STm (someTree T)} → a ≈[ ⌊ T ⌋ ]stm b → SShift {S = S} a ≈[ ⌊ Join S T ⌋ ]stm SShift b
-≈SShift {S = S} [ q ] = [ (apply-sub-tm-eq (connect-susp-inc-right-Ty ⌊ S ⌋) q) ]
+≈SShift {S = S} [ q ] = [ (apply-sub-tm-eq (wedge-susp-inc-right-Ty ⌊ S ⌋) q) ]
 
 ≈SPath : P ≃p Q → SPath P ≃stm SPath Q
 ≈SPath p = [ path-to-term-≃ p ]
@@ -56,28 +56,28 @@ unrestrict-label-≈ p q .get (PShift P) = sty-tgt-≈ q
 
 label-to-sub-Ty : {L : Label-WT X S} → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-Sub ⌊ S ⌋ Γ (label-to-sub L)
 label-to-sub-Ty (TySing [ x ]) [ Aty ] = TyExt (TyNull Aty) x
-label-to-sub-Ty {L = L} (TyJoin x Lty Mty) Aty = sub-from-connect-Ty (unrestrictTy (label-to-sub-Ty Lty (TySArr x Aty (ap-phere-Ty Mty)))) get-sndTy (label-to-sub-Ty Mty Aty) (reflexive≈tm (label-to-sub-lem L) )
+label-to-sub-Ty {L = L} (TyJoin x Lty Mty) Aty = sub-from-wedge-Ty (unrestrictTy (label-to-sub-Ty Lty (TySArr x Aty (ap-phere-Ty Mty)))) get-sndTy (label-to-sub-Ty Mty Aty) (reflexive≈tm (label-to-sub-lem L) )
 
 TySPath : (P : Path S) → Typing-STm ⌊ S ⌋ (SPath P) (getPathType P)
 TySPath P .get = path-to-term-Ty P
 
 TySExt : {a : STm (someTree S)} → Typing-STm ⌊ S ⌋ a As → Typing-STm ⌊ Join S T ⌋ (SExt {T = T} a) (map-sty-ext As)
-TySExt {As = As} {T = T} [ aty ] .get = TyConv (apply-sub-tm-typing (susp-tmTy aty) (connect-susp-inc-left-Ty ⌊ T ⌋)) (reflexive≈ty (begin
-  < susp-ty (sty-to-type As) [ connect-susp-inc-left _ _ ]ty >ty
+TySExt {As = As} {T = T} [ aty ] .get = TyConv (apply-sub-tm-typing (susp-tmTy aty) (wedge-susp-inc-left-Ty ⌊ T ⌋)) (reflexive≈ty (begin
+  < susp-ty (sty-to-type As) [ wedge-susp-inc-left _ _ ]ty >ty
     ≈˘⟨ sub-action-≃-ty (susp-sty-to-type As) refl≃s ⟩
-  < sty-to-type (susp-sty As) [ connect-susp-inc-left _ (tree-size T) ]ty >ty
-    ≈˘⟨ sty-sub-to-type (susp-sty As) (connect-susp-inc-left _ (tree-size T)) ⟩
-  < sty-to-type (susp-sty As [ connect-susp-inc-left _ (tree-size T) ]sty) >ty
+  < sty-to-type (susp-sty As) [ wedge-susp-inc-left _ (tree-size T) ]ty >ty
+    ≈˘⟨ sty-sub-to-type (susp-sty As) (wedge-susp-inc-left _ (tree-size T)) ⟩
+  < sty-to-type (susp-sty As [ wedge-susp-inc-left _ (tree-size T) ]sty) >ty
     ≈⟨ map-sty-ext-prop As .get  ⟩
   < sty-to-type (map-sty-ext As) >ty ∎))
   where
     open Reasoning ty-setoid
 
 TySShift : {a : STm (someTree T)} → Typing-STm ⌊ T ⌋ a As → Typing-STm ⌊ Join S T ⌋ (SShift {S = S} a) (map-sty-shift As)
-TySShift {As = As} {S = S} [ aty ] .get = TyConv (apply-sub-tm-typing aty (connect-susp-inc-right-Ty ⌊ S ⌋)) (reflexive≈ty (begin
-  < sty-to-type As [ connect-susp-inc-right _ _ ]ty >ty
-    ≈˘⟨ sty-sub-to-type As (connect-susp-inc-right (tree-size S) _) ⟩
-  < sty-to-type (As [ connect-susp-inc-right (tree-size S) _ ]sty) >ty
+TySShift {As = As} {S = S} [ aty ] .get = TyConv (apply-sub-tm-typing aty (wedge-susp-inc-right-Ty ⌊ S ⌋)) (reflexive≈ty (begin
+  < sty-to-type As [ wedge-susp-inc-right _ _ ]ty >ty
+    ≈˘⟨ sty-sub-to-type As (wedge-susp-inc-right (tree-size S) _) ⟩
+  < sty-to-type (As [ wedge-susp-inc-right (tree-size S) _ ]sty) >ty
     ≈˘⟨ map-sty-shift-prop As .get ⟩
   < sty-to-type (map-sty-shift As) >ty ∎))
   where
@@ -100,7 +100,7 @@ TySCoh S {As} {L} [ Aty ] Lty Ltyty .get = TyConv (apply-sub-tm-typing (TyCoh �
 label-equality-to-sub : (L M : Label-WT X S) → ap L ≈[ Γ ]l ap M → lty L ≈[ Γ ]sty lty M → label-to-sub L ≈[ Γ ]s label-to-sub M
 label-equality-to-sub {S = Sing} L M [ p ] [ q ] = Ext≈ (Null≈ q) (p PHere .get)
 label-equality-to-sub {S = Join S T} L M [ p ] q
-  = sub-from-connect-≈
+  = sub-from-wedge-≈
       (unrestrictEq (label-equality-to-sub (label₁ L) (label₁ M) [ p ∘ PExt ] (≈SArr (p PHere) q (p (PShift PHere)))))
       (label-equality-to-sub (label₂ L) (label₂ M) [ p ∘ PShift ] q)
 

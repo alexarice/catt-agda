@@ -22,9 +22,9 @@ import Catt.Suspension
 import Catt.Suspension.Properties
 import Catt.Suspension.Pasting
 
-import Catt.Connection
-import Catt.Connection.Properties
-import Catt.Connection.Pasting
+import Catt.Wedge
+import Catt.Wedge.Properties
+import Catt.Wedge.Pasting
 
 import Catt.Discs
 import Catt.Discs.Properties
@@ -75,7 +75,7 @@ import Catt.Typing.Properties.Conversion
 import Catt.Globular.Typing
 import Catt.Pasting.Typing
 import Catt.Suspension.Typing
-import Catt.Connection.Typing
+import Catt.Wedge.Typing
 import Catt.Discs.Typing
 import Catt.Tree.Typing
 import Catt.Tree.Path.Typing
@@ -112,7 +112,7 @@ import Catt.Support.Properties
 import Catt.Support.Context
 
 import Catt.Suspension.Support
-import Catt.Connection.Support
+import Catt.Wedge.Support
 import Catt.Discs.Support
 import Catt.Tree.Support
 import Catt.Tree.Structured.Support

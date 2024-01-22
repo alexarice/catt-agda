@@ -19,11 +19,11 @@ open import Catt.Typing rules
 open import Catt.Typing.Properties rules tame
 open import Catt.Globular.Typing rules lift-cond
 open import Catt.Suspension.Typing rules lift-cond susp-cond
-open import Catt.Connection.Typing rules tame
+open import Catt.Wedge.Typing rules tame
 
 ⌊⌋-Ty : (T : Tree n) → Typing-Ctx ⌊ T ⌋
 ⌊⌋-Ty Sing = TyAdd TyEmp TyStar
-⌊⌋-Ty (Join S T) = connect-susp-Ty (⌊⌋-Ty S) (⌊⌋-Ty T)
+⌊⌋-Ty (Join S T) = wedge-susp-Ty (⌊⌋-Ty S) (⌊⌋-Ty T)
 
 fst-var-Ty : (Γ : Ctx (suc n)) → Typing-Tm Γ (Var (fromℕ _)) ⋆
 fst-var-Ty (∅ , ⋆) = TyVar zero
@@ -32,4 +32,4 @@ fst-var-Ty (Γ , B , A) = lift-tm-typing (fst-var-Ty (Γ , B))
 
 tree-last-var-Ty : (T : Tree n) → Typing-Tm ⌊ T ⌋ (tree-last-var T) ⋆
 tree-last-var-Ty Sing = TyVar zero
-tree-last-var-Ty (Join S T) = apply-sub-tm-typing (tree-last-var-Ty T) (connect-susp-inc-right-Ty ⌊ S ⌋)
+tree-last-var-Ty (Join S T) = apply-sub-tm-typing (tree-last-var-Ty T) (wedge-susp-inc-right-Ty ⌊ S ⌋)

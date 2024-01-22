@@ -11,8 +11,8 @@ open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Properties
-open import Catt.Connection
-open import Catt.Connection.Properties
+open import Catt.Wedge
+open import Catt.Wedge.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path

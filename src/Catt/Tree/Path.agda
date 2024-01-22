@@ -5,7 +5,7 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Variables
 open import Catt.Suspension
-open import Catt.Connection
+open import Catt.Wedge
 open import Catt.Tree
 open import Catt.Tree.Properties
 
@@ -24,8 +24,8 @@ path-length (PShift P) = path-length P
 
 path-to-term : {T : Tree n} → (P : Path T) → Tm (suc n)
 path-to-term PHere = Var (fromℕ _)
-path-to-term (PExt P) = susp-tm (path-to-term P) [ connect-susp-inc-left _ _ ]tm
-path-to-term (PShift P) = path-to-term P [ connect-susp-inc-right _ _ ]tm
+path-to-term (PExt P) = susp-tm (path-to-term P) [ wedge-susp-inc-left _ _ ]tm
+path-to-term (PShift P) = path-to-term P [ wedge-susp-inc-right _ _ ]tm
 
 path-to-fin : {T : Tree n} → (P : Path T) → Fin (suc n)
 path-to-fin PHere = fromℕ _

@@ -15,8 +15,8 @@ open import Catt.Variables
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Suspension
-open import Catt.Connection
-open import Catt.Connection.Properties
+open import Catt.Wedge
+open import Catt.Wedge.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Pasting
@@ -41,7 +41,7 @@ open import Catt.Typing.Insertion.Rule
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Suspension.Support
-open import Catt.Connection.Support
+open import Catt.Wedge.Support
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
 open import Catt.Tree.Structured.Support.Properties

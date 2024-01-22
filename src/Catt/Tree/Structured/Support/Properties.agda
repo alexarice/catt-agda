@@ -7,7 +7,7 @@ open import Catt.Syntax.Properties
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Suspension
-open import Catt.Connection
+open import Catt.Wedge
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Pasting
@@ -20,7 +20,7 @@ open import Catt.Tree.Structured.ToTerm
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Suspension.Support
-open import Catt.Connection.Support
+open import Catt.Wedge.Support
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
 
@@ -117,17 +117,17 @@ fromPath-to-term {S = S} PHere = begin
     ≡˘⟨ DC-fromℕ ⌊ S ⌋ ⟩
   SuppTm ⌊ S ⌋ (Var (fromℕ _)) ∎
 fromPath-to-term {S = Join S T} (PExt P) rewrite Truth-prop (fromPath-non-empty P) = begin
-  connect-susp-supp (suspSupp (toVarSet (fromPath P))) (toVarSet (tEmp {S = T}))
-    ≡⟨ cong₂ (λ x y → connect-susp-supp (suspSupp x) y) (fromPath-to-term P) (toVarSet-emp T) ⟩
-  connect-susp-supp (suspSupp (SuppTm ⌊ S ⌋ (path-to-term P))) empty
-    ≡⟨ connect-susp-supp-ext ⌊ S ⌋ (path-to-term P) ⌊ T ⌋ ⟩
-  SuppTm (⌊ Join S T ⌋) (susp-tm (path-to-term P) [ connect-susp-inc-left _ _ ]tm) ∎
+  wedge-susp-supp (suspSupp (toVarSet (fromPath P))) (toVarSet (tEmp {S = T}))
+    ≡⟨ cong₂ (λ x y → wedge-susp-supp (suspSupp x) y) (fromPath-to-term P) (toVarSet-emp T) ⟩
+  wedge-susp-supp (suspSupp (SuppTm ⌊ S ⌋ (path-to-term P))) empty
+    ≡⟨ wedge-susp-supp-ext ⌊ S ⌋ (path-to-term P) ⌊ T ⌋ ⟩
+  SuppTm (⌊ Join S T ⌋) (susp-tm (path-to-term P) [ wedge-susp-inc-left _ _ ]tm) ∎
 fromPath-to-term {S = Join S T} (PShift P) rewrite Truth-not-prop (tvarset-empty S) = begin
-  connect-susp-supp empty (toVarSet (fromPath P))
-    ≡⟨ cong (connect-susp-supp empty) (fromPath-to-term P) ⟩
-  connect-susp-supp empty (SuppTm ⌊ T ⌋ (path-to-term P))
-    ≡⟨ connect-susp-supp-shift ⌊ S ⌋ ⌊ T ⌋ (path-to-term P) ⟩
-  SuppTm (connect-susp ⌊ S ⌋ ⌊ T ⌋) (path-to-term P [ connect-susp-inc-right _ _ ]tm) ∎
+  wedge-susp-supp empty (toVarSet (fromPath P))
+    ≡⟨ cong (wedge-susp-supp empty) (fromPath-to-term P) ⟩
+  wedge-susp-supp empty (SuppTm ⌊ T ⌋ (path-to-term P))
+    ≡⟨ wedge-susp-supp-shift ⌊ S ⌋ ⌊ T ⌋ (path-to-term P) ⟩
+  SuppTm (wedge-susp ⌊ S ⌋ ⌊ T ⌋) (path-to-term P [ wedge-susp-inc-right _ _ ]tm) ∎
 
 FVSTm-to-term : {ΓS : CtxOrTree n} → (a : STm (COT-to-MT ΓS)) → MtoVarSet ΓS (FVSTm a) ≡ SuppTm (COT-to-Ctx ΓS) (stm-to-term a)
 FVSTy-to-type : {ΓS : CtxOrTree n} → (A : STy (COT-to-MT ΓS)) → MtoVarSet ΓS (FVSTy A) ≡ SuppTy (COT-to-Ctx ΓS) (sty-to-type A)
@@ -154,17 +154,17 @@ FVSTm-to-term {ΓS = incCtx Γ} (SCoh S A L) = begin
   SuppTm Γ (Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm) ∎
 FVSTm-to-term {ΓS = incCtx _} (SOther t) = refl
 FVSTm-to-term {ΓS = incTree (Join S T)} (SExt a) rewrite Truth-prop (FVSTm-non-empty a) = begin
-  connect-susp-supp (suspSupp (toVarSet (FVSTm a))) (toVarSet (tEmp {S = T}))
-    ≡⟨ cong₂ (λ x y → connect-susp-supp (suspSupp x) y) (FVSTm-to-term a) (toVarSet-emp T) ⟩
-  connect-susp-supp (suspSupp (SuppTm ⌊ S ⌋ (stm-to-term a))) empty
-    ≡⟨ connect-susp-supp-ext ⌊ S ⌋ (stm-to-term a) ⌊ T ⌋ ⟩
-  SuppTm ⌊ Join S T ⌋ (susp-tm (stm-to-term a) [ connect-susp-inc-left _ _ ]tm) ∎
+  wedge-susp-supp (suspSupp (toVarSet (FVSTm a))) (toVarSet (tEmp {S = T}))
+    ≡⟨ cong₂ (λ x y → wedge-susp-supp (suspSupp x) y) (FVSTm-to-term a) (toVarSet-emp T) ⟩
+  wedge-susp-supp (suspSupp (SuppTm ⌊ S ⌋ (stm-to-term a))) empty
+    ≡⟨ wedge-susp-supp-ext ⌊ S ⌋ (stm-to-term a) ⌊ T ⌋ ⟩
+  SuppTm ⌊ Join S T ⌋ (susp-tm (stm-to-term a) [ wedge-susp-inc-left _ _ ]tm) ∎
 FVSTm-to-term {ΓS = incTree (Join S T)} (SShift a) rewrite Truth-not-prop (tvarset-empty S) = begin
-  connect-susp-supp empty (toVarSet (FVSTm a))
-    ≡⟨ cong (connect-susp-supp empty) (FVSTm-to-term a) ⟩
-  connect-susp-supp empty (SuppTm ⌊ T ⌋ (stm-to-term a))
-    ≡⟨ connect-susp-supp-shift ⌊ S ⌋ ⌊ T ⌋ (stm-to-term a)  ⟩
-  SuppTm ⌊ Join S T ⌋ (stm-to-term a [ connect-susp-inc-right _ _ ]tm) ∎
+  wedge-susp-supp empty (toVarSet (FVSTm a))
+    ≡⟨ cong (wedge-susp-supp empty) (FVSTm-to-term a) ⟩
+  wedge-susp-supp empty (SuppTm ⌊ T ⌋ (stm-to-term a))
+    ≡⟨ wedge-susp-supp-shift ⌊ S ⌋ ⌊ T ⌋ (stm-to-term a)  ⟩
+  SuppTm ⌊ Join S T ⌋ (stm-to-term a [ wedge-susp-inc-right _ _ ]tm) ∎
 
 FVSTy-to-type {ΓS = ΓS} S⋆ = trans (MtoVarSet-emp ΓS) (sym (DC-empty (COT-to-Ctx ΓS)))
 FVSTy-to-type {ΓS = ΓS} (SArr s A t) = begin
@@ -210,9 +210,9 @@ FVLabel-to-sub′ {S = Join S T} {ΓS = ΓS} L f g = begin
   SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₁ L)) ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))
     ≡˘⟨ cong (λ x → DC (COT-to-Ctx ΓS) x ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))) (unrestrict-supp (label-to-sub (label₁ L))) ⟩
   SuppSub (COT-to-Ctx ΓS) (unrestrict (label-to-sub (label₁ L))) ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))
-    ≡˘⟨ sub-from-connect-supp′ (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) l3 ⟩
+    ≡˘⟨ sub-from-wedge-supp′ (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) l3 ⟩
   SuppSub (COT-to-Ctx ΓS)
-          (sub-from-connect (unrestrict (label-to-sub (label₁ L)))
+          (sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
                             (label-to-sub (label₂ L))) ∎
   where
     l1 : FVSTy (lty L) ∪m ((FVSTm (ap L PHere) ∪m FVLabel (ap L ∘ PExt)) ∪m FVLabel (ap L ∘ PShift))

@@ -11,9 +11,9 @@ open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Suspension
 open import Catt.Suspension.Pasting
-open import Catt.Connection
-open import Catt.Connection.Properties
-open import Catt.Connection.Pasting
+open import Catt.Wedge
+open import Catt.Wedge.Properties
+open import Catt.Wedge.Pasting
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Pasting
@@ -23,8 +23,7 @@ open import Catt.Tree.Boundary.Properties
 
 open import Catt.Support
 open import Catt.Support.Properties
-open import Catt.Connection.Support
-open import Catt.Connection.Support
+open import Catt.Wedge.Support
 open import Catt.Suspension.Support
 
 open import Algebra.Bundles
@@ -154,7 +153,7 @@ fromPath (PShift P) = VSJoin false tEmp (fromPath P)
 
 toVarSet : TVarSet S → VarSet (suc (tree-size S))
 toVarSet (VSSing b) = b ∷ emp
-toVarSet (VSJoin b vs xs) = connect-susp-supp (if tvarset-non-empty vs then suspSupp (toVarSet vs) else if b then trueAt (fromℕ _) else empty ) (toVarSet xs)
+toVarSet (VSJoin b vs xs) = wedge-susp-supp (if tvarset-non-empty vs then suspSupp (toVarSet vs) else if b then trueAt (fromℕ _) else empty ) (toVarSet xs)
 
 tEmp-empty : (S : Tree n) → tvarset-non-empty (tEmp {S = S}) ≡ false
 tEmp-empty Sing = refl
@@ -162,7 +161,7 @@ tEmp-empty (Join S T) = cong₂ _∨_ (tEmp-empty S) (tEmp-empty T)
 
 toVarSet-emp : (S : Tree n) → toVarSet (tEmp {S = S}) ≡ empty {n = suc n}
 toVarSet-emp Sing = refl
-toVarSet-emp (Join S T) rewrite tEmp-empty S = trans (cong (connect-susp-supp empty) (toVarSet-emp T)) (connect-supp-empty (suc (suc _)) get-snd _)
+toVarSet-emp (Join S T) rewrite tEmp-empty S = trans (cong (wedge-susp-supp empty) (toVarSet-emp T)) (wedge-supp-empty (suc (suc _)) get-snd _)
 
 tFull-non-empty : (S : Tree n) → tvarset-non-empty (tFull {S = S}) ≡ true
 tFull-non-empty Sing = refl
@@ -172,12 +171,12 @@ toVarSet-full : (S : Tree n) → toVarSet (tFull {S = S}) ≡ full {n = suc n}
 toVarSet-full Sing = refl
 toVarSet-full (Join S T)
   rewrite tFull-non-empty S = begin
-  connect-susp-supp (suspSupp (toVarSet (tFull {S = S}))) (toVarSet (tFull {S = T}))
-    ≡⟨ cong₂ connect-susp-supp (cong suspSupp (toVarSet-full S)) (toVarSet-full T) ⟩
-  connect-susp-supp (suspSupp full) full
-    ≡⟨ cong (λ - → connect-susp-supp - full) suspSuppFull ⟩
-  connect-susp-supp full full
-    ≡⟨ connect-supp-full (2 + tree-size S) get-snd (tree-size T) ⟩
+  wedge-susp-supp (suspSupp (toVarSet (tFull {S = S}))) (toVarSet (tFull {S = T}))
+    ≡⟨ cong₂ wedge-susp-supp (cong suspSupp (toVarSet-full S)) (toVarSet-full T) ⟩
+  wedge-susp-supp (suspSupp full) full
+    ≡⟨ cong (λ - → wedge-susp-supp - full) suspSuppFull ⟩
+  wedge-susp-supp full full
+    ≡⟨ wedge-supp-full (2 + tree-size S) get-snd (tree-size T) ⟩
   full ∎
   where
     open ≡-Reasoning
@@ -194,9 +193,9 @@ tvarset-maybe-empty xs with tvarset-non-empty xs | inspect tvarset-non-empty xs
 tvarset-compat-1 : (xs : TVarSet S) → Truth (tvarset-non-empty xs) → Truth (varset-non-empty (toVarSet xs))
 tvarset-compat-1 (VSSing true) t = tt
 tvarset-compat-1 (VSJoin {n} b xs xs′) t with tvarset-non-empty xs | tvarset-maybe-empty xs | b
-... | false | p | false = connect-susp-supp-non-empty-right empty (toVarSet xs′) (tvarset-compat-1 xs′ t)
-... | false | p | true = connect-susp-supp-non-empty-left (FVTm get-fst) (toVarSet xs′) (trueAt-non-empty (fromℕ n))
-... | true | p | b = connect-susp-supp-non-empty-left (suspSupp (toVarSet xs)) (toVarSet xs′) (suspSupp-non-empty (toVarSet xs))
+... | false | p | false = wedge-susp-supp-non-empty-right empty (toVarSet xs′) (tvarset-compat-1 xs′ t)
+... | false | p | true = wedge-susp-supp-non-empty-left (FVTm get-fst) (toVarSet xs′) (trueAt-non-empty (fromℕ n))
+... | true | p | b = wedge-susp-supp-non-empty-left (suspSupp (toVarSet xs)) (toVarSet xs′) (suspSupp-non-empty (toVarSet xs))
 
 tvarset-non-empty-compat : (xs : TVarSet S) → tvarset-non-empty xs ≡ varset-non-empty (toVarSet xs)
 tvarset-non-empty-compat {n} {S = S} xs with tvarset-non-empty xs | tvarset-maybe-empty xs | tvarset-compat-1 xs
@@ -213,32 +212,32 @@ tvarset-non-empty-compat {n} {S = S} xs with tvarset-non-empty xs | tvarset-mayb
 toVarSet-∪t : (xs ys : TVarSet S) → toVarSet (xs ∪t ys) ≡ toVarSet xs ∪ toVarSet ys
 toVarSet-∪t (VSSing b) (VSSing b′) = refl
 toVarSet-∪t {S = Join S T} (VSJoin b xs xs′) (VSJoin b′ ys ys′) = begin
-  connect-susp-supp
+  wedge-susp-supp
       (if tvarset-non-empty (xs ∪t ys) then
        suspSupp (toVarSet (xs ∪t ys)) else
        (if b ∨ b′ then trueAt (fromℕ _) else empty))
       (toVarSet (xs′ ∪t ys′))
-    ≡⟨ cong₂ (λ x y → connect-susp-supp (if x then suspSupp y else (if b ∨ b′ then trueAt (fromℕ _) else empty)) (toVarSet (xs′ ∪t ys′))) (tvarset-non-empty-∪t xs ys) (toVarSet-∪t xs ys) ⟩
-  connect-susp-supp
+    ≡⟨ cong₂ (λ x y → wedge-susp-supp (if x then suspSupp y else (if b ∨ b′ then trueAt (fromℕ _) else empty)) (toVarSet (xs′ ∪t ys′))) (tvarset-non-empty-∪t xs ys) (toVarSet-∪t xs ys) ⟩
+  wedge-susp-supp
     (if tvarset-non-empty xs ∨ tvarset-non-empty ys then
      suspSupp (toVarSet xs ∪ toVarSet ys) else
      (if b ∨ b′ then trueAt (fromℕ (suc (suc _))) else empty))
     (toVarSet (xs′ ∪t ys′))
-    ≡⟨ cong₂ connect-susp-supp (lem b b′) (toVarSet-∪t xs′ ys′) ⟩
-  connect-susp-supp
+    ≡⟨ cong₂ wedge-susp-supp (lem b b′) (toVarSet-∪t xs′ ys′) ⟩
+  wedge-susp-supp
     ((if tvarset-non-empty xs then suspSupp (toVarSet xs) else
       (if b then trueAt (fromℕ (suc (suc _))) else empty))
      ∪
      (if tvarset-non-empty ys then suspSupp (toVarSet ys) else
       (if b′ then trueAt (fromℕ (suc (suc _))) else empty)))
     (toVarSet xs′ ∪ toVarSet ys′)
-    ≡˘⟨ connect-supp-∪ _ _ (toVarSet xs′) (toVarSet ys′) get-snd ⟩
-  connect-susp-supp
+    ≡˘⟨ wedge-supp-∪ _ _ (toVarSet xs′) (toVarSet ys′) get-snd ⟩
+  wedge-susp-supp
       (if tvarset-non-empty xs then suspSupp (toVarSet xs) else
        (if b then trueAt (fromℕ _) else empty))
       (toVarSet xs′)
       ∪
-      connect-susp-supp
+      wedge-susp-supp
       (if tvarset-non-empty ys then suspSupp (toVarSet ys) else
        (if b′ then trueAt (fromℕ _) else empty))
       (toVarSet ys′) ∎
@@ -285,10 +284,10 @@ toVarSet-∪t {S = Join S T} (VSJoin b xs xs′) (VSJoin b′ ys ys′) = begin
 fromPath-PHere : (S : Tree n) → toVarSet (fromPath (PHere {S = S})) ≡ trueAt (fromℕ _)
 fromPath-PHere Sing = refl
 fromPath-PHere (Join S T) rewrite tEmp-empty S = begin
-  connect-susp-supp (trueAt (fromℕ _)) (toVarSet (tEmp {S = T}))
-    ≡⟨ cong (connect-susp-supp (trueAt (fromℕ _))) (toVarSet-emp T) ⟩
-  connect-susp-supp (trueAt (fromℕ (suc (suc _)))) empty
-    ≡⟨ connect-supp-fst get-snd (tree-size T) ⟩
+  wedge-susp-supp (trueAt (fromℕ _)) (toVarSet (tEmp {S = T}))
+    ≡⟨ cong (wedge-susp-supp (trueAt (fromℕ _))) (toVarSet-emp T) ⟩
+  wedge-susp-supp (trueAt (fromℕ (suc (suc _)))) empty
+    ≡⟨ wedge-supp-fst get-snd (tree-size T) ⟩
   trueAt (fromℕ ((tree-size T) + suc (suc (tree-size S)))) ∎
   where
     open ≡-Reasoning
@@ -296,14 +295,14 @@ fromPath-PHere (Join S T) rewrite tEmp-empty S = begin
 fromPath-last-path : (S : Tree n) → toVarSet (fromPath (last-path S)) ≡ FVTm (tree-last-var S)
 fromPath-last-path Sing = refl
 fromPath-last-path (Join S T) rewrite tEmp-empty S = begin
-  connect-susp-supp empty (toVarSet (fromPath (last-path T)))
-    ≡⟨ cong (connect-susp-supp empty) (fromPath-last-path T) ⟩
-  connect-susp-supp empty (FVTm (tree-last-var T))
-    ≡˘⟨ connect-supp-inc-right get-snd (FVTm (tree-last-var T)) ⟩
+  wedge-susp-supp empty (toVarSet (fromPath (last-path T)))
+    ≡⟨ cong (wedge-susp-supp empty) (fromPath-last-path T) ⟩
+  wedge-susp-supp empty (FVTm (tree-last-var T))
+    ≡˘⟨ wedge-supp-inc-right get-snd (FVTm (tree-last-var T)) ⟩
   TransportVarSet (FVTm (tree-last-var T))
-    (connect-susp-inc-right _ _)
-    ≡⟨ TransportVarSet-tm (tree-last-var T) (connect-susp-inc-right _ _) ⟩
-  FVTm (tree-last-var T [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm) ∎
+    (wedge-susp-inc-right _ _)
+    ≡⟨ TransportVarSet-tm (tree-last-var T) (wedge-susp-inc-right _ _) ⟩
+  FVTm (tree-last-var T [ wedge-susp-inc-right (tree-size S) (tree-size T) ]tm) ∎
   where
     open ≡-Reasoning
 
@@ -379,11 +378,11 @@ supp-compat′ (suc d) (Join S T) b rewrite Truth-prop (supp-tree-bd-non-empty d
   instance _ = tree-to-pd T
   instance _ = tree-to-pd (Join S T)
   in begin
-  connect-susp-supp (suspSupp (toVarSet (supp-tree-bd d S b))) (toVarSet (supp-tree-bd (suc d) T b))
-    ≡⟨ cong₂ connect-susp-supp (cong suspSupp (supp-compat′ d S b)) (supp-compat′ (suc d) T b) ⟩
-  connect-susp-supp (suspSupp (pd-bd-supp d ⌊ S ⌋ b)) (pd-bd-supp (suc d) ⌊ T ⌋ b)
-    ≡⟨ connect-susp-pdb-bd-compat d ⌊ S ⌋ ⌊ T ⌋ ⦃ pd-to-pdb it ⦄ b ⟩
-  pd-bd-supp (suc d) (connect-susp ⌊ S ⌋ ⌊ T ⌋) b ∎
+  wedge-susp-supp (suspSupp (toVarSet (supp-tree-bd d S b))) (toVarSet (supp-tree-bd (suc d) T b))
+    ≡⟨ cong₂ wedge-susp-supp (cong suspSupp (supp-compat′ d S b)) (supp-compat′ (suc d) T b) ⟩
+  wedge-susp-supp (suspSupp (pd-bd-supp d ⌊ S ⌋ b)) (pd-bd-supp (suc d) ⌊ T ⌋ b)
+    ≡⟨ wedge-susp-pdb-bd-compat d ⌊ S ⌋ ⌊ T ⌋ ⦃ pd-to-pdb it ⦄ b ⟩
+  pd-bd-supp (suc d) (wedge-susp ⌊ S ⌋ ⌊ T ⌋) b ∎
   where
     open ≡-Reasoning
 
@@ -449,18 +448,18 @@ set-fst-true-toVarSet : (xs : TVarSet S) → toVarSet (set-fst-true xs) ≡ true
 set-fst-true-toVarSet (VSSing b) = refl
 set-fst-true-toVarSet (VSJoin {T = T} b xs ys) with tvarset-non-empty xs
 ... | false = begin
-  connect-susp-supp (trueAt (fromℕ _)) (toVarSet ys)
-    ≡˘⟨ cong₂ connect-susp-supp (lem b) (∪-left-unit (toVarSet ys)) ⟩
-  connect-susp-supp
+  wedge-susp-supp (trueAt (fromℕ _)) (toVarSet ys)
+    ≡˘⟨ cong₂ wedge-susp-supp (lem b) (∪-left-unit (toVarSet ys)) ⟩
+  wedge-susp-supp
     (trueAt (fromℕ (suc (suc _))) ∪
      (if b then trueAt (fromℕ (suc (suc _))) else empty))
     (empty ∪ toVarSet ys)
-    ≡˘⟨ connect-supp-∪ (trueAt (fromℕ (suc (suc _)))) (if b then trueAt (fromℕ (suc (suc _))) else empty) empty (toVarSet ys) get-snd ⟩
-  connect-susp-supp (trueAt (fromℕ (suc (suc _)))) empty
-  ∪ connect-susp-supp (if b then trueAt (fromℕ (suc (suc _))) else empty) (toVarSet ys)
-    ≡⟨ cong (_∪ connect-susp-supp (if b then trueAt (fromℕ _) else empty) (toVarSet ys)) (connect-supp-fst get-snd (tree-size T)) ⟩
+    ≡˘⟨ wedge-supp-∪ (trueAt (fromℕ (suc (suc _)))) (if b then trueAt (fromℕ (suc (suc _))) else empty) empty (toVarSet ys) get-snd ⟩
+  wedge-susp-supp (trueAt (fromℕ (suc (suc _)))) empty
+  ∪ wedge-susp-supp (if b then trueAt (fromℕ (suc (suc _))) else empty) (toVarSet ys)
+    ≡⟨ cong (_∪ wedge-susp-supp (if b then trueAt (fromℕ _) else empty) (toVarSet ys)) (wedge-supp-fst get-snd (tree-size T)) ⟩
   trueAt (fromℕ (_ + suc (suc _)))
-  ∪ connect-susp-supp (if b then trueAt (fromℕ _) else empty) (toVarSet ys) ∎
+  ∪ wedge-susp-supp (if b then trueAt (fromℕ _) else empty) (toVarSet ys) ∎
   where
     open ≡-Reasoning
     lem : (b : Bool)
@@ -469,28 +468,28 @@ set-fst-true-toVarSet (VSJoin {T = T} b xs ys) with tvarset-non-empty xs
     lem false = ∪-right-unit (trueAt (fromℕ _))
     lem true = ∪-idem (trueAt (fromℕ _))
 ... | true = begin
-  connect-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys)
-    ≡˘⟨ cong₂ connect-susp-supp (trans (∪-comm _ _) (sym (lookup-isVar-⊆ (suspSupp (toVarSet xs)) get-fst (suspSuppFstTruth (toVarSet xs))))) (∪-left-unit (toVarSet ys)) ⟩
-  connect-susp-supp (trueAt (fromℕ (suc (suc _))) ∪ suspSupp (toVarSet xs)) (empty ∪ toVarSet ys)
-    ≡˘⟨ connect-supp-∪ (trueAt (fromℕ (suc (suc _)))) (suspSupp (toVarSet xs)) empty (toVarSet ys) get-snd ⟩
-  connect-susp-supp (trueAt (fromℕ (suc (suc _)))) empty ∪
-    connect-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys)
-    ≡⟨ cong (_∪ connect-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys)) (connect-supp-fst get-snd (tree-size T)) ⟩
+  wedge-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys)
+    ≡˘⟨ cong₂ wedge-susp-supp (trans (∪-comm _ _) (sym (lookup-isVar-⊆ (suspSupp (toVarSet xs)) get-fst (suspSuppFstTruth (toVarSet xs))))) (∪-left-unit (toVarSet ys)) ⟩
+  wedge-susp-supp (trueAt (fromℕ (suc (suc _))) ∪ suspSupp (toVarSet xs)) (empty ∪ toVarSet ys)
+    ≡˘⟨ wedge-supp-∪ (trueAt (fromℕ (suc (suc _)))) (suspSupp (toVarSet xs)) empty (toVarSet ys) get-snd ⟩
+  wedge-susp-supp (trueAt (fromℕ (suc (suc _)))) empty ∪
+    wedge-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys)
+    ≡⟨ cong (_∪ wedge-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys)) (wedge-supp-fst get-snd (tree-size T)) ⟩
   trueAt (fromℕ (_ + suc (suc _))) ∪
-      connect-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys) ∎
+      wedge-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys) ∎
   where
     open ≡-Reasoning
 
 DCT-toVarSet : (xs : TVarSet S) → toVarSet (DCT xs) ≡ toVarSet xs
 DCT-toVarSet (VSSing b) = refl
 DCT-toVarSet (VSJoin b xs ys) rewrite DCT-non-empty xs with tvarset-non-empty xs
-... | false = cong₂ connect-susp-supp (cong (λ - → if - then trueAt (fromℕ _) else empty) (∨-identityʳ b)) (DCT-toVarSet ys)
+... | false = cong₂ wedge-susp-supp (cong (λ - → if - then trueAt (fromℕ _) else empty) (∨-identityʳ b)) (DCT-toVarSet ys)
 ... | true = begin
-  connect-susp-supp (suspSupp (toVarSet (DCT xs))) (toVarSet (set-fst-true (DCT ys)))
-    ≡⟨ cong₂ connect-susp-supp (cong suspSupp (DCT-toVarSet xs)) (trans (set-fst-true-toVarSet (DCT ys)) (cong (trueAt (fromℕ _) ∪_) (DCT-toVarSet ys))) ⟩
-  connect-susp-supp (suspSupp (toVarSet xs)) (trueAt (fromℕ _) ∪ toVarSet ys)
-    ≡˘⟨ connect-susp-supp-lem (toVarSet xs) (toVarSet ys) ⟩
-  connect-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys) ∎
+  wedge-susp-supp (suspSupp (toVarSet (DCT xs))) (toVarSet (set-fst-true (DCT ys)))
+    ≡⟨ cong₂ wedge-susp-supp (cong suspSupp (DCT-toVarSet xs)) (trans (set-fst-true-toVarSet (DCT ys)) (cong (trueAt (fromℕ _) ∪_) (DCT-toVarSet ys))) ⟩
+  wedge-susp-supp (suspSupp (toVarSet xs)) (trueAt (fromℕ _) ∪ toVarSet ys)
+    ≡˘⟨ wedge-susp-supp-lem (toVarSet xs) (toVarSet ys) ⟩
+  wedge-susp-supp (suspSupp (toVarSet xs)) (toVarSet ys) ∎
   where
     open ≡-Reasoning
 
@@ -541,10 +540,10 @@ tvarset-fst-toVarSet (VSJoin {n} b xs ys) = begin
     (if tvarset-non-empty xs then suspSupp (toVarSet xs) else
      (if b then ewf (ewf (trueAt (fromℕ _))) else empty))
     (fromℕ _)
-    ≡˘⟨ connect-susp-supp-fst-var (if tvarset-non-empty xs then suspSupp (toVarSet xs) else
+    ≡˘⟨ wedge-susp-supp-fst-var (if tvarset-non-empty xs then suspSupp (toVarSet xs) else
         (if b then ewf (ewf (trueAt (fromℕ _))) else empty)) (toVarSet ys) ⟩
   lookup
-      (connect-susp-supp
+      (wedge-susp-supp
        (if tvarset-non-empty xs then suspSupp (toVarSet xs) else
         (if b then ewf (ewf (trueAt (fromℕ _))) else empty))
        (toVarSet ys))
@@ -571,9 +570,9 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
   where
     open ≡-Reasoning
     import Algebra.Solver.IdempotentCommutativeMonoid as Solver
-    connect-prop : ∀ (xs xs′ : VarSet (3 + n)) (ys ys′ : VarSet 1) → connect-susp-supp xs ys ≡ connect-susp-supp xs′ ys′ → xs ∪ FVTm get-snd ≡ xs′ ∪ FVTm get-snd
-    connect-prop xs xs′ (ewf emp) (ewf emp) p = cong (_∪ trueAt (inject₁ (fromℕ _))) p
-    connect-prop xs xs′ (ewf emp) (ewt emp) p = begin
+    wedge-prop : ∀ (xs xs′ : VarSet (3 + n)) (ys ys′ : VarSet 1) → wedge-susp-supp xs ys ≡ wedge-susp-supp xs′ ys′ → xs ∪ FVTm get-snd ≡ xs′ ∪ FVTm get-snd
+    wedge-prop xs xs′ (ewf emp) (ewf emp) p = cong (_∪ trueAt (inject₁ (fromℕ _))) p
+    wedge-prop xs xs′ (ewf emp) (ewt emp) p = begin
       xs ∪ FVTm get-snd
         ≡⟨ cong (_∪ FVTm get-snd) p ⟩
       xs′ ∪ FVTm get-snd ∪ FVTm get-snd
@@ -581,7 +580,7 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
       xs′ ∪ FVTm get-snd ∎
       where
         open Solver (∪-idempotentCommutativeMonoid)
-    connect-prop xs xs′ (ewt emp) (ewf emp) p = begin
+    wedge-prop xs xs′ (ewt emp) (ewf emp) p = begin
       xs ∪ FVTm get-snd
         ≡⟨ prove 2 (var 0F ⊕ var 1F) ((var 0F ⊕ var 1F) ⊕ var 1F) (_ ∷ _ ∷ emp) ⟩
       xs ∪ FVTm get-snd ∪ FVTm get-snd
@@ -589,7 +588,7 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
       xs′ ∪ FVTm get-snd ∎
       where
         open Solver (∪-idempotentCommutativeMonoid)
-    connect-prop xs xs′ (ewt emp) (ewt emp) p = p
+    wedge-prop xs xs′ (ewt emp) (ewt emp) p = p
 
     absurd : {A : Set} → (true ≡ false) → A
     absurd ()
@@ -684,23 +683,23 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
     susp-prop (ewt xs) (ewt ys) b b′ p = suspSupp-reflect (ewt xs) (ewt ys) p
 
     lem : ∀ b (xs ys : VarSet (suc n)) b′ (xs′ ys′ : VarSet (suc m))
-        → connect-susp-supp (if varset-non-empty xs then suspSupp xs else (if b then ewf (ewf (trueAt (fromℕ _))) else empty)) xs′
-        ≡ connect-susp-supp (if varset-non-empty ys then suspSupp ys else (if b′ then ewf (ewf (trueAt (fromℕ _))) else empty)) ys′
+        → wedge-susp-supp (if varset-non-empty xs then suspSupp xs else (if b then ewf (ewf (trueAt (fromℕ _))) else empty)) xs′
+        ≡ wedge-susp-supp (if varset-non-empty ys then suspSupp ys else (if b′ then ewf (ewf (trueAt (fromℕ _))) else empty)) ys′
         → xs ≡ ys
-    lem {m = zero} b xs ys b′ xs′ ys′ p = susp-prop xs ys b b′ (connect-prop (if varset-non-empty xs then suspSupp xs else
+    lem {m = zero} b xs ys b′ xs′ ys′ p = susp-prop xs ys b b′ (wedge-prop (if varset-non-empty xs then suspSupp xs else
                                                                                            (if b then FVTm get-fst else empty)) (if varset-non-empty ys then suspSupp ys else
                                                                                                                                  (if b′ then FVTm get-fst else empty)) xs′ ys′ p)
     lem {m = suc m} b xs ys b′ (x ∷ xs′) (y ∷ ys′) p = lem b xs ys b′ xs′ ys′ (cong tail p)
 
     lem2 : DCT xs ≡ DCT ys
     lem2 = DCT-reflect (lem b (toVarSet xs) (toVarSet ys) b′ (toVarSet xs′) (toVarSet ys′) (begin
-      connect-susp-supp
+      wedge-susp-supp
         (if varset-non-empty (toVarSet xs) then suspSupp (toVarSet xs) else
          (if b then ewf (ewf (trueAt (fromℕ _))) else empty))
         (toVarSet xs′)
         ≡˘⟨ cong
              (λ a →
-                connect-susp-supp
+                wedge-susp-supp
                 (if a then suspSupp (toVarSet xs) else
                  (if b then ewf (ewf (trueAt (fromℕ _))) else empty))
                 (toVarSet xs′))
@@ -710,12 +709,12 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
       toVarSet (VSJoin b′ ys ys′)
         ≡⟨ cong
              (λ a →
-                connect-susp-supp
+                wedge-susp-supp
                 (if a then suspSupp (toVarSet ys) else
                  (if b′ then ewf (ewf (trueAt (fromℕ _))) else empty))
                 (toVarSet ys′))
              (tvarset-non-empty-compat ys) ⟩
-      connect-susp-supp
+      wedge-susp-supp
         (if varset-non-empty (toVarSet ys) then suspSupp (toVarSet ys) else
          (if b′ then ewf (ewf (trueAt (fromℕ _))) else empty))
         (toVarSet ys′) ∎))
@@ -741,7 +740,7 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
               toVarSet (set-fst-true xs′)
                 ≡⟨ set-fst-true-toVarSet xs′ ⟩
               trueAt (fromℕ _) ∪ toVarSet xs′
-                ≡⟨ connect-susp-supp-proj-right _ _ _ _ p ⟩
+                ≡⟨ wedge-susp-supp-proj-right _ _ _ _ p ⟩
               trueAt (fromℕ _) ∪ toVarSet ys′
                 ≡˘⟨ set-fst-true-toVarSet ys′ ⟩
               toVarSet (set-fst-true ys′) ∎
@@ -759,11 +758,11 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
               (if b then lookup (trueAt (fromℕ (suc (suc n)))) (fromℕ (2 + n)) else lookup empty (fromℕ (2 + n)))
                 ≡˘⟨ if-float (λ a → lookup a (fromℕ (2 + n))) b ⟩
               lookup (if b then trueAt (fromℕ (suc (suc n))) else empty) (fromℕ (suc (suc n)))
-                ≡˘⟨ connect-susp-supp-fst-var (if b then trueAt (fromℕ _) else empty) (toVarSet xs′) ⟩
-              lookup (connect-susp-supp (if b then trueAt (fromℕ _) else empty) (toVarSet xs′)) (fromℕ _)
+                ≡˘⟨ wedge-susp-supp-fst-var (if b then trueAt (fromℕ _) else empty) (toVarSet xs′) ⟩
+              lookup (wedge-susp-supp (if b then trueAt (fromℕ _) else empty) (toVarSet xs′)) (fromℕ _)
                 ≡⟨ cong (λ a → lookup a (fromℕ _)) p ⟩
-              lookup (connect-susp-supp (if b′ then trueAt (fromℕ _) else empty) (toVarSet ys′)) (fromℕ _)
-                ≡⟨ connect-susp-supp-fst-var (if b′ then trueAt (fromℕ _) else empty) (toVarSet ys′) ⟩
+              lookup (wedge-susp-supp (if b′ then trueAt (fromℕ _) else empty) (toVarSet ys′)) (fromℕ _)
+                ≡⟨ wedge-susp-supp-fst-var (if b′ then trueAt (fromℕ _) else empty) (toVarSet ys′) ⟩
               lookup (if b′ then trueAt (fromℕ (suc (suc n))) else empty) (fromℕ (suc (suc n)))
                 ≡⟨ if-float (λ a → lookup a (fromℕ (2 + n))) b′ ⟩
               (if b′ then lookup (trueAt (fromℕ (suc (suc n)))) (fromℕ (2 + n)) else lookup empty (fromℕ (2 + n)))
@@ -792,13 +791,13 @@ DCT-reflect {xs = VSJoin b xs xs′} {ys = VSJoin b′ ys ys′} p = final
                 ≡⟨ cong₂ _∨_ (sym (l3 b (suc n))) (tvarset-fst-toVarSet xs′) ⟩
               lookup (if b then ewf (ewf (trueAt (fromℕ n))) else empty) (inject₁ (fromℕ (suc n)))
                 ∨ lookup (toVarSet xs′) (fromℕ _)
-                ≡˘⟨ connect-susp-supp-snd-var (if b then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet xs′) ⟩
-              lookup (connect-susp-supp (if b then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet xs′))
+                ≡˘⟨ wedge-susp-supp-snd-var (if b then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet xs′) ⟩
+              lookup (wedge-susp-supp (if b then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet xs′))
                 (suc m ↑ʳ inject₁ (fromℕ n))
                 ≡⟨ cong (λ a → lookup a (suc m ↑ʳ inject₁ (fromℕ n))) p ⟩
-              lookup (connect-susp-supp (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet ys′))
+              lookup (wedge-susp-supp (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet ys′))
                 (suc m ↑ʳ inject₁ (fromℕ n))
-                ≡⟨ connect-susp-supp-snd-var (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet ys′) ⟩
+                ≡⟨ wedge-susp-supp-snd-var (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty) (toVarSet ys′) ⟩
               lookup (if b′ then ewf (ewf (trueAt (fromℕ n))) else empty)
                 (inject₁ (fromℕ (suc n)))
                 ∨ lookup (toVarSet ys′) (fromℕ _)

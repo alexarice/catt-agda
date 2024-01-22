@@ -8,8 +8,8 @@ open import Catt.Syntax.Bundles
 open import Catt.Variables
 open import Catt.Variables.Properties
 open import Catt.Suspension
-open import Catt.Connection
-open import Catt.Connection.Properties
+open import Catt.Wedge
+open import Catt.Wedge.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
@@ -26,8 +26,8 @@ data _≃p_ : Path S → Path T → Set where
 
 path-to-term-≃ : P ≃p Q → path-to-term P ≃tm path-to-term Q
 path-to-term-≃ (Here≃ x) = Var≃ (cong suc (≃-to-same-n x)) (cong (λ - → toℕ (fromℕ -)) (≃-to-same-n x))
-path-to-term-≃ (Ext≃ p x) = sub-action-≃-tm (susp-tm-≃ (path-to-term-≃ p)) (connect-susp-inc-left-≃ (≃p-to-same-n p) (≃-to-same-n x))
-path-to-term-≃ (Shift≃ x p) = sub-action-≃-tm (path-to-term-≃ p) (connect-susp-inc-right-≃ (≃-to-same-n x) (≃p-to-same-n p))
+path-to-term-≃ (Ext≃ p x) = sub-action-≃-tm (susp-tm-≃ (path-to-term-≃ p)) (wedge-susp-inc-left-≃ (≃p-to-same-n p) (≃-to-same-n x))
+path-to-term-≃ (Shift≃ x p) = sub-action-≃-tm (path-to-term-≃ p) (wedge-susp-inc-right-≃ (≃-to-same-n x) (≃p-to-same-n p))
 
 refl≃p : P ≃p P
 refl≃p {P = PHere} = Here≃ refl≃
@@ -74,8 +74,8 @@ maximal-join-not-here {T = Join S T} (PShift P) = tt
 
 path-to-term-is-var : (P : Path T) → isVar (path-to-term P)
 path-to-term-is-var PHere = tt
-path-to-term-is-var (PExt P) = var-to-var-comp-tm (susp-tm (path-to-term P)) ⦃ susp-tm-var (path-to-term P) ⦃ path-to-term-is-var P ⦄ ⦄ (connect-susp-inc-left _ _) ⦃ connect-susp-inc-left-var-to-var _ _ ⦄
-path-to-term-is-var (PShift P) = var-to-var-comp-tm (path-to-term P) ⦃ path-to-term-is-var P ⦄ (connect-susp-inc-right _ _) ⦃ connect-susp-inc-right-var-to-var _ _ ⦄
+path-to-term-is-var (PExt P) = var-to-var-comp-tm (susp-tm (path-to-term P)) ⦃ susp-tm-var (path-to-term P) ⦃ path-to-term-is-var P ⦄ ⦄ (wedge-susp-inc-left _ _) ⦃ wedge-susp-inc-left-var-to-var _ _ ⦄
+path-to-term-is-var (PShift P) = var-to-var-comp-tm (path-to-term P) ⦃ path-to-term-is-var P ⦄ (wedge-susp-inc-right _ _) ⦃ wedge-susp-inc-right-var-to-var _ _ ⦄
 
 max-path-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → (Z : Path T) → .⦃ is-maximal Z ⦄ → S ≃ T → is-linear-max-path S ≃p Z
 max-path-lin-tree Sing PHere Sing≃ = Here≃ Sing≃
@@ -94,25 +94,25 @@ proj-ext (Ext≃ p _) = p
 proj-shift : PShift {S = S} P ≃p PShift {S = T} Q → P ≃p Q
 proj-shift (Shift≃ _ p) = p
 
-var-connect-susp-inc-left : (i : Fin (3 + m)) → (n : ℕ) → Var i [ connect-susp-inc-left m n ]tm ≃tm Var (n ↑ʳ i)
-var-connect-susp-inc-left i zero = id-on-tm (Var i)
-var-connect-susp-inc-left i (suc n) = begin
-  < Var i [ connect-susp-inc-left _ (suc n) ]tm >tm
-    ≈⟨ apply-lifted-sub-tm-≃ (Var i) (connect-susp-inc-left _ n) ⟩
-  < lift-tm (Var i [ connect-susp-inc-left _ n ]tm) >tm
-    ≈⟨ lift-tm-≃ (var-connect-susp-inc-left i n) ⟩
+var-wedge-susp-inc-left : (i : Fin (3 + m)) → (n : ℕ) → Var i [ wedge-susp-inc-left m n ]tm ≃tm Var (n ↑ʳ i)
+var-wedge-susp-inc-left i zero = id-on-tm (Var i)
+var-wedge-susp-inc-left i (suc n) = begin
+  < Var i [ wedge-susp-inc-left _ (suc n) ]tm >tm
+    ≈⟨ apply-lifted-sub-tm-≃ (Var i) (wedge-susp-inc-left _ n) ⟩
+  < lift-tm (Var i [ wedge-susp-inc-left _ n ]tm) >tm
+    ≈⟨ lift-tm-≃ (var-wedge-susp-inc-left i n) ⟩
   < Var (suc n ↑ʳ i) >tm ∎
   where
     open Reasoning tm-setoid
 
-var-connect-susp-inc-right : (i : Fin (suc m)) → (n : ℕ) → i ≢ fromℕ m → Var i [ connect-susp-inc-right n m ]tm ≃tm Var (i ↑ˡ 2 + n)
-var-connect-susp-inc-right {zero} 0F n p = ⊥-elim (p refl)
-var-connect-susp-inc-right {suc m} 0F n p = refl≃tm
-var-connect-susp-inc-right {suc m} (suc i) n p = begin
-  < Var i [ lift-sub (connect-susp-inc-right n m) ]tm >tm
-    ≈⟨ apply-lifted-sub-tm-≃ (Var i) (connect-susp-inc-right n m) ⟩
-  < lift-tm (Var i [ connect-susp-inc-right n m ]tm) >tm
-    ≈⟨ lift-tm-≃ (var-connect-susp-inc-right i n (λ x → p (cong suc x))) ⟩
+var-wedge-susp-inc-right : (i : Fin (suc m)) → (n : ℕ) → i ≢ fromℕ m → Var i [ wedge-susp-inc-right n m ]tm ≃tm Var (i ↑ˡ 2 + n)
+var-wedge-susp-inc-right {zero} 0F n p = ⊥-elim (p refl)
+var-wedge-susp-inc-right {suc m} 0F n p = refl≃tm
+var-wedge-susp-inc-right {suc m} (suc i) n p = begin
+  < Var i [ lift-sub (wedge-susp-inc-right n m) ]tm >tm
+    ≈⟨ apply-lifted-sub-tm-≃ (Var i) (wedge-susp-inc-right n m) ⟩
+  < lift-tm (Var i [ wedge-susp-inc-right n m ]tm) >tm
+    ≈⟨ lift-tm-≃ (var-wedge-susp-inc-right i n (λ x → p (cong suc x))) ⟩
   < lift-tm (Var (i ↑ˡ 2 + n)) >tm ∎
   where
     open Reasoning tm-setoid
@@ -175,19 +175,19 @@ path-to-fin-lem {T = Join {n} {m} S T} (PShift (PShift P)) p = ⊥-elim (fromℕ
 path-to-term-is-path-to-fin : (P : Path T) → path-to-term P ≃tm Var (path-to-fin P)
 path-to-term-is-path-to-fin PHere = refl≃tm
 path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PExt P) = begin
-  < susp-tm (path-to-term P) [ connect-susp-inc-left n m ]tm >tm
+  < susp-tm (path-to-term P) [ wedge-susp-inc-left n m ]tm >tm
     ≈⟨ sub-action-≃-tm (susp-tm-≃ (path-to-term-is-path-to-fin P)) refl≃s ⟩
-  < Var (inject₁ (inject₁ (path-to-fin P))) [ connect-susp-inc-left n m ]tm >tm
-    ≈⟨ var-connect-susp-inc-left (inject₁ (inject₁ (path-to-fin P))) m ⟩
+  < Var (inject₁ (inject₁ (path-to-fin P))) [ wedge-susp-inc-left n m ]tm >tm
+    ≈⟨ var-wedge-susp-inc-left (inject₁ (inject₁ (path-to-fin P))) m ⟩
   < Var (m ↑ʳ (inject₁ (inject₁ (path-to-fin P)))) >tm
     ≈˘⟨ var-cast (+-suc m (suc (suc n))) (m ↑ʳ (inject₁ (inject₁ (path-to-fin P)))) ⟩
   < Var (cast _ (m ↑ʳ (inject₁ (inject₁ (path-to-fin P))))) >tm ∎
   where open Reasoning tm-setoid
 path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PShift PHere) = begin
-  < Var (fromℕ m) [ connect-susp-inc-right n m ]tm >tm
-    ≈˘⟨ connect-inc-fst-var get-snd m ⟩
-  < get-snd [ connect-susp-inc-left n m ]tm >tm
-    ≈⟨ var-connect-susp-inc-left (inject₁ (fromℕ _)) m ⟩
+  < Var (fromℕ m) [ wedge-susp-inc-right n m ]tm >tm
+    ≈˘⟨ wedge-inc-fst-var get-snd m ⟩
+  < get-snd [ wedge-susp-inc-left n m ]tm >tm
+    ≈⟨ var-wedge-susp-inc-left (inject₁ (fromℕ _)) m ⟩
   < Var (m ↑ʳ (inject₁ (fromℕ (suc n)))) >tm
     ≈˘⟨ Var≃ (sym (+-suc m (2 + n))) lem ⟩
   < Var (cast _ (inject₁ (fromℕ (m + suc n)))) >tm ∎
@@ -210,10 +210,10 @@ path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PShift PHere) = begin
         open ≡-Reasoning
     open Reasoning tm-setoid
 path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PShift P@(PExt _)) = begin
-  < path-to-term P [ connect-susp-inc-right n m ]tm >tm
+  < path-to-term P [ wedge-susp-inc-right n m ]tm >tm
     ≈⟨ sub-action-≃-tm (path-to-term-is-path-to-fin P) refl≃s ⟩
-  < Var (path-to-fin P) [ connect-susp-inc-right n m ]tm >tm
-    ≈⟨ var-connect-susp-inc-right (path-to-fin P) n (λ y → l2 (path-to-fin-lem P y)) ⟩
+  < Var (path-to-fin P) [ wedge-susp-inc-right n m ]tm >tm
+    ≈⟨ var-wedge-susp-inc-right (path-to-fin P) n (λ y → l2 (path-to-fin-lem P y)) ⟩
   < Var (path-to-fin P ↑ˡ 2 + n) >tm ∎
   where
     open Reasoning tm-setoid
@@ -222,10 +222,10 @@ path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PShift P@(PExt _)) = begin
     l2 ()
 
 path-to-term-is-path-to-fin {T = Join {n} {m} S T} (PShift P@(PShift _)) = begin
-  < path-to-term P [ connect-susp-inc-right n m ]tm >tm
+  < path-to-term P [ wedge-susp-inc-right n m ]tm >tm
     ≈⟨ sub-action-≃-tm (path-to-term-is-path-to-fin P) refl≃s ⟩
-  < Var (path-to-fin P) [ connect-susp-inc-right n m ]tm >tm
-    ≈⟨ var-connect-susp-inc-right (path-to-fin P) n (λ y → l2 (path-to-fin-lem P y)) ⟩
+  < Var (path-to-fin P) [ wedge-susp-inc-right n m ]tm >tm
+    ≈⟨ var-wedge-susp-inc-right (path-to-fin P) n (λ y → l2 (path-to-fin-lem P y)) ⟩
   < Var (path-to-fin P ↑ˡ 2 + n) >tm ∎
   where
     open Reasoning tm-setoid

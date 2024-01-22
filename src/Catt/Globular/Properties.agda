@@ -7,7 +7,7 @@ open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
 open import Catt.Globular
 open import Catt.Suspension
-open import Catt.Connection
+open import Catt.Wedge
 open import Catt.Tree
 
 tm-to-ty-≃ : Γ ≃c Δ → s ≃tm t → tm-to-ty Γ s ≃ty tm-to-ty Δ t
@@ -34,22 +34,22 @@ susp-ctx-dim : (Γ : Ctx n) → .⦃ NonZero n ⦄ → ctx-dim (susp-ctx Γ) ≡
 susp-ctx-dim (∅ , A) = susp-dim A
 susp-ctx-dim (Γ , B , A) = cong₂ _⊔_ (susp-ctx-dim (Γ , B)) (susp-dim A)
 
-connect-ctx-dim : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → ctx-dim (connect Γ t Δ) ≡ ctx-dim Γ ⊔ ctx-dim Δ
-connect-ctx-dim Γ t (∅ , ⋆) = sym (⊔-identityʳ (ctx-dim Γ))
-connect-ctx-dim Γ t (∅ , s ─⟨ A ⟩⟶ t₁) = ⊥-elim (no-term-in-empty-context s)
-connect-ctx-dim Γ t (Δ , B , A) = begin
-  ctx-dim (connect Γ t (Δ , B)) ⊔ ty-dim (A [ connect-inc-right t (ctxLength Δ) ]ty)
-    ≡⟨ cong₂ _⊔_ (connect-ctx-dim Γ t (Δ , B)) (sym (sub-dim (connect-inc-right t (ctxLength Δ)) A)) ⟩
+wedge-ctx-dim : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → ctx-dim (wedge Γ t Δ) ≡ ctx-dim Γ ⊔ ctx-dim Δ
+wedge-ctx-dim Γ t (∅ , ⋆) = sym (⊔-identityʳ (ctx-dim Γ))
+wedge-ctx-dim Γ t (∅ , s ─⟨ A ⟩⟶ t₁) = ⊥-elim (no-term-in-empty-context s)
+wedge-ctx-dim Γ t (Δ , B , A) = begin
+  ctx-dim (wedge Γ t (Δ , B)) ⊔ ty-dim (A [ wedge-inc-right t (ctxLength Δ) ]ty)
+    ≡⟨ cong₂ _⊔_ (wedge-ctx-dim Γ t (Δ , B)) (sym (sub-dim (wedge-inc-right t (ctxLength Δ)) A)) ⟩
   ctx-dim Γ ⊔ ctx-dim (Δ , B) ⊔ ty-dim A
     ≡⟨ ⊔-assoc (ctx-dim Γ) (ctx-dim (Δ , B)) (ty-dim A) ⟩
   ctx-dim Γ ⊔ (ctx-dim (Δ , B) ⊔ ty-dim A) ∎
   where
     open ≡-Reasoning
 
-connect-susp-ctx-dim : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → ctx-dim (connect-susp Γ Δ) ≡ suc (ctx-dim Γ) ⊔ ctx-dim Δ
-connect-susp-ctx-dim Γ Δ = begin
-  ctx-dim (connect-susp Γ Δ)
-    ≡⟨ connect-ctx-dim (susp-ctx Γ) get-snd Δ ⟩
+wedge-susp-ctx-dim : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → ctx-dim (wedge-susp Γ Δ) ≡ suc (ctx-dim Γ) ⊔ ctx-dim Δ
+wedge-susp-ctx-dim Γ Δ = begin
+  ctx-dim (wedge-susp Γ Δ)
+    ≡⟨ wedge-ctx-dim (susp-ctx Γ) get-snd Δ ⟩
   ctx-dim (susp-ctx Γ) ⊔ ctx-dim Δ
     ≡⟨ cong (_⊔ ctx-dim Δ) (susp-ctx-dim Γ) ⟩
   suc (ctx-dim Γ) ⊔ ctx-dim Δ ∎
@@ -59,8 +59,8 @@ connect-susp-ctx-dim Γ Δ = begin
 tree-dim-ctx-dim : (T : Tree n) → ctx-dim ⌊ T ⌋ ≡ tree-dim T
 tree-dim-ctx-dim Sing = refl
 tree-dim-ctx-dim (Join S T) = begin
-  ctx-dim (connect-susp ⌊ S ⌋ ⌊ T ⌋)
-    ≡⟨ connect-susp-ctx-dim ⌊ S ⌋ ⌊ T ⌋ ⟩
+  ctx-dim (wedge-susp ⌊ S ⌋ ⌊ T ⌋)
+    ≡⟨ wedge-susp-ctx-dim ⌊ S ⌋ ⌊ T ⌋ ⟩
   suc (ctx-dim ⌊ S ⌋) ⊔ ctx-dim ⌊ T ⌋
     ≡⟨ cong₂ (λ a → suc a ⊔_) (tree-dim-ctx-dim S) (tree-dim-ctx-dim T) ⟩
   suc (tree-dim S) ⊔ tree-dim T

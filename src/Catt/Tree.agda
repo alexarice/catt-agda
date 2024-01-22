@@ -3,7 +3,7 @@ module Catt.Tree where
 open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Suspension
-open import Catt.Connection
+open import Catt.Wedge
 open import Reflection
 open import Agda.Builtin.List
 
@@ -24,13 +24,13 @@ tree-size {n} T = n
 tree-last-var : (T : Tree n) → Tm (suc n)
 
 ⌊ Sing ⌋ = singleton-ctx
-⌊ Join S T ⌋ = connect-susp ⌊ S ⌋ ⌊ T ⌋
+⌊ Join S T ⌋ = wedge-susp ⌊ S ⌋ ⌊ T ⌋
 
 tree-fst-var : (T : Tree n) → Tm (suc n)
 tree-fst-var T = Var (fromℕ _)
 
 tree-last-var Sing = 0V
-tree-last-var (Join S T) = tree-last-var T [ connect-susp-inc-right (tree-size S) (tree-size T) ]tm
+tree-last-var (Join S T) = tree-last-var T [ wedge-susp-inc-right (tree-size S) (tree-size T) ]tm
 
 trunk-height : Tree n → ℕ
 trunk-height Sing = 0

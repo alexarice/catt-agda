@@ -9,7 +9,7 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Suspension
-open import Catt.Connection
+open import Catt.Wedge
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
@@ -29,7 +29,7 @@ open import Catt.Tree.Insertion.Properties
 open import Catt.Typing rules
 open import Catt.Typing.Properties rules tame
 open import Catt.Suspension.Typing rules lift-cond susp-cond
-open import Catt.Connection.Typing rules tame
+open import Catt.Wedge.Typing rules tame
 open import Catt.Tree.Typing rules tame
 open import Catt.Tree.Boundary.Typing rules tame
 open import Catt.Tree.Structured.Typing rules

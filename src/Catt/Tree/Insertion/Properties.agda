@@ -100,7 +100,7 @@ module _ where
          → (M : Label X T)
          → .⦃ _ : has-trunk-height d T ⦄
          → (Bs : STy X)
-         → L ⌊ P ⌋p ≃stm standard-comp′ (ih P) T >>= (M ,, Bs)
+         → L ⌊ P ⌋p ≃stm standard-coh′ (ih P) T >>= (M ,, Bs)
          → κ S P T ●l (L >>l[ P ] M ,, Bs) ≃lm L
   κ-comm {S = Join S₁ S₂} {T = T} L BHere M Bs q .get (PExt Z) = begin
     < standard-label (Susp S₁) T (PExt Z)
@@ -113,7 +113,7 @@ module _ where
       >>= ++t-inc-left T S₂ ●lt (M ++l L ∘ PShift ,, Bs) >stm
       ≈⟨ >>=-≃ (standard-label-max (Susp S₁) T (PExt Z))
                (++l-inc-left M (L ∘ PShift) Bs) refl≃sty ⟩
-    < standard-comp′ (suc (tree-dim S₁)) T >>= (M ,, Bs) >stm
+    < standard-coh′ (suc (tree-dim S₁)) T >>= (M ,, Bs) >stm
       ≈˘⟨ q ⟩
     < L (PExt (is-linear-max-path S₁)) >stm
       ≈⟨ ap-≃ (refl≃l {L = L ∘ PExt}) (max-path-lin-tree S₁ Z refl≃) ⟩
@@ -237,7 +237,7 @@ label-from-insertion-map f L (BShift P) M .get (PShift Z) = label-from-insertion
               → .⦃ _ : has-trunk-height l T ⦄
               → κ S P T ⌊ P ⌋p
                 ≃stm
-                standard-comp′ (ih P) T >>= (ι S P T ,, S⋆)
+                standard-coh′ (ih P) T >>= (ι S P T ,, S⋆)
 κ-branch-path (Join S₁ S₂) BHere T
   = >>=-≃ (standard-label-max (Susp S₁) T (is-linear-max-path (Susp S₁)) ⦃ inst ⦄)
           refl≃l
@@ -245,17 +245,17 @@ label-from-insertion-map f L (BShift P) M .get (PShift Z) = label-from-insertion
 κ-branch-path (Join S₁ S₂) (BExt {n = n} P) (Susp T) = begin
   < SExt (κ S₁ P T ⌊ P ⌋p) >stm
     ≈⟨ SExt≃ (κ-branch-path S₁ P T) refl≃ ⟩
-  < SExt (standard-comp′ (ih P) T >>= (ι S₁ P T ,, S⋆)) >stm
-   ≈˘⟨ >>=-ext (standard-comp′ (ih P) T) (ι S₁ P T ,, S⋆) ⟩
-  < standard-comp′ (ih P) T >>= map-ext (ι S₁ P T ,, S⋆) >stm ∎
+  < SExt (standard-coh′ (ih P) T >>= (ι S₁ P T ,, S⋆)) >stm
+   ≈˘⟨ >>=-ext (standard-coh′ (ih P) T) (ι S₁ P T ,, S⋆) ⟩
+  < standard-coh′ (ih P) T >>= map-ext (ι S₁ P T ,, S⋆) >stm ∎
   where
     open Reasoning stm-setoid
 κ-branch-path (Join S₁ S₂) (BShift {n = n} P) T = begin
   < SShift (κ S₂ P T ⌊ P ⌋p) >stm
     ≈⟨ SShift≃ refl≃ (κ-branch-path S₂ P T) ⟩
-  < SShift (standard-comp′ (ih P) T >>= (ι S₂ P T ,, S⋆)) >stm
-    ≈˘⟨ >>=-shift (standard-comp′ (ih P) T) (ι S₂ P T ,, S⋆) ⟩
-  < standard-comp′ (ih P) T >>= map-shift (ι S₂ P T ,, S⋆) >stm ∎
+  < SShift (standard-coh′ (ih P) T >>= (ι S₂ P T ,, S⋆)) >stm
+    ≈˘⟨ >>=-shift (standard-coh′ (ih P) T) (ι S₂ P T ,, S⋆) ⟩
+  < standard-coh′ (ih P) T >>= map-shift (ι S₂ P T ,, S⋆) >stm ∎
   where
     open Reasoning stm-setoid
 
@@ -285,17 +285,17 @@ insertion-parallel (Join S₁ S₂) (BShift P) (BShift Q) T p = Join≃′ Refl�
 κ-parallel (Join S₁ S₂) BHere (BExt {n = n} Q) (Susp T) p .get (PExt Z) = begin
   < standard-label (Susp S₁) (Susp T) (PExt Z) >>= ++t-inc-left (Susp T) S₂ >stm
     ≈⟨ >>=-≃ (standard-label-max (Susp S₁) (Susp T) (PExt Z)) refl≃l refl≃sty ⟩
-  < standard-comp′ (tree-dim S₁) T >>= label₁ (++t-inc-left (Susp T) S₂) >stm
-    ≈˘⟨ >>=-≃ (standard-comp′-≃ (ih-linear _ Q) (refl≃ {T = T}))
+  < standard-coh′ (tree-dim S₁) T >>= label₁ (++t-inc-left (Susp T) S₂) >stm
+    ≈˘⟨ >>=-≃ (standard-coh′-≃ (ih-linear _ Q) (refl≃ {T = T}))
               [ (λ P → compute-≃ refl≃stm) ]
               (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
-  < standard-comp′ (ih Q) T >>= map-ext (id-label-wt T) >stm
-    ≈⟨ >>=-ext (standard-comp′ (ih Q) T) (id-label-wt T) ⟩
-  < SExt (standard-comp′ (ih Q) T >>= id-label-wt T) >stm
-    ≈˘⟨ SExt≃ (>>=-≃ (refl≃stm {a = standard-comp′ (ih Q) T})
+  < standard-coh′ (ih Q) T >>= map-ext (id-label-wt T) >stm
+    ≈⟨ >>=-ext (standard-coh′ (ih Q) T) (id-label-wt T) ⟩
+  < SExt (standard-coh′ (ih Q) T >>= id-label-wt T) >stm
+    ≈˘⟨ SExt≃ (>>=-≃ (refl≃stm {a = standard-coh′ (ih Q) T})
                      (disc-ι S₁ Q T)
                      (S⋆-≃ (≃′-to-≃ (disc-insertion S₁ Q T)))) refl≃ ⟩
-  < SExt (standard-comp′ (ih Q) T >>= (ι S₁ Q T ,, S⋆)) >stm
+  < SExt (standard-coh′ (ih Q) T >>= (ι S₁ Q T ,, S⋆)) >stm
     ≈˘⟨ SExt≃ (κ-branch-path S₁ Q T) refl≃ ⟩
   < SExt (κ S₁ Q T ⌊ Q ⌋p) >stm
     ≈⟨ SExt≃ (ap-≃ (refl≃l {L = κ S₁ Q T})
@@ -940,12 +940,12 @@ module _ where
     < standard-label (Susp S₁) T (PExt (tree-inc-label′ d S₁ b Z))
         >>= ++t-inc-left T S₂ >stm
       ≈⟨ >>=-≃ (standard-label-bd->-trunk-height (Susp S₁) T (suc d) b r′ q r (PExt Z)) refl≃l refl≃sty ⟩
-    < standard-comp′ (1 + d) (tree-bd (1 + d) T) >>= tree-inc-label (1 + d) T b >>= ++t-inc-left T S₂ >stm
-      ≈˘⟨ reflexive≃stm (cong (λ - → standard-comp′ (1 + -) (tree-bd (1 + d) T) >>= tree-inc-label (1 + d) T b >>= ++t-inc-left T S₂)
+    < standard-coh′ (1 + d) (tree-bd (1 + d) T) >>= tree-inc-label (1 + d) T b >>= ++t-inc-left T S₂ >stm
+      ≈˘⟨ reflexive≃stm (cong (λ - → standard-coh′ (1 + -) (tree-bd (1 + d) T) >>= tree-inc-label (1 + d) T b >>= ++t-inc-left T S₂)
                         (trans (tree-dim-bd d S₁) (m≤n⇒m⊓n≡m (≤-pred r′)))) ⟩
-    < standard-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T) >>= tree-inc-label (suc d) T b >>= ++t-inc-left T S₂ >stm
-      ≈⟨ >>=-assoc (standard-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)) (tree-inc-label (suc d) T b) (++t-inc-left T S₂) ⟩
-    < standard-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)
+    < standard-coh′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T) >>= tree-inc-label (suc d) T b >>= ++t-inc-left T S₂ >stm
+      ≈⟨ >>=-assoc (standard-coh′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)) (tree-inc-label (suc d) T b) (++t-inc-left T S₂) ⟩
+    < standard-coh′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)
       >>= tree-inc-label (suc d) T b ●lt ++t-inc-left T S₂ >stm
       ≈⟨ >>=-≃ (sym≃stm (standard-label-max (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)))
                [ (λ P → SPath≃ (tree-inc-inc-left d T S₂ b P)) ]
@@ -968,13 +968,13 @@ module _ where
                                                 ⦃ inst ⦃ tree-inc-full-preserve-max d S₁ b (≤-pred q) Z ⦄ ⦄)
                refl≃l
                refl≃sty ⟩
-    < standard-comp′ (1 + tree-dim S₁) T >>= ++t-inc-left T S₂ >stm
-      ≈˘⟨ >>=-≃′ (standard-comp′-≃ (cong suc (tree-dim-≃ (≃′-to-≃ (tree-bd-full d S₁ (≤-pred q)))))
+    < standard-coh′ (1 + tree-dim S₁) T >>= ++t-inc-left T S₂ >stm
+      ≈˘⟨ >>=-≃′ (standard-coh′-≃ (cong suc (tree-dim-≃ (≃′-to-≃ (tree-bd-full d S₁ (≤-pred q)))))
                                     (≃′-to-≃ (tree-bd-full (suc d) T (≤-trans r q))))
                  ((tree-bd-full (suc d) T (≤-trans r q))
                    ,, [ (λ P → SPath≃ (ap′-≃ (++t-inc-left′ T S₂) (tree-inc-label-full (suc d) T b (≤-trans r q) .get P))) ])
                  refl≃sty ⟩
-    < standard-comp′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)
+    < standard-coh′ (1 + tree-dim (tree-bd d S₁)) (tree-bd (suc d) T)
       >>= tree-inc-label (suc d) T b ●lt ++t-inc-left T S₂ >stm
       ≈⟨ >>=-≃ (sym≃stm (standard-label-max (Susp (tree-bd d S₁)) (tree-bd (suc d) T) (PExt Z)))
                [ (λ P → SPath≃ (tree-inc-inc-left d T S₂ b P)) ]
@@ -1100,7 +1100,7 @@ label-from-pruned-branch : (L : Label X S)
                          → (M : Label-WT X T)
                          → .⦃ _ : has-trunk-height l T ⦄
                          → .(q : bh P < pred (ih P))
-                         → L ⌊ P ⌋p ≃stm standard-comp′ (ih P) T >>= M
+                         → L ⌊ P ⌋p ≃stm standard-coh′ (ih P) T >>= M
                          → (L >>p[ P ] standard-label (n-disc (pred (ih P))) T ●l M) >>l[ pruned-branch S P q ] (ap M)
                            ≃lm
                            label-≃ (insertion-tree-pruned-branch S P T q)

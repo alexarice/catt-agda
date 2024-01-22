@@ -193,18 +193,18 @@ ins-supp [ Insert Γ S As L P T M p ] tty = begin
     Lty : Typing-Label Γ (L ,, S⋆)
     Lty = SCoh-Label-Ty tty
 
-    lem : Typing-STm Γ (standard-comp (ih P) T >>= (M ,, S⋆)) _
+    lem : Typing-STm Γ (standard-coh (ih P) T >>= (M ,, S⋆)) _
     lem = transport-stm-typing (>>=-Ty (TySPath ⌊ P ⌋p) Lty TySStar)
-                               (trans≃stm p (>>=-≃ (standard-comp′-compat (ih P) T) refl≃l refl≃sty))
+                               (trans≃stm p (>>=-≃ (standard-coh′-compat (ih P) T) refl≃l refl≃sty))
                                refl≃sty
 
     Mty : Typing-Label Γ (M ,, S⋆)
-    Mty = SCoh-Label-Ty {S = T} {As = standard-type (ih P) T} {L = M} (stm-to-term-Ty lem)
+    Mty = SCoh-Label-Ty {S = T} {As = standard-sty (ih P) T} {L = M} (stm-to-term-Ty lem)
 
     l1 : branch-type S P >>=′ (L ,, S⋆)
          ≈[ Γ ]sty
-         standard-type (ih P) T >>=′ (M ,, S⋆)
-    l1 = STy-unique-≃ p (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (standard-comp′-Ty (ih P) T) Mty TySStar)
+         standard-sty (ih P) T >>=′ (M ,, S⋆)
+    l1 = STy-unique-≃ p (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (standard-coh′-Ty (ih P) T) Mty TySStar)
 
     l2 : Typing-Label Γ (L >>l[ P ] M ,, S⋆)
     l2 = label-from-insertion-Ty Lty P Mty l1

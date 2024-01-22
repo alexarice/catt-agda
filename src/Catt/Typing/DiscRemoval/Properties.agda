@@ -50,7 +50,7 @@ disc-rem-stm S L Lty .get = begin
   where
     open Reasoning (tm-setoid-≈ _)
 
-standard-stm-is-comp′ : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → standard-stm d S ≈[ ⌊ S ⌋ ]stm standard-comp′ d S
+standard-stm-is-comp′ : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → standard-stm d S ≈[ ⌊ S ⌋ ]stm standard-coh′ d S
 standard-stm-is-comp′ (suc zero) Sing = refl≈stm
 standard-stm-is-comp′ (suc zero) (Join S (Join T₁ T₂)) = refl≈stm
 standard-stm-is-comp′ (suc zero) (Join Sing Sing) = begin
@@ -68,12 +68,12 @@ standard-stm-is-comp′ (suc (suc d)) Sing = refl≈stm
 standard-stm-is-comp′ (suc (suc d)) (Join S Sing) = ≈SExt (standard-stm-is-comp′ (suc d) S)
 standard-stm-is-comp′ (suc (suc d)) (Join S (Join S₁ S₂)) = refl≈stm
 
-standard-stm-is-comp : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → standard-stm d S ≈[ ⌊ S ⌋ ]stm standard-comp d S
+standard-stm-is-comp : (d : ℕ) → .⦃ NonZero d ⦄ → (S : Tree n) → standard-stm d S ≈[ ⌊ S ⌋ ]stm standard-coh d S
 standard-stm-is-comp d S = begin
   standard-stm d S
     ≈⟨ standard-stm-is-comp′ d S ⟩
-  standard-comp′ d S
-    ≈⟨ reflexive≈stm (standard-comp′-compat d S) ⟩
-  standard-comp d S ∎
+  standard-coh′ d S
+    ≈⟨ reflexive≈stm (standard-coh′-compat d S) ⟩
+  standard-coh d S ∎
   where
     open Reasoning stm-setoid-≈

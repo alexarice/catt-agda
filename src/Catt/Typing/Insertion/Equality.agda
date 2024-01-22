@@ -139,8 +139,8 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
                   → (P : Branch S l)
                   → (T : Tree m)
                   → .⦃ _ : has-trunk-height l T ⦄
-                  → .(q : bh P < pred (ih P))
-                  → (x : tree-dim T < ih P)
+                  → .(q : bh P < pred (lh P))
+                  → (x : tree-dim T < lh P)
                   → πt P ●l (κ (S //t P) (pruned-branch S P q) T ,, S⋆)
                     ≈[ ⌊ (S //t P) >>[ pruned-branch S P q ] T ⌋ ]lm
                     ≃-label (sym≃′ (insertion-tree-pruned-branch S P T q)) (κ S P T)
@@ -262,8 +262,8 @@ module _ (disc-rem : HasDiscRemoval) where
 
   κ-disc : (S : Tree n)
          → (P : Branch S l)
-         → κ S P (n-disc (ih P)) ⦃ has-trunk-height-n-disc (<⇒≤ (bh-<-ih P)) ⦄
-           ≈[ ⌊ (S >>[ P ] (n-disc (ih P))) ⦃ _ ⦄ ⌋ ]lm
+         → κ S P (n-disc (lh P)) ⦃ has-trunk-height-n-disc (<⇒≤ (bh-<-lh P)) ⦄
+           ≈[ ⌊ (S >>[ P ] (n-disc (lh P))) ⦃ _ ⦄ ⌋ ]lm
            ≃-label (sym≃′ (insertion-disc S P)) (id-label S)
   κ-disc (Join S T) BHere .get (PExt Z) = begin
     standard-label (Susp S) (n-disc (suc (tree-dim S))) (PExt Z)
@@ -318,7 +318,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                    → (T : Tree m)
                    → .⦃ _ : has-trunk-height l T ⦄
                    → (d : ℕ)
-                   → (tree-dim T ≤ ih P)
+                   → (tree-dim T ≤ lh P)
                    → standard-sty d S >>=′ (κ S P T ,, S⋆)
                      ≈[ ⌊ S >>[ P ] T ⌋ ]sty
                      standard-sty d (S >>[ P ] T)
@@ -327,7 +327,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                    → (T : Tree m)
                    → .⦃ _ : has-trunk-height l T ⦄
                    → (d : ℕ)
-                   → (tree-dim T ≤ ih P)
+                   → (tree-dim T ≤ lh P)
                    → standard-coh d S >>= (κ S P T ,, S⋆)
                      ≈[ ⌊ S >>[ P ] T ⌋ ]stm
                      standard-coh d (S >>[ P ] T)
@@ -336,7 +336,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                     → (T : Tree m)
                     → .⦃ _ : has-trunk-height l T ⦄
                     → (d : ℕ)
-                    → (tree-dim T ≤ ih P)
+                    → (tree-dim T ≤ lh P)
                     → standard-coh′ d S >>= (κ S P T ,, S⋆)
                       ≈[ ⌊ S >>[ P ] T ⌋ ]stm
                       standard-coh′ d (S >>[ P ] T)
@@ -346,7 +346,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                   → .⦃ _ : has-trunk-height l T ⦄
                   → (d : ℕ)
                   → d ≥ tree-dim S
-                  → tree-dim T ≤ ih P
+                  → tree-dim T ≤ lh P
                   → standard-stm d S >>= (κ S P T ,, S⋆)
                     ≈[ ⌊ S >>[ P ] T ⌋ ]stm
                     standard-stm d (S >>[ P ] T)
@@ -359,8 +359,8 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
     where
       open Reasoning stm-setoid-≈
 
-      lem3 : (x : Condition d T (ih P)) → tree-dim (tree-bd d T) ≤
-               ih (bd-branch S P d (bd-branch-lem P x))
+      lem3 : (x : Condition d T (lh P)) → tree-dim (tree-bd d T) ≤
+               lh (bd-branch S P d (bd-branch-lem P x))
       lem3 x = (≤-trans (≤-reflexive (tree-dim-bd d T))
                         (≤-trans (⊓-monoʳ-≤ d q)
                                  (≤-reflexive (sym (bd-branch-height S P d (bd-branch-lem P x))))))
@@ -491,7 +491,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                     → (Q : Branch T l′)
                     → (U : Tree m′)
                     → .⦃ _ : has-trunk-height l′ U ⦄
-                    → tree-dim U ≤ ih Q
+                    → tree-dim U ≤ lh Q
                     → κ S P T ●l (κ (S >>[ P ] T) (inserted-branch S P T Q) U ,, S⋆)
                       ≈[ ⌊ (S >>[ P ] T) >>[ inserted-branch S P T Q ] U ⌋ ]lm
                       ≃-label (sym≃′ (insertion-tree-inserted-branch S P T Q U)) (κ S P (T >>[ Q ] U) ⦃ insertion-trunk-height T Q U l ⦄)

@@ -38,18 +38,18 @@ ins-conv [ Insert Γ S As L P T M pf ] {A = A} tty
     Lty : Typing-Label Γ (L ,, S⋆)
     Lty = SCoh-Label-Ty tty
 
-    lem : Typing-STm Γ (standard-coh (ih P) T >>= (M ,, S⋆)) _
+    lem : Typing-STm Γ (standard-coh (lh P) T >>= (M ,, S⋆)) _
     lem = transport-stm-typing (>>=-Ty (TySPath ⌊ P ⌋p) Lty TySStar)
-                               (trans≃stm pf (>>=-≃ (standard-coh′-compat (ih P) T) refl≃l refl≃sty))
+                               (trans≃stm pf (>>=-≃ (standard-coh′-compat (lh P) T) refl≃l refl≃sty))
                                refl≃sty
 
     Mty : Typing-Label Γ (M ,, S⋆)
-    Mty = SCoh-Label-Ty {S = T} {As = standard-sty (ih P) T} {L = M} (stm-to-term-Ty lem)
+    Mty = SCoh-Label-Ty {S = T} {As = standard-sty (lh P) T} {L = M} (stm-to-term-Ty lem)
 
     l1 : branch-type S P >>=′ (L ,, S⋆)
          ≈[ Γ ]sty
-         standard-sty (ih P) T >>=′ (M ,, S⋆)
-    l1 = STy-unique-≃ pf (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (standard-coh′-Ty (ih P) T) Mty TySStar)
+         standard-sty (lh P) T >>=′ (M ,, S⋆)
+    l1 = STy-unique-≃ pf (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (standard-coh′-Ty (lh P) T) Mty TySStar)
 
     l3 : As >>=′ (κ S P T ,, S⋆) >>=′ (L >>l[ P ] M ,, S⋆)
          ≈[ Γ ]sty

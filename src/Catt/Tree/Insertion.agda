@@ -27,13 +27,13 @@ data Branch : Tree n → ℕ → Set where
 bh : Branch S d → ℕ
 bh {d = d} p = d
 
-ih′ : {T : Tree n} → (p : Branch T d) → ℕ
-ih′ {T = Join S T} BHere = tree-dim S
-ih′ (BExt P) = suc (ih′ P)
-ih′ (BShift P) = ih′ P
+lh′ : {T : Tree n} → (p : Branch T d) → ℕ
+lh′ {T = Join S T} BHere = tree-dim S
+lh′ (BExt P) = suc (lh′ P)
+lh′ (BShift P) = lh′ P
 
-ih : {T : Tree n} → (p : Branch T d) → ℕ
-ih p = suc (ih′ p)
+lh : {T : Tree n} → (p : Branch T d) → ℕ
+lh p = suc (lh′ p)
 
 ⌊_⌋p : (p : Branch T d) → Path T
 ⌊_⌋p {T = Join S T} BHere = PExt (is-linear-max-path S)
@@ -71,7 +71,7 @@ Join S₁ S₂ >>[ BShift P ] T = Join S₁ (S₂ >>[ P ] T)
    → (T : Tree m)
    → .⦃ _ : has-trunk-height d T ⦄
    → (As : STy (someTree (chop-trunk d T)))
-   → .⦃ has-dim (ih P ∸ d) As ⦄
+   → .⦃ has-dim (lh P ∸ d) As ⦄
    → Label (someTree (S >>[ P ] T)) S
 κ′ (Join S₁ S₂) BHere T As
   = label-between-++t (replace-label (stm-to-label (Susp S₁) (sty-to-coh As) As) SHere) SPath
@@ -119,25 +119,25 @@ _>>l′[_]_ L (BShift P) M PHere = L PHere
 _>>l′[_]_ L (BShift P) M (PExt Z) = L (PExt Z)
 _>>l′[_]_ L (BShift P) M (PShift Z) = (L ∘ PShift >>l′[ P ] M) Z
 
-bh-<-ih : (p : Branch S d) → d < ih p
-bh-<-ih BHere = s≤s z≤n
-bh-<-ih (BExt p) = s≤s (bh-<-ih p)
-bh-<-ih (BShift p) = bh-<-ih p
+bh-<-lh : (p : Branch S d) → d < lh p
+bh-<-lh BHere = s≤s z≤n
+bh-<-lh (BExt p) = s≤s (bh-<-lh p)
+bh-<-lh (BShift p) = bh-<-lh p
 
 prune-lem : (P : Branch S d)
-          → has-trunk-height d (n-disc (pred (ih P)))
-prune-lem P = has-trunk-height-n-disc (≤-pred (bh-<-ih P))
+          → has-trunk-height d (n-disc (pred (lh P)))
+prune-lem P = has-trunk-height-n-disc (≤-pred (bh-<-lh P))
 
 infix 5 _//t_
 _//t_ : (S : Tree n)
       → (P : Branch S d)
-      → Tree (insertion-size S P (n-disc (pred (ih P))) ⦃ prune-lem P ⦄)
-S //t p = (S >>[ p ] (n-disc (pred (ih p)))) ⦃ prune-lem p ⦄
+      → Tree (insertion-size S P (n-disc (pred (lh P))) ⦃ prune-lem P ⦄)
+S //t p = (S >>[ p ] (n-disc (pred (lh p)))) ⦃ prune-lem p ⦄
 
 infix 5 _>>p[_]_
 _>>p[_]_ : (L : Label X S)
          → (P : Branch S d)
-         → (M : Label X (n-disc (pred (ih P))))
+         → (M : Label X (n-disc (pred (lh P))))
          → Label X (S //t P)
 L >>p[ P ] M = (L >>l[ P ] M) ⦃ prune-lem P ⦄
 
@@ -145,4 +145,4 @@ L >>p[ P ] M = (L >>l[ P ] M) ⦃ prune-lem P ⦄
    → Label (someTree (S //t P)) S
 πt P = let
   instance _ = prune-lem P
-  in κ _ P (n-disc (pred (ih P)))
+  in κ _ P (n-disc (pred (lh P)))

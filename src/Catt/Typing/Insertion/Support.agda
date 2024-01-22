@@ -83,7 +83,7 @@ open import Catt.Typing.Structured.Support rules tame supp-cond
                 → (p : Branch S d)
                 → (T : Tree m)
                 → .⦃ _ : has-trunk-height d T ⦄
-                → (q : ih p ≥ tree-dim T)
+                → (q : lh p ≥ tree-dim T)
                 → (d : ℕ)
                 → (b : Bool)
                 → TransportVarSet-Label (supp-tree-bd d S b) (κ S p T) ≡ toVarSet (supp-tree-bd d (S >>[ p ] T) b)
@@ -193,18 +193,18 @@ ins-supp [ Insert Γ S As L P T M p ] tty = begin
     Lty : Typing-Label Γ (L ,, S⋆)
     Lty = SCoh-Label-Ty tty
 
-    lem : Typing-STm Γ (standard-coh (ih P) T >>= (M ,, S⋆)) _
+    lem : Typing-STm Γ (standard-coh (lh P) T >>= (M ,, S⋆)) _
     lem = transport-stm-typing (>>=-Ty (TySPath ⌊ P ⌋p) Lty TySStar)
-                               (trans≃stm p (>>=-≃ (standard-coh′-compat (ih P) T) refl≃l refl≃sty))
+                               (trans≃stm p (>>=-≃ (standard-coh′-compat (lh P) T) refl≃l refl≃sty))
                                refl≃sty
 
     Mty : Typing-Label Γ (M ,, S⋆)
-    Mty = SCoh-Label-Ty {S = T} {As = standard-sty (ih P) T} {L = M} (stm-to-term-Ty lem)
+    Mty = SCoh-Label-Ty {S = T} {As = standard-sty (lh P) T} {L = M} (stm-to-term-Ty lem)
 
     l1 : branch-type S P >>=′ (L ,, S⋆)
          ≈[ Γ ]sty
-         standard-sty (ih P) T >>=′ (M ,, S⋆)
-    l1 = STy-unique-≃ p (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (standard-coh′-Ty (ih P) T) Mty TySStar)
+         standard-sty (lh P) T >>=′ (M ,, S⋆)
+    l1 = STy-unique-≃ p (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (standard-coh′-Ty (lh P) T) Mty TySStar)
 
     l2 : Typing-Label Γ (L >>l[ P ] M ,, S⋆)
     l2 = label-from-insertion-Ty Lty P Mty l1

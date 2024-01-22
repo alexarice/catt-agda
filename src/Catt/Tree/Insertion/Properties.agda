@@ -45,9 +45,9 @@ branch-type-is-path-type {S = Join S₁ S₂} BHere = map-sty-ext-≃ (linear-ma
 branch-type-is-path-type (BExt P) = map-sty-ext-≃ (branch-type-is-path-type P)
 branch-type-is-path-type (BShift P) = map-sty-shift-≃ (branch-type-is-path-type P)
 
-ih-linear : (S : Tree n) → .⦃ is-linear S ⦄ → (P : Branch S l) → ih P ≡ tree-dim S
-ih-linear (Susp S) BHere = refl
-ih-linear (Susp S) (BExt P) = cong suc (ih-linear S P)
+lh-linear : (S : Tree n) → .⦃ is-linear S ⦄ → (P : Branch S l) → lh P ≡ tree-dim S
+lh-linear (Susp S) BHere = refl
+lh-linear (Susp S) (BExt P) = cong suc (lh-linear S P)
 
 κ-phere : (S : Tree n)
         → (p : Branch S d)
@@ -100,7 +100,7 @@ module _ where
          → (M : Label X T)
          → .⦃ _ : has-trunk-height d T ⦄
          → (Bs : STy X)
-         → L ⌊ P ⌋p ≃stm standard-coh′ (ih P) T >>= (M ,, Bs)
+         → L ⌊ P ⌋p ≃stm standard-coh′ (lh P) T >>= (M ,, Bs)
          → κ S P T ●l (L >>l[ P ] M ,, Bs) ≃lm L
   κ-comm {S = Join S₁ S₂} {T = T} L BHere M Bs q .get (PExt Z) = begin
     < standard-label (Susp S₁) T (PExt Z)
@@ -158,16 +158,16 @@ disc-label-from {S = Susp S} L (BExt P) {Susp T} M .get (PShift PHere) = refl≃
 
 insertion-disc : (S : Tree n)
                → (P : Branch S l)
-               → (S >>[ P ] (n-disc (ih P))) ⦃ has-trunk-height-n-disc (<⇒≤ (bh-<-ih P)) ⦄ ≃′ S
+               → (S >>[ P ] (n-disc (lh P))) ⦃ has-trunk-height-n-disc (<⇒≤ (bh-<-lh P)) ⦄ ≃′ S
 insertion-disc (Join S₁ S₂) BHere = Join≃′ (linear-tree-unique (n-disc (tree-dim S₁)) S₁ (≃n-to-≡ it)) refl≃′
 insertion-disc (Join S₁ S₂) (BExt P) = Join≃′ (insertion-disc S₁ P) refl≃′
 insertion-disc (Join S₁ S₂) (BShift P) = Join≃′ refl≃′ (insertion-disc S₂ P)
 
 disc-label-from-2 : (L : Label X S)
                   → (P : Branch S l)
-                  → (M : Label X (n-disc (ih P)))
-                  → L ⌊ P ⌋p ≃stm M (is-linear-max-path (n-disc (ih P)))
-                  → (L >>l[ P ] M) ⦃ has-trunk-height-n-disc (<⇒≤ (bh-<-ih P)) ⦄
+                  → (M : Label X (n-disc (lh P)))
+                  → L ⌊ P ⌋p ≃stm M (is-linear-max-path (n-disc (lh P)))
+                  → (L >>l[ P ] M) ⦃ has-trunk-height-n-disc (<⇒≤ (bh-<-lh P)) ⦄
                     ≃lm
                     label-≃ (insertion-disc S P) L
 disc-label-from-2 {S = Join S T} L BHere M q .get (PExt Z) = begin
@@ -237,7 +237,7 @@ label-from-insertion-map f L (BShift P) M .get (PShift Z) = label-from-insertion
               → .⦃ _ : has-trunk-height l T ⦄
               → κ S P T ⌊ P ⌋p
                 ≃stm
-                standard-coh′ (ih P) T >>= (ι S P T ,, S⋆)
+                standard-coh′ (lh P) T >>= (ι S P T ,, S⋆)
 κ-branch-path (Join S₁ S₂) BHere T
   = >>=-≃ (standard-label-max (Susp S₁) T (is-linear-max-path (Susp S₁)) ⦃ inst ⦄)
           refl≃l
@@ -245,17 +245,17 @@ label-from-insertion-map f L (BShift P) M .get (PShift Z) = label-from-insertion
 κ-branch-path (Join S₁ S₂) (BExt {n = n} P) (Susp T) = begin
   < SExt (κ S₁ P T ⌊ P ⌋p) >stm
     ≈⟨ SExt≃ (κ-branch-path S₁ P T) refl≃ ⟩
-  < SExt (standard-coh′ (ih P) T >>= (ι S₁ P T ,, S⋆)) >stm
-   ≈˘⟨ >>=-ext (standard-coh′ (ih P) T) (ι S₁ P T ,, S⋆) ⟩
-  < standard-coh′ (ih P) T >>= map-ext (ι S₁ P T ,, S⋆) >stm ∎
+  < SExt (standard-coh′ (lh P) T >>= (ι S₁ P T ,, S⋆)) >stm
+   ≈˘⟨ >>=-ext (standard-coh′ (lh P) T) (ι S₁ P T ,, S⋆) ⟩
+  < standard-coh′ (lh P) T >>= map-ext (ι S₁ P T ,, S⋆) >stm ∎
   where
     open Reasoning stm-setoid
 κ-branch-path (Join S₁ S₂) (BShift {n = n} P) T = begin
   < SShift (κ S₂ P T ⌊ P ⌋p) >stm
     ≈⟨ SShift≃ refl≃ (κ-branch-path S₂ P T) ⟩
-  < SShift (standard-coh′ (ih P) T >>= (ι S₂ P T ,, S⋆)) >stm
-    ≈˘⟨ >>=-shift (standard-coh′ (ih P) T) (ι S₂ P T ,, S⋆) ⟩
-  < standard-coh′ (ih P) T >>= map-shift (ι S₂ P T ,, S⋆) >stm ∎
+  < SShift (standard-coh′ (lh P) T >>= (ι S₂ P T ,, S⋆)) >stm
+    ≈˘⟨ >>=-shift (standard-coh′ (lh P) T) (ι S₂ P T ,, S⋆) ⟩
+  < standard-coh′ (lh P) T >>= map-shift (ι S₂ P T ,, S⋆) >stm ∎
   where
     open Reasoning stm-setoid
 
@@ -286,16 +286,16 @@ insertion-parallel (Join S₁ S₂) (BShift P) (BShift Q) T p = Join≃′ Refl�
   < standard-label (Susp S₁) (Susp T) (PExt Z) >>= ++t-inc-left (Susp T) S₂ >stm
     ≈⟨ >>=-≃ (standard-label-max (Susp S₁) (Susp T) (PExt Z)) refl≃l refl≃sty ⟩
   < standard-coh′ (tree-dim S₁) T >>= label₁ (++t-inc-left (Susp T) S₂) >stm
-    ≈˘⟨ >>=-≃ (standard-coh′-≃ (ih-linear _ Q) (refl≃ {T = T}))
+    ≈˘⟨ >>=-≃ (standard-coh′-≃ (lh-linear _ Q) (refl≃ {T = T}))
               [ (λ P → compute-≃ refl≃stm) ]
               (SArr≃ refl≃stm refl≃sty (compute-≃ refl≃stm)) ⟩
-  < standard-coh′ (ih Q) T >>= map-ext (id-label-wt T) >stm
-    ≈⟨ >>=-ext (standard-coh′ (ih Q) T) (id-label-wt T) ⟩
-  < SExt (standard-coh′ (ih Q) T >>= id-label-wt T) >stm
-    ≈˘⟨ SExt≃ (>>=-≃ (refl≃stm {a = standard-coh′ (ih Q) T})
+  < standard-coh′ (lh Q) T >>= map-ext (id-label-wt T) >stm
+    ≈⟨ >>=-ext (standard-coh′ (lh Q) T) (id-label-wt T) ⟩
+  < SExt (standard-coh′ (lh Q) T >>= id-label-wt T) >stm
+    ≈˘⟨ SExt≃ (>>=-≃ (refl≃stm {a = standard-coh′ (lh Q) T})
                      (disc-ι S₁ Q T)
                      (S⋆-≃ (≃′-to-≃ (disc-insertion S₁ Q T)))) refl≃ ⟩
-  < SExt (standard-coh′ (ih Q) T >>= (ι S₁ Q T ,, S⋆)) >stm
+  < SExt (standard-coh′ (lh Q) T >>= (ι S₁ Q T ,, S⋆)) >stm
     ≈˘⟨ SExt≃ (κ-branch-path S₁ Q T) refl≃ ⟩
   < SExt (κ S₁ Q T ⌊ Q ⌋p) >stm
     ≈⟨ SExt≃ (ap-≃ (refl≃l {L = κ S₁ Q T})
@@ -357,8 +357,8 @@ label-from-prune-≃ : {L : Label X S}
                    → {L′ : Label Y S}
                    → L ≃l L′
                    → (P : Branch S d)
-                   → {M : Label X (n-disc (pred (ih P)))}
-                   → {M′ : Label Y (n-disc (pred (ih P)))}
+                   → {M : Label X (n-disc (pred (lh P)))}
+                   → {M′ : Label Y (n-disc (pred (lh P)))}
                    → M ≃l M′
                    → L >>p[ P ] M ≃l L′ >>p[ P ] M′
 label-from-prune-≃ p P q = label-from-insertion-≃ p P q ⦃ prune-lem P ⦄
@@ -383,7 +383,7 @@ connect-branch-left-prop (Join S₁ S₂) T (BShift P) = compute-≃ (SShift≃ 
 connect-branch-left-height : (S : Tree n)
                            → (T : Tree m)
                            → (P : Branch S l)
-                           → ih (connect-branch-left S T P) ≃n ih P
+                           → lh (connect-branch-left S T P) ≃n lh P
 connect-branch-left-height (Join S₁ S₂) T BHere = refl≃n
 connect-branch-left-height (Join S₁ S₂) T (BExt P) = refl≃n
 connect-branch-left-height (Join S₁ S₂) T (BShift P) = connect-branch-left-height S₂ T P
@@ -504,7 +504,7 @@ connect-branch-right-prop (Join S₁ S₂) T P = compute-≃ (SShift≃ refl≃ 
 connect-branch-right-height : (S : Tree n)
                             → (T : Tree m)
                             → (P : Branch T l)
-                            → ih (connect-branch-right S T P) ≃n ih P
+                            → lh (connect-branch-right S T P) ≃n lh P
 connect-branch-right-height Sing T P = refl≃n
 connect-branch-right-height (Join S₁ S₂) T P = connect-branch-right-height S₂ T P
 
@@ -610,18 +610,18 @@ orthog-branch-prop (Join S₁ S₂) (BShift P) BHere T = compute-≃ refl≃stm
 orthog-branch-prop (Join S₁ S₂) (BShift P) (BExt Q) T = compute-≃ refl≃stm
 orthog-branch-prop (Join S₁ S₂) (BShift P) (BShift Q) T = compute-≃ (SShift≃ refl≃ (orthog-branch-prop S₂ P Q T))
 
-orthog-ih : (P : Branch S l)
+orthog-lh : (P : Branch S l)
           → (Q : Branch S l′)
           → .⦃ _ : Orthogonal P Q ⦄
           → (T : Tree m)
           → .⦃ _ : has-trunk-height (bh P) T ⦄
-          → ih (orthog-branch P Q T) ≃n ih Q
-orthog-ih BHere (BShift Q) T = connect-branch-right-height T _ Q
-orthog-ih (BExt P) (BExt Q) (Susp T) = inst ⦃ orthog-ih P Q T ⦄
-orthog-ih (BExt P) (BShift Q) (Susp T) = refl≃n
-orthog-ih (BShift P) BHere T = refl≃n
-orthog-ih (BShift P) (BExt Q) T = refl≃n
-orthog-ih (BShift P) (BShift Q) T = orthog-ih P Q T
+          → lh (orthog-branch P Q T) ≃n lh Q
+orthog-lh BHere (BShift Q) T = connect-branch-right-height T _ Q
+orthog-lh (BExt P) (BExt Q) (Susp T) = inst ⦃ orthog-lh P Q T ⦄
+orthog-lh (BExt P) (BShift Q) (Susp T) = refl≃n
+orthog-lh (BShift P) BHere T = refl≃n
+orthog-lh (BShift P) (BExt Q) T = refl≃n
+orthog-lh (BShift P) (BShift Q) T = orthog-lh P Q T
 
 insertion-orthog : (S : Tree n)
                  → (P : Branch S l)
@@ -776,7 +776,7 @@ insertion-bd-1 : (S : Tree n)
                → .⦃ _ : has-trunk-height (bh P) T ⦄
                → (d : ℕ)
                → .(d ≤ trunk-height T)
-               → .(ih P ≥ tree-dim T)
+               → .(lh P ≥ tree-dim T)
                → tree-bd d S ≃′ tree-bd d (S >>[ P ] T)
 insertion-bd-1 (Join S₁ S₂) P T zero q r = refl≃′
 insertion-bd-1 (Join S₁ S₂) BHere (Susp T) (suc d) q r = let
@@ -796,9 +796,9 @@ standard-κ-comm-1 : (S : Tree n)
                    → (T : Tree m)
                    → .⦃ _ : has-trunk-height (bh P) T ⦄
                    → (d : ℕ)
-                   → (d < ih P)
+                   → (d < lh P)
                    → (q : d ≤ trunk-height T)
-                   → (r : ih P ≥ tree-dim T)
+                   → (r : lh P ≥ tree-dim T)
                    → (b : Bool)
                    → ap (tree-inc-label d S b) ●l (κ S P T ,, S⋆)
                      ≃lm
@@ -867,10 +867,10 @@ cond-pred (Cond2 x) = Cond2 (≤-pred x)
 bd-branch-lem : (P : Branch S l)
               → {T : Tree n}
               → .⦃ has-trunk-height (bh P) T ⦄
-              → Condition d T (ih P)
+              → Condition d T (lh P)
               → d > bh P
 bd-branch-lem P {T} (Cond1 x y) = ≤-<-trans (has-trunk-height-prop (bh P) T) x
-bd-branch-lem P (Cond2 q) = <-≤-trans (bh-<-ih P) q
+bd-branch-lem P (Cond2 q) = <-≤-trans (bh-<-lh P) q
 
 bd-branch : (S : Tree n)
           → (P : Branch S l)
@@ -885,7 +885,7 @@ bd-branch-height : (S : Tree n)
                  → (P : Branch S l)
                  → (d : ℕ)
                  → .(q : d > bh P)
-                 → ih (bd-branch S P d q) ≡ d ⊓ ih P
+                 → lh (bd-branch S P d q) ≡ d ⊓ lh P
 bd-branch-height (Join S₁ S₂) BHere (suc d) q = cong suc (tree-dim-bd d S₁)
 bd-branch-height (Join S₁ S₂) (BExt P) (suc d) q = cong suc (bd-branch-height S₁ P d (≤-pred q))
 bd-branch-height (Join S₁ S₂) (BShift P) (suc d) q = bd-branch-height S₂ P (suc d) q
@@ -921,8 +921,8 @@ module _ where
                      → .⦃ _ : has-trunk-height (bh P) T ⦄
                      → (d : ℕ)
                      → (b : Bool)
-                     → ih P ≥ tree-dim T
-                     → (c : Condition d T (ih P))
+                     → lh P ≥ tree-dim T
+                     → (c : Condition d T (lh P))
                      → ap (tree-inc-label d S b) ●l (κ S P T ,, S⋆)
                        ≃lm
                        κ (tree-bd d S)
@@ -1032,11 +1032,11 @@ module _ where
                            (tree-inc-label (suc d) (Join S₁ (S₂ >>[ P ] T)) b)) >stm ∎
 
 data Bd-Conditions (d : ℕ) {S : Tree n} (P : Branch S l) (T : Tree m) : Set where
-  Bd-Cond1 : d < ih P → d ≤ trunk-height T → Bd-Conditions d P T
-  Bd-Cond2 : Condition d T (ih P) → Bd-Conditions d P T
+  Bd-Cond1 : d < lh P → d ≤ trunk-height T → Bd-Conditions d P T
+  Bd-Cond2 : Condition d T (lh P) → Bd-Conditions d P T
 
 Bd-Conditions-one-of : (d : ℕ) → (P : Branch S l) → (T : Tree m) → Bd-Conditions d P T
-Bd-Conditions-one-of d P T with <-cmp d (ih P)
+Bd-Conditions-one-of d P T with <-cmp d (lh P)
 ... | tri≈ ¬a b ¬c = Bd-Cond2 (Cond2 (≤-reflexive (sym b)))
 ... | tri> ¬a ¬b c = Bd-Cond2 (Cond2 (<⇒≤ c))
 ... | tri< a ¬b ¬c with <-cmp d (trunk-height T)
@@ -1046,7 +1046,7 @@ Bd-Conditions-one-of d P T with <-cmp d (ih P)
 
 pruned-branch : (S : Tree n)
               → (P : Branch S l)
-              → .(bh P < pred (ih P))
+              → .(bh P < pred (lh P))
               → Branch (S //t P) l
 pruned-branch (Join S T) (BExt P) q = BExt (pruned-branch S P (≤-pred q))
 pruned-branch (Join S T) (BShift P) q = BShift (pruned-branch T P q)
@@ -1056,7 +1056,7 @@ insertion-tree-pruned-branch : (S : Tree n)
                              → (P : Branch S l)
                              → (T : Tree m)
                              → .⦃ _ : has-trunk-height (bh P) T ⦄
-                             → .(q : bh P < pred (ih P))
+                             → .(q : bh P < pred (lh P))
                              →  (S //t P) >>[ pruned-branch S P q ] T ≃′ S >>[ P ] T
 insertion-tree-pruned-branch (Join S₁ S₂) (BExt P) (Susp T) q = Join≃′ (insertion-tree-pruned-branch S₁ P T (≤-pred q)) refl≃′
 insertion-tree-pruned-branch (Join S₁ S₂) (BShift P) T q = Join≃′ refl≃′ (insertion-tree-pruned-branch S₂ P T q)
@@ -1064,12 +1064,12 @@ insertion-tree-pruned-branch (Join (Susp S₁) S₂) BHere T q = refl≃′
 
 pruned-branch-prop : (S : Tree n)
                    → (P : Branch S l)
-                   → .(q : bh P < pred (ih P))
+                   → .(q : bh P < pred (lh P))
                    → SPath ⌊ pruned-branch S P q ⌋p
                      ≃stm
-                     ι S P (n-disc (pred (ih P)))
-                       ⦃ has-trunk-height-n-disc (≤-pred (bh-<-ih P)) ⦄
-                       (is-linear-max-path (n-disc (pred (ih P))))
+                     ι S P (n-disc (pred (lh P)))
+                       ⦃ has-trunk-height-n-disc (≤-pred (bh-<-lh P)) ⦄
+                       (is-linear-max-path (n-disc (pred (lh P))))
 pruned-branch-prop (Join S T) (BExt P) q = compute-≃ (SExt≃ (pruned-branch-prop S P (≤-pred q)) refl≃)
 pruned-branch-prop (Join S T) (BShift P) q = compute-≃ (SShift≃ refl≃ (pruned-branch-prop T P q))
 pruned-branch-prop (Join (Susp S) T) BHere q = refl≃stm
@@ -1099,24 +1099,24 @@ label-from-pruned-branch : (L : Label X S)
                          → {T : Tree n}
                          → (M : Label-WT X T)
                          → .⦃ _ : has-trunk-height l T ⦄
-                         → .(q : bh P < pred (ih P))
-                         → L ⌊ P ⌋p ≃stm standard-coh′ (ih P) T >>= M
-                         → (L >>p[ P ] standard-label (n-disc (pred (ih P))) T ●l M) >>l[ pruned-branch S P q ] (ap M)
+                         → .(q : bh P < pred (lh P))
+                         → L ⌊ P ⌋p ≃stm standard-coh′ (lh P) T >>= M
+                         → (L >>p[ P ] standard-label (n-disc (pred (lh P))) T ●l M) >>l[ pruned-branch S P q ] (ap M)
                            ≃lm
                            label-≃ (insertion-tree-pruned-branch S P T q)
                                    (L >>l[ P ] (ap M))
 label-from-pruned-branch {S = Join S₁ S₂} L (BExt {n = n} P) {T = Susp T} M q pf .get (PExt Z) = begin
-  < ((L ∘ PExt >>p[ P ] (standard-label (n-disc (ih P)) (Susp T) ●l M) ∘ PExt)
+  < ((L ∘ PExt >>p[ P ] (standard-label (n-disc (lh P)) (Susp T) ●l M) ∘ PExt)
     >>l[ pruned-branch S₁ P _ ] ap M ∘ PExt) Z >stm
     ≈⟨ label-from-insertion-≃
          (label-from-prune-≃ refl≃l P
-           (label-comp-≃ [ (λ Z → standard-label-susp-lem (n-disc (pred (ih P))) T .get (PExt Z)) ]
+           (label-comp-≃ [ (λ Z → standard-label-susp-lem (n-disc (pred (lh P))) T .get (PExt Z)) ]
                          refl≃l
                          refl≃sty))
          (pruned-branch S₁ P _)
          refl≃l
          .get Z ⟩
-  < ((L ∘ PExt >>p[ P ] (standard-label (n-disc (pred (ih P))) T ●l label₁ M))
+  < ((L ∘ PExt >>p[ P ] (standard-label (n-disc (pred (lh P))) T ●l label₁ M))
     >>l[ (pruned-branch S₁ P _) ] (ap M ∘ PExt)) Z >stm
     ≈⟨ label-from-pruned-branch (L ∘ PExt) P (label₁ M) (≤-pred q) pf .get Z ⟩
   < label-≃ (insertion-tree-pruned-branch S₁ P T _)
@@ -1125,10 +1125,10 @@ label-from-pruned-branch {S = Join S₁ S₂} L (BExt {n = n} P) {T = Susp T} M 
     open Reasoning stm-setoid
 label-from-pruned-branch {S = Join S₁ S₂} L (BExt {n = n} P) {T = Susp T} M q pf .get (PShift Z) = begin
   < replace-label
-      ((L >>p[ BExt {n = n} P ] standard-label (Susp (n-disc (ih′ P))) (Susp T) ●l M) ∘ PShift)
+      ((L >>p[ BExt {n = n} P ] standard-label (Susp (n-disc (lh′ P))) (Susp T) ●l M) ∘ PShift)
       (ap M (PShift PHere)) Z >stm
     ≈⟨ replace-not-here _ (ap M (PShift PHere)) Z ⟩
-  < (L >>p[ BExt P ] (standard-label (n-disc (ih P)) (Susp T) ●l M)) (PShift Z) >stm
+  < (L >>p[ BExt P ] (standard-label (n-disc (lh P)) (Susp T) ●l M)) (PShift Z) >stm
     ≈⟨ replace-not-here (L ∘ PShift) _ Z ⟩
   < L (PShift Z) >stm
     ≈˘⟨ replace-not-here (L ∘ PShift) (ap M (PShift PHere)) Z ⟩

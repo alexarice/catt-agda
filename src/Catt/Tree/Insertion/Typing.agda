@@ -128,7 +128,7 @@ label-from-insertion-Ty : {L : Label X S}
                         → .⦃ _ : has-trunk-height l T ⦄
                         → branch-type S P >>=′ (L ,, As)
                           ≈[ Γ ]sty
-                          standard-sty (ih P) T >>=′ (M ,, As)
+                          standard-sty (lh P) T >>=′ (M ,, As)
                         → Typing-Label Γ (L >>l[ P ] M ,, As)
 label-from-insertion-Ty {S = Join S₁ S₂} {As = As} {L = L} (TyJoin x Lty Lty′) BHere {T} {M} Mty p
   = ++l-Ty Mty Lty′ (sym≈stm (≈SArr-proj₃ lem))
@@ -140,14 +140,14 @@ label-from-insertion-Ty {S = Join S₁ S₂} {As = As} {L = L} (TyJoin x LTy LTy
   where
     lem : (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, As)) ≈[ _ ]sty
             (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
-    lem = label-from-insertion-lem S₁ S₂ (Susp T) (branch-type S₁ P) L M (suc (ih P)) p
+    lem = label-from-insertion-lem S₁ S₂ (Susp T) (branch-type S₁ P) L M (suc (lh P)) p
 
     open Reasoning sty-setoid-≈
 
     lem2 : branch-type S₁ P >>=′
              ((L ∘ PExt) ,, SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
              ≈[ _ ]sty
-           standard-sty (ih P) T >>=′
+           standard-sty (lh P) T >>=′
              ((M ∘ PExt) ,, SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
     lem2 = begin
       branch-type S₁ P >>=′
@@ -157,38 +157,38 @@ label-from-insertion-Ty {S = Join S₁ S₂} {As = As} {L = L} (TyJoin x LTy LTy
         ≈˘⟨ reflexive≈sty (map-sty-ext-label (branch-type S₁ P) (L ,, As)) ⟩
       map-sty-ext (branch-type S₁ P) >>=′ (L ,, As)
         ≈⟨ p ⟩
-      standard-sty (suc (ih P)) (Susp T) >>=′ (M ,, As)
-        ≈˘⟨ reflexive≈sty (>>=′-≃ (standard-sty-susp-lem (ih P) T) refl≃l refl≃sty) ⟩
-      susp-sty (standard-sty (ih P) T) >>=′ (M ,, As)
-        ≈˘⟨ reflexive≈sty (>>=′-≃ (map-sty-ext-susp-compat (standard-sty (ih P) T)) refl≃l refl≃sty) ⟩
-      map-sty-ext (standard-sty (ih P) T) >>=′ (M ,, As)
-        ≈⟨ reflexive≈sty (map-sty-ext-label (standard-sty (ih P) T) (M ,, As)) ⟩
-      standard-sty (ih P) T >>=′ (label₁ (M ,, As)) ∎
+      standard-sty (suc (lh P)) (Susp T) >>=′ (M ,, As)
+        ≈˘⟨ reflexive≈sty (>>=′-≃ (standard-sty-susp-lem (lh P) T) refl≃l refl≃sty) ⟩
+      susp-sty (standard-sty (lh P) T) >>=′ (M ,, As)
+        ≈˘⟨ reflexive≈sty (>>=′-≃ (map-sty-ext-susp-compat (standard-sty (lh P) T)) refl≃l refl≃sty) ⟩
+      map-sty-ext (standard-sty (lh P) T) >>=′ (M ,, As)
+        ≈⟨ reflexive≈sty (map-sty-ext-label (standard-sty (lh P) T) (M ,, As)) ⟩
+      standard-sty (lh P) T >>=′ (label₁ (M ,, As)) ∎
 
 label-from-insertion-Ty {S = Join S₁ S₂} {As = As} {L = L} (TyJoin x Lty Lty′) (BShift {n = n} P) {T} {M} Mty p
   = TyJoin x (label-typing-conv Lty (≈SArr refl≈stm
                                            refl≈sty
-                                           (sym≈stm (label-from-insertion-phere (L ∘ PShift) P M (ih P) lem))))
+                                           (sym≈stm (label-from-insertion-phere (L ∘ PShift) P M (lh P) lem))))
              (label-from-insertion-Ty Lty′ P Mty lem)
 
   where
     open Reasoning sty-setoid-≈
     lem : branch-type S₂ P >>=′ ((L ∘ PShift) ,, As)
           ≈[ _ ]sty
-          standard-sty (ih P) T >>=′ (M ,, As)
+          standard-sty (lh P) T >>=′ (M ,, As)
     lem = begin
       branch-type S₂ P >>=′ ((L ∘ PShift) ,, As)
         ≈˘⟨ reflexive≈sty (map-sty-shift-label (branch-type S₂ P) (L ,, As)) ⟩
       map-sty-shift (branch-type S₂ P) >>=′ (L ,, As)
         ≈⟨ p ⟩
-      standard-sty (ih P) T >>=′ (M ,, As) ∎
+      standard-sty (lh P) T >>=′ (M ,, As) ∎
 
 label-from-insertion-eq : (L : Label X S)
                         → (P : Branch S l)
                         → {T : Tree m}
                         → (M : Label X T)
                         → .⦃ _ : has-trunk-height l T ⦄
-                        → branch-type S P >>=′ (L ,, As) ≈[ Γ ]sty standard-sty (ih P) T >>=′ (M ,, As)
+                        → branch-type S P >>=′ (L ,, As) ≈[ Γ ]sty standard-sty (lh P) T >>=′ (M ,, As)
                         → L >>l[ P ] M ≈[ Γ ]l L >>l′[ P ] M
 label-from-insertion-eq {S = Join S₁ S₂} L BHere {T} M p
   = trans≈l (++l-eq M (L ∘ PShift) (sym≈stm (≈SArr-proj₃ lem)))
@@ -203,14 +203,14 @@ label-from-insertion-eq {S = Join S₁ S₂} {As = As} L (BExt {n = n} P) {Susp 
     lem : (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
           ≈[ _ ]sty
           (SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (L ,, As))
-    lem = sym≈sty (label-from-insertion-lem S₁ S₂ (Susp T) (branch-type S₁ P) L M (suc (ih P)) p)
+    lem = sym≈sty (label-from-insertion-lem S₁ S₂ (Susp T) (branch-type S₁ P) L M (suc (lh P)) p)
 
     open Reasoning sty-setoid-≈
 
     lem2 : branch-type S₁ P >>=′
              ((L ∘ PExt) ,, SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
              ≈[ _ ]sty
-           standard-sty (ih P) T >>=′
+           standard-sty (lh P) T >>=′
              ((M ∘ PExt) ,, SArr SHere S⋆ (SPath (PShift PHere)) >>=′ (M ,, As))
     lem2 = begin
       branch-type S₁ P >>=′
@@ -220,13 +220,13 @@ label-from-insertion-eq {S = Join S₁ S₂} {As = As} L (BExt {n = n} P) {Susp 
         ≈˘⟨ reflexive≈sty (map-sty-ext-label (branch-type S₁ P) (L ,, As)) ⟩
       map-sty-ext (branch-type S₁ P) >>=′ (L ,, As)
         ≈⟨ p ⟩
-      standard-sty (suc (ih P)) (Susp T) >>=′ (M ,, As)
-        ≈˘⟨ reflexive≈sty (>>=′-≃ (standard-sty-susp-lem (ih P) T) refl≃l refl≃sty) ⟩
-      susp-sty (standard-sty (ih P) T) >>=′ (M ,, As)
-        ≈˘⟨ reflexive≈sty (>>=′-≃ (map-sty-ext-susp-compat (standard-sty (ih P) T)) refl≃l refl≃sty) ⟩
-      map-sty-ext (standard-sty (ih P) T) >>=′ (M ,, As)
-        ≈⟨ reflexive≈sty (map-sty-ext-label (standard-sty (ih P) T) (M ,, As)) ⟩
-      standard-sty (ih P) T >>=′ (label₁ (M ,, As)) ∎
+      standard-sty (suc (lh P)) (Susp T) >>=′ (M ,, As)
+        ≈˘⟨ reflexive≈sty (>>=′-≃ (standard-sty-susp-lem (lh P) T) refl≃l refl≃sty) ⟩
+      susp-sty (standard-sty (lh P) T) >>=′ (M ,, As)
+        ≈˘⟨ reflexive≈sty (>>=′-≃ (map-sty-ext-susp-compat (standard-sty (lh P) T)) refl≃l refl≃sty) ⟩
+      map-sty-ext (standard-sty (lh P) T) >>=′ (M ,, As)
+        ≈⟨ reflexive≈sty (map-sty-ext-label (standard-sty (lh P) T) (M ,, As)) ⟩
+      standard-sty (lh P) T >>=′ (label₁ (M ,, As)) ∎
 
     γ : L >>l[ BExt P ] M
         ≈[ _ ]l
@@ -243,13 +243,13 @@ label-from-insertion-eq {S = Join S₁ S₂} {As = As} L (BShift {n = n} P) {T} 
     open Reasoning sty-setoid-≈
     lem : branch-type S₂ P >>=′ ((L ∘ PShift) ,, As)
           ≈[ _ ]sty
-          standard-sty (ih P) T >>=′ (M ,, As)
+          standard-sty (lh P) T >>=′ (M ,, As)
     lem = begin
       branch-type S₂ P >>=′ ((L ∘ PShift) ,, As)
         ≈˘⟨ reflexive≈sty (map-sty-shift-label (branch-type S₂ P) (L ,, As)) ⟩
       map-sty-shift (branch-type S₂ P) >>=′ (L ,, As)
         ≈⟨ p ⟩
-      standard-sty (ih P) T >>=′ (M ,, As) ∎
+      standard-sty (lh P) T >>=′ (M ,, As) ∎
 
 ⌊⌋p-Ty : (P : Branch S l) → Typing-STm ⌊ S ⌋ (SPath ⌊ P ⌋p) (branch-type S P)
 ⌊⌋p-Ty P = TySConv (TySPath ⌊ P ⌋p) (reflexive≈sty (branch-type-is-path-type P))

@@ -373,7 +373,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
       lem2 b (Bd-Cond1 x y) = begin
         standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
           ≈⟨ >>=-≈ (standard-stm d (tree-bd d S))
-                   (label-max-equality-to-equality (standard-κ-comm-1 S P T d x y q b)
+                   (label-max-equality-to-equality (bd-κ-comm-1 S P T d x y q b)
                                                    (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T) TySStar)
                                                    (label-≃-Ty (insertion-bd-1 S P T d y q) (tree-inc-Ty d (S >>[ P ] T) b)))
                    refl≈sty ⟩
@@ -387,7 +387,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
         standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
           ≈⟨ >>=-≈ (standard-stm d (tree-bd d S))
                    (label-max-equality-to-equality
-                     (standard-κ-comm-2 S P T d b q x)
+                     (bd-κ-comm-2 S P T d b q x)
                      (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T) TySStar)
                      (label-comp-Ty (κ-Ty (tree-bd d S)
                                                        (bd-branch S P d _)

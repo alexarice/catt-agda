@@ -113,7 +113,7 @@ open import Catt.Typing.Structured.Support rules tame supp-cond
       DCT
         (FVLabel
          (ap (tree-inc-label d S b) ●l (κ S p T ,, S⋆)))
-        ≡⟨ EqSuppLabel (label-max-equality-to-equality (standard-κ-comm-1 S p T d x y q b)
+        ≡⟨ EqSuppLabel (label-max-equality-to-equality (bd-κ-comm-1 S p T d x y q b)
                                                        (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S p T) TySStar)
                                                        (label-≃-Ty (insertion-bd-1 S p T d y q) (tree-inc-Ty d (S >>[ p ] T) b))) ⟩
       DCT (FVLabel (label-≃ (insertion-bd-1 S p T d y q) (ap (tree-inc-label d (S >>[ p ] T) b))))
@@ -131,7 +131,7 @@ open import Catt.Typing.Structured.Support rules tame supp-cond
     lem (Bd-Cond2 x) = begin
       DCT (FVLabel (ap (tree-inc-label d S b) ●l (κ S p T ,, S⋆)))
         ≡⟨ EqSuppLabel (label-max-equality-to-equality
-                         (standard-κ-comm-2 S p T d b q x)
+                         (bd-κ-comm-2 S p T d b q x)
                          (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S p T) TySStar)
                          (label-comp-Ty (κ-Ty (tree-bd d S) (bd-branch S p d _) (tree-bd d T) ⦃ _ ⦄)
                                         (label-≃-Ty (insertion-bd-2 S p T d (bd-branch-lem p x)) (tree-inc-Ty d (S >>[ p ] T) b)) TySStar)) ⟩

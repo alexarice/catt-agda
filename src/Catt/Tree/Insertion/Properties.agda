@@ -581,6 +581,13 @@ Orthogonal-sym (BShift P) BHere = tt
 Orthogonal-sym (BShift P) (BExt Q) = tt
 Orthogonal-sym (BShift P) (BShift Q) = Orthogonal-sym P Q
 
+Orthogonal→≢ : (P : Branch S l) → (Q : Branch S l′) → ⦃ Orthogonal P Q ⦄ → ¬ ⌊ P ⌋p ≃p ⌊ Q ⌋p
+Orthogonal→≢ BHere BHere p = it
+Orthogonal→≢ BHere (BExt Q) p = it
+Orthogonal→≢ BHere (BShift Q) ()
+Orthogonal→≢ (BExt P) (BExt Q) (Ext≃ p x) = Orthogonal→≢ P Q p
+Orthogonal→≢ (BShift P) (BShift Q) (Shift≃ x p) = Orthogonal→≢ P Q p
+
 orthog-branch : (P : Branch S l)
               → (Q : Branch S l′)
               → .⦃ Orthogonal P Q ⦄
@@ -791,7 +798,7 @@ insertion-bd-1 (Join S₁ S₂) BHere (Susp T) (suc d) q r = let
 insertion-bd-1 (Join S₁ S₂) (BExt P) (Susp T) (suc d) q r = Join≃′ (insertion-bd-1 S₁ P T d (≤-pred q) (≤-pred r)) refl≃′
 insertion-bd-1 (Join S₁ S₂) (BShift P) T (suc d) q r = Join≃′ refl≃′ (insertion-bd-1 S₂ P T (suc d) q r)
 
-standard-κ-comm-1 : (S : Tree n)
+bd-κ-comm-1 : (S : Tree n)
                    → (P : Branch S l)
                    → (T : Tree m)
                    → .⦃ _ : has-trunk-height (bh P) T ⦄
@@ -803,9 +810,9 @@ standard-κ-comm-1 : (S : Tree n)
                    → ap (tree-inc-label d S b) ●l (κ S P T ,, S⋆)
                      ≃lm
                      label-≃ (insertion-bd-1 S P T d q r) (ap (tree-inc-label d (S >>[ P ] T) b))
-standard-κ-comm-1 S P T zero p q r false .get Z = κ-phere S P T
-standard-κ-comm-1 S P T zero p q r true .get Z = κ-last-path S P T
-standard-κ-comm-1 (Join S₁ S₂) (BHere ⦃ l ⦄) (Susp T) (suc d) P q r b .get (PExt Z) = begin
+bd-κ-comm-1 S P T zero p q r false .get Z = κ-phere S P T
+bd-κ-comm-1 S P T zero p q r true .get Z = κ-last-path S P T
+bd-κ-comm-1 (Join S₁ S₂) (BHere ⦃ l ⦄) (Susp T) (suc d) P q r b .get (PExt Z) = begin
   < standard-label (Susp S₁) (Susp T) (PExt (tree-inc-label′ d S₁ b Z))
         >>= ++t-inc-left (Susp T) S₂ >stm
     ≈⟨ >>=-≃ lem2 refl≃l refl≃sty ⟩
@@ -846,15 +853,15 @@ standard-κ-comm-1 (Join S₁ S₂) (BHere ⦃ l ⦄) (Susp T) (suc d) P q r b .
       < SPath (is-linear-max-path (tree-bd (suc d) (Susp T))) >>= (tree-inc-label (suc d) (Susp T) b) >stm
         ≡⟨⟩
       < SPath (PExt (tree-inc-label′ d T b (is-linear-max-path (tree-bd d T)))) >stm ∎
-standard-κ-comm-1 (Join S₁ S₂) BHere (Susp T) (suc d) p q r b .get (PShift Z) = refl≃stm
-standard-κ-comm-1 (Join S₁ S₂) (BExt P) (Susp T) (suc d) p q r b .get (PExt Z)
-  = compute-≃ (SExt≃ (standard-κ-comm-1 S₁ P T d (≤-pred p) (≤-pred q) (≤-pred r) b .get Z) refl≃)
-standard-κ-comm-1 (Join S₁ S₂) (BExt P) (Susp T) (suc d) p q r b .get (PShift Z)
+bd-κ-comm-1 (Join S₁ S₂) BHere (Susp T) (suc d) p q r b .get (PShift Z) = refl≃stm
+bd-κ-comm-1 (Join S₁ S₂) (BExt P) (Susp T) (suc d) p q r b .get (PExt Z)
+  = compute-≃ (SExt≃ (bd-κ-comm-1 S₁ P T d (≤-pred p) (≤-pred q) (≤-pred r) b .get Z) refl≃)
+bd-κ-comm-1 (Join S₁ S₂) (BExt P) (Susp T) (suc d) p q r b .get (PShift Z)
   = compute-≃ refl≃stm
-standard-κ-comm-1 (Join S₁ S₂) (BShift P) T (suc d) p q r b .get (PExt Z)
+bd-κ-comm-1 (Join S₁ S₂) (BShift P) T (suc d) p q r b .get (PExt Z)
   = compute-≃ refl≃stm
-standard-κ-comm-1 (Join S₁ S₂) (BShift P) T (suc d) p q r b .get (PShift Z)
-  = compute-≃ (SShift≃ refl≃ (standard-κ-comm-1 S₂ P T (suc d) p q r b .get Z))
+bd-κ-comm-1 (Join S₁ S₂) (BShift P) T (suc d) p q r b .get (PShift Z)
+  = compute-≃ (SShift≃ refl≃ (bd-κ-comm-1 S₂ P T (suc d) p q r b .get Z))
 
 data Condition (d : ℕ) (T : Tree n) (m : ℕ) : Set where
   Cond1 : d > (trunk-height T) → d ≤ m → Condition d T m
@@ -915,7 +922,7 @@ insertion-bd-2 (Join S₁ S₂) (BShift P) T (suc d) q
 module _ where
   open Reasoning stm-setoid
 
-  standard-κ-comm-2 : (S : Tree n)
+  bd-κ-comm-2 : (S : Tree n)
                      → (P : Branch S l)
                      → (T : Tree m)
                      → .⦃ _ : has-trunk-height (bh P) T ⦄
@@ -930,11 +937,11 @@ module _ where
                          (tree-bd d T)
                          ⦃ bd-has-trunk-height d l T (bd-branch-lem P c) ⦄
                          ●l (label-wt-≃ (insertion-bd-2 S P T d (bd-branch-lem P c)) (tree-inc-label d (S >>[ P ] T) b))
-  standard-κ-comm-2 S P T zero b r (Cond1 () x)
-  standard-κ-comm-2 S P T zero b r (Cond2 ())
-  standard-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r c .get (PShift Z)
+  bd-κ-comm-2 S P T zero b r (Cond1 () x)
+  bd-κ-comm-2 S P T zero b r (Cond2 ())
+  bd-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r c .get (PShift Z)
     = SPath≃ (tree-inc-inc-right d T S₂ b Z)
-  standard-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r (Cond1 q r′) .get (PExt Z) = let
+  bd-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r (Cond1 q r′) .get (PExt Z) = let
     instance _ = is-linear-bd d S₁
     in begin
     < standard-label (Susp S₁) T (PExt (tree-inc-label′ d S₁ b Z))
@@ -959,7 +966,7 @@ module _ where
         ++t-inc-left (tree-bd (suc d) T) (tree-bd (suc d) S₂)
         >>=
         label-wt-≃ (++t-bd d T S₂) (tree-inc-label (suc d) (T ++t S₂) b) >stm ∎
-  standard-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r (Cond2 q) .get (PExt Z) = let
+  bd-κ-comm-2 (Join S₁ S₂) BHere T (suc d) b r (Cond2 q) .get (PExt Z) = let
     instance _ = is-linear-bd d S₁
     in begin
     < standard-label (Susp S₁) T (PExt (tree-inc-label′ d S₁ b Z))
@@ -989,11 +996,11 @@ module _ where
         >>=
         label-wt-≃ (++t-bd d T S₂) (tree-inc-label (suc d) (T ++t S₂) b) >stm ∎
 
-  standard-κ-comm-2 (Join S₁ S₂) (BExt P) (Susp T) (suc d) b r c .get (PExt Z) = let
+  bd-κ-comm-2 (Join S₁ S₂) (BExt P) (Susp T) (suc d) b r c .get (PExt Z) = let
     instance _ = bd-has-trunk-height d (bh P) T (bd-branch-lem P (cond-pred c))
     in begin
     < SExt (κ S₁ P T (tree-inc-label′ d S₁ b Z)) >stm
-      ≈⟨ SExt≃ (standard-κ-comm-2 S₁ P T d b (≤-pred r) (cond-pred c) .get Z) refl≃ ⟩
+      ≈⟨ SExt≃ (bd-κ-comm-2 S₁ P T d b (≤-pred r) (cond-pred c) .get Z) refl≃ ⟩
     < SExt ((κ (tree-bd d S₁)
                                (bd-branch S₁ P d (bd-branch-lem P (cond-pred c)))
                                (tree-bd d T)
@@ -1009,15 +1016,15 @@ module _ where
     < κ (tree-bd d S₁) (bd-branch S₁ P d (bd-branch-lem P (cond-pred c))) (tree-bd d T) Z
        >>= label₁ (label-wt-≃ (Join≃′ (insertion-bd-2 S₁ P T d (bd-branch-lem P (cond-pred c))) refl≃′)
                               (tree-inc-label (suc d) (Join (S₁ >>[ P ] T) S₂) b)) >stm ∎
-  standard-κ-comm-2 (Join S₁ S₂) (BExt P) (Susp T) (suc d) b r c .get (PShift Z)
+  bd-κ-comm-2 (Join S₁ S₂) (BExt P) (Susp T) (suc d) b r c .get (PShift Z)
     = compute-≃ refl≃stm
-  standard-κ-comm-2 (Join S₁ S₂) (BShift P) T (suc d) b r c .get (PExt Z)
+  bd-κ-comm-2 (Join S₁ S₂) (BShift P) T (suc d) b r c .get (PExt Z)
     = compute-≃ refl≃stm
-  standard-κ-comm-2 (Join S₁ S₂) (BShift P) T (suc d) b r c .get (PShift Z) = let
+  bd-κ-comm-2 (Join S₁ S₂) (BShift P) T (suc d) b r c .get (PShift Z) = let
     instance _ = bd-has-trunk-height (suc d) (bh P) T (bd-branch-lem P c)
     in begin
     < SShift (κ S₂ P T (tree-inc-label′ (suc d) S₂ b Z)) >stm
-      ≈⟨ SShift≃ refl≃ (standard-κ-comm-2 S₂ P T (suc d) b r c .get Z) ⟩
+      ≈⟨ SShift≃ refl≃ (bd-κ-comm-2 S₂ P T (suc d) b r c .get Z) ⟩
     < SShift (κ (tree-bd (suc d) S₂) (bd-branch S₂ P (suc d) (bd-branch-lem P c)) (tree-bd (suc d) T) Z
         >>= label-wt-≃ (insertion-bd-2 S₂ P T (suc d) (bd-branch-lem P c)) (tree-inc-label (suc d) (S₂ >>[ P ] T) b)) >stm
       ≈˘⟨ >>=-shift (κ (tree-bd (suc d) S₂) (bd-branch S₂ P (suc d) (bd-branch-lem P c)) (tree-bd (suc d) T) Z)

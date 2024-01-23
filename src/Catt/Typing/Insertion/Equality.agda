@@ -314,42 +314,42 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
   open import Catt.Typing.DiscRemoval.Properties rules tame dr
 
   κ-standard-sty : (S : Tree n)
-                   → (P : Branch S l)
-                   → (T : Tree m)
-                   → .⦃ _ : has-trunk-height l T ⦄
-                   → (d : ℕ)
-                   → (tree-dim T ≤ lh P)
-                   → standard-sty d S >>=′ (κ S P T ,, S⋆)
-                     ≈[ ⌊ S >>[ P ] T ⌋ ]sty
-                     standard-sty d (S >>[ P ] T)
+                 → (P : Branch S l)
+                 → (T : Tree m)
+                 → .⦃ _ : has-trunk-height l T ⦄
+                 → (d : ℕ)
+                 → (tree-dim T ≤ lh P)
+                 → standard-sty d S >>=′ (κ S P T ,, S⋆)
+                   ≈[ ⌊ S >>[ P ] T ⌋ ]sty
+                   standard-sty d (S >>[ P ] T)
   κ-standard-coh : (S : Tree n)
-                   → (P : Branch S l)
-                   → (T : Tree m)
-                   → .⦃ _ : has-trunk-height l T ⦄
-                   → (d : ℕ)
-                   → (tree-dim T ≤ lh P)
-                   → standard-coh d S >>= (κ S P T ,, S⋆)
-                     ≈[ ⌊ S >>[ P ] T ⌋ ]stm
-                     standard-coh d (S >>[ P ] T)
+                 → (P : Branch S l)
+                 → (T : Tree m)
+                 → .⦃ _ : has-trunk-height l T ⦄
+                 → (d : ℕ)
+                 → (tree-dim T ≤ lh P)
+                 → standard-coh d S >>= (κ S P T ,, S⋆)
+                   ≈[ ⌊ S >>[ P ] T ⌋ ]stm
+                   standard-coh d (S >>[ P ] T)
   κ-standard-coh′ : (S : Tree n)
-                    → (P : Branch S l)
-                    → (T : Tree m)
-                    → .⦃ _ : has-trunk-height l T ⦄
-                    → (d : ℕ)
-                    → (tree-dim T ≤ lh P)
-                    → standard-coh′ d S >>= (κ S P T ,, S⋆)
-                      ≈[ ⌊ S >>[ P ] T ⌋ ]stm
-                      standard-coh′ d (S >>[ P ] T)
-  κ-standard-stm : (S : Tree n)
                   → (P : Branch S l)
                   → (T : Tree m)
                   → .⦃ _ : has-trunk-height l T ⦄
                   → (d : ℕ)
-                  → d ≥ tree-dim S
-                  → tree-dim T ≤ lh P
-                  → standard-stm d S >>= (κ S P T ,, S⋆)
+                  → (tree-dim T ≤ lh P)
+                  → standard-coh′ d S >>= (κ S P T ,, S⋆)
                     ≈[ ⌊ S >>[ P ] T ⌋ ]stm
-                    standard-stm d (S >>[ P ] T)
+                    standard-coh′ d (S >>[ P ] T)
+  κ-standard-stm : (S : Tree n)
+                 → (P : Branch S l)
+                 → (T : Tree m)
+                 → .⦃ _ : has-trunk-height l T ⦄
+                 → (d : ℕ)
+                 → d ≥ tree-dim S
+                 → tree-dim T ≤ lh P
+                 → standard-stm d S >>= (κ S P T ,, S⋆)
+                   ≈[ ⌊ S >>[ P ] T ⌋ ]stm
+                   standard-stm d (S >>[ P ] T)
 
   κ-standard-sty S P T zero q = refl≈sty
   κ-standard-sty S P T (suc d) q

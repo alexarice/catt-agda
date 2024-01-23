@@ -1081,26 +1081,6 @@ pruned-branch-prop (Join S T) (BExt P) q = compute-≃ (SExt≃ (pruned-branch-p
 pruned-branch-prop (Join S T) (BShift P) q = compute-≃ (SShift≃ refl≃ (pruned-branch-prop T P q))
 pruned-branch-prop (Join (Susp S) T) BHere q = refl≃stm
 
-label-from-pruned-branch-lem : (n : ℕ)
-                             → .⦃ NonZero n ⦄
-                             → (T : Tree m)
-                             → .⦃ _ : has-trunk-height l T ⦄
-                             → (As : STy (someTree (chop-trunk l T)))
-                             → ⦃ _ : n ≃n l + suc (sty-dim As) ⦄
-                             → tree-dim (n-disc (pred n)) ≃n sty-dim (resuspend l As)
-label-from-pruned-branch-lem {l = l} (suc n) T As ⦃ P ⦄ = ≡-to-≃n (begin
-  tree-dim (n-disc n)
-    ≡⟨ ≃n-to-≡ tree-dim-n-disc ⟩
-  n
-    ≡⟨ cong pred (≃n-to-≡ P) ⟩
-  pred (l + suc (sty-dim As))
-    ≡⟨ cong pred (+-suc l (sty-dim As)) ⟩
-  l + sty-dim As
-    ≡˘⟨ sty-dim-resuspend l T As ⟩
-  sty-dim (resuspend l As) ∎)
-  where
-    open ≡-Reasoning
-
 label-from-pruned-branch : (L : Label X S)
                          → (P : Branch S l)
                          → {T : Tree n}

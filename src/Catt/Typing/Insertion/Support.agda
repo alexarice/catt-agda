@@ -208,3 +208,113 @@ ins-supp [ Insert Γ S As L P T M p ] tty = begin
 
     l2 : Typing-Label Γ (L >>l[ P ] M ,, S⋆)
     l2 = label-from-insertion-Ty Lty P Mty l1
+module _ where
+  open ≡-Reasoning
+  κ-preserves-supp : (S : Tree n)
+                   → (As : STy (someTree S))
+                   → (P : Branch S l)
+                   → (T : Tree m)
+                   → .⦃ _ : has-trunk-height l T ⦄
+                   → lh P ≥ tree-dim T
+                   → (b : Bool)
+                   → supp-condition-s b S As
+                   → supp-condition-s (b ∧ (tree-dim (S >>[ P ] T) ≡ᵇ tree-dim S)) (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆))
+  κ-preserves-supp S As P T p false x = trans (DCT-reflect lem) DCT-full
+    where
+      lem : toVarSet (FVSTy (As >>=′ (κ S P T ,, S⋆))) ≡ toVarSet (tFull {S = S >>[ P ] T})
+      lem = begin
+        toVarSet (FVSTy (As >>=′ (κ S P T ,, S⋆)))
+          ≡⟨ TransportVarSet-Label-STy As (κ S P T) (κ-Ty S P T) ⟩
+        TransportVarSet-Label (FVSTy As) (κ S P T)
+          ≡˘⟨ TransportVarSet-Label-DCT (FVSTy As) (κ S P T) ⟩
+        TransportVarSet-Label (DCT (FVSTy As)) (κ S P T)
+          ≡⟨ cong (λ - → TransportVarSet-Label - (κ S P T)) x ⟩
+        TransportVarSet-Label mFull (κ S P T)
+          ≡⟨ TransportVarSet-Label-full (κ S P T) (κ-Ty S P T) ⟩
+        toVarSet (FVLabel (κ S P T))
+          ≡˘⟨ DCT-toVarSet (FVLabel (κ S P T)) ⟩
+        toVarSet (DCT (FVLabel (κ S P T)))
+          ≡⟨ cong toVarSet (κ-full S P T) ⟩
+        toVarSet (tFull {S = S >>[ P ] T}) ∎
+
+  κ-preserves-supp S (SArr s As t) P T p true (nz ,, src ,, tgt)
+    with tree-dim (S >>[ P ] T) ≡ᵇ tree-dim S
+         | inspect (tree-dim (S >>[ P ] T) ≡ᵇ_) (tree-dim S)
+  ... | false | [ eq ]r = begin
+    DCT (FVSTy (As >>=′ (κ S P T ,, S⋆))
+        ∪t FVSTm (s >>= (κ S P T ,, S⋆))
+        ∪t FVSTm (t >>= (κ S P T ,, S⋆)))
+      ≡⟨ DCT-∪ _ _ ⟩
+    DCT (FVSTy (As >>=′ (κ S P T ,, S⋆)) ∪t FVSTm (s >>= (κ S P T ,, S⋆)))
+     ∪t DCT (FVSTm (t >>= (κ S P T ,, S⋆)))
+      ≡⟨ cong (DCT (FVSTy (As >>=′ (κ S P T ,, S⋆))
+                   ∪t FVSTm (s >>= (κ S P T ,, S⋆))) ∪t_)
+              lem ⟩
+    DCT (FVSTy (As >>=′ (κ S P T ,, S⋆)) ∪t FVSTm (s >>= (κ S P T ,, S⋆)))
+     ∪t tFull
+      ≡⟨ ∪t-right-zero _ ⟩
+    tFull ∎
+    where
+      dim-< : tree-dim (S >>[ P ] T) ≤ pred (tree-dim S)
+      dim-< with <-cmp (tree-dim (S >>[ P ] T)) (tree-dim S)
+      ... | tri< a ¬b ¬c = ≤-pred (≤-trans a (suc-pred-≤ (tree-dim S)))
+      ... | tri≈ ¬a b ¬c = ⊥-elim (subst Truth eq (≡⇒≡ᵇ (tree-dim (S >>[ P ] T)) (tree-dim S) b))
+      ... | tri> ¬a ¬b c = ⊥-elim (≤⇒≯ (insertion-tree-dim S P T p) c)
+
+      l1 : toVarSet (FVSTm (t >>= (κ S P T ,, S⋆))) ≡ toVarSet (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true)
+      l1 = begin
+        toVarSet (FVSTm (t >>= (κ S P T ,, S⋆)))
+          ≡⟨ TransportVarSet-Label-STm t (κ S P T) (κ-Ty S P T) ⟩
+        TransportVarSet-Label (FVSTm t) (κ S P T)
+          ≡˘⟨ TransportVarSet-Label-DCT (FVSTm t) (κ S P T) ⟩
+        TransportVarSet-Label (DCT (FVSTm t)) (κ S P T)
+          ≡⟨ cong (λ - → TransportVarSet-Label - (κ S P T)) tgt ⟩
+        TransportVarSet-Label (supp-tree-bd (pred (tree-dim S)) S true) (κ S P T)
+          ≡⟨ κ-boundary-supp S P T p (pred (tree-dim S)) true ⟩
+        toVarSet (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true) ∎
+
+      lem : DCT (FVSTm (t >>= (κ S P T ,, S⋆))) ≡ tFull
+      lem = begin
+        DCT (FVSTm (t >>= (κ S P T ,, S⋆)))
+          ≡⟨ DCT-reflect l1 ⟩
+        DCT (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true)
+          ≡⟨ DCT-supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true ⟩
+        supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true
+          ≡⟨ supp-tree-bd-full (pred (tree-dim S)) (S >>[ P ] T) true dim-< ⟩
+        tFull ∎
+  ... | true | [ eq ]r = NonZero-subst (sym dim-eq) nz ,, lem s false src ,, lem t true tgt
+    where
+      dim-eq : tree-dim (S >>[ P ] T) ≡ tree-dim S
+      dim-eq = ≡ᵇ⇒≡ (tree-dim (S >>[ P ] T)) (tree-dim S) (T-≡ .from eq )
+
+      l1 : (a : STm (someTree S))
+         → (b : Bool)
+         → DCT (FVSTm a) ≡ supp-tree-bd (pred (tree-dim S)) S b
+         → toVarSet (FVSTm (a >>= (κ S P T ,, S⋆)))
+           ≡
+           toVarSet (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b)
+      l1 a b q = begin
+        toVarSet (FVSTm (a >>= (κ S P T ,, S⋆)))
+          ≡⟨ TransportVarSet-Label-STm a (κ S P T) (κ-Ty S P T) ⟩
+        TransportVarSet-Label (FVSTm a) (κ S P T)
+          ≡˘⟨ TransportVarSet-Label-DCT (FVSTm a) (κ S P T) ⟩
+        TransportVarSet-Label (DCT (FVSTm a)) (κ S P T)
+          ≡⟨ cong (λ - → TransportVarSet-Label - (κ S P T)) q ⟩
+        TransportVarSet-Label (supp-tree-bd (pred (tree-dim S)) S b) (κ S P T)
+          ≡⟨ κ-boundary-supp S P T p (pred (tree-dim S)) b ⟩
+        toVarSet (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b) ∎
+
+      lem : (a : STm (someTree S))
+          → (b : Bool)
+          → DCT (FVSTm a) ≡ supp-tree-bd (pred (tree-dim S)) S b
+          → DCT (FVSTm (a >>= (κ S P T ,, S⋆)))
+            ≡
+            supp-tree-bd (pred (tree-dim (S >>[ P ] T))) (S >>[ P ] T) b
+      lem a b q = begin
+        DCT (FVSTm (a >>= (κ S P T ,, S⋆)))
+          ≡⟨ DCT-reflect (l1 a b q) ⟩
+        DCT (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b)
+          ≡⟨ DCT-supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b ⟩
+        supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b
+          ≡˘⟨ cong (λ - → supp-tree-bd (pred -) (S >>[ P ] T) b) dim-eq ⟩
+        supp-tree-bd (pred (tree-dim (S >>[ P ] T))) (S >>[ P ] T) b ∎

@@ -49,6 +49,27 @@ lh-linear : (S : Tree n) → .⦃ is-linear S ⦄ → (P : Branch S l) → lh P 
 lh-linear (Susp S) BHere = refl
 lh-linear (Susp S) (BExt P) = cong suc (lh-linear S P)
 
+insertion-tree-dim : (S : Tree n)
+                   → (P : Branch S l)
+                   → (T : Tree m)
+                   → .⦃ _ : has-trunk-height l T ⦄
+                   → (lh P ≥ tree-dim T)
+                   → tree-dim (S >>[ P ] T) ≤ tree-dim S
+insertion-tree-dim (Join S₁ S₂) BHere T p = begin
+  tree-dim (T ++t S₂)
+    ≡⟨ ++t-dim T S₂ ⟩
+  tree-dim T ⊔ tree-dim S₂
+    ≤⟨ ⊔-mono-≤ p (suc-pred-≤ (tree-dim S₂)) ⟩
+  suc (tree-dim S₁) ⊔ suc (pred (tree-dim S₂))
+    ≡⟨ ⊔-comm (suc (tree-dim S₁)) (suc (pred (tree-dim S₂))) ⟩
+  suc (pred (tree-dim S₂)) ⊔ suc (tree-dim S₁) ∎
+  where
+    open ≤-Reasoning
+insertion-tree-dim (Join S₁ S₂) (BExt P) (Susp T) p
+  = s≤s (⊔-monoʳ-≤ (pred (tree-dim S₂)) (insertion-tree-dim S₁ P T (≤-pred p)))
+insertion-tree-dim (Join S₁ S₂) (BShift P) T p
+  = s≤s (⊔-monoˡ-≤ (tree-dim S₁) (∸-monoˡ-≤ 1 (insertion-tree-dim S₂ P T p)))
+
 κ-phere : (S : Tree n)
         → (p : Branch S d)
         → (T : Tree m)

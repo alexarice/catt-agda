@@ -1,9 +1,9 @@
 module Catt.Prelude where
 
 open import Data.Nat public
-open import Data.Bool using (not;Bool;true;false;_∨_;if_then_else_) renaming (T to Truth) public
+open import Data.Bool using (not;Bool;true;false;_∨_;_∧_;if_then_else_) renaming (T to Truth) public
 open import Data.Fin using (Fin; zero; suc; inject₁; fromℕ; toℕ; cast; opposite; splitAt; _↑ˡ_; _↑ʳ_) renaming (_≟_ to _f≟_; _<?_ to _f<?_) public
-open import Relation.Binary.PropositionalEquality hiding ([_]) public
+open import Relation.Binary.PropositionalEquality renaming ([_] to [_]r) public
 open import Data.Product renaming (_,_ to _,,_) hiding (map) public
 open import Relation.Binary.Definitions hiding (Irrelevant) public
 open import Data.Empty using (⊥) public
@@ -12,9 +12,10 @@ open import Relation.Nullary hiding (⌊_⌋) public
 open import Data.Fin.Patterns public
 open import Data.Wrap public
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′) renaming (map to map⊎) public
-open import Function using (it; _∘_) public
+open import Function using (it; _∘_; Equivalence) public
 
 open Reveal_·_is_ public
+open Equivalence public
 
 infixr 2 _×′_
 record _×′_ (A : Set) (B : Set) : Set where

@@ -5,6 +5,7 @@ open import Catt.Tree
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.ToTerm
+open import Catt.Tree.Structured.Globular
 
 open import Catt.Support
 open import Catt.Support.Properties

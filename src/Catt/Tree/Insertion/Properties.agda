@@ -214,6 +214,7 @@ disc-label-from-2 L (BExt P) M q .get (PShift Z) = replace-not-here (L ∘ PShif
 disc-label-from-2 L (BShift P) M q .get (PExt Z) = refl≃stm
 disc-label-from-2 L (BShift P) M q .get (PShift Z) = disc-label-from-2 (L ∘ PShift) P M q .get Z
 
+-- Lemma 24
 label-from-insertion-map : (f : STm X → STm Y)
                          → (L : Label X S)
                          → (P : Branch S l)

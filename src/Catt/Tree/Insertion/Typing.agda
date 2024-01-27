@@ -24,6 +24,7 @@ open import Catt.Tree.Structured.Typing rules
 open import Catt.Tree.Structured.Typing.Properties rules tame
 open import Catt.Tree.Standard.Typing rules tame
 
+-- Proposition 23
 ι-Ty : (S : Tree n)
      → (p : Branch S d)
      → (T : Tree m)

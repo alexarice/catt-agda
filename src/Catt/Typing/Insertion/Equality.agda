@@ -50,12 +50,12 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
   open import Catt.Typing.EndoCoherenceRemoval.Properties rules tame ecr
 
   standard-ecr : (d : ℕ)
-                → (T : Tree n)
-                → (tree-dim T < d)
-                → (1 < d)
-                → standard-coh d T
-                  ≈[ ⌊ T ⌋ ]stm
-                  identity-stm (n-disc (pred d)) >>= (standard-label (n-disc (pred d)) T ,, S⋆)
+               → (T : Tree n)
+               → (tree-dim T < d)
+               → (1 < d)
+               → standard-coh d T
+                 ≈[ ⌊ T ⌋ ]stm
+                 identity-stm (n-disc (pred d)) >>= (standard-label (n-disc (pred d)) T ,, S⋆)
   standard-ecr (suc d) T p q = begin
     SCoh T
          (SArr (standard-stm d (tree-bd d T) >>=

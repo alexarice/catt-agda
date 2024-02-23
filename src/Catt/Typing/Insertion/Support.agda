@@ -208,6 +208,7 @@ ins-supp [ Insert Γ S As L P T M p ] tty = begin
 
     l2 : Typing-Label Γ (L >>l[ P ] M ,, S⋆)
     l2 = label-from-insertion-Ty Lty P Mty l1
+
 module _ where
   open ≡-Reasoning
   κ-preserves-supp : (S : Tree n)

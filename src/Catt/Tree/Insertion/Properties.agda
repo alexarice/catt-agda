@@ -109,11 +109,12 @@ module _ where
          → (M : Label X T)
          → .⦃ _ : has-trunk-height d T ⦄
          → (As : STy X)
-         → ι S P T ●l (L >>l[ P ] M ,, As) ≃lm M
+         → ι S P T ●l (L >>l[ P ] M ,, As) ≃l M
   ι-comm L BHere M A .get Z = ++l-inc-left M (L ∘ PShift) A .get Z
+  ι-comm {T = Susp T} L (BExt P) M A .get PHere = refl≃stm
   ι-comm {T = Susp T} L (BExt P) M A .get (PExt Z)
     = ι-comm (L ∘ PExt) P (M ∘ PExt) _ .get Z
-  ι-comm {T = Susp T} L (BExt P) M A .get (PShift PHere) = ⊥-elim it
+  ι-comm {T = Susp T} L (BExt P) M A .get (PShift PHere) = refl≃stm
   ι-comm L (BShift P) M = ι-comm (L ∘ PShift) P M
 
   κ-comm : (L : Label X S)
@@ -1189,16 +1190,16 @@ inserted-branch-prop (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) = compute-≃ (
 inserted-branch-prop (Join S₁ S₂) (BShift P) T Q = compute-≃ (SShift≃ refl≃ (inserted-branch-prop S₂ P T Q))
 
 insertion-tree-inserted-branch : (S : Tree n)
-                           → (P : Branch S l)
-                           → (T : Tree m)
-                           → .⦃ _ : has-trunk-height l T ⦄
-                           → .⦃ _ : non-linear T ⦄
-                           → (Q : Branch T l′)
-                           → (U : Tree m′)
-                           → .⦃ _ : has-trunk-height l′ U ⦄
-                           → (S >>[ P ] T) >>[ inserted-branch S P T Q ] U
-                             ≃′
-                             (S >>[ P ] (T >>[ Q ] U)) ⦃ insertion-trunk-height T Q U l ⦄
+                               → (P : Branch S l)
+                               → (T : Tree m)
+                               → .⦃ _ : has-trunk-height l T ⦄
+                               → .⦃ _ : non-linear T ⦄
+                               → (Q : Branch T l′)
+                               → (U : Tree m′)
+                               → .⦃ _ : has-trunk-height l′ U ⦄
+                               → (S >>[ P ] T) >>[ inserted-branch S P T Q ] U
+                                 ≃′
+                                 (S >>[ P ] (T >>[ Q ] U)) ⦃ insertion-trunk-height T Q U l ⦄
 insertion-tree-inserted-branch (Join S₁ S₂) BHere T Q U = insertion-branch-left T S₂ Q U
 insertion-tree-inserted-branch (Join S₁ S₂) (BExt P) (Susp T) BHere U = ⊥-elim (linear-non-linear T)
 insertion-tree-inserted-branch (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) (Susp U) = Join≃′ (insertion-tree-inserted-branch S₁ P T Q U) refl≃′

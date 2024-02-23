@@ -38,14 +38,14 @@ sub-res-unrestrict-comm ⟨ σ , t ⟩ = Ext≃ (sub-res-unrestrict-comm σ) ref
 
 susp-res-comp-ty : (B : Ty n) → (σ : Sub n m A) → susp-ty (B [ σ ]ty) ≃ty B [ susp-sub-res σ ]ty
 susp-res-comp-tm : (t : Tm n) → (σ : Sub n m A) → susp-tm (t [ σ ]tm) ≃tm t [ susp-sub-res σ ]tm
-susp-res-comp-sub : (σ : Sub n m A) → (τ : Sub l n B) → susp-sub-res (σ ● τ) ≃s susp-sub-res σ ● τ
+susp-res-comp-sub : (τ : Sub l n B) → (σ : Sub n m A) → susp-sub-res (τ ● σ) ≃s τ ● susp-sub-res σ
 
 susp-res-comp-ty ⋆ σ = refl≃ty
 susp-res-comp-ty (s ─⟨ B ⟩⟶ t) σ = Arr≃ (susp-res-comp-tm s σ) (susp-res-comp-ty B σ) (susp-res-comp-tm t σ)
 
 susp-res-comp-tm (Var zero) ⟨ σ , t ⟩ = refl≃tm
 susp-res-comp-tm (Var (suc i)) ⟨ σ , t ⟩ = susp-res-comp-tm (Var i) σ
-susp-res-comp-tm {A = ⋆} (Coh Δ B τ) σ = Coh≃ refl≃c refl≃ty (susp-functorial σ τ)
+susp-res-comp-tm {A = ⋆} (Coh Δ B τ) σ = Coh≃ refl≃c refl≃ty (susp-functorial τ σ)
 susp-res-comp-tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = begin
   < susp-tm (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm) >tm
     ≈⟨ susp-res-comp-tm {A = A} (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (unrestrict σ) ⟩
@@ -55,19 +55,19 @@ susp-res-comp-tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = begin
     where
       open Reasoning tm-setoid
 
-susp-res-comp-sub σ ⟨⟩ = Null≃ (susp-res-comp-ty _ σ)
-susp-res-comp-sub σ ⟨ τ , t ⟩ = Ext≃ (susp-res-comp-sub σ τ) (susp-res-comp-tm t σ)
+susp-res-comp-sub ⟨⟩ σ = Null≃ (susp-res-comp-ty _ σ)
+susp-res-comp-sub ⟨ τ , t ⟩ σ = Ext≃ (susp-res-comp-sub τ σ) (susp-res-comp-tm t σ)
 
 susp-res-restrict : (σ : Sub (2 + n) m A) → (s t : Tm m) → susp-sub-res (restrict σ s t) ≃s restrict (susp-sub-res σ) (susp-tm s) (susp-tm t)
 susp-res-restrict ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ s t = refl≃s
 susp-res-restrict ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = Ext≃ (susp-res-restrict σ s t) refl≃tm
 
-restrict-comp-sub : (τ : Sub n m A)
-                  → (σ : Sub (2 + l) n B)
+restrict-comp-sub : (σ : Sub (2 + l) n B)
+                  → (τ : Sub n m A)
                   → (s t : Tm n)
-                  → τ ● restrict σ s t ≃s restrict (τ ● σ) (s [ τ ]tm) (t [ τ ]tm)
-restrict-comp-sub τ ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ s t = refl≃s
-restrict-comp-sub τ ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ s t = Ext≃ (restrict-comp-sub τ σ s t) refl≃tm
+                  → restrict σ s t ● τ ≃s restrict (σ ● τ) (s [ τ ]tm) (t [ τ ]tm)
+restrict-comp-sub ⟨ ⟨ ⟨⟩ , _ ⟩ , _ ⟩ τ s t = refl≃s
+restrict-comp-sub ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ τ s t = Ext≃ (restrict-comp-sub σ τ s t) refl≃tm
 
 restrict-susp : (u : Tm n) → .⦃ isVar u ⦄ → (σ : Sub (2 + n) m A) → susp-tm u [ σ ]tm ≃tm u [ restrict σ s t ]tm
 restrict-susp (Var zero) ⟨ ⟨ ⟨ σ , u ⟩ , s ⟩ , t ⟩ = refl≃tm

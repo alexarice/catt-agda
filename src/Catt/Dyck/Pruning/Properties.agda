@@ -125,12 +125,14 @@ susp-π (⇑pk p)
         open Reasoning sub-setoid
 susp-π (⇓pk p) = susp-π p
 
-susp-//s : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + n * 2) m ⋆) → susp-sub σ //s susp-peak p ≃s susp-sub (σ //s p)
+susp-//s : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + n * 2) m ⋆)
+         → susp-sub σ //s susp-peak p ≃s susp-sub (σ //s p)
 susp-//s (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ = refl≃s
 susp-//s (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (susp-//s p σ) refl≃tm) refl≃tm
 susp-//s (⇓pk p) σ = susp-//s p σ
 
-//s-sub : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + n * 2) m ⋆) → (τ : Sub m l ⋆) → τ ● σ //s p ≃s τ ● (σ //s p)
+//s-sub : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + n * 2) m ⋆) → (τ : Sub m l ⋆)
+        → σ ● τ //s p ≃s (σ //s p) ● τ
 //s-sub (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ τ = refl≃s
 //s-sub (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ τ = Ext≃ (Ext≃ (//s-sub p σ τ) refl≃tm) refl≃tm
 //s-sub (⇓pk p) σ τ = //s-sub p σ τ

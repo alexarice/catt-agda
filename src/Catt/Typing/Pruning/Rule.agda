@@ -114,12 +114,12 @@ pruning-susp [ Prune Γ dy A p σ B t pf ]
 
 
 pruning-sub : {rules : RuleSet} → SubCond′ rules PruningSet
-pruning-sub Δ {σ = τ} τty [ Prune Γ dy A p σ B t pf ] = ∈r-≃ [ Prune Δ dy A p (τ ● σ) (B [ τ ]ty) (t [ τ ]tm) lem ] γ
+pruning-sub Δ {σ = τ} τty [ Prune Γ dy A p σ B t pf ] = ∈r-≃ [ Prune Δ dy A p (σ ● τ) (B [ τ ]ty) (t [ τ ]tm) lem ] γ
   where
-    lem : (peak-term p [ τ ● σ ]tm) ≃tm identity-term (B [ τ ]ty) (t [ τ ]tm)
+    lem : (peak-term p [ σ ● τ ]tm) ≃tm identity-term (B [ τ ]ty) (t [ τ ]tm)
     lem = begin
-      < peak-term p [ τ ● σ ]tm >tm
-        ≈⟨ assoc-tm τ σ (peak-term p) ⟩
+      < peak-term p [ σ ● τ ]tm >tm
+        ≈⟨ assoc-tm σ τ (peak-term p) ⟩
       < peak-term p [ σ ]tm [ τ ]tm >tm
         ≈⟨ sub-action-≃-tm pf refl≃s ⟩
       < identity-term B t [ τ ]tm >tm
@@ -128,7 +128,7 @@ pruning-sub Δ {σ = τ} τty [ Prune Γ dy A p σ B t pf ] = ∈r-≃ [ Prune �
       where
         open Reasoning tm-setoid
 
-    γ : Pruning Δ dy A p (τ ● σ) ≃r sub-rule (Pruning Γ dy A p σ) Δ τ
+    γ : Pruning Δ dy A p (σ ● τ) ≃r sub-rule (Pruning Γ dy A p σ) Δ τ
     γ .ctxeq = refl≃c
     γ .lhseq = refl≃tm
     γ .rhseq = Coh≃ refl≃c refl≃ty (//s-sub p σ τ)

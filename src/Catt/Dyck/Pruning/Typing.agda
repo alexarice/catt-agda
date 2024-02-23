@@ -65,9 +65,9 @@ prune-Eq : {Γ : Ctx n}
          → peak-term p [ σ ]tm
            ≃tm
            identity-term A t
-         → σ ≈[ Γ ]s (σ //s p) ● π p
+         → σ ≈[ Γ ]s π p ● (σ //s p)
 prune-Eq {Γ = Γ} (⇕pk dy) (TyExt {t = u} (TyExt {σ = σ} {t = s} σty sty) tty) {t} {A} q
-  = Ext≈ (Ext≈ (reflexive≈s (sym≃s (id-right-unit σ))) l1) l2
+  = Ext≈ (Ext≈ (reflexive≈s (sym≃s (id-left-unit σ))) l1) l2
   where
     ity : Typing-Tm Γ (identity-term A t) _
     ity = transport-typing tty q
@@ -124,15 +124,15 @@ prune-Eq (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty sty) tty) {t
       where
         open Reasoning tm-setoid
 
-    lem : σ ≈[ Δ ]s  ⟨ ⟨ σ //s p , _ ⟩ , _ ⟩ ● lift-sub (lift-sub (π p))
+    lem : σ ≈[ Δ ]s lift-sub (lift-sub (π p)) ● ⟨ ⟨ σ //s p , _ ⟩ , _ ⟩
     lem = begin
       < σ >s′
         ≈⟨ prune-Eq p σty l4 ⟩
-      < (σ //s p) ● π p >s′
+      < π p ● (σ //s p) >s′
         ≈˘⟨ reflexive≈s (apply-sub-lifted-sub-≃ (π p) ⟨ σ //s p , _ ⟩) ⟩
-      < ⟨ σ //s p , _ ⟩ ● lift-sub (π p) >s′
+      < lift-sub (π p) ● ⟨ σ //s p , _ ⟩ >s′
         ≈˘⟨ reflexive≈s (apply-sub-lifted-sub-≃ (lift-sub (π p)) ⟨ ⟨ σ //s p , _ ⟩ , _ ⟩) ⟩
-      < ⟨ ⟨ σ //s p , _ ⟩ , _ ⟩ ● lift-sub (lift-sub (π p)) >s′ ∎
+      < lift-sub (lift-sub (π p)) ● ⟨ ⟨ σ //s p , _ ⟩ , _ ⟩ >s′ ∎
       where
         open Reasoning (sub-setoid-≈ _)
 
@@ -167,8 +167,8 @@ prune-sub-Ty (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty sty) tty
     l1 = begin
       dyck-type dy [ σ ]ty
         ≈⟨ apply-sub-eq-ty (dyck-type dy) (prune-Eq p σty l4) ⟩
-      dyck-type dy [ (σ //s p) ● π p ]ty
-        ≈⟨ reflexive≈ty (assoc-ty (σ //s p) (π p) (dyck-type dy)) ⟩
+      dyck-type dy [ π p ● (σ //s p) ]ty
+        ≈⟨ reflexive≈ty (assoc-ty (π p) (σ //s p) (dyck-type dy)) ⟩
       dyck-type dy [ π p ]ty [ σ //s p ]ty
         ≈˘⟨ reflexive≈ty (sub-action-≃-ty (dyck-type-prune p) refl≃s) ⟩
       dyck-type (dy // p) [ σ //s p ]ty ∎
@@ -182,8 +182,8 @@ prune-sub-Ty (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty sty) tty
         ≈⟨ reflexive≈tm (apply-sub-lifted-tm-≃ (dyck-term dy) ⟨ σ , _ ⟩) ⟩
       dyck-term dy [ σ ]tm
         ≈⟨ apply-sub-eq-tm (dyck-term dy) (prune-Eq p σty l4) ⟩
-      dyck-term dy [ (σ //s p) ● π p ]tm
-        ≈⟨ reflexive≈tm (assoc-tm (σ //s p) (π p) (dyck-term dy)) ⟩
+      dyck-term dy [ π p ● (σ //s p) ]tm
+        ≈⟨ reflexive≈tm (assoc-tm (π p) (σ //s p) (dyck-term dy)) ⟩
       dyck-term dy [ π p ]tm [ σ //s p ]tm
         ≈˘⟨ reflexive≈tm (sub-action-≃-tm (dyck-term-prune p) refl≃s) ⟩
       dyck-term (dy // p) [ σ //s p ]tm

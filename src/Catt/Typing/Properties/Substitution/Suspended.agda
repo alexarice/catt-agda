@@ -20,10 +20,10 @@ open import Catt.Suspension.Typing rules lift-cond susp-cond
 
 apply-sub-ty-typing : {σ : Sub n m B} → Typing-Ty Γ A → Typing-Sub Γ Δ σ → Typing-Ty Δ (A [ σ ]ty)
 apply-sub-tm-typing : {σ : Sub n m B} → Typing-Tm Γ t A → Typing-Sub Γ Δ σ → Typing-Tm Δ (t [ σ ]tm) (A [ σ ]ty)
-apply-sub-sub-typing : {σ : Sub n m B} → Typing-Sub Υ Γ τ → Typing-Sub Γ Δ σ → Typing-Sub Υ Δ (σ ● τ)
+apply-sub-sub-typing : {σ : Sub n m B} → Typing-Sub Υ Γ τ → Typing-Sub Γ Δ σ → Typing-Sub Υ Δ (τ ● σ)
 apply-sub-ty-eq : Typing-Sub Γ Δ σ → A ≈[ Γ ]ty B → A [ σ ]ty ≈[ Δ ]ty B [ σ ]ty
 apply-sub-tm-eq : {σ : Sub n m A} → Typing-Sub Γ Δ σ → s ≈[ Γ ]tm t → s [ σ ]tm ≈[ Δ ]tm t [ σ ]tm
-apply-sub-sub-eq : Typing-Sub Γ Δ σ → τ ≈[ Γ ]s μ → σ ● τ ≈[ Δ ]s σ ● μ
+apply-sub-sub-eq : Typing-Sub Γ Δ σ → τ ≈[ Γ ]s μ → τ ● σ ≈[ Δ ]s μ ● σ
 
 apply-sub-ty-typing TyStar σty = sub-typing-implies-ty-typing σty
 apply-sub-ty-typing (TyArr sty Aty tty) σty = TyArr (apply-sub-tm-typing sty σty) (apply-sub-ty-typing Aty σty) (apply-sub-tm-typing tty σty)

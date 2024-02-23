@@ -358,7 +358,7 @@ SupportedSub-apply-sub : (τ : Sub n m A)
                        → (σ : Sub m m′ B)
                        → SupportedSub τ
                        → SupportedSub σ
-                       → SupportedSub (σ ● τ)
+                       → SupportedSub (τ ● σ)
 
 SupportedTm-apply-sub (Var 0F) ⟨ σ , t ⟩ ssupp (σsupp ,, tsupp) = tsupp
 SupportedTm-apply-sub (Var (suc i)) ⟨ σ , t ⟩ ssupp (σsupp ,, tsupp)

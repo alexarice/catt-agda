@@ -44,8 +44,8 @@ open ECR rules
 
 ecr-stm : HasEndoCoherenceRemoval-STm
 ecr-stm S s As supp L [ sty ] [ Asty ] Lty .get = begin
-  Coh ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (label-to-sub (L ,, S⋆) ● idSub)
-    ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (id-right-unit (label-to-sub (L ,, S⋆)))) ⟩
+  Coh ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (idSub ● label-to-sub (L ,, S⋆))
+    ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (id-left-unit (label-to-sub (L ,, S⋆)))) ⟩
   Coh ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (label-to-sub (L ,, S⋆))
     ≈⟨ ecr supp-lem (TyCoh ⦃ tree-to-pd S ⦄ (TyArr sty Asty sty) (label-to-sub-Ty Lty TySStar)) ⟩
   identity (ty-dim (sty-to-type As))
@@ -68,15 +68,16 @@ ecr-stm S s As supp L [ sty ] [ Asty ] Lty .get = begin
     ≈⟨ reflexive≈tm (sub-action-≃-tm (identity-≃ (sty-to-type-dim As) lem) (refl≃s {σ = label-to-sub (L ,, S⋆)})) ⟩
   identity (sty-dim As) (label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆)) [ label-to-sub (L ,, S⋆) ]tm
     ≈˘⟨ reflexive≈tm (sub-action-≃-tm (identity-≃ (refl {x = sty-dim As})
-                                                  (id-right-unit (label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆))))
+                                                  (id-left-unit (label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆))))
                                       (refl≃s {σ = label-to-sub (L ,, S⋆)})) ⟩
   identity (sty-dim As) idSub
     [ label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ]tm
     [ label-to-sub (L ,, S⋆) ]tm
-    ≈˘⟨ reflexive≈tm (assoc-tm (label-to-sub (L ,, S⋆))
-                     (label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆))
-                     (identity (sty-dim As) idSub)) ⟩
-  identity (sty-dim As) idSub [ label-to-sub (L ,, S⋆) ● label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ]tm
+    ≈˘⟨ reflexive≈tm (assoc-tm (label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆))
+                               (label-to-sub (L ,, S⋆))
+                               (identity (sty-dim As) idSub)) ⟩
+  identity (sty-dim As) idSub [ label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆)
+                              ● label-to-sub (L ,, S⋆) ]tm
     ≈⟨ reflexive≈tm (sub-action-≃-tm (trans≃tm (identity-≃ (sym (≃n-to-≡ (tree-dim-n-disc {n = sty-dim As})))
                                                            (idSub-≃ (cong disc-size (sym (≃n-to-≡ (tree-dim-n-disc {n = sty-dim As}))))))
                                                (sym≃tm (identity-stm-to-term (n-disc (sty-dim As)))))

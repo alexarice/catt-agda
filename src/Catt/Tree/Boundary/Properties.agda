@@ -86,9 +86,13 @@ tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p .get PHere = re
 tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ (s≤s p) .get (PExt P) = Ext≃ (tree-inc-label-glob d₁ d₂ S b₁ b₂ p .get P) refl≃
 tree-inc-label-glob (suc d₁) (suc d₂) (Join S T) b₁ b₂ p .get (PShift P) = Shift≃ refl≃ (tree-inc-label-glob (suc d₁) (suc d₂) T b₁ b₂ p .get P)
 
-tree-inc-glob : (d₁ d₂ : ℕ) → (T : Tree n) → (b₁ b₂ : Bool) → d₁ < d₂ → tree-inc d₂ T b₂ ● tree-inc d₁ (tree-bd d₂ T) b₁ ≃s tree-inc d₁ T b₁
+tree-inc-glob : (d₁ d₂ : ℕ)
+              → (T : Tree n)
+              → (b₁ b₂ : Bool)
+              → d₁ < d₂
+              → tree-inc d₁ (tree-bd d₂ T) b₁ ● tree-inc d₂ T b₂ ≃s tree-inc d₁ T b₁
 tree-inc-glob d₁ d₂ T b₁ b₂ p = begin
-  < tree-inc d₂ T b₂ ● tree-inc d₁ (tree-bd d₂ T) b₁ >s
+  < tree-inc d₁ (tree-bd d₂ T) b₁ ● tree-inc d₂ T b₂ >s
     ≈⟨ label-comp-to-sub (tree-inc-label d₁ (tree-bd d₂ T) b₁) (tree-inc-label d₂ T b₂) ⟩
   < label-to-sub (tree-inc-label d₁ (tree-bd d₂ T) b₁ ●lt tree-inc-label d₂ T b₂) >s
     ≈⟨ label-to-sub-≃′ (tree-inc-label d₁ (tree-bd d₂ T) b₁ ●lt tree-inc-label d₂ T b₂) (tree-inc-label d₁ T b₁) ((tree-bd-glob d₁ d₂ T p) ,, [ (λ P → SPath≃ (tree-inc-label-glob d₁ d₂ T b₁ b₂ p .get P)) ]) refl≃sty ⟩
@@ -120,14 +124,18 @@ tree-inc-full d T b p = begin
   where
     open Reasoning sub-setoid
 
-tree-inc-glob-step : (d : ℕ) → (T : Tree n) (b₁ b₂ : Bool) → tree-inc (suc d) T b₁ ● tree-inc d (tree-bd (suc d) T) b₂ ≃s tree-inc (suc d) T (not b₁) ● tree-inc d (tree-bd (suc d) T) b₂
+tree-inc-glob-step : (d : ℕ)
+                   → (T : Tree n)
+                   → (b₁ b₂ : Bool)
+                   → tree-inc d (tree-bd (suc d) T) b₂ ● tree-inc (suc d) T b₁
+                     ≃s
+                     tree-inc d (tree-bd (suc d) T) b₂ ● tree-inc (suc d) T (not b₁)
 tree-inc-glob-step d T b₁ b₂ = begin
-  < tree-inc (suc d) T b₁ ● tree-inc d (tree-bd (suc d) T) b₂ >s
+  < tree-inc d (tree-bd (suc d) T) b₂ ● tree-inc (suc d) T b₁ >s
     ≈⟨ tree-inc-glob d (suc d) T b₂ b₁ (s≤s ≤-refl) ⟩
   < tree-inc d T b₂ >s
     ≈˘⟨ tree-inc-glob d (suc d) T b₂ (not b₁) (s≤s ≤-refl)  ⟩
-  < tree-inc (suc d) T (not b₁) ● tree-inc d (tree-bd (suc d) T) b₂
-    >s ∎
+  < tree-inc d (tree-bd (suc d) T) b₂ ● tree-inc (suc d) T (not b₁) >s ∎
   where
     open Reasoning sub-setoid
 

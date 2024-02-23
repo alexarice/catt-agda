@@ -82,7 +82,7 @@ varToVarFunction-idSub≃ (Add≃ p x) (suc i) = trans (varToVarFunction-lift (i
 
 var-to-var-comp-ty : (A : Ty n) → ⦃ ty-is-globular A ⦄ → (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → ty-is-globular (A [ σ ]ty)
 var-to-var-comp-tm : (t : Tm n) → ⦃ isVar t ⦄ → (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → isVar (t [ σ ]tm)
-var-to-var-comp-sub : (τ : Sub l n ⋆) → ⦃ varToVar τ ⦄ → (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → varToVar (σ ● τ)
+var-to-var-comp-sub : (τ : Sub l n ⋆) → ⦃ varToVar τ ⦄ → (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → varToVar (τ ● σ)
 
 var-to-var-comp-ty ⋆ σ = tt
 var-to-var-comp-ty (s ─⟨ A ⟩⟶ t) ⦃ a ,, b ,, c ⦄ σ = var-to-var-comp-tm s ⦃ a ⦄ σ ,, var-to-var-comp-ty A ⦃ b ⦄ σ ,, var-to-var-comp-tm t ⦃ c ⦄ σ
@@ -94,7 +94,7 @@ var-to-var-comp-sub ⟨⟩ σ = tt
 var-to-var-comp-sub ⟨ τ , Var j ⟩ ⦃ v ⦄ σ with Var j [ σ ]tm | var-to-var-comp-tm (Var j) σ ⦃ it ⦄
 ... | Var i | q = var-to-var-comp-sub τ ⦃ proj₁ v ⦄ σ ,, tt
 
-varToVarFunc-comp-sub : (τ : Sub m l ⋆) → .⦃ _ : varToVar τ ⦄ → (σ : Sub n m ⋆) → .⦃ _ : varToVar σ ⦄ → (i : Fin n) → varToVarFunction (τ ● σ) ⦃ var-to-var-comp-sub σ τ ⦄ i ≡ varToVarFunction τ (varToVarFunction σ i)
+varToVarFunc-comp-sub : (τ : Sub m l ⋆) → .⦃ _ : varToVar τ ⦄ → (σ : Sub n m ⋆) → .⦃ _ : varToVar σ ⦄ → (i : Fin n) → varToVarFunction (σ ● τ) ⦃ var-to-var-comp-sub σ τ ⦄ i ≡ varToVarFunction τ (varToVarFunction σ i)
 varToVarFunc-comp-tm : (τ : Sub n l ⋆) → .⦃ _ : varToVar τ ⦄ → (i : Fin n) → getVarFin (Var i [ τ ]tm) ⦃ var-to-var-comp-tm (Var i) τ ⦄ ≡ varToVarFunction τ i
 
 varToVarFunc-comp-sub τ ⟨ σ , Var j ⟩ zero = varToVarFunc-comp-tm τ j

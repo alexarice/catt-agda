@@ -438,10 +438,10 @@ stm-to-label-to-sub (Join S Sing) a (SArr s As t) = begin
 sty-to-coh-≃ : {As : STy (someTree S)} → {Bs : STy (someTree T)} → S ≃ T → As ≃sty Bs → sty-to-coh As ≃stm sty-to-coh Bs
 sty-to-coh-≃ {S = S} {T = T} p [ q ] = [ (Coh≃ (⌊⌋-≃ p) q lem) ]
   where
-    lem : label-to-sub (id-label-wt S) ● idSub ≃s label-to-sub (id-label-wt T) ● idSub
+    lem : idSub ● label-to-sub (id-label-wt S) ≃s idSub ● label-to-sub (id-label-wt T)
     lem = begin
-      < label-to-sub (id-label-wt S) ● idSub >s
-        ≈⟨ id-right-unit (label-to-sub (id-label-wt S)) ⟩
+      < idSub ● label-to-sub (id-label-wt S) >s
+        ≈⟨ id-left-unit (label-to-sub (id-label-wt S)) ⟩
       < label-to-sub (id-label-wt S) >s
         ≈⟨ id-label-to-sub S ⟩
       < idSub >s
@@ -449,8 +449,8 @@ sty-to-coh-≃ {S = S} {T = T} p [ q ] = [ (Coh≃ (⌊⌋-≃ p) q lem) ]
       < idSub >s
         ≈˘⟨ id-label-to-sub T ⟩
       < label-to-sub (id-label-wt T) >s
-        ≈˘⟨ id-right-unit (label-to-sub (id-label-wt T)) ⟩
-      < label-to-sub (id-label-wt T) ● idSub >s ∎
+        ≈˘⟨ id-left-unit (label-to-sub (id-label-wt T)) ⟩
+      < idSub ● label-to-sub (id-label-wt T) >s ∎
       where
         open Reasoning sub-setoid
 
@@ -502,10 +502,10 @@ identity-stm-to-term : (S : Tree n) → .⦃ _ : is-linear S ⦄ → stm-to-term
 identity-stm-to-term S = begin
   < Coh ⌊ S ⌋
         (path-to-term (is-linear-max-path S) ─⟨ sty-to-type (disc-sty S) ⟩⟶ path-to-term (is-linear-max-path S))
-        (label-to-sub (id-label-wt S) ● idSub) >tm
+        (idSub ● label-to-sub (id-label-wt S)) >tm
     ≈⟨ Coh≃ refl≃c
             (Arr≃ (is-linear-max-path-is-0V S) refl≃ty (is-linear-max-path-is-0V S))
-            (trans≃s (id-right-unit (label-to-sub (id-label-wt S))) (id-label-to-sub S)) ⟩
+            (trans≃s (id-left-unit (label-to-sub (id-label-wt S))) (id-label-to-sub S)) ⟩
   < Coh ⌊ S ⌋
         (0V ─⟨ sty-to-type (disc-sty S) ⟩⟶ 0V)
         idSub >tm

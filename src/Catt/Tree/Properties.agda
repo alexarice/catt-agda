@@ -185,13 +185,17 @@ linear-tree-dim (Join S Sing) = begin
 ++t-length-lem Sing T = sym (+-identityʳ _)
 ++t-length-lem (Join S₁ S₂) T = trans (cong (_+ (2 + tree-size S₁)) (++t-length-lem S₂ T)) (+-assoc (tree-size T) (tree-size S₂) (2 + tree-size S₁))
 
-++t-last-var : (S : Tree n) → (T : Tree m) → tree-last-var (S ++t T) ≃tm tree-last-var T [ idSub≃ (sym≃c (++t-to-ctx S T)) ● (wedge-inc-right (tree-last-var S) (tree-size T)) ]tm
+++t-last-var : (S : Tree n)
+             → (T : Tree m)
+             → tree-last-var (S ++t T)
+               ≃tm
+               tree-last-var T [ (wedge-inc-right (tree-last-var S) (tree-size T))
+                               ● idSub≃ (sym≃c (++t-to-ctx S T)) ]tm
 ++t-last-var Sing T = sym≃tm (trans≃tm (sub-action-≃-tm (refl≃tm {s = tree-last-var T}) lem) (id-on-tm (tree-last-var (Sing ++t T))))
   where
-    lem : idSub≃ (sym≃c (sym≃c (wedge-left-unit ⌊ T ⌋))) ● wedge-inc-right (Var zero) (tree-size T) ≃s idSub {suc (tree-size T)}
+    lem : wedge-inc-right (Var zero) (tree-size T) ● idSub≃ (sym≃c (sym≃c (wedge-left-unit ⌊ T ⌋))) ≃s idSub {suc (tree-size T)}
     lem = begin
-      < idSub≃ (sym≃c (sym≃c (wedge-left-unit ⌊ T ⌋)))
-        ● wedge-inc-right (Var zero) (tree-size T) >s
+      < wedge-inc-right (Var zero) (tree-size T) ● idSub≃ (sym≃c (sym≃c (wedge-left-unit ⌊ T ⌋))) >s
         ≈⟨ idSub≃-on-sub (sym≃c (sym≃c (wedge-left-unit ⌊ T ⌋))) (wedge-inc-right (Var zero) _) ⟩
       < wedge-inc-right (Var zero) _ >s
         ≈⟨ wedge-inc-right-left-unit ⟩
@@ -205,27 +209,26 @@ linear-tree-dim (Join S Sing) = begin
        ]tm >tm
     ≈⟨ sub-action-≃-tm (++t-last-var S₂ T) refl≃s ⟩
   < tree-last-var T
-    [ idSub≃ (sym≃c (++t-to-ctx S₂ T))
-      ● wedge-inc-right (tree-last-var S₂) (tree-size T) ]tm
+    [ wedge-inc-right (tree-last-var S₂) (tree-size T) ● idSub≃ (sym≃c (++t-to-ctx S₂ T)) ]tm
     [ wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T)) ]tm >tm
     ≈˘⟨ assoc-tm _ _ (tree-last-var T) ⟩
   < tree-last-var T
-    [ wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T))
-    ● (idSub≃ (sym≃c (++t-to-ctx S₂ T)) ●
-      wedge-inc-right (tree-last-var S₂) (tree-size T)) ]tm >tm
+    [ (wedge-inc-right (tree-last-var S₂) (tree-size T)
+          ● idSub≃ (sym≃c (++t-to-ctx S₂ T)))
+          ● wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T)) ]tm >tm
     ≈⟨ sub-action-≃-tm (refl≃tm {s = tree-last-var T}) lem ⟩
   < tree-last-var T
-    [ idSub≃ (sym≃c (++t-to-ctx (Join S₁ S₂) T))
-      ● wedge-inc-right (tree-last-var S₂ [ wedge-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm) (tree-size T) ]tm >tm ∎
+    [ wedge-inc-right
+             (tree-last-var S₂ [ wedge-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
+             (tree-size T)
+          ● idSub≃ (sym≃c (++t-to-ctx (Join S₁ S₂) T)) ]tm >tm ∎
   where
-    l2 : (wedge-susp-inc-right (tree-size S₁)
-            (tree-size (S₂ ++t T))
-            ● idSub≃ (sym≃c (++t-to-ctx S₂ T)))
-           ≃s wedge-inc-right get-snd (tree-size T + tree-size S₂)
+    l2 : (idSub≃ (sym≃c (++t-to-ctx S₂ T)) ● wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T)))
+         ≃s
+         wedge-inc-right get-snd (tree-size T + tree-size S₂)
     l2 = begin
-      < wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T))
-        ● idSub≃ (sym≃c (++t-to-ctx S₂ T)) >s
-        ≈⟨ idSub≃-right-unit (sym≃c (++t-to-ctx S₂ T)) (wedge-susp-inc-right (tree-size S₁)
+      < idSub≃ (sym≃c (++t-to-ctx S₂ T)) ● wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T)) >s
+        ≈⟨ idSub≃-left-unit (sym≃c (++t-to-ctx S₂ T)) (wedge-susp-inc-right (tree-size S₁)
                                                                   (tree-size (S₂ ++t T))) ⟩
       < wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T)) >s
         ≈⟨ wedge-inc-right-≃ refl refl≃tm (++t-length-lem S₂ T) ⟩
@@ -233,38 +236,33 @@ linear-tree-dim (Join S Sing) = begin
       where
         open Reasoning sub-setoid
 
-    lem : (wedge-susp-inc-right (tree-size S₁)
-             (tree-size (S₂ ++t T))
-             ●
-             (idSub≃ (sym≃c (++t-to-ctx S₂ T)) ●
-              wedge-inc-right (tree-last-var S₂) (tree-size T)))
-            ≃s
-            (idSub≃ (sym≃c (++t-to-ctx (Join S₁ S₂) T)) ●
-             wedge-inc-right
-             (tree-last-var S₂ [
-              wedge-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
-             (tree-size T))
+    lem : (wedge-inc-right (tree-last-var S₂) (tree-size T)
+          ● idSub≃ (sym≃c (++t-to-ctx S₂ T)))
+          ● wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T))
+          ≃s
+          wedge-inc-right
+             (tree-last-var S₂ [ wedge-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
+             (tree-size T)
+          ● idSub≃ (sym≃c (++t-to-ctx (Join S₁ S₂) T))
     lem = begin
-      < wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T))
-        ● (idSub≃ (sym≃c (++t-to-ctx S₂ T)) ● wedge-inc-right (tree-last-var S₂) (tree-size T)) >s
+      < (wedge-inc-right (tree-last-var S₂) (tree-size T)
+        ● idSub≃ (sym≃c (++t-to-ctx S₂ T)))
+        ● wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T)) >s
         ≈˘⟨ ●-assoc _ _ _ ⟩
-      < wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T))
+      < wedge-inc-right (tree-last-var S₂) (tree-size T)
         ● idSub≃ (sym≃c (++t-to-ctx S₂ T))
-        ● wedge-inc-right (tree-last-var S₂) (tree-size T) >s
+        ● wedge-susp-inc-right (tree-size S₁) (tree-size (S₂ ++t T)) >s
         ≈⟨ sub-action-≃-sub refl≃s l2 ⟩
-      < wedge-inc-right get-snd (tree-size T + tree-size S₂)
-        ● wedge-inc-right (tree-last-var S₂) (tree-size T) >s
+      < wedge-inc-right (tree-last-var S₂) (tree-size T)
+        ● wedge-inc-right get-snd (tree-size T + tree-size S₂) >s
         ≈˘⟨ wedge-inc-right-assoc get-snd (tree-last-var S₂) (tree-size T) ⟩
       < wedge-inc-right (tree-last-var S₂ [ wedge-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
         (tree-size T) >s
         ≈˘⟨ idSub≃-on-sub (sym≃c (++t-to-ctx (Join S₁ S₂) T)) _ ⟩
-      <
-        idSub≃ (sym≃c (++t-to-ctx (Join S₁ S₂) T)) ●
-        wedge-inc-right
-        (tree-last-var S₂ [
-         wedge-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
-        (tree-size T)
-        >s ∎
+      < wedge-inc-right
+          (tree-last-var S₂ [ wedge-susp-inc-right (tree-size S₁) (tree-size S₂) ]tm)
+          (tree-size T)
+        ● idSub≃ (sym≃c (++t-to-ctx (Join S₁ S₂) T)) >s ∎
       where
         open Reasoning sub-setoid
 

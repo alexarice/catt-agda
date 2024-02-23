@@ -36,18 +36,18 @@ infixr 30 _[_]ty _[_]tm
 _[_]ty : Ty n → Sub n m A → Ty m
 _[_]tm : Tm n → Sub n m A → Tm m
 
-infixl 31 _●_
-_●_ : (σ : Sub n l A) → Sub m n B → Sub m l (B [ σ ]ty)
+infixr 31 _●_
+_●_ : Sub m n A → (σ : Sub n l B) → Sub m l (A [ σ ]ty)
 
 ⋆ [ σ ]ty = sub-type σ
 (s ─⟨ A ⟩⟶ t) [ σ ]ty = (s [ σ ]tm) ─⟨ (A [ σ ]ty) ⟩⟶ (t [ σ ]tm)
 
 Var zero [ σ ]tm = sub-proj₂ σ
 Var (suc x) [ σ ]tm = Var x [ sub-proj₁ σ ]tm
-_[_]tm {A = ⋆} (Coh T B τ) σ = Coh T B (σ ● τ)
+_[_]tm {A = ⋆} (Coh T B τ) σ = Coh T B (τ ● σ)
 _[_]tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm
-σ ● ⟨⟩ = ⟨⟩
-σ ● ⟨ τ , t ⟩ = ⟨ (σ ● τ) , t [ σ ]tm ⟩
+⟨⟩ ● σ = ⟨⟩
+⟨ τ , t ⟩ ● σ = ⟨ (τ ● σ) , t [ σ ]tm ⟩
 
 idSub : {n : ℕ} → Sub n n ⋆
 idSub {zero} = ⟨⟩

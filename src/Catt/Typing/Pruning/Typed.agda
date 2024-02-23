@@ -38,8 +38,8 @@ pruning-conv [ Prune Γ dy A p σ B t pf ] {A = C} tty
     lem : (A [ π p ]ty) [ σ //s p ]ty ≈[ Γ ]ty C
     lem = begin
       (A [ π p ]ty) [ σ //s p ]ty
-        ≈˘⟨ reflexive≈ty (assoc-ty (σ //s p) (π p) A) ⟩
-      A [ (σ //s p) ● π p ]ty
+        ≈˘⟨ reflexive≈ty (assoc-ty (π p) (σ //s p) A) ⟩
+      A [ π p ● (σ //s p) ]ty
         ≈˘⟨ apply-sub-eq-ty A (prune-Eq p σty pf) ⟩
       A [ σ ]ty
         ≈⟨ tm-to-ty-prop tty ⟩

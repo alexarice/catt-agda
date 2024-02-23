@@ -57,8 +57,8 @@ sub-tm-height {A = A} (Coh S B τ) Γ {σ} σty = begin
   ty-dim (B [ τ ]ty) + ty-dim A
     ≡⟨ sub-dim′ σ (B [ τ ]ty) ⟩
   ty-dim ((B [ τ ]ty) [ σ ]ty)
-    ≡˘⟨ cong ty-dim (≃ty-to-≡ (assoc-ty σ τ B)) ⟩
-  ty-dim (B [ σ ● τ ]ty)
+    ≡˘⟨ cong ty-dim (≃ty-to-≡ (assoc-ty τ σ B)) ⟩
+  ty-dim (B [ τ ● σ ]ty)
     ≡˘⟨ cong ty-dim (≃ty-to-≡ (tm-to-ty-coh-sub S B τ _ σ)) ⟩
   tm-height _ (Coh S B τ [ σ ]tm) ∎
   where

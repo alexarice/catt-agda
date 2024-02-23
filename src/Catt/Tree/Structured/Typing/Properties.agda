@@ -351,8 +351,8 @@ SCoh-typing-prop {S = S} {Γ = Γ} {As = As} {L = L} [ tty ] .get = begin
   sty-to-type (As >>=′ L)
     ≈˘⟨ reflexive≈ty (label-to-sub-sty L As) ⟩
   sty-to-type As [ label-to-sub L ]ty
-    ≈˘⟨ reflexive≈ty (sub-action-≃-ty (refl≃ty {A = sty-to-type As}) (id-right-unit (label-to-sub L))) ⟩
-  sty-to-type As [ label-to-sub L ● idSub ]ty
+    ≈˘⟨ reflexive≈ty (sub-action-≃-ty (refl≃ty {A = sty-to-type As}) (id-left-unit (label-to-sub L))) ⟩
+  sty-to-type As [ idSub ● label-to-sub L ]ty
     ≈˘⟨ reflexive≈ty (tm-to-ty-coh-sub ⌊ S ⌋ (sty-to-type As) idSub Γ (label-to-sub L)) ⟩
   tm-to-ty Γ (stm-to-term (SCoh S As L))
     ≈⟨ tm-to-ty-prop tty ⟩
@@ -361,7 +361,8 @@ SCoh-typing-prop {S = S} {Γ = Γ} {As = As} {L = L} [ tty ] .get = begin
     open Reasoning (ty-setoid-≈ _)
 
 SCoh-Label-Ty : Typing-Tm Γ (stm-to-term (SCoh S As (L ,, S⋆))) B → Typing-Label Γ (L ,, S⋆)
-SCoh-Label-Ty {L = L} aty = Label-ty [ (transport-typing-sub (coh-sub-ty aty) refl≃c refl≃c (id-right-unit (label-to-sub (L ,, S⋆)))) ]
+SCoh-Label-Ty {L = L} aty
+  = Label-ty [ (transport-typing-sub (coh-sub-ty aty) refl≃c refl≃c (id-left-unit (label-to-sub (L ,, S⋆)))) ]
 
 sty-to-coh-Ty : {As : STy (someTree S)} → Typing-STy ⌊ S ⌋ As → Typing-STm ⌊ S ⌋ (sty-to-coh As) As
 sty-to-coh-Ty {S = S} {As = As} AsTy = TySConv (TySCoh S AsTy (id-label-Ty S) TySStar) (reflexive≈sty (>>=′-id As))

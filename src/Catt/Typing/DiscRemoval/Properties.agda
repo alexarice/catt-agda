@@ -35,15 +35,15 @@ open DR rules
 
 disc-rem-stm : HasDiscRemoval-STm
 disc-rem-stm S L Lty .get = begin
-  Coh ⌊ S ⌋ (sty-to-type (disc-sty S)) (label-to-sub (L ,, S⋆) ● idSub)
+  Coh ⌊ S ⌋ (sty-to-type (disc-sty S)) (idSub ● label-to-sub (L ,, S⋆))
     ≈⟨ reflexive≈tm (Coh≃ (linear-tree-compat S)
                           (disc-sty-to-type S)
-                          (trans≃s (id-right-unit _)
-                                   (sym≃s (idSub≃-right-unit (sym≃c (linear-tree-compat S)) _)))) ⟩
-  disc-term (tree-dim S) ((label-to-sub (L ,, S⋆)) ● idSub≃ (sym≃c (linear-tree-compat S)))
+                          (trans≃s (id-left-unit _)
+                                   (sym≃s (idSub≃-left-unit (sym≃c (linear-tree-compat S)) _)))) ⟩
+  disc-term (tree-dim S) (idSub≃ (sym≃c (linear-tree-compat S)) ● (label-to-sub (L ,, S⋆)))
     ≈⟨ disc-rem (disc-term-Ty (tree-dim S) (apply-sub-sub-typing (idSub≃-Ty (sym≃c (linear-tree-compat S))) (label-to-sub-Ty Lty TySStar))) ⟩
-  0V [ label-to-sub (L ,, S⋆) ● idSub≃ (sym≃c (linear-tree-compat S)) ]tm
-    ≈⟨ reflexive≈tm (sub-action-≃-tm {s = 0V} {t = 0V} (Var≃ (≃c-preserve-length (sym≃c (linear-tree-compat S))) refl) (idSub≃-right-unit (sym≃c (linear-tree-compat S)) (label-to-sub (L ,, S⋆)))) ⟩
+  0V [ idSub≃ (sym≃c (linear-tree-compat S)) ● label-to-sub (L ,, S⋆) ]tm
+    ≈⟨ reflexive≈tm (sub-action-≃-tm {s = 0V} {t = 0V} (Var≃ (≃c-preserve-length (sym≃c (linear-tree-compat S))) refl) (idSub≃-left-unit (sym≃c (linear-tree-compat S)) (label-to-sub (L ,, S⋆)))) ⟩
   0V [ label-to-sub (L ,, S⋆)]tm
     ≈˘⟨ reflexive≈tm (label-linear-0V (L ,, S⋆)) ⟩
   stm-to-term (L (is-linear-max-path S)) ∎

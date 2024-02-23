@@ -73,8 +73,8 @@ ins-conv [ Insert Γ S As L P T M pf ] {A = A} tty
       sty-to-type (As >>=′ (L ,, S⋆))
         ≈˘⟨ reflexive≈ty (label-to-sub-sty (L ,, S⋆) As) ⟩
       sty-to-type As [ label-to-sub (L ,, S⋆) ]ty
-        ≈˘⟨ reflexive≈ty (sub-action-≃-ty (refl≃ty {A = sty-to-type As}) (id-right-unit (label-to-sub (L ,, S⋆)))) ⟩
-      sty-to-type As [ label-to-sub (L ,, S⋆) ● idSub ]ty
+        ≈˘⟨ reflexive≈ty (sub-action-≃-ty (refl≃ty {A = sty-to-type As}) (id-left-unit (label-to-sub (L ,, S⋆)))) ⟩
+      sty-to-type As [ idSub ● label-to-sub (L ,, S⋆) ]ty
         ≈⟨ tm-to-ty-prop tty ⟩
       A ∎
       where

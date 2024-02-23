@@ -112,21 +112,21 @@ ecr-susp [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ) 
 
 
 ecr-sub : {rules : RuleSet} → SubCond′ rules ECRSet
-ecr-sub Υ {σ = τ} τty [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR Υ Δ s A supp (τ ● σ) ] γ
+ecr-sub Υ {σ = τ} τty [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR Υ Δ s A supp (σ ● τ) ] γ
   where
-    γ : EndoCoherenceRemoval Υ Δ s A (τ ● σ) ≃r sub-rule (EndoCoherenceRemoval Γ Δ s A σ) Υ τ
+    γ : EndoCoherenceRemoval Υ Δ s A (σ ● τ) ≃r sub-rule (EndoCoherenceRemoval Γ Δ s A σ) Υ τ
     γ .ctxeq = refl≃c
     γ .lhseq = refl≃tm
     γ .rhseq = identity-≃ refl (begin
-      < sub-from-disc (ty-dim A) (A [ τ ● σ ]ty) _ (s [ τ ● σ ]tm) >s
+      < sub-from-disc (ty-dim A) (A [ σ ● τ ]ty) _ (s [ σ ● τ ]tm) >s
         ≈⟨ sub-from-disc-≃ (ty-dim A)
                               (ty-dim A)
-                              (assoc-ty τ σ A)
-                              (sym (sub-dim (τ ● σ) A))
+                              (assoc-ty σ τ A)
+                              (sym (sub-dim (σ ● τ) A))
                               (trans (sym (sub-dim τ (A [ σ ]ty))) (sym (sub-dim σ A)))
-                              (assoc-tm τ σ s) ⟩
+                              (assoc-tm σ τ s) ⟩
       < sub-from-disc (ty-dim A) ((A [ σ ]ty) [ τ ]ty) _ (s [ σ ]tm [ τ ]tm) >s
         ≈⟨ sub-from-disc-sub (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm) τ ⟩
-      < τ ● sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm) >s ∎)
+      < sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm) ● τ >s ∎)
       where
         open Reasoning sub-setoid

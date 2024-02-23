@@ -76,7 +76,7 @@ TransportVarSet-Label-Label {T = T} {ΓS = ΓS} L M Mty = begin
     ≡⟨ FVLabel-to-sub (L ●l (M ,, S⋆) ,, S⋆) ⟩
   SuppSub (COT-to-Ctx ΓS) (label-to-sub (L ●l (M ,, S⋆) ,, S⋆))
     ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (FVSub-≃ (label-comp-to-sub (L ,, S⋆) (M ,, S⋆))) ⟩
-  DC (COT-to-Ctx ΓS) (FVSub (label-to-sub (M ,, S⋆) ● label-to-sub (L ,, S⋆)))
+  DC (COT-to-Ctx ΓS) (FVSub (label-to-sub (L ,, S⋆) ● label-to-sub (M ,, S⋆)))
     ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (TransportVarSet-sub (label-to-sub (L ,, S⋆)) (label-to-sub (M ,, S⋆))) ⟩
   DC (COT-to-Ctx ΓS)
     (TransportVarSet (FVSub (label-to-sub (L ,, S⋆)))

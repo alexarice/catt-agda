@@ -37,9 +37,9 @@ dr-susp [ DR {n = n} Γ σ ] = ∈r-≃ [ DR {n = suc n} (susp-ctx Γ) (susp-sub
     γ .rhseq = sym≃tm (susp-functorial-tm σ 0V)
 
 dr-sub : {rules : RuleSet} → SubCond′ rules DiscRemovalSet
-dr-sub Γ {σ = τ} τty [ DR Δ σ ] = ∈r-≃ [ DR Γ (τ ● σ) ] γ
+dr-sub Γ {σ = τ} τty [ DR Δ σ ] = ∈r-≃ [ DR Γ (σ ● τ) ] γ
   where
-    γ : DiscRemoval Γ (τ ● σ) ≃r sub-rule (DiscRemoval Δ σ) Γ τ
+    γ : DiscRemoval Γ (σ ● τ) ≃r sub-rule (DiscRemoval Δ σ) Γ τ
     γ .ctxeq = refl≃c
     γ .lhseq = refl≃tm
-    γ .rhseq = assoc-tm τ σ 0V
+    γ .rhseq = assoc-tm σ τ 0V

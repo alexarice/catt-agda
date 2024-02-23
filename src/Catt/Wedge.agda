@@ -31,7 +31,7 @@ sub-from-wedge σ ⟨ ⟨⟩ , t ⟩ = σ
 sub-from-wedge σ ⟨ ⟨ τ , u ⟩ , t ⟩ = ⟨ sub-from-wedge σ ⟨ τ , u ⟩ , t ⟩
 
 sub-between-wedges : Sub (suc n) (suc l) ⋆ → Sub (suc m) (suc l′) ⋆ → (s : Tm (suc l)) → Sub (suc (m + n)) (suc (l′ + l)) ⋆
-sub-between-wedges {l′ = l′} σ τ s = sub-from-wedge (wedge-inc-left s l′ ● σ) (wedge-inc-right s l′ ● τ)
+sub-between-wedges {l′ = l′} σ τ s = sub-from-wedge (σ ● wedge-inc-left s l′) (τ ● wedge-inc-right s l′)
 
 sub-between-wedge-susps : Sub (suc n) (suc l) ⋆ → Sub (suc m) (suc l′) ⋆ → Sub (suc (m + (2 + n))) (suc (l′ + (2 + l))) ⋆
 sub-between-wedge-susps σ τ = sub-between-wedges (susp-sub σ) τ get-snd

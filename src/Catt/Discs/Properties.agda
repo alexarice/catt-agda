@@ -59,11 +59,11 @@ sub-from-disc-≃ d₁ d₂ a b c d = Ext≃ (sub-from-sphere-≃ d₁ d₂ a b 
 sub-from-sphere-≃ zero zero (Star≃ x) p q = Null≃ (Star≃ x)
 sub-from-sphere-≃ (suc d₁) (suc d₂) (Arr≃ a b c) p q = Ext≃ (Ext≃ (sub-from-sphere-≃ d₁ d₂ b (cong pred p) (cong pred q)) a) c
 
-sub-from-sphere-sub : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (σ : Sub n m ⋆) → sub-from-sphere d (A [ σ ]ty) (trans (sym (sub-dim σ A)) p) ≃s (σ ● sub-from-sphere d A p)
+sub-from-sphere-sub : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (σ : Sub n m ⋆) → sub-from-sphere d (A [ σ ]ty) (trans (sym (sub-dim σ A)) p) ≃s (sub-from-sphere d A p ● σ)
 sub-from-sphere-sub zero ⋆ p σ = refl≃s
 sub-from-sphere-sub (suc d) (s ─⟨ A ⟩⟶ t) p σ = Ext≃ (Ext≃ (sub-from-sphere-sub d A (cong pred p) σ) refl≃tm) refl≃tm
 
-sub-from-disc-sub : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (s : Tm n) → (σ : Sub n m ⋆) → sub-from-disc d (A [ σ ]ty) (trans (sym (sub-dim σ A)) p) (s [ σ ]tm) ≃s σ ● sub-from-disc d A p s
+sub-from-disc-sub : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (s : Tm n) → (σ : Sub n m ⋆) → sub-from-disc d (A [ σ ]ty) (trans (sym (sub-dim σ A)) p) (s [ σ ]tm) ≃s sub-from-disc d A p s ● σ
 sub-from-disc-sub d A p s σ = Ext≃ (sub-from-sphere-sub d A p σ) refl≃tm
 
 identity-≃ : n ≡ m → σ ≃s τ → identity n σ ≃tm identity m τ
@@ -130,7 +130,7 @@ identity-term-sub : (A : Ty m) → (s : Tm m) → (σ : Sub m l ⋆) → identit
 identity-term-sub A s σ = begin
   < identity-term A s [ σ ]tm >tm
     ≈⟨ sub-action-≃-tm (identity-≃ (sub-dim σ A) (sub-from-disc-≃ (ty-dim A) (ty-dim (A [ σ ]ty)) refl≃ty refl (sub-dim σ A) (refl≃tm {s = s}))) (refl≃s {σ = σ}) ⟩
-  < (identity (ty-dim (A [ σ ]ty)) (σ ● sub-from-disc (ty-dim (A [ σ ]ty)) A _ s)) >tm
+  < (identity (ty-dim (A [ σ ]ty)) (sub-from-disc (ty-dim (A [ σ ]ty)) A _ s ● σ)) >tm
     ≈˘⟨ identity-≃ refl (sub-from-disc-sub (ty-dim (A [ σ ]ty)) A (sub-dim σ A) s σ) ⟩
   < identity-term (A [ σ ]ty) (s [ σ ]tm) >tm ∎
   where open Reasoning tm-setoid

@@ -73,11 +73,15 @@ wedge-susp-pdb-bd-compat n Γ ⦃ pd ⦄ (∅ , A) b = begin
     open ≡-Reasoning
 
 wedge-susp-pdb-bd-compat n Γ (∅ , B , A) b = ⊥-elim (pdb-odd-length it)
-wedge-susp-pdb-bd-compat {m = m} n Γ (Δ , C , B , A) b with ty-dim B | ty-dim (B [ wedge-susp-inc-right m _ ]ty) | .(ty-dim-≃ (pdb-proj₁ {Γ = Δ , C} it)) | sub-dim (wedge-susp-inc-right m _) B
-... | x | .x | p | refl with <-cmp (suc n) x | b
+wedge-susp-pdb-bd-compat {m = m} n Γ (Δ , C , B , A) b rewrite sym (sub-dim (wedge-susp-inc-right m _) B) with <-cmp (suc n) (ty-dim B) | b
 ... | tri< a ¬b ¬c | b = cong ewf (cong ewf (wedge-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ b))
 ... | tri≈ ¬a b₁ ¬c | false = cong ewf (cong ewf (wedge-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ false))
-... | tri≈ ¬a b₁ ¬c | true = cong ewf (cong ewt (trans (wedge-drop (suspSupp (pd-bd-supp n Γ true)) (pdb-bd-supp (suc n) (Δ , C) ⦃ pdb-prefix it ⦄ true) ⦃ pdb-bd-supp-non-empty-special n (Δ , C) ⦃ pdb-prefix it ⦄ true ⦃ focus-ty-dim-to-non-empty (pdb-prefix it) (≤-trans (≤-trans (s≤s z≤n) (≤-reflexive b₁)) (≤-reflexive p)) ⦄ ⦄) (cong drop (wedge-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ true))))
+... | tri≈ ¬a b₁ ¬c | true
+  = cong ewf (cong ewt (trans (wedge-drop (suspSupp (pd-bd-supp n Γ true))
+                                          (pdb-bd-supp (suc n) (Δ , C) ⦃ pdb-prefix it ⦄ true)
+                                          ⦃ pdb-bd-supp-non-empty-special n (Δ , C) ⦃ pdb-prefix it ⦄ true
+                                                                          ⦃ focus-ty-dim-to-non-empty (pdb-prefix it) (≤-trans (≤-trans (s≤s z≤n) (≤-reflexive b₁)) (≤-reflexive (ty-dim-≃ (pdb-proj₁ {Γ = Δ , C} it)))) ⦄ ⦄)
+                              (cong drop (wedge-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ true))))
 ... | tri> ¬a ¬b c | b = cong ewt (cong ewt (wedge-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ b))
 
 wedge-susp-pd-bd-compat : (n : ℕ)

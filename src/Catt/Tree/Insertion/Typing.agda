@@ -183,6 +183,7 @@ label-from-insertion-Ty {S = Join S₁ S₂} {As = As} {L = L} (TyJoin x Lty Lty
         ≈⟨ p ⟩
       standard-sty (lh P) T >>=′ (M ,, As) ∎
 
+-- Lemma 46
 label-from-insertion-eq : (L : Label X S)
                         → (P : Branch S l)
                         → {T : Tree m}

@@ -135,6 +135,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
             identity-stm (n-disc m) >>= (standard-label (n-disc m) T ,, S⋆)
       lem _ _ refl = refl≃stm
 
+  -- Lemma 55
   pruned-branch-κ : (S : Tree n)
                   → (P : Branch S l)
                   → (T : Tree m)
@@ -260,6 +261,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
 module _ (disc-rem : HasDiscRemoval) where
   open import Catt.Typing.DiscRemoval.Properties rules tame disc-rem
 
+  -- Lemma 49
   κ-disc : (S : Tree n)
          → (P : Branch S l)
          → κ S P (n-disc (lh P)) ⦃ has-trunk-height-n-disc (<⇒≤ (bh-<-lh P)) ⦄
@@ -313,6 +315,7 @@ module _ (disc-rem : HasDiscRemoval) where
 module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
   open import Catt.Typing.DiscRemoval.Properties rules tame dr
 
+  -- Theorem 29
   κ-standard-sty : (S : Tree n)
                  → (P : Branch S l)
                  → (T : Tree m)
@@ -482,7 +485,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
     where
       open Reasoning stm-setoid-≈
 
-
+  -- Lemma 41
   κ-inserted-branch : (S : Tree n)
                     → (P : Branch S l)
                     → (T : Tree m)

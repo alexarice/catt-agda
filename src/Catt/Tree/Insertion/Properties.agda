@@ -104,6 +104,7 @@ module _ where
   κ-last-path (Susp S₁) BHere T = SPath≃ (++t-inc-right-last-path T Sing)
   κ-last-path (Join S₁ S₂@(Join S₃ S₄)) BHere T = SPath≃ (++t-inc-right-last-path T S₂)
 
+  -- Lemma 26 / 42
   ι-comm : (L : Label X S)
          → (P : Branch S d)
          → (M : Label X T)
@@ -146,6 +147,7 @@ module _ where
   κ-comm L (BShift P) M Bs q .get (PExt Z) = refl≃stm
   κ-comm L (BShift P) M Bs q .get (PShift Z) = κ-comm (L ∘ PShift) P M Bs q .get Z
 
+-- Lemma 25
 disc-insertion : (S : Tree n)
                → .⦃ is-linear S ⦄
                → (P : Branch S l)
@@ -178,6 +180,7 @@ disc-label-from {S = Susp S} L (BExt P) {Susp T} M .get PHere = refl≃stm
 disc-label-from {S = Susp S} L (BExt P) {Susp T} M .get (PExt Z) = disc-label-from (L ∘ PExt) P (M ∘ PExt) .get Z
 disc-label-from {S = Susp S} L (BExt P) {Susp T} M .get (PShift PHere) = refl≃stm
 
+-- Lemma 49
 insertion-disc : (S : Tree n)
                → (P : Branch S l)
                → (S >>[ P ] (n-disc (lh P))) ⦃ has-trunk-height-n-disc (<⇒≤ (bh-<-lh P)) ⦄ ≃′ S
@@ -225,6 +228,7 @@ label-from-insertion-map f L (BShift P) M .get PHere = refl≃stm
 label-from-insertion-map f L (BShift P) M .get (PExt Z) = refl≃stm
 label-from-insertion-map f L (BShift P) M .get (PShift Z) = label-from-insertion-map f (L ∘ PShift) P M .get Z
 
+-- Lemma 26
 κ-ι-prop : (S : Tree n)
          → (P : Branch S l)
          → (T : Tree m)
@@ -281,6 +285,7 @@ label-from-insertion-map f L (BShift P) M .get (PShift Z) = label-from-insertion
   where
     open Reasoning stm-setoid
 
+-- Lemma 43
 insertion-parallel : (S : Tree n)
                    → (P : Branch S l)
                    → (Q : Branch S l′)
@@ -652,6 +657,7 @@ orthog-lh (BShift P) BHere T = refl≃n
 orthog-lh (BShift P) (BExt Q) T = refl≃n
 orthog-lh (BShift P) (BShift Q) T = orthog-lh P Q T
 
+-- Lemma 47
 insertion-orthog : (S : Tree n)
                  → (P : Branch S l)
                  → (T : Tree m)
@@ -799,6 +805,7 @@ module _ where
   label-from-orthog L (BShift P) M (BShift Q) N .get (PExt Z) = refl≃stm
   label-from-orthog L (BShift P) M (BShift Q) N .get (PShift Z) = label-from-orthog (L ∘ PShift) P M Q N .get Z
 
+-- Lemma 56
 insertion-bd-1 : (S : Tree n)
                → (P : Branch S l)
                → (T : Tree m)
@@ -926,6 +933,7 @@ bd-has-trunk-height : (d : ℕ) → (m : ℕ)
 bd-has-trunk-height d zero T q = tt
 bd-has-trunk-height (suc d) (suc m) (Susp T) q = inst ⦃ bd-has-trunk-height d m T (≤-pred q) ⦄
 
+-- Lemma 58
 insertion-bd-2 : (S : Tree n)
                → (P : Branch S l)
                → (T : Tree m)
@@ -1081,6 +1089,7 @@ pruned-branch (Join S T) (BExt P) q = BExt (pruned-branch S P (≤-pred q))
 pruned-branch (Join S T) (BShift P) q = BShift (pruned-branch T P q)
 pruned-branch (Join (Susp S) T) BHere q = BHere
 
+-- Lemma 55
 insertion-tree-pruned-branch : (S : Tree n)
                              → (P : Branch S l)
                              → (T : Tree m)
@@ -1151,6 +1160,7 @@ label-from-pruned-branch {S = Susp (Susp S)} L BHere M q pf = ≃l-to-≃lm (++l
 label-from-pruned-branch {S = Join (Susp S₁) (Join S₂ S₃)} L BHere M q pf
   = ++l-≃m (refl≃lm {L = ap M}) (replace-join-≃lm (L ∘ PShift) _)
 
+-- Lemma 39
 insertion-trunk-height : (S : Tree n)
                        → .⦃ non-linear S ⦄
                        → (P : Branch S l)
@@ -1175,6 +1185,7 @@ inserted-branch (Join S₁ S₂) (BExt P) (Susp T) BHere = ⊥-elim (linear-non-
 inserted-branch (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) = BExt (inserted-branch S₁ P T Q)
 inserted-branch (Join S₁ S₂) (BShift P) T Q = BShift (inserted-branch S₂ P T Q)
 
+-- Lemma 41
 inserted-branch-prop : (S : Tree n)
                      → (P : Branch S l)
                      → (T : Tree m)

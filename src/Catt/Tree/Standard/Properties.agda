@@ -283,7 +283,7 @@ standard-coh-susp-lem d T = begin
   < SExt (standard-coh d T) >stm
     ≈˘⟨ SCoh-ext T (standard-sty d T) (id-label-wt T) ⟩
   < SCoh T (standard-sty d T) (map-ext (id-label-wt T)) >stm
-    ≈⟨ SCoh-unrestrict T (standard-sty d T) (map-ext (id-label-wt T)) ⟩
+    ≈⟨ SCoh-↓ T (standard-sty d T) (map-ext (id-label-wt T)) ⟩
   < SCoh (Susp T) (susp-sty (standard-sty d T)) (susp-label-full (id-label T) ,, S⋆) >stm
     ≈⟨ SCoh≃ (Susp T) (standard-sty-susp-lem d T) (id-label-susp-full T) refl≃sty ⟩
   < standard-coh (suc d) (Susp T) >stm ∎

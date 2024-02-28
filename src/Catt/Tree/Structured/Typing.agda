@@ -218,8 +218,8 @@ label-typing-conv : Typing-Label Γ (L ,, As) → As ≈[ Γ ]sty Bs → Typing-
 label-typing-conv (TySing x) p = TySing (TySConv x p)
 label-typing-conv (TyJoin x LTy LTy′) p = TyJoin (TySConv x p) (label-typing-conv LTy (≈SArr refl≈stm p refl≈stm)) (label-typing-conv LTy′ p)
 
-unrestrict-label-Ty : {L : Label-WT X S } → Typing-Label Γ L → Typing-STy Γ (lty L) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → Typing-Label Γ (unrestrict-label L ,, sty-base (lty L))
-unrestrict-label-Ty {L = L ,, SArr s As t} LTy AsTy = TyJoin (TySArr-proj₁ AsTy) LTy (TySing (TySArr-proj₃ AsTy))
+↓-label-Ty : {L : Label-WT X S} → Typing-Label Γ L → Typing-STy Γ (lty L) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → Typing-Label Γ (↓-label L ,, sty-base (lty L))
+↓-label-Ty {L = L ,, SArr s As t} LTy AsTy = TyJoin (TySArr-proj₁ AsTy) LTy (TySing (TySArr-proj₃ AsTy))
 
 extend-disc-label-Ty : {L : Label X S}
                      → .⦃ _ : is-linear S ⦄

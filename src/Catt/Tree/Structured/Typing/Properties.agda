@@ -49,14 +49,14 @@ susp-sty-tree-≈ : {As Bs : STy (someTree S)} → As ≈[ ⌊ S ⌋ ]sty Bs →
 susp-sty-tree-≈ {As = S⋆} {Bs = S⋆} p = refl≈sty
 susp-sty-tree-≈ {As = SArr s As t} {Bs = SArr s′ Bs t′} [ Arr≈ x p x′ ] = ≈SArr (≈SExt [ x ]) (susp-sty-tree-≈ [ p ]) (≈SExt [ x′ ])
 
-unrestrict-label-≈ : {L M : Label-WT X S} → ap L ≈[ Γ ]l ap M → (q : lty L ≈[ Γ ]sty lty M) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → unrestrict-label L ≈[ Γ ]l unrestrict-label M ⦃ NonZero-subst (sty-dim-≈ q) it ⦄
-unrestrict-label-≈ p q .get PHere = sty-src-≈ q
-unrestrict-label-≈ p q .get (PExt P) = p .get P
-unrestrict-label-≈ p q .get (PShift P) = sty-tgt-≈ q
+↓-label-≈ : {L M : Label-WT X S} → ap L ≈[ Γ ]l ap M → (q : lty L ≈[ Γ ]sty lty M) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → ↓-label L ≈[ Γ ]l ↓-label M ⦃ NonZero-subst (sty-dim-≈ q) it ⦄
+↓-label-≈ p q .get PHere = sty-src-≈ q
+↓-label-≈ p q .get (PExt P) = p .get P
+↓-label-≈ p q .get (PShift P) = sty-tgt-≈ q
 
 label-to-sub-Ty : {L : Label-WT X S} → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-Sub ⌊ S ⌋ Γ (label-to-sub L)
 label-to-sub-Ty (TySing [ x ]) [ Aty ] = TyExt (TyNull Aty) x
-label-to-sub-Ty {L = L} (TyJoin x Lty Mty) Aty = sub-from-wedge-Ty (unrestrictTy (label-to-sub-Ty Lty (TySArr x Aty (ap-phere-Ty Mty)))) get-sndTy (label-to-sub-Ty Mty Aty) (reflexive≈tm (label-to-sub-lem L) )
+label-to-sub-Ty {L = L} (TyJoin x Lty Mty) Aty = sub-from-wedge-Ty (↓-Ty (label-to-sub-Ty Lty (TySArr x Aty (ap-phere-Ty Mty)))) get-sndTy (label-to-sub-Ty Mty Aty) (reflexive≈tm (label-to-sub-lem L) )
 
 TySPath : (P : Path S) → Typing-STm ⌊ S ⌋ (SPath P) (getPathType P)
 TySPath P .get = path-to-term-Ty P
@@ -101,19 +101,19 @@ label-equality-to-sub : (L M : Label-WT X S) → ap L ≈[ Γ ]l ap M → lty L 
 label-equality-to-sub {S = Sing} L M [ p ] [ q ] = Ext≈ (Null≈ q) (p PHere .get)
 label-equality-to-sub {S = Join S T} L M [ p ] q
   = sub-from-wedge-≈
-      (unrestrictEq (label-equality-to-sub (label₁ L) (label₁ M) [ p ∘ PExt ] (≈SArr (p PHere) q (p (PShift PHere)))))
+      (↓-≈ (label-equality-to-sub (label₁ L) (label₁ M) [ p ∘ PExt ] (≈SArr (p PHere) q (p (PShift PHere)))))
       (label-equality-to-sub (label₂ L) (label₂ M) [ p ∘ PShift ] q)
 
 ≈SCoh : (S : Tree n) → {As Bs : STy (someTree S)} → As ≈[ ⌊ S ⌋ ]sty Bs → {L M : Label X S} → L ≈[ Γ ]l M → {Cs Cs′ : STy X} → Cs ≈[ Γ ]sty Cs′ → SCoh S As (L ,, Cs) ≈[ Γ ]stm SCoh S Bs (M ,, Cs′)
 ≈SCoh S {As} {Bs} [ p ] {L} {M} q {S⋆} {S⋆} r = [ Coh≈ p (apply-sub-eq-sub idSub (label-equality-to-sub (L ,, S⋆) (M ,, S⋆) q r)) ]
 ≈SCoh S {As} {Bs} p {L} {M} q {SArr s Cs t} {SArr s′ Cs′ t′} r = begin
   SCoh S As (L ,, SArr s Cs t)
-    ≈⟨ reflexive≈stm (SCoh-unrestrict S As (L ,, SArr s Cs t)) ⟩
-  SCoh (Susp S) (susp-sty As) (unrestrict-label (L ,, SArr s Cs t) ,, Cs)
-    ≈⟨ ≈SCoh (Susp S) (susp-sty-tree-≈ p) (unrestrict-label-≈ q r) {Cs} {Cs′} (sty-base-≈ r) ⟩
+    ≈⟨ reflexive≈stm (SCoh-↓ S As (L ,, SArr s Cs t)) ⟩
+  SCoh (Susp S) (susp-sty As) (↓-label (L ,, SArr s Cs t) ,, Cs)
+    ≈⟨ ≈SCoh (Susp S) (susp-sty-tree-≈ p) (↓-label-≈ q r) {Cs} {Cs′} (sty-base-≈ r) ⟩
   SCoh (Susp S) (susp-sty Bs)
-    (unrestrict-label (M ,, SArr s′ Cs′ t′) ,, Cs′)
-    ≈˘⟨ reflexive≈stm (SCoh-unrestrict S Bs (M ,, SArr s′ Cs′ t′)) ⟩
+    (↓-label (M ,, SArr s′ Cs′ t′) ,, Cs′)
+    ≈˘⟨ reflexive≈stm (SCoh-↓ S Bs (M ,, SArr s′ Cs′ t′)) ⟩
   SCoh S Bs (M ,, SArr s′ Cs′ t′) ∎
   where
     open Reasoning stm-setoid-≈

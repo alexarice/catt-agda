@@ -12,7 +12,7 @@ getVarFin : (t : Tm n) → .⦃ isVar t ⦄ → Fin n
 getVarFin (Var j) = j
 
 varToVar : Sub n m A → Set
-varToVar ⟨⟩ = ⊤
+varToVar ⟨ A ⟩′ = ⊤
 varToVar ⟨ σ , t ⟩ = varToVar σ × isVar t
 
 ty-is-globular : Ty n → Set

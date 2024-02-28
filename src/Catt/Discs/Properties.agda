@@ -91,7 +91,7 @@ sub-from-sphere-type-dim {n = zero} σ = refl
 sub-from-sphere-type-dim {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = cong suc (sub-from-sphere-type-dim σ)
 
 prop-sub-from-sphere : (σ : Sub (sphere-size n) m ⋆) → σ ≃s sub-from-sphere n (sub-from-sphere-type σ) (sub-from-sphere-type-dim σ)
-prop-sub-from-sphere {n = zero} ⟨⟩ = refl≃s
+prop-sub-from-sphere {n = zero} ⟨ _ ⟩′ = refl≃s
 prop-sub-from-sphere {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (prop-sub-from-sphere σ) refl≃tm) refl≃tm
 
 sub-from-disc-type-dim : (σ : Sub (disc-size n) m ⋆) → ty-dim (sub-from-disc-type σ) ≡ n
@@ -100,15 +100,15 @@ sub-from-disc-type-dim ⟨ σ , t ⟩ = sub-from-sphere-type-dim σ
 prop-sub-from-disc : (σ : Sub (disc-size n) m ⋆) → σ ≃s sub-from-disc n (sub-from-disc-type σ) (sub-from-disc-type-dim σ) (sub-from-disc-term σ)
 prop-sub-from-disc ⟨ σ , t ⟩ = Ext≃ (prop-sub-from-sphere σ) refl≃tm
 
-sub-from-disc-term-unrestrict : (σ : Sub (disc-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-disc-term (unrestrict σ) ≃tm sub-from-disc-term σ
-sub-from-disc-term-unrestrict ⟨ σ , t ⟩ = refl≃tm
+sub-from-disc-term-↓ : (σ : Sub (disc-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-disc-term (↓ σ) ≃tm sub-from-disc-term σ
+sub-from-disc-term-↓ ⟨ σ , t ⟩ = refl≃tm
 
-sub-from-sphere-type-unrestrict : (σ : Sub (sphere-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-sphere-type (unrestrict σ) ≃ty sub-from-sphere-type σ
-sub-from-sphere-type-unrestrict {n = zero} ⟨⟩ = refl≃ty
-sub-from-sphere-type-unrestrict {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = Arr≃ refl≃tm (sub-from-sphere-type-unrestrict σ) refl≃tm
+sub-from-sphere-type-↓ : (σ : Sub (sphere-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-sphere-type (↓ σ) ≃ty sub-from-sphere-type σ
+sub-from-sphere-type-↓ {n = zero} ⟨ _ ⟩′ = refl≃ty
+sub-from-sphere-type-↓ {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = Arr≃ refl≃tm (sub-from-sphere-type-↓ σ) refl≃tm
 
-sub-from-disc-type-unrestrict : (σ : Sub (disc-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-disc-type (unrestrict σ) ≃ty sub-from-disc-type σ
-sub-from-disc-type-unrestrict ⟨ σ , t ⟩ = sub-from-sphere-type-unrestrict σ
+sub-from-disc-type-↓ : (σ : Sub (disc-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-disc-type (↓ σ) ≃ty sub-from-disc-type σ
+sub-from-disc-type-↓ ⟨ σ , t ⟩ = sub-from-sphere-type-↓ σ
 
 sub-from-sphere-type-prop : (σ : Sub (sphere-size d) m A) → sphere-type d [ σ ]ty ≃ty sub-from-sphere-type σ
 sub-from-sphere-type-prop {d = zero} σ = refl≃ty

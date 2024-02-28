@@ -229,7 +229,7 @@ wedge-susp-supp-shift Γ Δ t = begin
 sub-from-wedge-supp : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A)
                       → FVTm (Var (fromℕ _) [ τ ]tm) ⊆ FVSub σ
                       → FVSub (sub-from-wedge σ τ) ≡ FVSub σ ∪ FVSub τ
-sub-from-wedge-supp {l = l} {A = A} σ ⟨ ⟨⟩ , x ⟩ p = begin
+sub-from-wedge-supp {l = l} σ ⟨ ⟨ A ⟩′ , x ⟩ p = begin
   FVSub σ
     ≡⟨ p ⟩
   FVSub σ ∪ FVTm x
@@ -244,7 +244,7 @@ sub-from-wedge-supp {l = l} σ ⟨ ⟨ τ , y ⟩ , x ⟩ p = trans (cong (_∪ 
 sub-from-wedge-supp′ : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A)
                        → SuppTm Γ (Var (fromℕ _) [ τ ]tm) ⊆ SuppSub Γ σ
                        → SuppSub Γ (sub-from-wedge σ τ) ≡ SuppSub Γ σ ∪ SuppSub Γ τ
-sub-from-wedge-supp′ {A = A} {Γ = Γ} σ ⟨ ⟨⟩ , x ⟩ p = begin
+sub-from-wedge-supp′ {Γ = Γ} σ ⟨ ⟨ A ⟩′ , x ⟩ p = begin
   SuppSub Γ σ
     ≡⟨ p ⟩
   SuppSub Γ σ ∪ SuppTm Γ x

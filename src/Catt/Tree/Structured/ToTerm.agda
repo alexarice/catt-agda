@@ -25,8 +25,8 @@ sty-to-type S⋆ = ⋆
 sty-to-type (SArr s A t) = (stm-to-term s) ─⟨ (sty-to-type A) ⟩⟶ (stm-to-term t)
 
 label-to-sub′ : ((P : Path S) → Tm n) → (A : Ty n) → Sub (suc (tree-size S)) n A
-label-to-sub′ {S = Sing} f A = ⟨ ⟨⟩ , f PHere ⟩
-label-to-sub′ {S = Join S₁ S₂} f A = sub-from-wedge (unrestrict (label-to-sub′ (λ P → f (PExt P)) (f PHere ─⟨ A ⟩⟶ f (PShift PHere)))) (label-to-sub′ (λ P → f (PShift P)) A)
+label-to-sub′ {S = Sing} f A = ⟨ ⟨ A ⟩′ , f PHere ⟩
+label-to-sub′ {S = Join S₁ S₂} f A = sub-from-wedge (↓ (label-to-sub′ (λ P → f (PExt P)) (f PHere ─⟨ A ⟩⟶ f (PShift PHere)))) (label-to-sub′ (λ P → f (PShift P)) A)
 
 label-to-sub (L ,, A) = label-to-sub′ (λ P → stm-to-term (L P)) (sty-to-type A)
 

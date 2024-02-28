@@ -208,12 +208,12 @@ FVLabel-to-sub′ {S = Join S T} {ΓS = ΓS} L f g = begin
   MtoVarSet ΓS (FVLabel-WT (label₁ L)) ∪ MtoVarSet ΓS (FVLabel-WT (label₂ L))
     ≡⟨ cong₂ _∪_ (FVLabel-to-sub′ (label₁ L) (f ∘ PExt) l2) (FVLabel-to-sub′ (label₂ L) (f ∘ PShift) g) ⟩
   SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₁ L)) ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))
-    ≡˘⟨ cong (λ x → DC (COT-to-Ctx ΓS) x ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))) (unrestrict-supp (label-to-sub (label₁ L))) ⟩
-  SuppSub (COT-to-Ctx ΓS) (unrestrict (label-to-sub (label₁ L))) ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))
-    ≡˘⟨ sub-from-wedge-supp′ (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) l3 ⟩
+    ≡˘⟨ cong (λ x → DC (COT-to-Ctx ΓS) x ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))) (↓-supp (label-to-sub (label₁ L))) ⟩
+  SuppSub (COT-to-Ctx ΓS) (↓ (label-to-sub (label₁ L))) ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))
+    ≡˘⟨ sub-from-wedge-supp′ (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) l3 ⟩
   SuppSub (COT-to-Ctx ΓS)
-          (sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
-                            (label-to-sub (label₂ L))) ∎
+          (sub-from-wedge (↓ (label-to-sub (label₁ L)))
+                          (label-to-sub (label₂ L))) ∎
   where
     l1 : FVSTy (lty L) ∪m ((FVSTm (ap L PHere) ∪m FVLabel (ap L ∘ PExt)) ∪m FVLabel (ap L ∘ PShift))
        ≡ FVSTy (lty L)
@@ -266,13 +266,13 @@ FVLabel-to-sub′ {S = Join S T} {ΓS = ΓS} L f g = begin
       (stm-to-term (ap L PHere) ─⟨ sty-to-type (lty L) ⟩⟶
        stm-to-term (ap L (PShift PHere))) ∎
 
-    l3 : SuppTm (COT-to-Ctx ΓS) (Var (fromℕ _) [ label-to-sub (label₂ L) ]tm) ⊆ SuppSub (COT-to-Ctx ΓS) (unrestrict (label-to-sub (label₁ L)))
+    l3 : SuppTm (COT-to-Ctx ΓS) (Var (fromℕ _) [ label-to-sub (label₂ L) ]tm) ⊆ SuppSub (COT-to-Ctx ΓS) (↓ (label-to-sub (label₁ L)))
     l3 = PR.begin
       SuppTm (COT-to-Ctx ΓS) (Var (fromℕ _) [ label-to-sub (label₂ L) ]tm)
         ≈˘⟨ cong (DC (COT-to-Ctx ΓS)) (FVTm-≃ (label-to-sub-lem L)) ⟩
-      SuppTm (COT-to-Ctx ΓS) (get-snd [ unrestrict (label-to-sub (label₁ L)) ]tm)
-        ≤⟨ DC-cong-⊆ (COT-to-Ctx ΓS) (FVTm-comp-⊆ get-snd (unrestrict (label-to-sub (label₁ L)))) ⟩
-      SuppSub (COT-to-Ctx ΓS) (unrestrict (label-to-sub (label₁ L))) PR.∎
+      SuppTm (COT-to-Ctx ΓS) (get-snd [ ↓ (label-to-sub (label₁ L)) ]tm)
+        ≤⟨ DC-cong-⊆ (COT-to-Ctx ΓS) (FVTm-comp-⊆ get-snd (↓ (label-to-sub (label₁ L)))) ⟩
+      SuppSub (COT-to-Ctx ΓS) (↓ (label-to-sub (label₁ L))) PR.∎
       where
         module PR = PReasoning (⊆-poset _)
         open PR

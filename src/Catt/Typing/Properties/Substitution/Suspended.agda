@@ -29,7 +29,7 @@ apply-sub-ty-typing TyStar σty = sub-typing-implies-ty-typing σty
 apply-sub-ty-typing (TyArr sty Aty tty) σty = TyArr (apply-sub-tm-typing sty σty) (apply-sub-ty-typing Aty σty) (apply-sub-tm-typing tty σty)
 
 apply-sub-tm-typing {B = ⋆} tty σty = S.apply-sub-tm-typing tty σty
-apply-sub-tm-typing {B = u ─⟨ B ⟩⟶ v} {t = t} {σ = σ} tty σty = transport-typing-full (apply-sub-tm-typing (susp-tmTy tty) (unrestrictTy σty)) refl≃c (unrestrict-comp-tm t σ) (unrestrict-comp-ty _ σ)
+apply-sub-tm-typing {B = u ─⟨ B ⟩⟶ v} {t = t} {σ = σ} tty σty = transport-typing-full (apply-sub-tm-typing (susp-tmTy tty) (↓-Ty σty)) refl≃c (↓-comp-tm t σ) (↓-comp-ty _ σ)
 
 apply-sub-sub-typing (TyNull x) σty = TyNull (apply-sub-ty-typing x σty)
 apply-sub-sub-typing (TyExt {A = A} τty tty) σty = TyExt (apply-sub-sub-typing τty σty) (TyConv (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ A))))
@@ -40,11 +40,11 @@ apply-sub-ty-eq σty (Arr≈ p q r) = Arr≈ (apply-sub-tm-eq σty p) (apply-sub
 apply-sub-tm-eq {A = ⋆} σty p = S.apply-sub-tm-eq σty p
 apply-sub-tm-eq {A = u ─⟨ A ⟩⟶ v} {Δ = Δ} {s = s} {t = t} {σ = σ} σty p = begin
   s [ σ ]tm
-    ≈˘⟨ reflexive≈tm (unrestrict-comp-tm s σ) ⟩
-  susp-tm s [ unrestrict σ ]tm
-    ≈⟨ apply-sub-tm-eq (unrestrictTy σty) (susp-tmEq p) ⟩
-  susp-tm t [ unrestrict σ ]tm
-    ≈⟨ reflexive≈tm (unrestrict-comp-tm t σ) ⟩
+    ≈˘⟨ reflexive≈tm (↓-comp-tm s σ) ⟩
+  susp-tm s [ ↓ σ ]tm
+    ≈⟨ apply-sub-tm-eq (↓-Ty σty) (susp-tmEq p) ⟩
+  susp-tm t [ ↓ σ ]tm
+    ≈⟨ reflexive≈tm (↓-comp-tm t σ) ⟩
   t [ σ ]tm ∎
   where
     open Reasoning (tm-setoid-≈ Δ)

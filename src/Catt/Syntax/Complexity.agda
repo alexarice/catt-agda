@@ -221,5 +221,5 @@ SCTm (Coh S A σ) = omega (ty-dim A) ♯ SCTy A ♯ SCSub σ
 SCTy ⋆ = []
 SCTy (s ─⟨ A ⟩⟶ t) = SCTm s ♯ SCTy A ♯ SCTm t
 
-SCSub ⟨⟩ = []
+SCSub ⟨ _ ⟩′ = []
 SCSub ⟨ σ , t ⟩ = SCSub σ ♯ SCTm t

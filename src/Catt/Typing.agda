@@ -34,7 +34,7 @@ data _≈[_]ty_ where
   Arr≈ : s ≈[ Γ ]tm s′ → A ≈[ Γ ]ty A′ → t ≈[ Γ ]tm t′ → (s ─⟨ A ⟩⟶ t) ≈[ Γ ]ty (s′ ─⟨ A′ ⟩⟶ t′)
 
 data _≈[_]s_ where
-  Null≈ : A ≈[ Δ ]ty B → ⟨⟩ {A = A} ≈[ Δ ]s ⟨⟩ {A = B}
+  Null≈ : A ≈[ Δ ]ty B → ⟨ A ⟩′ ≈[ Δ ]s ⟨ B ⟩′
   Ext≈ : σ ≈[ Δ ]s τ → s ≈[ Δ ]tm t → ⟨ σ , s ⟩ ≈[ Δ ]s ⟨ τ , t ⟩
 
 data Typing-Ctx where
@@ -51,5 +51,5 @@ data Typing-Ty where
   TyArr : Typing-Tm Γ s A → Typing-Ty Γ A → Typing-Tm Γ t A → Typing-Ty Γ (s ─⟨ A ⟩⟶ t)
 
 data Typing-Sub where
-  TyNull : Typing-Ty Δ A → Typing-Sub ∅ Δ (⟨⟩ {A = A})
+  TyNull : Typing-Ty Δ A → Typing-Sub ∅ Δ ⟨ A ⟩′
   TyExt : Typing-Sub Γ Δ σ → Typing-Tm Δ t (A [ σ ]ty) → Typing-Sub (Γ , A) Δ ⟨ σ , t ⟩

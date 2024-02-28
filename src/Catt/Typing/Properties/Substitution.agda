@@ -72,7 +72,7 @@ apply-sub-eq-tm {A = ⋆} {B = s ─⟨ B ⟩⟶ t} (Coh T C τ) eq with sub-eq-
 ... | ()
 apply-sub-eq-tm {A = s ─⟨ A ⟩⟶ t} {B = ⋆} (Coh T C τ) eq with sub-eq-implies-ty-eq eq
 ... | ()
-apply-sub-eq-tm {A = s ─⟨ A ⟩⟶ t} {B = s₁ ─⟨ B ⟩⟶ t₁} (Coh Δ C τ) eq = apply-sub-eq-tm (Coh (susp-ctx Δ) (susp-ty C) (susp-sub τ)) (unrestrictEq eq)
+apply-sub-eq-tm {A = s ─⟨ A ⟩⟶ t} {B = s₁ ─⟨ B ⟩⟶ t₁} (Coh Δ C τ) eq = apply-sub-eq-tm (Coh (susp-ctx Δ) (susp-ty C) (susp-sub τ)) (↓-≈ eq)
 
-apply-sub-eq-sub ⟨⟩ eq = Null≈ (sub-eq-implies-ty-eq eq)
+apply-sub-eq-sub ⟨ _ ⟩′ eq = Null≈ (sub-eq-implies-ty-eq eq)
 apply-sub-eq-sub ⟨ μ , t ⟩ eq = Ext≈ (apply-sub-eq-sub μ eq) (apply-sub-eq-tm t eq)

@@ -17,30 +17,3 @@ open import Catt.Typing rules
 open import Catt.Typing.Properties.Base rules public
 open import Catt.Typing.Properties.Lifting rules lift-cond public
 open import Catt.Typing.Properties.Substitution.Suspended rules tame public
-
-
-unrestrict-restrict-≈ : (σ : Sub (2 + n) m A) → s ≈[ Δ ]tm get-fst [ σ ]tm → t ≈[ Δ ]tm get-snd [ σ ]tm → unrestrict (restrict σ s t) ≈[ Δ ]s σ
-unrestrict-restrict-≈ ⟨ ⟨ ⟨⟩ , s ⟩ , t ⟩ p q = Ext≈ (Ext≈ refl≈s p) q
-unrestrict-restrict-≈ ⟨ ⟨ ⟨ σ , u ⟩ , s ⟩ , t ⟩ p q = Ext≈ (unrestrict-restrict-≈ ⟨ ⟨ σ , u ⟩ , s ⟩ p q) refl≈tm
-
-restrictTy : {σ : Sub (2 + n) m A}
-           → Typing-Sub (susp-ctx Γ) Δ σ
-           → Typing-Ctx Γ
-           → Typing-Tm Δ s A
-           → Typing-Tm Δ t A
-           → s ≈[ Δ ]tm get-fst [ σ ]tm
-           → t ≈[ Δ ]tm get-snd [ σ ]tm
-           → Typing-Sub Γ Δ (restrict σ s t)
-restrictTy {Γ = ∅} (TyExt (TyExt (TyNull z) y) x) Γty sty tty p q = TyNull (TyArr sty z tty)
-restrictTy {Γ = ∅ , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd TyEmp Aty) sty tty p q
-  = TyExt (restrictTy (TyExt (TyExt σty z) y) TyEmp sty tty p q)
-          (TyConv x (trans≈ty (sym≈ty (apply-sub-eq-ty (susp-ty A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))
-                              (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _)))))
-restrictTy {Γ = ∅ , B , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd Γty Aty) sty tty p q
-  = TyExt (restrictTy (TyExt (TyExt σty z) y) Γty sty tty p q)
-          (TyConv x (trans≈ty (sym≈ty (apply-sub-eq-ty (susp-ty A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))
-                              (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _)))))
-restrictTy {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty z) y) x) (TyAdd Γty Aty) sty tty p q
-  = TyExt (restrictTy (TyExt (TyExt σty z) y) Γty sty tty p q)
-          (TyConv x (trans≈ty (sym≈ty (apply-sub-eq-ty (susp-ty A) (unrestrict-restrict-≈ ⟨ ⟨ _ , _ ⟩ , _ ⟩ p q)))
-                              (reflexive≈ty (unrestrict-comp-ty A (restrict ⟨ ⟨ _ , _ ⟩ , _ ⟩ _ _)))))

@@ -117,15 +117,15 @@ module _ {n : ℕ} where
     }
 
 TransportVarSet-empty : (σ : Sub n m ⋆) → TransportVarSet empty σ ≡ empty
-TransportVarSet-empty ⟨⟩ = refl
+TransportVarSet-empty ⟨ _ ⟩′ = refl
 TransportVarSet-empty ⟨ σ , t ⟩ = TransportVarSet-empty σ
 
 TransportVarSet-full : (σ : Sub n m ⋆) → TransportVarSet full σ ≡ FVSub σ
-TransportVarSet-full ⟨⟩ = refl
+TransportVarSet-full ⟨ _ ⟩′ = refl
 TransportVarSet-full ⟨ σ , t ⟩ = cong (_∪ FVTm t) (TransportVarSet-full σ)
 
 TransportVarSet-∪ : (xs ys : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet (xs ∪ ys) σ ≡ TransportVarSet xs σ ∪ TransportVarSet ys σ
-TransportVarSet-∪ xs ys ⟨⟩ = sym (∪-left-unit empty)
+TransportVarSet-∪ xs ys ⟨ _ ⟩′ = sym (∪-left-unit empty)
 TransportVarSet-∪ (ewf xs) (ewf ys) ⟨ σ , t ⟩ = TransportVarSet-∪ xs ys σ
 TransportVarSet-∪ (ewf xs) (ewt ys) ⟨ σ , t ⟩ = trans (cong (_∪ FVTm t) (TransportVarSet-∪ xs ys σ)) (∪-assoc (TransportVarSet xs σ) (TransportVarSet ys σ) (FVTm t))
 TransportVarSet-∪ (ewt xs) (ewf ys) ⟨ σ , t ⟩ = begin
@@ -177,7 +177,7 @@ TransportVarSet-tm (Var zero) ⟨ σ , t ⟩ = trans (cong (_∪ FVTm t) (Transp
 TransportVarSet-tm (Var (suc i)) ⟨ σ , t ⟩ = TransportVarSet-tm (Var i) σ
 TransportVarSet-tm (Coh S A τ) σ = TransportVarSet-sub τ σ
 
-TransportVarSet-sub {A = A} ⟨⟩ σ = TransportVarSet-ty A σ
+TransportVarSet-sub ⟨ A ⟩′ σ = TransportVarSet-ty A σ
 TransportVarSet-sub ⟨ τ , t ⟩ σ = trans (TransportVarSet-∪ (FVSub τ) (FVTm t) σ) (cong₂ _∪_ (TransportVarSet-sub τ σ) (TransportVarSet-tm t σ))
 
 supp-lift-ty : (A : Ty n) → FVTy (lift-ty A) ≡ ewf (FVTy A)
@@ -190,7 +190,7 @@ supp-lift-ty (s ─⟨ A ⟩⟶ t) = cong₂ _∪_ (cong₂ _∪_ (supp-lift-ty 
 supp-lift-tm (Var i) = refl
 supp-lift-tm (Coh S A σ) = supp-lift-sub σ
 
-supp-lift-sub ⟨⟩ = refl
+supp-lift-sub ⟨ _ ⟩′ = refl
 supp-lift-sub ⟨ σ , t ⟩ = cong₂ _∪_ (supp-lift-sub σ) (supp-lift-tm t)
 
 idSub-supp : FVSub (idSub {n}) ≡ full
@@ -202,7 +202,7 @@ idSub≃-supp Emp≃ = refl
 idSub≃-supp (Add≃ p x) = trans (cong (_∪ ewt empty) (supp-lift-sub (idSub≃ p))) (cong ewt (trans (∪-right-unit (FVSub (idSub≃ p))) (idSub≃-supp p)))
 
 TransportVarSet-lift : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet xs (lift-sub σ) ≡ ewf (TransportVarSet xs σ)
-TransportVarSet-lift emp ⟨⟩ = refl
+TransportVarSet-lift emp ⟨ _ ⟩′ = refl
 TransportVarSet-lift (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-lift xs σ
 TransportVarSet-lift (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (TransportVarSet-lift xs σ) (supp-lift-tm t)
 
@@ -280,7 +280,7 @@ lookup-isVar-⊆ (ewf xs) (Var (suc i)) p = cong ewf (lookup-isVar-⊆ xs (Var i
 lookup-isVar-⊆ (ewt xs) (Var (suc i)) p = cong ewt (lookup-isVar-⊆ xs (Var i) p)
 
 TransportVarSet-comp : (xs : VarSet l) → (σ : Sub n m ⋆) → (τ : Sub l n ⋆) → TransportVarSet xs (τ ● σ) ≡ TransportVarSet (TransportVarSet xs τ) σ
-TransportVarSet-comp emp σ ⟨⟩ = sym (TransportVarSet-empty σ)
+TransportVarSet-comp emp σ ⟨ _ ⟩′ = sym (TransportVarSet-empty σ)
 TransportVarSet-comp (ewf xs) σ ⟨ τ , t ⟩ = TransportVarSet-comp xs σ τ
 TransportVarSet-comp (ewt xs) σ ⟨ τ , t ⟩ = begin
   TransportVarSet xs (τ ● σ) ∪ FVTm (t [ σ ]tm)
@@ -294,19 +294,19 @@ TransportVarSet-comp (ewt xs) σ ⟨ τ , t ⟩ = begin
 isVar-supp : (t : Tm n) → .⦃ _ : isVar t ⦄ → FVTm t ≡ trueAt (getVarFin t)
 isVar-supp (Var i) = refl
 
-unrestrict-supp : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → FVSub (unrestrict σ) ≡ FVSub σ
-unrestrict-supp ⟨⟩ = refl
-unrestrict-supp ⟨ σ , t ⟩ = cong (_∪ FVTm t) (unrestrict-supp σ)
+↓-supp : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → FVSub (↓ σ) ≡ FVSub σ
+↓-supp ⟨ _ ⟩′ = refl
+↓-supp ⟨ σ , t ⟩ = cong (_∪ FVTm t) (↓-supp σ)
 
 coh-sub-fv : (Γ : Ctx (suc n)) → (A : Ty (suc n)) → (σ : Sub (suc n) m B) → FVTm (Coh Γ A idSub [ σ ]tm) ≡ FVSub σ
 coh-sub-fv {B = ⋆} Γ A σ = FVSub-≃ (id-left-unit σ)
 coh-sub-fv {B = s ─⟨ B ⟩⟶ t} Γ A σ = begin
-  FVTm (Coh (susp-ctx Γ) (susp-ty A) (susp-sub idSub) [ unrestrict σ ]tm)
-    ≡⟨ FVTm-≃ (sub-action-≃-tm (Coh≃ (refl≃c {Γ = susp-ctx Γ}) refl≃ty susp-functorial-id) (refl≃s {σ = unrestrict σ})) ⟩
-  FVTm (Coh (susp-ctx Γ) (susp-ty A) idSub [ unrestrict σ ]tm)
-    ≡⟨ coh-sub-fv (susp-ctx Γ) (susp-ty A) (unrestrict σ) ⟩
-  FVSub (unrestrict σ)
-    ≡⟨ unrestrict-supp σ ⟩
+  FVTm (Coh (susp-ctx Γ) (susp-ty A) (susp-sub idSub) [ ↓ σ ]tm)
+    ≡⟨ FVTm-≃ (sub-action-≃-tm (Coh≃ (refl≃c {Γ = susp-ctx Γ}) refl≃ty susp-functorial-id) (refl≃s {σ = ↓ σ})) ⟩
+  FVTm (Coh (susp-ctx Γ) (susp-ty A) idSub [ ↓ σ ]tm)
+    ≡⟨ coh-sub-fv (susp-ctx Γ) (susp-ty A) (↓ σ) ⟩
+  FVSub (↓ σ)
+    ≡⟨ ↓-supp σ ⟩
   FVSub σ ∎
   where
     open ≡-Reasoning
@@ -342,7 +342,7 @@ TransportVarSet-idSub≃ (ewt xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwis
 ∪-Truth (ewt xs) (y ∷ ys) zero truth = inj₁ tt
 
 sub-type-⊆ : (σ : Sub n m A) → FVTy A ⊆ FVSub σ
-sub-type-⊆ ⟨⟩ = ⊆-refl
+sub-type-⊆ ⟨ _ ⟩′ = ⊆-refl
 sub-type-⊆ ⟨ σ , t ⟩ = ⊆-trans (sub-type-⊆ σ) (∪-⊆-1 (FVSub σ) (FVTm t))
 
 ∪-⊆ : {xs ys zs : VarSet n} → xs ⊆ zs → ys ⊆ zs → xs ∪ ys ⊆ zs
@@ -452,15 +452,15 @@ FVTm-comp-⊆ (Var (suc i)) ⟨ σ , t ⟩ = ⊆-trans (FVTm-comp-⊆ (Var i) σ
 FVTm-comp-⊆ {A = ⋆} (Coh S B τ) σ = FVSub-comp-⊆ τ σ
 FVTm-comp-⊆ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = begin
   FVTm
-      (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm)
-    ≤⟨ FVTm-comp-⊆ (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (unrestrict σ) ⟩
-  FVSub (unrestrict σ)
-    ≡⟨ unrestrict-supp σ ⟩
+      (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ ↓ σ ]tm)
+    ≤⟨ FVTm-comp-⊆ (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (↓ σ) ⟩
+  FVSub (↓ σ)
+    ≡⟨ ↓-supp σ ⟩
   FVSub σ ∎
   where
     open PReasoning (⊆-poset _)
 
-FVSub-comp-⊆ ⟨⟩ σ = sub-type-⊆ σ
+FVSub-comp-⊆ ⟨ _ ⟩′ σ = sub-type-⊆ σ
 FVSub-comp-⊆ ⟨ τ , t ⟩ σ = begin
   FVSub (τ ● σ) ∪ FVTm (t [ σ ]tm)
     ≤⟨ ⊆-cong-∪-1 (FVTm-comp-⊆ t σ) ⟩
@@ -560,7 +560,7 @@ SupportedTy-lift ⋆ Asupp = tt
 SupportedTy-lift (s ─⟨ A ⟩⟶ t) (ssupp ,, Asupp ,, tsupp)
   = SupportedTm-lift s ssupp ,, SupportedTy-lift A Asupp ,, SupportedTm-lift t tsupp
 
-SupportedSub-lift ⟨⟩ σsupp = SupportedTy-lift _ σsupp
+SupportedSub-lift ⟨ _ ⟩′ σsupp = SupportedTy-lift _ σsupp
 SupportedSub-lift ⟨ σ , t ⟩ (σsupp ,, tsupp)
   = SupportedSub-lift σ σsupp ,, SupportedTm-lift t tsupp
 

@@ -124,7 +124,7 @@ suspSuppTm (Var i) = lem _ i
     lem (suc n) (suc i) = cong ewf (lem n i)
 suspSuppTm (Coh Δ A σ) = trans (∪-comm (suspSupp empty) (FVTm (susp-tm (Coh Δ A σ)))) (trans (cong (_∪ suspSupp empty) (suspSuppSub σ)) (sym (suspSuppEmpRight (FVSub σ))))
 
-suspSuppSub ⟨⟩ = suspSuppLem _
+suspSuppSub ⟨ A ⟩′ = suspSuppLem _
 suspSuppSub ⟨ σ , t ⟩ = begin
   FVSub (susp-sub ⟨ σ , t ⟩) ≡⟨⟩
   FVSub (susp-sub σ) ∪ FVTm (susp-tm t) ≡⟨ cong (_∪ FVTm (susp-tm t)) (suspSuppSub σ) ⟩
@@ -141,7 +141,7 @@ suspSuppFull {zero} = refl
 suspSuppFull {suc n} = cong ewt suspSuppFull
 
 TransportVarSet-susp : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet (suspSupp xs) (susp-sub σ) ≡ suspSupp (TransportVarSet xs σ)
-TransportVarSet-susp emp ⟨⟩ = suspSuppLem _
+TransportVarSet-susp emp ⟨ A ⟩′ = suspSuppLem _
 TransportVarSet-susp (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-susp xs σ
 TransportVarSet-susp (ewt xs) ⟨ σ , t ⟩ = begin
   TransportVarSet (suspSupp xs) (susp-sub σ) ∪ FVTm (susp-tm t)
@@ -305,16 +305,16 @@ suspSupp-fst-var : (xs : VarSet n) → lookup (suspSupp xs) (fromℕ _) ≡ true
 suspSupp-fst-var emp = refl
 suspSupp-fst-var (x ∷ xs) = suspSupp-fst-var xs
 
-SupportedSub-unrestrict : (σ : Sub n m (s ─⟨ A ⟩⟶ t))
+SupportedSub-↓ : (σ : Sub n m (s ─⟨ A ⟩⟶ t))
                         → SupportedSub σ
-                        → SupportedSub (unrestrict σ)
-SupportedSub-unrestrict ⟨⟩ (ssupp ,, Asupp ,, tsupp) = (Asupp ,, ssupp) ,, tsupp
-SupportedSub-unrestrict ⟨ σ , t ⟩ (σsupp ,, tsupp) = (SupportedSub-unrestrict σ σsupp) ,, tsupp
+                        → SupportedSub (↓ σ)
+SupportedSub-↓ ⟨ _ ⟩′ (ssupp ,, Asupp ,, tsupp) = (Asupp ,, ssupp) ,, tsupp
+SupportedSub-↓ ⟨ σ , t ⟩ (σsupp ,, tsupp) = (SupportedSub-↓ σ σsupp) ,, tsupp
 
 SupportedSub-sub-type : (σ : Sub n m A)
                       → SupportedSub σ
                       → SupportedTy A
-SupportedSub-sub-type ⟨⟩ σsupp = σsupp
+SupportedSub-sub-type ⟨ _ ⟩′ σsupp = σsupp
 SupportedSub-sub-type ⟨ σ , t ⟩ (σsupp ,, _) = SupportedSub-sub-type σ σsupp
 
 SupportedTm-susp : (s : Tm n)
@@ -323,9 +323,9 @@ SupportedTm-susp : (s : Tm n)
 SupportedTy-susp : (A : Ty n)
                  → SupportedTy A
                  → SupportedTy (susp-ty A)
-SupportedSub-susp-res : (σ : Sub n m A)
+SupportedSub-susp-↑ : (σ : Sub n m A)
                       → SupportedSub σ
-                      → SupportedSub (susp-sub-res σ)
+                      → SupportedSub (susp-sub-↑ σ)
 SupportedSub-susp : (σ : Sub n m ⋆)
                   → SupportedSub σ
                   → SupportedSub (susp-sub σ)
@@ -338,11 +338,11 @@ SupportedTy-susp ⋆ Asupp = tt ,, tt ,, tt
 SupportedTy-susp (s ─⟨ A ⟩⟶ t) (ssupp ,, Asupp ,, tsupp)
   = SupportedTm-susp s ssupp ,, SupportedTy-susp A Asupp ,, SupportedTm-susp t tsupp
 
-SupportedSub-susp-res ⟨⟩ σsupp = SupportedTy-susp _ σsupp
-SupportedSub-susp-res ⟨ σ , t ⟩ (σsupp ,, tsupp)
-  = SupportedSub-susp-res σ σsupp ,, SupportedTm-susp t tsupp
+SupportedSub-susp-↑ ⟨ _ ⟩′ σsupp = SupportedTy-susp _ σsupp
+SupportedSub-susp-↑ ⟨ σ , t ⟩ (σsupp ,, tsupp)
+  = SupportedSub-susp-↑ σ σsupp ,, SupportedTm-susp t tsupp
 
-SupportedSub-susp σ σsupp = SupportedSub-unrestrict (susp-sub-res σ) (SupportedSub-susp-res σ σsupp)
+SupportedSub-susp σ σsupp = SupportedSub-↓ (susp-sub-↑ σ) (SupportedSub-susp-↑ σ σsupp)
 
 SupportedTm-apply-sub : (s : Tm n)
                       → (σ : Sub n m A)
@@ -367,9 +367,9 @@ SupportedTm-apply-sub {A = ⋆} (Coh Δ A τ) σ (Asupp ,, τsupp ,, cond) σsup
   = Asupp ,, SupportedSub-apply-sub τ σ τsupp σsupp ,, cond
 SupportedTm-apply-sub {A = s ─⟨ B ⟩⟶ t} (Coh Δ A τ) σ ssupp σsupp
   = SupportedTm-apply-sub (Coh (susp-ctx Δ) (susp-ty A) (susp-sub τ))
-                          (unrestrict σ)
+                          (↓ σ)
                           (SupportedTm-susp (Coh Δ A τ) ssupp)
-                          (SupportedSub-unrestrict σ σsupp)
+                          (SupportedSub-↓ σ σsupp)
 
 SupportedTy-apply-sub ⋆ σ Asupp σsupp = SupportedSub-sub-type σ σsupp
 SupportedTy-apply-sub (s ─⟨ A ⟩⟶ t) σ (ssupp ,, Asupp ,, tsupp) σsupp
@@ -377,6 +377,6 @@ SupportedTy-apply-sub (s ─⟨ A ⟩⟶ t) σ (ssupp ,, Asupp ,, tsupp) σsupp
     ,, SupportedTy-apply-sub A σ Asupp σsupp
     ,, SupportedTm-apply-sub t σ tsupp σsupp
 
-SupportedSub-apply-sub ⟨⟩ σ τsupp σsupp = SupportedTy-apply-sub _ σ τsupp σsupp
+SupportedSub-apply-sub ⟨ _ ⟩′ σ τsupp σsupp = SupportedTy-apply-sub _ σ τsupp σsupp
 SupportedSub-apply-sub ⟨ τ , t ⟩ σ (τsupp ,, tsupp) σsupp
   = SupportedSub-apply-sub τ σ τsupp σsupp ,, SupportedTm-apply-sub t σ tsupp σsupp

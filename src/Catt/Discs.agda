@@ -28,7 +28,7 @@ sub-from-sphere : (d : ℕ) → (A : Ty n) → .(ty-dim A ≡ d) → Sub (sphere
 
 sub-from-disc d A p t = ⟨ sub-from-sphere d A p , t ⟩
 
-sub-from-sphere zero ⋆ p = ⟨⟩
+sub-from-sphere zero ⋆ p = ⟨ ⋆ ⟩′
 sub-from-sphere (suc d) (s ─⟨ A ⟩⟶ t) p = ⟨ ⟨ (sub-from-sphere d A (cong pred p)) , s ⟩ , t ⟩
 
 identity : (n : ℕ) → Sub (disc-size n) m ⋆ → Tm m

@@ -63,7 +63,7 @@ Join S₁ S₂ >>[ BShift P ] T = Join S₁ (S₂ >>[ P ] T)
   → .⦃ _ : has-trunk-height d T ⦄
   → Label (someTree (S >>[ P ] T)) T
 ι (Join S₁ S₂) BHere T = ap (++t-inc-left T S₂)
-ι (Join S₁ S₂) (BExt P) (Susp T) = unrestrict-label (map-ext (ι S₁ P T ,, S⋆))
+ι (Join S₁ S₂) (BExt P) (Susp T) = ↓-label (map-ext (ι S₁ P T ,, S⋆))
 ι (Join S₁ S₂) (BShift P) T Z = SShift (ι S₂ P T Z)
 
 κ′ : (S : Tree n)

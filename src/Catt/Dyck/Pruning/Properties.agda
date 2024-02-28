@@ -111,8 +111,9 @@ susp-π (⇑pk p)
                refl≃tm)
          refl≃tm
   where
-    lem : lift-sub (lift-sub (π (susp-peak p))) ≃s
-           unrestrict (susp-sub-res (lift-sub (lift-sub (π p))))
+    lem : lift-sub (lift-sub (π (susp-peak p)))
+          ≃s
+          susp-sub (lift-sub (lift-sub (π p)))
     lem = begin
       < lift-sub (lift-sub (π (susp-peak p))) >s
         ≈⟨ lift-sub-≃ (lift-sub-≃ (susp-π p)) ⟩

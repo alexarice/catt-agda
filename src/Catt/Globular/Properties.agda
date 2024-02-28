@@ -80,12 +80,12 @@ ty-dim-ty-base (s ─⟨ A ⟩⟶ t) = refl
 tm-to-ty-coh-sub : (Δ : Ctx (suc n)) → (B : Ty (suc n)) → (τ : Sub (suc n) m ⋆) → (Γ : Ctx l) → (σ : Sub m l A) → tm-to-ty Γ (Coh Δ B τ [ σ ]tm) ≃ty B [ τ ● σ ]ty
 tm-to-ty-coh-sub {A = ⋆} Δ B τ Γ σ = refl≃ty
 tm-to-ty-coh-sub {A = s ─⟨ A ⟩⟶ t} Δ B τ Γ σ = begin
-  < tm-to-ty Γ (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ unrestrict σ ]tm) >ty
-    ≈⟨ tm-to-ty-coh-sub {A = A} (susp-ctx Δ) (susp-ty B) (susp-sub τ) Γ (unrestrict σ) ⟩
-  < susp-ty B [ susp-sub τ ● unrestrict σ ]ty >ty
-    ≈˘⟨ sub-action-≃-ty (refl≃ty {A = susp-ty B}) (unrestrict-comp τ σ) ⟩
-  < susp-ty B [ unrestrict (τ ● σ) ]ty >ty
-    ≈⟨ unrestrict-comp-ty B (τ ● σ) ⟩
+  < tm-to-ty Γ (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ ↓ σ ]tm) >ty
+    ≈⟨ tm-to-ty-coh-sub {A = A} (susp-ctx Δ) (susp-ty B) (susp-sub τ) Γ (↓ σ) ⟩
+  < susp-ty B [ susp-sub τ ● ↓ σ ]ty >ty
+    ≈˘⟨ sub-action-≃-ty (refl≃ty {A = susp-ty B}) (↓-comp τ σ) ⟩
+  < susp-ty B [ ↓ (τ ● σ) ]ty >ty
+    ≈⟨ ↓-comp-ty B (τ ● σ) ⟩
   < B [ τ ● σ ]ty >ty ∎
   where
     open Reasoning ty-setoid

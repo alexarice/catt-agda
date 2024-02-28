@@ -23,7 +23,7 @@ refl≈ty {A = s ─⟨ A ⟩⟶ t} = Arr≈ refl≈tm refl≈ty refl≈tm
 refl≈tm {t = Var i} = Var≈ refl
 refl≈tm {t = Coh Δ A σ} = Coh≈ refl≈ty refl≈s
 
-refl≈s {σ = ⟨⟩} = Null≈ refl≈ty
+refl≈s {σ = ⟨ _ ⟩′} = Null≈ refl≈ty
 refl≈s {σ = ⟨ σ , t ⟩} = Ext≈ refl≈s refl≈tm
 
 reflexive≈ty : A ≃ty B → A ≈[ Γ ]ty B
@@ -157,9 +157,9 @@ ty-dim-≈ : A ≈[ Γ ]ty B → ty-dim A ≡ ty-dim B
 ty-dim-≈ Star≈ = refl
 ty-dim-≈ (Arr≈ _ p _) = cong suc (ty-dim-≈ p)
 
-unrestrictEq : σ ≈[ Δ ]s τ → unrestrict σ ≈[ Δ ]s unrestrict τ
-unrestrictEq (Null≈ (Arr≈ p q r)) = Ext≈ (Ext≈ (Null≈ q) p) r
-unrestrictEq (Ext≈ eq x) = Ext≈ (unrestrictEq eq) x
+↓-≈ : σ ≈[ Δ ]s τ → ↓ σ ≈[ Δ ]s ↓ τ
+↓-≈ (Null≈ (Arr≈ p q r)) = Ext≈ (Ext≈ (Null≈ q) p) r
+↓-≈ (Ext≈ eq x) = Ext≈ (↓-≈ eq) x
 
 truncate′-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate′ d A ≈[ Γ ]ty truncate′ d′ A′
 truncate′-≈ {d = zero} refl p = p

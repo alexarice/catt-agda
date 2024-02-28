@@ -28,13 +28,25 @@ data Ty where
   ⋆ : Ty n
   _─⟨_⟩⟶_ : (s : Tm n) → (A : Ty n) → (t : Tm n) → Ty n
 
+infix 15 ⟨_,_⟩
 data Sub where
-  ⟨⟩ : Sub 0 n A
+  ⟨_⟩′ : (A : Ty n) → Sub 0 n A
   ⟨_,_⟩ : (σ : Sub n m A) → (t : Tm m) → Sub (suc n) m A
 
 data Tm where
   Var : (i : (Fin n)) → Tm n
   Coh : (Δ : Ctx (suc n)) → (A : Ty (suc n)) → (σ : Sub (suc n) m ⋆) → Tm m
+
+sub-proj₁ : Sub (suc n) m A → Sub n m A
+sub-proj₁ ⟨ σ , t ⟩ = σ
+
+sub-proj₂ : Sub (suc n) m A → Tm m
+sub-proj₂ ⟨ σ , t ⟩ = t
+
+infixr 30 _[_]v
+_[_]v : Fin n → Sub n m A → Tm m
+0F [ σ ]v = sub-proj₂ σ
+suc i [ σ ]v = i [ sub-proj₁ σ ]v
 
 pattern 0V {n} = Var {n} 0F
 pattern 1V {n} = Var {n} 1F

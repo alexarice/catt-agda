@@ -10,7 +10,7 @@ wedge-inc-right : (x : Tm (suc n)) → (m : ℕ) → Sub (suc m) (suc (m + n)) �
 wedge {m = zero} Γ x (Δ , A) = Γ
 wedge {m = suc m} Γ x (Δ , A) = (wedge Γ x Δ) , A [ wedge-inc-right x m ]ty
 
-wedge-inc-right x zero = ⟨ ⟨⟩ , x ⟩
+wedge-inc-right x zero = ⟨ ⟨ ⋆ ⟩′ , x ⟩
 wedge-inc-right x (suc m) = ⟨ lift-sub (wedge-inc-right x m) , 0V ⟩
 
 wedge-inc-left : (x : Tm (suc n)) → (m : ℕ) → Sub (suc n) (suc (m + n)) ⋆
@@ -27,7 +27,7 @@ wedge-susp-inc-left : (n m : ℕ) → Sub (3 + n) (suc (m + (2 + n))) ⋆
 wedge-susp-inc-left n m = wedge-inc-left get-snd m
 
 sub-from-wedge : Sub (suc n) l A → Sub (suc m) l A → Sub (suc (m + n)) l A
-sub-from-wedge σ ⟨ ⟨⟩ , t ⟩ = σ
+sub-from-wedge σ ⟨ ⟨ _ ⟩′ , t ⟩ = σ
 sub-from-wedge σ ⟨ ⟨ τ , u ⟩ , t ⟩ = ⟨ sub-from-wedge σ ⟨ τ , u ⟩ , t ⟩
 
 sub-between-wedges : Sub (suc n) (suc l) ⋆ → Sub (suc m) (suc l′) ⋆ → (s : Tm (suc l)) → Sub (suc (m + n)) (suc (l′ + l)) ⋆

@@ -33,10 +33,10 @@ stm-fst {X = Other _} = SOther get-fst
 stm-snd {X = someTree x} = SShift (SPath PHere)
 stm-snd {X = Other _} = SOther get-snd
 
-unrestrict-label : (L : Label-WT X S) → .⦃ NonZero (sty-dim (lty L)) ⦄ → Label X (Susp S)
-unrestrict-label {X = X} {S = S} (L ,, As) PHere = sty-src As
-unrestrict-label {X = X} {S = S} (L ,, As) (PExt P) = L P
-unrestrict-label {X = X} {S = S} (L ,, As) (PShift P) = sty-tgt As
+↓-label : (L : Label-WT X S) → .⦃ NonZero (sty-dim (lty L)) ⦄ → Label X (Susp S)
+↓-label {X = X} {S = S} (L ,, As) PHere = sty-src As
+↓-label {X = X} {S = S} (L ,, As) (PExt P) = L P
+↓-label {X = X} {S = S} (L ,, As) (PShift P) = sty-tgt As
 
 susp-stm : STm X → STm (susp-maybe-tree X)
 susp-sty : STy X → STy (susp-maybe-tree X)
@@ -52,7 +52,7 @@ susp-sty (SArr s A t) = SArr (susp-stm s) (susp-sty A) (susp-stm t)
 
 susp-label L = susp-stm ∘ (ap L) ,, susp-sty (lty L)
 
-susp-label-full L = unrestrict-label (susp-label (L ,, S⋆))
+susp-label-full L = ↓-label (susp-label (L ,, S⋆))
 
 susp-sty-n : (n : ℕ) → STy X → STy (susp-maybe-tree-n n X)
 susp-sty-n zero As = As

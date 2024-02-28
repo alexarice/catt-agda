@@ -31,7 +31,7 @@ open import Catt.Tree.Standard.Typing rules tame
      → Typing-Label ⌊ S >>[ p ] T ⌋ (ι S p T ,, S⋆)
 ι-Ty (Join S₁ S₂) BHere T = ++t-inc-left-Ty T S₂
 ι-Ty (Join S₁ S₂) (BExt p) (Susp T)
-  = unrestrict-label-Ty (map-ext-Ty (ι-Ty S₁ p T)) (map-sty-ext-Ty TySStar)
+  = ↓-label-Ty (map-ext-Ty (ι-Ty S₁ p T)) (map-sty-ext-Ty TySStar)
 ι-Ty (Join S₁ S₂) (BShift p) T = map-shift-Ty (ι-Ty S₂ p T)
 
 κ-Ty : (S : Tree n)

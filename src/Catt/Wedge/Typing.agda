@@ -44,7 +44,7 @@ wedge-susp-inc-right-Ty : (Γ : Ctx (suc n)) → Typing-Sub Δ (wedge-susp Γ Δ
 wedge-susp-inc-right-Ty Γ = wedge-inc-right-Ty get-sndTy
 
 sub-from-wedge-inc-right-≈ : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → {Γ : Ctx l} → (t [ σ ]tm ≈[ Γ ]tm Var (fromℕ _) [ τ ]tm) → wedge-inc-right t m ● sub-from-wedge σ τ ≈[ Γ ]s τ
-sub-from-wedge-inc-right-≈ σ t ⟨ ⟨⟩ , s ⟩ p = Ext≈ (Null≈ refl≈ty) p
+sub-from-wedge-inc-right-≈ σ t ⟨ ⟨ _ ⟩′ , s ⟩ p = Ext≈ (Null≈ refl≈ty) p
 sub-from-wedge-inc-right-≈ σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≈ lem refl≈tm
   where
     open Reasoning (sub-setoid-≈ _)
@@ -108,7 +108,7 @@ between-wedge-from-wedge-≈ : (σ : Sub (suc n) (suc l) ⋆)
                            → sub-between-wedges σ τ s ● sub-from-wedge σ′ τ′
                              ≈[ Γ ]s
                              sub-from-wedge (σ ● σ′) (τ ● τ′)
-between-wedge-from-wedge-≈ {Γ = Γ} σ ⟨ ⟨⟩ , t ⟩ s σ′ τ′ p = reflexive≈s (begin
+between-wedge-from-wedge-≈ {Γ = Γ} σ ⟨ ⟨ _ ⟩′ , t ⟩ s σ′ τ′ p = reflexive≈s (begin
   < (σ ● wedge-inc-left s _) ● sub-from-wedge σ′ τ′ >s
     ≈˘⟨ ●-assoc σ (wedge-inc-left s _) (sub-from-wedge σ′ τ′) ⟩
   < σ ● wedge-inc-left s _ ● sub-from-wedge σ′ τ′ >s

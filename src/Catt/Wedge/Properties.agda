@@ -107,7 +107,7 @@ wedge-susp-assoc : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → (s : Tm (suc m)
 wedge-susp-assoc Γ Δ s Υ = wedge-assoc (susp-ctx Γ) get-snd Δ s Υ
 
 sub-from-wedge-inc-left : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → wedge-inc-left t m ● sub-from-wedge σ τ ≃s σ
-sub-from-wedge-inc-left σ t τ@(⟨ ⟨⟩ , s ⟩) = id-left-unit (sub-from-wedge σ τ)
+sub-from-wedge-inc-left σ t τ@(⟨ ⟨ _ ⟩′ , s ⟩) = id-left-unit (sub-from-wedge σ τ)
 sub-from-wedge-inc-left σ t ⟨ ⟨ τ , s ⟩ , u ⟩ = begin
   < wedge-inc-left t (suc _) ● sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩ >s
     ≈⟨ apply-sub-lifted-sub-≃ (wedge-inc-left t _) (sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩) ⟩
@@ -118,7 +118,7 @@ sub-from-wedge-inc-left σ t ⟨ ⟨ τ , s ⟩ , u ⟩ = begin
     open Reasoning sub-setoid
 
 sub-from-wedge-inc-right : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → (t [ σ ]tm ≃tm Var (fromℕ _) [ τ ]tm) → wedge-inc-right t m ● sub-from-wedge σ τ ≃s τ
-sub-from-wedge-inc-right σ t ⟨ ⟨⟩ , s ⟩ p = Ext≃ refl≃s p
+sub-from-wedge-inc-right σ t ⟨ ⟨ _ ⟩′ , s ⟩ p = Ext≃ refl≃s p
 sub-from-wedge-inc-right σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≃ lem refl≃tm
   where
     open Reasoning sub-setoid
@@ -193,7 +193,7 @@ wedge-inc-left-fst-var t zero = id-on-tm (Var (fromℕ _))
 wedge-inc-left-fst-var t (suc m) = trans≃tm (apply-lifted-sub-tm-≃ (Var (fromℕ _)) (wedge-inc-left t m)) (lift-tm-≃ (wedge-inc-left-fst-var t m))
 
 sub-from-wedge-fst-var : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → Var (fromℕ _) [ sub-from-wedge σ τ ]tm ≃tm Var (fromℕ _) [ σ ]tm
-sub-from-wedge-fst-var σ ⟨ ⟨⟩ , s ⟩ = refl≃tm
+sub-from-wedge-fst-var σ ⟨ ⟨ _ ⟩′ , s ⟩ = refl≃tm
 sub-from-wedge-fst-var σ ⟨ ⟨ τ , s ⟩ , u ⟩ = sub-from-wedge-fst-var σ ⟨ τ , s ⟩
 
 sub-between-wedges-fst-var : (σ : Sub (suc n) (suc l) ⋆)
@@ -229,7 +229,7 @@ between-wedge-from-wedge : (σ : Sub (suc n) (suc l) ⋆)
                          → sub-between-wedges σ τ s ● sub-from-wedge σ′ τ′
                            ≃s
                            sub-from-wedge (σ ● σ′) (τ ● τ′)
-between-wedge-from-wedge σ ⟨ ⟨⟩ , t ⟩ s σ′ τ′ p = begin
+between-wedge-from-wedge σ ⟨ ⟨ _ ⟩′ , t ⟩ s σ′ τ′ p = begin
   < (σ ● wedge-inc-left s _) ● sub-from-wedge σ′ τ′ >s
     ≈˘⟨ ●-assoc σ (wedge-inc-left s _) (sub-from-wedge σ′ τ′) ⟩
   < σ ● wedge-inc-left s _ ● sub-from-wedge σ′ τ′ >s
@@ -261,7 +261,7 @@ sub-between-wedges-comp : (σ : Sub (suc n) (suc l) ⋆)
                         → sub-between-wedges σ τ s ● sub-between-wedges σ′ τ′ u
                           ≃s
                           sub-between-wedges (σ ● σ′) (τ ● τ′) u
-sub-between-wedges-comp {l′ = l′} {m′ = m′} σ ⟨ ⟨⟩ , x ⟩ s σ′ u τ′ p q = begin
+sub-between-wedges-comp {l′ = l′} {m′ = m′} σ ⟨ ⟨ _ ⟩′ , x ⟩ s σ′ u τ′ p q = begin
   < (σ ● wedge-inc-left s l′) ● sub-from-wedge (σ′ ● wedge-inc-left u m′) (τ′ ● wedge-inc-right u m′) >s
     ≈˘⟨ ●-assoc σ
                 (wedge-inc-left s l′)
@@ -307,18 +307,18 @@ sub-between-wedge-susps-comp σ τ σ′ τ′ p = begin
     open Reasoning sub-setoid
 
 sub-from-wedge-lift : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → lift-sub (sub-from-wedge σ τ) ≃s sub-from-wedge (lift-sub σ) (lift-sub τ)
-sub-from-wedge-lift σ ⟨ ⟨⟩ , t ⟩ = refl≃s
+sub-from-wedge-lift σ ⟨ ⟨ _ ⟩′ , t ⟩ = refl≃s
 sub-from-wedge-lift σ ⟨ ⟨ τ , s ⟩ , t ⟩ = Ext≃ (sub-from-wedge-lift σ ⟨ τ , s ⟩) refl≃tm
 
-sub-from-wedge-susp-res : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → susp-sub-res (sub-from-wedge σ τ) ≃s sub-from-wedge (susp-sub-res σ) (susp-sub-res τ)
-sub-from-wedge-susp-res σ ⟨ ⟨⟩ , t ⟩ = refl≃s
-sub-from-wedge-susp-res σ ⟨ ⟨ τ , s ⟩ , t ⟩ = Ext≃ (sub-from-wedge-susp-res σ ⟨ τ , s ⟩) refl≃tm
+sub-from-wedge-susp-↑ : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → susp-sub-↑ (sub-from-wedge σ τ) ≃s sub-from-wedge (susp-sub-↑ σ) (susp-sub-↑ τ)
+sub-from-wedge-susp-↑ σ ⟨ ⟨ _ ⟩′ , t ⟩ = refl≃s
+sub-from-wedge-susp-↑ σ ⟨ ⟨ τ , s ⟩ , t ⟩ = Ext≃ (sub-from-wedge-susp-↑ σ ⟨ τ , s ⟩) refl≃tm
 
 sub-from-wedge-sub : (σ : Sub (suc n) l A)
                    → (τ : Sub (suc m) l A)
                    → (μ : Sub l l′ B)
                    → sub-from-wedge σ τ ● μ ≃s sub-from-wedge (σ ● μ) (τ ● μ)
-sub-from-wedge-sub σ ⟨ ⟨⟩ , t ⟩ μ = refl≃s
+sub-from-wedge-sub σ ⟨ ⟨ _ ⟩′ , t ⟩ μ = refl≃s
 sub-from-wedge-sub σ ⟨ ⟨ τ , s ⟩ , t ⟩ μ = Ext≃ (sub-from-wedge-sub σ ⟨ τ , s ⟩ μ) refl≃tm
 
 sub-from-wedge-prop : (t : Tm (suc n)) → {m : ℕ}
@@ -350,7 +350,7 @@ wedge-inc-left-var-to-var {n = n} t zero = id-is-var-to-var
 wedge-inc-left-var-to-var t (suc m) = lift-sub-preserve-var-to-var (wedge-inc-left t m) ⦃ wedge-inc-left-var-to-var t m ⦄
 
 wedge-inc-right-var-to-var : (t : Tm (suc n)) → (m : ℕ) → .⦃ isVar t ⦄ → varToVar (wedge-inc-right t m)
-wedge-inc-right-var-to-var t zero = extend-var-to-var ⟨⟩ t
+wedge-inc-right-var-to-var t zero = extend-var-to-var ⟨ _ ⟩′ t
 wedge-inc-right-var-to-var t (suc m) = lift-sub-preserve-var-to-var (wedge-inc-right t m) ⦃ wedge-inc-right-var-to-var t m ⦄ ,, tt
 
 wedge-glob : (Γ : Ctx (suc n)) → ⦃ ctx-is-globular Γ ⦄ → (t : Tm (suc n)) → .⦃ isVar t ⦄ → (Δ : Ctx (suc m)) → ⦃ ctx-is-globular Δ ⦄ → ctx-is-globular (wedge Γ t Δ)

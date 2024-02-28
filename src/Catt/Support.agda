@@ -47,7 +47,7 @@ FVTm (Var i) = trueAt i
 FVTm (Coh Δ A σ) = FVSub σ
 FVTy ⋆ = empty
 FVTy (s ─⟨ A ⟩⟶ t) = FVTy A ∪ FVTm s ∪ FVTm t
-FVSub {A = A} ⟨⟩ = FVTy A
+FVSub ⟨ A ⟩′ = FVTy A
 FVSub ⟨ σ , t ⟩ = FVSub σ ∪ FVTm t
 
 pdb-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pdb : Γ ⊢pdb ⦄ → (b : Bool) → VarSet m
@@ -62,7 +62,7 @@ pd-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pd : Γ ⊢pd ⦄ → (b : Bool
 pd-bd-supp n Γ b = pdb-bd-supp n Γ ⦃ pd-to-pdb it ⦄ b
 
 TransportVarSet : VarSet n → Sub n m A → VarSet m
-TransportVarSet xs ⟨⟩ = empty
+TransportVarSet xs ⟨ _ ⟩′ = empty
 TransportVarSet (ewf xs) ⟨ σ , t ⟩ = TransportVarSet xs σ
 TransportVarSet (ewt xs) ⟨ σ , t ⟩ = TransportVarSet xs σ ∪ FVTm t
 
@@ -119,5 +119,5 @@ SupportedTm (Coh Δ A σ) = SupportedTy A × SupportedSub σ × Σ[ b ∈ Bool ]
 SupportedTy ⋆ = ⊤
 SupportedTy (s ─⟨ A ⟩⟶ t) = SupportedTm s × SupportedTy A × SupportedTm t
 
-SupportedSub {A = A} ⟨⟩ = SupportedTy A
+SupportedSub ⟨ A ⟩′ = SupportedTy A
 SupportedSub ⟨ σ , t ⟩ = SupportedSub σ × SupportedTm t

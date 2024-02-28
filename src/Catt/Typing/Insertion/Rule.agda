@@ -143,7 +143,7 @@ ins-susp [ Insert {l = l} Γ S As L P T M p ]
               ((susp-label-full L >>l[ BExt P ] susp-label-full M) ⦃ inst ⦄ ,, S⋆)
     l1 = begin
       < SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (susp-label (L >>l[ P ] M ,, S⋆)) >stm
-        ≈⟨ SCoh-unrestrict (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (susp-label (L >>l[ P ] M ,, S⋆)) ⟩
+        ≈⟨ SCoh-↓ (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (susp-label (L >>l[ P ] M ,, S⋆)) ⟩
       < SCoh (Susp (S >>[ P ] T))
              (susp-sty (As >>=′ (κ S P T ,, S⋆)))
              (susp-label-full (L >>l[ P ] M) ,, S⋆) >stm
@@ -162,7 +162,7 @@ ins-susp [ Insert {l = l} Γ S As L P T M p ]
     γ .ctxeq = refl≃c
     γ .lhseq = begin
       < stm-to-term (SCoh (Susp S) (susp-sty As) (susp-label-full L ,, S⋆)) >tm
-        ≈˘⟨ SCoh-unrestrict S As (susp-label (L ,, S⋆)) .get ⟩
+        ≈˘⟨ SCoh-↓ S As (susp-label (L ,, S⋆)) .get ⟩
       < stm-to-term (susp-stm (SCoh S As (L ,, S⋆))) >tm
         ≈⟨ susp-stm-to-term (SCoh S As (L ,, S⋆)) ⟩
       < susp-tm (stm-to-term (SCoh S As (L ,, S⋆))) >tm ∎

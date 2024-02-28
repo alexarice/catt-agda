@@ -67,6 +67,23 @@ susp-tmEq (Rule≈ r p tc) = Rule≈ (susp-rule r) (susp-cond p) (susp-tmTy tc)
 susp-subEq (Null≈ x) = refl≈s
 susp-subEq (Ext≈ p x) = Ext≈ (susp-subEq p) (susp-tmEq x)
 
-unrestrictTy : Typing-Sub Γ Δ σ → Typing-Sub (susp-ctx Γ) Δ (unrestrict σ)
-unrestrictTy (TyNull (TyArr p q r)) = TyExt (TyExt (TyNull q) p) r
-unrestrictTy (TyExt σty x) = TyExt (unrestrictTy σty) (TyConv x (reflexive≈ty (sym≃ty (unrestrict-comp-ty _ _))))
+↓-Ty : Typing-Sub Γ Δ σ → Typing-Sub (susp-ctx Γ) Δ (↓ σ)
+↓-Ty (TyNull (TyArr p q r)) = TyExt (TyExt (TyNull q) p) r
+↓-Ty (TyExt σty x) = TyExt (↓-Ty σty) (TyConv x (reflexive≈ty (sym≃ty (↓-comp-ty _ _))))
+
+↑-Ty : {σ : Sub (2 + n) m A}
+     → Typing-Sub (susp-ctx Γ) Δ σ
+     → Typing-Sub Γ Δ (↑ σ)
+↑-Ty {Γ = ∅} (TyExt (TyExt (TyNull z) y) x) = TyNull (TyArr y z x)
+↑-Ty {Γ = ∅ , A} (TyExt (TyExt (TyExt σty z) y) x)
+  = TyExt (↑-Ty (TyExt (TyExt σty z) y))
+          (TyConv x (reflexive≈ty (trans≃ty (sub-action-≃-ty (refl≃ty {A = susp-ty A}) (sym≃s (↓-↑-≃ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))
+                                            (↓-comp-ty A (↑ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))))
+↑-Ty {Γ = ∅ , B , A} (TyExt (TyExt (TyExt σty z) y) x)
+  = TyExt (↑-Ty (TyExt (TyExt σty z) y))
+          (TyConv x (reflexive≈ty (trans≃ty (sub-action-≃-ty (refl≃ty {A = susp-ty A}) (sym≃s (↓-↑-≃ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))
+                                            (↓-comp-ty A (↑ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))))
+↑-Ty {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty z) y) x)
+  = TyExt (↑-Ty (TyExt (TyExt σty z) y))
+          (TyConv x (reflexive≈ty (trans≃ty (sub-action-≃-ty (refl≃ty {A = susp-ty A}) (sym≃s (↓-↑-≃ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))
+                                            (↓-comp-ty A (↑ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))))

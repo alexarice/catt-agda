@@ -151,7 +151,7 @@ SPath≃ p = [ path-to-term-≃ p ]
 label-to-sub-≃ : (L : Label-WT X S) → (M : Label-WT Y S) → (ap L ≃l ap M) → lty L ≃sty lty M → label-to-sub L ≃s label-to-sub M
 label-to-sub-≃ {S = Sing} L M [ p ] q = Ext≃ (Null≃ (q .get)) (p PHere .get)
 label-to-sub-≃ {S = Join S T} L M [ p ] q
-  = sub-from-wedge-≃ (unrestrict-≃ (label-to-sub-≃ (label₁ L) (label₁ M) ([ (λ P → p (PExt P)) ]) (SArr≃ (p PHere) q (p (PShift PHere)))))
+  = sub-from-wedge-≃ (↓-≃ (label-to-sub-≃ (label₁ L) (label₁ M) ([ (λ P → p (PExt P)) ]) (SArr≃ (p PHere) q (p (PShift PHere)))))
                        (label-to-sub-≃ (label₂ L) (label₂ M) ([ (λ P → p (PShift P)) ]) q)
 
 SCoh≃ : (S : Tree n) → {A A′ : STy (someTree S)} → A ≃sty A′ → {L : Label-WT X S} → {M : Label-WT Y S} → ap L ≃l ap M → lty L ≃sty lty M → SCoh S A L ≃stm SCoh S A′ M
@@ -171,25 +171,25 @@ label-sub-to-sub : {X : MaybeTree n}
                  → label-to-sub (L [ σ ]l) ≃s label-to-sub L ● σ
 label-sub-to-sub {S = Sing} L σ = Ext≃ (Null≃ (sty-sub-to-type (lty L) σ)) refl≃tm
 label-sub-to-sub {S = Join S T} L σ = begin
-  < sub-from-wedge (unrestrict (label-to-sub (label₁ (L [ σ ]l))))
+  < sub-from-wedge (↓ (label-to-sub (label₁ (L [ σ ]l))))
                      (label-to-sub (label₂ (L [ σ ]l))) >s
     ≈⟨ sub-from-wedge-≃ l1 l2 ⟩
-  < sub-from-wedge (unrestrict (label-to-sub (label₁ L)) ● σ)
+  < sub-from-wedge (↓ (label-to-sub (label₁ L)) ● σ)
                      (label-to-sub (label₂ L) ● σ) >s
-    ≈˘⟨ sub-from-wedge-sub (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) σ ⟩
+    ≈˘⟨ sub-from-wedge-sub (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) σ ⟩
   < label-to-sub L ● σ >s ∎
   where
     open Reasoning sub-setoid
 
-    l1 : unrestrict (label-to-sub (label₁ (L [ σ ]l))) ≃s (unrestrict (label-to-sub (label₁ L)) ● σ)
+    l1 : ↓ (label-to-sub (label₁ (L [ σ ]l))) ≃s (↓ (label-to-sub (label₁ L)) ● σ)
     l1 = begin
-      < unrestrict (label-to-sub (label₁ (L [ σ ]l))) >s
+      < ↓ (label-to-sub (label₁ (L [ σ ]l))) >s
         ≡⟨⟩
-      < unrestrict (label-to-sub (label₁ L [ σ ]l)) >s
-        ≈⟨ unrestrict-≃ (label-sub-to-sub (label₁ L) σ) ⟩
-      < unrestrict (label-to-sub (label₁ L) ● σ) >s
-        ≈⟨ unrestrict-comp-higher (label-to-sub (label₁ L)) σ ⟩
-      < unrestrict (label-to-sub (label₁ L)) ● σ >s ∎
+      < ↓ (label-to-sub (label₁ L [ σ ]l)) >s
+        ≈⟨ ↓-≃ (label-sub-to-sub (label₁ L) σ) ⟩
+      < ↓ (label-to-sub (label₁ L) ● σ) >s
+        ≈⟨ ↓-comp-higher (label-to-sub (label₁ L)) σ ⟩
+      < ↓ (label-to-sub (label₁ L)) ● σ >s ∎
 
     l2 : label-to-sub (label₂ (L [ σ ]l)) ≃s (label-to-sub (label₂ L) ● σ)
     l2 = begin
@@ -201,15 +201,15 @@ label-sub-to-sub {S = Join S T} L σ = begin
 
 label-to-sub-stm : (L : Label-WT X S) → (a : STm (someTree S)) → stm-to-term a [ label-to-sub L ]tm ≃tm stm-to-term (a >>= L)
 label-comp-to-sub : (L : Label-WT (someTree T) S) → (M : Label-WT X T) → label-to-sub L ● label-to-sub M ≃s label-to-sub (L ●lt M)
-label-to-sub-lem : (L : Label-WT X (Join S T)) → get-snd [ unrestrict (label-to-sub (label₁ L)) ]tm ≃tm Var (fromℕ m) [ label-to-sub (label₂ L) ]tm
+label-to-sub-lem : (L : Label-WT X (Join S T)) → get-snd [ ↓ (label-to-sub (label₁ L)) ]tm ≃tm Var (fromℕ m) [ label-to-sub (label₂ L) ]tm
 
 label-to-sub-phere : (L : Label-WT X S) → Var (fromℕ (tree-size S)) [ label-to-sub L ]tm ≃tm apt L PHere
 label-to-sub-phere {S = Sing} L = refl≃tm
 label-to-sub-phere {S = Join S₁ S₂} L = begin
-  < Var (fromℕ _) [ sub-from-wedge (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ]tm >tm
-    ≈⟨ sub-from-wedge-fst-var (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ⟩
-  < get-fst [ unrestrict (label-to-sub (label₁ L)) ]tm >tm
-    ≈⟨ unrestrict-fst (label-to-sub (label₁ L)) ⟩
+  < Var (fromℕ _) [ sub-from-wedge (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ]tm >tm
+    ≈⟨ sub-from-wedge-fst-var (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ⟩
+  < get-fst [ ↓ (label-to-sub (label₁ L)) ]tm >tm
+    ≈⟨ ↓-fst (label-to-sub (label₁ L)) ⟩
   < apt L PHere >tm ∎
   where
     open Reasoning tm-setoid
@@ -218,15 +218,15 @@ label-to-sub-path : (L : Label-WT X S) → (P : Path S) → path-to-term P [ lab
 label-to-sub-path L PHere = label-to-sub-phere L
 label-to-sub-path L (PExt P) = begin
   < susp-tm (path-to-term P) [ wedge-susp-inc-left _ _ ]tm
-                            [ sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
+                            [ sub-from-wedge (↓ (label-to-sub (label₁ L)))
                                                (label-to-sub (label₂ L)) ]tm >tm
     ≈˘⟨ assoc-tm _ _ (susp-tm (path-to-term P)) ⟩
   < susp-tm (path-to-term P) [ wedge-susp-inc-left _ _
-                             ● sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
+                             ● sub-from-wedge (↓ (label-to-sub (label₁ L)))
                                               (label-to-sub (label₂ L)) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = susp-tm (path-to-term P)}) (sub-from-wedge-inc-left (unrestrict (label-to-sub (label₁ L))) get-snd (label-to-sub (label₂ L))) ⟩
-  < susp-tm (path-to-term P) [ unrestrict (label-to-sub (label₁ L)) ]tm >tm
-    ≈⟨ unrestrict-comp-tm (path-to-term P) (label-to-sub (label₁ L)) ⟩
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = susp-tm (path-to-term P)}) (sub-from-wedge-inc-left (↓ (label-to-sub (label₁ L))) get-snd (label-to-sub (label₂ L))) ⟩
+  < susp-tm (path-to-term P) [ ↓ (label-to-sub (label₁ L)) ]tm >tm
+    ≈⟨ ↓-comp-tm (path-to-term P) (label-to-sub (label₁ L)) ⟩
   < path-to-term P [ label-to-sub (label₁ L) ]tm >tm
     ≈⟨ label-to-sub-path (label₁ L) P ⟩
   < apt L (PExt P) >tm ∎
@@ -234,13 +234,13 @@ label-to-sub-path L (PExt P) = begin
     open Reasoning tm-setoid
 label-to-sub-path L (PShift P) = begin
   < path-to-term P [ wedge-susp-inc-right _ _ ]tm
-                   [ sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
+                   [ sub-from-wedge (↓ (label-to-sub (label₁ L)))
                                       (label-to-sub (label₂ L)) ]tm >tm
     ≈˘⟨ assoc-tm _ _ (path-to-term P) ⟩
   < path-to-term P [ wedge-susp-inc-right _ _
-                   ● sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
+                   ● sub-from-wedge (↓ (label-to-sub (label₁ L)))
                                       (label-to-sub (label₂ L)) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = path-to-term P}) (sub-from-wedge-inc-right (unrestrict (label-to-sub (label₁ L))) get-snd (label-to-sub (label₂ L)) (label-to-sub-lem L)) ⟩
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = path-to-term P}) (sub-from-wedge-inc-right (↓ (label-to-sub (label₁ L))) get-snd (label-to-sub (label₂ L)) (label-to-sub-lem L)) ⟩
   < path-to-term P [ label-to-sub (label₂ L) ]tm >tm
     ≈⟨ label-to-sub-path (label₂ L) P ⟩
   < apt L (PShift P) >tm ∎
@@ -249,15 +249,15 @@ label-to-sub-path L (PShift P) = begin
 
 label-to-sub-stm L (SExt a) = begin
   < susp-tm (stm-to-term a) [ wedge-susp-inc-left _ _ ]tm
-                            [ sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
+                            [ sub-from-wedge (↓ (label-to-sub (label₁ L)))
                                                (label-to-sub (label₂ L)) ]tm >tm
     ≈˘⟨ assoc-tm _ _ (susp-tm (stm-to-term a)) ⟩
   < susp-tm (stm-to-term a) [ wedge-susp-inc-left _ _
-                            ● sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
+                            ● sub-from-wedge (↓ (label-to-sub (label₁ L)))
                                              (label-to-sub (label₂ L)) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = susp-tm (stm-to-term a)}) (sub-from-wedge-inc-left (unrestrict (label-to-sub (label₁ L))) get-snd (label-to-sub (label₂ L))) ⟩
-  < susp-tm (stm-to-term a) [ unrestrict (label-to-sub (label₁ L)) ]tm >tm
-    ≈⟨ unrestrict-comp-tm (stm-to-term a) (label-to-sub (label₁ L)) ⟩
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = susp-tm (stm-to-term a)}) (sub-from-wedge-inc-left (↓ (label-to-sub (label₁ L))) get-snd (label-to-sub (label₂ L))) ⟩
+  < susp-tm (stm-to-term a) [ ↓ (label-to-sub (label₁ L)) ]tm >tm
+    ≈⟨ ↓-comp-tm (stm-to-term a) (label-to-sub (label₁ L)) ⟩
   < stm-to-term a [ label-to-sub (label₁ L) ]tm >tm
     ≈⟨ label-to-sub-stm (label₁ L) a ⟩
   < stm-to-term (a >>= label₁ L) >tm ∎
@@ -265,13 +265,13 @@ label-to-sub-stm L (SExt a) = begin
     open Reasoning tm-setoid
 label-to-sub-stm L (SShift a) = begin
   < stm-to-term a [ wedge-susp-inc-right _ _ ]tm
-                   [ sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
+                   [ sub-from-wedge (↓ (label-to-sub (label₁ L)))
                                       (label-to-sub (label₂ L)) ]tm >tm
     ≈˘⟨ assoc-tm _ _ (stm-to-term a) ⟩
   < stm-to-term a [ wedge-susp-inc-right _ _
-                  ● sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
+                  ● sub-from-wedge (↓ (label-to-sub (label₁ L)))
                                    (label-to-sub (label₂ L)) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = stm-to-term a}) (sub-from-wedge-inc-right (unrestrict (label-to-sub (label₁ L))) get-snd (label-to-sub (label₂ L)) (label-to-sub-lem L)) ⟩
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = stm-to-term a}) (sub-from-wedge-inc-right (↓ (label-to-sub (label₁ L))) get-snd (label-to-sub (label₂ L)) (label-to-sub-lem L)) ⟩
   < stm-to-term a [ label-to-sub (label₂ L) ]tm >tm
     ≈⟨ label-to-sub-stm (label₂ L) a ⟩
   < stm-to-term (a >>= label₂ L) >tm ∎
@@ -314,8 +314,8 @@ label-comp-to-sub L M = begin
     open Reasoning sub-setoid
 
 label-to-sub-lem L = begin
-  < get-snd [ unrestrict (label-to-sub (label₁ L)) ]tm >tm
-    ≈⟨ unrestrict-snd (label-to-sub (label₁ L)) ⟩
+  < get-snd [ ↓ (label-to-sub (label₁ L)) ]tm >tm
+    ≈⟨ ↓-snd (label-to-sub (label₁ L)) ⟩
   < apt L (PShift PHere) >tm
     ≡⟨⟩
   < apt (label₂ L) PHere >tm
@@ -416,15 +416,15 @@ label-comp-assoc L M N .get Z = >>=-assoc (ap L Z) M N
 
 susp-stm-to-term : (a : STm X) → stm-to-term (susp-stm a) ≃tm susp-tm (stm-to-term a)
 susp-sty-to-type : (A : STy X) → sty-to-type (susp-sty A) ≃ty susp-ty (sty-to-type A)
-susp-label-to-sub′ : (L : Label-WT X S) → ((P : Path S) → apt (susp-label L) P ≃tm susp-tm (apt L P)) → sty-to-type (susp-sty (lty L)) ≃ty susp-ty (sty-to-type (lty L)) → label-to-sub (susp-label L) ≃s susp-sub-res (label-to-sub L)
-susp-label-to-sub : (L : Label-WT X S) → label-to-sub (susp-label L) ≃s susp-sub-res (label-to-sub L)
+susp-label-to-sub′ : (L : Label-WT X S) → ((P : Path S) → apt (susp-label L) P ≃tm susp-tm (apt L P)) → sty-to-type (susp-sty (lty L)) ≃ty susp-ty (sty-to-type (lty L)) → label-to-sub (susp-label L) ≃s susp-sub-↑ (label-to-sub L)
+susp-label-to-sub : (L : Label-WT X S) → label-to-sub (susp-label L) ≃s susp-sub-↑ (label-to-sub L)
 
 susp-stm-to-term {X = someTree x} a = id-on-tm (susp-tm (stm-to-term a))
 susp-stm-to-term {X = Other _} (SCoh S A L) = begin
   < Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub (susp-label L) ]tm >tm
     ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh ⌊ S ⌋ (sty-to-type A) idSub}) (susp-label-to-sub L) ⟩
-  < Coh ⌊ S ⌋ (sty-to-type A) idSub [ susp-sub-res (label-to-sub L) ]tm >tm
-    ≈˘⟨ susp-res-comp-tm (Coh ⌊ S ⌋ (sty-to-type A) idSub) (label-to-sub L) ⟩
+  < Coh ⌊ S ⌋ (sty-to-type A) idSub [ susp-sub-↑ (label-to-sub L) ]tm >tm
+    ≈˘⟨ susp-↑-comp-tm (Coh ⌊ S ⌋ (sty-to-type A) idSub) (label-to-sub L) ⟩
   < susp-tm (Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm) >tm ∎
   where
     open Reasoning tm-setoid
@@ -436,15 +436,15 @@ susp-sty-to-type {X = Other _} S⋆ = refl≃ty
 
 susp-label-to-sub′ {S = Sing} L f p = Ext≃ (Null≃ p) (f PHere)
 susp-label-to-sub′ {S = Join S T} L f p = begin
-  < sub-from-wedge (unrestrict (label-to-sub (susp-label (label₁ L))))
+  < sub-from-wedge (↓ (label-to-sub (susp-label (label₁ L))))
                                  (label-to-sub (susp-label (label₂ L))) >s
-    ≈⟨ sub-from-wedge-≃ (unrestrict-≃ (susp-label-to-sub′ (label₁ L) (λ P → f (PExt P)) (Arr≃ (f PHere) p (f (PShift PHere)))))
+    ≈⟨ sub-from-wedge-≃ (↓-≃ (susp-label-to-sub′ (label₁ L) (λ P → f (PExt P)) (Arr≃ (f PHere) p (f (PShift PHere)))))
                           (susp-label-to-sub′ (label₂ L) (λ P → f (PShift P)) p) ⟩
-  < sub-from-wedge (unrestrict (susp-sub-res (label-to-sub (label₁ L)))) (susp-sub-res (label-to-sub (label₂ L))) >s
-    ≈˘⟨ sub-from-wedge-≃ (sub-res-unrestrict-comm (label-to-sub (label₁ L))) refl≃s ⟩
-  < sub-from-wedge (susp-sub-res (unrestrict (label-to-sub (label₁ L)))) (susp-sub-res (label-to-sub (label₂ L))) >s
-    ≈˘⟨ sub-from-wedge-susp-res (unrestrict (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ⟩
-  < susp-sub-res (sub-from-wedge (unrestrict (label-to-sub (label₁ L)))
+  < sub-from-wedge (↓ (susp-sub-↑ (label-to-sub (label₁ L)))) (susp-sub-↑ (label-to-sub (label₂ L))) >s
+    ≈˘⟨ sub-from-wedge-≃ (susp-↑-↓-comm (label-to-sub (label₁ L))) refl≃s ⟩
+  < sub-from-wedge (susp-sub-↑ (↓ (label-to-sub (label₁ L)))) (susp-sub-↑ (label-to-sub (label₂ L))) >s
+    ≈˘⟨ sub-from-wedge-susp-↑ (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ⟩
+  < susp-sub-↑ (sub-from-wedge (↓ (label-to-sub (label₁ L)))
                                              (label-to-sub (label₂ L))) >s ∎
   where
     open Reasoning sub-setoid
@@ -501,7 +501,7 @@ map-sty-ext-prop : (A : STy (someTree S)) → susp-sty A [ wedge-susp-inc-left (
 map-sty-ext-prop S⋆ = SArr≃ [ (wedge-inc-left-fst-var get-snd _) ] [ refl≃ty ] [ wedge-inc-fst-var get-snd _ ]
 map-sty-ext-prop (SArr s A t) = SArr≃ [ sub-action-≃-tm (id-on-tm (susp-tm (stm-to-term s))) refl≃s ] (map-sty-ext-prop A) [ sub-action-≃-tm (id-on-tm (susp-tm (stm-to-term t))) refl≃s ]
 
-label-to-sub-map-ext : (L : Label-WT (someTree T) S) → label-to-sub (map-ext {T = U} L) ≃s susp-sub-res (label-to-sub L) ● wedge-susp-inc-left (tree-size T) (tree-size U)
+label-to-sub-map-ext : (L : Label-WT (someTree T) S) → label-to-sub (map-ext {T = U} L) ≃s susp-sub-↑ (label-to-sub L) ● wedge-susp-inc-left (tree-size T) (tree-size U)
 label-to-sub-map-ext {U = U} L = begin
   < label-to-sub (map-ext {T = U} L) >s
     ≈˘⟨ label-to-sub-≃ (susp-label L [ wedge-susp-inc-left _ (tree-size U) ]l)
@@ -512,14 +512,14 @@ label-to-sub-map-ext {U = U} L = begin
     ≈⟨ label-sub-to-sub (susp-label L) (wedge-susp-inc-left _ (tree-size U)) ⟩
   < label-to-sub (susp-label L) ● wedge-susp-inc-left _ (tree-size U) >s
     ≈⟨ sub-action-≃-sub (susp-label-to-sub L) refl≃s ⟩
-  < susp-sub-res (label-to-sub L) ● wedge-susp-inc-left _ (tree-size U) >s ∎
+  < susp-sub-↑ (label-to-sub L) ● wedge-susp-inc-left _ (tree-size U) >s ∎
   where
     open Reasoning sub-setoid
 
 id-label-to-sub : (S : Tree n) → label-to-sub (id-label-wt S) ≃s idSub {n = suc n}
 id-label-to-sub Sing = refl≃s
 id-label-to-sub (Join S T) = begin
-  < sub-from-wedge (unrestrict (label-to-sub (label₁ (id-label-wt (Join S T)))))
+  < sub-from-wedge (↓ (label-to-sub (label₁ (id-label-wt (Join S T)))))
                                  (label-to-sub (label₂ (id-label-wt (Join S T)))) >s
     ≈⟨ sub-from-wedge-≃ l1 l2 ⟩
   < sub-from-wedge (wedge-susp-inc-left _ _) (wedge-susp-inc-right _ _) >s
@@ -528,13 +528,13 @@ id-label-to-sub (Join S T) = begin
   where
     open Reasoning sub-setoid
 
-    l1 : unrestrict (label-to-sub (label₁ (id-label-wt (Join S T)))) ≃s wedge-susp-inc-left (tree-size S) (tree-size T)
+    l1 : ↓ (label-to-sub (label₁ (id-label-wt (Join S T)))) ≃s wedge-susp-inc-left (tree-size S) (tree-size T)
     l1 = begin
-      < unrestrict (label-to-sub (map-ext {T = T} (id-label-wt S))) >s
-        ≈⟨ unrestrict-≃ (label-to-sub-map-ext {U = T} (id-label-wt S)) ⟩
-      < unrestrict (susp-sub-res (label-to-sub (id-label-wt S))
+      < ↓ (label-to-sub (map-ext {T = T} (id-label-wt S))) >s
+        ≈⟨ ↓-≃ (label-to-sub-map-ext {U = T} (id-label-wt S)) ⟩
+      < ↓ (susp-sub-↑ (label-to-sub (id-label-wt S))
                    ● wedge-susp-inc-left (tree-size S) (tree-size T)) >s
-        ≈⟨ unrestrict-comp-higher (susp-sub-res (label-to-sub (id-label-wt S)))
+        ≈⟨ ↓-comp-higher (susp-sub-↑ (label-to-sub (id-label-wt S)))
                                   (wedge-susp-inc-left (tree-size S) (tree-size T)) ⟩
       < susp-sub (label-to-sub (id-label-wt S)) ● wedge-susp-inc-left (tree-size S) (tree-size T) >s
         ≈⟨ sub-action-≃-sub (susp-sub-≃ (id-label-to-sub S)) refl≃s ⟩
@@ -663,8 +663,8 @@ label-to-sub-≃′ L M (p ,, [ q ]) r with ≃-to-same-n (≃′-to-≃ p)
   < susp-tm (stm-to-term (a >>= L)) >tm
     ≈˘⟨ susp-tm-≃ (label-to-sub-stm L a) ⟩
   < susp-tm (stm-to-term a [ label-to-sub L ]tm) >tm
-    ≈⟨ susp-res-comp-tm (stm-to-term a) (label-to-sub L) ⟩
-  < stm-to-term a [ susp-sub-res (label-to-sub L) ]tm >tm
+    ≈⟨ susp-↑-comp-tm (stm-to-term a) (label-to-sub L) ⟩
+  < stm-to-term a [ susp-sub-↑ (label-to-sub L) ]tm >tm
     ≈˘⟨ sub-action-≃-tm (refl≃tm {s = stm-to-term a}) (susp-label-to-sub L) ⟩
   < stm-to-term a [ label-to-sub (susp-label L) ]tm >tm
     ≈⟨ label-to-sub-stm (susp-label L) a ⟩
@@ -706,10 +706,10 @@ comp-shift M L .get Z = >>=-shift (M Z) L
     ≈˘⟨ label-to-sub-stm (map-ext L) a ⟩
   < stm-to-term a [ label-to-sub (map-ext L) ]tm >tm
     ≈⟨ sub-action-≃-tm (refl≃tm {s = stm-to-term a}) (label-to-sub-map-ext L) ⟩
-  < stm-to-term a [ susp-sub-res (label-to-sub L) ● wedge-susp-inc-left _ _ ]tm >tm
+  < stm-to-term a [ susp-sub-↑ (label-to-sub L) ● wedge-susp-inc-left _ _ ]tm >tm
     ≈⟨ assoc-tm _ _ (stm-to-term a) ⟩
-  < stm-to-term a [ susp-sub-res (label-to-sub L) ]tm [ wedge-susp-inc-left _ _ ]tm >tm
-    ≈˘⟨ sub-action-≃-tm (susp-res-comp-tm (stm-to-term a) (label-to-sub L)) refl≃s ⟩
+  < stm-to-term a [ susp-sub-↑ (label-to-sub L) ]tm [ wedge-susp-inc-left _ _ ]tm >tm
+    ≈˘⟨ sub-action-≃-tm (susp-↑-comp-tm (stm-to-term a) (label-to-sub L)) refl≃s ⟩
   < susp-tm (stm-to-term a [ label-to-sub L ]tm) [ wedge-susp-inc-left _ _ ]tm >tm
     ≈⟨ sub-action-≃-tm (susp-tm-≃ (label-to-sub-stm L a)) refl≃s ⟩
   < susp-tm (stm-to-term (a >>= L)) [ wedge-susp-inc-left _ _ ]tm >tm ∎
@@ -727,27 +727,27 @@ comp-ext : (M : Label (someTree U) U′) -> (L : Label-WT (someTree S) U) → M 
 comp-ext M L .get Z = >>=-ext (M Z) L
 
 susp-label-full-to-sub : (L : Label X S) → label-to-sub (susp-label-full L ,, S⋆) ≃s susp-sub (label-to-sub (L ,, S⋆))
-susp-label-full-to-sub L = unrestrict-≃ (susp-label-to-sub (L ,, S⋆))
+susp-label-full-to-sub L = ↓-≃ (susp-label-to-sub (L ,, S⋆))
 
-SCoh-unrestrict : (S : Tree n) → (As : STy (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → SCoh S As L ≃stm SCoh (Susp S) (susp-sty As) (unrestrict-label L ,, sty-base (lty L))
-SCoh-unrestrict S As (L ,, SArr s Bs t) .get
+SCoh-↓ : (S : Tree n) → (As : STy (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → SCoh S As L ≃stm SCoh (Susp S) (susp-sty As) (↓-label L ,, sty-base (lty L))
+SCoh-↓ S As (L ,, SArr s Bs t) .get
   = sub-action-≃-tm (Coh≃ refl≃c (sym≃ty (susp-sty-to-type As)) susp-functorial-id)
-                    (refl≃s {σ = unrestrict (label-to-sub′ (λ P → stm-to-term (L P))
+                    (refl≃s {σ = ↓ (label-to-sub′ (λ P → stm-to-term (L P))
                                                            (stm-to-term s ─⟨ sty-to-type Bs ⟩⟶ stm-to-term t))})
 
->>=-unrestrict : (a : STm (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → susp-stm a >>= (unrestrict-label L ,, sty-base (lty L)) ≃stm a >>= L
->>=-unrestrict a (L ,, SArr s As t) = refl≃stm
+>>=-↓ : (a : STm (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → susp-stm a >>= (↓-label L ,, sty-base (lty L)) ≃stm a >>= L
+>>=-↓ a (L ,, SArr s As t) = refl≃stm
 
->>=′-unrestrict : (As : STy (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → susp-sty As >>=′ (unrestrict-label L ,, sty-base (lty L)) ≃sty As >>=′ L
->>=′-unrestrict S⋆ (L ,, SArr s Bs t) = refl≃sty
->>=′-unrestrict (SArr s As t) L = SArr≃ (>>=-unrestrict s L) (>>=′-unrestrict As L) (>>=-unrestrict t L)
+>>=′-↓ : (As : STy (someTree S)) → (L : Label-WT X S) → .⦃ _ : NonZero (sty-dim (lty L)) ⦄ → susp-sty As >>=′ (↓-label L ,, sty-base (lty L)) ≃sty As >>=′ L
+>>=′-↓ S⋆ (L ,, SArr s Bs t) = refl≃sty
+>>=′-↓ (SArr s As t) L = SArr≃ (>>=-↓ s L) (>>=′-↓ As L) (>>=-↓ t L)
 
 susp-stm-functorial : (a : STm (someTree S)) → (L : Label X S) → susp-stm (a >>= (L ,, S⋆)) ≃stm susp-stm a >>= (susp-label-full L ,, S⋆)
 susp-stm-functorial a L = begin
   < susp-stm (a >>= (L ,, S⋆)) >stm
     ≈⟨ >>=-susp-label a (L ,, S⋆) ⟩
   < a >>= susp-label (L ,, S⋆) >stm
-    ≈˘⟨ >>=-unrestrict a (susp-label (L ,, S⋆)) ⟩
+    ≈˘⟨ >>=-↓ a (susp-label (L ,, S⋆)) ⟩
   < susp-stm a >>= (susp-label-full L ,, S⋆) >stm ∎
   where
     open Reasoning stm-setoid
@@ -757,7 +757,7 @@ susp-sty-functorial As L = begin
   < susp-sty (As >>=′ (L ,, S⋆)) >sty
     ≈⟨ >>=′-susp-label As (L ,, S⋆) ⟩
   < As >>=′ susp-label (L ,, S⋆) >sty
-    ≈˘⟨ >>=′-unrestrict As (susp-label (L ,, S⋆)) ⟩
+    ≈˘⟨ >>=′-↓ As (susp-label (L ,, S⋆)) ⟩
   < susp-sty As >>=′ (susp-label-full L ,, S⋆) >sty ∎
   where
     open Reasoning sty-setoid
@@ -886,7 +886,7 @@ map-sty-ext-proj {As = SArr s As t} {Bs = SArr s₁ Bs t₁} p
 map-sty-ext-proj {As = SArr _ S⋆ _} {Bs = S⋆} [ Arr≃ _ () _ ]
 map-sty-ext-proj {As = SArr _ (SArr _ _ _) _} {Bs = S⋆} [ Arr≃ _ () _ ]
 
-unrestrict-label₁ : (L : Label-WT X (Susp S)) → unrestrict-label (label₁ L) ≃l ap L
-unrestrict-label₁ L .get PHere = refl≃stm
-unrestrict-label₁ L .get (PExt Z) = refl≃stm
-unrestrict-label₁ L .get (PShift PHere) = refl≃stm
+↓-label₁ : (L : Label-WT X (Susp S)) → ↓-label (label₁ L) ≃l ap L
+↓-label₁ L .get PHere = refl≃stm
+↓-label₁ L .get (PExt Z) = refl≃stm
+↓-label₁ L .get (PShift PHere) = refl≃stm

@@ -18,7 +18,7 @@ varToVarFunctionProp ⟨ σ , Var j ⟩ zero = refl≃tm
 varToVarFunctionProp ⟨ σ , Var j ⟩ ⦃ v ⦄ (suc i) = varToVarFunctionProp σ ⦃ proj₁ v ⦄ i
 
 lift-sub-preserve-var-to-var : (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → varToVar (lift-sub σ)
-lift-sub-preserve-var-to-var ⟨⟩ = tt
+lift-sub-preserve-var-to-var ⟨ _ ⟩′ = tt
 lift-sub-preserve-var-to-var ⟨ σ , Var i ⟩ ⦃ p ⦄ = (lift-sub-preserve-var-to-var σ ⦃ proj₁ p ⦄) ,, tt
 
 lift-tm-preserve-isVar : (t : Tm n) → .(isVar t) → isVar (lift-tm t)
@@ -90,7 +90,7 @@ var-to-var-comp-ty (s ─⟨ A ⟩⟶ t) ⦃ a ,, b ,, c ⦄ σ = var-to-var-com
 var-to-var-comp-tm (Var zero) ⟨ σ , Var i ⟩ = tt
 var-to-var-comp-tm (Var (suc i)) ⟨ σ , Var j ⟩ ⦃ v ⦄ = var-to-var-comp-tm (Var i) σ ⦃ proj₁ v ⦄
 
-var-to-var-comp-sub ⟨⟩ σ = tt
+var-to-var-comp-sub ⟨ _ ⟩′ σ = tt
 var-to-var-comp-sub ⟨ τ , Var j ⟩ ⦃ v ⦄ σ with Var j [ σ ]tm | var-to-var-comp-tm (Var j) σ ⦃ it ⦄
 ... | Var i | q = var-to-var-comp-sub τ ⦃ proj₁ v ⦄ σ ,, tt
 
@@ -104,7 +104,7 @@ varToVarFunc-comp-tm ⟨ τ , t ⟩ zero = refl
 varToVarFunc-comp-tm ⟨ τ , t ⟩ ⦃ v ⦄ (suc i) = varToVarFunc-comp-tm τ ⦃ proj₁ v ⦄ i
 
 susp-sub-var-to-var : (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → varToVar (susp-sub σ)
-susp-sub-var-to-var ⟨⟩ = (tt ,, tt) ,, tt
+susp-sub-var-to-var ⟨ _ ⟩′ = (tt ,, tt) ,, tt
 susp-sub-var-to-var ⟨ σ , Var i ⟩ ⦃ v ⦄ = susp-sub-var-to-var σ ⦃ proj₁ v ⦄ ,, tt
 
 susp-tm-var : (t : Tm n) → ⦃ isVar t ⦄ → isVar (susp-tm t)

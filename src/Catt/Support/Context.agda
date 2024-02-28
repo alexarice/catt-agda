@@ -15,7 +15,7 @@ subctx-inc-sub : (τ : Sub l n ⋆) → (σ : Sub m n ⋆) → .⦃ varToVar σ 
 subctx-inc-ty ⋆ σ p = ⋆
 subctx-inc-ty (s ─⟨ A ⟩⟶ t) σ p = (subctx-inc-tm s σ (⊆-trans (⊆-trans (∪-⊆-2 (FVTy A) (FVTm s)) (∪-⊆-1 (FVTy A ∪ FVTm s) (FVTm t))) p)) ─⟨ (subctx-inc-ty A σ (⊆-trans (⊆-trans (∪-⊆-1 (FVTy A) (FVTm s)) (∪-⊆-1 (FVTy A ∪ FVTm s) (FVTm t))) p)) ⟩⟶ (subctx-inc-tm t σ (⊆-trans (∪-⊆-2 (FVTy A ∪ FVTm s) (FVTm t)) p))
 
-subctx-inc-tm (Var i) ⟨⟩ p = ⊥-elim (lem i p)
+subctx-inc-tm (Var i) ⟨ _ ⟩′ p = ⊥-elim (lem i p)
   where
     lem : (i : Fin n) → .(trueAt i ⊆ empty) → ⊥
     lem zero ()
@@ -32,7 +32,7 @@ subctx-inc-tm (Var i) ⟨ σ , Var j ⟩ ⦃ q ⦄ p with i f≟ j
 
 subctx-inc-tm (Coh S A τ) σ p = Coh S A (subctx-inc-sub τ σ p)
 
-subctx-inc-sub ⟨⟩ σ p = ⟨⟩
+subctx-inc-sub ⟨ _ ⟩′ σ p = ⟨ ⋆ ⟩′
 subctx-inc-sub ⟨ τ , t ⟩ σ p = ⟨ (subctx-inc-sub τ σ (⊆-trans (∪-⊆-1 (FVSub τ) (FVTm t)) p)) , (subctx-inc-tm t σ (⊆-trans (∪-⊆-2 (FVSub τ) (FVTm t)) p)) ⟩
 
 VarSet-size : VarSet n → ℕ
@@ -41,7 +41,7 @@ VarSet-size (ewf xs) = VarSet-size xs
 VarSet-size (ewt xs) = suc (VarSet-size xs)
 
 supp-ctx-inc : (xs : VarSet n) → Sub (VarSet-size xs) n ⋆
-supp-ctx-inc emp = ⟨⟩
+supp-ctx-inc emp = ⟨ ⋆ ⟩′
 supp-ctx-inc (ewf xs) = lift-sub (supp-ctx-inc xs)
 supp-ctx-inc (ewt xs) = ⟨ (lift-sub (supp-ctx-inc xs)) , 0V ⟩
 

@@ -269,3 +269,31 @@ right-base-isVar (s ─⟨ A ⟩⟶ t) (g1 ,, g2 ,, g3) _ _ = right-base-isVar A
 
 pdb-right-base-isVar : (pdb : Γ ⊢pdb) → isVar (pdb-right-base pdb)
 pdb-right-base-isVar pdb = right-base-isVar (focus-ty pdb) (focus-ty-is-globular pdb) (focus-tm pdb) (focus-tm-is-globular pdb)
+
+pdb-length-prop : (pdb : Γ ⊢pdb) → 1 + pdb-length pdb * 2 ≡ ctxLength Γ
+pdb-length-prop Base = refl
+pdb-length-prop (Extend pdb p q) = cong 2+ (pdb-length-prop pdb)
+pdb-length-prop (Restr pdb) = pdb-length-prop pdb
+
+pdb-focus-dim-prop : (pdb : Γ ⊢pdb) → pdb-focus-dim pdb ≡ ty-dim (focus-ty pdb)
+pdb-focus-dim-prop Base = refl
+pdb-focus-dim-prop (Extend {B = B} pdb p q) = begin
+  suc (pdb-focus-dim pdb)
+    ≡⟨ cong suc (pdb-focus-dim-prop pdb) ⟩
+  suc (ty-dim (focus-ty pdb))
+    ≡˘⟨ cong suc (lift-ty-dim (focus-ty pdb)) ⟩
+  suc (ty-dim (lift-ty (focus-ty pdb)))
+    ≡˘⟨ ty-dim-≃ q ⟩
+  ty-dim B
+    ≡˘⟨ lift-ty-dim B ⟩
+  ty-dim (lift-ty B) ∎
+  where
+    open ≡-Reasoning
+pdb-focus-dim-prop (Restr pdb) = begin
+  pred (pdb-focus-dim pdb)
+    ≡⟨ cong pred (pdb-focus-dim-prop pdb) ⟩
+  pred (ty-dim (focus-ty pdb))
+    ≡˘⟨ ty-dim-ty-base (focus-ty pdb) ⟩
+  ty-dim (ty-base (focus-ty pdb)) ∎
+  where
+    open ≡-Reasoning

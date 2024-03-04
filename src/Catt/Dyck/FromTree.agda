@@ -5,7 +5,11 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
+open import Catt.Globular
+open import Catt.Globular.Properties
 open import Catt.Suspension
+open import Catt.Wedge
+open import Catt.Wedge.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Dyck
@@ -59,8 +63,29 @@ dyck-to-tree-is-n-extendable (⇓ {d = d} dy) = pred-n-extendable d (dyck-to-tre
 tree-to-dyck-len : (d : ℕ) → (T : Tree n) → .⦃ n-extendable d T ⦄ → ℕ
 tree-to-dyck-len zero Sing = 0
 tree-to-dyck-len zero (Join S T) = tree-to-dyck-len 0 T + suc (tree-to-dyck-len zero S)
-tree-to-dyck-len (suc d) (Join S Sing) = suc (tree-to-dyck-len d S)
+tree-to-dyck-len (suc d) (Susp S) = suc (tree-to-dyck-len d S)
 tree-to-dyck-len (suc d) (Join S T@(Join _ _)) = tree-to-dyck-len (suc d) T + suc (tree-to-dyck-len zero S)
+
+tree-to-dyck-len-prop : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄
+                      → tree-to-dyck-len d T * 2 ≡ n
+tree-to-dyck-len-prop zero Sing = refl
+tree-to-dyck-len-prop zero (Join S T) = begin
+  (tree-to-dyck-len 0 T + suc (tree-to-dyck-len zero S)) * 2
+    ≡⟨ *-distribʳ-+ 2 (tree-to-dyck-len 0 T) (suc (tree-to-dyck-len zero S)) ⟩
+  tree-to-dyck-len 0 T * 2 + suc (tree-to-dyck-len zero S) * 2
+    ≡⟨ cong₂ _+_ (tree-to-dyck-len-prop 0 T) (cong 2+ (tree-to-dyck-len-prop 0 S)) ⟩
+  _ ∎
+  where
+    open ≡-Reasoning
+tree-to-dyck-len-prop (suc d) (Susp T) = cong 2+ (tree-to-dyck-len-prop d T)
+tree-to-dyck-len-prop (suc d) (Join S T@(Join _ _)) = begin
+  (tree-to-dyck-len (suc d) T + suc (tree-to-dyck-len zero S)) * 2
+    ≡⟨ *-distribʳ-+ 2 (tree-to-dyck-len (suc d) T) (suc (tree-to-dyck-len zero S)) ⟩
+  tree-to-dyck-len (suc d) T * 2 + suc (tree-to-dyck-len zero S) * 2
+    ≡⟨ cong₂ _+_ (tree-to-dyck-len-prop (suc d) T) (cong 2+ (tree-to-dyck-len-prop 0 S)) ⟩
+  _ ∎
+  where
+    open ≡-Reasoning
 
 tree-to-dyck : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄ → Dyck (tree-to-dyck-len d T) d
 tree-to-dyck zero Sing = End
@@ -179,3 +204,39 @@ dyck-to-tree-to-dyck {d = d} (⇓ dy) = let
   < ⇓ dy >d ∎
   where
     open Reasoning dyck-setoid
+
+-- Compat
+
+⌊⌋-to-dyck-compat : (S : Tree n)
+                  → ⌊ tree-to-dyck 0 S ⌋d ≃c ⌊ S ⌋
+⌊⌋-to-dyck-compat Sing = refl≃c
+⌊⌋-to-dyck-compat (Join S T) = begin
+  < ⌊ wedge-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T) ⌋d >c
+    ≈⟨ wedge-⌊⌋d (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T) ⟩
+  < wedge ⌊ susp-dyck (tree-to-dyck zero S) ⌋d
+          (dyck-term (⇓ (susp-dyck (tree-to-dyck zero S))))
+          ⌊ tree-to-dyck zero T ⌋d >c
+    ≈⟨ wedge-≃ l1 (ty-tgt′-≃ lem) (⌊⌋-to-dyck-compat T) ⟩
+  < wedge-susp ⌊ S ⌋ ⌊ T ⌋ >c ∎
+  where
+    lem : dyck-type (susp-dyck (tree-to-dyck zero S)) ≃ty susp-ty ⋆
+    lem = begin
+      < dyck-type (susp-dyck (tree-to-dyck zero S)) >ty
+        ≈⟨ susp-dyck-type (tree-to-dyck zero S) ⟩
+      < susp-ty (dyck-type (tree-to-dyck zero S)) >ty
+        ≈⟨ susp-ty-≃ (⋆-is-only-0-d-ty ⦃ IsZero-subst (sym (dyck-type-dim (tree-to-dyck zero S))) it ⦄) ⟩
+      < susp-ty ⋆ >ty
+        ≈⟨ susp-ty-≃ (Star≃ (cong suc (tree-to-dyck-len-prop 0 S))) ⟩
+      < susp-ty ⋆ >ty ∎
+      where
+        open Reasoning ty-setoid
+
+    open Reasoning ctx-setoid
+
+    l1 : ⌊ susp-dyck (tree-to-dyck zero S) ⌋d ≃c susp-ctx ⌊ S ⌋
+    l1 = begin
+      < ⌊ susp-dyck (tree-to-dyck zero S) ⌋d >c
+        ≈⟨ susp-⌊⌋d (tree-to-dyck zero S) ⟩
+      < susp-ctx ⌊ tree-to-dyck zero S ⌋d >c
+        ≈⟨ susp-ctx-≃ (⌊⌋-to-dyck-compat S) ⟩
+      < susp-ctx ⌊ S ⌋ >c ∎

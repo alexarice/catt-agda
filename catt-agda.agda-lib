@@ -1,4 +1,4 @@
 name: catt-agda
-include: src/
+include: src/ .
 depend: standard-library
 flags: --safe --without-K --exact-split --postfix-projections

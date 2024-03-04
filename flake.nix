@@ -9,14 +9,15 @@
   outputs = { self, nixpkgs, flake-utils, all-agda }: flake-utils.lib.eachDefaultSystem (system: let
     pkgs = import nixpkgs { inherit system; overlays = [ all-agda.overlay.${system} ]; };
   in {
-    test = 1;
     devShell = pkgs.mkShell {
       nativeBuildInputs = with pkgs; [
-        cabal-install
-        haskell-language-server
-        haskellPackages.fix-whitespace
-        (agda-2_6_3.withPackages (p: [ p.standard-library ]))
+        (agda-2_6_4.withPackages (p: [ p.standard-library ]))
       ];
+    };
+
+    packages = rec {
+      default = catt-agda;
+      catt-agda = pkgs.agdaPackages-2_6_4.callPackage ./default.nix { };
     };
   });
 }

@@ -1,4 +1,4 @@
-module Catt.Everything where
+module Everything where
 
 import Catt.Prelude
 import Catt.Prelude.Properties

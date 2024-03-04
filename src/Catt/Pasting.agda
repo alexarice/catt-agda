@@ -67,3 +67,19 @@ right-base (s ─⟨ A ⟩⟶ t) u = right-base A t
 
 pdb-right-base : {Γ : Ctx n} → Γ ⊢pdb → Tm n
 pdb-right-base pdb = right-base (focus-ty pdb) (focus-tm pdb)
+
+pdb-length : {Γ : Ctx n} → Γ ⊢pdb → ℕ
+pdb-length Base = 0
+pdb-length (Extend pdb p q) = suc (pdb-length pdb)
+pdb-length (Restr pdb) = pdb-length pdb
+
+pd-length : {Γ : Ctx n} → Γ ⊢pd → ℕ
+pd-length (Finish pdb) = pdb-length pdb
+
+pdb-focus-dim : {Γ : Ctx n} → Γ ⊢pdb → ℕ
+pdb-focus-dim Base = 0
+pdb-focus-dim (Extend pdb p q) = suc (pdb-focus-dim pdb)
+pdb-focus-dim (Restr pdb) = pred (pdb-focus-dim pdb)
+
+pd-focus-dim : {Γ : Ctx n} → Γ ⊢pd → ℕ
+pd-focus-dim (Finish pdb) = pdb-focus-dim pdb

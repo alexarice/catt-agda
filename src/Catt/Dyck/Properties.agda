@@ -8,6 +8,7 @@ open import Catt.Syntax.Properties
 open import Catt.Variables
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Catt.Wedge
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Dyck
@@ -88,6 +89,11 @@ dyck-zero-lem (⇓ dy) = dyck-zero-lem dy
 ≃d-to-same-n (⇑≃ p) = cong suc (≃d-to-same-n p)
 ≃d-to-same-n (⇓≃ p) = ≃d-to-same-n p
 
+≃d-to-same-d : {dy : Dyck n d} → {ey : Dyck m d′} → dy ≃d ey → d ≡ d′
+≃d-to-same-d End≃ = refl
+≃d-to-same-d (⇑≃ p) = cong suc (≃d-to-same-d p)
+≃d-to-same-d (⇓≃ p) = cong pred (≃d-to-same-d p)
+
 dyck-pre-type-≃ : dy ≃d ey → dyck-pre-type dy ≃ty dyck-pre-type ey
 dyck-type-≃ : dy ≃d ey → dyck-type dy ≃ty dyck-type ey
 dyck-term-≃ : dy ≃d ey → dyck-term dy ≃tm dyck-term ey
@@ -151,3 +157,89 @@ susp-peak-term (⇑pk p) = begin
   where
     open Reasoning tm-setoid
 susp-peak-term (⇓pk p) = susp-peak-term p
+
+dyck-0-is-0-d : (dy : Dyck 0 (suc d)) → ⊥
+dyck-0-is-0-d (⇓ dy) = dyck-0-is-0-d dy
+
+wedge-dyck-pre-type : (dy : Dyck n 0) → (ey : Dyck (suc m) d)
+                    → dyck-pre-type (wedge-dyck dy ey)
+                      ≃ty
+                      dyck-pre-type ey [ wedge-inc-right (dyck-term dy) _ ]ty
+wedge-dyck-type : (dy : Dyck n 0) → (ey : Dyck m d)
+                → dyck-type (wedge-dyck dy ey)
+                  ≃ty
+                  dyck-type ey [ wedge-inc-right (dyck-term dy) _ ]ty
+wedge-dyck-term : (dy : Dyck n 0) → (ey : Dyck m d)
+                → dyck-term (wedge-dyck dy ey)
+                  ≃tm
+                  dyck-term ey [ wedge-inc-right (dyck-term dy) _ ]tm
+
+wedge-dyck-pre-type {n = n} {m = m} dy (⇑ ey)
+  = Arr≃ l1 l2 (Var≃ (cong 2+ (*-distribʳ-+ 2 m n)) refl)
+  where
+    l1 : lift-tm (dyck-term (wedge-dyck dy ey))
+         ≃tm
+         lift-tm (dyck-term ey) [ wedge-inc-right (dyck-term dy) _ ]tm
+    l1 = begin
+      < lift-tm (dyck-term (wedge-dyck dy ey)) >tm
+        ≈⟨ lift-tm-≃ (wedge-dyck-term dy ey) ⟩
+      < lift-tm (dyck-term ey [ wedge-inc-right (dyck-term dy) _ ]tm) >tm
+        ≈˘⟨ apply-lifted-sub-tm-≃ (dyck-term ey) (wedge-inc-right (dyck-term dy) _) ⟩
+      < dyck-term ey [ lift-sub (wedge-inc-right (dyck-term dy) _) ]tm >tm
+        ≈˘⟨ apply-sub-lifted-tm-≃ (dyck-term ey) (wedge-inc-right (dyck-term dy) _) ⟩
+      < lift-tm (dyck-term ey) [ wedge-inc-right (dyck-term dy) _ ]tm >tm ∎
+     where
+       open Reasoning tm-setoid
+
+    l2 : lift-ty (dyck-type (wedge-dyck dy ey))
+         ≃ty
+         lift-ty (dyck-type ey) [ wedge-inc-right (dyck-term dy) _ ]ty
+    l2 = begin
+      < lift-ty (dyck-type (wedge-dyck dy ey)) >ty
+        ≈⟨ lift-ty-≃ (wedge-dyck-type dy ey) ⟩
+      < lift-ty (dyck-type ey [ wedge-inc-right (dyck-term dy) _ ]ty) >ty
+        ≈˘⟨ apply-lifted-sub-ty-≃ (dyck-type ey) (wedge-inc-right (dyck-term dy) _) ⟩
+      < dyck-type ey [ lift-sub (wedge-inc-right (dyck-term dy) _) ]ty >ty
+        ≈˘⟨ apply-sub-lifted-ty-≃ (dyck-type ey) (wedge-inc-right (dyck-term dy) _) ⟩
+      < lift-ty (dyck-type ey) [ wedge-inc-right (dyck-term dy) _ ]ty >ty ∎
+      where
+        open Reasoning ty-setoid
+wedge-dyck-pre-type dy (⇓ ey) = begin
+  < ty-base (dyck-pre-type (wedge-dyck dy ey)) >ty
+    ≈⟨ ty-base-≃ (wedge-dyck-pre-type dy ey) ⟩
+  < ty-base (dyck-pre-type ey [ wedge-inc-right (dyck-term dy) _ ]ty) >ty
+    ≈˘⟨ ty-base-sub (dyck-pre-type ey) (wedge-inc-right (dyck-term dy) _) ⟩
+  < ty-base (dyck-pre-type ey) [ wedge-inc-right (dyck-term dy) _ ]ty >ty ∎
+  where
+    open Reasoning ty-setoid
+
+wedge-dyck-type {m = zero} dy End = ⋆-is-only-0-d-ty ⦃ IsZero-subst (sym (dyck-type-dim dy)) it ⦄
+wedge-dyck-type {m = zero} dy (⇓ ey) = ⊥-elim (dyck-0-is-0-d ey)
+wedge-dyck-type {m = suc m} dy ey = begin
+  < dyck-type (wedge-dyck dy ey) >ty
+    ≈⟨ lift-ty-≃ (wedge-dyck-pre-type dy ey) ⟩
+  < lift-ty (dyck-pre-type ey [ wedge-inc-right (dyck-term dy) _ ]ty) >ty
+    ≈˘⟨ apply-lifted-sub-ty-≃ (dyck-pre-type ey) (wedge-inc-right (dyck-term dy) _) ⟩
+  < dyck-pre-type ey [ lift-sub (wedge-inc-right (dyck-term dy) _) ]ty >ty
+    ≈˘⟨ apply-sub-lifted-ty-≃ (dyck-pre-type ey) (wedge-inc-right (dyck-term dy) _) ⟩
+  < dyck-type ey [ wedge-inc-right (dyck-term dy) _ ]ty >ty ∎
+  where
+    open Reasoning ty-setoid
+
+wedge-dyck-term dy End = refl≃tm
+wedge-dyck-term {n = n} dy (⇑ {n = m} ey) = Var≃ (cong (3 +_) (*-distribʳ-+ 2 m n)) refl
+wedge-dyck-term dy (⇓ ey) = begin
+  < ty-tgt′ (dyck-type (wedge-dyck dy ey)) >tm
+    ≈⟨ ty-tgt′-≃ (wedge-dyck-type dy ey) ⟩
+  < ty-tgt′ (dyck-type ey [ wedge-inc-right (dyck-term dy) _ ]ty) >tm
+    ≈˘⟨ ty-tgt′-sub (dyck-type ey) (wedge-inc-right (dyck-term dy) _) ⦃ NonZero-subst (sym (dyck-type-dim ey)) it ⦄ ⟩
+  < ty-tgt′ (dyck-type ey) [ wedge-inc-right (dyck-term dy) _ ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+
+wedge-⌊⌋d : (dy : Dyck n 0) → (ey : Dyck m d) → ⌊ wedge-dyck dy ey ⌋d ≃c wedge ⌊ dy ⌋d (dyck-term dy) ⌊ ey ⌋d
+wedge-⌊⌋d dy End = refl≃c
+wedge-⌊⌋d dy (⇑ ey)
+  = Add≃ (Add≃ (wedge-⌊⌋d dy ey) (wedge-dyck-type dy ey)) (wedge-dyck-pre-type dy (⇑ ey))
+wedge-⌊⌋d dy (⇓ ey)
+  = wedge-⌊⌋d dy ey

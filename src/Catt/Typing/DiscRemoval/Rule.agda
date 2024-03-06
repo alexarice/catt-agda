@@ -1,3 +1,5 @@
+open import Catt.Typing.Rule
+
 module Catt.Typing.DiscRemoval.Rule where
 
 open import Catt.Prelude
@@ -36,7 +38,7 @@ dr-susp [ DR {n = n} Γ σ ] = ∈r-≃ [ DR {n = suc n} (susp-ctx Γ) (susp-sub
     γ .lhseq = sym≃tm (disc-term-susp _ σ)
     γ .rhseq = sym≃tm (susp-functorial-tm σ 0V)
 
-dr-sub : {rules : RuleSet} → SubCond′ rules DiscRemovalSet
+dr-sub : {ops : Op} {rules : RuleSet} → SubCond′ ops rules DiscRemovalSet
 dr-sub Γ {σ = τ} τty [ DR Δ σ ] = ∈r-≃ [ DR Γ (σ ● τ) ] γ
   where
     γ : DiscRemoval Γ (σ ● τ) ≃r sub-rule (DiscRemoval Δ σ) Γ τ

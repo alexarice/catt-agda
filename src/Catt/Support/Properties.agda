@@ -548,22 +548,50 @@ empty-is-empty : {n : ℕ} → varset-non-empty (empty {n = n}) ≡ false
 empty-is-empty {n = zero} = refl
 empty-is-empty {n = suc n} = empty-is-empty {n = n}
 
-SupportedTm-lift : (t : Tm n) → SupportedTm t → SupportedTm (lift-tm t)
-SupportedTy-lift : (A : Ty n) → SupportedTy A → SupportedTy (lift-ty A)
-SupportedSub-lift : (σ : Sub n m A) → SupportedSub σ → SupportedSub (lift-sub σ)
+pdb-bd-supp-full : (n : ℕ)
+                 → (Γ : Ctx m)
+                 → .⦃ _ : Γ ⊢pdb ⦄
+                 → (b : Bool)
+                 → n ≥ ctx-dim Γ
+                 → pdb-bd-supp n Γ b ≡ full
+pdb-bd-supp-full n ∅ ⦃ pdb ⦄ b p = ⊥-elim (pdb-odd-length pdb)
+pdb-bd-supp-full n (∅ , A) b p = refl
+pdb-bd-supp-full n (Γ , B , A) b p = begin
+  pdb-bd-supp n (Γ , B , A) b
+    ≡⟨ tri-case> lem (<-cmp n (ty-dim B)) _ _ _ ⟩
+  ewt (ewt (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b))
+    ≡⟨ cong (ewt ∘ ewt) (pdb-bd-supp-full n Γ ⦃ pdb-prefix it ⦄ b lem2) ⟩
+  ewt (ewt full) ∎
+  where
+    lem : ty-dim B < n
+    lem = begin
+      suc (ty-dim B)
+        ≡˘⟨ pdb-dim-proj (recompute (pdb-dec (Γ , B , A)) it) ⟩
+      ty-dim A
+        ≤⟨ m≤n⊔m (ctx-dim Γ ⊔ ty-dim B) (ty-dim A) ⟩
+      ctx-dim (Γ , B) ⊔ ty-dim A
+        ≤⟨ p ⟩
+      n ∎
+      where
+        open ≤-Reasoning
 
-SupportedTm-lift (Var i) tsupp = tt
-SupportedTm-lift (Coh Δ A σ) (Asupp ,, σsupp ,, cond)
-  = Asupp ,, SupportedSub-lift σ σsupp ,, cond
+    lem2 : ctx-dim Γ ≤ n
+    lem2 = begin
+      ctx-dim Γ
+        ≤⟨ m≤m⊔n (ctx-dim Γ) (ty-dim B) ⟩
+      ctx-dim Γ ⊔ ty-dim B
+        ≤⟨ m≤m⊔n (ctx-dim Γ ⊔ ty-dim B) (ty-dim A) ⟩
+      ctx-dim Γ ⊔ ty-dim B ⊔ ty-dim A
+        ≤⟨ p ⟩
+      n ∎
+      where
+        open ≤-Reasoning
+    open ≡-Reasoning
 
-SupportedTy-lift ⋆ Asupp = tt
-SupportedTy-lift (s ─⟨ A ⟩⟶ t) (ssupp ,, Asupp ,, tsupp)
-  = SupportedTm-lift s ssupp ,, SupportedTy-lift A Asupp ,, SupportedTm-lift t tsupp
-
-SupportedSub-lift ⟨ _ ⟩′ σsupp = SupportedTy-lift _ σsupp
-SupportedSub-lift ⟨ σ , t ⟩ (σsupp ,, tsupp)
-  = SupportedSub-lift σ σsupp ,, SupportedTm-lift t tsupp
-
-idSub-supported : SupportedSub (idSub {n = n})
-idSub-supported {n = zero} = tt
-idSub-supported {n = suc n} = SupportedSub-lift (idSub {n = n}) (idSub-supported {n = n}) ,, tt
+pd-bd-supp-full : (n : ℕ)
+                → (Γ : Ctx m)
+                → .⦃ _ : Γ ⊢pd ⦄
+                → (b : Bool)
+                → n ≥ ctx-dim Γ
+                → pd-bd-supp n Γ b ≡ full
+pd-bd-supp-full n Γ b p = pdb-bd-supp-full n Γ ⦃ pd-to-pdb it ⦄ b p

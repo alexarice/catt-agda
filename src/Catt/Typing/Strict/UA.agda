@@ -1,9 +1,10 @@
-module Catt.Typing.Strict.UA where
+open import Catt.Typing.Rule
+open import Catt.Tree.Insertion.Ops
+
+module Catt.Typing.Strict.UA (ops : Op) (tameOp : TameOp ops) (ins-op : InsertionSOp ops) where
 
 open import Catt.Prelude
 open import Catt.Syntax
-
-open import Catt.Typing.Rule
 
 open import Catt.Typing.DiscRemoval.Rule
 open import Catt.Typing.EndoCoherenceRemoval.Rule
@@ -12,10 +13,10 @@ open import Catt.Typing.Insertion.Rule
 SUA-Rules : RuleSet
 SUA-Rules = DiscRemovalSet ∪r ECRSet ∪r InsertionSet
 
-open import Catt.Typing SUA-Rules public
-open import Catt.Typing.DiscRemoval SUA-Rules
-open import Catt.Typing.EndoCoherenceRemoval SUA-Rules
-open import Catt.Typing.Insertion SUA-Rules
+open import Catt.Typing ops SUA-Rules public
+open import Catt.Typing.DiscRemoval ops SUA-Rules
+open import Catt.Typing.EndoCoherenceRemoval ops SUA-Rules
+open import Catt.Typing.Insertion ops SUA-Rules
 
 hasDiscRemovalRule : HasDiscRemovalRule
 hasDiscRemovalRule = ⊆r-∪-1
@@ -41,31 +42,32 @@ sua-lift = LiftCond-∪ dr-lift (LiftCond-∪ ecr-lift ins-lift)
 sua-susp : SuspCond SUA-Rules
 sua-susp = SuspCond-∪ dr-susp (SuspCond-∪ ecr-susp ins-susp)
 
-sua-sub : SubCond SUA-Rules
-sua-sub = SubCond-∪ dr-sub (SubCond-∪ ecr-sub ins-sub)
+sua-sub : SubCond ops SUA-Rules
+sua-sub = SubCond-∪ ops dr-sub (SubCond-∪ ops ecr-sub ins-sub)
 
-open Tame
+sua-tame : Tame ops SUA-Rules
+sua-tame .Tame.tame-op = tameOp
+sua-tame .Tame.lift-cond = sua-lift
+sua-tame .Tame.susp-cond = sua-susp
+sua-tame .Tame.sub-cond = sua-sub
 
-sua-tame : Tame SUA-Rules
-sua-tame .lift-cond = sua-lift
-sua-tame .susp-cond = sua-susp
-sua-tame .sub-cond = sua-sub
+open TameOp tameOp
 
-open import Catt.Typing.DiscRemoval.Typed SUA-Rules sua-lift
-open import Catt.Typing.EndoCoherenceRemoval.Typed SUA-Rules sua-lift sua-sub
-open import Catt.Typing.Insertion.Typed SUA-Rules sua-tame
+open import Catt.Typing.DiscRemoval.Typed ops standard-op SUA-Rules sua-lift
+open import Catt.Typing.EndoCoherenceRemoval.Typed ops standard-op SUA-Rules sua-lift sua-sub
+open import Catt.Typing.Insertion.Typed ops ins-op SUA-Rules sua-tame
 
-sua-conv : ConvCond SUA-Rules
-sua-conv = ConvCond-∪ dr-conv (ConvCond-∪ ecr-conv ins-conv)
+sua-conv : ConvCond ops SUA-Rules
+sua-conv = ConvCond-∪ ops dr-conv (ConvCond-∪ ops ecr-conv ins-conv)
 
 module _ where
-  open import Catt.Support.Typing SUA-Rules
-  open import Catt.Typing.DiscRemoval.Support rulesWithSupp (rulesWithSupp-lift sua-lift) rulesWithSupp-supp
-  open import Catt.Typing.EndoCoherenceRemoval.Support rulesWithSupp rulesWithSupp-supp
-  open import Catt.Typing.Insertion.Support rulesWithSupp (rulesWithSupp-tame sua-tame) rulesWithSupp-supp
+  open import Catt.Support.Typing ops SUA-Rules
+  open import Catt.Typing.DiscRemoval.Support ops standard-op rulesWithSupp (rulesWithSupp-lift sua-lift) rulesWithSupp-supp
+  open import Catt.Typing.EndoCoherenceRemoval.Support ops standard-op rulesWithSupp rulesWithSupp-supp
+  open import Catt.Typing.Insertion.Support ops rulesWithSupp (rulesWithSupp-tame sua-tame) rulesWithSupp-supp
 
-  sua-supp′ : SupportCond′ rulesWithSupp SUA-Rules
-  sua-supp′ = SupportCond-∪ dr-supp (SupportCond-∪ ecr-supp ins-supp)
+  sua-supp′ : SupportCond′ ops rulesWithSupp SUA-Rules
+  sua-supp′ = SupportCond-∪ ops dr-supp (SupportCond-∪ ops ecr-supp ins-supp)
 
-  sua-supp : SupportCond SUA-Rules
+  sua-supp : SupportCond ops SUA-Rules
   sua-supp = SupportCond-prop sua-supp′

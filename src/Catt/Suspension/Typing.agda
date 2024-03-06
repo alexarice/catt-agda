@@ -1,6 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Suspension.Typing (rules : RuleSet)
+module Catt.Suspension.Typing (ops : Op)
+                              (susp-op : SuspOp ops)
+                              (rules : RuleSet)
                               (lift-cond : LiftCond rules)
                               (susp-cond : SuspCond rules) where
 
@@ -8,13 +10,18 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Properties
+open import Catt.Globular
+open import Catt.Globular.Properties
+open import Catt.Pasting
+open import Catt.Support
 open import Catt.Suspension
 open import Catt.Suspension.Properties
 open import Catt.Suspension.Pasting
+open import Catt.Suspension.Support
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
-open import Catt.Typing.Properties.Lifting rules lift-cond
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
+open import Catt.Typing.Properties.Lifting ops rules lift-cond
 
 
 susp-ctxTy : Typing-Ctx Γ → Typing-Ctx (susp-ctx Γ)
@@ -36,7 +43,16 @@ susp-tyTy (TyArr p q r) = TyArr (susp-tmTy p) (susp-tyTy q) (susp-tmTy r)
 
 susp-tmTy (TyConv tty p) = TyConv (susp-tmTy tty) (susp-tyEq p)
 susp-tmTy {Γ = Γ} (TyVar i) = TyConv (TyVar (inject₁ (inject₁ i))) (reflexive≈ty (susp-‼ Γ i))
-susp-tmTy (TyCoh Aty σty) = TyConv (TyCoh ⦃ susp-pd it ⦄ (susp-tyTy Aty) (susp-subTy σty)) (reflexive≈ty (sym≃ty (susp-functorial-ty _ _)))
+susp-tmTy (TyCoh {Δ = Δ} {A = A@(s ─⟨ _ ⟩⟶ t)} supp Aty σty) = let
+  instance .x : susp-ctx Δ ⊢pd
+  x = susp-pd it
+  in TyConv (TyCoh ⦃ nz = NonZero-subst (sym (susp-dim A)) it ⦄
+                   (subst₂ (ops (susp-ctx Δ)) (sym (suspSuppTm′ Δ s))
+                                              (sym (suspSuppTm′ Δ t))
+                                              (susp-op supp))
+                   (susp-tyTy Aty)
+                   (susp-subTy σty))
+            (reflexive≈ty (sym≃ty (susp-functorial-ty _ A)))
 
 susp-subTy (TyNull x) = TyExt (TyExt (TyNull TyStar) get-fstTy) get-sndTy
 susp-subTy (TyExt p r) = TyExt (susp-subTy p) (TyConv (susp-tmTy r) (reflexive≈ty (susp-functorial-ty _ _)))

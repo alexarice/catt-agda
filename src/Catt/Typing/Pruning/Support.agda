@@ -1,9 +1,11 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Pruning.Support (rules : RuleSet)
+module Catt.Typing.Pruning.Support (ops : Op)
+                                   (standard-op : StandardOp ops)
+                                   (rules : RuleSet)
                                    (lift-cond : LiftCond rules)
-                                   (sub-cond : SubCond rules)
-                                   (supp-cond : SupportCond rules) where
+                                   (sub-cond : SubCond ops rules)
+                                   (supp-cond : SupportCond ops rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -12,16 +14,16 @@ open import Catt.Dyck
 open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Support
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
-open import Catt.Typing.Properties.Support rules supp-cond
-open import Catt.Dyck.Pruning.Typing rules lift-cond sub-cond
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
+open import Catt.Typing.Properties.Support ops rules supp-cond
+open import Catt.Dyck.Pruning.Typing ops standard-op rules lift-cond sub-cond
 open import Catt.Typing.Pruning.Rule
 
 open import Catt.Support
 open import Catt.Support.Properties
 
-pruning-supp : SupportCond′ rules PruningSet
+pruning-supp : SupportCond′ ops rules PruningSet
 pruning-supp [ Prune Γ dy A p σ B t pf ] tty = begin
   SuppTm Γ (Coh ⌊ dy ⌋d A σ)
     ≡⟨⟩

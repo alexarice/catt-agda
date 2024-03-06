@@ -1,8 +1,10 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.EndoCoherenceRemoval.Typed (rules : RuleSet)
+module Catt.Typing.EndoCoherenceRemoval.Typed (ops : Op)
+                                              (standard-op : StandardOp ops)
+                                              (rules : RuleSet)
                                               (lift-cond : LiftCond rules)
-                                              (sub-cond : SubCond rules) where
+                                              (sub-cond : SubCond ops rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -16,14 +18,14 @@ open import Catt.Discs.Properties
 
 open import Catt.Typing.EndoCoherenceRemoval.Rule
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
-open import Catt.Typing.Properties.Substitution rules lift-cond sub-cond
-open import Catt.Globular.Typing rules lift-cond
-open import Catt.Discs.Typing rules lift-cond
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
+open import Catt.Typing.Properties.Substitution ops rules lift-cond sub-cond
+open import Catt.Globular.Typing ops rules
+open import Catt.Discs.Typing ops standard-op rules lift-cond
 
-ecr-conv : ConvCond′ rules ECRSet
-ecr-conv [ ECR Γ Δ s A supp σ ] {A = B} tty
+ecr-conv : ConvCond′ ops rules ECRSet
+ecr-conv [ ECR Γ Δ s sfull A σ ] {A = B} tty
   = TyConv (identity-Ty (ty-dim A) (sub-from-disc-Ty (ty-dim A)
                                                      (apply-sub-ty-typing A_ty σty)
                                                      (sym (sub-dim σ A))

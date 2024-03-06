@@ -1,9 +1,10 @@
 open import Catt.Typing.Rule
 import Catt.Typing.DiscRemoval as DR
 
-module Catt.Typing.DiscRemoval.Properties (rules : RuleSet)
-                                          (tame : Tame rules)
-                                          (disc-rem : DR.HasDiscRemoval rules) where
+module Catt.Typing.DiscRemoval.Properties (ops : Op)
+                                          (rules : RuleSet)
+                                          (tame : Tame ops rules)
+                                          (disc-rem : DR.HasDiscRemoval ops rules) where
 
 open Tame tame
 
@@ -24,14 +25,14 @@ open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Standard
 open import Catt.Tree.Standard.Properties
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties rules tame
-open import Catt.Globular.Typing rules lift-cond
-open import Catt.Discs.Typing rules lift-cond
-open import Catt.Tree.Structured.Typing rules
-open import Catt.Tree.Structured.Typing.Properties rules tame
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties ops rules tame
+open import Catt.Globular.Typing ops rules
+open import Catt.Discs.Typing ops standard-op rules lift-cond
+open import Catt.Tree.Structured.Typing ops rules
+open import Catt.Tree.Structured.Typing.Properties ops rules tame
 
-open DR rules
+open DR ops rules
 
 disc-rem-stm : HasDiscRemoval-STm
 disc-rem-stm S L Lty .get = begin

@@ -1,8 +1,10 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Properties.Conversion (rules : RuleSet)
-                                         (tame : Tame rules)
-                                         (conv-rule : ConvCond rules) where
+module Catt.Typing.Properties.Conversion (ops : Op)
+                                         (rules : RuleSet)
+                                         (tame : Tame ops rules)
+                                         (supp-cond : SupportCond ops rules)
+                                         (conv-cond : ConvCond ops rules) where
 
 open Tame tame
 
@@ -10,9 +12,10 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties rules tame
-open import Catt.Globular.Typing rules lift-cond
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties ops rules tame
+open import Catt.Globular.Typing ops rules
+open import Catt.Typing.Properties.Support ops rules supp-cond
 
 open import Function.Bundles
 open import Function.Construct.Identity
@@ -34,9 +37,14 @@ term-conversion′ {A = C} (Coh≈ {A = A} {Δ = Δ} {B = B} {σ = σ} {Γ = Γ}
   where
     f : ∀ C → Typing-Tm Γ (Coh Δ A σ) C → Typing-Tm Γ (Coh Δ B τ) C
     f C (TyConv tty p) = TyConv (f _ tty) p
-    f C (TyCoh Aty σty) = TyConv (TyCoh (E.to (type-conversion′ p) Aty)
-                                   (E.to (sub-conversion′ q) σty))
-                                   lem
+    f C (TyCoh supp Aty σty) = TyConv (TyCoh ⦃ nz = NonZero-subst (ty-dim-≈ p) it ⦄
+                                             (subst₂ (ops Δ)
+                                                     (EqSuppTm (ty-src-≈ p))
+                                                     (EqSuppTm (ty-tgt-≈ p))
+                                                     supp)
+                                             (E.to (type-conversion′ p) Aty)
+                                             (E.to (sub-conversion′ q) σty))
+                                      lem
       where
         open Reasoning (ty-setoid-≈ Γ)
         lem : (B [ τ ]ty) ≈[ Γ ]ty A [ σ ]ty
@@ -49,9 +57,14 @@ term-conversion′ {A = C} (Coh≈ {A = A} {Δ = Δ} {B = B} {σ = σ} {Γ = Γ}
 
     g : ∀ C → Typing-Tm Γ (Coh Δ B τ) C → Typing-Tm Γ (Coh Δ A σ) C
     g C (TyConv tty p) = TyConv (g _ tty) p
-    g C (TyCoh Bty τty) = TyConv (TyCoh (E.from (type-conversion′ p) Bty)
-                                     (E.from (sub-conversion′ q) τty))
-                                     lem
+    g C (TyCoh supp Bty τty) = TyConv (TyCoh ⦃ nz = NonZero-subst (sym (ty-dim-≈ p)) it ⦄
+                                             (subst₂ (ops Δ)
+                                                     (EqSuppTm (ty-src-≈ (sym≈ty p)))
+                                                     (EqSuppTm (ty-tgt-≈ (sym≈ty p)))
+                                                     supp)
+                                             (E.from (type-conversion′ p) Bty)
+                                             (E.from (sub-conversion′ q) τty))
+                                             lem
       where
         open Reasoning (ty-setoid-≈ Γ)
         lem : (A [ σ ]ty) ≈[ Γ ]ty B [ τ ]ty
@@ -67,11 +80,11 @@ term-conversion′ (Rule≈ r p tty) = mk⇔ f g
     open Rule r
     f : Typing-Tm tgtCtx lhs _ →
           Typing-Tm tgtCtx rhs _
-    f tty′ = conv-rule p tty′
+    f tty′ = conv-cond p tty′
 
     g : Typing-Tm tgtCtx rhs _ →
           Typing-Tm tgtCtx lhs _
-    g tty′ = TyConv tty (Ty-unique (conv-rule p tty) tty′)
+    g tty′ = TyConv tty (Ty-unique (conv-cond p tty) tty′)
 
 type-conversion′ Star≈ = ⇔-id (Typing-Ty _ ⋆)
 type-conversion′ (Arr≈ p q r) = mk⇔ f g

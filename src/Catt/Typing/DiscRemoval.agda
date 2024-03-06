@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.DiscRemoval (rules : RuleSet) where
+module Catt.Typing.DiscRemoval (ops : Op) (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -18,8 +18,8 @@ open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Construct
 
-open import Catt.Typing rules
-open import Catt.Tree.Structured.Typing rules
+open import Catt.Typing ops rules
+open import Catt.Tree.Structured.Typing ops rules
 
 open import Catt.Typing.DiscRemoval.Rule
 

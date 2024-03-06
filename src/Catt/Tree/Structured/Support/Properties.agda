@@ -468,17 +468,3 @@ ppath-≃-full (Join≃′ {S′ = S′} {T′ = T′} p q) = begin
         FVLabel (ap (++t-inc-right S₂ T))
         ≡⟨ ++t-incs-full S₂ T ⟩
       tFull ∎
-
-SupportedSTm-SCoh : {L : Label-WT X S}
-                  → SupportedSTy As
-                  → (b : Bool)
-                  → supp-condition-s b S As
-                  → SupportedLabel L
-                  → SupportedSTy (lty L)
-                  → SupportedSTm (SCoh S As L)
-SupportedSTm-SCoh {S = S} {As = As} {L = L} [ AsSupp ] b cond [ LSupp ] LtySupp .get
-  = SupportedTm-apply-sub (Coh ⌊ S ⌋ (sty-to-type As) idSub)
-                          (label-to-sub L)
-                          (AsSupp ,, (idSub-supported {n = suc (tree-size S)})
-                            ,, b ,, supp-condition-compat b S As cond)
-                          LSupp

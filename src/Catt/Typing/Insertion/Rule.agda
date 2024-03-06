@@ -47,13 +47,14 @@ data InsertionSet : RuleSet where
          → (P : Branch S l)
          → (T : Tree n′)
          → .⦃ _ : has-trunk-height l T ⦄
+         → (q : lh P ≥ tree-dim T)
          → (M : Label (Other m) T)
          → (p : L ⌊ P ⌋p ≃stm standard-coh′ (lh P) T >>= (M ,, S⋆))
          → InsertionSet (Insertion Γ S As L P T M)
 
 ins-lift : LiftCond InsertionSet
-ins-lift A [ Insert Γ S As L P T M p ]
-  = ∈r-≃ [ Insert (Γ , A) S As (lift-stm ∘ L) P T (lift-stm ∘ M) lem ] γ
+ins-lift A [ Insert Γ S As L P T q M p ]
+  = ∈r-≃ [ Insert (Γ , A) S As (lift-stm ∘ L) P T q (lift-stm ∘ M) lem ] γ
   where
     lem : lift-stm (L ⌊ P ⌋p)
           ≃stm
@@ -93,8 +94,8 @@ ins-lift A [ Insert Γ S As L P T M p ]
         open Reasoning tm-setoid
 
 ins-susp : SuspCond InsertionSet
-ins-susp [ Insert {l = l} Γ S As L P T M p ]
-  = ∈r-≃ [ Insert (susp-ctx Γ) (Susp S) (susp-sty As) (susp-label-full L) (BExt P) (Susp T) ⦃ inst ⦄ (susp-label-full M) lem ] γ
+ins-susp [ Insert {l = l} Γ S As L P T q M p ]
+  = ∈r-≃ [ Insert (susp-ctx Γ) (Susp S) (susp-sty As) (susp-label-full L) (BExt P) (Susp T) ⦃ inst ⦄ (s≤s q) (susp-label-full M) lem ] γ
   where
     lem : susp-label-full L (PExt ⌊ P ⌋p)
           ≃stm
@@ -181,9 +182,9 @@ ins-susp [ Insert {l = l} Γ S As L P T M p ]
                                    (As >>=′ (κ S P T ,, S⋆))
                                    (L >>l[ P ] M ,, S⋆))) >tm ∎
 
-ins-sub : {rules : RuleSet} → SubCond′ rules InsertionSet
-ins-sub Δ {σ = σ} σty [ Insert Γ S As L P T M p ]
-  = ∈r-≃ [ Insert Δ S As (_[ σ ]stm ∘ L) P T (_[ σ ]stm ∘ M) lem ] γ
+ins-sub : {ops : Op} {rules : RuleSet} → SubCond′ ops rules InsertionSet
+ins-sub Δ {σ = σ} σty [ Insert Γ S As L P T q M p ]
+  = ∈r-≃ [ Insert Δ S As (_[ σ ]stm ∘ L) P T q (_[ σ ]stm ∘ M) lem ] γ
   where
     open Reasoning stm-setoid
     lem : L ⌊ P ⌋p [ σ ]stm

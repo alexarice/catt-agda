@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Insertion (rules : RuleSet) where
+module Catt.Typing.Insertion (ops : Op) (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -22,9 +22,9 @@ open import Catt.Tree.Standard
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
-open import Catt.Tree.Structured.Typing rules
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
+open import Catt.Tree.Structured.Typing ops rules
 
 open import Catt.Typing.Insertion.Rule
 
@@ -38,6 +38,7 @@ HasInsertion = ∀ {m n l n′}
              → (P : Branch S l)
              → {T : Tree n′}
              → .⦃ _ : has-trunk-height l T ⦄
+             → lh P ≥ tree-dim T
              → (M : Label X T)
              → L ⌊ P ⌋p ≃stm (standard-coh′ (lh P) T >>= (M ,, S⋆))
              → {Cs : STy X}
@@ -50,11 +51,11 @@ HasInsertionRule : Set
 HasInsertionRule = InsertionSet ⊆r rules
 
 ins-from-rule : HasInsertionRule → HasInsertion
-ins-from-rule p {S = S} As L P {T = T} M pf [ tty ] .get = begin
+ins-from-rule p {S = S} As L P {T = T} q M pf [ tty ] .get = begin
   stm-to-term (SCoh S As (L ,, S⋆))
     ≈˘⟨ reflexive≈tm (stm-to-other-prop (SCoh S As (L ,, S⋆)) .get) ⟩
   stm-to-term (SCoh S As (label-to-other L ,, S⋆))
-    ≈⟨ Rule≈ _ (p [ Insert _ S As (label-to-other L) P T (label-to-other M) lem ])
+    ≈⟨ Rule≈ _ (p [ Insert _ S As (label-to-other L) P T q (label-to-other M) lem ])
              (transport-typing tty (sym≃tm (stm-to-other-prop (SCoh S As (L ,, S⋆)) .get))) ⟩
   stm-to-term (SCoh (S >>[ P ] T) (As >>=′ (κ S P T ,, S⋆)) (label-to-other L >>l[ P ] label-to-other M ,, S⋆))
     ≈˘⟨ reflexive≈tm (SCoh≃ (S >>[ P ] T)

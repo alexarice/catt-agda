@@ -1,8 +1,9 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Structured.Support (rules : RuleSet)
-                                      (tame : Tame rules)
-                                      (supp-cond : SupportCond rules) where
+module Catt.Typing.Structured.Support (ops : Op)
+                                      (rules : RuleSet)
+                                      (tame : Tame ops rules)
+                                      (supp-cond : SupportCond ops rules) where
 
 open Tame tame
 
@@ -16,10 +17,10 @@ open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.ToTerm
 
-open import Catt.Typing rules
-open import Catt.Tree.Structured.Typing rules
-open import Catt.Typing.Properties.Support rules supp-cond
-open import Catt.Tree.Structured.Typing.Properties rules tame
+open import Catt.Typing ops rules
+open import Catt.Tree.Structured.Typing ops rules
+open import Catt.Typing.Properties.Support ops rules supp-cond
+open import Catt.Tree.Structured.Typing.Properties ops rules tame
 
 open import Catt.Support
 open import Catt.Support.Properties
@@ -64,9 +65,6 @@ EqSuppLabel {ΓS = ΓS} {L = L} {M = M} p = DCM-reflect (begin
   MtoVarSet ΓS (FVLabel-WT (M ,, S⋆))
     ≡⟨ cong (MtoVarSet ΓS) (FVLabel-WT-⋆ M) ⟩
   MtoVarSet ΓS (FVLabel M) ∎)
-
-TransportVarSet-Label : {ΓS : CtxOrTree n} → TVarSet S → (L : Label (COT-to-MT ΓS) S) → VarSet n
-TransportVarSet-Label xs L = TransportVarSet (toVarSet xs) (label-to-sub (L ,, S⋆))
 
 TransportVarSet-Label-Label : {ΓS : CtxOrTree n} → (L : Label (someTree T) S) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → MtoVarSet ΓS (FVLabel (L ●l (M ,, S⋆))) ≡ TransportVarSet-Label (FVLabel L) M
 TransportVarSet-Label-Label {T = T} {ΓS = ΓS} L M Mty = begin

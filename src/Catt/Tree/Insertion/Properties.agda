@@ -919,6 +919,26 @@ bd-branch-height (Join S₁ S₂) BHere (suc d) q = cong suc (tree-dim-bd d S₁
 bd-branch-height (Join S₁ S₂) (BExt P) (suc d) q = cong suc (bd-branch-height S₁ P d (≤-pred q))
 bd-branch-height (Join S₁ S₂) (BShift P) (suc d) q = bd-branch-height S₂ P (suc d) q
 
+bd-branch-lh : (S : Tree n)
+             → (P : Branch S l)
+             → (d : ℕ)
+             → (q : d > bh P)
+             → (T : Tree m)
+             → (p : lh P ≥ tree-dim T)
+             → tree-dim (tree-bd d T)
+               ≤
+               lh (bd-branch S P d q)
+bd-branch-lh S P d q T p = begin
+  tree-dim (tree-bd d T)
+    ≡⟨ tree-dim-bd d T ⟩
+  d ⊓ tree-dim T
+    ≤⟨ ⊓-monoʳ-≤ d p ⟩
+  d ⊓ lh P
+    ≡˘⟨ bd-branch-height S P d q ⟩
+  lh (bd-branch S P d q) ∎
+    where
+      open ≤-Reasoning
+
 bd-has-trunk-height : (d : ℕ) → (m : ℕ)
                     → (T : Tree n) → .⦃ has-trunk-height m T ⦄
                     → .(d > m)

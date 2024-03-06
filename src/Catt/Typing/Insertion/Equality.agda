@@ -1,7 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Insertion.Equality (rules : RuleSet)
-                                      (tame : Tame rules) where
+module Catt.Typing.Insertion.Equality (ops : Op)
+                                      (rules : RuleSet)
+                                      (tame : Tame ops rules) where
 
 open Tame tame
 
@@ -21,24 +22,26 @@ open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
+open import Catt.Tree.Boundary.Support
 open import Catt.Tree.Standard
 open import Catt.Tree.Standard.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties rules tame
-open import Catt.Suspension.Typing rules lift-cond susp-cond
-open import Catt.Wedge.Typing rules tame
-open import Catt.Tree.Typing rules tame
-open import Catt.Tree.Boundary.Typing rules tame
-open import Catt.Tree.Structured.Typing rules
-open import Catt.Tree.Structured.Typing.Properties rules tame
-open import Catt.Tree.Standard.Typing rules tame
-open import Catt.Tree.Insertion.Typing rules tame
-open import Catt.Typing.DiscRemoval rules
-open import Catt.Typing.EndoCoherenceRemoval rules
-open import Catt.Typing.Insertion rules
+open import Catt.Tree.Ops ops
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties ops rules tame
+open import Catt.Suspension.Typing ops susp-op rules lift-cond susp-cond
+open import Catt.Wedge.Typing ops rules tame
+open import Catt.Tree.Typing ops rules tame
+open import Catt.Tree.Boundary.Typing ops rules tame
+open import Catt.Tree.Structured.Typing ops rules
+open import Catt.Tree.Structured.Typing.Properties ops rules tame
+open import Catt.Tree.Standard.Typing ops rules tame
+open import Catt.Tree.Insertion.Typing ops rules tame
+open import Catt.Typing.DiscRemoval ops rules
+open import Catt.Typing.EndoCoherenceRemoval ops rules
+open import Catt.Typing.Insertion ops rules
 
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
@@ -46,8 +49,8 @@ open import Catt.Tree.Standard.Support
 
 
 module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
-  open import Catt.Typing.DiscRemoval.Properties rules tame dr
-  open import Catt.Typing.EndoCoherenceRemoval.Properties rules tame ecr
+  open import Catt.Typing.DiscRemoval.Properties ops rules tame dr
+  open import Catt.Typing.EndoCoherenceRemoval.Properties ops rules tame ecr
 
   standard-ecr : (d : ℕ)
                → (T : Tree n)
@@ -74,10 +77,14 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
                  (standard-stm d T))
            (id-label-wt T)
       ≈⟨ ecr-stm T (standard-stm d T)
+                   (standard-stm-full d T (≤-pred p))
                    (standard-sty d T)
-                   supp-lem
+                   (subst₂ (ops-s T)
+                           (sym (supp-lem false))
+                           (sym (supp-lem true))
+                           (standard-op-s standard-op T d (≤-trans (n≤1+n (tree-dim T)) p)))
                    (id-label T)
-                   (standard-stm-Ty d T)
+                   (standard-stm-Ty d T (≤-pred p))
                    (standard-sty-Ty d T)
                    (id-label-Ty T) ⟩
     identity-stm (n-disc (sty-dim (standard-sty d T)))
@@ -109,15 +116,13 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
       ≈⟨ reflexive≈stm (lem (sty-dim (standard-sty d T)) d (standard-sty-dim d T)) ⟩
     identity-stm (n-disc d) >>= (standard-label (n-disc d) T ,, S⋆) ∎
     where
-      supp-lem : DCT (FVSTy (SArr (standard-stm d T) (standard-sty d T) (standard-stm d T))) ≡ mFull
-      supp-lem = begin
-        DCT (FVSTy (SArr (standard-stm d T) (standard-sty d T) (standard-stm d T)))
-          ≡⟨ DCT-∪ (FVSTy (standard-sty d T) ∪t FVSTm (standard-stm d T)) (FVSTm (standard-stm d T)) ⟩
-        DCT (FVSTy (standard-sty d T) ∪t FVSTm (standard-stm d T)) ∪t DCT (FVSTm (standard-stm d T))
-          ≡⟨ cong (DCT (FVSTy (standard-sty d T) ∪t FVSTm (standard-stm d T)) ∪t_) (standard-stm-full d T (≤-pred p)) ⟩
-        DCT (FVSTy (standard-sty d T) ∪t FVSTm (standard-stm d T)) ∪t tFull
-          ≡⟨ ∪t-right-zero (DCT (FVSTy (standard-sty d T) ∪t FVSTm (standard-stm d T))) ⟩
-        mFull ∎
+      supp-lem : (b : Bool) → DCT (FVSTm (standard-stm d T)) ≡ supp-tree-bd d T b
+      supp-lem b = begin
+        DCT (FVSTm (standard-stm d T))
+          ≡⟨ standard-stm-full d T (≤-pred p) ⟩
+        tFull
+          ≡˘⟨ supp-tree-bd-full d T b (≤-pred p) ⟩
+        supp-tree-bd d T b ∎
         where
           open ≡-Reasoning
 
@@ -258,7 +263,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
   pruned-branch-κ (Join (Join S₁ Sing) S₂) BHere T q x .get (PShift Z) = refl≈stm
 
 module _ (disc-rem : HasDiscRemoval) where
-  open import Catt.Typing.DiscRemoval.Properties rules tame disc-rem
+  open import Catt.Typing.DiscRemoval.Properties ops rules tame disc-rem
 
   κ-disc : (S : Tree n)
          → (P : Branch S l)
@@ -311,7 +316,7 @@ module _ (disc-rem : HasDiscRemoval) where
     = compute-≈ (≈SShift (trans≈stm (κ-disc T P .get Z) (reflexive≈stm (stm-≃-spath (sym≃′ (insertion-disc T P)) Z))))
 
 module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
-  open import Catt.Typing.DiscRemoval.Properties rules tame dr
+  open import Catt.Typing.DiscRemoval.Properties ops rules tame dr
 
   κ-standard-sty : (S : Tree n)
                  → (P : Branch S l)
@@ -327,6 +332,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                  → (T : Tree m)
                  → .⦃ _ : has-trunk-height l T ⦄
                  → (d : ℕ)
+                 → d ≥ tree-dim S
                  → (tree-dim T ≤ lh P)
                  → standard-coh d S >>= (κ S P T ,, S⋆)
                    ≈[ ⌊ S >>[ P ] T ⌋ ]stm
@@ -336,6 +342,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                   → (T : Tree m)
                   → .⦃ _ : has-trunk-height l T ⦄
                   → (d : ℕ)
+                  → d ≥ tree-dim S
                   → (tree-dim T ≤ lh P)
                   → standard-coh′ d S >>= (κ S P T ,, S⋆)
                     ≈[ ⌊ S >>[ P ] T ⌋ ]stm
@@ -357,13 +364,8 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
             (κ-standard-sty S P T d q)
             (lem true)
     where
-      open Reasoning stm-setoid-≈
 
-      lem3 : (x : Condition d T (lh P)) → tree-dim (tree-bd d T) ≤
-               lh (bd-branch S P d (bd-branch-lem P x))
-      lem3 x = (≤-trans (≤-reflexive (tree-dim-bd d T))
-                        (≤-trans (⊓-monoʳ-≤ d q)
-                                 (≤-reflexive (sym (bd-branch-height S P d (bd-branch-lem P x))))))
+      open Reasoning stm-setoid-≈
 
       lem2 : (b : Bool)
            → Bd-Conditions d P T
@@ -374,7 +376,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
         standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
           ≈⟨ >>=-≈ (standard-stm d (tree-bd d S))
                    (label-max-equality-to-equality (bd-κ-comm-1 S P T d x y q b)
-                                                   (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T) TySStar)
+                                                   (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T q) TySStar)
                                                    (label-≃-Ty (insertion-bd-1 S P T d y q) (tree-inc-Ty d (S >>[ P ] T) b)))
                    refl≈sty ⟩
         standard-stm d (tree-bd d S) >>=
@@ -388,11 +390,12 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
           ≈⟨ >>=-≈ (standard-stm d (tree-bd d S))
                    (label-max-equality-to-equality
                      (bd-κ-comm-2 S P T d b q x)
-                     (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T) TySStar)
+                     (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T q) TySStar)
                      (label-comp-Ty (κ-Ty (tree-bd d S)
-                                                       (bd-branch S P d _)
-                                                       (tree-bd d T)
-                                                       ⦃ _ ⦄)
+                                          (bd-branch S P d _)
+                                          (tree-bd d T)
+                                          ⦃ _ ⦄
+                                          (bd-branch-lh S P d (bd-branch-lem P x) T q))
                                     (label-≃-Ty (insertion-bd-2 S P T d _) (tree-inc-Ty d (S >>[ P ] T) b)) TySStar))
                    refl≈sty ⟩
         standard-stm d (tree-bd d S)
@@ -415,7 +418,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                                            ⦃ _ ⦄
                                            d
                                            (tree-dim-bd″ d S)
-                                           (lem3 x))
+                                           (bd-branch-lh S P d (bd-branch-lem P x) T q))
                    (label-≃-Ty (insertion-bd-2 S P T d _) (tree-inc-Ty d (S >>[ P ] T) b))
                    TySStar ⟩
         standard-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄)
@@ -442,14 +445,15 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
           ≈⟨ lem2 b (Bd-Conditions-one-of d P T) ⟩
         standard-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b ∎
 
-  κ-standard-coh S P T d p = begin
+  κ-standard-coh S@(Join _ _) P T d q p = begin
     SCoh S (standard-sty d S) (κ S P T ,, S⋆)
       ≈⟨ insert (standard-sty d S)
                 (κ S P T)
                 P
+                p
                 (ι S P T)
                 (κ-branch-path S P T)
-                (TySCoh S (standard-sty-Ty d S) (κ-Ty S P T) TySStar) ⟩
+                (>>=-Ty (standard-coh-Ty d ⦃ NonZero-≤ q it ⦄ S q) (κ-Ty S P T p) TySStar) ⟩
     SCoh (S >>[ P ] T)
          (standard-sty d S >>=′ (κ S P T ,, S⋆))
          (κ S P T >>l[ P ] ι S P T ,, S⋆)
@@ -460,11 +464,11 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
     where
       open Reasoning stm-setoid-≈
 
-  κ-standard-coh′ S P T d p = begin
+  κ-standard-coh′ S P T d q p = begin
     standard-coh′ d S >>= (κ S P T ,, S⋆)
       ≈⟨ reflexive≈stm (>>=-≃ (standard-coh′-compat d S) refl≃l refl≃sty) ⟩
     standard-coh d S >>= (κ S P T ,, S⋆)
-      ≈⟨ κ-standard-coh S P T d p ⟩
+      ≈⟨ κ-standard-coh S P T d q p ⟩
     standard-coh d (S >>[ P ] T)
       ≈˘⟨ reflexive≈stm (standard-coh′-compat d (S >>[ P ] T)) ⟩
     standard-coh′ d (S >>[ P ] T) ∎
@@ -473,9 +477,9 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
 
   κ-standard-stm S@(Join _ _) P T d q p = begin
     standard-stm d S >>= (κ S P T ,, S⋆)
-      ≈⟨ ≈->>= (standard-stm-is-comp d ⦃ NonZero-≤ q it ⦄ S) (κ-Ty S P T) TySStar ⟩
+      ≈⟨ ≈->>= (standard-stm-is-comp d ⦃ NonZero-≤ q it ⦄ S) (κ-Ty S P T p) TySStar ⟩
     standard-coh d S >>= (κ S P T ,, S⋆)
-      ≈⟨ κ-standard-coh S P T d p ⟩
+      ≈⟨ κ-standard-coh S P T d q p ⟩
     standard-coh d (S >>[ P ] T)
       ≈˘⟨ standard-stm-is-comp d ⦃ NonZero-≤ q it ⦄ (S >>[ P ] T) ⟩
     standard-stm d (S >>[ P ] T) ∎
@@ -488,14 +492,16 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                     → (T : Tree m)
                     → .⦃ _ : has-trunk-height l T ⦄
                     → .⦃ _ : non-linear T ⦄
+                    → (lh P ≥ tree-dim T)
                     → (Q : Branch T l′)
                     → (U : Tree m′)
                     → .⦃ _ : has-trunk-height l′ U ⦄
                     → tree-dim U ≤ lh Q
                     → κ S P T ●l (κ (S >>[ P ] T) (inserted-branch S P T Q) U ,, S⋆)
                       ≈[ ⌊ (S >>[ P ] T) >>[ inserted-branch S P T Q ] U ⌋ ]lm
-                      ≃-label (sym≃′ (insertion-tree-inserted-branch S P T Q U)) (κ S P (T >>[ Q ] U) ⦃ insertion-trunk-height T Q U l ⦄)
-  κ-inserted-branch (Join S₁ S₂) BHere T Q U q .get (PExt Z) = begin
+                      ≃-label (sym≃′ (insertion-tree-inserted-branch S P T Q U))
+                              (κ S P (T >>[ Q ] U) ⦃ insertion-trunk-height T Q U l ⦄)
+  κ-inserted-branch (Join S₁ S₂) BHere T p Q U q .get (PExt Z) = begin
     standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T S₂
       >>= (κ (T ++t S₂) (wedge-branch-left T S₂ Q) U ,, S⋆)
@@ -515,7 +521,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
       (standard-coh′ (1 + tree-dim S₁) T >>= (κ T Q U ,, S⋆)
                                            >>= ++t-inc-left (T >>[ Q ] U) S₂)
       ≈⟨ stm-≃-≈ ((sym≃′ (insertion-branch-left T S₂ Q U)))
-                 (≈->>= (κ-standard-coh′ T Q U (1 + tree-dim S₁) q)
+                 (≈->>= (κ-standard-coh′ T Q U (1 + tree-dim S₁) p q)
                         (++t-inc-left-Ty (T >>[ Q ] U) S₂)
                         TySStar) ⟩
     stm-≃ (sym≃′ (insertion-branch-left T S₂ Q U))
@@ -528,25 +534,25 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
            >>= ++t-inc-left (T >>[ Q ] U) S₂) ∎
     where
       open Reasoning stm-setoid-≈
-  κ-inserted-branch (Join S₁ S₂) BHere T Q U q .get (PShift Z)
+  κ-inserted-branch (Join S₁ S₂) BHere T p Q U q .get (PShift Z)
     = fixup-reflexive≈stm (κ-branch-left-inc-right T S₂ Q U .get Z) (insertion-branch-left T S₂ Q U)
-  κ-inserted-branch (Join S₁ S₂) (BExt P) (Susp T) BHere U q = ⊥-elim (linear-non-linear T)
-  κ-inserted-branch (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) (Join U Sing) q .get (PExt Z) = begin
+  κ-inserted-branch (Join S₁ S₂) (BExt P) (Susp T) p BHere U q = ⊥-elim (linear-non-linear T)
+  κ-inserted-branch (Join S₁ S₂) (BExt P) (Susp T) p (BExt Q) (Join U Sing) q .get (PExt Z) = begin
     (κ S₁ P T Z >>= map-ext (κ (S₁ >>[ P ] T) (inserted-branch S₁ P T Q) U ,, S⋆))
       ≈⟨ reflexive≈stm (>>=-ext (κ S₁ P T Z) (κ (S₁ >>[ P ] T) (inserted-branch S₁ P T Q) U ,, S⋆)) ⟩
     SExt (κ S₁ P T Z >>= (κ (S₁ >>[ P ] T) (inserted-branch S₁ P T Q) U ,, S⋆))
-      ≈⟨ ≈SExt (κ-inserted-branch S₁ P T Q U (≤-pred q) .get Z) ⟩
+      ≈⟨ ≈SExt (κ-inserted-branch S₁ P T (≤-pred p) Q U (≤-pred q) .get Z) ⟩
     SExt (stm-≃ (sym≃′ (insertion-tree-inserted-branch S₁ P T Q U)) (κ S₁ P (T >>[ Q ] U) ⦃ insertion-trunk-height T Q U (bh P) ⦄ Z)) ∎
     where
       open Reasoning stm-setoid-≈
-  κ-inserted-branch (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) (Join U Sing) q .get (PShift Z) = ≈SShift refl≈stm
-  κ-inserted-branch (Join S₁ S₂) (BShift P) T Q U q .get (PExt Z) = ≈SExt refl≈stm
-  κ-inserted-branch (Join S₁ S₂) (BShift P) T Q U q .get (PShift Z) = begin
+  κ-inserted-branch (Join S₁ S₂) (BExt P) (Susp T) p (BExt Q) (Join U Sing) q .get (PShift Z) = ≈SShift refl≈stm
+  κ-inserted-branch (Join S₁ S₂) (BShift P) T p Q U q .get (PExt Z) = ≈SExt refl≈stm
+  κ-inserted-branch (Join S₁ S₂) (BShift P) T p Q U q .get (PShift Z) = begin
     (κ S₂ P T Z
       >>= map-shift (κ (S₂ >>[ P ] T) (inserted-branch S₂ P T Q) U ,, S⋆))
       ≈⟨ reflexive≈stm (>>=-shift (κ S₂ P T Z) _) ⟩
     SShift (κ S₂ P T Z >>= (κ (S₂ >>[ P ] T) (inserted-branch S₂ P T Q) U ,, S⋆))
-      ≈⟨ ≈SShift (κ-inserted-branch S₂ P T Q U q .get Z) ⟩
+      ≈⟨ ≈SShift (κ-inserted-branch S₂ P T p Q U q .get Z) ⟩
     SShift (stm-≃ (sym≃′ (insertion-tree-inserted-branch S₂ P T Q U)) (κ S₂ P (T >>[ Q ] U) ⦃ insertion-trunk-height T Q U (bh P) ⦄ Z)) ∎
     where
       open Reasoning stm-setoid-≈

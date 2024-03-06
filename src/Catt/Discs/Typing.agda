@@ -1,6 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Discs.Typing (rules : RuleSet)
+module Catt.Discs.Typing (ops : Op)
+                         (standard-op : StandardOp ops)
+                         (rules : RuleSet)
                          (lift-cond : LiftCond rules) where
 
 open import Catt.Prelude
@@ -12,11 +14,14 @@ open import Catt.Globular
 open import Catt.Discs
 open import Catt.Discs.Properties
 open import Catt.Discs.Pasting
+open import Catt.Discs.Support
+open import Catt.Support
+open import Catt.Support.Properties
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
-open import Catt.Typing.Properties.Lifting rules lift-cond
-open import Catt.Globular.Typing rules lift-cond
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
+open import Catt.Typing.Properties.Lifting ops rules lift-cond
+open import Catt.Globular.Typing ops rules
 
 sphere-type-Ty : (d : ℕ) → Typing-Ty (Sphere d) (sphere-type d)
 sphere-type-Ty zero = TyStar
@@ -30,8 +35,15 @@ sphere-Ty (suc d) = TyAdd (disc-Ty d) (lift-ty-typing (sphere-type-Ty d))
 
 disc-Ty d = TyAdd (sphere-Ty d) (sphere-type-Ty d)
 
-disc-term-Ty : (n : ℕ) → {σ : Sub (disc-size n) m ⋆} → Typing-Sub (Disc n) Γ σ → Typing-Tm Γ (disc-term n σ) (sphere-type n [ sub-proj₁ σ ]ty)
-disc-term-Ty n σty = TyConv (TyCoh ⦃ disc-pd n ⦄ (lift-ty-typing (sphere-type-Ty n)) σty ) (reflexive≈ty (apply-sub-lifted-ty-≃ (sphere-type n) _))
+disc-term-Ty : (n : ℕ) → .⦃ NonZero n ⦄ → {σ : Sub (disc-size n) m ⋆} → Typing-Sub (Disc n) Γ σ → Typing-Tm Γ (disc-term n σ) (sphere-type n [ sub-proj₁ σ ]ty)
+disc-term-Ty n@(suc n′) σty = let
+  instance _ = disc-pd n
+  in TyConv (TyCoh (subst₂ (ops (Disc n))
+                           (sym (var2-disc-supp n′))
+                           (sym (var1-disc-supp n′))
+                           (standard-op (Disc n) n′ (≤-reflexive (disc-dim n))))
+                   (lift-ty-typing (sphere-type-Ty n)) σty)
+            (reflexive≈ty (apply-sub-lifted-ty-≃ (sphere-type n) _))
 
 sub-from-sphere-Ty : (d : ℕ) → Typing-Ty Γ A → .(p : ty-dim A ≡ d) → Typing-Sub (Sphere d) Γ (sub-from-sphere d A p)
 sub-from-sphere-Ty zero TyStar p = TyNull TyStar
@@ -86,9 +98,14 @@ sub-from-disc-Eq : (d : ℕ) → {σ : Sub (disc-size d) n A} → {τ : Sub (dis
 sub-from-disc-Eq d (TyExt σty x) (TyExt τty y) p = Ext≈ (sub-from-sphere-Eq d σty τty (Ty-unique-≃ p x y)) (reflexive≈tm p)
 
 identity-Ty : (n : ℕ) → ∀ {σ} → Typing-Sub (Disc n) Γ σ → Typing-Tm Γ (identity n σ) ((0V ─⟨ lift-ty (sphere-type n) ⟩⟶ 0V) [ σ ]ty)
-identity-Ty n σty = TyCoh ⦃ disc-pd n ⦄
-                          (TyArr (TyVar zero) (lift-ty-typing (sphere-type-Ty n)) (TyVar zero))
-                          σty
+identity-Ty n σty = let
+  instance _ = disc-pd n
+  in TyCoh (subst₂ (ops (Disc n))
+                   (trans (pd-bd-supp-full n (Disc n) false (≤-reflexive (disc-dim n))) (sym (var0-disc-full n)))
+                   (trans (pd-bd-supp-full n (Disc n) true (≤-reflexive (disc-dim n))) (sym (var0-disc-full n)))
+                   (standard-op (Disc n) n (≤-trans (≤-reflexive (disc-dim n)) (n≤1+n n))))
+           (TyArr (TyVar zero) (lift-ty-typing (sphere-type-Ty n)) (TyVar zero))
+           σty
   where
     open ≡-Reasoning
 
@@ -142,8 +159,8 @@ sub-from-disc-type-Ty σty = sub-from-sphere-type-Ty (sub-proj₁-Ty σty)
 
 identity-to-term-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Tm Γ t A
 identity-to-term-Ty (TyConv tty p) = identity-to-term-Ty tty
-identity-to-term-Ty (TyCoh Aty σty) = sub-from-disc-to-term-Ty (ty-dim _) refl σty
+identity-to-term-Ty (TyCoh supp Aty σty) = sub-from-disc-to-term-Ty (ty-dim _) refl σty
 
 identity-to-type-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Ty Γ A
 identity-to-type-Ty (TyConv tty p) = identity-to-type-Ty tty
-identity-to-type-Ty (TyCoh Aty (TyExt σty _)) = sub-from-sphere-to-ty-Ty (ty-dim _) refl σty
+identity-to-type-Ty (TyCoh supp Aty (TyExt σty _)) = sub-from-sphere-to-ty-Ty (ty-dim _) refl σty

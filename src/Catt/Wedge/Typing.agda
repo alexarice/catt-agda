@@ -1,7 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Wedge.Typing (rules : RuleSet)
-                         (tame : Tame rules) where
+module Catt.Wedge.Typing (ops : Op)
+                         (rules : RuleSet)
+                         (tame : Tame ops rules) where
 
 open Tame tame
 
@@ -15,9 +16,9 @@ open import Catt.Suspension.Properties
 open import Catt.Wedge
 open import Catt.Wedge.Properties
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties rules tame
-open import Catt.Suspension.Typing rules lift-cond susp-cond
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties ops rules tame
+open import Catt.Suspension.Typing ops susp-op rules lift-cond susp-cond
 
 
 wedge-Ty : {Γ : Ctx (suc n)} → Typing-Ctx Γ → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → {Δ : Ctx (suc m)} → Typing-Ctx Δ → Typing-Ctx (wedge Γ t Δ)

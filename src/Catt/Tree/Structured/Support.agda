@@ -3,6 +3,7 @@ module Catt.Tree.Structured.Support where
 open import Catt.Prelude
 open import Catt.Tree
 open import Catt.Tree.Path
+open import Catt.Tree.Pasting
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Structured.Globular
@@ -131,11 +132,5 @@ MtoVarSet : (ΓS : CtxOrTree n) → MVarSet (COT-to-MT ΓS) → VarSet n
 MtoVarSet (incTree _) xs = toVarSet xs
 MtoVarSet (incCtx Γ) xs = DC Γ xs
 
-SupportedSTm : STm X → Set
-SupportedSTm = Wrap (λ a → SupportedTm (stm-to-term a))
-
-SupportedSTy : STy X → Set
-SupportedSTy = Wrap (λ As → SupportedTy (sty-to-type As))
-
-SupportedLabel : Label-WT X S → Set
-SupportedLabel = Wrap (λ L → SupportedSub (label-to-sub L))
+TransportVarSet-Label : {ΓS : CtxOrTree n} → TVarSet S → (L : Label (COT-to-MT ΓS) S) → VarSet n
+TransportVarSet-Label xs L = TransportVarSet (toVarSet xs) (label-to-sub (L ,, S⋆))

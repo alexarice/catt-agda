@@ -1,9 +1,10 @@
 open import Catt.Typing.Rule
 
 module Catt.Typing.Properties.Substitution
+  (ops : Op)
   (rules : RuleSet)
   (lift-cond : LiftCond rules)
-  (sub-cond : SubCond rules) where
+  (sub-cond : SubCond ops rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -11,9 +12,9 @@ open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Suspension
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
-open import Catt.Typing.Properties.Lifting rules lift-cond
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
+open import Catt.Typing.Properties.Lifting ops rules lift-cond
 
 sub-typing-implies-ty-typing : {σ : Sub n m A} → Typing-Sub Γ Δ σ → Typing-Ty Δ A
 sub-typing-implies-ty-typing (TyNull x) = x
@@ -38,7 +39,7 @@ apply-sub-tm-typing (TyVar zero) (TyExt {σ = σ} {A = A} σty x)
   = TyConv x (reflexive≈ty (sym≃ty (apply-sub-lifted-ty-≃ A ⟨ σ , _ ⟩)))
 apply-sub-tm-typing {Γ = Γ , _} (TyVar (suc i)) (TyExt {σ = σ} σty x)
   = TyConv (apply-sub-tm-typing (TyVar i) σty) (reflexive≈ty (sym≃ty (apply-sub-lifted-ty-≃ (Γ ‼ i) ⟨ σ , _ ⟩)))
-apply-sub-tm-typing (TyCoh {A = A} Aty τty) σty = TyConv (TyCoh Aty (apply-sub-sub-typing τty σty)) (reflexive≈ty (assoc-ty _ _ A))
+apply-sub-tm-typing (TyCoh {A = A} supp Aty τty) σty = TyConv (TyCoh supp Aty (apply-sub-sub-typing τty σty)) (reflexive≈ty (assoc-ty _ _ A))
 
 apply-sub-sub-typing (TyNull x) σty = TyNull (apply-sub-ty-typing x σty)
 apply-sub-sub-typing (TyExt {A = A} τty tty) σty = TyExt (apply-sub-sub-typing τty σty) (TyConv (apply-sub-tm-typing tty σty) (sym≈ty (reflexive≈ty (assoc-ty _ _ A))))

@@ -1,6 +1,7 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.EndoCoherenceRemoval (rules : RuleSet) where
+module Catt.Typing.EndoCoherenceRemoval (ops : Op)
+                                        (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -21,9 +22,10 @@ open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Path
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
-open import Catt.Tree.Structured.Typing rules
+open import Catt.Tree.Ops ops
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
+open import Catt.Tree.Structured.Typing ops rules
 
 open import Catt.Support
 open import Catt.Tree.Support
@@ -39,7 +41,7 @@ HasEndoCoherenceRemoval = ∀ {m n}
                         → {Δ : Ctx (suc n)}
                         → {s : Tm (suc n)}
                         → {A : Ty (suc n)}
-                        → (SuppTy Δ (s ─⟨ A ⟩⟶ s) ≡ full)
+                        → (supp : SuppTm Δ s ≡ full)
                         → {σ : Sub (suc n) m ⋆}
                         → {B : Ty m}
                         → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ s) σ) B
@@ -47,23 +49,24 @@ HasEndoCoherenceRemoval = ∀ {m n}
 
 HasEndoCoherenceRemoval-STm : Set
 HasEndoCoherenceRemoval-STm = ∀ {m n}
-                        → {Γ : Ctx m}
-                        → {X : MaybeTree m}
-                        → (S : Tree n)
-                        → (s : STm (someTree S))
-                        → (As : STy (someTree S))
-                        → (DCT (FVSTy (SArr s As s)) ≡ mFull)
-                        → (L : Label X S)
-                        → Typing-STm ⌊ S ⌋ s As
-                        → Typing-STy ⌊ S ⌋ As
-                        → Typing-Label Γ (L ,, S⋆)
-                        → SCoh S (SArr s As s) (L ,, S⋆)
-                          ≈[ Γ ]stm
-                          (identity-stm (n-disc (sty-dim As))
-                            >>= (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ●lt (L ,, S⋆))
+                            → {Γ : Ctx m}
+                            → {X : MaybeTree m}
+                            → (S : Tree n)
+                            → (s : STm (someTree S))
+                            → (DCT (FVSTm s) ≡ tFull)
+                            → (As : STy (someTree S))
+                            → ops-s S (DCT (FVSTm s)) (DCT (FVSTm s))
+                            → (L : Label X S)
+                            → Typing-STm ⌊ S ⌋ s As
+                            → Typing-STy ⌊ S ⌋ As
+                            → Typing-Label Γ (L ,, S⋆)
+                            → SCoh S (SArr s As s) (L ,, S⋆)
+                              ≈[ Γ ]stm
+                              (identity-stm (n-disc (sty-dim As))
+                              >>= (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆) ●lt (L ,, S⋆))
 
 HasEndoCoherenceRemovalRule : Set
 HasEndoCoherenceRemovalRule = ECRSet ⊆r rules
 
 ecr-from-rule : HasEndoCoherenceRemovalRule → HasEndoCoherenceRemoval
-ecr-from-rule p supp tty = Rule≈ _ (p [ (ECR _ _ _ _ supp _) ]) tty
+ecr-from-rule p sfull tty = Rule≈ _ (p [ (ECR _ _ _ sfull _ _) ]) tty

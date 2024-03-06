@@ -1,8 +1,10 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.DiscRemoval.Support (rules : RuleSet)
+module Catt.Typing.DiscRemoval.Support (ops : Op)
+                                       (standard-op : StandardOp ops)
+                                       (rules : RuleSet)
                                        (lift-cond : LiftCond rules)
-                                       (supp-cond : SupportCond rules) where
+                                       (supp-cond : SupportCond ops rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -13,14 +15,14 @@ open import Catt.Discs.Properties
 open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Discs.Support
-open import Catt.Typing.Properties.Support rules supp-cond
+open import Catt.Typing.Properties.Support ops rules supp-cond
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
-open import Catt.Discs.Typing rules lift-cond
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
+open import Catt.Discs.Typing ops standard-op rules lift-cond
 open import Catt.Typing.DiscRemoval.Rule
 
-dr-supp : SupportCond′ rules DiscRemovalSet
+dr-supp : SupportCond′ ops rules DiscRemovalSet
 dr-supp [ DR {n = n} Γ σ ] tty = begin
   SuppTm Γ (disc-term n σ)
     ≡⟨⟩

@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Support.Typing (rules : RuleSet) where
+module Catt.Support.Typing (ops : Op) (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Syntax
@@ -9,7 +9,7 @@ open import Catt.Suspension.Support
 open import Catt.Support
 open import Catt.Support.Properties
 
-open import Catt.Typing.Rule.Properties
+open import Catt.Typing.Rule.Properties ops
 
 rulesWithSupp : RuleSet
 rulesWithSupp r = rules r × SuppTm tgtCtx lhs ≡ SuppTm tgtCtx rhs
@@ -20,10 +20,10 @@ rulesWithSupp⊆ : rulesWithSupp ⊆r rules
 rulesWithSupp⊆ [ p ,, _ ] = [ p ]
 
 module _ where
-  open import Catt.Typing rulesWithSupp
+  open import Catt.Typing ops rulesWithSupp
   open ≡-Reasoning
 
-  rulesWithSupp-supp : SupportCond rulesWithSupp
+  rulesWithSupp-supp : SupportCond ops rulesWithSupp
   rulesWithSupp-supp [ p ,, supp ] tty = supp
 
   rulesWithSupp-lift : LiftCond rules → LiftCond rulesWithSupp
@@ -52,7 +52,7 @@ module _ where
     where
       open Rule r
 
-  rulesWithSupp-sub : SubCond rules → SubCond rulesWithSupp
+  rulesWithSupp-sub : SubCond ops rules → SubCond ops rulesWithSupp
   rulesWithSupp-sub p Γ σty [ x ,, supp ] .get .proj₁ = p Γ (Typing-Sub-⊆ rulesWithSupp⊆ σty) [ x ] .get
   rulesWithSupp-sub p {r = r} Γ {σ = σ} σty [ x ,, supp ] .get .proj₂ = begin
     SuppTm Γ (lhs [ σ ]tm)
@@ -68,24 +68,25 @@ module _ where
     SuppTm Γ (rhs [ σ ]tm) ∎
     where
       open Rule r
-      open import Catt.Typing.Properties.Support rulesWithSupp rulesWithSupp-supp
+      open import Catt.Typing.Properties.Support ops rulesWithSupp rulesWithSupp-supp
 
   open Tame
 
-  rulesWithSupp-tame : Tame rules → Tame rulesWithSupp
+  rulesWithSupp-tame : Tame ops rules → Tame ops rulesWithSupp
+  rulesWithSupp-tame p .tame-op = p .tame-op
   rulesWithSupp-tame p .lift-cond = rulesWithSupp-lift (p .lift-cond)
   rulesWithSupp-tame p .susp-cond = rulesWithSupp-susp (p .susp-cond)
   rulesWithSupp-tame p .sub-cond = rulesWithSupp-sub (p .sub-cond)
 
-module _ (supp-cond : SupportCond′ rulesWithSupp rules) where
+module _ (supp-cond : SupportCond′ ops rulesWithSupp rules) where
   open import Catt.Typing
 
-  SupportCond-≈tm : _≈[_]tm_ rules s Γ t → _≈[_]tm_ rulesWithSupp s Γ t
-  SupportCond-≈ty : _≈[_]ty_ rules A Γ B → _≈[_]ty_ rulesWithSupp A Γ B
-  SupportCond-≈s : _≈[_]s_ rules σ Γ τ → _≈[_]s_ rulesWithSupp σ Γ τ
-  SupportCond-Tm : Typing-Tm rules Γ t A → Typing-Tm rulesWithSupp Γ t A
-  SupportCond-Ty : Typing-Ty rules Γ A → Typing-Ty rulesWithSupp Γ A
-  SupportCond-Sub : Typing-Sub rules Γ Δ σ → Typing-Sub rulesWithSupp Γ Δ σ
+  SupportCond-≈tm : _≈[_]tm_ ops rules s Γ t → _≈[_]tm_ ops rulesWithSupp s Γ t
+  SupportCond-≈ty : _≈[_]ty_ ops rules A Γ B → _≈[_]ty_ ops rulesWithSupp A Γ B
+  SupportCond-≈s : _≈[_]s_ ops rules σ Γ τ → _≈[_]s_ ops rulesWithSupp σ Γ τ
+  SupportCond-Tm : Typing-Tm ops rules Γ t A → Typing-Tm ops rulesWithSupp Γ t A
+  SupportCond-Ty : Typing-Ty ops rules Γ A → Typing-Ty ops rulesWithSupp Γ A
+  SupportCond-Sub : Typing-Sub ops rules Γ Δ σ → Typing-Sub ops rulesWithSupp Γ Δ σ
 
   SupportCond-≈tm (Var≈ x) = Var≈ x
   SupportCond-≈tm (Sym≈ p) = Sym≈ (SupportCond-≈tm p)
@@ -101,7 +102,7 @@ module _ (supp-cond : SupportCond′ rulesWithSupp rules) where
 
   SupportCond-Tm (TyConv tty p) = TyConv (SupportCond-Tm tty) (SupportCond-≈ty p)
   SupportCond-Tm (TyVar i) = TyVar i
-  SupportCond-Tm (TyCoh Aty σty) = TyCoh (SupportCond-Ty Aty) (SupportCond-Sub σty)
+  SupportCond-Tm (TyCoh supp Aty σty) = TyCoh supp (SupportCond-Ty Aty) (SupportCond-Sub σty)
 
   SupportCond-Ty TyStar = TyStar
   SupportCond-Ty (TyArr sty Aty tty) = TyArr (SupportCond-Tm sty) (SupportCond-Ty Aty) (SupportCond-Tm tty)
@@ -109,5 +110,5 @@ module _ (supp-cond : SupportCond′ rulesWithSupp rules) where
   SupportCond-Sub (TyNull Aty) = TyNull (SupportCond-Ty Aty)
   SupportCond-Sub (TyExt σty tty) = TyExt (SupportCond-Sub σty) (SupportCond-Tm tty)
 
-  SupportCond-prop : SupportCond rules
+  SupportCond-prop : SupportCond ops rules
   SupportCond-prop q tty = supp-cond q (SupportCond-Tm tty)

@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Properties.Base (rules : RuleSet) where
+module Catt.Typing.Properties.Base (ops : Op) (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -10,8 +10,11 @@ open import Catt.Syntax.Properties
 open import Catt.Variables
 open import Catt.Globular
 open import Catt.Suspension
+open import Catt.Pasting
+open import Catt.Pasting.Properties
+open import Catt.Support
 
-open import Catt.Typing rules
+open import Catt.Typing ops rules
 
 refl≈ty : A ≈[ Γ ]ty A
 refl≈tm : t ≈[ Γ ]tm t
@@ -132,11 +135,26 @@ transport-tm-eq p q r s with ≃c-preserve-length q
 
 coh-sub-ty : Typing-Tm Γ (Coh Δ A τ) B → Typing-Sub Δ Γ τ
 coh-sub-ty (TyConv tty p) = coh-sub-ty tty
-coh-sub-ty (TyCoh x τty) = τty
+coh-sub-ty (TyCoh supp x τty) = τty
 
 coh-ty-ty : Typing-Tm Γ (Coh Δ A τ) B → Typing-Ty Δ A
 coh-ty-ty (TyConv tty p) = coh-ty-ty tty
-coh-ty-ty (TyCoh Aty τty) = Aty
+coh-ty-ty (TyCoh supp Aty τty) = Aty
+
+coh-nonZero : Typing-Tm Γ (Coh Δ A τ) B → NonZero (ty-dim A)
+coh-nonZero (TyConv tty _) = coh-nonZero tty
+coh-nonZero {A = s ─⟨ A ⟩⟶ t} (TyCoh _ _ _) = it
+
+coh-pd : Typing-Tm Γ (Coh Δ A τ) B → Δ ⊢pd
+coh-pd (TyConv tty _) = coh-pd tty
+coh-pd (TyCoh ⦃ pd ⦄ _ _ _) = recompute (pd-dec _) pd
+
+coh-supp : (tty : Typing-Tm Γ (Coh Δ A τ) B) → ops Δ
+                                                   ⦃ coh-pd tty ⦄
+                                                   (SuppTm Δ (ty-src A ⦃ coh-nonZero tty ⦄))
+                                                   (SuppTm Δ (ty-tgt A ⦃ coh-nonZero tty ⦄))
+coh-supp (TyConv tty _) = coh-supp tty
+coh-supp (TyCoh supp _ _) = supp
 
 sub-proj₁-Ty : Typing-Sub (Γ , A) Δ σ → Typing-Sub Γ Δ (sub-proj₁ σ)
 sub-proj₁-Ty (TyExt σty x) = σty

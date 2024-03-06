@@ -125,7 +125,7 @@ standard-label-full S T = begin
   tFull ∎
 
 
-standard-stm-full : (d : ℕ) → (T : Tree m) → .(d ≥ tree-dim T) → DCT (FVSTm (standard-stm d T)) ≡ tFull
+standard-stm-full : (d : ℕ) → (T : Tree m) → (d ≥ tree-dim T) → DCT (FVSTm (standard-stm d T)) ≡ tFull
 standard-stm-full zero Sing p = refl
 standard-stm-full (suc d) Sing p = refl
 standard-stm-full (suc d) (Susp T) p = begin

@@ -1,7 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Structured.Typing.Properties (rules : RuleSet)
-                                              (tame : Tame rules) where
+module Catt.Tree.Structured.Typing.Properties (ops : Op)
+                                              (rules : RuleSet)
+                                              (tame : Tame ops rules) where
 
 open Tame tame
 
@@ -20,21 +21,29 @@ open import Catt.Tree.Properties
 open import Catt.Tree.Pasting
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
+open import Catt.Tree.Ops ops
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Globular
+open import Catt.Tree.Structured.Globular.Properties
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Structured.ToTerm
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties rules tame
-open import Catt.Globular.Typing rules lift-cond
-open import Catt.Suspension.Typing rules lift-cond susp-cond
-open import Catt.Wedge.Typing rules tame
-open import Catt.Tree.Typing rules tame
-open import Catt.Tree.Path.Typing rules tame
-open import Catt.Tree.Structured.Typing rules
+open import Catt.Support
+open import Catt.Support.Properties
+open import Catt.Tree.Support
+open import Catt.Tree.Structured.Support
+open import Catt.Tree.Structured.Support.Properties
+
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties ops rules tame
+open import Catt.Globular.Typing ops rules
+open import Catt.Suspension.Typing ops susp-op rules lift-cond susp-cond
+open import Catt.Wedge.Typing ops rules tame
+open import Catt.Tree.Typing ops rules tame
+open import Catt.Tree.Path.Typing ops rules tame
+open import Catt.Tree.Structured.Typing ops rules
 
 ≈SExt : {a b : STm (someTree S)} → a ≈[ ⌊ S ⌋ ]stm b → SExt {T = T} a ≈[ ⌊ Join S T ⌋ ]stm SExt b
 ≈SExt {T = T} [ p ] = [ (apply-sub-tm-eq (wedge-susp-inc-left-Ty ⌊ T ⌋) (susp-tmEq p)) ]
@@ -83,18 +92,57 @@ TySShift {As = As} {S = S} [ aty ] .get = TyConv (apply-sub-tm-typing aty (wedge
   where
     open Reasoning ty-setoid
 
-TySCoh : (S : Tree n) → {As : STy (someTree S)} → {L : Label-WT X S}
-         → Typing-STy ⌊ S ⌋ As
-         → Typing-Label Γ L
-         → Typing-STy Γ (lty L)
-         → Typing-STm Γ (SCoh S As L) (As >>=′ L)
-TySCoh S {As} {L} [ Aty ] Lty Ltyty .get = TyConv (apply-sub-tm-typing (TyCoh ⦃ tree-to-pd S ⦄ Aty id-Ty) (label-to-sub-Ty Lty Ltyty)) (reflexive≈ty (begin
+TySCoh : (S : Tree n)
+       → {As : STy (someTree S)} → .⦃ _ : NonZero (sty-dim As) ⦄
+       → ops-s S (DCT (FVSTm (sty-src As))) (DCT (FVSTm (sty-tgt As)))
+       → {L : Label-WT X S}
+       → Typing-STy ⌊ S ⌋ As
+       → Typing-Label Γ L
+       → Typing-STy Γ (lty L)
+       → Typing-STm Γ (SCoh S As L) (As >>=′ L)
+TySCoh S {As} supp {L} [ Aty ] Lty Ltyty .get
+  = TyConv (apply-sub-tm-typing (TyCoh ⦃ tree-to-pd S ⦄
+                                       (subst₂ (ops ⌊ S ⌋ ⦃ tree-to-pd S ⦄)
+                                               l1
+                                               l2
+                                               supp)
+                                       Aty
+                                       id-Ty)
+                                (label-to-sub-Ty Lty Ltyty))
+           (reflexive≈ty (begin
   < sty-to-type As [ idSub ]ty [ label-to-sub L ]ty >ty
     ≈⟨ sub-action-≃-ty (id-on-ty (sty-to-type As)) refl≃s ⟩
   < sty-to-type As [ label-to-sub L ]ty >ty
     ≈⟨ label-to-sub-sty L As ⟩
   < sty-to-type (As >>=′ L) >ty ∎))
   where
+    instance .x : NonZero (ty-dim (sty-to-type As))
+    x = NonZero-subst (sym (sty-to-type-dim As)) it
+
+    l1 : toVarSet (DCT (FVSTm (sty-src As))) ≡ SuppTm ⌊ S ⌋ (ty-src (sty-to-type As))
+    l1 = begin
+      toVarSet (DCT (FVSTm (sty-src As)))
+        ≡⟨ DCT-toVarSet (FVSTm (sty-src As)) ⟩
+      toVarSet (FVSTm (sty-src As))
+        ≡⟨ FVSTm-to-term (sty-src As) ⟩
+      SuppTm ⌊ S ⌋ (stm-to-term (sty-src As))
+        ≡⟨ cong (DC ⌊ S ⌋) (FVTm-≃ (sty-src-to-term As)) ⟩
+      SuppTm ⌊ S ⌋ (ty-src (sty-to-type As)) ∎
+      where
+        open ≡-Reasoning
+
+    l2 : toVarSet (DCT (FVSTm (sty-tgt As))) ≡ SuppTm ⌊ S ⌋ (ty-tgt (sty-to-type As))
+    l2 = begin
+      toVarSet (DCT (FVSTm (sty-tgt As)))
+        ≡⟨ DCT-toVarSet (FVSTm (sty-tgt As)) ⟩
+      toVarSet (FVSTm (sty-tgt As))
+        ≡⟨ FVSTm-to-term (sty-tgt As) ⟩
+      SuppTm ⌊ S ⌋ (stm-to-term (sty-tgt As))
+        ≡⟨ cong (DC ⌊ S ⌋) (FVTm-≃ (sty-tgt-to-term As)) ⟩
+      SuppTm ⌊ S ⌋ (ty-tgt (sty-to-type As)) ∎
+      where
+        open ≡-Reasoning
+
     open Reasoning ty-setoid
 
 label-equality-to-sub : (L M : Label-WT X S) → ap L ≈[ Γ ]l ap M → lty L ≈[ Γ ]sty lty M → label-to-sub L ≈[ Γ ]s label-to-sub M
@@ -364,8 +412,12 @@ SCoh-Label-Ty : Typing-Tm Γ (stm-to-term (SCoh S As (L ,, S⋆))) B → Typing-
 SCoh-Label-Ty {L = L} aty
   = Label-ty [ (transport-typing-sub (coh-sub-ty aty) refl≃c refl≃c (id-left-unit (label-to-sub (L ,, S⋆)))) ]
 
-sty-to-coh-Ty : {As : STy (someTree S)} → Typing-STy ⌊ S ⌋ As → Typing-STm ⌊ S ⌋ (sty-to-coh As) As
-sty-to-coh-Ty {S = S} {As = As} AsTy = TySConv (TySCoh S AsTy (id-label-Ty S) TySStar) (reflexive≈sty (>>=′-id As))
+sty-to-coh-Ty : {As : STy (someTree S)}
+              → .⦃ _ : NonZero (sty-dim As) ⦄
+              → ops-s S (DCT (FVSTm (sty-src As))) (DCT (FVSTm (sty-tgt As)))
+              → Typing-STy ⌊ S ⌋ As
+              → Typing-STm ⌊ S ⌋ (sty-to-coh As) As
+sty-to-coh-Ty {S = S} {As = As} supp AsTy = TySConv (TySCoh S supp AsTy (id-label-Ty S) TySStar) (reflexive≈sty (>>=′-id As))
 
 ++l′-inc-left : (L : Label X S)
               → (M : Label X T)

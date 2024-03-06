@@ -19,6 +19,41 @@ sphere-≡ : .(d ≡ d′) → sphere-type d ≃ty sphere-type d′
 sphere-≡ p with recompute (_ ≟ _) p
 ... | refl = refl≃ty
 
+sphere-type-dim : (n : ℕ) → ty-dim (sphere-type n) ≡ n
+sphere-type-dim zero = refl
+sphere-type-dim (suc n) = cong suc (begin
+  ty-dim (lift-ty (lift-ty (sphere-type n)))
+    ≡⟨ lift-ty-dim (lift-ty (sphere-type n)) ⟩
+  ty-dim (lift-ty (sphere-type n))
+    ≡⟨ lift-ty-dim (sphere-type n) ⟩
+  ty-dim (sphere-type n)
+    ≡⟨ sphere-type-dim n ⟩
+  n ∎)
+  where
+    open ≡-Reasoning
+
+sphere-dim : (n : ℕ) → ctx-dim (Sphere n) ≡ pred n
+disc-dim : (n : ℕ) → ctx-dim (Disc n) ≡ n
+
+sphere-dim zero = refl
+sphere-dim (suc n) = begin
+  ctx-dim (Disc n) ⊔ ty-dim (lift-ty (sphere-type n))
+    ≡⟨ cong₂ _⊔_ (disc-dim n) (trans (lift-ty-dim (sphere-type n)) (sphere-type-dim n)) ⟩
+  n ⊔ n
+    ≡⟨ ⊔-idem n ⟩
+  n ∎
+  where
+    open ≡-Reasoning
+
+disc-dim n = begin
+  ctx-dim (Sphere n) ⊔ ty-dim (sphere-type n)
+    ≡⟨ cong₂ _⊔_ (sphere-dim n) (sphere-type-dim n) ⟩
+  pred n ⊔ n
+    ≡⟨ m≤n⇒m⊔n≡n pred[n]≤n ⟩
+  n ∎
+  where
+    open ≡-Reasoning
+
 disc-susp : (n : ℕ) → susp-ctx (Disc n) ≃c Disc (suc n)
 sphere-susp : (n : ℕ) → susp-ctx (Sphere n) ≃c Sphere (suc n)
 sphere-type-susp : (n : ℕ) → susp-ty (sphere-type n) ≃ty sphere-type (suc n)

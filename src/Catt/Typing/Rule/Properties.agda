@@ -1,9 +1,11 @@
-module Catt.Typing.Rule.Properties where
+open import Catt.Typing.Base
+
+module Catt.Typing.Rule.Properties (ops : Op) where
 
 open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Typing.Rule
-open import Catt.Typing
+open import Catt.Typing ops
 
 module _ {rs} {rs′} (subset : rs ⊆r rs′) where
   ≈tm-⊆ : _≈[_]tm_ rs s Γ t → _≈[_]tm_ rs′ s Γ t
@@ -31,7 +33,7 @@ module _ {rs} {rs′} (subset : rs ⊆r rs′) where
 
   Typing-Tm-⊆ (TyConv x p) = TyConv (Typing-Tm-⊆ x) (≈ty-⊆ p)
   Typing-Tm-⊆ (TyVar i) = TyVar i
-  Typing-Tm-⊆ (TyCoh x y) = TyCoh (Typing-Ty-⊆ x) (Typing-Sub-⊆ y)
+  Typing-Tm-⊆ (TyCoh x y z) = TyCoh x (Typing-Ty-⊆ y) (Typing-Sub-⊆ z)
 
   Typing-Ty-⊆ TyStar = TyStar
   Typing-Ty-⊆ (TyArr x y z) = TyArr (Typing-Tm-⊆ x) (Typing-Ty-⊆ y) (Typing-Tm-⊆ z)

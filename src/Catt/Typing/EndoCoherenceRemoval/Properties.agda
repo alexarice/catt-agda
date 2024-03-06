@@ -1,9 +1,10 @@
 open import Catt.Typing.Rule
 import Catt.Typing.EndoCoherenceRemoval as ECR
 
-module Catt.Typing.EndoCoherenceRemoval.Properties (rules : RuleSet)
-                                                   (tame : Tame rules)
-                                                   (ecr : ECR.HasEndoCoherenceRemoval rules) where
+module Catt.Typing.EndoCoherenceRemoval.Properties (ops : Op)
+                                                   (rules : RuleSet)
+                                                   (tame : Tame ops rules)
+                                                   (ecr : ECR.HasEndoCoherenceRemoval ops rules) where
 
 open Tame tame
 
@@ -28,26 +29,33 @@ open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties rules tame
-open import Catt.Tree.Structured.Typing rules
-open import Catt.Tree.Structured.Typing.Properties rules tame
-open import Catt.Globular.Typing rules lift-cond
-open import Catt.Discs.Typing rules lift-cond
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties ops rules tame
+open import Catt.Tree.Structured.Typing ops rules
+open import Catt.Tree.Structured.Typing.Properties ops rules tame
+open import Catt.Globular.Typing ops rules
+open import Catt.Discs.Typing ops standard-op rules lift-cond
 
 open import Catt.Support
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
 open import Catt.Tree.Structured.Support.Properties
 
-open ECR rules
+open ECR ops rules
 
 ecr-stm : HasEndoCoherenceRemoval-STm
-ecr-stm S s As supp L [ sty ] [ Asty ] Lty .get = begin
+ecr-stm S s sfull As supp L [ sty ] [ Asty ] Lty .get = begin
   Coh ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (idSub ● label-to-sub (L ,, S⋆))
     ≈⟨ reflexive≈tm (Coh≃ refl≃c refl≃ty (id-left-unit (label-to-sub (L ,, S⋆)))) ⟩
   Coh ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (label-to-sub (L ,, S⋆))
-    ≈⟨ ecr supp-lem (TyCoh ⦃ tree-to-pd S ⦄ (TyArr sty Asty sty) (label-to-sub-Ty Lty TySStar)) ⟩
+    ≈⟨ ecr full-lem
+           (TyCoh ⦃ tree-to-pd S ⦄
+                  (subst₂ (ops ⌊ S ⌋ ⦃ tree-to-pd S ⦄)
+                          (trans (DCT-toVarSet (FVSTm s)) (FVSTm-to-term s))
+                          (trans (DCT-toVarSet (FVSTm s)) (FVSTm-to-term s))
+                          supp)
+                  (TyArr sty Asty sty)
+                  (label-to-sub-Ty Lty TySStar)) ⟩
   identity (ty-dim (sty-to-type As))
            (sub-from-disc (ty-dim (sty-to-type As))
                           (sty-to-type As [ label-to-sub (L ,, S⋆) ]ty)
@@ -97,15 +105,15 @@ ecr-stm S s As supp L [ sty ] [ Asty ] Lty .get = begin
       where
         open Reasoning sub-setoid
 
-    supp-lem : SuppTy ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) ≡ full
-    supp-lem = begin
-      SuppTy ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s)
-        ≡˘⟨ FVSTy-to-type (SArr s As s) ⟩
-      MtoVarSet (incTree S) (FVSTy (SArr s As s))
-        ≡˘⟨ DCM-toVarSet (FVSTy (SArr s As s)) ⟩
-      MtoVarSet (incTree S) (DCT (FVSTy (SArr s As s)))
-        ≡⟨ cong (MtoVarSet (incTree S)) supp ⟩
-      MtoVarSet (incTree S) mFull
+    full-lem : SuppTm ⌊ S ⌋ (stm-to-term s) ≡ full
+    full-lem = begin
+      SuppTm ⌊ S ⌋ (stm-to-term s)
+        ≡˘⟨ FVSTm-to-term s ⟩
+      toVarSet (FVSTm s)
+        ≡˘⟨ DCT-toVarSet (FVSTm s) ⟩
+      toVarSet (DCT (FVSTm s))
+        ≡⟨ cong toVarSet sfull ⟩
+      toVarSet (tFull {S = S})
         ≡⟨ toVarSet-full S ⟩
       full ∎
       where

@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Pruning (rules : RuleSet) where
+module Catt.Typing.Pruning (ops : Op) (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -15,8 +15,8 @@ open import Catt.Dyck.Properties
 open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Properties
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
 
 open import Catt.Typing.Pruning.Rule
 

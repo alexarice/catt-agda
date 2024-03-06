@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Structured.Typing (rules : RuleSet) where
+module Catt.Tree.Structured.Typing (ops : Op) (rules : RuleSet) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -10,6 +10,7 @@ open import Catt.Syntax.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Path
+open import Catt.Tree.Pasting
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Globular
@@ -17,9 +18,10 @@ open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Structured.ToTerm
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
+open import Catt.Tree.Support
 
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
 
 stm-eq : {X : MaybeTree n} → (Γ : Ctx n) → STm X → STm X → Set
 stm-eq Γ = Wrap (λ a b → stm-to-term a ≈[ Γ ]tm stm-to-term b)

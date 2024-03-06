@@ -32,13 +32,13 @@ data ECRSet : RuleSet where
   ECR : (Γ : Ctx m)
       → (Δ : Ctx (suc n))
       → (s : Tm (suc n))
+      → (supp : SuppTm Δ s ≡ full)
       → (A : Ty (suc n))
-      → (SuppTy Δ (s ─⟨ A ⟩⟶ s) ≡ full)
       → (σ : Sub (suc n) m ⋆)
       → ECRSet (EndoCoherenceRemoval Γ Δ s A σ)
 
 ecr-lift : LiftCond ECRSet
-ecr-lift B [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR (Γ , B) Δ s A supp (lift-sub σ) ] γ
+ecr-lift B [ ECR Γ Δ s sfull A σ ] = ∈r-≃ [ ECR (Γ , B) Δ s sfull A (lift-sub σ) ] γ
   where
     γ : EndoCoherenceRemoval (Γ , B) Δ s A (lift-sub σ) ≃r lift-rule (EndoCoherenceRemoval Γ Δ s A σ) B
     γ .ctxeq = refl≃c
@@ -52,7 +52,7 @@ ecr-lift B [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR (Γ , B) Δ s A supp (lift
                                         (sym≃s (lift-sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))))
 
 ecr-susp : SuspCond ECRSet
-ecr-susp [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ) (susp-tm s) (susp-ty A) supp-lem (susp-sub σ) ] γ
+ecr-susp [ ECR Γ Δ s sfull A σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ) (susp-tm s) supp-lem (susp-ty A) (susp-sub σ) ] γ
   where
     lem : susp-ty (lift-ty (sphere-type (ty-dim A)))
           ≃ty
@@ -66,14 +66,12 @@ ecr-susp [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ) 
       where
         open Reasoning ty-setoid
 
-    supp-lem : SuppTy (susp-ctx Δ) (susp-tm s ─⟨ susp-ty A ⟩⟶ susp-tm s) ≡ full
+    supp-lem : SuppTm (susp-ctx Δ) (susp-tm s) ≡ full
     supp-lem = begin
-      SuppTy (susp-ctx Δ) (susp-tm s ─⟨ susp-ty A ⟩⟶ susp-tm s)
-        ≡⟨ cong (DC (susp-ctx Δ)) (suspSuppTy (s ─⟨ A ⟩⟶ s)) ⟩
-      DC (susp-ctx Δ) (suspSupp (FVTy (s ─⟨ A ⟩⟶ s)))
-        ≡⟨ DC-suspSupp Δ (FVTy (s ─⟨ A ⟩⟶ s)) ⟩
-      suspSupp (SuppTy Δ (s ─⟨ A ⟩⟶ s))
-        ≡⟨ cong suspSupp supp ⟩
+      SuppTm (susp-ctx Δ) (susp-tm s)
+        ≡⟨ suspSuppTm′ Δ s ⟩
+      suspSupp (SuppTm Δ s)
+        ≡⟨ cong suspSupp sfull ⟩
       suspSupp full
         ≡⟨ suspSuppFull ⟩
       full ∎
@@ -111,8 +109,8 @@ ecr-susp [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ) 
       < susp-tm (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))) >tm ∎
 
 
-ecr-sub : {rules : RuleSet} → SubCond′ rules ECRSet
-ecr-sub Υ {σ = τ} τty [ ECR Γ Δ s A supp σ ] = ∈r-≃ [ ECR Υ Δ s A supp (σ ● τ) ] γ
+ecr-sub : {ops : Op} {rules : RuleSet} → SubCond′ ops rules ECRSet
+ecr-sub Υ {σ = τ} τty [ ECR Γ Δ s sfull A σ ] = ∈r-≃ [ ECR Υ Δ s sfull A (σ ● τ) ] γ
   where
     γ : EndoCoherenceRemoval Υ Δ s A (σ ● τ) ≃r sub-rule (EndoCoherenceRemoval Γ Δ s A σ) Υ τ
     γ .ctxeq = refl≃c

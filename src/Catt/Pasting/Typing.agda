@@ -1,6 +1,7 @@
 open import Catt.Typing.Rule
 
-module Catt.Pasting.Typing (rules : RuleSet)
+module Catt.Pasting.Typing (ops : Op)
+                           (rules : RuleSet)
                            (lift-cond : LiftCond rules) where
 
 open import Catt.Prelude
@@ -11,10 +12,10 @@ open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Pasting
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
-open import Catt.Typing.Properties.Lifting rules lift-cond
-open import Catt.Globular.Typing rules lift-cond
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
+open import Catt.Typing.Properties.Lifting ops rules lift-cond
+open import Catt.Globular.Typing ops rules
 
 
 

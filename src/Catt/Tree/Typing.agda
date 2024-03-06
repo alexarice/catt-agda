@@ -1,7 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Typing (rules : RuleSet)
-                        (tame : Tame rules) where
+module Catt.Tree.Typing (ops : Op)
+                        (rules : RuleSet)
+                        (tame : Tame ops rules) where
 
 open Tame tame
 
@@ -15,11 +16,11 @@ open import Catt.Suspension.Properties
 open import Catt.Tree
 open import Catt.Tree.Properties
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties rules tame
-open import Catt.Globular.Typing rules lift-cond
-open import Catt.Suspension.Typing rules lift-cond susp-cond
-open import Catt.Wedge.Typing rules tame
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties ops rules tame
+open import Catt.Globular.Typing ops rules
+open import Catt.Suspension.Typing ops susp-op rules lift-cond susp-cond
+open import Catt.Wedge.Typing ops rules tame
 
 ⌊⌋-Ty : (T : Tree n) → Typing-Ctx ⌊ T ⌋
 ⌊⌋-Ty Sing = TyAdd TyEmp TyStar

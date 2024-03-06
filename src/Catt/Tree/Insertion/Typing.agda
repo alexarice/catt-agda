@@ -1,7 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Tree.Insertion.Typing (rules : RuleSet)
-                                  (tame : Tame rules) where
+module Catt.Tree.Insertion.Typing (ops : Op)
+                                  (rules : RuleSet)
+                                  (tame : Tame ops rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -19,41 +20,42 @@ open import Catt.Tree.Standard.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
-open import Catt.Typing rules
-open import Catt.Tree.Structured.Typing rules
-open import Catt.Tree.Structured.Typing.Properties rules tame
-open import Catt.Tree.Standard.Typing rules tame
+open import Catt.Typing ops rules
+open import Catt.Tree.Structured.Typing ops rules
+open import Catt.Tree.Structured.Typing.Properties ops rules tame
+open import Catt.Tree.Standard.Typing ops rules tame
 
 ι-Ty : (S : Tree n)
-     → (p : Branch S d)
+     → (P : Branch S d)
      → (T : Tree m)
      → .⦃ _ : has-trunk-height d T ⦄
-     → Typing-Label ⌊ S >>[ p ] T ⌋ (ι S p T ,, S⋆)
+     → Typing-Label ⌊ S >>[ P ] T ⌋ (ι S P T ,, S⋆)
 ι-Ty (Join S₁ S₂) BHere T = ++t-inc-left-Ty T S₂
-ι-Ty (Join S₁ S₂) (BExt p) (Susp T)
-  = ↓-label-Ty (map-ext-Ty (ι-Ty S₁ p T)) (map-sty-ext-Ty TySStar)
-ι-Ty (Join S₁ S₂) (BShift p) T = map-shift-Ty (ι-Ty S₂ p T)
+ι-Ty (Join S₁ S₂) (BExt P) (Susp T)
+  = ↓-label-Ty (map-ext-Ty (ι-Ty S₁ P T)) (map-sty-ext-Ty TySStar)
+ι-Ty (Join S₁ S₂) (BShift P) T = map-shift-Ty (ι-Ty S₂ P T)
 
 κ-Ty : (S : Tree n)
      → (P : Branch S d)
      → (T : Tree m)
      → .⦃ _ : has-trunk-height d T ⦄
+     → (p : lh P ≥ tree-dim T)
      → Typing-Label ⌊ S >>[ P ] T ⌋ (κ S P T ,, S⋆)
-κ-Ty (Join S₁ S₂) BHere T
-  = label-between-++t-Ty (replace-label-Ty (standard-label-Ty (Susp S₁) T)
-                                                     (TySPath PHere)
-                                                     (reflexive≈stm (standard-label-fst (Susp S₁) T)))
-                                   (id-label-Ty S₂)
-                                   (reflexive≈stm (standard-label-last (Susp S₁) T))
-                                   refl≈stm
-κ-Ty (Join S₁ S₂) (BExt p) (Susp T)
-  = label-between-joins-Ty (κ-Ty S₁ p T)
+κ-Ty (Join S₁ S₂) BHere T p
+  = label-between-++t-Ty (replace-label-Ty (standard-label-Ty (Susp S₁) T p)
+                                           (TySPath PHere)
+                                           (reflexive≈stm (standard-label-fst (Susp S₁) T)))
+                         (id-label-Ty S₂)
+                         (reflexive≈stm (standard-label-last (Susp S₁) T))
+                         refl≈stm
+κ-Ty (Join S₁ S₂) (BExt P) (Susp T) p
+  = label-between-joins-Ty (κ-Ty S₁ P T (≤-pred p))
                            (id-label-Ty S₂)
                            refl≈stm
-κ-Ty (Join S₁ S₂) (BShift p) T
+κ-Ty (Join S₁ S₂) (BShift P) T p
   = label-between-joins-Ty (id-label-Ty S₁)
-                           (κ-Ty S₂ p T)
-                           (reflexive≈stm (κ-phere S₂ p T) )
+                           (κ-Ty S₂ P T p)
+                           (reflexive≈stm (κ-phere S₂ P T))
 
 label-from-insertion-lem : (S₁ : Tree n)
                          → (S₂ : Tree m)

@@ -1,8 +1,9 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Insertion.Support (rules : RuleSet)
-                                     (tame : Tame rules)
-                                     (supp-cond : SupportCond rules) where
+module Catt.Typing.Insertion.Support (ops : Op)
+                                     (rules : RuleSet)
+                                     (tame : Tame ops rules)
+                                     (supp-cond : SupportCond ops rules) where
 
 open Tame tame
 
@@ -31,11 +32,11 @@ open import Catt.Tree.Standard
 open import Catt.Tree.Standard.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
-open import Catt.Tree.Structured.Typing rules
-open import Catt.Tree.Structured.Typing.Properties rules tame
-open import Catt.Tree.Boundary.Typing rules tame
-open import Catt.Tree.Standard.Typing rules tame
-open import Catt.Tree.Insertion.Typing rules tame
+open import Catt.Tree.Structured.Typing ops rules
+open import Catt.Tree.Structured.Typing.Properties ops rules tame
+open import Catt.Tree.Boundary.Typing ops rules tame
+open import Catt.Tree.Standard.Typing ops rules tame
+open import Catt.Tree.Insertion.Typing ops rules tame
 open import Catt.Typing.Insertion.Rule
 
 open import Catt.Support
@@ -48,7 +49,7 @@ open import Catt.Tree.Structured.Support.Properties
 open import Catt.Tree.Boundary.Support
 open import Catt.Tree.Standard.Support
 
-open import Catt.Typing.Structured.Support rules tame supp-cond
+open import Catt.Typing.Structured.Support ops rules tame supp-cond
 
 κ-full : (S : Tree n)
        → (p : Branch S d)
@@ -93,7 +94,7 @@ open import Catt.Typing.Structured.Support rules tame supp-cond
     ≡˘⟨ cong (λ a → TransportVarSet-Label a (κ S p T)) (trans (sym (FVLabel-WT-⋆ (ap (tree-inc-label d S b)))) (tree-inc-label-supp d S b)) ⟩
   TransportVarSet-Label (FVLabel (ap (tree-inc-label d S b)))
     (κ S p T)
-    ≡˘⟨ TransportVarSet-Label-Label (ap (tree-inc-label d S b)) (κ S p T) (κ-Ty S p T) ⟩
+    ≡˘⟨ TransportVarSet-Label-Label (ap (tree-inc-label d S b)) (κ S p T) (κ-Ty S p T q) ⟩
   toVarSet (FVLabel (ap (tree-inc-label d S b) ●l (κ S p T ,, S⋆)))
     ≡˘⟨ DCT-toVarSet (FVLabel (ap (tree-inc-label d S b) ●l (κ S p T ,, S⋆))) ⟩
   toVarSet
@@ -114,7 +115,7 @@ open import Catt.Typing.Structured.Support rules tame supp-cond
         (FVLabel
          (ap (tree-inc-label d S b) ●l (κ S p T ,, S⋆)))
         ≡⟨ EqSuppLabel (label-max-equality-to-equality (bd-κ-comm-1 S p T d x y q b)
-                                                       (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S p T) TySStar)
+                                                       (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S p T q) TySStar)
                                                        (label-≃-Ty (insertion-bd-1 S p T d y q) (tree-inc-Ty d (S >>[ p ] T) b))) ⟩
       DCT (FVLabel (label-≃ (insertion-bd-1 S p T d y q) (ap (tree-inc-label d (S >>[ p ] T) b))))
         ≡⟨ FV-label-comp-full (SPath ∘ (ppath-≃ (insertion-bd-1 S p T d y q)))
@@ -132,8 +133,12 @@ open import Catt.Typing.Structured.Support rules tame supp-cond
       DCT (FVLabel (ap (tree-inc-label d S b) ●l (κ S p T ,, S⋆)))
         ≡⟨ EqSuppLabel (label-max-equality-to-equality
                          (bd-κ-comm-2 S p T d b q x)
-                         (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S p T) TySStar)
-                         (label-comp-Ty (κ-Ty (tree-bd d S) (bd-branch S p d _) (tree-bd d T) ⦃ _ ⦄)
+                         (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S p T q) TySStar)
+                         (label-comp-Ty (κ-Ty (tree-bd d S)
+                                              (bd-branch S p d _)
+                                              (tree-bd d T)
+                                              ⦃ _ ⦄
+                                              (bd-branch-lh S p d (bd-branch-lem p x) T q))
                                         (label-≃-Ty (insertion-bd-2 S p T d (bd-branch-lem p x)) (tree-inc-Ty d (S >>[ p ] T) b)) TySStar)) ⟩
       DCT (FVLabel (κ (tree-bd d S)
                       (bd-branch S p d (bd-branch-lem p x))
@@ -162,8 +167,8 @@ open import Catt.Typing.Structured.Support rules tame supp-cond
         ≡⟨ DCT-supp-tree-bd d (S >>[ p ] T) b ⟩
       supp-tree-bd d (S >>[ p ] T) b ∎
 
-ins-supp : SupportCond′ rules InsertionSet
-ins-supp [ Insert Γ S As L P T M p ] tty = begin
+ins-supp : SupportCond′ ops rules InsertionSet
+ins-supp [ Insert Γ S As L P T q M p ] tty = begin
   SuppTm Γ (stm-to-term (SCoh S As (L ,, S⋆)))
     ≡˘⟨ FVSTm-to-term (SCoh S As (L ,, S⋆)) ⟩
   MtoVarSet (incCtx Γ) (FVLabel-WT (L ,, S⋆))
@@ -171,7 +176,7 @@ ins-supp [ Insert Γ S As L P T M p ] tty = begin
   DC Γ (FVLabel-WT (L ,, S⋆))
     ≡⟨ cong (DC Γ) (FVLabel-WT-⋆ L) ⟩
   DC Γ (FVLabel L)
-    ≡˘⟨ EqSuppLabel (label-max-equality-to-equality (κ-comm L P M S⋆ p) (label-comp-Ty (κ-Ty S P T) l2 TySStar) Lty) ⟩
+    ≡˘⟨ EqSuppLabel (label-max-equality-to-equality (κ-comm L P M S⋆ p) (label-comp-Ty (κ-Ty S P T q) l2 TySStar) Lty) ⟩
   DC Γ (FVLabel (κ S P T ●l (L >>l[ P ] M ,, S⋆)))
     ≡⟨ TransportVarSet-Label-Label (κ S P T) (L >>l[ P ] M) l2 ⟩
   TransportVarSet-Label {ΓS = incCtx Γ} (FVLabel (κ S P T)) (L >>l[ P ] M)
@@ -193,6 +198,7 @@ ins-supp [ Insert Γ S As L P T M p ] tty = begin
     Lty : Typing-Label Γ (L ,, S⋆)
     Lty = SCoh-Label-Ty tty
 
+
     lem : Typing-STm Γ (standard-coh (lh P) T >>= (M ,, S⋆)) _
     lem = transport-stm-typing (>>=-Ty (TySPath ⌊ P ⌋p) Lty TySStar)
                                (trans≃stm p (>>=-≃ (standard-coh′-compat (lh P) T) refl≃l refl≃sty))
@@ -204,7 +210,7 @@ ins-supp [ Insert Γ S As L P T M p ] tty = begin
     l1 : branch-type S P >>=′ (L ,, S⋆)
          ≈[ Γ ]sty
          standard-sty (lh P) T >>=′ (M ,, S⋆)
-    l1 = STy-unique-≃ p (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (standard-coh′-Ty (lh P) T) Mty TySStar)
+    l1 = STy-unique-≃ p (>>=-Ty (⌊⌋p-Ty P) Lty TySStar) (>>=-Ty (standard-coh′-Ty (lh P) T q) Mty TySStar)
 
     l2 : Typing-Label Γ (L >>l[ P ] M ,, S⋆)
     l2 = label-from-insertion-Ty Lty P Mty l1
@@ -225,13 +231,13 @@ module _ where
       lem : toVarSet (FVSTy (As >>=′ (κ S P T ,, S⋆))) ≡ toVarSet (tFull {S = S >>[ P ] T})
       lem = begin
         toVarSet (FVSTy (As >>=′ (κ S P T ,, S⋆)))
-          ≡⟨ TransportVarSet-Label-STy As (κ S P T) (κ-Ty S P T) ⟩
+          ≡⟨ TransportVarSet-Label-STy As (κ S P T) (κ-Ty S P T p) ⟩
         TransportVarSet-Label (FVSTy As) (κ S P T)
           ≡˘⟨ TransportVarSet-Label-DCT (FVSTy As) (κ S P T) ⟩
         TransportVarSet-Label (DCT (FVSTy As)) (κ S P T)
           ≡⟨ cong (λ - → TransportVarSet-Label - (κ S P T)) x ⟩
         TransportVarSet-Label mFull (κ S P T)
-          ≡⟨ TransportVarSet-Label-full (κ S P T) (κ-Ty S P T) ⟩
+          ≡⟨ TransportVarSet-Label-full (κ S P T) (κ-Ty S P T p) ⟩
         toVarSet (FVLabel (κ S P T))
           ≡˘⟨ DCT-toVarSet (FVLabel (κ S P T)) ⟩
         toVarSet (DCT (FVLabel (κ S P T)))
@@ -265,7 +271,7 @@ module _ where
       l1 : toVarSet (FVSTm (t >>= (κ S P T ,, S⋆))) ≡ toVarSet (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true)
       l1 = begin
         toVarSet (FVSTm (t >>= (κ S P T ,, S⋆)))
-          ≡⟨ TransportVarSet-Label-STm t (κ S P T) (κ-Ty S P T) ⟩
+          ≡⟨ TransportVarSet-Label-STm t (κ S P T) (κ-Ty S P T p) ⟩
         TransportVarSet-Label (FVSTm t) (κ S P T)
           ≡˘⟨ TransportVarSet-Label-DCT (FVSTm t) (κ S P T) ⟩
         TransportVarSet-Label (DCT (FVSTm t)) (κ S P T)
@@ -296,7 +302,7 @@ module _ where
            toVarSet (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b)
       l1 a b q = begin
         toVarSet (FVSTm (a >>= (κ S P T ,, S⋆)))
-          ≡⟨ TransportVarSet-Label-STm a (κ S P T) (κ-Ty S P T) ⟩
+          ≡⟨ TransportVarSet-Label-STm a (κ S P T) (κ-Ty S P T p) ⟩
         TransportVarSet-Label (FVSTm a) (κ S P T)
           ≡˘⟨ TransportVarSet-Label-DCT (FVSTm a) (κ S P T) ⟩
         TransportVarSet-Label (DCT (FVSTm a)) (κ S P T)

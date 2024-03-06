@@ -1,6 +1,7 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Properties.Lifting (rules : RuleSet)
+module Catt.Typing.Properties.Lifting (ops : Op)
+                                      (rules : RuleSet)
                                       (lift-cond : LiftCond rules) where
 
 open import Catt.Prelude
@@ -9,8 +10,8 @@ open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
 
-open import Catt.Typing rules
-open import Catt.Typing.Properties.Base rules
+open import Catt.Typing ops rules
+open import Catt.Typing.Properties.Base ops rules
 
 open Rule
 
@@ -27,7 +28,7 @@ lift-ty-typing (TyArr p q r) = TyArr (lift-tm-typing p) (lift-ty-typing q) (lift
 
 lift-tm-typing (TyConv tty p) = TyConv (lift-tm-typing tty) (lift-ty-equality p)
 lift-tm-typing (TyVar i) = TyVar (suc i)
-lift-tm-typing (TyCoh {A = A} Aty σty) = TyConv (TyCoh Aty (lift-sub-typing σty)) (reflexive≈ty (apply-lifted-sub-ty-≃ A _))
+lift-tm-typing (TyCoh {A = A} supp Aty σty) = TyConv (TyCoh supp Aty (lift-sub-typing σty)) (reflexive≈ty (apply-lifted-sub-ty-≃ A _))
 
 lift-sub-typing (TyNull x) = TyNull (lift-ty-typing x)
 lift-sub-typing (TyExt {A = A} p r) = TyExt (lift-sub-typing p) (TyConv (lift-tm-typing r) (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ A _))))

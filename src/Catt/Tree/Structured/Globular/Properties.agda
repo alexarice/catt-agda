@@ -34,6 +34,9 @@ sty-dim-label : (As : STy (someTree S)) → (L : Label-WT X S) → sty-dim (As >
 sty-dim-label S⋆ L = refl
 sty-dim-label (SArr s As t) L = cong suc (sty-dim-label As L)
 
+sty-dim-label-* : (As : STy (someTree S)) → (L : Label X S) → sty-dim (As >>=′ (L ,, S⋆)) ≡ sty-dim As
+sty-dim-label-* As L = trans (sty-dim-label As (L ,, S⋆)) (+-identityʳ (sty-dim As))
+
 sty-to-type-dim : (As : STy X) → ty-dim (sty-to-type As) ≡ sty-dim As
 sty-to-type-dim S⋆ = refl
 sty-to-type-dim (SArr s As t) = cong suc (sty-to-type-dim As)
@@ -92,3 +95,24 @@ truncate-sty-≤ d (SArr s As t) p
 sty-base-dim : (As : STy X) → sty-dim (sty-base As) ≡ pred (sty-dim As)
 sty-base-dim S⋆ = refl
 sty-base-dim (SArr s As t) = refl
+
+sty-src-to-term : (As : STy X)
+                → .⦃ _ : NonZero (sty-dim As) ⦄
+                → stm-to-term (sty-src As)
+                  ≃tm
+                  ty-src (sty-to-type As) ⦃ NonZero-subst (sym (sty-to-type-dim As)) it ⦄
+sty-src-to-term (SArr s As t) = refl≃tm
+
+sty-tgt-to-term : (As : STy X)
+                → .⦃ _ : NonZero (sty-dim As) ⦄
+                → stm-to-term (sty-tgt As)
+                  ≃tm
+                  ty-tgt (sty-to-type As) ⦃ NonZero-subst (sym (sty-to-type-dim As)) it ⦄
+sty-tgt-to-term (SArr s As t) = refl≃tm
+
+sty-base-to-type : (As : STy X)
+                 → sty-to-type (sty-base As)
+                   ≃ty
+                   ty-base (sty-to-type As)
+sty-base-to-type S⋆ = refl≃ty
+sty-base-to-type (SArr s As t) = refl≃ty

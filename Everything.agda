@@ -33,6 +33,7 @@ import Catt.Discs.Pasting
 import Catt.Tree
 import Catt.Tree.Properties
 import Catt.Tree.Pasting
+import Catt.Tree.Ops
 
 import Catt.Tree.Path
 import Catt.Tree.Path.Properties
@@ -53,6 +54,7 @@ import Catt.Tree.Standard.Properties
 
 import Catt.Tree.Insertion
 import Catt.Tree.Insertion.Properties
+import Catt.Tree.Insertion.Ops
 
 import Catt.Dyck
 import Catt.Dyck.Properties

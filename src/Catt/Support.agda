@@ -7,7 +7,7 @@ open import Catt.Variables
 open import Catt.Globular
 open import Catt.Pasting
 
-open import Data.Vec hiding (drop ; [_]) public
+open import Data.Vec hiding (drop ; [_]; truncate) public
 open import Data.Vec.Relation.Binary.Pointwise.Inductive using (Pointwise)
 
 VarSet : ℕ → Set
@@ -108,16 +108,3 @@ varset-non-empty : VarSet n → Bool
 varset-non-empty emp = false
 varset-non-empty (ewf xs) = varset-non-empty xs
 varset-non-empty (ewt xs) = true
-
-SupportedTm : Tm n → Set
-SupportedTy : Ty n → Set
-SupportedSub : Sub n m A → Set
-
-SupportedTm (Var i) = ⊤
-SupportedTm (Coh Δ A σ) = SupportedTy A × SupportedSub σ × Σ[ b ∈ Bool ] supp-condition b A Δ
-
-SupportedTy ⋆ = ⊤
-SupportedTy (s ─⟨ A ⟩⟶ t) = SupportedTm s × SupportedTy A × SupportedTm t
-
-SupportedSub ⟨ A ⟩′ = SupportedTy A
-SupportedSub ⟨ σ , t ⟩ = SupportedSub σ × SupportedTm t

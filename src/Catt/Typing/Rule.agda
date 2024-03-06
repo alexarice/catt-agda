@@ -3,8 +3,13 @@ module Catt.Typing.Rule where
 open import Catt.Prelude
 open import Catt.Syntax
 open import Catt.Syntax.Properties
+open import Catt.Globular
 open import Catt.Suspension
+open import Catt.Suspension.Pasting
+open import Catt.Suspension.Support
+open import Catt.Pasting
 open import Catt.Support
+
 
 open import Catt.Typing.Base public
 
@@ -63,11 +68,25 @@ rs ⊆r rs′ = ∀ {r} → r ∈r rs → r ∈r rs′
 
 -- Conditions
 
+SuspOp : Op → Set
+SuspOp ops = ∀ {n} {Γ : Ctx n} .⦃ _ : Γ ⊢pd ⦄ {xs ys : VarSet n}
+           → ops Γ xs ys
+           → ops (susp-ctx Γ) ⦃ susp-pd it ⦄ (suspSupp xs) (suspSupp ys)
+
+StandardOp : Op → Set
+StandardOp ops = ∀ {n} (Γ : Ctx n) .⦃ _ : Γ ⊢pd ⦄ (d : ℕ) (p : suc d ≥ ctx-dim Γ)
+               → ops Γ (pd-bd-supp d Γ false) (pd-bd-supp d Γ true)
+
 lift-rule : (r : Rule) → Ty (r .len) → Rule
 lift-rule r A .len = suc (r .len)
 lift-rule r A .tgtCtx = r .tgtCtx , A
 lift-rule r A .lhs = lift-tm (r .lhs)
 lift-rule r A .rhs = lift-tm (r .rhs)
+
+record TameOp (ops : Op) : Set where
+  field
+    susp-op : SuspOp ops
+    standard-op : StandardOp ops
 
 LiftCond : RuleSet → Set
 LiftCond rs = ∀ {r} A → r ∈r rs → lift-rule r A ∈r rs
@@ -93,61 +112,65 @@ sub-rule r Γ σ .tgtCtx = Γ
 sub-rule r Γ σ .lhs = r .lhs [ σ ]tm
 sub-rule r Γ σ .rhs = r .rhs [ σ ]tm
 
-module Conditions (rules : RuleSet) where
-  open import Catt.Typing rules
+module _ (ops : Op) where
+  module Conditions (rules : RuleSet) where
+    open import Catt.Typing ops rules
 
-  SubCond′ : RuleSet → Set
-  SubCond′ rs = ∀ {r n} (Γ : Ctx n) {σ : Sub (r .len) n ⋆} → Typing-Sub (r .tgtCtx) Γ σ → r ∈r rs → sub-rule r Γ σ ∈r rs
+    SubCond′ : RuleSet → Set
+    SubCond′ rs = ∀ {r n} (Γ : Ctx n) {σ : Sub (r .len) n ⋆} → Typing-Sub (r .tgtCtx) Γ σ → r ∈r rs → sub-rule r Γ σ ∈r rs
 
-  ConvCondRule : Rule → Set
-  ConvCondRule r = {A : Ty (r .len)}
-                 → Typing-Tm (r .tgtCtx) (r .lhs) A
-                 → Typing-Tm (r .tgtCtx) (r .rhs) A
+    ConvCondRule : Rule → Set
+    ConvCondRule r = {A : Ty (r .len)}
+                   → Typing-Tm (r .tgtCtx) (r .lhs) A
+                   → Typing-Tm (r .tgtCtx) (r .rhs) A
 
-  ConvCond′ : RuleSet → Set
-  ConvCond′ rs = ∀ {r} → r ∈r rs → ConvCondRule r
+    ConvCond′ : RuleSet → Set
+    ConvCond′ rs = ∀ {r} → r ∈r rs → ConvCondRule r
 
-  SupportCondRule : Rule → Set
-  SupportCondRule r = {A : Ty (r .len)}
-                    → (tty : Typing-Tm (r .tgtCtx) (r .lhs) A)
-                    → SuppTm (r .tgtCtx) (r .lhs) ≡ SuppTm (r .tgtCtx) (r .rhs)
+    SupportCondRule : Rule → Set
+    SupportCondRule r = {A : Ty (r .len)}
+                      → (tty : Typing-Tm (r .tgtCtx) (r .lhs) A)
+                      → SuppTm (r .tgtCtx) (r .lhs) ≡ SuppTm (r .tgtCtx) (r .rhs)
 
-  SupportCond′ : RuleSet → Set
-  SupportCond′ rs = ∀ {r} → r ∈r rs → SupportCondRule r
+    SupportCond′ : RuleSet → Set
+    SupportCond′ rs = ∀ {r} → r ∈r rs → SupportCondRule r
 
-module _ {rules : RuleSet} where
-  open Conditions rules
+  module _ {rules : RuleSet} where
+    open Conditions rules
 
-  SubCond-∪ : ∀ {rs rs′} → SubCond′ rs → SubCond′ rs′ → SubCond′ (rs ∪r rs′)
-  SubCond-∪ p q Γ σ [ i ] = [ map⊎ (p Γ σ) (q Γ σ) i ]
+    SubCond-∪ : ∀ {rs rs′} → SubCond′ rs → SubCond′ rs′ → SubCond′ (rs ∪r rs′)
+    SubCond-∪ p q Γ σ [ i ] = [ map⊎ (p Γ σ) (q Γ σ) i ]
 
-  ConvCond-∪ : ∀ {rs rs′} → ConvCond′ rs → ConvCond′ rs′ → ConvCond′ (rs ∪r rs′)
-  ConvCond-∪ p q [ inj₁ x ] = p x
-  ConvCond-∪ p q [ inj₂ y ] = q y
+    ConvCond-∪ : ∀ {rs rs′} → ConvCond′ rs → ConvCond′ rs′ → ConvCond′ (rs ∪r rs′)
+    ConvCond-∪ p q [ inj₁ x ] = p x
+    ConvCond-∪ p q [ inj₂ y ] = q y
 
-  SupportCond-∪ : ∀ {rs rs′} → SupportCond′ rs → SupportCond′ rs′ → SupportCond′ (rs ∪r rs′)
-  SupportCond-∪ p q [ inj₁ x ] = p x
-  SupportCond-∪ p q [ inj₂ y ] = q y
+    SupportCond-∪ : ∀ {rs rs′} → SupportCond′ rs → SupportCond′ rs′ → SupportCond′ (rs ∪r rs′)
+    SupportCond-∪ p q [ inj₁ x ] = p x
+    SupportCond-∪ p q [ inj₂ y ] = q y
 
-open Conditions public
-
-
-
+  open Conditions public
 
 
-SubCond : RuleSet → Set
-SubCond rs = SubCond′ rs rs
 
-ConvCond : RuleSet → Set
-ConvCond rs = ConvCond′ rs rs
 
-SupportCond : RuleSet → Set
-SupportCond rs = SupportCond′ rs rs
 
-record Tame (rs : RuleSet) : Set where
-  field
-    lift-cond : LiftCond rs
-    susp-cond : SuspCond rs
-    sub-cond : SubCond rs
+  SubCond : RuleSet → Set
+  SubCond rs = SubCond′ rs rs
 
-open Tame
+  ConvCond : RuleSet → Set
+  ConvCond rs = ConvCond′ rs rs
+
+  SupportCond : RuleSet → Set
+  SupportCond rs = SupportCond′ rs rs
+
+  record Tame (rs : RuleSet) : Set where
+    field
+      tame-op : TameOp ops
+      lift-cond : LiftCond rs
+      susp-cond : SuspCond rs
+      sub-cond : SubCond rs
+
+    open TameOp tame-op public
+
+  open Tame

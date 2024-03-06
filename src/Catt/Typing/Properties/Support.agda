@@ -1,7 +1,8 @@
 open import Catt.Typing.Rule
 
-module Catt.Typing.Properties.Support (rules : RuleSet)
-                                      (supp-cond : SupportCond rules) where
+module Catt.Typing.Properties.Support (ops : Op)
+                                      (rules : RuleSet)
+                                      (supp-cond : SupportCond ops rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -10,7 +11,7 @@ open import Catt.Globular
 open import Catt.Pasting
 open import Catt.Tree
 
-open import Catt.Typing rules
+open import Catt.Typing ops rules
 
 open import Catt.Support
 open import Catt.Support.Properties
@@ -117,7 +118,7 @@ SuppTmChar (TyVar {Γ = Γ , A} (suc i)) = begin
     ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewf (FVTm (Var i))) (supp-lift-ty (Γ ‼ i)) ⟩
   SuppTy (Γ , A) (lift-ty (Γ ‼ i)) ∪ ewf (FVTm (Var i)) ∎
 
-SuppTmChar {Γ = Γ} (TyCoh {Δ = Δ} {A = A} {σ = σ} Aty σty) = begin
+SuppTmChar {Γ = Γ} (TyCoh {Δ = Δ} {A = A} {σ = σ} x Aty σty) = begin
   SuppSub Γ σ
     ≡⟨ cong (DC Γ) (trans (FVTy-comp-⊆ A σ) (∪-comm (FVSub σ) (FVTy (A [ σ ]ty)))) ⟩
   DC Γ (FVTy (A [ σ ]ty) ∪ FVSub σ)

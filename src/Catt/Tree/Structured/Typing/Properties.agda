@@ -21,7 +21,6 @@ open import Catt.Tree.Properties
 open import Catt.Tree.Pasting
 open import Catt.Tree.Path
 open import Catt.Tree.Path.Properties
-open import Catt.Tree.Ops ops
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Globular
@@ -29,6 +28,8 @@ open import Catt.Tree.Structured.Globular.Properties
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Structured.ToTerm
+
+open import Catt.Ops.Tree ops
 
 open import Catt.Support
 open import Catt.Support.Properties
@@ -102,7 +103,7 @@ TySCoh : (S : Tree n)
        → Typing-STm Γ (SCoh S As L) (As >>=′ L)
 TySCoh S {As} supp {L} [ Aty ] Lty Ltyty .get
   = TyConv (apply-sub-tm-typing (TyCoh ⦃ tree-to-pd S ⦄
-                                       (subst₂ (ops ⌊ S ⌋ ⦃ tree-to-pd S ⦄)
+                                       (subst₂ (ops ⌊ S ⌋)
                                                l1
                                                l2
                                                supp)

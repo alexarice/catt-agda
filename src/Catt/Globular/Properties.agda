@@ -146,6 +146,12 @@ ty-base-lift : (A : Ty n) → ty-base (lift-ty A) ≃ty lift-ty (ty-base A)
 ty-base-lift ⋆ = refl≃ty
 ty-base-lift (s ─⟨ A ⟩⟶ t) = refl≃ty
 
+ty-src′-lift : (A : Ty (suc n)) → .⦃ NonZero (ty-dim A) ⦄ → ty-src′ (lift-ty A) ≃tm lift-tm (ty-src′ A)
+ty-src′-lift (s ─⟨ A ⟩⟶ t) = refl≃tm
+
+ty-tgt′-lift : (A : Ty (suc n)) → .⦃ NonZero (ty-dim A) ⦄ → ty-tgt′ (lift-ty A) ≃tm lift-tm (ty-tgt′ A)
+ty-tgt′-lift (s ─⟨ A ⟩⟶ t) = refl≃tm
+
 ty-base-sub : (A : Ty n) → (σ : Sub n m ⋆) → ty-base A [ σ ]ty ≃ty ty-base (A [ σ ]ty)
 ty-base-sub ⋆ σ = refl≃ty
 ty-base-sub (s ─⟨ A ⟩⟶ t) σ = refl≃ty
@@ -222,3 +228,16 @@ truncate-sub {B = B} d A σ = begin
 truncate′-lift : (n : ℕ) → (A : Ty m) → truncate′ n (lift-ty A) ≃ty lift-ty (truncate′ n A)
 truncate′-lift zero A = refl≃ty
 truncate′-lift (suc n) A = trans≃ty (truncate′-≃ {d = n} refl (ty-base-lift A)) (truncate′-lift n (ty-base A))
+
+truncate′-dim : (n : ℕ) → (A : Ty m) → ty-dim (truncate′ n A) ≡ ty-dim A ∸ n
+truncate′-dim zero A = refl
+truncate′-dim (suc n) A = begin
+  ty-dim (truncate′ n (ty-base A))
+    ≡⟨ truncate′-dim n (ty-base A) ⟩
+  ty-dim (ty-base A) ∸ n
+    ≡⟨ cong (_∸ n) (ty-base-dim A) ⟩
+  ty-dim A ∸ 1 ∸ n
+    ≡⟨ ∸-+-assoc (ty-dim A) 1 n ⟩
+  ty-dim A ∸ suc n ∎
+  where
+    open ≡-Reasoning

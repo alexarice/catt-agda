@@ -1,6 +1,6 @@
-open import Catt.Typing.Base
+open import Catt.Ops
 
-module Catt.Dyck.Pruning.Ops (ops : Op) where
+module Catt.Ops.Pruning (ops : Op) where
 
 open import Catt.Prelude
 open import Catt.Dyck
@@ -13,7 +13,7 @@ PruningOp = ∀ {n} (dy : Dyck (suc n) 0)
                 → (pk : Peak dy)
                 → (xs : VarSet (3 + (n * 2)))
                 → (ys : VarSet (3 + (n * 2)))
-                → ops ⌊ dy ⌋d ⦃ dyck-to-pd dy ⦄ xs ys
-                → ops ⌊ dy // pk ⌋d ⦃ dyck-to-pd (dy // pk) ⦄
+                → ops ⌊ dy ⌋d xs ys
+                → ops ⌊ dy // pk ⌋d
                       (TransportVarSet xs (π pk))
                       (TransportVarSet ys (π pk))

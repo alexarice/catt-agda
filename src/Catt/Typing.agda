@@ -1,4 +1,5 @@
 open import Catt.Typing.Base
+open import Catt.Ops
 
 module Catt.Typing (ops : Op) (rules : RuleSet) where
 

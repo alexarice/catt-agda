@@ -100,3 +100,6 @@ sub-from-sphere-supp (suc d) (s ─⟨ A ⟩⟶ t) p = cong (λ - → - ∪ FVTm
 
 sub-from-disc-supp : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (t : Tm n) → FVSub (sub-from-disc d A p t) ≡ FVTy A ∪ FVTm t
 sub-from-disc-supp d A p t = cong (_∪ FVTm t) (sub-from-sphere-supp d A p)
+
+identity-term-supp : (A : Ty n) → (t : Tm n) → FVTm (identity-term A t) ≡ FVTy A ∪ FVTm t
+identity-term-supp A t = sub-from-disc-supp (ty-dim A) A refl t

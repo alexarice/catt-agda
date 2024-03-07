@@ -1,10 +1,9 @@
-open import Catt.Typing.Base
+open import Catt.Typing.Rule
 
 module Catt.Typing.Rule.Properties (ops : Op) where
 
 open import Catt.Prelude
 open import Catt.Syntax
-open import Catt.Typing.Rule
 open import Catt.Typing ops
 
 module _ {rs} {rs′} (subset : rs ⊆r rs′) where

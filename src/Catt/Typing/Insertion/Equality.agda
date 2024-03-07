@@ -28,7 +28,7 @@ open import Catt.Tree.Standard.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
-open import Catt.Tree.Ops ops
+open import Catt.Ops.Tree ops
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties ops rules tame
 open import Catt.Suspension.Typing ops susp-op rules lift-cond susp-cond

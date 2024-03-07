@@ -1,5 +1,5 @@
 open import Catt.Typing.Rule
-open import Catt.Tree.Insertion.Ops
+open import Catt.Ops.Insertion
 
 module Catt.Typing.Insertion.Typed (ops : Op)
                                    (ins-op : InsertionSOp ops)
@@ -45,15 +45,16 @@ ins-conv : ConvCond′ ops rules InsertionSet
 ins-conv [ Insert Γ S S⋆ L P T q M pf ] {A = A} tty = ⊥-elim (NonZero-⊥ z≤n ⦃ coh-nonZero tty ⦄)
 ins-conv [ Insert Γ S As@(SArr _ _ _) L P T q M pf ] {A = A} tty
   = TyConv (stm-to-term-Ty (TySCoh (S >>[ P ] T)
-                                   (subst₂ (ops ⌊ S >>[ P ] T ⌋ ⦃ tree-to-pd (S >>[ P ] T) ⦄)
+                                   (subst₂ (ops ⌊ S >>[ P ] T ⌋)
                                            (l4 (sty-src As))
                                            (l4 (sty-tgt As))
-                                           (ins-op S P T (DCT (FVSTm (sty-src As)))
+                                           (ins-op S P T q
+                                                         (DCT (FVSTm (sty-src As)))
                                                          (DCT (FVSTm (sty-tgt As)))
-                                                         (subst₂ (ops ⌊ S ⌋ ⦃ tree-to-pd S ⦄)
-                                                                            (l5 (sty-src As))
-                                                                            (l5 (sty-tgt As))
-                                                                            (coh-supp tty))))
+                                                         (subst₂ (ops ⌊ S ⌋)
+                                                                 (l5 (sty-src As))
+                                                                 (l5 (sty-tgt As))
+                                                                 (coh-supp tty))))
                                    (>>=′-Ty AsTy (κ-Ty S P T q) TySStar)
                                    (label-from-insertion-Ty Lty P Mty l1)
                                    TySStar))

@@ -22,7 +22,7 @@ open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Path
 
-open import Catt.Tree.Ops ops
+open import Catt.Ops.Tree ops
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
 open import Catt.Tree.Structured.Typing ops rules

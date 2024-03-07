@@ -1,5 +1,5 @@
 open import Catt.Typing.Rule
-open import Catt.Tree.Insertion.Ops
+open import Catt.Ops.Insertion
 
 module Catt.Typing.Strict.UA (ops : Op) (tameOp : TameOp ops) (ins-op : InsertionSOp ops) where
 

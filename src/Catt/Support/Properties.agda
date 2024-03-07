@@ -206,10 +206,28 @@ TransportVarSet-lift emp ⟨ _ ⟩′ = refl
 TransportVarSet-lift (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-lift xs σ
 TransportVarSet-lift (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (TransportVarSet-lift xs σ) (supp-lift-tm t)
 
+TransportVarSet-id-lem : (b : Bool) → (xs : VarSet n) → (σ : Sub n m ⋆)
+                       → TransportVarSet (b ∷ xs) ⟨ lift-sub σ , 0V ⟩ ≡ b ∷ TransportVarSet xs σ
+TransportVarSet-id-lem false xs σ = TransportVarSet-lift xs σ
+TransportVarSet-id-lem true xs σ = begin
+  TransportVarSet xs (lift-sub σ) ∪ ewt empty
+    ≡⟨ cong (_∪ ewt empty) (TransportVarSet-lift xs σ) ⟩
+  ewt (TransportVarSet xs σ ∪ empty)
+    ≡⟨ cong ewt (∪-right-unit (TransportVarSet xs σ)) ⟩
+  ewt (TransportVarSet xs σ) ∎
+  where
+    open ≡-Reasoning
+
 TransportVarSet-id : (xs : VarSet n) → TransportVarSet xs idSub ≡ xs
 TransportVarSet-id emp = refl
-TransportVarSet-id (ewf xs) = trans (TransportVarSet-lift xs idSub) (cong ewf (TransportVarSet-id xs))
-TransportVarSet-id (ewt xs) = trans (cong (_∪ ewt empty) (TransportVarSet-lift xs idSub)) (cong ewt (trans (∪-right-unit (TransportVarSet xs idSub)) (TransportVarSet-id xs)))
+TransportVarSet-id (b ∷ xs) = begin
+  TransportVarSet (b ∷ xs) idSub
+    ≡⟨ TransportVarSet-id-lem b xs idSub ⟩
+  b ∷ TransportVarSet xs idSub
+    ≡⟨ cong (b ∷_) (TransportVarSet-id xs) ⟩
+  b ∷ xs ∎
+  where
+    open ≡-Reasoning
 
 ⊆-refl : {xs : VarSet n} → xs ⊆ xs
 ⊆-refl = sym (∪-idem _)
@@ -263,6 +281,17 @@ Poset.isPartialOrder (⊆-poset n) = ⊆-partial-order n
 
 ⊆-bot : (xs : VarSet n) → empty ⊆ xs
 ⊆-bot xs = sym (∪-right-unit xs)
+
+⊆-step : (xs : VarSet n) → ewf xs ⊆ ewt xs
+⊆-step xs = cong ewt (sym (∪-idem xs))
+
+⊆-cong : {xs ys : VarSet n} → (b : Bool) → xs ⊆ ys → (b ∷ xs) ⊆ (b ∷ ys)
+⊆-cong b p = cong₂ _∷_ (sym (∨-idem b)) p
+
+⊆-drop : (xs : VarSet n) → drop xs ⊆ xs
+⊆-drop emp = ⊆-refl
+⊆-drop (ewf xs) = ⊆-cong false (⊆-drop xs)
+⊆-drop (ewt xs) = ⊆-step xs
 
 ⊆-TransportVarSet : (σ : Sub n m ⋆) → {xs ys : VarSet n} → xs ⊆ ys → TransportVarSet xs σ ⊆ TransportVarSet ys σ
 ⊆-TransportVarSet σ {xs} {ys} p = begin
@@ -330,6 +359,9 @@ coh-sub-fv {B = s ─⟨ B ⟩⟶ t} Γ A σ = begin
   xs ∪ ys ∎
   where
     open PReasoning (⊆-poset _)
+
+ty-tgt′-⊆ : (A : Ty (suc n)) → .⦃ NonZero (ty-dim A) ⦄ → FVTm (ty-tgt′ A) ⊆ FVTy A
+ty-tgt′-⊆ (s ─⟨ A ⟩⟶ t) = ∪-⊆-2 (FVTy A ∪ FVTm s) (FVTm t)
 
 TransportVarSet-idSub≃ : (xs : VarSet n) → (p : Γ ≃c Δ) → TransportVarSet xs (idSub≃ p) ≡ᵖ xs
 TransportVarSet-idSub≃ emp Emp≃ = P.refl refl

@@ -1,5 +1,5 @@
 open import Catt.Typing.Rule
-open import Catt.Dyck.Pruning.Ops
+open import Catt.Ops.Pruning
 
 module Catt.Typing.Strict.Units (ops : Op) (tameOp : TameOp ops) (pruning-op : PruningOp ops) where
 

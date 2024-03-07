@@ -1,5 +1,5 @@
 open import Catt.Typing.Rule
-open import Catt.Dyck.Pruning.Ops
+open import Catt.Ops.Pruning
 
 module Catt.Typing.Pruning.Typed (ops : Op)
                                  (standard-op : StandardOp ops)
@@ -34,7 +34,7 @@ pruning-conv : ConvCond′ ops rules PruningSet
 pruning-conv [ Prune Γ dy ⋆ p σ B t pf ] {A = C} tty = ⊥-elim (NonZero-⊥ z≤n ⦃ coh-nonZero tty ⦄)
 pruning-conv [ Prune Γ dy A@(src ─⟨ _ ⟩⟶ tgt) p σ B t pf ] {A = C} tty
   = TyConv (TyCoh ⦃ dyck-to-pd (dy // p) ⦄
-                  (subst₂ (ops ⌊ dy // p ⌋d ⦃ dyck-to-pd (dy // p) ⦄)
+                  (subst₂ (ops ⌊ dy // p ⌋d)
                           (supp-lem src)
                           (supp-lem tgt)
                           (pruning-op dy p (SuppTm ⌊ dy ⌋d src) (SuppTm ⌊ dy ⌋d tgt) (coh-supp tty)))

@@ -50,7 +50,7 @@ ecr-stm S s sfull As supp L [ sty ] [ Asty ] Lty .get = begin
   Coh ⌊ S ⌋ (stm-to-term s ─⟨ sty-to-type As ⟩⟶ stm-to-term s) (label-to-sub (L ,, S⋆))
     ≈⟨ ecr full-lem
            (TyCoh ⦃ tree-to-pd S ⦄
-                  (subst₂ (ops ⌊ S ⌋ ⦃ tree-to-pd S ⦄)
+                  (subst₂ (ops ⌊ S ⌋)
                           (trans (DCT-toVarSet (FVSTm s)) (FVSTm-to-term s))
                           (trans (DCT-toVarSet (FVSTm s)) (FVSTm-to-term s))
                           supp)

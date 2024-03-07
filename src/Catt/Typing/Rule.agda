@@ -10,7 +10,7 @@ open import Catt.Suspension.Support
 open import Catt.Pasting
 open import Catt.Support
 
-
+open import Catt.Ops public
 open import Catt.Typing.Base public
 
 open Rule
@@ -69,9 +69,9 @@ rs ⊆r rs′ = ∀ {r} → r ∈r rs → r ∈r rs′
 -- Conditions
 
 SuspOp : Op → Set
-SuspOp ops = ∀ {n} {Γ : Ctx n} .⦃ _ : Γ ⊢pd ⦄ {xs ys : VarSet n}
+SuspOp ops = ∀ {n} (Γ : Ctx n) .⦃ _ : Γ ⊢pd ⦄ (xs ys : VarSet n)
            → ops Γ xs ys
-           → ops (susp-ctx Γ) ⦃ susp-pd it ⦄ (suspSupp xs) (suspSupp ys)
+           → ops (susp-ctx Γ) (suspSupp xs) (suspSupp ys)
 
 StandardOp : Op → Set
 StandardOp ops = ∀ {n} (Γ : Ctx n) .⦃ _ : Γ ⊢pd ⦄ (d : ℕ) (p : suc d ≥ ctx-dim Γ)

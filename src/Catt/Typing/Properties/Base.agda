@@ -150,7 +150,6 @@ coh-pd (TyConv tty _) = coh-pd tty
 coh-pd (TyCoh ⦃ pd ⦄ _ _ _) = recompute (pd-dec _) pd
 
 coh-supp : (tty : Typing-Tm Γ (Coh Δ A τ) B) → ops Δ
-                                                   ⦃ coh-pd tty ⦄
                                                    (SuppTm Δ (ty-src A ⦃ coh-nonZero tty ⦄))
                                                    (SuppTm Δ (ty-tgt A ⦃ coh-nonZero tty ⦄))
 coh-supp (TyConv tty _) = coh-supp tty

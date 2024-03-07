@@ -20,7 +20,8 @@ open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
 
-open import Catt.Tree.Ops ops
+open import Catt.Ops.Tree ops
+
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
 open import Catt.Tree.Standard.Support

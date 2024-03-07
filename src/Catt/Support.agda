@@ -6,6 +6,7 @@ open import Catt.Syntax
 open import Catt.Variables
 open import Catt.Globular
 open import Catt.Pasting
+open import Catt.Pasting.Properties
 
 open import Data.Vec hiding (drop ; [_]; truncate) public
 open import Data.Vec.Relation.Binary.Pointwise.Inductive using (Pointwise)
@@ -27,6 +28,10 @@ drop : VarSet n → VarSet n
 drop emp = emp
 drop (ewf xs) = ewf (drop xs)
 drop (ewt xs) = ewf xs
+
+cdrop : Bool → VarSet n → VarSet n
+cdrop false xs = xs
+cdrop true xs = drop xs
 
 trueAt : Fin n → VarSet n
 trueAt {n = suc n} zero = ewt empty
@@ -55,7 +60,7 @@ pdb-bd-supp n ∅ ⦃ pdb ⦄ b = ⊥-elim (pdb-odd-length pdb)
 pdb-bd-supp n (∅ , A) b = ewt emp
 pdb-bd-supp n (Γ , B , A) b = tri-cases (<-cmp n (ty-dim B))
                                             (ewf (ewf (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)))
-                                            (ewf (if b then ewt (drop (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)) else (ewf (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b))))
+                                            (ewf (b ∷ cdrop b (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)))
                                             (ewt (ewt (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)))
 
 pd-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pd : Γ ⊢pd ⦄ → (b : Bool) → VarSet m

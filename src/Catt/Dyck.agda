@@ -39,6 +39,11 @@ data Peak : ∀ {n} → Dyck (suc n) d → Set where
   ⇑pk : (p : Peak dy) → Peak (⇑ dy)
   ⇓pk : (p : Peak dy) → Peak (⇓ dy)
 
+peak-height : {dy : Dyck (suc n) d} → Peak dy → ℕ
+peak-height (⇕pk {d = d} dy) = d
+peak-height (⇑pk pk) = peak-height pk
+peak-height (⇓pk pk) = peak-height pk
+
 peak-term : {dy : Dyck (suc n) d} → Peak dy → Tm (3 + (n * 2))
 peak-term (⇕pk dy) = 0V
 peak-term (⇑pk p) = lift-tm (lift-tm (peak-term p))
@@ -58,3 +63,8 @@ wedge-dyck : (dy : Dyck n 0) → Dyck m d → Dyck (m + n) d
 wedge-dyck d End = d
 wedge-dyck d (⇑ e) = ⇑ (wedge-dyck d e)
 wedge-dyck d (⇓ e) = ⇓ (wedge-dyck d e)
+
+dyck-dim : (dy : Dyck n d) → ℕ
+dyck-dim End = 0
+dyck-dim (⇑ {d = d} dy) = dyck-dim dy ⊔ suc d
+dyck-dim (⇓ dy) = dyck-dim dy

@@ -33,7 +33,6 @@ import Catt.Discs.Pasting
 import Catt.Tree
 import Catt.Tree.Properties
 import Catt.Tree.Pasting
-import Catt.Tree.Ops
 
 import Catt.Tree.Path
 import Catt.Tree.Path.Properties
@@ -54,11 +53,11 @@ import Catt.Tree.Standard.Properties
 
 import Catt.Tree.Insertion
 import Catt.Tree.Insertion.Properties
-import Catt.Tree.Insertion.Ops
 
 import Catt.Dyck
 import Catt.Dyck.Properties
 import Catt.Dyck.Pasting
+import Catt.Dyck.Support
 import Catt.Dyck.Pruning
 import Catt.Dyck.Pruning.Properties
 import Catt.Dyck.FromTree
@@ -107,6 +106,12 @@ import Catt.Typing.Pruning.Rule
 import Catt.Typing.Pruning
 import Catt.Typing.Pruning.Typed
 
+import Catt.Ops
+import Catt.Ops.Pruning
+import Catt.Ops.Tree
+import Catt.Ops.Insertion
+import Catt.Ops.All
+import Catt.Ops.Regular
 
 import Catt.Support
 import Catt.Support.Typing
@@ -116,11 +121,14 @@ import Catt.Support.Context
 import Catt.Suspension.Support
 import Catt.Wedge.Support
 import Catt.Discs.Support
+import Catt.Dyck.Support
+import Catt.Dyck.Pruning.Support
 import Catt.Tree.Support
 import Catt.Tree.Structured.Support
 import Catt.Tree.Structured.Support.Properties
 import Catt.Tree.Boundary.Support
 import Catt.Tree.Standard.Support
+import Catt.Tree.Insertion.Support
 
 import Catt.Typing.Properties.Support
 import Catt.Typing.Structured.Support

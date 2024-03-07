@@ -81,6 +81,23 @@ dyck-pre-type-dim (⇓ dy) = trans (ty-dim-ty-base (dyck-pre-type dy)) (cong pre
 
 dyck-type-dim d = trans (lift-ty-dim (dyck-pre-type d)) (dyck-pre-type-dim d)
 
+dyck-dim-to-ctx : (dy : Dyck n d) → ctx-dim ⌊ dy ⌋d ≡ dyck-dim dy
+dyck-dim-to-ctx End = refl
+dyck-dim-to-ctx (⇑ {d = d} dy) = begin
+  ctx-dim ⌊ dy ⌋d ⊔ ty-dim (dyck-type dy) ⊔ suc (ty-dim (lift-ty (dyck-type dy)))
+    ≡⟨ cong₃ (λ a b c → a ⊔ b ⊔ suc c)
+             (dyck-dim-to-ctx dy)
+             (dyck-type-dim dy)
+             (trans (lift-ty-dim (dyck-type dy)) (dyck-type-dim dy)) ⟩
+  dyck-dim dy ⊔ d ⊔ suc d
+    ≡⟨ ⊔-assoc (dyck-dim dy) d (suc d) ⟩
+  dyck-dim dy ⊔ (d ⊔ suc d)
+    ≡⟨ cong (dyck-dim dy ⊔_) (m≤n⇒m⊔n≡n (n≤1+n d)) ⟩
+  dyck-dim dy ⊔ suc d ∎
+  where
+    open ≡-Reasoning
+dyck-dim-to-ctx (⇓ dy) = dyck-dim-to-ctx dy
+
 dyck-zero-lem : ¬ (Dyck zero (suc d))
 dyck-zero-lem (⇓ dy) = dyck-zero-lem dy
 

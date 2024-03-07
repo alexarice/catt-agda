@@ -46,17 +46,6 @@ pd-to-pdb-0-d (Finish pdb) with ty-dim (focus-ty pdb)
 pd-to-pdb-focus-tm : (pd : Γ ⊢pd) → focus-tm (pd-to-pdb pd) ≃tm pd-focus-tm pd
 pd-to-pdb-focus-tm (Finish pdb) = refl≃tm
 
-Odd Even : ℕ → Set
-Odd zero = ⊥
-Odd (suc n) = Even n
-Even zero = ⊤
-Even (suc n) = Odd n
-
-pdb-odd-length : {Γ : Ctx m} → Γ ⊢pdb → Odd m
-pdb-odd-length Base = tt
-pdb-odd-length (Extend pdb p q) = pdb-odd-length pdb
-pdb-odd-length (Restr pdb) = pdb-odd-length pdb
-
 pdb-prefix : Γ , A , B ⊢pdb → Γ ⊢pdb
 pdb-prefix (Extend pdb p q) = pdb
 pdb-prefix (Restr pdb) = pdb-prefix pdb

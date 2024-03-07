@@ -49,7 +49,7 @@ susp-tmTy (TyCoh {Δ = Δ} {A = A@(s ─⟨ _ ⟩⟶ t)} supp Aty σty) = let
   in TyConv (TyCoh ⦃ nz = NonZero-subst (sym (susp-dim A)) it ⦄
                    (subst₂ (ops (susp-ctx Δ)) (sym (suspSuppTm′ Δ s))
                                               (sym (suspSuppTm′ Δ t))
-                                              (susp-op supp))
+                                              (susp-op _ _ _ supp))
                    (susp-tyTy Aty)
                    (susp-subTy σty))
             (reflexive≈ty (sym≃ty (susp-functorial-ty _ A)))

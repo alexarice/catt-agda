@@ -11,6 +11,11 @@ open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Pasting
 
+pdb-odd-length : {Γ : Ctx m} → Γ ⊢pdb → Odd m
+pdb-odd-length Base = tt
+pdb-odd-length (Extend pdb p q) = pdb-odd-length pdb
+pdb-odd-length (Restr pdb) = pdb-odd-length pdb
+
 pdb-≃ : Γ ≃c Δ → Γ ⊢pdb → Δ ⊢pdb
 pdb-≃ p pdb with ≃c-preserve-length p
 ... | refl with ≃c-to-≡ p
@@ -297,3 +302,9 @@ pdb-focus-dim-prop (Restr pdb) = begin
   ty-dim (ty-base (focus-ty pdb)) ∎
   where
     open ≡-Reasoning
+
+pdb-non-empty : {Γ : Ctx n} → (Γ ⊢pdb) → NonZero n
+pdb-non-empty pdb = Odd-is-NonZero _ (pdb-odd-length pdb)
+
+pd-non-empty : {Γ : Ctx n} → (Γ ⊢pd) → NonZero n
+pd-non-empty (Finish pdb) = pdb-non-empty pdb

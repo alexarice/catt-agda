@@ -14,6 +14,8 @@ open import Catt.Discs.Properties
 open import Catt.Dyck
 open import Catt.Dyck.Properties
 open import Catt.Dyck.Pruning
+open import Catt.Dyck.Support
+open import Catt.Support.Context
 
 dyck-type-prune : (p : Peak dy) → dyck-type (dy // p) ≃ty dyck-type dy [ π p ]ty
 dyck-term-prune : (p : Peak dy) → dyck-term (dy // p) ≃tm dyck-term dy [ π p ]tm
@@ -137,3 +139,8 @@ susp-//s (⇓pk p) σ = susp-//s p σ
 //s-sub (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ τ = refl≃s
 //s-sub (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ τ = Ext≃ (Ext≃ (//s-sub p σ τ) refl≃tm) refl≃tm
 //s-sub (⇓pk p) σ τ = //s-sub p σ τ
+
+prune-dim : {dy : Dyck (suc n) d} → (p : Peak dy) → dyck-dim (dy // p) ≤ dyck-dim dy
+prune-dim (⇕pk {d = d} dy) = m≤m⊔n (dyck-dim (⇓ (⇑ dy) // ⇕pk dy)) (suc d)
+prune-dim (⇑pk {d} p) = ⊔-monoˡ-≤ (suc d) (prune-dim p)
+prune-dim (⇓pk p) = prune-dim p

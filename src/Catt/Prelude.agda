@@ -7,6 +7,7 @@ open import Relation.Binary.PropositionalEquality renaming ([_] to [_]r) public
 open import Data.Product renaming (_,_ to _,,_) hiding (map) public
 open import Relation.Binary.Definitions hiding (Irrelevant) public
 open import Data.Empty using (⊥) public
+open import Data.Empty.Irrelevant public
 open import Data.Unit using (⊤; tt) public
 open import Relation.Nullary hiding (⌊_⌋) public
 open import Data.Fin.Patterns public
@@ -35,9 +36,6 @@ open WrapInst public
 
 variable
   n n′ m m′ l l′ o d d′ d″ : ℕ
-
-⊥-elim : ∀ {w} {Whatever : Set w} → .⊥ → Whatever
-⊥-elim ()
 
 record IsZero (n : ℕ) : Set where
   field
@@ -79,3 +77,9 @@ tri-case> p (tri> ¬a ¬b c) A B C = refl
 double : ℕ → ℕ
 double zero = zero
 double (suc n) = suc (suc (double n))
+
+Odd Even : ℕ → Set
+Odd zero = ⊥
+Odd (suc n) = Even n
+Even zero = ⊤
+Even (suc n) = Odd n

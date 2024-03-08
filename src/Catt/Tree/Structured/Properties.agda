@@ -767,19 +767,19 @@ id-label-susp-full T .get PHere = refl≃stm
 id-label-susp-full T .get (PExt Z) = compute-≃ refl≃stm
 id-label-susp-full T .get (PShift PHere) = compute-≃ refl≃stm
 
->>=-lift : (a : STm (someTree S)) → (L : Label-WT (Other n) S) → (a >>= lift-label L) ≃stm lift-stm (a >>= L)
->>=′-lift : (As : STy (someTree S)) → (L : Label-WT (Other n) S) → As >>=′ lift-label L ≃sty lift-sty (As >>=′ L)
-comp-lift : (L : Label (someTree S) U) → (M : Label-WT (Other n) S) → L ●l lift-label M ≃l (lift-stm ∘ L ●l M)
+>>=-wk : (a : STm (someTree S)) → (L : Label-WT (Other n) S) → (a >>= wk-label L) ≃stm wk-stm (a >>= L)
+>>=′-wk : (As : STy (someTree S)) → (L : Label-WT (Other n) S) → As >>=′ wk-label L ≃sty wk-sty (As >>=′ L)
+comp-wk : (L : Label (someTree S) U) → (M : Label-WT (Other n) S) → L ●l wk-label M ≃l (wk-stm ∘ L ●l M)
 
->>=-lift (SExt a) L = >>=-lift a (label₁ L)
->>=-lift (SShift a) L = >>=-lift a (label₂ L)
->>=-lift (SPath x) L = refl≃stm
->>=-lift (SCoh S A M) L = SCoh≃ S refl≃sty (comp-lift (ap M) L) (>>=′-lift (lty M) L)
+>>=-wk (SExt a) L = >>=-wk a (label₁ L)
+>>=-wk (SShift a) L = >>=-wk a (label₂ L)
+>>=-wk (SPath x) L = refl≃stm
+>>=-wk (SCoh S A M) L = SCoh≃ S refl≃sty (comp-wk (ap M) L) (>>=′-wk (lty M) L)
 
->>=′-lift S⋆ L = refl≃sty
->>=′-lift (SArr s As t) L = SArr≃ (>>=-lift s L) (>>=′-lift As L) (>>=-lift t L)
+>>=′-wk S⋆ L = refl≃sty
+>>=′-wk (SArr s As t) L = SArr≃ (>>=-wk s L) (>>=′-wk As L) (>>=-wk t L)
 
-comp-lift L M .get Z = >>=-lift (L Z) M
+comp-wk L M .get Z = >>=-wk (L Z) M
 
 map-sty-ext-susp-compat : (As : STy (someTree S)) → map-sty-ext {T = Sing} As ≃sty susp-sty As
 map-sty-ext-susp-compat S⋆ = refl≃sty

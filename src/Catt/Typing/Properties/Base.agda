@@ -168,7 +168,7 @@ fromℕ-Ty : (Γ : Ctx (suc n)) → Typing-Tm Γ (Var (fromℕ _)) ⋆
 fromℕ-Ty Γ = TyConv (TyVar (fromℕ _)) (reflexive≈ty (fromℕ-‼ Γ))
 
 replaceSub-Ty : {Γ : Ctx (suc n)} → Typing-Sub Γ Δ σ → Typing-Tm Δ t (Γ ‼ zero [ σ ]ty) → Typing-Sub Γ Δ (replaceSub σ t)
-replaceSub-Ty (TyExt {σ = σ} {A = A} σty sty) tty = TyExt σty (TyConv tty (reflexive≈ty (apply-sub-lifted-ty-≃ A ⟨ σ , _ ⟩)))
+replaceSub-Ty (TyExt {σ = σ} {A = A} σty sty) tty = TyExt σty (TyConv tty (reflexive≈ty (apply-sub-wk-ty-≃ A ⟨ σ , _ ⟩)))
 
 ty-dim-≈ : A ≈[ Γ ]ty B → ty-dim A ≡ ty-dim B
 ty-dim-≈ Star≈ = refl

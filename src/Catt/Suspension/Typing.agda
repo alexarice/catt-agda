@@ -3,7 +3,7 @@ open import Catt.Typing.Rule
 module Catt.Suspension.Typing (ops : Op)
                               (susp-op : SuspOp ops)
                               (rules : RuleSet)
-                              (lift-cond : LiftCond rules)
+                              (wk-cond : WkCond rules)
                               (susp-cond : SuspCond rules) where
 
 open import Catt.Prelude
@@ -21,7 +21,7 @@ open import Catt.Suspension.Support
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
-open import Catt.Typing.Properties.Lifting ops rules lift-cond
+open import Catt.Typing.Properties.Weakening ops rules wk-cond
 
 
 susp-ctxTy : Typing-Ctx Γ → Typing-Ctx (susp-ctx Γ)
@@ -58,10 +58,10 @@ susp-subTy (TyNull x) = TyExt (TyExt (TyNull TyStar) get-fstTy) get-sndTy
 susp-subTy (TyExt p r) = TyExt (susp-subTy p) (TyConv (susp-tmTy r) (reflexive≈ty (susp-functorial-ty _ _)))
 
 get-fstTy {Γ = ∅} = TyVar (suc zero)
-get-fstTy {Γ = Γ , A} = lift-tm-typing get-fstTy
+get-fstTy {Γ = Γ , A} = wk-tm-typing get-fstTy
 
 get-sndTy {Γ = ∅} = TyVar zero
-get-sndTy {Γ = Γ , A} = lift-tm-typing get-sndTy
+get-sndTy {Γ = Γ , A} = wk-tm-typing get-sndTy
 
 susp-tyEq Star≈ = refl≈ty
 susp-tyEq (Arr≈ q r s) = Arr≈ (susp-tmEq q) (susp-tyEq r) (susp-tmEq s)

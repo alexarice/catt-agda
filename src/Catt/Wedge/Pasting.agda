@@ -22,17 +22,17 @@ wedge-pdb pd Base = pd-to-pdb pd
 wedge-pdb pd (Extend {Γ = ∅} pdb p q) = ⊥-elim (pdb-odd-length pdb)
 wedge-pdb pd (Extend {Γ = Δ , _} {A = A} {B = B} pdb p q) = Extend (wedge-pdb pd pdb) lem1 lem2
   where
-    lem3 : lift-tm (focus-tm pdb) [
+    lem3 : wk-tm (focus-tm pdb) [
               wedge-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]tm
-             ≃tm lift-tm (focus-tm (wedge-pdb pd pdb))
+             ≃tm wk-tm (focus-tm (wedge-pdb pd pdb))
     lem3 = begin
-      < lift-tm (focus-tm pdb) [ ⟨ lift-sub (wedge-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]tm >tm
-        ≈⟨ apply-sub-lifted-tm-≃ (focus-tm pdb) ⟨ lift-sub (wedge-inc-right (pd-focus-tm pd) _) , 0V ⟩ ⟩
-      < focus-tm pdb [ lift-sub (wedge-inc-right (pd-focus-tm pd) _) ]tm >tm
-        ≈⟨ apply-lifted-sub-tm-≃ (focus-tm pdb) (wedge-inc-right (pd-focus-tm pd) _) ⟩
-      < lift-tm (focus-tm pdb [ wedge-inc-right (pd-focus-tm pd) _ ]tm) >tm
-        ≈˘⟨ lift-tm-≃ (wedge-focus-tm pd pdb) ⟩
-      < lift-tm (focus-tm (wedge-pdb pd pdb)) >tm ∎
+      < wk-tm (focus-tm pdb) [ ⟨ wk-sub (wedge-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]tm >tm
+        ≈⟨ apply-sub-wk-tm-≃ (focus-tm pdb) ⟨ wk-sub (wedge-inc-right (pd-focus-tm pd) _) , 0V ⟩ ⟩
+      < focus-tm pdb [ wk-sub (wedge-inc-right (pd-focus-tm pd) _) ]tm >tm
+        ≈⟨ apply-wk-sub-tm-≃ (focus-tm pdb) (wedge-inc-right (pd-focus-tm pd) _) ⟩
+      < wk-tm (focus-tm pdb [ wedge-inc-right (pd-focus-tm pd) _ ]tm) >tm
+        ≈˘⟨ wk-tm-≃ (wedge-focus-tm pd pdb) ⟩
+      < wk-tm (focus-tm (wedge-pdb pd pdb)) >tm ∎
       where
         open Reasoning tm-setoid
 
@@ -46,39 +46,39 @@ wedge-pdb pd (Extend {Γ = Δ , _} {A = A} {B = B} pdb p q) = Extend (wedge-pdb 
         ≈˘⟨ wedge-focus-ty pd pdb ⟩
       < focus-ty (wedge-pdb pd pdb) >ty ∎
 
-    lem4 : lift-ty (focus-ty pdb) [ wedge-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]ty
-             ≃ty lift-ty (focus-ty (wedge-pdb pd pdb))
+    lem4 : wk-ty (focus-ty pdb) [ wedge-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]ty
+             ≃ty wk-ty (focus-ty (wedge-pdb pd pdb))
     lem4 = begin
-      < lift-ty (focus-ty pdb) [ ⟨ lift-sub (wedge-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]ty >ty
-        ≈⟨ apply-sub-lifted-ty-≃ (focus-ty pdb) ⟨ lift-sub (wedge-inc-right (pd-focus-tm pd) _) , 0V ⟩ ⟩
-      < focus-ty pdb [ lift-sub (wedge-inc-right (pd-focus-tm pd) _) ]ty >ty
-        ≈⟨ apply-lifted-sub-ty-≃ (focus-ty pdb) (wedge-inc-right (pd-focus-tm pd) _) ⟩
-      < lift-ty (focus-ty pdb [ wedge-inc-right (pd-focus-tm pd) _ ]ty) >ty
-        ≈˘⟨ lift-ty-≃ (wedge-focus-ty pd pdb) ⟩
-      < lift-ty (focus-ty (wedge-pdb pd pdb)) >ty ∎
+      < wk-ty (focus-ty pdb) [ ⟨ wk-sub (wedge-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]ty >ty
+        ≈⟨ apply-sub-wk-ty-≃ (focus-ty pdb) ⟨ wk-sub (wedge-inc-right (pd-focus-tm pd) _) , 0V ⟩ ⟩
+      < focus-ty pdb [ wk-sub (wedge-inc-right (pd-focus-tm pd) _) ]ty >ty
+        ≈⟨ apply-wk-sub-ty-≃ (focus-ty pdb) (wedge-inc-right (pd-focus-tm pd) _) ⟩
+      < wk-ty (focus-ty pdb [ wedge-inc-right (pd-focus-tm pd) _ ]ty) >ty
+        ≈˘⟨ wk-ty-≃ (wedge-focus-ty pd pdb) ⟩
+      < wk-ty (focus-ty (wedge-pdb pd pdb)) >ty ∎
 
     lem2 : (B [ wedge-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]ty) ≃ty
-             (lift-tm (focus-tm (wedge-pdb pd pdb)) ─⟨
-              lift-ty (focus-ty (wedge-pdb pd pdb)) ⟩⟶
+             (wk-tm (focus-tm (wedge-pdb pd pdb)) ─⟨
+              wk-ty (focus-ty (wedge-pdb pd pdb)) ⟩⟶
               0V)
     lem2 = begin
       < B [ wedge-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]ty >ty
         ≈⟨ sub-action-≃-ty q refl≃s ⟩
-      < (lift-tm (focus-tm pdb) ─⟨ lift-ty (focus-ty pdb) ⟩⟶ 0V)
+      < (wk-tm (focus-tm pdb) ─⟨ wk-ty (focus-ty pdb) ⟩⟶ 0V)
         [ wedge-inc-right (pd-focus-tm pd) (suc (ctxLength Δ)) ]ty >ty
         ≈⟨ Arr≃ lem3 lem4 refl≃tm ⟩
-      < lift-tm (focus-tm (wedge-pdb pd pdb)) ─⟨ lift-ty (focus-ty (wedge-pdb pd pdb)) ⟩⟶ 0V >ty ∎
+      < wk-tm (focus-tm (wedge-pdb pd pdb)) ─⟨ wk-ty (focus-ty (wedge-pdb pd pdb)) ⟩⟶ 0V >ty ∎
 
 wedge-pdb pd (Restr pdb) = Restr (wedge-pdb pd pdb) ⦃ NonZero-subst (sym (trans (ty-dim-≃ (wedge-focus-ty pd pdb)) (sym (sub-dim (wedge-inc-right (pd-focus-tm pd) _) (focus-ty pdb))))) it ⦄
 
 wedge-focus-ty pd Base = ⋆-is-only-0-d-ty ⦃ pd-to-pdb-0-d pd ⦄
 wedge-focus-ty pd (Extend {Γ = ∅} pdb p q) = ⊥-elim (pdb-odd-length pdb)
 wedge-focus-ty pd (Extend {Γ = Δ , A} {B = B} pdb p q) = begin
-  < lift-ty (B [ ⟨ lift-sub (wedge-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]ty) >ty
-    ≈˘⟨ apply-lifted-sub-ty-≃ B _ ⟩
-  < B [ ⟨ lift-sub (lift-sub (wedge-inc-right (pd-focus-tm pd) _)) , 1V ⟩ ]ty >ty
-    ≈˘⟨ apply-sub-lifted-ty-≃ B _ ⟩
-  < lift-ty B [ ⟨ ⟨ lift-sub (lift-sub (wedge-inc-right (pd-focus-tm pd) _)) , 1V ⟩ , 0V ⟩ ]ty >ty ∎
+  < wk-ty (B [ ⟨ wk-sub (wedge-inc-right (pd-focus-tm pd) _) , 0V ⟩ ]ty) >ty
+    ≈˘⟨ apply-wk-sub-ty-≃ B _ ⟩
+  < B [ ⟨ wk-sub (wk-sub (wedge-inc-right (pd-focus-tm pd) _)) , 1V ⟩ ]ty >ty
+    ≈˘⟨ apply-sub-wk-ty-≃ B _ ⟩
+  < wk-ty B [ ⟨ ⟨ wk-sub (wk-sub (wedge-inc-right (pd-focus-tm pd) _)) , 1V ⟩ , 0V ⟩ ]ty >ty ∎
   where
     open Reasoning ty-setoid
 

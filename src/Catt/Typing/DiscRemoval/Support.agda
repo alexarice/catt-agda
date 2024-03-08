@@ -3,7 +3,7 @@ open import Catt.Typing.Rule
 module Catt.Typing.DiscRemoval.Support (ops : Op)
                                        (standard-op : StandardOp ops)
                                        (rules : RuleSet)
-                                       (lift-cond : LiftCond rules)
+                                       (wk-cond : WkCond rules)
                                        (supp-cond : SupportCond ops rules) where
 
 open import Catt.Prelude
@@ -19,7 +19,7 @@ open import Catt.Typing.Properties.Support ops rules supp-cond
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
-open import Catt.Discs.Typing ops standard-op rules lift-cond
+open import Catt.Discs.Typing ops standard-op rules wk-cond
 open import Catt.Typing.DiscRemoval.Rule
 
 dr-supp : SupportCond′ ops rules DiscRemovalSet

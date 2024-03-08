@@ -12,17 +12,17 @@ open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.ToTerm
 
-lift-stm : STm (Other n) → STm (Other (suc n))
-lift-sty : STy (Other n) → STy (Other (suc n))
-lift-label : Label-WT (Other n) S → Label-WT (Other (suc n)) S
+wk-stm : STm (Other n) → STm (Other (suc n))
+wk-sty : STy (Other n) → STy (Other (suc n))
+wk-label : Label-WT (Other n) S → Label-WT (Other (suc n)) S
 
-lift-stm (SCoh S A L) = SCoh S A (lift-label L)
-lift-stm (SOther t) = SOther (lift-tm t)
+wk-stm (SCoh S A L) = SCoh S A (wk-label L)
+wk-stm (SOther t) = SOther (wk-tm t)
 
-lift-sty S⋆ = S⋆
-lift-sty (SArr s A t) = SArr (lift-stm s) (lift-sty A) (lift-stm t)
+wk-sty S⋆ = S⋆
+wk-sty (SArr s A t) = SArr (wk-stm s) (wk-sty A) (wk-stm t)
 
-lift-label L = lift-stm ∘ (ap L) ,, lift-sty (lty L)
+wk-label L = wk-stm ∘ (ap L) ,, wk-sty (lty L)
 
 stm-fst : STm (susp-maybe-tree X)
 stm-snd : STm (susp-maybe-tree X)

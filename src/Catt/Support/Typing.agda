@@ -26,16 +26,16 @@ module _ where
   rulesWithSupp-supp : SupportCond ops rulesWithSupp
   rulesWithSupp-supp [ p ,, supp ] tty = supp
 
-  rulesWithSupp-lift : LiftCond rules → LiftCond rulesWithSupp
-  rulesWithSupp-lift p A [ x ,, supp ] .get .proj₁ = p A [ x ] .get
-  rulesWithSupp-lift p {r = r} A [ x ,, supp ] .get .proj₂ = begin
-    SuppTm (tgtCtx , A) (lift-tm lhs)
-      ≡⟨ cong (DC _) (supp-lift-tm lhs) ⟩
+  rulesWithSupp-wk : WkCond rules → WkCond rulesWithSupp
+  rulesWithSupp-wk p A [ x ,, supp ] .get .proj₁ = p A [ x ] .get
+  rulesWithSupp-wk p {r = r} A [ x ,, supp ] .get .proj₂ = begin
+    SuppTm (tgtCtx , A) (wk-tm lhs)
+      ≡⟨ cong (DC _) (supp-wk-tm lhs) ⟩
     ewf (SuppTm tgtCtx lhs)
       ≡⟨ cong ewf supp ⟩
     ewf (SuppTm tgtCtx rhs)
-      ≡˘⟨ cong (DC _) (supp-lift-tm rhs) ⟩
-    SuppTm (tgtCtx , A) (lift-tm rhs) ∎
+      ≡˘⟨ cong (DC _) (supp-wk-tm rhs) ⟩
+    SuppTm (tgtCtx , A) (wk-tm rhs) ∎
     where
       open Rule r
 
@@ -74,7 +74,7 @@ module _ where
 
   rulesWithSupp-tame : Tame ops rules → Tame ops rulesWithSupp
   rulesWithSupp-tame p .tame-op = p .tame-op
-  rulesWithSupp-tame p .lift-cond = rulesWithSupp-lift (p .lift-cond)
+  rulesWithSupp-tame p .wk-cond = rulesWithSupp-wk (p .wk-cond)
   rulesWithSupp-tame p .susp-cond = rulesWithSupp-susp (p .susp-cond)
   rulesWithSupp-tame p .sub-cond = rulesWithSupp-sub (p .sub-cond)
 

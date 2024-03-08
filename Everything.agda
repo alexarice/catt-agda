@@ -67,7 +67,7 @@ import Catt.Typing
 import Catt.Typing.Rule
 import Catt.Typing.Rule.Properties
 import Catt.Typing.Properties.Base
-import Catt.Typing.Properties.Lifting
+import Catt.Typing.Properties.Weakening
 import Catt.Typing.Properties.Substitution
 import Catt.Typing.Properties.Substitution.Suspended
 import Catt.Typing.Properties

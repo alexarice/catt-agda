@@ -196,18 +196,18 @@ cast-ty-prop refl A = refl≃ty
   rewrite ≃s-to-≡ p
   rewrite ≃tm-to-≡ q = refl
 
-lift-ty-≃ : B ≃ty C → lift-ty B ≃ty lift-ty C
-lift-tm-≃ : s ≃tm t → lift-tm s ≃tm lift-tm t
-lift-sub-≃ : σ ≃s τ → lift-sub σ ≃s lift-sub τ
+wk-ty-≃ : B ≃ty C → wk-ty B ≃ty wk-ty C
+wk-tm-≃ : s ≃tm t → wk-tm s ≃tm wk-tm t
+wk-sub-≃ : σ ≃s τ → wk-sub σ ≃s wk-sub τ
 
-lift-ty-≃ (Star≃ x) = Star≃ (cong suc x)
-lift-ty-≃ (Arr≃ q r s) = Arr≃ (lift-tm-≃ q) (lift-ty-≃ r) (lift-tm-≃ s)
+wk-ty-≃ (Star≃ x) = Star≃ (cong suc x)
+wk-ty-≃ (Arr≃ q r s) = Arr≃ (wk-tm-≃ q) (wk-ty-≃ r) (wk-tm-≃ s)
 
-lift-tm-≃ (Var≃ x y) = Var≃ (cong suc x) (cong suc y)
-lift-tm-≃ (Coh≃ q r s) = Coh≃ q r (lift-sub-≃ s)
+wk-tm-≃ (Var≃ x y) = Var≃ (cong suc x) (cong suc y)
+wk-tm-≃ (Coh≃ q r s) = Coh≃ q r (wk-sub-≃ s)
 
-lift-sub-≃ (Null≃ x) = Null≃ (lift-ty-≃ x)
-lift-sub-≃ (Ext≃ q r) = Ext≃ (lift-sub-≃ q) (lift-tm-≃ r)
+wk-sub-≃ (Null≃ x) = Null≃ (wk-ty-≃ x)
+wk-sub-≃ (Ext≃ q r) = Ext≃ (wk-sub-≃ q) (wk-tm-≃ r)
 
 susp-ctx-≃ : Γ ≃c Δ → susp-ctx Γ ≃c susp-ctx Δ
 susp-ty-≃ : A ≃ty B → susp-ty A ≃ty susp-ty B
@@ -256,13 +256,13 @@ sub-action-≃-tm {A = s₁ ─⟨ A ⟩⟶ t} {B = s₂ ─⟨ B ⟩⟶ t₁} (
 sub-action-≃-sub (Null≃ x) q = Null≃ (sub-action-≃-ty x q)
 sub-action-≃-sub (Ext≃ p x) q = Ext≃ (sub-action-≃-sub p q) (sub-action-≃-tm x q)
 
-↓-lift : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → ↓ (lift-sub σ) ≃s lift-sub (↓ σ)
-↓-lift ⟨ A ⟩′ = refl≃s
-↓-lift ⟨ σ , t ⟩ = Ext≃ (↓-lift σ) refl≃tm
+↓-wk : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → ↓ (wk-sub σ) ≃s wk-sub (↓ σ)
+↓-wk ⟨ A ⟩′ = refl≃s
+↓-wk ⟨ σ , t ⟩ = Ext≃ (↓-wk σ) refl≃tm
 
-↑-lift : (σ : Sub (2 + n) m A) → ↑ (lift-sub σ) ≃s lift-sub (↑ σ)
-↑-lift ⟨ ⟨ ⟨ A ⟩′ , v ⟩ , u ⟩ = Null≃ refl≃ty
-↑-lift ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ = Ext≃ (↑-lift σ) refl≃tm
+↑-wk : (σ : Sub (2 + n) m A) → ↑ (wk-sub σ) ≃s wk-sub (↑ σ)
+↑-wk ⟨ ⟨ ⟨ A ⟩′ , v ⟩ , u ⟩ = Null≃ refl≃ty
+↑-wk ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , u ⟩ = Ext≃ (↑-wk σ) refl≃tm
 
 ↑-↓ : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → ↑ (↓ σ) ≃s σ
 ↑-↓ ⟨ A ⟩′ = refl≃s
@@ -270,65 +270,65 @@ sub-action-≃-sub (Ext≃ p x) q = Ext≃ (sub-action-≃-sub p q) (sub-action-
 ↑-↓ ⟨ ⟨ ⟨ A ⟩′ , s ⟩ , t ⟩ = refl≃s
 ↑-↓ ⟨ σ@(⟨ ⟨ _ , _ ⟩ , _ ⟩) , t ⟩ = Ext≃ (↑-↓ σ) refl≃tm
 
-apply-lifted-sub-ty-≃ : (B : Ty n) → (σ : Sub n m A) → B [ lift-sub σ ]ty ≃ty lift-ty (B [ σ ]ty)
-apply-lifted-sub-tm-≃ : (t : Tm n) → (σ : Sub n m A) → t [ lift-sub σ ]tm ≃tm lift-tm (t [ σ ]tm)
-apply-lifted-sub-sub-≃ : (τ : Sub l n B) → (σ : Sub n m A) → τ ● lift-sub σ ≃s lift-sub (τ ● σ)
+apply-wk-sub-ty-≃ : (B : Ty n) → (σ : Sub n m A) → B [ wk-sub σ ]ty ≃ty wk-ty (B [ σ ]ty)
+apply-wk-sub-tm-≃ : (t : Tm n) → (σ : Sub n m A) → t [ wk-sub σ ]tm ≃tm wk-tm (t [ σ ]tm)
+apply-wk-sub-sub-≃ : (τ : Sub l n B) → (σ : Sub n m A) → τ ● wk-sub σ ≃s wk-sub (τ ● σ)
 
-apply-lifted-sub-ty-≃ ⋆ σ = refl≃ty
-apply-lifted-sub-ty-≃ (s ─⟨ B ⟩⟶ t) σ = Arr≃ (apply-lifted-sub-tm-≃ s σ) (apply-lifted-sub-ty-≃ B σ) (apply-lifted-sub-tm-≃ t σ)
+apply-wk-sub-ty-≃ ⋆ σ = refl≃ty
+apply-wk-sub-ty-≃ (s ─⟨ B ⟩⟶ t) σ = Arr≃ (apply-wk-sub-tm-≃ s σ) (apply-wk-sub-ty-≃ B σ) (apply-wk-sub-tm-≃ t σ)
 
-apply-lifted-sub-tm-≃ (Var zero) ⟨ σ , t ⟩ = refl≃tm
-apply-lifted-sub-tm-≃ (Var (suc i)) ⟨ σ , t ⟩ = apply-lifted-sub-tm-≃ (Var i) σ
-apply-lifted-sub-tm-≃ {A = ⋆} (Coh T B τ) σ = Coh≃ refl≃c refl≃ty (apply-lifted-sub-sub-≃ τ σ)
-apply-lifted-sub-tm-≃ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = begin
-  < Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ ↓ (lift-sub σ) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)}) (↓-lift σ) ⟩
-  < Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ lift-sub (↓ σ) ]tm >tm
-    ≈⟨ apply-lifted-sub-tm-≃ (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (↓ σ) ⟩
-  < lift-tm (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ ↓ σ ]tm) >tm ∎
+apply-wk-sub-tm-≃ (Var zero) ⟨ σ , t ⟩ = refl≃tm
+apply-wk-sub-tm-≃ (Var (suc i)) ⟨ σ , t ⟩ = apply-wk-sub-tm-≃ (Var i) σ
+apply-wk-sub-tm-≃ {A = ⋆} (Coh T B τ) σ = Coh≃ refl≃c refl≃ty (apply-wk-sub-sub-≃ τ σ)
+apply-wk-sub-tm-≃ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = begin
+  < Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ ↓ (wk-sub σ) ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)}) (↓-wk σ) ⟩
+  < Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ wk-sub (↓ σ) ]tm >tm
+    ≈⟨ apply-wk-sub-tm-≃ (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (↓ σ) ⟩
+  < wk-tm (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ ↓ σ ]tm) >tm ∎
   where
     open Reasoning tm-setoid
 
-apply-lifted-sub-sub-≃ ⟨ A ⟩′ σ = Null≃ (apply-lifted-sub-ty-≃ _ σ)
-apply-lifted-sub-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (apply-lifted-sub-sub-≃ τ σ) (apply-lifted-sub-tm-≃ t σ)
+apply-wk-sub-sub-≃ ⟨ A ⟩′ σ = Null≃ (apply-wk-sub-ty-≃ _ σ)
+apply-wk-sub-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (apply-wk-sub-sub-≃ τ σ) (apply-wk-sub-tm-≃ t σ)
 
-susp-ty-lift : (B : Ty n) → susp-ty (lift-ty B) ≃ty lift-ty (susp-ty B)
-susp-tm-lift : (t : Tm n) → susp-tm (lift-tm t) ≃tm lift-tm (susp-tm t)
-susp-sub-lift : (σ : Sub n m ⋆) → susp-sub (lift-sub σ) ≃s lift-sub (susp-sub σ)
+susp-ty-wk : (B : Ty n) → susp-ty (wk-ty B) ≃ty wk-ty (susp-ty B)
+susp-tm-wk : (t : Tm n) → susp-tm (wk-tm t) ≃tm wk-tm (susp-tm t)
+susp-sub-wk : (σ : Sub n m ⋆) → susp-sub (wk-sub σ) ≃s wk-sub (susp-sub σ)
 
-susp-ty-lift ⋆ = Arr≃ refl≃tm (Star≃ refl) refl≃tm
-susp-ty-lift (s ─⟨ B ⟩⟶ t) = Arr≃ (susp-tm-lift s) (susp-ty-lift B) (susp-tm-lift t)
+susp-ty-wk ⋆ = Arr≃ refl≃tm (Star≃ refl) refl≃tm
+susp-ty-wk (s ─⟨ B ⟩⟶ t) = Arr≃ (susp-tm-wk s) (susp-ty-wk B) (susp-tm-wk t)
 
-susp-tm-lift (Var i) = refl≃tm
-susp-tm-lift (Coh Δ A σ) = Coh≃ refl≃c refl≃ty (susp-sub-lift σ)
+susp-tm-wk (Var i) = refl≃tm
+susp-tm-wk (Coh Δ A σ) = Coh≃ refl≃c refl≃ty (susp-sub-wk σ)
 
-susp-sub-lift ⟨ A ⟩′ = refl≃s
-susp-sub-lift ⟨ σ , t ⟩ = Ext≃ (susp-sub-lift σ) (susp-tm-lift t)
+susp-sub-wk ⟨ A ⟩′ = refl≃s
+susp-sub-wk ⟨ σ , t ⟩ = Ext≃ (susp-sub-wk σ) (susp-tm-wk t)
 
-apply-sub-lifted-ty-≃ : (B : Ty n) → (σ : Sub (suc n) m A) → (lift-ty B) [ σ ]ty ≃ty B [ sub-proj₁ σ ]ty
-apply-sub-lifted-tm-≃ : (s : Tm n) → (σ : Sub (suc n) m A) → (lift-tm s) [ σ ]tm ≃tm s [ sub-proj₁ σ ]tm
-apply-sub-lifted-sub-≃ : (τ : Sub l n B) → (σ : Sub (suc n) m A) → lift-sub τ ● σ ≃s τ ● sub-proj₁ σ
+apply-sub-wk-ty-≃ : (B : Ty n) → (σ : Sub (suc n) m A) → (wk-ty B) [ σ ]ty ≃ty B [ sub-proj₁ σ ]ty
+apply-sub-wk-tm-≃ : (s : Tm n) → (σ : Sub (suc n) m A) → (wk-tm s) [ σ ]tm ≃tm s [ sub-proj₁ σ ]tm
+apply-sub-wk-sub-≃ : (τ : Sub l n B) → (σ : Sub (suc n) m A) → wk-sub τ ● σ ≃s τ ● sub-proj₁ σ
 
-apply-sub-lifted-ty-≃ ⋆ σ = refl≃ty
-apply-sub-lifted-ty-≃ (s ─⟨ B ⟩⟶ t) σ = Arr≃ (apply-sub-lifted-tm-≃ s σ) (apply-sub-lifted-ty-≃ B σ) (apply-sub-lifted-tm-≃ t σ)
+apply-sub-wk-ty-≃ ⋆ σ = refl≃ty
+apply-sub-wk-ty-≃ (s ─⟨ B ⟩⟶ t) σ = Arr≃ (apply-sub-wk-tm-≃ s σ) (apply-sub-wk-ty-≃ B σ) (apply-sub-wk-tm-≃ t σ)
 
-apply-sub-lifted-tm-≃ (Var i) σ = refl≃tm
-apply-sub-lifted-tm-≃ {A = ⋆} (Coh Δ B τ) σ = Coh≃ refl≃c refl≃ty (apply-sub-lifted-sub-≃ τ σ)
-apply-sub-lifted-tm-≃ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) ⟨ σ , u ⟩ = begin
-  < susp-tm (lift-tm (Coh Δ B τ)) [ ⟨ ↓ σ , u ⟩ ]tm >tm
-    ≈⟨ sub-action-≃-tm (susp-tm-lift (Coh Δ B τ)) (refl≃s {σ = ⟨ ↓ σ , u ⟩}) ⟩
-  < lift-tm (susp-tm (Coh Δ B τ)) [ ⟨ ↓ σ , u ⟩ ]tm >tm
-    ≈⟨ apply-sub-lifted-tm-≃ (susp-tm (Coh Δ B τ)) ⟨ ↓ σ , u ⟩ ⟩
+apply-sub-wk-tm-≃ (Var i) σ = refl≃tm
+apply-sub-wk-tm-≃ {A = ⋆} (Coh Δ B τ) σ = Coh≃ refl≃c refl≃ty (apply-sub-wk-sub-≃ τ σ)
+apply-sub-wk-tm-≃ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) ⟨ σ , u ⟩ = begin
+  < susp-tm (wk-tm (Coh Δ B τ)) [ ⟨ ↓ σ , u ⟩ ]tm >tm
+    ≈⟨ sub-action-≃-tm (susp-tm-wk (Coh Δ B τ)) (refl≃s {σ = ⟨ ↓ σ , u ⟩}) ⟩
+  < wk-tm (susp-tm (Coh Δ B τ)) [ ⟨ ↓ σ , u ⟩ ]tm >tm
+    ≈⟨ apply-sub-wk-tm-≃ (susp-tm (Coh Δ B τ)) ⟨ ↓ σ , u ⟩ ⟩
   < Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ ↓ σ ]tm >tm ∎
   where
     open Reasoning tm-setoid
 
-apply-sub-lifted-sub-≃ {B = B} ⟨ A ⟩′ σ = Null≃ (apply-sub-lifted-ty-≃ B σ)
-apply-sub-lifted-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (apply-sub-lifted-sub-≃ τ σ) (apply-sub-lifted-tm-≃ t σ)
+apply-sub-wk-sub-≃ {B = B} ⟨ A ⟩′ σ = Null≃ (apply-sub-wk-ty-≃ B σ)
+apply-sub-wk-sub-≃ ⟨ τ , t ⟩ σ = Ext≃ (apply-sub-wk-sub-≃ τ σ) (apply-sub-wk-tm-≃ t σ)
 
 ‼-≃ : (i : Fin (ctxLength Γ)) → (j : Fin (ctxLength Δ)) → toℕ i ≡ toℕ j → Γ ≃c Δ → Γ ‼ i ≃ty Δ ‼ j
-‼-≃ zero zero p (Add≃ q x) = lift-ty-≃ x
-‼-≃ (suc i) (suc j) p (Add≃ q x) = lift-ty-≃ (‼-≃ i j (cong pred p) q)
+‼-≃ zero zero p (Add≃ q x) = wk-ty-≃ x
+‼-≃ (suc i) (suc j) p (Add≃ q x) = wk-ty-≃ (‼-≃ i j (cong pred p) q)
 
 ≃c-dec : (Γ : Ctx n) → (Γ′ : Ctx m) → Dec (Γ ≃c Γ′)
 ≃ty-dec : (A : Ty n) → (B : Ty m) → Dec (A ≃ty B)
@@ -416,7 +416,7 @@ sub-dec σ τ = map (mk⇔ ≃s-to-≡ reflexive≃s) (≃s-dec σ τ)
 
 id-left-unit : (σ : Sub n m A) → idSub ● σ ≃s σ
 id-left-unit ⟨ A ⟩′ = refl≃s
-id-left-unit ⟨ σ , t ⟩ = Ext≃ (trans≃s (apply-sub-lifted-sub-≃ idSub ⟨ σ , t ⟩) (id-left-unit σ)) refl≃tm
+id-left-unit ⟨ σ , t ⟩ = Ext≃ (trans≃s (apply-sub-wk-sub-≃ idSub ⟨ σ , t ⟩) (id-left-unit σ)) refl≃tm
 
 id-right-unit : (σ : Sub m n A) → σ ● idSub ≃s σ
 id-on-ty : (B : Ty m) → B [ idSub ]ty ≃ty B
@@ -432,7 +432,7 @@ id-on-tm (Var i) = lem i
   where
     lem : (i : Fin m) → Var i [ idSub ]tm ≃tm Var i
     lem {m = suc m} zero = refl≃tm
-    lem {m = suc m} (suc i) = trans≃tm (apply-lifted-sub-tm-≃ (Var i) idSub) (lift-tm-≃ (lem i))
+    lem {m = suc m} (suc i) = trans≃tm (apply-wk-sub-tm-≃ (Var i) idSub) (wk-tm-≃ (lem i))
 id-on-tm (Coh Δ A σ) = Coh≃ refl≃c refl≃ty (id-right-unit σ)
 
 idSub-≃ : (n ≡ m) → idSub {n = n} ≃s idSub {n = m}
@@ -528,7 +528,7 @@ assoc-ty σ τ (s ─⟨ A ⟩⟶ t) = Arr≃ (assoc-tm σ τ s) (assoc-ty σ τ
 
 idSub≃ : Γ ≃c Δ → Sub (ctxLength Γ) (ctxLength Δ) ⋆
 idSub≃ Emp≃ = ⟨ ⋆ ⟩′
-idSub≃ (Add≃ p x) = ⟨ (lift-sub (idSub≃ p)) , 0V ⟩
+idSub≃ (Add≃ p x) = ⟨ (wk-sub (idSub≃ p)) , 0V ⟩
 
 idSub≃-on-ty : (p : Γ ≃c Δ) → (A : Ty (ctxLength Γ)) → A [ idSub≃ p ]ty ≃ty A
 idSub≃-on-tm : (p : Γ ≃c Δ) → (s : Tm (ctxLength Γ)) → s [ idSub≃ p ]tm ≃tm s
@@ -541,7 +541,7 @@ idSub≃-on-tm p (Var i) = lem p i
   where
     lem : (p : Γ ≃c Δ) → (i : Fin (ctxLength Γ)) → Var i [ idSub≃ p ]tm ≃tm Var {n = ctxLength Γ} i
     lem (Add≃ p x) zero = Var≃ (cong suc (sym (≃c-preserve-length p))) refl
-    lem (Add≃ p x) (suc i) = trans≃tm (apply-lifted-sub-tm-≃ (Var i) (idSub≃ p)) (lift-tm-≃ (lem p i))
+    lem (Add≃ p x) (suc i) = trans≃tm (apply-wk-sub-tm-≃ (Var i) (idSub≃ p)) (wk-tm-≃ (lem p i))
 idSub≃-on-tm p (Coh Δ A σ) = Coh≃ refl≃c refl≃ty (idSub≃-on-sub p σ)
 
 idSub≃-on-sub p ⟨ _ ⟩′ = Null≃ (idSub≃-on-ty p _)
@@ -549,29 +549,29 @@ idSub≃-on-sub p ⟨ σ , t ⟩ = Ext≃ (idSub≃-on-sub p σ) (idSub≃-on-tm
 
 idSub≃-left-unit : (p : Γ ≃c Δ) → (σ : Sub (ctxLength Δ) n A) → idSub≃ p ● σ ≃s σ
 idSub≃-left-unit Emp≃ ⟨ _ ⟩′ = refl≃s
-idSub≃-left-unit (Add≃ p x) ⟨ σ , t ⟩ = Ext≃ (trans≃s (apply-sub-lifted-sub-≃ (idSub≃ p) ⟨ σ , t ⟩) (idSub≃-left-unit p σ)) refl≃tm
+idSub≃-left-unit (Add≃ p x) ⟨ σ , t ⟩ = Ext≃ (trans≃s (apply-sub-wk-sub-≃ (idSub≃ p) ⟨ σ , t ⟩) (idSub≃-left-unit p σ)) refl≃tm
 
 idSub≃-functorial : (p : Γ ≃c Δ) → (q : Δ ≃c Υ) → idSub≃ p ● idSub≃ q ≃s idSub≃ (trans≃c p q)
 idSub≃-functorial Emp≃ Emp≃ = refl≃s
 idSub≃-functorial (Add≃ p x) (Add≃ q y) = Ext≃ lem refl≃tm
   where
-    lem : (lift-sub (idSub≃ p) ● idSub≃ (Add≃ q y)) ≃s
-            lift-sub (idSub≃ (trans≃c p q))
-    lem = trans≃s (apply-sub-lifted-sub-≃ (idSub≃ p) (idSub≃ (Add≃ q y)))
-                  (trans≃s (apply-lifted-sub-sub-≃ (idSub≃ p) (idSub≃ q))
-                  (lift-sub-≃ (idSub≃-functorial p q)))
+    lem : (wk-sub (idSub≃ p) ● idSub≃ (Add≃ q y)) ≃s
+            wk-sub (idSub≃ (trans≃c p q))
+    lem = trans≃s (apply-sub-wk-sub-≃ (idSub≃ p) (idSub≃ (Add≃ q y)))
+                  (trans≃s (apply-wk-sub-sub-≃ (idSub≃ p) (idSub≃ q))
+                  (wk-sub-≃ (idSub≃-functorial p q)))
 
 idSub≃-fst-var : {Γ : Ctx (suc n)} → {Δ : Ctx (suc m)} → (p : Γ ≃c Δ) → Var (fromℕ n) [ idSub≃ p ]tm ≃tm Var (fromℕ m)
 idSub≃-fst-var (Add≃ Emp≃ x) = refl≃tm
-idSub≃-fst-var (Add≃ (Add≃ p y) x) = trans≃tm (apply-lifted-sub-tm-≃ (Var (fromℕ _)) (idSub≃ (Add≃ p y))) (lift-tm-≃ (idSub≃-fst-var (Add≃ p y)))
+idSub≃-fst-var (Add≃ (Add≃ p y) x) = trans≃tm (apply-wk-sub-tm-≃ (Var (fromℕ _)) (idSub≃ (Add≃ p y))) (wk-tm-≃ (idSub≃-fst-var (Add≃ p y)))
 
 idSub≃-snd-var : {Γ : Ctx (suc (suc n))} → {Δ : Ctx (suc (suc m))} → (p : Γ ≃c Δ) → Var (inject₁ (fromℕ n)) [ idSub≃ p ]tm ≃tm Var (inject₁ (fromℕ m))
 idSub≃-snd-var (Add≃ (Add≃ Emp≃ y) x) = refl≃tm
-idSub≃-snd-var (Add≃ (Add≃ (Add≃ p z) y) x) = trans≃tm (apply-lifted-sub-tm-≃ (Var (inject₁ (fromℕ _))) (idSub≃ (Add≃ (Add≃ p z) y))) (lift-tm-≃ (idSub≃-snd-var (Add≃ (Add≃ p z) y)))
+idSub≃-snd-var (Add≃ (Add≃ (Add≃ p z) y) x) = trans≃tm (apply-wk-sub-tm-≃ (Var (inject₁ (fromℕ _))) (idSub≃ (Add≃ (Add≃ p z) y))) (wk-tm-≃ (idSub≃-snd-var (Add≃ (Add≃ p z) y)))
 
 idSub-id : {Γ Δ : Ctx n} → (p : Γ ≃c Δ) → idSub≃ p ≃s idSub {n}
 idSub-id Emp≃ = refl≃s
-idSub-id (Add≃ p x) = Ext≃ (lift-sub-≃ (idSub-id p)) refl≃tm
+idSub-id (Add≃ p x) = Ext≃ (wk-sub-≃ (idSub-id p)) refl≃tm
 
 ⋆-is-only-0-d-ty : {A : Ty n} → .⦃ IsZero (ty-dim A) ⦄ → A ≃ty ⋆ {n = n}
 ⋆-is-only-0-d-ty {A = ⋆} = Star≃ refl
@@ -581,32 +581,32 @@ idSub-id (Add≃ p x) = Ext≃ (lift-sub-≃ (idSub-id p)) refl≃tm
 ⋆-is-only-ty-in-empty-context (s ─⟨ A ⟩⟶ t) = ⊥-elim (no-term-in-empty-context s)
 
 fromℕ-‼ : (Γ : Ctx (suc n)) → Γ ‼ fromℕ _ ≃ty ⋆ {n = suc n}
-fromℕ-‼ {n = zero} (Γ , A) = lift-ty-≃ (⋆-is-only-ty-in-empty-context A)
-fromℕ-‼ {n = suc n} (Γ , A) = lift-ty-≃ (fromℕ-‼ Γ)
+fromℕ-‼ {n = zero} (Γ , A) = wk-ty-≃ (⋆-is-only-ty-in-empty-context A)
+fromℕ-‼ {n = suc n} (Γ , A) = wk-ty-≃ (fromℕ-‼ Γ)
 
-lift-ty-inj : lift-ty A ≃ty lift-ty B → A ≃ty B
-lift-tm-inj : lift-tm s ≃tm lift-tm t → s ≃tm t
-lift-sub-inj : lift-sub σ ≃s lift-sub τ → σ ≃s τ
+wk-ty-inj : wk-ty A ≃ty wk-ty B → A ≃ty B
+wk-tm-inj : wk-tm s ≃tm wk-tm t → s ≃tm t
+wk-sub-inj : wk-sub σ ≃s wk-sub τ → σ ≃s τ
 
-lift-ty-inj {A = ⋆} {B = ⋆} (Star≃ refl) = refl≃ty
-lift-ty-inj {A = s ─⟨ A ⟩⟶ t} {B = s′ ─⟨ B ⟩⟶ t′} (Arr≃ p q r) = Arr≃ (lift-tm-inj p) (lift-ty-inj q) (lift-tm-inj r)
+wk-ty-inj {A = ⋆} {B = ⋆} (Star≃ refl) = refl≃ty
+wk-ty-inj {A = s ─⟨ A ⟩⟶ t} {B = s′ ─⟨ B ⟩⟶ t′} (Arr≃ p q r) = Arr≃ (wk-tm-inj p) (wk-ty-inj q) (wk-tm-inj r)
 
-lift-tm-inj {s = Var i} {t = Var j} (Var≃ refl p) = Var≃ refl (cong pred p)
-lift-tm-inj {s = Coh Δ A σ} {t = Coh Δ′ A′ σ′} (Coh≃ p q r) = Coh≃ p q (lift-sub-inj r)
+wk-tm-inj {s = Var i} {t = Var j} (Var≃ refl p) = Var≃ refl (cong pred p)
+wk-tm-inj {s = Coh Δ A σ} {t = Coh Δ′ A′ σ′} (Coh≃ p q r) = Coh≃ p q (wk-sub-inj r)
 
-lift-sub-inj {σ = ⟨ _ ⟩′} {τ = ⟨ _ ⟩′} (Null≃ x) = Null≃ (lift-ty-inj x)
-lift-sub-inj {σ = ⟨ σ , t ⟩} {τ = ⟨ τ , s ⟩} (Ext≃ p q) = Ext≃ (lift-sub-inj p) (lift-tm-inj q)
+wk-sub-inj {σ = ⟨ _ ⟩′} {τ = ⟨ _ ⟩′} (Null≃ x) = Null≃ (wk-ty-inj x)
+wk-sub-inj {σ = ⟨ σ , t ⟩} {τ = ⟨ τ , s ⟩} (Ext≃ p q) = Ext≃ (wk-sub-inj p) (wk-tm-inj q)
 
-replaceSub-lift : (σ : Sub (1 + n) m A) → (t : Tm m) → lift-sub (replaceSub σ t) ≃s replaceSub (lift-sub σ) (lift-tm t)
-replaceSub-lift ⟨ σ , _ ⟩ t = refl≃s
+replaceSub-wk : (σ : Sub (1 + n) m A) → (t : Tm m) → wk-sub (replaceSub σ t) ≃s replaceSub (wk-sub σ) (wk-tm t)
+replaceSub-wk ⟨ σ , _ ⟩ t = refl≃s
 
-apply-replaceSub-lift-ty : (A : Ty n) → (σ : Sub (1 + n) m B) → (t : Tm m) → lift-ty A [ replaceSub σ t ]ty ≃ty lift-ty A [ σ ]ty
-apply-replaceSub-lift-ty A ⟨ σ , s ⟩ t = begin
-  < lift-ty A [ ⟨ σ , t ⟩ ]ty >ty
-    ≈⟨ apply-sub-lifted-ty-≃ A ⟨ σ , t ⟩ ⟩
+apply-replaceSub-wk-ty : (A : Ty n) → (σ : Sub (1 + n) m B) → (t : Tm m) → wk-ty A [ replaceSub σ t ]ty ≃ty wk-ty A [ σ ]ty
+apply-replaceSub-wk-ty A ⟨ σ , s ⟩ t = begin
+  < wk-ty A [ ⟨ σ , t ⟩ ]ty >ty
+    ≈⟨ apply-sub-wk-ty-≃ A ⟨ σ , t ⟩ ⟩
   < A [ σ ]ty >ty
-    ≈˘⟨ apply-sub-lifted-ty-≃ A ⟨ σ , s ⟩ ⟩
-  < lift-ty A [ ⟨ σ , s ⟩ ]ty >ty ∎
+    ≈˘⟨ apply-sub-wk-ty-≃ A ⟨ σ , s ⟩ ⟩
+  < wk-ty A [ ⟨ σ , s ⟩ ]ty >ty ∎
   where
     open Reasoning ty-setoid
 

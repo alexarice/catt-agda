@@ -3,7 +3,7 @@ open import Catt.Typing.Rule
 module Catt.Typing.Pruning.Support (ops : Op)
                                    (standard-op : StandardOp ops)
                                    (rules : RuleSet)
-                                   (lift-cond : LiftCond rules)
+                                   (wk-cond : WkCond rules)
                                    (sub-cond : SubCond ops rules)
                                    (supp-cond : SupportCond ops rules) where
 
@@ -17,7 +17,7 @@ open import Catt.Dyck.Pruning.Support
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
 open import Catt.Typing.Properties.Support ops rules supp-cond
-open import Catt.Dyck.Pruning.Typing ops standard-op rules lift-cond sub-cond
+open import Catt.Dyck.Pruning.Typing ops standard-op rules wk-cond sub-cond
 open import Catt.Typing.Pruning.Rule
 
 open import Catt.Support

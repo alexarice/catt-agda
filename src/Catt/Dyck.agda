@@ -25,10 +25,10 @@ dyck-term : Dyck n d → Tm (suc (n * 2))
 ⌊ ⇓ d ⌋d = ⌊ d ⌋d
 
 dyck-pre-type End = ⋆
-dyck-pre-type (⇑ d) = (lift-tm (dyck-term d)) ─⟨ (lift-ty (dyck-type d)) ⟩⟶ 0V
+dyck-pre-type (⇑ d) = (wk-tm (dyck-term d)) ─⟨ (wk-ty (dyck-type d)) ⟩⟶ 0V
 dyck-pre-type (⇓ d) = ty-base (dyck-pre-type d)
 
-dyck-type dy = lift-ty (dyck-pre-type dy)
+dyck-type dy = wk-ty (dyck-pre-type dy)
 
 dyck-term End = 0V
 dyck-term (⇑ d) = 0V
@@ -46,7 +46,7 @@ peak-height (⇓pk pk) = peak-height pk
 
 peak-term : {dy : Dyck (suc n) d} → Peak dy → Tm (3 + (n * 2))
 peak-term (⇕pk dy) = 0V
-peak-term (⇑pk p) = lift-tm (lift-tm (peak-term p))
+peak-term (⇑pk p) = wk-tm (wk-tm (peak-term p))
 peak-term (⇓pk p) = peak-term p
 
 susp-dyck : Dyck n d → Dyck (suc n) (suc d)

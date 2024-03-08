@@ -31,7 +31,7 @@ open import Catt.Tree.Insertion.Properties
 open import Catt.Ops.Tree ops
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties ops rules tame
-open import Catt.Suspension.Typing ops susp-op rules lift-cond susp-cond
+open import Catt.Suspension.Typing ops susp-op rules wk-cond susp-cond
 open import Catt.Wedge.Typing ops rules tame
 open import Catt.Tree.Typing ops rules tame
 open import Catt.Tree.Boundary.Typing ops rules tame

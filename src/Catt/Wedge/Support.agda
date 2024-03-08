@@ -100,8 +100,8 @@ wedge-supp-full n t (suc m) = cong ewt (wedge-supp-full n t m)
 wedge-supp-inc-left : (xs : VarSet (suc n)) → (t : Tm (suc n)) → (m : ℕ) → TransportVarSet xs (wedge-inc-left t m) ≡ wedge-supp xs t empty
 wedge-supp-inc-left xs t zero = TransportVarSet-id xs
 wedge-supp-inc-left xs t (suc m) = begin
-  TransportVarSet xs (lift-sub (wedge-inc-left t m))
-    ≡⟨ TransportVarSet-lift xs (wedge-inc-left t m) ⟩
+  TransportVarSet xs (wk-sub (wedge-inc-left t m))
+    ≡⟨ TransportVarSet-wk xs (wedge-inc-left t m) ⟩
   ewf (TransportVarSet xs (wedge-inc-left t m))
     ≡⟨ cong ewf (wedge-supp-inc-left xs t m) ⟩
   ewf (wedge-supp xs t empty) ∎
@@ -112,16 +112,16 @@ wedge-supp-inc-right : (t : Tm (suc n)) → (ys : VarSet (suc m)) → TransportV
 wedge-supp-inc-right {m = zero} t (ewf ys) = refl
 wedge-supp-inc-right {m = zero} t (ewt ys) = refl
 wedge-supp-inc-right {m = suc m} t (ewf ys) = begin
-  TransportVarSet ys (lift-sub (wedge-inc-right t m))
-    ≡⟨ TransportVarSet-lift ys (wedge-inc-right t m) ⟩
+  TransportVarSet ys (wk-sub (wedge-inc-right t m))
+    ≡⟨ TransportVarSet-wk ys (wedge-inc-right t m) ⟩
   ewf (TransportVarSet ys (wedge-inc-right t m))
     ≡⟨ cong ewf (wedge-supp-inc-right t ys) ⟩
   ewf (wedge-supp empty t ys) ∎
   where
     open ≡-Reasoning
 wedge-supp-inc-right {m = suc m} t (ewt ys) = begin
-  TransportVarSet ys (lift-sub (wedge-inc-right t m)) ∪ ewt empty
-    ≡⟨ cong (_∪ ewt empty) (TransportVarSet-lift ys (wedge-inc-right t m)) ⟩
+  TransportVarSet ys (wk-sub (wedge-inc-right t m)) ∪ ewt empty
+    ≡⟨ cong (_∪ ewt empty) (TransportVarSet-wk ys (wedge-inc-right t m)) ⟩
   ewt (TransportVarSet ys (wedge-inc-right t m) ∪ empty)
     ≡⟨ cong ewt (∪-right-unit (TransportVarSet ys (wedge-inc-right t m))) ⟩
   ewt (TransportVarSet ys (wedge-inc-right t m))

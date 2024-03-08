@@ -3,7 +3,7 @@ open import Catt.Typing.Rule
 module Catt.Typing.DiscRemoval.Typed (ops : Op)
                                      (standard-op : StandardOp ops)
                                      (rules : RuleSet)
-                                     (lift-cond : LiftCond rules) where
+                                     (wk-cond : WkCond rules) where
 
 open import Catt.Prelude
 
@@ -12,7 +12,7 @@ open import Catt.Typing.DiscRemoval.Rule
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
 open import Catt.Globular.Typing ops rules
-open import Catt.Discs.Typing ops standard-op rules lift-cond
+open import Catt.Discs.Typing ops standard-op rules wk-cond
 
 dr-conv : ConvCond′ ops rules DiscRemovalSet
 dr-conv [ DR {n = n} Γ σ ] tty with coh-sub-ty tty

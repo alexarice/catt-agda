@@ -20,8 +20,8 @@ Disc-src n = let
   instance _ = disc-pd n
   in begin
   pd-bd-supp n (Disc (suc n)) false
-    ≡⟨ tri-case≡ (sym (trans (lift-ty-dim (sphere-type n)) (sphere-type-dim n)))
-                 (<-cmp n (ty-dim (lift-ty (sphere-type n)))) _ _ _ ⟩
+    ≡⟨ tri-case≡ (sym (trans (wk-ty-dim (sphere-type n)) (sphere-type-dim n)))
+                 (<-cmp n (ty-dim (wk-ty (sphere-type n)))) _ _ _ ⟩
   ewf (ewf (pd-bd-supp n (Disc n) false))
     ≡⟨ cong (ewf ∘ ewf) (pd-bd-supp-full n (Disc n) false (≤-reflexive (disc-dim n))) ⟩
   ewf (ewf full) ∎
@@ -32,8 +32,8 @@ Disc-tgt n = let
   instance _ = disc-pd n
   in begin
   pd-bd-supp n (Disc (suc n)) true
-    ≡⟨ tri-case≡ (sym (trans (lift-ty-dim (sphere-type n)) (sphere-type-dim n)))
-                 (<-cmp n (ty-dim (lift-ty (sphere-type n)))) _ _ _ ⟩
+    ≡⟨ tri-case≡ (sym (trans (wk-ty-dim (sphere-type n)) (sphere-type-dim n)))
+                 (<-cmp n (ty-dim (wk-ty (sphere-type n)))) _ _ _ ⟩
   ewf (ewt (drop (pd-bd-supp n (Disc n) true)))
     ≡⟨ cong (ewf ∘ ewt ∘ drop) (pd-bd-supp-full n (Disc n) true (≤-reflexive (disc-dim n))) ⟩
   ewf (ewt (ewf full)) ∎
@@ -41,10 +41,10 @@ Disc-tgt n = let
 sphere-supp : (d : ℕ) → FVTy (sphere-type d) ≡ full
 sphere-supp zero = refl
 sphere-supp (suc d) = begin
-  FVTy (lift-ty (lift-ty (sphere-type d))) ∪ ewf (ewt empty) ∪ ewt empty
-    ≡⟨ cong (λ - → - ∪ ewf (ewt empty) ∪ ewt empty) (supp-lift-ty (lift-ty (sphere-type d))) ⟩
-  ewf (FVTy (lift-ty (sphere-type d))) ∪ ewf (ewt empty) ∪ ewt empty
-    ≡⟨ cong (λ - → ewf - ∪ ewf (ewt empty) ∪ ewt empty) (supp-lift-ty (sphere-type d)) ⟩
+  FVTy (wk-ty (wk-ty (sphere-type d))) ∪ ewf (ewt empty) ∪ ewt empty
+    ≡⟨ cong (λ - → - ∪ ewf (ewt empty) ∪ ewt empty) (supp-wk-ty (wk-ty (sphere-type d))) ⟩
+  ewf (FVTy (wk-ty (sphere-type d))) ∪ ewf (ewt empty) ∪ ewt empty
+    ≡⟨ cong (λ - → ewf - ∪ ewf (ewt empty) ∪ ewt empty) (supp-wk-ty (sphere-type d)) ⟩
   ewf (ewf (FVTy (sphere-type d))) ∪ ewf (ewt empty) ∪ ewt empty
     ≡⟨ cong (λ - → ewt (ewt -)) (∪-right-unit (FVTy (sphere-type d) ∪ empty)) ⟩
   ewt (ewt (FVTy (sphere-type d) ∪ empty))
@@ -69,9 +69,9 @@ var1-disc-supp n = let
   instance _ = disc-pd n
   in begin
   SuppTm (Disc (suc n)) (Var 1F)
-    ≡⟨ cong (ewf ∘ ewt ∘ DC (Disc n)) (∪-left-unit (FVTy (lift-ty (sphere-type n)))) ⟩
-  ewf (ewt (DC (Disc n) (FVTy (lift-ty (sphere-type n)))))
-    ≡⟨ cong (ewf ∘ ewt ∘ DC (Disc n)) (supp-lift-ty (sphere-type n)) ⟩
+    ≡⟨ cong (ewf ∘ ewt ∘ DC (Disc n)) (∪-left-unit (FVTy (wk-ty (sphere-type n)))) ⟩
+  ewf (ewt (DC (Disc n) (FVTy (wk-ty (sphere-type n)))))
+    ≡⟨ cong (ewf ∘ ewt ∘ DC (Disc n)) (supp-wk-ty (sphere-type n)) ⟩
   ewf (ewt (ewf (DC (Sphere n) (FVTy (sphere-type n)))))
     ≡⟨ cong (ewf ∘ ewt ∘ ewf ∘ DC (Sphere n)) (sphere-supp n) ⟩
   ewf (ewt (ewf (DC (Sphere n) full)))

@@ -23,55 +23,55 @@ open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.ToTerm
 
 ++t-inc-left-phere : (S : Tree n)
-                            → (T : Tree m)
-                            → ++t-inc-left′ S T PHere ≃p PHere {S = S ++t T}
+                   → (T : Tree m)
+                   → ++t-inc-left′ S T PHere ≃p PHere {S = S ++t T}
 ++t-inc-left-phere Sing T = refl≃p
 ++t-inc-left-phere (Join S₁ S₂) T = refl≃p
 
 ++t-inc-phere : (S : Tree n)
-                       → (T : Tree m)
-                       → ++t-inc-left′ S T (last-path S) ≃p ++t-inc-right′ S T PHere
+              → (T : Tree m)
+              → ++t-inc-left′ S T (last-path S) ≃p ++t-inc-right′ S T PHere
 ++t-inc-phere Sing T = refl≃p
 ++t-inc-phere (Join S₁ S₂) T = Shift≃ refl≃ (++t-inc-phere S₂ T)
 
 ++t-inc-right-last-path : (S : Tree n)
-                                 → (T : Tree m)
-                                 → ++t-inc-right′ S T (last-path T) ≃p last-path (S ++t T)
+                        → (T : Tree m)
+                        → ++t-inc-right′ S T (last-path T) ≃p last-path (S ++t T)
 ++t-inc-right-last-path Sing T = refl≃p
 ++t-inc-right-last-path (Join S₁ S₂) T = Shift≃ refl≃ (++t-inc-right-last-path S₂ T)
 
 
-lift-stm-to-term : (a : STm (Other n)) → stm-to-term (lift-stm a) ≃tm lift-tm (stm-to-term a)
-lift-sty-to-type : (A : STy (Other n)) → sty-to-type (lift-sty A) ≃ty lift-ty (sty-to-type A)
-lift-label-to-sub′ : (L : Label-WT (Other n) S) → ((P : Path S) → apt (lift-label L) P ≃tm lift-tm (apt L P)) → sty-to-type (lift-sty (lty L)) ≃ty lift-ty (sty-to-type (lty L)) → label-to-sub (lift-label L) ≃s lift-sub (label-to-sub L)
-lift-label-to-sub : (L : Label-WT (Other n) S) → label-to-sub (lift-label L) ≃s lift-sub (label-to-sub L)
+wk-stm-to-term : (a : STm (Other n)) → stm-to-term (wk-stm a) ≃tm wk-tm (stm-to-term a)
+wk-sty-to-type : (A : STy (Other n)) → sty-to-type (wk-sty A) ≃ty wk-ty (sty-to-type A)
+wk-label-to-sub′ : (L : Label-WT (Other n) S) → ((P : Path S) → apt (wk-label L) P ≃tm wk-tm (apt L P)) → sty-to-type (wk-sty (lty L)) ≃ty wk-ty (sty-to-type (lty L)) → label-to-sub (wk-label L) ≃s wk-sub (label-to-sub L)
+wk-label-to-sub : (L : Label-WT (Other n) S) → label-to-sub (wk-label L) ≃s wk-sub (label-to-sub L)
 
-lift-stm-to-term (SCoh S A L) = begin
-  < Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub (lift-label L) ]tm >tm
-    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh ⌊ S ⌋ (sty-to-type A) idSub}) (lift-label-to-sub L) ⟩
-  < Coh ⌊ S ⌋ (sty-to-type A) idSub [ lift-sub (label-to-sub L) ]tm >tm
-    ≈⟨ apply-lifted-sub-tm-≃ (Coh ⌊ S ⌋ (sty-to-type A) idSub) (label-to-sub L) ⟩
-  < lift-tm (Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm) >tm ∎
+wk-stm-to-term (SCoh S A L) = begin
+  < Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub (wk-label L) ]tm >tm
+    ≈⟨ sub-action-≃-tm (refl≃tm {s = Coh ⌊ S ⌋ (sty-to-type A) idSub}) (wk-label-to-sub L) ⟩
+  < Coh ⌊ S ⌋ (sty-to-type A) idSub [ wk-sub (label-to-sub L) ]tm >tm
+    ≈⟨ apply-wk-sub-tm-≃ (Coh ⌊ S ⌋ (sty-to-type A) idSub) (label-to-sub L) ⟩
+  < wk-tm (Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm) >tm ∎
   where
     open Reasoning tm-setoid
-lift-stm-to-term (SOther t) = refl≃tm
+wk-stm-to-term (SOther t) = refl≃tm
 
-lift-sty-to-type S⋆ = refl≃ty
-lift-sty-to-type (SArr s A t) = Arr≃ (lift-stm-to-term s) (lift-sty-to-type A) (lift-stm-to-term t)
+wk-sty-to-type S⋆ = refl≃ty
+wk-sty-to-type (SArr s A t) = Arr≃ (wk-stm-to-term s) (wk-sty-to-type A) (wk-stm-to-term t)
 
-lift-label-to-sub′ {S = Sing} L f p = Ext≃ (Null≃ p) (f PHere)
-lift-label-to-sub′ {S = Join S T} L f p = begin
-  < sub-from-wedge (↓ (label-to-sub (lift-label (label₁ L)))) (label-to-sub (lift-label (label₂ L))) >s
-    ≈⟨ sub-from-wedge-≃ (↓-≃ (lift-label-to-sub′ (label₁ L) (λ P → f (PExt P)) (Arr≃ (f PHere) p (f (PShift PHere))))) (lift-label-to-sub′ (label₂ L) (λ P → f (PShift P)) p) ⟩
-  < sub-from-wedge (↓ (lift-sub (label-to-sub (label₁ L)))) (lift-sub (label-to-sub (label₂ L))) >s
-    ≈⟨ sub-from-wedge-≃ (↓-lift (label-to-sub (label₁ L))) (refl≃s {σ = lift-sub (label-to-sub (label₂ L))}) ⟩
-  < sub-from-wedge (lift-sub (↓ (label-to-sub (label₁ L)))) (lift-sub (label-to-sub (label₂ L))) >s
-    ≈˘⟨ sub-from-wedge-lift (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ⟩
-  < lift-sub (sub-from-wedge (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L))) >s ∎
+wk-label-to-sub′ {S = Sing} L f p = Ext≃ (Null≃ p) (f PHere)
+wk-label-to-sub′ {S = Join S T} L f p = begin
+  < sub-from-wedge (↓ (label-to-sub (wk-label (label₁ L)))) (label-to-sub (wk-label (label₂ L))) >s
+    ≈⟨ sub-from-wedge-≃ (↓-≃ (wk-label-to-sub′ (label₁ L) (λ P → f (PExt P)) (Arr≃ (f PHere) p (f (PShift PHere))))) (wk-label-to-sub′ (label₂ L) (λ P → f (PShift P)) p) ⟩
+  < sub-from-wedge (↓ (wk-sub (label-to-sub (label₁ L)))) (wk-sub (label-to-sub (label₂ L))) >s
+    ≈⟨ sub-from-wedge-≃ (↓-wk (label-to-sub (label₁ L))) (refl≃s {σ = wk-sub (label-to-sub (label₂ L))}) ⟩
+  < sub-from-wedge (wk-sub (↓ (label-to-sub (label₁ L)))) (wk-sub (label-to-sub (label₂ L))) >s
+    ≈˘⟨ sub-from-wedge-wk (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) ⟩
+  < wk-sub (sub-from-wedge (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L))) >s ∎
   where
     open Reasoning sub-setoid
 
-lift-label-to-sub L = lift-label-to-sub′ L (λ P → lift-stm-to-term (ap L P)) (lift-sty-to-type (lty L))
+wk-label-to-sub L = wk-label-to-sub′ L (λ P → wk-stm-to-term (ap L P)) (wk-sty-to-type (lty L))
 
 ++t-inc-left-unit : (T : Tree n)
                            → ++t-inc-left′ T Sing ≃lp (λ Z → Z)
@@ -277,15 +277,15 @@ stm-≃-≃ {a = a} {b = b} p q = begin
   where
     open Reasoning stm-setoid
 
-lift-stm-≃ : a ≃stm b → lift-stm a ≃stm lift-stm b
-lift-stm-≃ {a = a} {b = b} [ p ] .get = begin
-  < stm-to-term (lift-stm a) >tm
-    ≈⟨ lift-stm-to-term a ⟩
-  < lift-tm (stm-to-term a) >tm
-    ≈⟨ lift-tm-≃ p ⟩
-  < lift-tm (stm-to-term b) >tm
-    ≈˘⟨ lift-stm-to-term b ⟩
-  < stm-to-term (lift-stm b) >tm ∎
+wk-stm-≃ : a ≃stm b → wk-stm a ≃stm wk-stm b
+wk-stm-≃ {a = a} {b = b} [ p ] .get = begin
+  < stm-to-term (wk-stm a) >tm
+    ≈⟨ wk-stm-to-term a ⟩
+  < wk-tm (stm-to-term a) >tm
+    ≈⟨ wk-tm-≃ p ⟩
+  < wk-tm (stm-to-term b) >tm
+    ≈˘⟨ wk-stm-to-term b ⟩
+  < stm-to-term (wk-stm b) >tm ∎
   where
     open Reasoning tm-setoid
 
@@ -483,18 +483,18 @@ map-sty-ext-to-type : (As : STy (someTree S)) → sty-to-type (map-sty-ext {T = 
 map-sty-ext-to-type S⋆ = refl≃ty
 map-sty-ext-to-type (SArr s As t) = Arr≃ (id-on-tm (susp-tm (stm-to-term s))) (map-sty-ext-to-type As) (id-on-tm (susp-tm (stm-to-term t)))
 
-disc-sty-to-type : (S : Tree n) → .⦃ _ : is-linear S ⦄ → sty-to-type (disc-sty S) ≃ty lift-ty (sphere-type (tree-dim S))
+disc-sty-to-type : (S : Tree n) → .⦃ _ : is-linear S ⦄ → sty-to-type (disc-sty S) ≃ty wk-ty (sphere-type (tree-dim S))
 disc-sty-to-type Sing = refl≃ty
 disc-sty-to-type (Susp S) = begin
   < sty-to-type (map-sty-ext (disc-sty S)) >ty
     ≈⟨ map-sty-ext-to-type (disc-sty S) ⟩
   < susp-ty (sty-to-type (disc-sty S)) >ty
     ≈⟨ susp-ty-≃ (disc-sty-to-type S) ⟩
-  < susp-ty (lift-ty (sphere-type (tree-dim S))) >ty
-    ≈⟨ susp-ty-lift (sphere-type (tree-dim S)) ⟩
-  < lift-ty (susp-ty (sphere-type (tree-dim S))) >ty
-    ≈⟨ lift-ty-≃ (sphere-type-susp (tree-dim S)) ⟩
-  < lift-ty (sphere-type (suc (tree-dim S))) >ty ∎
+  < susp-ty (wk-ty (sphere-type (tree-dim S))) >ty
+    ≈⟨ susp-ty-wk (sphere-type (tree-dim S)) ⟩
+  < wk-ty (susp-ty (sphere-type (tree-dim S))) >ty
+    ≈⟨ wk-ty-≃ (sphere-type-susp (tree-dim S)) ⟩
+  < wk-ty (sphere-type (suc (tree-dim S))) >ty ∎
   where
     open Reasoning ty-setoid
 

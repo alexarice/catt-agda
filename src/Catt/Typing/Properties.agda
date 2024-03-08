@@ -16,5 +16,5 @@ open import Catt.Suspension
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules public
-open import Catt.Typing.Properties.Lifting ops rules lift-cond public
+open import Catt.Typing.Properties.Weakening ops rules wk-cond public
 open import Catt.Typing.Properties.Substitution.Suspended ops rules tame public

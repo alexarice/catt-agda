@@ -180,38 +180,38 @@ TransportVarSet-tm (Coh S A τ) σ = TransportVarSet-sub τ σ
 TransportVarSet-sub ⟨ A ⟩′ σ = TransportVarSet-ty A σ
 TransportVarSet-sub ⟨ τ , t ⟩ σ = trans (TransportVarSet-∪ (FVSub τ) (FVTm t) σ) (cong₂ _∪_ (TransportVarSet-sub τ σ) (TransportVarSet-tm t σ))
 
-supp-lift-ty : (A : Ty n) → FVTy (lift-ty A) ≡ ewf (FVTy A)
-supp-lift-tm : (t : Tm n) → FVTm (lift-tm t) ≡ ewf (FVTm t)
-supp-lift-sub : (σ : Sub n m ⋆) → FVSub (lift-sub σ) ≡ ewf (FVSub σ)
+supp-wk-ty : (A : Ty n) → FVTy (wk-ty A) ≡ ewf (FVTy A)
+supp-wk-tm : (t : Tm n) → FVTm (wk-tm t) ≡ ewf (FVTm t)
+supp-wk-sub : (σ : Sub n m ⋆) → FVSub (wk-sub σ) ≡ ewf (FVSub σ)
 
-supp-lift-ty ⋆ = refl
-supp-lift-ty (s ─⟨ A ⟩⟶ t) = cong₂ _∪_ (cong₂ _∪_ (supp-lift-ty A) (supp-lift-tm s)) (supp-lift-tm t)
+supp-wk-ty ⋆ = refl
+supp-wk-ty (s ─⟨ A ⟩⟶ t) = cong₂ _∪_ (cong₂ _∪_ (supp-wk-ty A) (supp-wk-tm s)) (supp-wk-tm t)
 
-supp-lift-tm (Var i) = refl
-supp-lift-tm (Coh S A σ) = supp-lift-sub σ
+supp-wk-tm (Var i) = refl
+supp-wk-tm (Coh S A σ) = supp-wk-sub σ
 
-supp-lift-sub ⟨ _ ⟩′ = refl
-supp-lift-sub ⟨ σ , t ⟩ = cong₂ _∪_ (supp-lift-sub σ) (supp-lift-tm t)
+supp-wk-sub ⟨ _ ⟩′ = refl
+supp-wk-sub ⟨ σ , t ⟩ = cong₂ _∪_ (supp-wk-sub σ) (supp-wk-tm t)
 
 idSub-supp : FVSub (idSub {n}) ≡ full
 idSub-supp {zero} = refl
-idSub-supp {suc n} = trans (cong (_∪ ewt empty) (supp-lift-sub idSub)) (cong ewt (trans (∪-right-unit (FVSub idSub)) idSub-supp))
+idSub-supp {suc n} = trans (cong (_∪ ewt empty) (supp-wk-sub idSub)) (cong ewt (trans (∪-right-unit (FVSub idSub)) idSub-supp))
 
 idSub≃-supp : (p : Γ ≃c Δ) → FVSub (idSub≃ p) ≡ full
 idSub≃-supp Emp≃ = refl
-idSub≃-supp (Add≃ p x) = trans (cong (_∪ ewt empty) (supp-lift-sub (idSub≃ p))) (cong ewt (trans (∪-right-unit (FVSub (idSub≃ p))) (idSub≃-supp p)))
+idSub≃-supp (Add≃ p x) = trans (cong (_∪ ewt empty) (supp-wk-sub (idSub≃ p))) (cong ewt (trans (∪-right-unit (FVSub (idSub≃ p))) (idSub≃-supp p)))
 
-TransportVarSet-lift : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet xs (lift-sub σ) ≡ ewf (TransportVarSet xs σ)
-TransportVarSet-lift emp ⟨ _ ⟩′ = refl
-TransportVarSet-lift (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-lift xs σ
-TransportVarSet-lift (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (TransportVarSet-lift xs σ) (supp-lift-tm t)
+TransportVarSet-wk : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet xs (wk-sub σ) ≡ ewf (TransportVarSet xs σ)
+TransportVarSet-wk emp ⟨ _ ⟩′ = refl
+TransportVarSet-wk (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-wk xs σ
+TransportVarSet-wk (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (TransportVarSet-wk xs σ) (supp-wk-tm t)
 
 TransportVarSet-id-lem : (b : Bool) → (xs : VarSet n) → (σ : Sub n m ⋆)
-                       → TransportVarSet (b ∷ xs) ⟨ lift-sub σ , 0V ⟩ ≡ b ∷ TransportVarSet xs σ
-TransportVarSet-id-lem false xs σ = TransportVarSet-lift xs σ
+                       → TransportVarSet (b ∷ xs) ⟨ wk-sub σ , 0V ⟩ ≡ b ∷ TransportVarSet xs σ
+TransportVarSet-id-lem false xs σ = TransportVarSet-wk xs σ
 TransportVarSet-id-lem true xs σ = begin
-  TransportVarSet xs (lift-sub σ) ∪ ewt empty
-    ≡⟨ cong (_∪ ewt empty) (TransportVarSet-lift xs σ) ⟩
+  TransportVarSet xs (wk-sub σ) ∪ ewt empty
+    ≡⟨ cong (_∪ ewt empty) (TransportVarSet-wk xs σ) ⟩
   ewt (TransportVarSet xs σ ∪ empty)
     ≡⟨ cong ewt (∪-right-unit (TransportVarSet xs σ)) ⟩
   ewt (TransportVarSet xs σ) ∎
@@ -365,8 +365,8 @@ ty-tgt′-⊆ (s ─⟨ A ⟩⟶ t) = ∪-⊆-2 (FVTy A ∪ FVTm s) (FVTm t)
 
 TransportVarSet-idSub≃ : (xs : VarSet n) → (p : Γ ≃c Δ) → TransportVarSet xs (idSub≃ p) ≡ᵖ xs
 TransportVarSet-idSub≃ emp Emp≃ = P.refl refl
-TransportVarSet-idSub≃ (ewf xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (TransportVarSet-lift xs (idSub≃ p))) (refl P.∷ TransportVarSet-idSub≃ xs p)
-TransportVarSet-idSub≃ (ewt xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (trans (cong (_∪ ewt empty) (TransportVarSet-lift xs (idSub≃ p))) (cong ewt (∪-right-unit (TransportVarSet xs (idSub≃ p)))))) (refl P.∷ TransportVarSet-idSub≃ xs p)
+TransportVarSet-idSub≃ (ewf xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (TransportVarSet-wk xs (idSub≃ p))) (refl P.∷ TransportVarSet-idSub≃ xs p)
+TransportVarSet-idSub≃ (ewt xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (trans (cong (_∪ ewt empty) (TransportVarSet-wk xs (idSub≃ p))) (cong ewt (∪-right-unit (TransportVarSet xs (idSub≃ p)))))) (refl P.∷ TransportVarSet-idSub≃ xs p)
 
 ∪-Truth : (xs ys : VarSet n) → (i : Fin n) → Truth (lookup (xs ∪ ys) i) → Truth (lookup xs i) ⊎ Truth (lookup ys i)
 ∪-Truth (x ∷ xs) (y ∷ ys) (suc i) truth = ∪-Truth xs ys i truth
@@ -504,8 +504,8 @@ FVSub-comp-⊆ ⟨ τ , t ⟩ σ = begin
 
 SuppContainsType : (t : Tm n) → (Γ : Ctx n) → SuppTy Γ (tm-to-ty Γ t) ⊆ SuppTm Γ t
 SuppContainsType (Var zero) (Γ , A) = begin
-  SuppTy (Γ , A) (lift-ty A)
-    ≡⟨ cong (DC (Γ , A)) (supp-lift-ty A) ⟩
+  SuppTy (Γ , A) (wk-ty A)
+    ≡⟨ cong (DC (Γ , A)) (supp-wk-ty A) ⟩
   ewf (SuppTy Γ A)
     ≤⟨ cong ewt (sym (∪-idem (SuppTy Γ A))) ⟩
   ewt (SuppTy Γ A)
@@ -517,8 +517,8 @@ SuppContainsType (Var zero) (Γ , A) = begin
     open PReasoning (⊆-poset _)
 
 SuppContainsType (Var (suc i)) (Γ , A) = begin
-  SuppTy (Γ , A) (lift-ty (Γ ‼ i))
-    ≡⟨ cong (DC (Γ , A)) (supp-lift-ty (Γ ‼ i)) ⟩
+  SuppTy (Γ , A) (wk-ty (Γ ‼ i))
+    ≡⟨ cong (DC (Γ , A)) (supp-wk-ty (Γ ‼ i)) ⟩
   ewf (SuppTy Γ (Γ ‼ i))
     ≤⟨ cong ewf (SuppContainsType (Var i) Γ) ⟩
   ewf (SuppTm Γ (Var i))

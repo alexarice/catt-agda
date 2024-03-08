@@ -24,56 +24,56 @@ dyck-type-prune (⇕pk dy) = begin
   < dyck-type dy >ty
     ≈˘⟨ id-on-ty (dyck-type dy) ⟩
   < dyck-type dy [ idSub ]ty >ty
-    ≈˘⟨ apply-sub-lifted-ty-≃ (dyck-type dy) ⟨ idSub , dyck-term dy ⟩ ⟩
-  < lift-ty (dyck-type dy) [ ⟨ idSub , dyck-term dy ⟩ ]ty >ty
-    ≈˘⟨ apply-sub-lifted-ty-≃ (lift-ty (dyck-type dy)) (π (⇕pk dy)) ⟩
+    ≈˘⟨ apply-sub-wk-ty-≃ (dyck-type dy) ⟨ idSub , dyck-term dy ⟩ ⟩
+  < wk-ty (dyck-type dy) [ ⟨ idSub , dyck-term dy ⟩ ]ty >ty
+    ≈˘⟨ apply-sub-wk-ty-≃ (wk-ty (dyck-type dy)) (π (⇕pk dy)) ⟩
   < dyck-type (⇓ (⇑ dy)) [ π (⇕pk dy) ]ty >ty ∎
   where
     open Reasoning ty-setoid
 dyck-type-prune (⇑pk {dy = dy} p) = Arr≃ l1 l2 refl≃tm
   where
-    l1 : lift-tm (lift-tm (dyck-term (dy // p))) ≃tm
-           (lift-tm (lift-tm (dyck-term dy)) [ π (⇑pk p) ]tm)
+    l1 : wk-tm (wk-tm (dyck-term (dy // p))) ≃tm
+           (wk-tm (wk-tm (dyck-term dy)) [ π (⇑pk p) ]tm)
     l1 = begin
-      < lift-tm (lift-tm (dyck-term (dy // p))) >tm
-        ≈⟨ lift-tm-≃ (lift-tm-≃ (dyck-term-prune p)) ⟩
-      < lift-tm (lift-tm (dyck-term dy [ π p ]tm)) >tm
-        ≈˘⟨ lift-tm-≃ (apply-lifted-sub-tm-≃ (dyck-term dy) (π p)) ⟩
-      < lift-tm (dyck-term dy [ lift-sub (π p) ]tm) >tm
-        ≈˘⟨ apply-lifted-sub-tm-≃ (dyck-term dy) (lift-sub (π p)) ⟩
-      < dyck-term dy [ lift-sub (lift-sub (π p)) ]tm >tm
-        ≈˘⟨ apply-sub-lifted-tm-≃ (dyck-term dy) ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ ⟩
-      < lift-tm (dyck-term dy) [ ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ ]tm >tm
-        ≈˘⟨ apply-sub-lifted-tm-≃  (lift-tm (dyck-term dy)) ⟨ ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ , 0V ⟩ ⟩
-      < lift-tm (lift-tm (dyck-term dy)) [ ⟨ ⟨ (lift-sub (lift-sub (π p))) , 1V ⟩ , 0V ⟩ ]tm >tm ∎
+      < wk-tm (wk-tm (dyck-term (dy // p))) >tm
+        ≈⟨ wk-tm-≃ (wk-tm-≃ (dyck-term-prune p)) ⟩
+      < wk-tm (wk-tm (dyck-term dy [ π p ]tm)) >tm
+        ≈˘⟨ wk-tm-≃ (apply-wk-sub-tm-≃ (dyck-term dy) (π p)) ⟩
+      < wk-tm (dyck-term dy [ wk-sub (π p) ]tm) >tm
+        ≈˘⟨ apply-wk-sub-tm-≃ (dyck-term dy) (wk-sub (π p)) ⟩
+      < dyck-term dy [ wk-sub (wk-sub (π p)) ]tm >tm
+        ≈˘⟨ apply-sub-wk-tm-≃ (dyck-term dy) ⟨ wk-sub (wk-sub (π p)) , 1V ⟩ ⟩
+      < wk-tm (dyck-term dy) [ ⟨ wk-sub (wk-sub (π p)) , 1V ⟩ ]tm >tm
+        ≈˘⟨ apply-sub-wk-tm-≃  (wk-tm (dyck-term dy)) ⟨ ⟨ wk-sub (wk-sub (π p)) , 1V ⟩ , 0V ⟩ ⟩
+      < wk-tm (wk-tm (dyck-term dy)) [ ⟨ ⟨ (wk-sub (wk-sub (π p))) , 1V ⟩ , 0V ⟩ ]tm >tm ∎
       where
         open Reasoning tm-setoid
 
-    l2 : lift-ty (lift-ty (dyck-type (dy // p))) ≃ty
-           (lift-ty (lift-ty (dyck-type dy)) [ π (⇑pk p) ]ty)
+    l2 : wk-ty (wk-ty (dyck-type (dy // p))) ≃ty
+           (wk-ty (wk-ty (dyck-type dy)) [ π (⇑pk p) ]ty)
     l2 = begin
-      < lift-ty (lift-ty (dyck-type (dy // p))) >ty
-        ≈⟨ lift-ty-≃ (lift-ty-≃ (dyck-type-prune p)) ⟩
-      < lift-ty (lift-ty (dyck-type dy [ π p ]ty)) >ty
-        ≈˘⟨ lift-ty-≃ (apply-lifted-sub-ty-≃ (dyck-type dy) (π p)) ⟩
-      < lift-ty (dyck-type dy [ lift-sub (π p) ]ty) >ty
-        ≈˘⟨ apply-lifted-sub-ty-≃ (dyck-type dy) (lift-sub (π p)) ⟩
-      < dyck-type dy [ lift-sub (lift-sub (π p)) ]ty >ty
-        ≈˘⟨ apply-sub-lifted-ty-≃ (dyck-type dy) ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ ⟩
-      < lift-ty (dyck-type dy) [ ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ ]ty >ty
-        ≈˘⟨ apply-sub-lifted-ty-≃ (lift-ty (dyck-type dy)) ⟨ ⟨ lift-sub (lift-sub (π p)) , 1V ⟩ , 0V ⟩ ⟩
-      < lift-ty (lift-ty (dyck-type dy)) [ ⟨ ⟨ (lift-sub (lift-sub (π p))) , 1V ⟩ , 0V ⟩ ]ty >ty ∎
+      < wk-ty (wk-ty (dyck-type (dy // p))) >ty
+        ≈⟨ wk-ty-≃ (wk-ty-≃ (dyck-type-prune p)) ⟩
+      < wk-ty (wk-ty (dyck-type dy [ π p ]ty)) >ty
+        ≈˘⟨ wk-ty-≃ (apply-wk-sub-ty-≃ (dyck-type dy) (π p)) ⟩
+      < wk-ty (dyck-type dy [ wk-sub (π p) ]ty) >ty
+        ≈˘⟨ apply-wk-sub-ty-≃ (dyck-type dy) (wk-sub (π p)) ⟩
+      < dyck-type dy [ wk-sub (wk-sub (π p)) ]ty >ty
+        ≈˘⟨ apply-sub-wk-ty-≃ (dyck-type dy) ⟨ wk-sub (wk-sub (π p)) , 1V ⟩ ⟩
+      < wk-ty (dyck-type dy) [ ⟨ wk-sub (wk-sub (π p)) , 1V ⟩ ]ty >ty
+        ≈˘⟨ apply-sub-wk-ty-≃ (wk-ty (dyck-type dy)) ⟨ ⟨ wk-sub (wk-sub (π p)) , 1V ⟩ , 0V ⟩ ⟩
+      < wk-ty (wk-ty (dyck-type dy)) [ ⟨ ⟨ (wk-sub (wk-sub (π p))) , 1V ⟩ , 0V ⟩ ]ty >ty ∎
       where
         open Reasoning ty-setoid
 dyck-type-prune (⇓pk {dy = dy} p) = begin
   < dyck-type (⇓ dy // (⇓pk p)) >ty
-    ≈˘⟨ ty-base-lift (dyck-pre-type (dy // p)) ⟩
+    ≈˘⟨ ty-base-wk (dyck-pre-type (dy // p)) ⟩
   < ty-base (dyck-type (dy // p)) >ty
     ≈⟨ ty-base-≃ (dyck-type-prune p) ⟩
   < ty-base (dyck-type dy [ π p ]ty) >ty
     ≈˘⟨ ty-base-sub (dyck-type dy) (π p) ⟩
   < ty-base (dyck-type dy) [ π p ]ty >ty
-    ≈⟨ sub-action-≃-ty (ty-base-lift (dyck-pre-type dy)) refl≃s ⟩
+    ≈⟨ sub-action-≃-ty (ty-base-wk (dyck-pre-type dy)) refl≃s ⟩
   < dyck-type (⇓ dy) [ π (⇓pk p) ]ty >ty ∎
   where
     open Reasoning ty-setoid
@@ -89,10 +89,10 @@ dyck-term-prune (⇓pk {dy = dy} p) = begin
   where
     open Reasoning tm-setoid
 
-lift-//s : (p : Peak dy) → (σ : Sub _ n ⋆) → lift-sub σ //s p ≃s lift-sub (σ //s p)
-lift-//s (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ = refl≃s
-lift-//s (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (lift-//s p σ) refl≃tm) refl≃tm
-lift-//s (⇓pk p) σ = lift-//s p σ
+wk-//s : (p : Peak dy) → (σ : Sub _ n ⋆) → wk-sub σ //s p ≃s wk-sub (σ //s p)
+wk-//s (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ = refl≃s
+wk-//s (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (wk-//s p σ) refl≃tm) refl≃tm
+wk-//s (⇓pk p) σ = wk-//s p σ
 
 prune-susp-peak : (p : Peak dy) → susp-dyck dy // (susp-peak p) ≃d susp-dyck (dy // p)
 prune-susp-peak (⇕pk dy) = refl≃d
@@ -113,17 +113,17 @@ susp-π (⇑pk p)
                refl≃tm)
          refl≃tm
   where
-    lem : lift-sub (lift-sub (π (susp-peak p)))
+    lem : wk-sub (wk-sub (π (susp-peak p)))
           ≃s
-          susp-sub (lift-sub (lift-sub (π p)))
+          susp-sub (wk-sub (wk-sub (π p)))
     lem = begin
-      < lift-sub (lift-sub (π (susp-peak p))) >s
-        ≈⟨ lift-sub-≃ (lift-sub-≃ (susp-π p)) ⟩
-      < lift-sub (lift-sub (susp-sub (π p))) >s
-        ≈˘⟨ lift-sub-≃ (susp-sub-lift (π p)) ⟩
-      < lift-sub (susp-sub (lift-sub (π p))) >s
-        ≈˘⟨ susp-sub-lift (lift-sub (π p)) ⟩
-      < susp-sub (lift-sub (lift-sub (π p))) >s ∎
+      < wk-sub (wk-sub (π (susp-peak p))) >s
+        ≈⟨ wk-sub-≃ (wk-sub-≃ (susp-π p)) ⟩
+      < wk-sub (wk-sub (susp-sub (π p))) >s
+        ≈˘⟨ wk-sub-≃ (susp-sub-wk (π p)) ⟩
+      < wk-sub (susp-sub (wk-sub (π p))) >s
+        ≈˘⟨ susp-sub-wk (wk-sub (π p)) ⟩
+      < susp-sub (wk-sub (wk-sub (π p))) >s ∎
       where
         open Reasoning sub-setoid
 susp-π (⇓pk p) = susp-π p

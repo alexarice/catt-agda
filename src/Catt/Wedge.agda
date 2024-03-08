@@ -11,11 +11,11 @@ wedge {m = zero} Γ x (Δ , A) = Γ
 wedge {m = suc m} Γ x (Δ , A) = (wedge Γ x Δ) , A [ wedge-inc-right x m ]ty
 
 wedge-inc-right x zero = ⟨ ⟨ ⋆ ⟩′ , x ⟩
-wedge-inc-right x (suc m) = ⟨ lift-sub (wedge-inc-right x m) , 0V ⟩
+wedge-inc-right x (suc m) = ⟨ wk-sub (wedge-inc-right x m) , 0V ⟩
 
 wedge-inc-left : (x : Tm (suc n)) → (m : ℕ) → Sub (suc n) (suc (m + n)) ⋆
 wedge-inc-left x zero = idSub
-wedge-inc-left x (suc m) = lift-sub (wedge-inc-left x m)
+wedge-inc-left x (suc m) = wk-sub (wedge-inc-left x m)
 
 wedge-susp : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → Ctx (suc (m + (2 + n)))
 wedge-susp Γ Δ = wedge (susp-ctx Γ) get-snd Δ

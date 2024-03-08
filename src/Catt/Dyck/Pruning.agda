@@ -15,7 +15,7 @@ dy // ⇕pk d = d
 
 π : {dy : Dyck (suc n) d} → Peak dy → Sub (3 + n * 2) (1 + n * 2) ⋆
 π (⇕pk {d = d} dy) = ⟨ ⟨ idSub , dyck-term dy ⟩ , identity-term (dyck-type dy) (dyck-term dy) ⟩
-π (⇑pk p) = ⟨ ⟨ (lift-sub (lift-sub (π p))) , 1V ⟩ , 0V ⟩
+π (⇑pk p) = ⟨ ⟨ (wk-sub (wk-sub (π p))) , 1V ⟩ , 0V ⟩
 π (⇓pk p) = π p
 
 private

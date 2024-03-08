@@ -36,8 +36,8 @@ hasPruningRule = ⊆r-trans ⊆r-∪-2 ⊆r-∪-2
 hasPruning : HasPruning
 hasPruning = pruning-from-rule hasPruningRule
 
-units-lift : LiftCond Unit-Rules
-units-lift = LiftCond-∪ dr-lift (LiftCond-∪ ecr-lift pruning-lift)
+units-wk : WkCond Unit-Rules
+units-wk = WkCond-∪ dr-wk (WkCond-∪ ecr-wk pruning-wk)
 
 units-susp : SuspCond Unit-Rules
 units-susp = SuspCond-∪ dr-susp (SuspCond-∪ ecr-susp pruning-susp)
@@ -47,26 +47,26 @@ units-sub = SubCond-∪ ops dr-sub (SubCond-∪ ops ecr-sub pruning-sub)
 
 units-tame : Tame ops Unit-Rules
 units-tame .Tame.tame-op = tameOp
-units-tame .Tame.lift-cond = units-lift
+units-tame .Tame.wk-cond = units-wk
 units-tame .Tame.susp-cond = units-susp
 units-tame .Tame.sub-cond = units-sub
 
 open TameOp tameOp
 
-open import Catt.Typing.DiscRemoval.Typed ops standard-op Unit-Rules units-lift
-open import Catt.Typing.EndoCoherenceRemoval.Typed ops standard-op Unit-Rules units-lift units-sub
-open import Catt.Typing.Pruning.Typed ops standard-op pruning-op Unit-Rules units-lift units-sub
+open import Catt.Typing.DiscRemoval.Typed ops standard-op Unit-Rules units-wk
+open import Catt.Typing.EndoCoherenceRemoval.Typed ops standard-op Unit-Rules units-wk units-sub
+open import Catt.Typing.Pruning.Typed ops standard-op pruning-op Unit-Rules units-wk units-sub
 
 units-conv : ConvCond ops Unit-Rules
 units-conv = ConvCond-∪ ops dr-conv (ConvCond-∪ ops ecr-conv pruning-conv)
 
 module _ where
   open import Catt.Support.Typing ops Unit-Rules
-  open import Catt.Typing.DiscRemoval.Support ops standard-op rulesWithSupp (rulesWithSupp-lift units-lift) rulesWithSupp-supp
+  open import Catt.Typing.DiscRemoval.Support ops standard-op rulesWithSupp (rulesWithSupp-wk units-wk) rulesWithSupp-supp
   open import Catt.Typing.EndoCoherenceRemoval.Support ops standard-op rulesWithSupp rulesWithSupp-supp
   open import Catt.Typing.Pruning.Support ops standard-op
                                           rulesWithSupp
-                                          (rulesWithSupp-lift units-lift)
+                                          (rulesWithSupp-wk units-wk)
                                           (rulesWithSupp-sub units-sub)
                                           rulesWithSupp-supp
 

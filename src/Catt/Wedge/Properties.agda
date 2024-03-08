@@ -18,11 +18,11 @@ wedge-≃ p q (Add≃ Emp≃ r) = p
 wedge-≃ p q (Add≃ (Add≃ r s) t) = Add≃ (wedge-≃ p q (Add≃ r s)) (sub-action-≃-ty t (wedge-inc-right-≃ (cong pred (≃c-preserve-length p)) q (cong pred (≃c-preserve-length (Add≃ r s)))))
 
 wedge-inc-right-≃ {m = zero} refl q refl = Ext≃ refl≃s q
-wedge-inc-right-≃ {m = suc m} refl q refl = Ext≃ (lift-sub-≃ (wedge-inc-right-≃ refl q refl)) (Var≃ refl refl)
+wedge-inc-right-≃ {m = suc m} refl q refl = Ext≃ (wk-sub-≃ (wedge-inc-right-≃ refl q refl)) (Var≃ refl refl)
 
 wedge-inc-left-≃ : {t : Tm (suc n)} → {t′ : Tm (suc n′)} → n ≡ n′ → m ≡ m′ → wedge-inc-left t m ≃s wedge-inc-left t′ m′
 wedge-inc-left-≃ {m = zero} refl refl = refl≃s
-wedge-inc-left-≃ {m = suc m} {t = t} {t′} refl refl = lift-sub-≃ (wedge-inc-left-≃ {t = t} {t′} refl refl)
+wedge-inc-left-≃ {m = suc m} {t = t} {t′} refl refl = wk-sub-≃ (wedge-inc-left-≃ {t = t} {t′} refl refl)
 
 wedge-susp-≃ : Γ ≃c Γ′ → Δ ≃c Δ′ → wedge-susp Γ Δ ≃c wedge-susp Γ′ Δ′
 wedge-susp-≃ p q = wedge-≃ (susp-ctx-≃ p) (Var≃ (cong (2 +_) (≃c-preserve-length p)) (cong (λ - → toℕ (inject₁ (fromℕ -))) (≃c-preserve-length p))) q
@@ -65,7 +65,7 @@ wedge-left-unit (∅ , A) = Add≃ Emp≃ (sym≃ty (⋆-is-only-ty-in-empty-con
 wedge-left-unit (Γ , A , B) = Add≃ (wedge-left-unit (Γ , A)) (trans≃ty (sub-action-≃-ty refl≃ty wedge-inc-right-left-unit) (id-on-ty B))
 
 wedge-inc-right-left-unit {zero} = refl≃s
-wedge-inc-right-left-unit {suc m} = Ext≃ (lift-sub-≃ (wedge-inc-right-left-unit {m})) (Var≃ (cong suc (cong suc (+-identityʳ m))) refl)
+wedge-inc-right-left-unit {suc m} = Ext≃ (wk-sub-≃ (wedge-inc-right-left-unit {m})) (Var≃ (cong suc (cong suc (+-identityʳ m))) refl)
 
 wedge-inc-right-assoc : (t : Tm (suc l)) → (s : Tm (suc m)) → (n : ℕ)
                       → wedge-inc-right (s [ wedge-inc-right t m ]tm) n
@@ -75,17 +75,17 @@ wedge-inc-right-assoc t s zero = refl≃s
 wedge-inc-right-assoc t s (suc n) = Ext≃ lem (Var≃ (cong suc (cong suc (sym (+-assoc n _ _)))) refl)
   where
     open Reasoning sub-setoid
-    lem : lift-sub (wedge-inc-right (s [ wedge-inc-right t _ ]tm) n)
+    lem : wk-sub (wedge-inc-right (s [ wedge-inc-right t _ ]tm) n)
           ≃s
-          lift-sub (wedge-inc-right s n) ● (wedge-inc-right t (suc n + _))
+          wk-sub (wedge-inc-right s n) ● (wedge-inc-right t (suc n + _))
     lem = begin
-      < lift-sub (wedge-inc-right (s [ wedge-inc-right t _ ]tm) n) >s
-        ≈⟨ lift-sub-≃ (wedge-inc-right-assoc t s n) ⟩
-      < lift-sub (wedge-inc-right s n ● wedge-inc-right t (n + _)) >s
-        ≈˘⟨ apply-lifted-sub-sub-≃ (wedge-inc-right s n) (wedge-inc-right t (n + _)) ⟩
-      < wedge-inc-right s n ● lift-sub (wedge-inc-right t (n + _)) >s
-        ≈˘⟨ apply-sub-lifted-sub-≃ (wedge-inc-right s n) (wedge-inc-right t (suc n + _)) ⟩
-      < lift-sub (wedge-inc-right s n) ● ⟨ lift-sub (wedge-inc-right t (n + _)) , Var zero ⟩ >s ∎
+      < wk-sub (wedge-inc-right (s [ wedge-inc-right t _ ]tm) n) >s
+        ≈⟨ wk-sub-≃ (wedge-inc-right-assoc t s n) ⟩
+      < wk-sub (wedge-inc-right s n ● wedge-inc-right t (n + _)) >s
+        ≈˘⟨ apply-wk-sub-sub-≃ (wedge-inc-right s n) (wedge-inc-right t (n + _)) ⟩
+      < wedge-inc-right s n ● wk-sub (wedge-inc-right t (n + _)) >s
+        ≈˘⟨ apply-sub-wk-sub-≃ (wedge-inc-right s n) (wedge-inc-right t (suc n + _)) ⟩
+      < wk-sub (wedge-inc-right s n) ● ⟨ wk-sub (wedge-inc-right t (n + _)) , Var zero ⟩ >s ∎
 
 wedge-assoc : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → (s : Tm (suc m)) → (Υ : Ctx (suc l))
               → wedge (wedge Γ t Δ) (s [ wedge-inc-right t m ]tm) Υ ≃c wedge Γ t (wedge Δ s Υ)
@@ -110,7 +110,7 @@ sub-from-wedge-inc-left : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : 
 sub-from-wedge-inc-left σ t τ@(⟨ ⟨ _ ⟩′ , s ⟩) = id-left-unit (sub-from-wedge σ τ)
 sub-from-wedge-inc-left σ t ⟨ ⟨ τ , s ⟩ , u ⟩ = begin
   < wedge-inc-left t (suc _) ● sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩ >s
-    ≈⟨ apply-sub-lifted-sub-≃ (wedge-inc-left t _) (sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩) ⟩
+    ≈⟨ apply-sub-wk-sub-≃ (wedge-inc-left t _) (sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩) ⟩
   < wedge-inc-left t _ ● sub-from-wedge σ ⟨ τ , s ⟩ >s
     ≈⟨ sub-from-wedge-inc-left σ t ⟨ τ , s ⟩ ⟩
   < σ >s ∎
@@ -122,10 +122,10 @@ sub-from-wedge-inc-right σ t ⟨ ⟨ _ ⟩′ , s ⟩ p = Ext≃ refl≃s p
 sub-from-wedge-inc-right σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≃ lem refl≃tm
   where
     open Reasoning sub-setoid
-    lem : lift-sub (wedge-inc-right t _) ● sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩ ≃s ⟨ τ , s ⟩
+    lem : wk-sub (wedge-inc-right t _) ● sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩ ≃s ⟨ τ , s ⟩
     lem = begin
-      < lift-sub (wedge-inc-right t _) ● sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩ >s
-        ≈⟨ apply-sub-lifted-sub-≃ (wedge-inc-right t _) (sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩) ⟩
+      < wk-sub (wedge-inc-right t _) ● sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩ >s
+        ≈⟨ apply-sub-wk-sub-≃ (wedge-inc-right t _) (sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩) ⟩
       < wedge-inc-right t _ ● sub-from-wedge σ ⟨ τ , s ⟩ >s
         ≈⟨ sub-from-wedge-inc-right σ t ⟨ τ , s ⟩ p ⟩
       < ⟨ τ , s ⟩ >s ∎
@@ -149,9 +149,9 @@ sub-between-wedge-susps-inc-left σ τ = sub-between-wedges-inc-left (susp-sub �
 wedge-inc-fst-var : (t : Tm (suc n)) → (m : ℕ) → t [ wedge-inc-left t m ]tm ≃tm Var (fromℕ _) [ wedge-inc-right t m ]tm
 wedge-inc-fst-var t zero = id-on-tm t
 wedge-inc-fst-var t (suc m) = begin
-  < t [ wedge-inc-left t (suc m) ]tm >tm ≈⟨ apply-lifted-sub-tm-≃ t (wedge-inc-left t m) ⟩
-  < lift-tm (t [ wedge-inc-left t m ]tm) >tm ≈⟨ lift-tm-≃ (wedge-inc-fst-var t m) ⟩
-  < lift-tm (Var (fromℕ _) [ wedge-inc-right t m ]tm) >tm ≈˘⟨ apply-lifted-sub-tm-≃ (Var (fromℕ _)) (wedge-inc-right t m) ⟩
+  < t [ wedge-inc-left t (suc m) ]tm >tm ≈⟨ apply-wk-sub-tm-≃ t (wedge-inc-left t m) ⟩
+  < wk-tm (t [ wedge-inc-left t m ]tm) >tm ≈⟨ wk-tm-≃ (wedge-inc-fst-var t m) ⟩
+  < wk-tm (Var (fromℕ _) [ wedge-inc-right t m ]tm) >tm ≈˘⟨ apply-wk-sub-tm-≃ (Var (fromℕ _)) (wedge-inc-right t m) ⟩
   < Var (fromℕ (suc _)) [ wedge-inc-right t (suc m) ]tm >tm ∎
   where
     open Reasoning tm-setoid
@@ -190,7 +190,7 @@ sub-between-wedge-susps-inc-right σ τ p = sub-between-wedges-inc-right (susp-s
 
 wedge-inc-left-fst-var : (t : Tm (suc n)) → (m : ℕ) → Var (fromℕ _) [ wedge-inc-left t m ]tm ≃tm Var {suc (m + n)} (fromℕ _)
 wedge-inc-left-fst-var t zero = id-on-tm (Var (fromℕ _))
-wedge-inc-left-fst-var t (suc m) = trans≃tm (apply-lifted-sub-tm-≃ (Var (fromℕ _)) (wedge-inc-left t m)) (lift-tm-≃ (wedge-inc-left-fst-var t m))
+wedge-inc-left-fst-var t (suc m) = trans≃tm (apply-wk-sub-tm-≃ (Var (fromℕ _)) (wedge-inc-left t m)) (wk-tm-≃ (wedge-inc-left-fst-var t m))
 
 sub-from-wedge-fst-var : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → Var (fromℕ _) [ sub-from-wedge σ τ ]tm ≃tm Var (fromℕ _) [ σ ]tm
 sub-from-wedge-fst-var σ ⟨ ⟨ _ ⟩′ , s ⟩ = refl≃tm
@@ -306,9 +306,9 @@ sub-between-wedge-susps-comp σ τ σ′ τ′ p = begin
   where
     open Reasoning sub-setoid
 
-sub-from-wedge-lift : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → lift-sub (sub-from-wedge σ τ) ≃s sub-from-wedge (lift-sub σ) (lift-sub τ)
-sub-from-wedge-lift σ ⟨ ⟨ _ ⟩′ , t ⟩ = refl≃s
-sub-from-wedge-lift σ ⟨ ⟨ τ , s ⟩ , t ⟩ = Ext≃ (sub-from-wedge-lift σ ⟨ τ , s ⟩) refl≃tm
+sub-from-wedge-wk : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → wk-sub (sub-from-wedge σ τ) ≃s sub-from-wedge (wk-sub σ) (wk-sub τ)
+sub-from-wedge-wk σ ⟨ ⟨ _ ⟩′ , t ⟩ = refl≃s
+sub-from-wedge-wk σ ⟨ ⟨ τ , s ⟩ , t ⟩ = Ext≃ (sub-from-wedge-wk σ ⟨ τ , s ⟩) refl≃tm
 
 sub-from-wedge-susp-↑ : (σ : Sub (suc n) l A) → (τ : Sub (suc m) l A) → susp-sub-↑ (sub-from-wedge σ τ) ≃s sub-from-wedge (susp-sub-↑ σ) (susp-sub-↑ τ)
 sub-from-wedge-susp-↑ σ ⟨ ⟨ _ ⟩′ , t ⟩ = refl≃s
@@ -327,7 +327,7 @@ sub-from-wedge-prop : (t : Tm (suc n)) → {m : ℕ}
                       ≃s idSub {suc (m + n)}
 sub-from-wedge-prop t {zero} = refl≃s
 sub-from-wedge-prop t {suc zero} = refl≃s
-sub-from-wedge-prop t {suc (suc m)} = Ext≃ (trans≃s (sym≃s (sub-from-wedge-lift (wedge-inc-left t (suc m)) (wedge-inc-right t (suc m)))) (lift-sub-≃ (sub-from-wedge-prop t {suc m}))) refl≃tm
+sub-from-wedge-prop t {suc (suc m)} = Ext≃ (trans≃s (sym≃s (sub-from-wedge-wk (wedge-inc-left t (suc m)) (wedge-inc-right t (suc m)))) (wk-sub-≃ (sub-from-wedge-prop t {suc m}))) refl≃tm
 
 sub-from-wedge-prop′ : (t : Tm (suc n)) → (m : ℕ)
                      → (σ : Sub (suc (m + n)) l A)
@@ -347,11 +347,11 @@ sub-from-wedge-prop′ t m σ = begin
 
 wedge-inc-left-var-to-var : (t : Tm (suc n)) → (m : ℕ) → varToVar (wedge-inc-left t m)
 wedge-inc-left-var-to-var {n = n} t zero = id-is-var-to-var
-wedge-inc-left-var-to-var t (suc m) = lift-sub-preserve-var-to-var (wedge-inc-left t m) ⦃ wedge-inc-left-var-to-var t m ⦄
+wedge-inc-left-var-to-var t (suc m) = wk-sub-preserve-var-to-var (wedge-inc-left t m) ⦃ wedge-inc-left-var-to-var t m ⦄
 
 wedge-inc-right-var-to-var : (t : Tm (suc n)) → (m : ℕ) → .⦃ isVar t ⦄ → varToVar (wedge-inc-right t m)
 wedge-inc-right-var-to-var t zero = extend-var-to-var ⟨ _ ⟩′ t
-wedge-inc-right-var-to-var t (suc m) = lift-sub-preserve-var-to-var (wedge-inc-right t m) ⦃ wedge-inc-right-var-to-var t m ⦄ ,, tt
+wedge-inc-right-var-to-var t (suc m) = wk-sub-preserve-var-to-var (wedge-inc-right t m) ⦃ wedge-inc-right-var-to-var t m ⦄ ,, tt
 
 wedge-glob : (Γ : Ctx (suc n)) → ⦃ ctx-is-globular Γ ⦄ → (t : Tm (suc n)) → .⦃ isVar t ⦄ → (Δ : Ctx (suc m)) → ⦃ ctx-is-globular Δ ⦄ → ctx-is-globular (wedge Γ t Δ)
 wedge-glob Γ t (∅ , A) = it

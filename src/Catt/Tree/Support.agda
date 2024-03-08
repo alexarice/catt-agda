@@ -356,10 +356,10 @@ supp-compat′ zero T true = let
     ... | tri< a ¬b ¬c = begin
       FVTm (pdb-right-base pdb)
         ≡⟨ FVTm-≃ (pdb-right-base-prefix pdb a) ⟩
-      FVTm (lift-tm (lift-tm (pdb-right-base (pdb-prefix pdb))))
-        ≡⟨ supp-lift-tm (lift-tm (pdb-right-base (pdb-prefix pdb))) ⟩
-      ewf (FVTm (lift-tm (pdb-right-base (pdb-prefix pdb))))
-        ≡⟨ cong ewf (supp-lift-tm (pdb-right-base (pdb-prefix pdb))) ⟩
+      FVTm (wk-tm (wk-tm (pdb-right-base (pdb-prefix pdb))))
+        ≡⟨ supp-wk-tm (wk-tm (pdb-right-base (pdb-prefix pdb))) ⟩
+      ewf (FVTm (wk-tm (pdb-right-base (pdb-prefix pdb))))
+        ≡⟨ cong ewf (supp-wk-tm (pdb-right-base (pdb-prefix pdb))) ⟩
       ewf (ewf (FVTm (pdb-right-base (pdb-prefix pdb))))
         ≡⟨ cong ewf (cong ewf (lem (Γ , C) (pdb-prefix pdb))) ⟩
       ewf (ewf (pdb-bd-supp 0 (Γ , C) ⦃ pdb-prefix pdb ⦄ true)) ∎

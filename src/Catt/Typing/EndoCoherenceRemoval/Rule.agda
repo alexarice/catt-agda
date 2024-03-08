@@ -37,32 +37,32 @@ data ECRSet : RuleSet where
       → (σ : Sub (suc n) m ⋆)
       → ECRSet (EndoCoherenceRemoval Γ Δ s A σ)
 
-ecr-lift : LiftCond ECRSet
-ecr-lift B [ ECR Γ Δ s sfull A σ ] = ∈r-≃ [ ECR (Γ , B) Δ s sfull A (lift-sub σ) ] γ
+ecr-wk : WkCond ECRSet
+ecr-wk B [ ECR Γ Δ s sfull A σ ] = ∈r-≃ [ ECR (Γ , B) Δ s sfull A (wk-sub σ) ] γ
   where
-    γ : EndoCoherenceRemoval (Γ , B) Δ s A (lift-sub σ) ≃r lift-rule (EndoCoherenceRemoval Γ Δ s A σ) B
+    γ : EndoCoherenceRemoval (Γ , B) Δ s A (wk-sub σ) ≃r wk-rule (EndoCoherenceRemoval Γ Δ s A σ) B
     γ .ctxeq = refl≃c
     γ .lhseq = refl≃tm
     γ .rhseq = identity-≃ refl (trans≃s (sub-from-disc-≃ (ty-dim A)
                                                          (ty-dim A)
-                                                         (apply-lifted-sub-ty-≃ A σ)
-                                                         (sym (sub-dim (lift-sub σ) A))
-                                                         (trans (lift-ty-dim (A [ σ ]ty)) (sym (sub-dim σ A)))
-                                                         (apply-lifted-sub-tm-≃ s σ))
-                                        (sym≃s (lift-sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))))
+                                                         (apply-wk-sub-ty-≃ A σ)
+                                                         (sym (sub-dim (wk-sub σ) A))
+                                                         (trans (wk-ty-dim (A [ σ ]ty)) (sym (sub-dim σ A)))
+                                                         (apply-wk-sub-tm-≃ s σ))
+                                        (sym≃s (wk-sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))))
 
 ecr-susp : SuspCond ECRSet
 ecr-susp [ ECR Γ Δ s sfull A σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ) (susp-tm s) supp-lem (susp-ty A) (susp-sub σ) ] γ
   where
-    lem : susp-ty (lift-ty (sphere-type (ty-dim A)))
+    lem : susp-ty (wk-ty (sphere-type (ty-dim A)))
           ≃ty
-          lift-ty (sphere-type (suc (ty-dim A)))
+          wk-ty (sphere-type (suc (ty-dim A)))
     lem = begin
-      < susp-ty (lift-ty (sphere-type (ty-dim A))) >ty
-        ≈⟨ susp-ty-lift (sphere-type (ty-dim A)) ⟩
-      < lift-ty (susp-ty (sphere-type (ty-dim A))) >ty
-        ≈⟨ lift-ty-≃ (sphere-type-susp (ty-dim A)) ⟩
-      < lift-ty (sphere-type (suc (ty-dim A))) >ty ∎
+      < susp-ty (wk-ty (sphere-type (ty-dim A))) >ty
+        ≈⟨ susp-ty-wk (sphere-type (ty-dim A)) ⟩
+      < wk-ty (susp-ty (sphere-type (ty-dim A))) >ty
+        ≈⟨ wk-ty-≃ (sphere-type-susp (ty-dim A)) ⟩
+      < wk-ty (sphere-type (suc (ty-dim A))) >ty ∎
       where
         open Reasoning ty-setoid
 

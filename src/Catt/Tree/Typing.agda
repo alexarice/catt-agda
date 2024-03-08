@@ -19,7 +19,7 @@ open import Catt.Tree.Properties
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties ops rules tame
 open import Catt.Globular.Typing ops rules
-open import Catt.Suspension.Typing ops susp-op rules lift-cond susp-cond
+open import Catt.Suspension.Typing ops susp-op rules wk-cond susp-cond
 open import Catt.Wedge.Typing ops rules tame
 
 ⌊⌋-Ty : (T : Tree n) → Typing-Ctx ⌊ T ⌋
@@ -29,7 +29,7 @@ open import Catt.Wedge.Typing ops rules tame
 fst-var-Ty : (Γ : Ctx (suc n)) → Typing-Tm Γ (Var (fromℕ _)) ⋆
 fst-var-Ty (∅ , ⋆) = TyVar zero
 fst-var-Ty (∅ , s ─⟨ A ⟩⟶ t) = ⊥-elim (no-term-in-empty-context s)
-fst-var-Ty (Γ , B , A) = lift-tm-typing (fst-var-Ty (Γ , B))
+fst-var-Ty (Γ , B , A) = wk-tm-typing (fst-var-Ty (Γ , B))
 
 tree-last-var-Ty : (T : Tree n) → Typing-Tm ⌊ T ⌋ (tree-last-var T) ⋆
 tree-last-var-Ty Sing = TyVar zero

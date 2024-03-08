@@ -17,16 +17,16 @@ varToVarFunctionProp : (σ : Sub n m ⋆) → .⦃ v : varToVar σ ⦄ → (i : 
 varToVarFunctionProp ⟨ σ , Var j ⟩ zero = refl≃tm
 varToVarFunctionProp ⟨ σ , Var j ⟩ ⦃ v ⦄ (suc i) = varToVarFunctionProp σ ⦃ proj₁ v ⦄ i
 
-lift-sub-preserve-var-to-var : (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → varToVar (lift-sub σ)
-lift-sub-preserve-var-to-var ⟨ _ ⟩′ = tt
-lift-sub-preserve-var-to-var ⟨ σ , Var i ⟩ ⦃ p ⦄ = (lift-sub-preserve-var-to-var σ ⦃ proj₁ p ⦄) ,, tt
+wk-sub-preserve-var-to-var : (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → varToVar (wk-sub σ)
+wk-sub-preserve-var-to-var ⟨ _ ⟩′ = tt
+wk-sub-preserve-var-to-var ⟨ σ , Var i ⟩ ⦃ p ⦄ = (wk-sub-preserve-var-to-var σ ⦃ proj₁ p ⦄) ,, tt
 
-lift-tm-preserve-isVar : (t : Tm n) → .(isVar t) → isVar (lift-tm t)
-lift-tm-preserve-isVar (Var i) v = tt
+wk-tm-preserve-isVar : (t : Tm n) → .(isVar t) → isVar (wk-tm t)
+wk-tm-preserve-isVar (Var i) v = tt
 
-lift-ty-preserve-is-globular : (A : Ty n) → (ty-is-globular A) → ty-is-globular (lift-ty A)
-lift-ty-preserve-is-globular ⋆ g = tt
-lift-ty-preserve-is-globular (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = lift-tm-preserve-isVar s vs ,, lift-ty-preserve-is-globular A gA ,, lift-tm-preserve-isVar t vt
+wk-ty-preserve-is-globular : (A : Ty n) → (ty-is-globular A) → ty-is-globular (wk-ty A)
+wk-ty-preserve-is-globular ⋆ g = tt
+wk-ty-preserve-is-globular (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = wk-tm-preserve-isVar s vs ,, wk-ty-preserve-is-globular A gA ,, wk-tm-preserve-isVar t vt
 
 ≃c-preserve-globular : Γ ≃c Δ → ctx-is-globular Γ → ctx-is-globular Δ
 ≃ty-preserve-globular : A ≃ty B → ty-is-globular A → ty-is-globular B
@@ -47,8 +47,8 @@ lift-ty-preserve-is-globular (s ─⟨ A ⟩⟶ t) (vs ,, gA ,, vt) = lift-tm-pr
 getVarFin-≃ : (p : s ≃tm t) → .⦃ v : isVar s ⦄ → getVarFin s ≡ getVarFin t ⦃ ≃tm-preserve-isVar p v ⦄
 getVarFin-≃ (Var≃ x y) = toℕ-injective y
 
-getVarFin-lift : (t : Tm n) → .⦃ v : isVar t ⦄ → getVarFin (lift-tm t) ⦃ lift-tm-preserve-isVar t v ⦄ ≡ suc (getVarFin t)
-getVarFin-lift (Var i) = refl
+getVarFin-wk : (t : Tm n) → .⦃ v : isVar t ⦄ → getVarFin (wk-tm t) ⦃ wk-tm-preserve-isVar t v ⦄ ≡ suc (getVarFin t)
+getVarFin-wk (Var i) = refl
 
 varToVarFunction-≃ : {σ τ : Sub n m ⋆} → (p : σ ≃s τ) → .⦃ _ : varToVar σ ⦄ → (i : Fin n) → varToVarFunction σ i ≡ varToVarFunction τ ⦃ ≃s-preserve-var-to-var p it ⦄ i
 varToVarFunction-≃ p i with ≃s-to-≡ p
@@ -56,29 +56,29 @@ varToVarFunction-≃ p i with ≃s-to-≡ p
 
 id-is-var-to-var : varToVar (idSub {n})
 id-is-var-to-var {zero} = tt
-id-is-var-to-var {suc n} = lift-sub-preserve-var-to-var idSub ⦃ id-is-var-to-var {n} ⦄ ,, tt
+id-is-var-to-var {suc n} = wk-sub-preserve-var-to-var idSub ⦃ id-is-var-to-var {n} ⦄ ,, tt
 
-varToVarFunction-lift : (σ : Sub n m ⋆) → .⦃ _ : varToVar σ ⦄ → (i : Fin n) → varToVarFunction (lift-sub σ) ⦃ lift-sub-preserve-var-to-var σ ⦄ i ≡ suc (varToVarFunction σ i)
-varToVarFunction-lift ⟨ σ , Var j ⟩ zero = refl
-varToVarFunction-lift ⟨ σ , Var j ⟩ ⦃ v ⦄ (suc i) = varToVarFunction-lift σ ⦃ proj₁ v ⦄ i
+varToVarFunction-wk : (σ : Sub n m ⋆) → .⦃ _ : varToVar σ ⦄ → (i : Fin n) → varToVarFunction (wk-sub σ) ⦃ wk-sub-preserve-var-to-var σ ⦄ i ≡ suc (varToVarFunction σ i)
+varToVarFunction-wk ⟨ σ , Var j ⟩ zero = refl
+varToVarFunction-wk ⟨ σ , Var j ⟩ ⦃ v ⦄ (suc i) = varToVarFunction-wk σ ⦃ proj₁ v ⦄ i
 
 varToVarFunction-idSub : (i : Fin n) → varToVarFunction idSub ⦃ id-is-var-to-var {n} ⦄ i ≡ i
 varToVarFunction-idSub {suc n} zero = refl
-varToVarFunction-idSub {suc n} (suc i) = trans (varToVarFunction-lift idSub ⦃ id-is-var-to-var {n} ⦄ i) (cong suc (varToVarFunction-idSub i))
+varToVarFunction-idSub {suc n} (suc i) = trans (varToVarFunction-wk idSub ⦃ id-is-var-to-var {n} ⦄ i) (cong suc (varToVarFunction-idSub i))
 
 extend-var-to-var : (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → (t : Tm m) → .⦃ isVar t ⦄ → varToVar ⟨ σ , t ⟩
 extend-var-to-var σ ⦃ v ⦄ (Var i) = v ,, tt
 
 idSub≃-var-to-var : (p : Γ ≃c Δ) → varToVar (idSub≃ p)
 idSub≃-var-to-var Emp≃ = tt
-idSub≃-var-to-var (Add≃ p x) = lift-sub-preserve-var-to-var (idSub≃ p) ⦃ idSub≃-var-to-var p ⦄ ,, tt
+idSub≃-var-to-var (Add≃ p x) = wk-sub-preserve-var-to-var (idSub≃ p) ⦃ idSub≃-var-to-var p ⦄ ,, tt
 
 idSub≃-func : (p : Γ ≃c Δ) → Fin (ctxLength Γ) → Fin (ctxLength Δ)
 idSub≃-func p = varToVarFunction (idSub≃ p) ⦃ idSub≃-var-to-var p ⦄
 
 varToVarFunction-idSub≃ : {Γ Δ : Ctx n} → (p : Γ ≃c Δ) → (i : Fin n) → idSub≃-func p i ≡ i
 varToVarFunction-idSub≃ (Add≃ p x) zero = refl
-varToVarFunction-idSub≃ (Add≃ p x) (suc i) = trans (varToVarFunction-lift (idSub≃ p) ⦃ idSub≃-var-to-var p ⦄ i) (cong suc (varToVarFunction-idSub≃ p i))
+varToVarFunction-idSub≃ (Add≃ p x) (suc i) = trans (varToVarFunction-wk (idSub≃ p) ⦃ idSub≃-var-to-var p ⦄ i) (cong suc (varToVarFunction-idSub≃ p i))
 
 var-to-var-comp-ty : (A : Ty n) → ⦃ ty-is-globular A ⦄ → (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → ty-is-globular (A [ σ ]ty)
 var-to-var-comp-tm : (t : Tm n) → ⦃ isVar t ⦄ → (σ : Sub n m ⋆) → ⦃ varToVar σ ⦄ → isVar (t [ σ ]tm)

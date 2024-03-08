@@ -19,13 +19,13 @@ susp-pdb Base = Extend Base refl≃ty refl≃ty
 susp-pdb (Extend pdb p q) = Extend (susp-pdb pdb)
                                    (trans≃ty (susp-ty-≃ p) (sym≃ty (susp-focus-ty pdb)))
                                    (trans≃ty (susp-ty-≃ q)
-                                             (Arr≃ (trans≃tm (susp-tm-lift (focus-tm pdb)) (lift-tm-≃ (sym≃tm (susp-focus-tm pdb))))
-                                                   (trans≃ty (susp-ty-lift (focus-ty pdb)) (lift-ty-≃ (sym≃ty (susp-focus-ty pdb))))
+                                             (Arr≃ (trans≃tm (susp-tm-wk (focus-tm pdb)) (wk-tm-≃ (sym≃tm (susp-focus-tm pdb))))
+                                                   (trans≃ty (susp-ty-wk (focus-ty pdb)) (wk-ty-≃ (sym≃ty (susp-focus-ty pdb))))
                                                    refl≃tm))
 susp-pdb (Restr pdb) = Restr (susp-pdb pdb) ⦃ NonZero-subst (trans (sym (susp-dim (focus-ty pdb))) (cong ty-dim (≃ty-to-≡ (sym≃ty (susp-focus-ty pdb))))) it ⦄
 
 susp-focus-ty Base = refl≃ty
-susp-focus-ty (Extend pdb p q) = sym≃ty (susp-ty-lift _)
+susp-focus-ty (Extend pdb p q) = sym≃ty (susp-ty-wk _)
 susp-focus-ty (Restr pdb) = begin
   < ty-base (focus-ty (susp-pdb pdb)) >ty
     ≈⟨ ty-base-≃ (susp-focus-ty pdb) ⟩

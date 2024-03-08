@@ -38,26 +38,26 @@ data PruningSet : RuleSet where
         → (pf : peak-term p [ σ ]tm ≃tm identity-term B t)
         → PruningSet (Pruning Γ dy A p σ)
 
-pruning-lift : LiftCond PruningSet
-pruning-lift C [ Prune Γ dy A p σ B t pf ]
-  = ∈r-≃ [ Prune (Γ , C) dy A p (lift-sub σ) (lift-ty B) (lift-tm t) lem ] γ
+pruning-wk : WkCond PruningSet
+pruning-wk C [ Prune Γ dy A p σ B t pf ]
+  = ∈r-≃ [ Prune (Γ , C) dy A p (wk-sub σ) (wk-ty B) (wk-tm t) lem ] γ
   where
-    lem : (peak-term p [ lift-sub σ ]tm) ≃tm identity-term (lift-ty B) (lift-tm t)
+    lem : (peak-term p [ wk-sub σ ]tm) ≃tm identity-term (wk-ty B) (wk-tm t)
     lem = begin
-      < peak-term p [ lift-sub σ ]tm >tm
-        ≈⟨ apply-lifted-sub-tm-≃ (peak-term p) σ ⟩
-      < lift-tm (peak-term p [ σ ]tm) >tm
-        ≈⟨ lift-tm-≃ pf ⟩
-      < lift-tm (identity-term B t) >tm
-        ≈⟨ identity-term-lift B t ⟩
-      < identity-term (lift-ty B) (lift-tm t) >tm ∎
+      < peak-term p [ wk-sub σ ]tm >tm
+        ≈⟨ apply-wk-sub-tm-≃ (peak-term p) σ ⟩
+      < wk-tm (peak-term p [ σ ]tm) >tm
+        ≈⟨ wk-tm-≃ pf ⟩
+      < wk-tm (identity-term B t) >tm
+        ≈⟨ identity-term-wk B t ⟩
+      < identity-term (wk-ty B) (wk-tm t) >tm ∎
       where
         open Reasoning tm-setoid
 
-    γ : Pruning (Γ , C) dy A p (lift-sub σ) ≃r lift-rule (Pruning Γ dy A p σ) C
+    γ : Pruning (Γ , C) dy A p (wk-sub σ) ≃r wk-rule (Pruning Γ dy A p σ) C
     γ .ctxeq = refl≃c
     γ .lhseq = refl≃tm
-    γ .rhseq = Coh≃ refl≃c refl≃ty (lift-//s p σ)
+    γ .rhseq = Coh≃ refl≃c refl≃ty (wk-//s p σ)
 
 pruning-susp : SuspCond PruningSet
 pruning-susp [ Prune Γ dy A p σ B t pf ]

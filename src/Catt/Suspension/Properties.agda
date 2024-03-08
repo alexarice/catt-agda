@@ -17,16 +17,16 @@ get-snd-Lem : susp-ctx Γ ≃c susp-ctx Δ → get-snd {n = ctxLength Γ} ≃tm 
 get-snd-Lem p = Var≃ (≃c-preserve-length p) (cong (λ - → toℕ (inject₁ (fromℕ (pred (pred -))))) (≃c-preserve-length p))
 
 susp-‼ : (Γ : Ctx n) → (i : Fin (ctxLength Γ)) → susp-ctx Γ ‼ inject₁ (inject₁ i) ≃ty susp-ty (Γ ‼ i)
-susp-‼ (Γ , A) zero = sym≃ty (susp-ty-lift A)
-susp-‼ (Γ , A) (suc i) = trans≃ty (lift-ty-≃ (susp-‼ Γ i)) (sym≃ty (susp-ty-lift (Γ ‼ i)))
+susp-‼ (Γ , A) zero = sym≃ty (susp-ty-wk A)
+susp-‼ (Γ , A) (suc i) = trans≃ty (wk-ty-≃ (susp-‼ Γ i)) (sym≃ty (susp-ty-wk (Γ ‼ i)))
 
 susp-functorial-id : {n : ℕ} → susp-sub (idSub {n}) ≃s idSub {2 + n}
 susp-functorial-id {zero} = refl≃s
-susp-functorial-id {suc n} = Ext≃ (trans≃s (susp-sub-lift idSub) (lift-sub-≃ (susp-functorial-id))) refl≃tm
+susp-functorial-id {suc n} = Ext≃ (trans≃s (susp-sub-wk idSub) (wk-sub-≃ (susp-functorial-id))) refl≃tm
 
 susp-sub-preserve-star : (σ : Sub n m ⋆) → susp-ty ⋆ [ susp-sub σ ]ty ≃ty susp-ty (⋆ {n = m})
 susp-sub-preserve-star ⟨ _ ⟩′ = refl≃ty
-susp-sub-preserve-star ⟨ σ , t ⟩ = trans≃ty (apply-sub-lifted-ty-≃ (get-fst ─⟨ ⋆ ⟩⟶ get-snd) (susp-sub ⟨ σ , t ⟩)) (susp-sub-preserve-star σ)
+susp-sub-preserve-star ⟨ σ , t ⟩ = trans≃ty (apply-sub-wk-ty-≃ (get-fst ─⟨ ⋆ ⟩⟶ get-snd) (susp-sub ⟨ σ , t ⟩)) (susp-sub-preserve-star σ)
 
 inject-susp-sub : (σ : Sub n m ⋆) → (i : Fin n) → Var (inject₁ (inject₁ i)) [ susp-sub σ ]tm ≃tm susp-tm (Var i [ σ ]tm)
 inject-susp-sub ⟨ σ , t ⟩ zero = refl≃tm
@@ -94,8 +94,8 @@ susp-ctx-glob ∅ = (tt ,, tt) ,, tt
 susp-ctx-glob (Γ , A) ⦃ a ,, b ⦄ = susp-ctx-glob Γ ⦃ a ⦄ ,, susp-ty-glob A ⦃ b ⦄
 
 tm-to-ty-susp : (t : Tm n) → (Γ : Ctx n) → susp-ty (tm-to-ty Γ t) ≃ty tm-to-ty (susp-ctx Γ) (susp-tm t)
-tm-to-ty-susp (Var zero) (Γ , A) = susp-ty-lift A
-tm-to-ty-susp (Var (suc i)) (Γ , A) = trans≃ty (susp-ty-lift (Γ ‼ i)) (lift-ty-≃ (tm-to-ty-susp (Var i) Γ))
+tm-to-ty-susp (Var zero) (Γ , A) = susp-ty-wk A
+tm-to-ty-susp (Var (suc i)) (Γ , A) = trans≃ty (susp-ty-wk (Γ ‼ i)) (wk-ty-≃ (tm-to-ty-susp (Var i) Γ))
 tm-to-ty-susp (Coh S A σ) Γ = susp-functorial-ty σ A
 
 ty-base-susp : (A : Ty n) → .⦃ NonZero (ty-dim A) ⦄ → ty-base (susp-ty A) ≃ty susp-ty (ty-base A)

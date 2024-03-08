@@ -4,18 +4,18 @@ open import Catt.Prelude
 open import Catt.Syntax.Base public
 open import Catt.Suspension
 
-lift-tm : Tm n → Tm (suc n)
-lift-ty : Ty n → Ty (suc n)
-lift-sub : Sub n m A → Sub n (suc m) (lift-ty A)
+wk-tm : Tm n → Tm (suc n)
+wk-ty : Ty n → Ty (suc n)
+wk-sub : Sub n m A → Sub n (suc m) (wk-ty A)
 
-lift-ty ⋆ = ⋆
-lift-ty (s ─⟨ A ⟩⟶ t) = lift-tm s ─⟨ lift-ty A ⟩⟶ lift-tm t
+wk-ty ⋆ = ⋆
+wk-ty (s ─⟨ A ⟩⟶ t) = wk-tm s ─⟨ wk-ty A ⟩⟶ wk-tm t
 
-lift-tm (Var i) = Var (suc i)
-lift-tm (Coh S A σ) = Coh S A (lift-sub σ)
+wk-tm (Var i) = Var (suc i)
+wk-tm (Coh S A σ) = Coh S A (wk-sub σ)
 
-lift-sub ⟨ A ⟩′ = ⟨ lift-ty A ⟩′
-lift-sub ⟨ σ , t ⟩ = ⟨ lift-sub σ , lift-tm t ⟩
+wk-sub ⟨ A ⟩′ = ⟨ wk-ty A ⟩′
+wk-sub ⟨ σ , t ⟩ = ⟨ wk-sub σ , wk-tm t ⟩
 
 ctx-proj₁ : Ctx (suc n) → Ctx n
 ctx-proj₁ (Γ , A) = Γ
@@ -44,12 +44,12 @@ _[_]tm {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = Coh (susp-ctx Δ) (susp-ty B
 
 idSub : {n : ℕ} → Sub n n ⋆
 idSub {zero} = ⟨ ⋆ ⟩′
-idSub {suc n} = ⟨ lift-sub idSub , Var zero ⟩
+idSub {suc n} = ⟨ wk-sub idSub , Var zero ⟩
 
 infix 45 _‼_
 _‼_ : (Γ : Ctx n) → (i : Fin n) → Ty n
-(Γ , A) ‼ zero = lift-ty A
-(Γ , A) ‼ suc i = lift-ty (Γ ‼ i)
+(Γ , A) ‼ zero = wk-ty A
+(Γ , A) ‼ suc i = wk-ty (Γ ‼ i)
 
 replaceSub : Sub (1 + n) m A → Tm m → Sub (1 + n) m A
 replaceSub σ t = ⟨ sub-proj₁ σ , t ⟩

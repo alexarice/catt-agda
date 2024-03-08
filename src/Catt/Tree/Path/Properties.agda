@@ -98,9 +98,9 @@ var-wedge-susp-inc-left : (i : Fin (3 + m)) → (n : ℕ) → Var i [ wedge-susp
 var-wedge-susp-inc-left i zero = id-on-tm (Var i)
 var-wedge-susp-inc-left i (suc n) = begin
   < Var i [ wedge-susp-inc-left _ (suc n) ]tm >tm
-    ≈⟨ apply-lifted-sub-tm-≃ (Var i) (wedge-susp-inc-left _ n) ⟩
-  < lift-tm (Var i [ wedge-susp-inc-left _ n ]tm) >tm
-    ≈⟨ lift-tm-≃ (var-wedge-susp-inc-left i n) ⟩
+    ≈⟨ apply-wk-sub-tm-≃ (Var i) (wedge-susp-inc-left _ n) ⟩
+  < wk-tm (Var i [ wedge-susp-inc-left _ n ]tm) >tm
+    ≈⟨ wk-tm-≃ (var-wedge-susp-inc-left i n) ⟩
   < Var (suc n ↑ʳ i) >tm ∎
   where
     open Reasoning tm-setoid
@@ -109,11 +109,11 @@ var-wedge-susp-inc-right : (i : Fin (suc m)) → (n : ℕ) → i ≢ fromℕ m �
 var-wedge-susp-inc-right {zero} 0F n p = ⊥-elim (p refl)
 var-wedge-susp-inc-right {suc m} 0F n p = refl≃tm
 var-wedge-susp-inc-right {suc m} (suc i) n p = begin
-  < Var i [ lift-sub (wedge-susp-inc-right n m) ]tm >tm
-    ≈⟨ apply-lifted-sub-tm-≃ (Var i) (wedge-susp-inc-right n m) ⟩
-  < lift-tm (Var i [ wedge-susp-inc-right n m ]tm) >tm
-    ≈⟨ lift-tm-≃ (var-wedge-susp-inc-right i n (λ x → p (cong suc x))) ⟩
-  < lift-tm (Var (i ↑ˡ 2 + n)) >tm ∎
+  < Var i [ wk-sub (wedge-susp-inc-right n m) ]tm >tm
+    ≈⟨ apply-wk-sub-tm-≃ (Var i) (wedge-susp-inc-right n m) ⟩
+  < wk-tm (Var i [ wedge-susp-inc-right n m ]tm) >tm
+    ≈⟨ wk-tm-≃ (var-wedge-susp-inc-right i n (λ x → p (cong suc x))) ⟩
+  < wk-tm (Var (i ↑ˡ 2 + n)) >tm ∎
   where
     open Reasoning tm-setoid
 

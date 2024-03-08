@@ -3,7 +3,7 @@ open import Catt.Typing.Rule
 module Catt.Typing.EndoCoherenceRemoval.Typed (ops : Op)
                                               (standard-op : StandardOp ops)
                                               (rules : RuleSet)
-                                              (lift-cond : LiftCond rules)
+                                              (wk-cond : WkCond rules)
                                               (sub-cond : SubCond ops rules) where
 
 open import Catt.Prelude
@@ -20,9 +20,9 @@ open import Catt.Typing.EndoCoherenceRemoval.Rule
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
-open import Catt.Typing.Properties.Substitution ops rules lift-cond sub-cond
+open import Catt.Typing.Properties.Substitution ops rules wk-cond sub-cond
 open import Catt.Globular.Typing ops rules
-open import Catt.Discs.Typing ops standard-op rules lift-cond
+open import Catt.Discs.Typing ops standard-op rules wk-cond
 
 ecr-conv : ConvCond′ ops rules ECRSet
 ecr-conv [ ECR Γ Δ s sfull A σ ] {A = B} tty
@@ -41,25 +41,25 @@ ecr-conv [ ECR Γ Δ s sfull A σ ] {A = B} tty
     A_ty : Typing-Ty Δ A
     A_ty = ty-base-Ty (coh-ty-ty tty)
 
-    l2 : lift-ty (sphere-type (ty-dim A))
+    l2 : wk-ty (sphere-type (ty-dim A))
            [ ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ]ty
          ≃ty
          A [ σ ]ty
     l2 = begin
-      < lift-ty (sphere-type (ty-dim A)) [ ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ]ty >ty
-        ≈⟨ apply-sub-lifted-ty-≃ (sphere-type (ty-dim A)) ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ⟩
+      < wk-ty (sphere-type (ty-dim A)) [ ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ]ty >ty
+        ≈⟨ apply-sub-wk-ty-≃ (sphere-type (ty-dim A)) ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ⟩
       < sphere-type (ty-dim A) [ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ ]ty >ty
         ≈⟨ sub-from-sphere-prop (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) ⟩
       < A [ σ ]ty >ty ∎
       where
         open Reasoning ty-setoid
 
-    lem : (Var 0F ─⟨ lift-ty (sphere-type (ty-dim A)) ⟩⟶ Var 0F)
+    lem : (Var 0F ─⟨ wk-ty (sphere-type (ty-dim A)) ⟩⟶ Var 0F)
             [ sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm) ]ty
           ≈[ Γ ]ty
           B
     lem = begin
-      (s [ σ ]tm) ─⟨ lift-ty (sphere-type (ty-dim A)) [ ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ]ty ⟩⟶ (s [ σ ]tm)
+      (s [ σ ]tm) ─⟨ wk-ty (sphere-type (ty-dim A)) [ ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ]ty ⟩⟶ (s [ σ ]tm)
         ≈⟨ Arr≈ refl≈tm (reflexive≈ty l2) refl≈tm ⟩
       (s [ σ ]tm) ─⟨ A [ σ ]ty ⟩⟶ (s [ σ ]tm)
         ≈⟨ tm-to-ty-prop tty ⟩

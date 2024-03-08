@@ -28,7 +28,7 @@ open import Catt.Tree.Standard.Properties
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties ops rules tame
 open import Catt.Globular.Typing ops rules
-open import Catt.Discs.Typing ops standard-op rules lift-cond
+open import Catt.Discs.Typing ops standard-op rules wk-cond
 open import Catt.Tree.Structured.Typing ops rules
 open import Catt.Tree.Structured.Typing.Properties ops rules tame
 

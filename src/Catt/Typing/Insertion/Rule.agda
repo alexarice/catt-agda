@@ -52,42 +52,42 @@ data InsertionSet : RuleSet where
          → (p : L ⌊ P ⌋p ≃stm standard-coh′ (lh P) T >>= (M ,, S⋆))
          → InsertionSet (Insertion Γ S As L P T M)
 
-ins-lift : LiftCond InsertionSet
-ins-lift A [ Insert Γ S As L P T q M p ]
-  = ∈r-≃ [ Insert (Γ , A) S As (lift-stm ∘ L) P T q (lift-stm ∘ M) lem ] γ
+ins-wk : WkCond InsertionSet
+ins-wk A [ Insert Γ S As L P T q M p ]
+  = ∈r-≃ [ Insert (Γ , A) S As (wk-stm ∘ L) P T q (wk-stm ∘ M) lem ] γ
   where
-    lem : lift-stm (L ⌊ P ⌋p)
+    lem : wk-stm (L ⌊ P ⌋p)
           ≃stm
-          standard-coh′ (lh P) T >>= lift-label (M ,, S⋆)
+          standard-coh′ (lh P) T >>= wk-label (M ,, S⋆)
     lem = begin
-      < lift-stm (L ⌊ P ⌋p) >stm
-        ≈⟨ lift-stm-≃ p ⟩
-      < lift-stm (standard-coh′ (lh P) T >>= (M ,, S⋆)) >stm
-        ≈˘⟨ >>=-lift (standard-coh′ (lh P) T) (M ,, S⋆) ⟩
-      < standard-coh′ (lh P) T >>= lift-label (M ,, S⋆) >stm ∎
+      < wk-stm (L ⌊ P ⌋p) >stm
+        ≈⟨ wk-stm-≃ p ⟩
+      < wk-stm (standard-coh′ (lh P) T >>= (M ,, S⋆)) >stm
+        ≈˘⟨ >>=-wk (standard-coh′ (lh P) T) (M ,, S⋆) ⟩
+      < standard-coh′ (lh P) T >>= wk-label (M ,, S⋆) >stm ∎
       where
         open Reasoning stm-setoid
 
-    γ : Insertion (Γ , A) S As (lift-stm ∘ L) P T (lift-stm ∘ M)
+    γ : Insertion (Γ , A) S As (wk-stm ∘ L) P T (wk-stm ∘ M)
         ≃r
-        lift-rule (Insertion Γ S As L P T M) A
+        wk-rule (Insertion Γ S As L P T M) A
     γ .ctxeq = refl≃c
-    γ .lhseq = lift-stm-to-term (SCoh S As (L ,, S⋆))
+    γ .lhseq = wk-stm-to-term (SCoh S As (L ,, S⋆))
     γ .rhseq = begin
       < stm-to-term (SCoh (S >>[ P ] T)
                           (As >>=′ (κ S P T ,, S⋆))
-                          (lift-stm ∘ L >>l[ P ] lift-stm ∘ M ,, S⋆)) >tm
+                          (wk-stm ∘ L >>l[ P ] wk-stm ∘ M ,, S⋆)) >tm
         ≈˘⟨ SCoh≃ (S >>[ P ] T)
                  (refl≃sty {As = As >>=′ (κ S P T ,, S⋆)})
-                 (label-from-insertion-map lift-stm L P M)
+                 (label-from-insertion-map wk-stm L P M)
                  (refl≃sty {As = S⋆}) .get ⟩
       < stm-to-term (SCoh (S >>[ P ] T)
                           (As >>=′ (κ S P T ,, S⋆))
-                          (lift-label (L >>l[ P ] M ,, S⋆))) >tm
-        ≈⟨ lift-stm-to-term (SCoh (S >>[ P ] T)
+                          (wk-label (L >>l[ P ] M ,, S⋆))) >tm
+        ≈⟨ wk-stm-to-term (SCoh (S >>[ P ] T)
                                    (As >>=′ (κ S P T ,, S⋆))
                                    (L >>l[ P ] M ,, S⋆)) ⟩
-      < lift-tm (stm-to-term (SCoh (S >>[ P ] T)
+      < wk-tm (stm-to-term (SCoh (S >>[ P ] T)
                                    (As >>=′ (κ S P T ,, S⋆))
                                    (L >>l[ P ] M ,, S⋆))) >tm ∎
       where

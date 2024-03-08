@@ -18,7 +18,7 @@ open import Catt.Wedge.Properties
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties ops rules tame
-open import Catt.Suspension.Typing ops susp-op rules lift-cond susp-cond
+open import Catt.Suspension.Typing ops susp-op rules wk-cond susp-cond
 
 
 wedge-Ty : {Γ : Ctx (suc n)} → Typing-Ctx Γ → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → {Δ : Ctx (suc m)} → Typing-Ctx Δ → Typing-Ctx (wedge Γ t Δ)
@@ -29,11 +29,11 @@ wedge-Ty Γty tty (TyAdd (TyAdd Δty y) x) = TyAdd (wedge-Ty Γty tty (TyAdd Δt
 
 wedge-inc-right-Ty {Δ = ∅ , ⋆} tty = TyExt (TyNull TyStar) tty
 wedge-inc-right-Ty {Δ = ∅ , s ─⟨ _ ⟩⟶ _} tty = ⊥-elim (no-term-in-empty-context s)
-wedge-inc-right-Ty {Δ = Δ , B , A} tty = TyExt (lift-sub-typing (wedge-inc-right-Ty tty)) (TyConv (TyVar zero) (reflexive≈ty (sym≃ty (apply-lifted-sub-ty-≃ A (wedge-inc-right _ _)))))
+wedge-inc-right-Ty {Δ = Δ , B , A} tty = TyExt (wk-sub-typing (wedge-inc-right-Ty tty)) (TyConv (TyVar zero) (reflexive≈ty (sym≃ty (apply-wk-sub-ty-≃ A (wedge-inc-right _ _)))))
 
 wedge-inc-left-Ty : {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → (Δ : Ctx (suc m)) → Typing-Sub Γ (wedge Γ t Δ) (wedge-inc-left t m)
 wedge-inc-left-Ty tty (∅ , A) = id-Ty
-wedge-inc-left-Ty tty (Δ , A , B) = lift-sub-typing (wedge-inc-left-Ty tty (Δ , A))
+wedge-inc-left-Ty tty (Δ , A , B) = wk-sub-typing (wedge-inc-left-Ty tty (Δ , A))
 
 wedge-susp-Ty : Typing-Ctx Γ → Typing-Ctx Δ → Typing-Ctx (wedge-susp Γ Δ)
 wedge-susp-Ty Γty Δty = wedge-Ty (susp-ctxTy Γty) get-sndTy Δty
@@ -49,10 +49,10 @@ sub-from-wedge-inc-right-≈ σ t ⟨ ⟨ _ ⟩′ , s ⟩ p = Ext≈ (Null≈ r
 sub-from-wedge-inc-right-≈ σ t ⟨ ⟨ τ , s ⟩ , u ⟩ p = Ext≈ lem refl≈tm
   where
     open Reasoning (sub-setoid-≈ _)
-    lem : lift-sub (wedge-inc-right t _) ● sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩ ≈[ _ ]s ⟨ τ , s ⟩
+    lem : wk-sub (wedge-inc-right t _) ● sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩ ≈[ _ ]s ⟨ τ , s ⟩
     lem = begin
-      < lift-sub (wedge-inc-right t _) ● sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩ >s′
-        ≈⟨ reflexive≈s (apply-sub-lifted-sub-≃ (wedge-inc-right t _) (sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩)) ⟩
+      < wk-sub (wedge-inc-right t _) ● sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩ >s′
+        ≈⟨ reflexive≈s (apply-sub-wk-sub-≃ (wedge-inc-right t _) (sub-from-wedge σ ⟨ ⟨ τ , s ⟩ , u ⟩)) ⟩
       < wedge-inc-right t _ ● sub-from-wedge σ ⟨ τ , s ⟩ >s′
         ≈⟨ sub-from-wedge-inc-right-≈ σ t ⟨ τ , s ⟩ p ⟩
       < ⟨ τ , s ⟩ >s′ ∎

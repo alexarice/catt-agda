@@ -9,8 +9,8 @@ Weak-Rules r = ⊥
 
 open import Catt.Typing ops Weak-Rules
 
-weak-lift : LiftCond Weak-Rules
-weak-lift A ()
+weak-wk : WkCond Weak-Rules
+weak-wk A ()
 
 weak-susp : SuspCond Weak-Rules
 weak-susp ()
@@ -22,7 +22,7 @@ open Tame
 
 weak-tame : (tame : TameOp ops) → Tame ops Weak-Rules
 weak-tame tame .tame-op = tame
-weak-tame tame .lift-cond = weak-lift
+weak-tame tame .wk-cond = weak-wk
 weak-tame tame .susp-cond = weak-susp
 weak-tame tame .sub-cond = weak-sub
 

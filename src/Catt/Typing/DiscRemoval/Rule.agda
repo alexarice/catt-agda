@@ -22,13 +22,13 @@ DiscRemoval Γ σ .rhs = 0V [ σ ]tm
 data DiscRemovalSet : RuleSet where
   DR : .⦃ NonZero n ⦄ → (Γ : Ctx m) → (σ : Sub (disc-size n) m ⋆) → DiscRemovalSet (DiscRemoval Γ σ)
 
-dr-lift : LiftCond DiscRemovalSet
-dr-lift A [ DR Γ σ ] = ∈r-≃ [ DR (Γ , A) (lift-sub σ) ] γ
+dr-wk : WkCond DiscRemovalSet
+dr-wk A [ DR Γ σ ] = ∈r-≃ [ DR (Γ , A) (wk-sub σ) ] γ
   where
-    γ : DiscRemoval (Γ , A) (lift-sub σ) ≃r lift-rule (DiscRemoval Γ σ) A
+    γ : DiscRemoval (Γ , A) (wk-sub σ) ≃r wk-rule (DiscRemoval Γ σ) A
     γ .ctxeq = refl≃c
     γ .lhseq = refl≃tm
-    γ .rhseq = apply-lifted-sub-tm-≃ 0V σ
+    γ .rhseq = apply-wk-sub-tm-≃ 0V σ
 
 dr-susp : SuspCond DiscRemovalSet
 dr-susp [ DR {n = n} Γ σ ] = ∈r-≃ [ DR {n = suc n} (susp-ctx Γ) (susp-sub σ) ] γ

@@ -77,22 +77,22 @@ StandardOp : Op → Set
 StandardOp ops = ∀ {n} (Γ : Ctx n) .⦃ _ : Γ ⊢pd ⦄ (d : ℕ) (p : suc d ≥ ctx-dim Γ)
                → ops Γ (pd-bd-supp d Γ false) (pd-bd-supp d Γ true)
 
-lift-rule : (r : Rule) → Ty (r .len) → Rule
-lift-rule r A .len = suc (r .len)
-lift-rule r A .tgtCtx = r .tgtCtx , A
-lift-rule r A .lhs = lift-tm (r .lhs)
-lift-rule r A .rhs = lift-tm (r .rhs)
+wk-rule : (r : Rule) → Ty (r .len) → Rule
+wk-rule r A .len = suc (r .len)
+wk-rule r A .tgtCtx = r .tgtCtx , A
+wk-rule r A .lhs = wk-tm (r .lhs)
+wk-rule r A .rhs = wk-tm (r .rhs)
 
 record TameOp (ops : Op) : Set where
   field
     susp-op : SuspOp ops
     standard-op : StandardOp ops
 
-LiftCond : RuleSet → Set
-LiftCond rs = ∀ {r} A → r ∈r rs → lift-rule r A ∈r rs
+WkCond : RuleSet → Set
+WkCond rs = ∀ {r} A → r ∈r rs → wk-rule r A ∈r rs
 
-LiftCond-∪ : ∀ {rs rs′} → LiftCond rs → LiftCond rs′ → LiftCond (rs ∪r rs′)
-LiftCond-∪ p q A [ i ] = [ map⊎ (p A) (q A) i ]
+WkCond-∪ : ∀ {rs rs′} → WkCond rs → WkCond rs′ → WkCond (rs ∪r rs′)
+WkCond-∪ p q A [ i ] = [ map⊎ (p A) (q A) i ]
 
 susp-rule : (r : Rule) → Rule
 susp-rule r .len = 2+ (r .len)
@@ -167,7 +167,7 @@ module _ (ops : Op) where
   record Tame (rs : RuleSet) : Set where
     field
       tame-op : TameOp ops
-      lift-cond : LiftCond rs
+      wk-cond : WkCond rs
       susp-cond : SuspCond rs
       sub-cond : SubCond rs
 

@@ -2,7 +2,7 @@ open import Catt.Typing.Rule
 
 module Catt.Pasting.Typing (ops : Op)
                            (rules : RuleSet)
-                           (lift-cond : LiftCond rules) where
+                           (wk-cond : WkCond rules) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -14,7 +14,7 @@ open import Catt.Pasting
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
-open import Catt.Typing.Properties.Lifting ops rules lift-cond
+open import Catt.Typing.Properties.Weakening ops rules wk-cond
 open import Catt.Globular.Typing ops rules
 
 
@@ -27,15 +27,15 @@ pdb-to-Ty Base = TyAdd TyEmp TyStar
 pdb-to-Ty (Extend pdb p q) with ≃ty-to-≡ p | ≃ty-to-≡ q
 ... | refl | refl = TyAdd (TyAdd (pdb-to-Ty pdb)
                                  (pdb-focus-ty-Ty pdb))
-                          (TyArr (lift-tm-typing (pdb-focus-tm-Ty pdb))
-                                 (lift-ty-typing (pdb-focus-ty-Ty pdb))
+                          (TyArr (wk-tm-typing (pdb-focus-tm-Ty pdb))
+                                 (wk-ty-typing (pdb-focus-ty-Ty pdb))
                                  (TyVar zero))
 pdb-to-Ty (Restr pdb) = pdb-to-Ty pdb
 
 pdb-focus-ty-Ty Base = TyStar
 pdb-focus-ty-Ty (Extend pdb p q) with ≃ty-to-≡ p | ≃ty-to-≡ q
-... | refl | refl = lift-ty-typing (TyArr (lift-tm-typing (pdb-focus-tm-Ty pdb))
-                                          (lift-ty-typing (pdb-focus-ty-Ty pdb))
+... | refl | refl = wk-ty-typing (TyArr (wk-tm-typing (pdb-focus-tm-Ty pdb))
+                                          (wk-ty-typing (pdb-focus-ty-Ty pdb))
                                           (TyVar zero))
 pdb-focus-ty-Ty (Restr pdb) = ty-base-Ty (pdb-focus-ty-Ty pdb)
 

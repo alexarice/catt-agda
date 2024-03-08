@@ -5,7 +5,7 @@ module Catt.Typing.Pruning.Typed (ops : Op)
                                  (standard-op : StandardOp ops)
                                  (pruning-op : PruningOp ops)
                                  (rules : RuleSet)
-                                 (lift-cond : LiftCond rules)
+                                 (wk-cond : WkCond rules)
                                  (sub-cond : SubCond ops rules) where
 
 open import Catt.Prelude
@@ -23,9 +23,9 @@ open import Catt.Support.Properties
 open import Catt.Typing.Pruning.Rule
 
 open import Catt.Typing ops rules
-open import Catt.Dyck.Pruning.Typing ops standard-op rules lift-cond sub-cond
+open import Catt.Dyck.Pruning.Typing ops standard-op rules wk-cond sub-cond
 open import Catt.Typing.Properties.Base ops rules
-open import Catt.Typing.Properties.Substitution ops rules lift-cond sub-cond
+open import Catt.Typing.Properties.Substitution ops rules wk-cond sub-cond
 open import Catt.Globular.Typing ops rules
 
 open import Catt.Typing.Weak ops
@@ -73,4 +73,4 @@ pruning-conv [ Prune Γ dy A@(src ─⟨ _ ⟩⟶ tgt) p σ B t pf ] {A = C} tty
       where
         open ≡-Reasoning
         open import Catt.Typing.Properties.Support ops Weak-Rules weak-supp
-        import Catt.Dyck.Pruning.Typing ops standard-op Weak-Rules weak-lift weak-sub as W
+        import Catt.Dyck.Pruning.Typing ops standard-op Weak-Rules weak-wk weak-sub as W

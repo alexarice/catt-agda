@@ -277,16 +277,16 @@ linear-tree-dim (Join S Sing) = begin
 ⌊⌋-glob Sing = tt ,, tt
 ⌊⌋-glob (Join S T) = wedge-susp-glob ⌊ S ⌋ ⦃ ⌊⌋-glob S ⦄ ⌊ T ⌋ ⦃ ⌊⌋-glob T ⦄
 
-susp-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → susp-ctx ⌊ S ⌋ ≃c ⌊ S ⌋ , ⌊ S ⌋ ‼ zero , 1V ─⟨ (lift-ty (⌊ S ⌋ ‼ zero)) ⟩⟶ 0V
+susp-lin-tree : (S : Tree n) → .⦃ _ : is-linear S ⦄ → susp-ctx ⌊ S ⌋ ≃c ⌊ S ⌋ , ⌊ S ⌋ ‼ zero , 1V ─⟨ (wk-ty (⌊ S ⌋ ‼ zero)) ⟩⟶ 0V
 susp-lin-tree Sing = refl≃c
 susp-lin-tree (Join S Sing) = begin
   < susp-ctx (susp-ctx ⌊ S ⌋) >c
     ≈⟨ susp-ctx-≃ (susp-lin-tree S) ⟩
   < susp-ctx ⌊ S ⌋ , susp-ty (⌊ S ⌋ ‼ zero) ,
-       1V ─⟨ susp-ty (lift-ty (⌊ S ⌋ ‼ zero)) ⟩⟶ 0V >c
-    ≈˘⟨ Add≃ (Add≃ refl≃c (susp-‼ ⌊ S ⌋ zero)) (Arr≃ refl≃tm (trans≃ty (lift-ty-≃ (susp-‼ ⌊ S ⌋ zero)) (sym≃ty (susp-ty-lift (⌊ S ⌋ ‼ zero)))) refl≃tm) ⟩
+       1V ─⟨ susp-ty (wk-ty (⌊ S ⌋ ‼ zero)) ⟩⟶ 0V >c
+    ≈˘⟨ Add≃ (Add≃ refl≃c (susp-‼ ⌊ S ⌋ zero)) (Arr≃ refl≃tm (trans≃ty (wk-ty-≃ (susp-‼ ⌊ S ⌋ zero)) (sym≃ty (susp-ty-wk (⌊ S ⌋ ‼ zero)))) refl≃tm) ⟩
   < susp-ctx ⌊ S ⌋ , susp-ctx ⌊ S ⌋ ‼ zero ,
-       1V ─⟨ lift-ty (susp-ctx ⌊ S ⌋ ‼ zero) ⟩⟶ 0V >c ∎
+       1V ─⟨ wk-ty (susp-ctx ⌊ S ⌋ ‼ zero) ⟩⟶ 0V >c ∎
   where
     open Reasoning ctx-setoid
 

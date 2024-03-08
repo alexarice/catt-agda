@@ -22,10 +22,10 @@ sphere-≡ p with recompute (_ ≟ _) p
 sphere-type-dim : (n : ℕ) → ty-dim (sphere-type n) ≡ n
 sphere-type-dim zero = refl
 sphere-type-dim (suc n) = cong suc (begin
-  ty-dim (lift-ty (lift-ty (sphere-type n)))
-    ≡⟨ lift-ty-dim (lift-ty (sphere-type n)) ⟩
-  ty-dim (lift-ty (sphere-type n))
-    ≡⟨ lift-ty-dim (sphere-type n) ⟩
+  ty-dim (wk-ty (wk-ty (sphere-type n)))
+    ≡⟨ wk-ty-dim (wk-ty (sphere-type n)) ⟩
+  ty-dim (wk-ty (sphere-type n))
+    ≡⟨ wk-ty-dim (sphere-type n) ⟩
   ty-dim (sphere-type n)
     ≡⟨ sphere-type-dim n ⟩
   n ∎)
@@ -37,8 +37,8 @@ disc-dim : (n : ℕ) → ctx-dim (Disc n) ≡ n
 
 sphere-dim zero = refl
 sphere-dim (suc n) = begin
-  ctx-dim (Disc n) ⊔ ty-dim (lift-ty (sphere-type n))
-    ≡⟨ cong₂ _⊔_ (disc-dim n) (trans (lift-ty-dim (sphere-type n)) (sphere-type-dim n)) ⟩
+  ctx-dim (Disc n) ⊔ ty-dim (wk-ty (sphere-type n))
+    ≡⟨ cong₂ _⊔_ (disc-dim n) (trans (wk-ty-dim (sphere-type n)) (sphere-type-dim n)) ⟩
   n ⊔ n
     ≡⟨ ⊔-idem n ⟩
   n ∎
@@ -62,10 +62,10 @@ disc-susp zero = refl≃c
 disc-susp (suc n) = Add≃ (sphere-susp (suc n)) (sphere-type-susp (suc n))
 
 sphere-susp zero = refl≃c
-sphere-susp (suc n) = Add≃ (disc-susp n) (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n)))
+sphere-susp (suc n) = Add≃ (disc-susp n) (trans≃ty (susp-ty-wk (sphere-type n)) (wk-ty-≃ (sphere-type-susp n)))
 
 sphere-type-susp zero = refl≃ty
-sphere-type-susp (suc n) = Arr≃ (refl≃tm) (trans≃ty (susp-ty-lift (lift-ty (sphere-type n))) (lift-ty-≃ (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n))))) (refl≃tm)
+sphere-type-susp (suc n) = Arr≃ (refl≃tm) (trans≃ty (susp-ty-wk (wk-ty (sphere-type n))) (wk-ty-≃ (trans≃ty (susp-ty-wk (sphere-type n)) (wk-ty-≃ (sphere-type-susp n))))) (refl≃tm)
 
 sub-from-sphere-prop : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → sphere-type d [ sub-from-sphere d A p ]ty ≃ty A
 sub-from-sphere-prop zero ⋆ p = refl≃ty
@@ -73,18 +73,18 @@ sub-from-sphere-prop (suc d) (s ─⟨ A ⟩⟶ t) p = Arr≃ refl≃tm lem refl
   where
     open Reasoning ty-setoid
 
-    lem : lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ]ty ≃ty A
+    lem : wk-ty (wk-ty (sphere-type d)) [ ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ]ty ≃ty A
     lem = begin
-      < lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ]ty >ty
-        ≈⟨ apply-sub-lifted-ty-≃ (lift-ty (sphere-type d)) ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ⟩
-      < lift-ty (sphere-type d) [ ⟨ sub-from-sphere d A _ , s ⟩ ]ty >ty
-        ≈⟨ apply-sub-lifted-ty-≃ (sphere-type d) ⟨ sub-from-sphere d A _ , s ⟩ ⟩
+      < wk-ty (wk-ty (sphere-type d)) [ ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ]ty >ty
+        ≈⟨ apply-sub-wk-ty-≃ (wk-ty (sphere-type d)) ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ⟩
+      < wk-ty (sphere-type d) [ ⟨ sub-from-sphere d A _ , s ⟩ ]ty >ty
+        ≈⟨ apply-sub-wk-ty-≃ (sphere-type d) ⟨ sub-from-sphere d A _ , s ⟩ ⟩
       < sphere-type d [ sub-from-sphere d A _ ]ty >ty
         ≈⟨ sub-from-sphere-prop d A _ ⟩
       < A >ty ∎
 
 disc-term-susp : (n : ℕ) → (σ : Sub (disc-size n) m ⋆) → susp-tm (disc-term n σ) ≃tm disc-term (suc n) (susp-sub σ)
-disc-term-susp n σ = Coh≃ (disc-susp n) (trans≃ty (susp-ty-lift (sphere-type n)) (lift-ty-≃ (sphere-type-susp n))) refl≃s
+disc-term-susp n σ = Coh≃ (disc-susp n) (trans≃ty (susp-ty-wk (sphere-type n)) (wk-ty-≃ (sphere-type-susp n))) refl≃s
 
 sub-from-disc-≃ : (d₁ d₂ : ℕ) → A ≃ty B → .(p : ty-dim A ≡ d₁) → .(q : ty-dim B ≡ d₂) → s ≃tm t → sub-from-disc d₁ A p s ≃s sub-from-disc d₂ B q t
 sub-from-sphere-≃ : (d₁ d₂ : ℕ) → A ≃ty B → .(p : ty-dim A ≡ d₁) → .(q : ty-dim B ≡ d₂) → sub-from-sphere d₁ A p ≃s sub-from-sphere d₂ B q
@@ -107,12 +107,12 @@ identity-≃ refl p = Coh≃ refl≃c refl≃ty p
 identity-term-≃ : A ≃ty B → s ≃tm t → identity-term A s ≃tm identity-term B t
 identity-term-≃ p q = identity-≃ (ty-dim-≃ p) (sub-from-disc-≃ (ty-dim _) (ty-dim _) p refl refl q)
 
-lift-sub-from-sphere : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → lift-sub (sub-from-sphere d A p) ≃s sub-from-sphere d (lift-ty A) (trans (lift-ty-dim A) p)
-lift-sub-from-sphere zero ⋆ p = refl≃s
-lift-sub-from-sphere (suc d) (s ─⟨ A ⟩⟶ t) p = Ext≃ (Ext≃ (lift-sub-from-sphere d A (cong pred p)) refl≃tm) refl≃tm
+wk-sub-from-sphere : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → wk-sub (sub-from-sphere d A p) ≃s sub-from-sphere d (wk-ty A) (trans (wk-ty-dim A) p)
+wk-sub-from-sphere zero ⋆ p = refl≃s
+wk-sub-from-sphere (suc d) (s ─⟨ A ⟩⟶ t) p = Ext≃ (Ext≃ (wk-sub-from-sphere d A (cong pred p)) refl≃tm) refl≃tm
 
-lift-sub-from-disc : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (t : Tm n) → lift-sub (sub-from-disc d A p t) ≃s sub-from-disc d (lift-ty A) (trans (lift-ty-dim A) p) (lift-tm t)
-lift-sub-from-disc d A p t = Ext≃ (lift-sub-from-sphere d A p) refl≃tm
+wk-sub-from-disc : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (t : Tm n) → wk-sub (sub-from-disc d A p t) ≃s sub-from-disc d (wk-ty A) (trans (wk-ty-dim A) p) (wk-tm t)
+wk-sub-from-disc d A p t = Ext≃ (wk-sub-from-sphere d A p) refl≃tm
 
 susp-sub-from-sphere : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → susp-sub (sub-from-sphere d A p) ≃s sub-from-sphere (suc d) (susp-ty A) (trans (susp-dim A) (cong suc p))
 susp-sub-from-sphere zero ⋆ p = refl≃s
@@ -151,12 +151,12 @@ sub-from-sphere-type-prop {d = suc d} ⟨ ⟨ σ , s ⟩ , t ⟩ = Arr≃ refl�
   where
     open Reasoning ty-setoid
 
-    lem : lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty ≃ty sub-from-sphere-type σ
+    lem : wk-ty (wk-ty (sphere-type d)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty ≃ty sub-from-sphere-type σ
     lem = begin
-      < lift-ty (lift-ty (sphere-type d)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty >ty
-        ≈⟨ apply-sub-lifted-ty-≃ (lift-ty (sphere-type d)) ⟨ ⟨ σ , s ⟩ , t ⟩ ⟩
-      < lift-ty (sphere-type d) [ ⟨ σ , s ⟩ ]ty >ty
-        ≈⟨ apply-sub-lifted-ty-≃ (sphere-type d) ⟨ σ , s ⟩ ⟩
+      < wk-ty (wk-ty (sphere-type d)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty >ty
+        ≈⟨ apply-sub-wk-ty-≃ (wk-ty (sphere-type d)) ⟨ ⟨ σ , s ⟩ , t ⟩ ⟩
+      < wk-ty (sphere-type d) [ ⟨ σ , s ⟩ ]ty >ty
+        ≈⟨ apply-sub-wk-ty-≃ (sphere-type d) ⟨ σ , s ⟩ ⟩
       < sphere-type d [ σ ]ty >ty
         ≈⟨ sub-from-sphere-type-prop σ ⟩
       < sub-from-sphere-type σ >ty ∎
@@ -170,21 +170,21 @@ identity-term-sub A s σ = begin
   < identity-term (A [ σ ]ty) (s [ σ ]tm) >tm ∎
   where open Reasoning tm-setoid
 
-identity-term-lift : (A : Ty m) → (s : Tm m) → lift-tm (identity-term A s) ≃tm identity-term (lift-ty A) (lift-tm s)
-identity-term-lift A s
-  = Coh≃ (disc-≡ (sym (lift-ty-dim A)))
-         (Arr≃ (Var≃ (cong (suc ∘ double) (sym (lift-ty-dim A))) refl)
-               (lift-ty-≃ (sphere-≡ (sym (lift-ty-dim A))))
-               (Var≃ (cong (suc ∘ double) (sym (lift-ty-dim A))) refl))
-         (trans≃s (lift-sub-from-disc (ty-dim A) A refl s)
-                  (sub-from-disc-≃ (ty-dim A) (ty-dim (lift-ty A)) refl≃ty (trans (lift-ty-dim A) refl) refl refl≃tm))
+identity-term-wk : (A : Ty m) → (s : Tm m) → wk-tm (identity-term A s) ≃tm identity-term (wk-ty A) (wk-tm s)
+identity-term-wk A s
+  = Coh≃ (disc-≡ (sym (wk-ty-dim A)))
+         (Arr≃ (Var≃ (cong (suc ∘ double) (sym (wk-ty-dim A))) refl)
+               (wk-ty-≃ (sphere-≡ (sym (wk-ty-dim A))))
+               (Var≃ (cong (suc ∘ double) (sym (wk-ty-dim A))) refl))
+         (trans≃s (wk-sub-from-disc (ty-dim A) A refl s)
+                  (sub-from-disc-≃ (ty-dim A) (ty-dim (wk-ty A)) refl≃ty (trans (wk-ty-dim A) refl) refl refl≃tm))
 
 identity-term-susp : (A : Ty m) → (s : Tm m) → susp-tm (identity-term A s) ≃tm identity-term (susp-ty A) (susp-tm s)
 identity-term-susp A s
   = Coh≃ (trans≃c (disc-susp (ty-dim A)) (disc-≡ (sym (susp-dim A))))
          (Arr≃ (Var≃ (cong (λ - → suc (double -)) (sym (susp-dim A))) refl)
-               (trans≃ty (susp-ty-lift (sphere-type (ty-dim A)))
-                         (lift-ty-≃ (trans≃ty (sphere-type-susp (ty-dim A))
+               (trans≃ty (susp-ty-wk (sphere-type (ty-dim A)))
+                         (wk-ty-≃ (trans≃ty (sphere-type-susp (ty-dim A))
                                               (sphere-≡ (sym (susp-dim A))))))
                (Var≃ (cong (λ - → suc (double -)) (sym (susp-dim A))) refl))
          (trans≃s (susp-sub-from-disc (ty-dim A) A refl s) (sub-from-disc-≃ (suc (ty-dim A)) (ty-dim (susp-ty A)) refl≃ty (trans (susp-dim A) (cong suc refl)) refl refl≃tm))

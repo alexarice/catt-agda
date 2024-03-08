@@ -69,9 +69,9 @@ tree-dim-ctx-dim (Join S T) = begin
   where
     open ≡-Reasoning
 
-lift-ty-dim : (A : Ty n) → ty-dim (lift-ty A) ≡ ty-dim A
-lift-ty-dim ⋆ = refl
-lift-ty-dim (s ─⟨ A ⟩⟶ t) = cong suc (lift-ty-dim A)
+wk-ty-dim : (A : Ty n) → ty-dim (wk-ty A) ≡ ty-dim A
+wk-ty-dim ⋆ = refl
+wk-ty-dim (s ─⟨ A ⟩⟶ t) = cong suc (wk-ty-dim A)
 
 ty-dim-ty-base : (A : Ty n) → ty-dim (ty-base A) ≡ pred (ty-dim A)
 ty-dim-ty-base ⋆ = refl
@@ -92,23 +92,23 @@ tm-to-ty-coh-sub {A = s ─⟨ A ⟩⟶ t} Δ B τ Γ σ = begin
 
 susp-tm-height : (t : Tm n) → (Δ : Ctx n) → tm-height (susp-ctx Δ) (susp-tm t) ≡ suc (tm-height Δ t)
 susp-tm-height (Var zero) (Δ , A) = begin
-  ty-dim (lift-ty (susp-ty A))
-    ≡⟨ lift-ty-dim (susp-ty A) ⟩
+  ty-dim (wk-ty (susp-ty A))
+    ≡⟨ wk-ty-dim (susp-ty A) ⟩
   ty-dim (susp-ty A)
     ≡⟨ susp-dim A ⟩
   suc (ty-dim A)
-    ≡˘⟨ cong suc (lift-ty-dim A) ⟩
-  suc (ty-dim (lift-ty A)) ∎
+    ≡˘⟨ cong suc (wk-ty-dim A) ⟩
+  suc (ty-dim (wk-ty A)) ∎
   where
     open ≡-Reasoning
 susp-tm-height (Var (suc i)) (Δ , A) = begin
-  ty-dim (lift-ty (susp-ctx Δ ‼ inject₁ (inject₁ i)))
-    ≡⟨ lift-ty-dim (susp-ctx Δ ‼ inject₁ (inject₁ i)) ⟩
+  ty-dim (wk-ty (susp-ctx Δ ‼ inject₁ (inject₁ i)))
+    ≡⟨ wk-ty-dim (susp-ctx Δ ‼ inject₁ (inject₁ i)) ⟩
   ty-dim (susp-ctx Δ ‼ inject₁ (inject₁ i))
     ≡⟨ susp-tm-height (Var i) Δ ⟩
   suc (ty-dim (Δ ‼ i))
-    ≡˘⟨ cong suc (lift-ty-dim (Δ ‼ i)) ⟩
-  suc (ty-dim (lift-ty (Δ ‼ i))) ∎
+    ≡˘⟨ cong suc (wk-ty-dim (Δ ‼ i)) ⟩
+  suc (ty-dim (wk-ty (Δ ‼ i))) ∎
   where
     open ≡-Reasoning
 susp-tm-height (Coh S A σ) Δ = begin
@@ -142,15 +142,15 @@ ty-tgt′-≃ : A ≃ty B → ty-tgt′ A ≃tm ty-tgt′ B
 ty-tgt′-≃ (Star≃ p) = Var≃ p refl
 ty-tgt′-≃ (Arr≃ p q r) = r
 
-ty-base-lift : (A : Ty n) → ty-base (lift-ty A) ≃ty lift-ty (ty-base A)
-ty-base-lift ⋆ = refl≃ty
-ty-base-lift (s ─⟨ A ⟩⟶ t) = refl≃ty
+ty-base-wk : (A : Ty n) → ty-base (wk-ty A) ≃ty wk-ty (ty-base A)
+ty-base-wk ⋆ = refl≃ty
+ty-base-wk (s ─⟨ A ⟩⟶ t) = refl≃ty
 
-ty-src′-lift : (A : Ty (suc n)) → .⦃ NonZero (ty-dim A) ⦄ → ty-src′ (lift-ty A) ≃tm lift-tm (ty-src′ A)
-ty-src′-lift (s ─⟨ A ⟩⟶ t) = refl≃tm
+ty-src′-wk : (A : Ty (suc n)) → .⦃ NonZero (ty-dim A) ⦄ → ty-src′ (wk-ty A) ≃tm wk-tm (ty-src′ A)
+ty-src′-wk (s ─⟨ A ⟩⟶ t) = refl≃tm
 
-ty-tgt′-lift : (A : Ty (suc n)) → .⦃ NonZero (ty-dim A) ⦄ → ty-tgt′ (lift-ty A) ≃tm lift-tm (ty-tgt′ A)
-ty-tgt′-lift (s ─⟨ A ⟩⟶ t) = refl≃tm
+ty-tgt′-wk : (A : Ty (suc n)) → .⦃ NonZero (ty-dim A) ⦄ → ty-tgt′ (wk-ty A) ≃tm wk-tm (ty-tgt′ A)
+ty-tgt′-wk (s ─⟨ A ⟩⟶ t) = refl≃tm
 
 ty-base-sub : (A : Ty n) → (σ : Sub n m ⋆) → ty-base A [ σ ]ty ≃ty ty-base (A [ σ ]ty)
 ty-base-sub ⋆ σ = refl≃ty
@@ -225,9 +225,9 @@ truncate-sub {B = B} d A σ = begin
 
     open Reasoning ty-setoid
 
-truncate′-lift : (n : ℕ) → (A : Ty m) → truncate′ n (lift-ty A) ≃ty lift-ty (truncate′ n A)
-truncate′-lift zero A = refl≃ty
-truncate′-lift (suc n) A = trans≃ty (truncate′-≃ {d = n} refl (ty-base-lift A)) (truncate′-lift n (ty-base A))
+truncate′-wk : (n : ℕ) → (A : Ty m) → truncate′ n (wk-ty A) ≃ty wk-ty (truncate′ n A)
+truncate′-wk zero A = refl≃ty
+truncate′-wk (suc n) A = trans≃ty (truncate′-≃ {d = n} refl (ty-base-wk A)) (truncate′-wk n (ty-base A))
 
 truncate′-dim : (n : ℕ) → (A : Ty m) → ty-dim (truncate′ n A) ≡ ty-dim A ∸ n
 truncate′-dim zero A = refl

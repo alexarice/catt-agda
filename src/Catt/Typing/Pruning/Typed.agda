@@ -25,7 +25,7 @@ open import Catt.Typing.Pruning.Rule
 open import Catt.Typing ops rules
 open import Catt.Dyck.Pruning.Typing ops standard-op rules wk-cond sub-cond
 open import Catt.Typing.Properties.Base ops rules
-open import Catt.Typing.Properties.Substitution ops rules wk-cond sub-cond
+open import Catt.Typing.Properties.Substitution ops rules sub-cond
 open import Catt.Globular.Typing ops rules
 
 open import Catt.Typing.Weak ops

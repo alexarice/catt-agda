@@ -20,7 +20,7 @@ open import Catt.Dyck.Pruning.Properties
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
 open import Catt.Typing.Properties.Weakening ops rules wk-cond
-open import Catt.Typing.Properties.Substitution ops rules wk-cond sub-cond
+open import Catt.Typing.Properties.Substitution ops rules sub-cond
 open import Catt.Globular.Typing ops rules
 open import Catt.Discs.Typing ops standard-op rules wk-cond
 open import Catt.Dyck.Typing ops rules wk-cond sub-cond

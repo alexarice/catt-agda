@@ -3,7 +3,6 @@ open import Catt.Typing.Rule
 module Catt.Typing.Properties.Substitution
   (ops : Op)
   (rules : RuleSet)
-  (wk-cond : WkCond rules)
   (sub-cond : SubCond ops rules) where
 
 open import Catt.Prelude
@@ -12,9 +11,13 @@ open import Catt.Syntax
 open import Catt.Syntax.Properties
 open import Catt.Suspension
 
+open import Catt.Typing.Rule
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
-open import Catt.Typing.Properties.Weakening ops rules wk-cond
+open import Catt.Typing.Rule.Properties ops
+
+open import Catt.Typing.Weak ops
+import Catt.Typing.Properties.Weakening ops Weak-Rules weak-wk as W
 
 sub-typing-implies-ty-typing : {σ : Sub n m A} → Typing-Sub Γ Δ σ → Typing-Ty Δ A
 sub-typing-implies-ty-typing (TyNull x) = x
@@ -77,3 +80,11 @@ apply-sub-eq-tm {A = s ─⟨ A ⟩⟶ t} {B = s₁ ─⟨ B ⟩⟶ t₁} (Coh �
 
 apply-sub-eq-sub ⟨ _ ⟩′ eq = Null≈ (sub-eq-implies-ty-eq eq)
 apply-sub-eq-sub ⟨ μ , t ⟩ eq = Ext≈ (apply-sub-eq-sub μ eq) (apply-sub-eq-tm t eq)
+
+sub-cond-implies-weak-cond : WkCond rules
+sub-cond-implies-weak-cond {r = r} A p = ∈r-≃ (sub-cond (_ , A) (Typing-Sub-⊆ (weak-⊆ rules) W.project-Ty) p) γ
+  where
+    γ : sub-rule r (_ , A) project ≃r wk-rule r A
+    γ .ctxeq = refl≃c
+    γ .lhseq = apply-project-is-wk-tm (r .Rule.lhs)
+    γ .rhseq = apply-project-is-wk-tm (r .Rule.rhs)

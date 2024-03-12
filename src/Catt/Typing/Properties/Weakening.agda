@@ -52,6 +52,9 @@ id-Ty : Typing-Sub Γ Γ idSub
 id-Ty {Γ = ∅} = TyNull TyStar
 id-Ty {Γ = Γ , A} = TyExt (wk-sub-typing id-Ty) (TyConv (TyVar zero) (reflexive≈ty (sym≃ty (trans≃ty (apply-wk-sub-ty-≃ A idSub) (wk-ty-≃ (id-on-ty A))))))
 
+project-Ty : Typing-Sub Γ (Γ , A) project
+project-Ty = wk-sub-typing id-Ty
+
 idSub≃-Ty : (p : Γ ≃c Δ) → Typing-Sub Γ Δ (idSub≃ p)
 idSub≃-Ty Emp≃ = TyNull TyStar
 idSub≃-Ty (Add≃ {A = A} {A′ = A′} p x) = TyExt (wk-sub-typing (idSub≃-Ty p)) (TyConv (TyVar zero) (reflexive≈ty (sym≃ty (trans≃ty (apply-wk-sub-ty-≃ A (idSub≃ p)) (wk-ty-≃ (trans≃ty (idSub≃-on-ty p A) x))))))

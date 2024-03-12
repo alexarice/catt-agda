@@ -46,6 +46,9 @@ idSub : {n : ℕ} → Sub n n ⋆
 idSub {zero} = ⟨ ⋆ ⟩′
 idSub {suc n} = ⟨ wk-sub idSub , Var zero ⟩
 
+project : {n : ℕ} → Sub n (suc n) ⋆
+project = wk-sub idSub
+
 infix 45 _‼_
 _‼_ : (Γ : Ctx n) → (i : Fin n) → Ty n
 (Γ , A) ‼ zero = wk-ty A

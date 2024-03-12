@@ -16,7 +16,7 @@ open import Catt.Suspension
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
-open import Catt.Typing.Properties.Substitution ops rules wk-cond sub-cond as S hiding (apply-sub-ty-typing;apply-sub-tm-typing;apply-sub-sub-typing;apply-sub-ty-eq;apply-sub-tm-eq;apply-sub-sub-eq) public
+open import Catt.Typing.Properties.Substitution ops rules sub-cond as S hiding (apply-sub-ty-typing;apply-sub-tm-typing;apply-sub-sub-typing;apply-sub-ty-eq;apply-sub-tm-eq;apply-sub-sub-eq) public
 open import Catt.Suspension.Typing ops susp-op rules wk-cond susp-cond
 
 apply-sub-ty-typing : {σ : Sub n m B} → Typing-Ty Γ A → Typing-Sub Γ Δ σ → Typing-Ty Δ (A [ σ ]ty)

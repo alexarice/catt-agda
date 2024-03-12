@@ -655,3 +655,33 @@ susp-sub-proj {σ = ⟨ _ ⟩′} {τ = ⟨ ⟨ τ , _ ⟩ , _ ⟩} (Ext≃ (Ext
 susp-sub-proj {σ = ⟨ σ , t ⟩} {τ = ⟨ τ , t₁ ⟩} (Ext≃ p q) = Ext≃ (susp-sub-proj p) (susp-tm-proj q)
 susp-sub-proj {σ = ⟨ ⟨ _ ⟩′ , _ ⟩} {τ = ⟨ _ ⟩′} (Ext≃ (Ext≃ () _) _)
 susp-sub-proj {σ = ⟨ ⟨ σ , _ ⟩ , _ ⟩} {τ = ⟨ _ ⟩′} (Ext≃ (Ext≃ () _) _)
+
+apply-project-is-wk-tm : (t : Tm n) → t [ project ]tm ≃tm wk-tm t
+apply-project-is-wk-tm t = begin
+  < t [ project ]tm >tm
+    ≈⟨ apply-wk-sub-tm-≃ t idSub ⟩
+  < wk-tm (t [ idSub ]tm) >tm
+    ≈⟨ wk-tm-≃ (id-on-tm t) ⟩
+  < wk-tm t >tm ∎
+  where
+    open Reasoning tm-setoid
+
+apply-project-is-wk-ty : (A : Ty n) → A [ project ]ty ≃ty wk-ty A
+apply-project-is-wk-ty A = begin
+  < A [ project ]ty >ty
+    ≈⟨ apply-wk-sub-ty-≃ A idSub ⟩
+  < wk-ty (A [ idSub ]ty) >ty
+    ≈⟨ wk-ty-≃ (id-on-ty A) ⟩
+  < wk-ty A >ty ∎
+  where
+    open Reasoning ty-setoid
+
+apply-project-is-wk-sub : (σ : Sub n m A) → σ ● project ≃s wk-sub σ
+apply-project-is-wk-sub σ = begin
+  < σ ● project >s
+    ≈⟨ apply-wk-sub-sub-≃ σ idSub ⟩
+  < wk-sub (σ ● idSub) >s
+    ≈⟨ wk-sub-≃ (id-right-unit σ) ⟩
+  < wk-sub σ >s ∎
+  where
+    open Reasoning sub-setoid

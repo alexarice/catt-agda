@@ -15,6 +15,7 @@ open import Catt.Pasting.Properties
 open import Catt.Support
 
 open import Catt.Typing ops rules
+open import Catt.Typing.Rule.Properties ops
 
 refl≈ty : A ≈[ Γ ]ty A
 refl≈tm : t ≈[ Γ ]tm t
@@ -185,3 +186,34 @@ truncate′-≈ {d = suc d} refl (Arr≈ x p x₁) = truncate′-≈ {d = d} ref
 
 truncate-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate d A ≈[ Γ ]ty truncate d′ A′
 truncate-≈ {d} {d′} {A = A} {A′ = A′} refl p = truncate′-≈ {d = ty-dim A ∸ d} {d′ = ty-dim A′ ∸ d} (cong (_∸ d) (≈ty-preserve-height p)) p
+
+module _ where
+  open import Catt.Typing.Weak ops
+  import Catt.Typing ops Weak-Rules as W
+  apply-sub-weak-ty-typing : {σ : Sub n m ⋆} → W.Typing-Ty Γ A → Typing-Sub Γ Δ σ → Typing-Ty Δ (A [ σ ]ty)
+  apply-sub-weak-tm-typing : {σ : Sub n m ⋆} → W.Typing-Tm Γ t A → Typing-Sub Γ Δ σ → Typing-Tm Δ (t [ σ ]tm) (A [ σ ]ty)
+  apply-sub-weak-sub-typing : {σ : Sub n m ⋆} → W.Typing-Sub Υ Γ τ → Typing-Sub Γ Δ σ → Typing-Sub Υ Δ (τ ● σ)
+
+  apply-sub-weak-ty-typing TyStar σty = TyStar
+  apply-sub-weak-ty-typing (TyArr x Aty y) σty
+    = TyArr (apply-sub-weak-tm-typing x σty)
+            (apply-sub-weak-ty-typing Aty σty)
+            (apply-sub-weak-tm-typing y σty)
+
+  apply-sub-weak-tm-typing (TyConv tty x) σty
+    = TyConv (apply-sub-weak-tm-typing tty σty)
+             (reflexive≈ty (sub-action-≃-ty (weak-eq-is-refl-ty x) refl≃s))
+  apply-sub-weak-tm-typing (TyVar 0F) (TyExt {σ = σ} {A = A} σty x)
+    = TyConv x (reflexive≈ty (sym≃ty (apply-sub-wk-ty-≃ A ⟨ σ , _ ⟩)))
+  apply-sub-weak-tm-typing {Γ = Γ , _} (TyVar (suc i)) (TyExt {σ = σ} σty x)
+    = TyConv (apply-sub-weak-tm-typing (W.TyVar i) σty)
+             (reflexive≈ty (sym≃ty (apply-sub-wk-ty-≃ (Γ ‼ i) ⟨ σ , _ ⟩)))
+  apply-sub-weak-tm-typing (TyCoh {A = A} p q r) σty
+    = TyConv (TyCoh p (Typing-Ty-⊆ (weak-⊆ rules) q) (apply-sub-weak-sub-typing r σty))
+             (reflexive≈ty (assoc-ty _ _ A))
+
+  apply-sub-weak-sub-typing (TyNull x) σty = TyNull (apply-sub-weak-ty-typing x σty)
+  apply-sub-weak-sub-typing (TyExt {A = A} τty x) σty
+    = TyExt (apply-sub-weak-sub-typing τty σty)
+            (TyConv (apply-sub-weak-tm-typing x σty)
+                    (reflexive≈ty (sym≃ty (assoc-ty _ _ A))))

@@ -23,17 +23,9 @@ open import Catt.Typing.Properties.Base ops rules
 open import Catt.Typing.Properties.Weakening ops rules wk-cond
 open import Catt.Globular.Typing ops rules
 
-sphere-type-Ty : (d : ℕ) → Typing-Ty (Sphere d) (sphere-type d)
-sphere-type-Ty zero = TyStar
-sphere-type-Ty (suc d) = TyArr (TyVar (suc zero)) (wk-ty-typing (wk-ty-typing (sphere-type-Ty d))) (TyVar zero)
+open import Catt.Discs.Typing.Base ops rules wk-cond
 
-sphere-Ty : (d : ℕ) → Typing-Ctx (Sphere d)
-disc-Ty : (d : ℕ) → Typing-Ctx (Disc d)
-
-sphere-Ty zero = TyEmp
-sphere-Ty (suc d) = TyAdd (disc-Ty d) (wk-ty-typing (sphere-type-Ty d))
-
-disc-Ty d = TyAdd (sphere-Ty d) (sphere-type-Ty d)
+open import Catt.Typing.Weak ops
 
 disc-term-Ty : (n : ℕ) → .⦃ NonZero n ⦄ → {σ : Sub (disc-size n) m ⋆} → Typing-Sub (Disc n) Γ σ → Typing-Tm Γ (disc-term n σ) (sphere-type n [ sub-proj₁ σ ]ty)
 disc-term-Ty n@(suc n′) σty = let
@@ -132,35 +124,14 @@ identity-term-≈ {A = A} {B = B} {s = s} {t = t} p q = begin
   where
     open Reasoning (tm-setoid-≈ _)
 
-sub-from-disc-to-term-Ty : (d : ℕ) → (p : ty-dim A ≡ d) → Typing-Sub (Disc d) Γ (sub-from-disc d A p t) → Typing-Tm Γ t A
-sub-from-disc-to-term-Ty {A = A} d p (TyExt _ tty) = TyConv tty (reflexive≈ty (sub-from-sphere-prop d A p))
-
-sub-from-sphere-to-ty-Ty : (d : ℕ) → (p : ty-dim A ≡ d) → Typing-Sub (Sphere d) Γ (sub-from-sphere d A p) → Typing-Ty Γ A
-sub-from-sphere-to-ty-Ty {A = ⋆} zero p σty = TyStar
-sub-from-sphere-to-ty-Ty {A = s ─⟨ A ⟩⟶ t} (suc d) p (TyExt (TyExt σty sty) tty)
-  = TyArr (TyConv sty (reflexive≈ty (sub-from-sphere-prop d A (cong pred p))))
-          (sub-from-sphere-to-ty-Ty d (cong pred p) σty)
-          (TyConv tty (reflexive≈ty (trans≃ty (apply-sub-wk-ty-≃ (sphere-type d) ⟨ sub-from-sphere d A _ , _ ⟩)
-                                              (sub-from-sphere-prop d A (cong pred p)))))
-
-sub-from-disc-term-Ty : Typing-Sub (Disc d) Γ σ → Typing-Tm Γ (sub-from-disc-term σ) (sub-from-disc-type σ)
-sub-from-disc-term-Ty (TyExt {σ = σ} σty x) = TyConv x (reflexive≈ty (sub-from-sphere-type-prop σ))
-
-sub-from-sphere-type-Ty : Typing-Sub (Sphere d) Γ σ → Typing-Ty Γ (sub-from-sphere-type σ)
-sub-from-sphere-type-Ty {d = zero} (TyNull x) = x
-sub-from-sphere-type-Ty {d = suc d} (TyExt (TyExt {σ = σ} σty sty) tty)
-  = TyArr (TyConv sty (reflexive≈ty (sub-from-sphere-type-prop σ)))
-          (sub-from-sphere-type-Ty σty)
-          (TyConv tty (reflexive≈ty (trans≃ty (apply-sub-wk-ty-≃ (sphere-type d) ⟨ σ , _ ⟩)
-                                              (sub-from-sphere-type-prop σ))))
-
-sub-from-disc-type-Ty : Typing-Sub (Disc d) Γ σ → Typing-Ty Γ (sub-from-disc-type σ)
-sub-from-disc-type-Ty σty = sub-from-sphere-type-Ty (sub-proj₁-Ty σty)
-
 identity-to-term-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Tm Γ t A
 identity-to-term-Ty (TyConv tty p) = identity-to-term-Ty tty
-identity-to-term-Ty (TyCoh supp Aty σty) = sub-from-disc-to-term-Ty (ty-dim _) refl σty
+identity-to-term-Ty {A = A} (TyCoh supp Aty (TyExt σty x))
+  = TyConv x (reflexive≈ty (sub-from-sphere-prop (ty-dim A) A refl))
 
 identity-to-type-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Ty Γ A
 identity-to-type-Ty (TyConv tty p) = identity-to-type-Ty tty
-identity-to-type-Ty (TyCoh supp Aty (TyExt σty _)) = sub-from-sphere-to-ty-Ty (ty-dim _) refl σty
+identity-to-type-Ty {A = A} (TyCoh supp Aty (TyExt σty _))
+  = transport-typing-ty (apply-sub-weak-ty-typing (W.sphere-type-Ty (ty-dim A)) σty) refl≃c (sub-from-sphere-prop (ty-dim A) A refl)
+  where
+    import Catt.Discs.Typing.Base ops Weak-Rules weak-wk as W

@@ -67,22 +67,6 @@ sphere-susp (suc n) = Add≃ (disc-susp n) (trans≃ty (susp-ty-wk (sphere-type 
 sphere-type-susp zero = refl≃ty
 sphere-type-susp (suc n) = Arr≃ (refl≃tm) (trans≃ty (susp-ty-wk (wk-ty (sphere-type n))) (wk-ty-≃ (trans≃ty (susp-ty-wk (sphere-type n)) (wk-ty-≃ (sphere-type-susp n))))) (refl≃tm)
 
-sub-from-sphere-prop : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → sphere-type d [ sub-from-sphere d A p ]ty ≃ty A
-sub-from-sphere-prop zero ⋆ p = refl≃ty
-sub-from-sphere-prop (suc d) (s ─⟨ A ⟩⟶ t) p = Arr≃ refl≃tm lem refl≃tm
-  where
-    open Reasoning ty-setoid
-
-    lem : wk-ty (wk-ty (sphere-type d)) [ ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ]ty ≃ty A
-    lem = begin
-      < wk-ty (wk-ty (sphere-type d)) [ ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ]ty >ty
-        ≈⟨ apply-sub-wk-ty-≃ (wk-ty (sphere-type d)) ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ⟩
-      < wk-ty (sphere-type d) [ ⟨ sub-from-sphere d A _ , s ⟩ ]ty >ty
-        ≈⟨ apply-sub-wk-ty-≃ (sphere-type d) ⟨ sub-from-sphere d A _ , s ⟩ ⟩
-      < sphere-type d [ sub-from-sphere d A _ ]ty >ty
-        ≈⟨ sub-from-sphere-prop d A _ ⟩
-      < A >ty ∎
-
 disc-term-susp : (n : ℕ) → (σ : Sub (disc-size n) m ⋆) → susp-tm (disc-term n σ) ≃tm disc-term (suc n) (susp-sub σ)
 disc-term-susp n σ = Coh≃ (disc-susp n) (trans≃ty (susp-ty-wk (sphere-type n)) (wk-ty-≃ (sphere-type-susp n))) refl≃s
 
@@ -100,6 +84,22 @@ sub-from-sphere-sub (suc d) (s ─⟨ A ⟩⟶ t) p σ = Ext≃ (Ext≃ (sub-fro
 
 sub-from-disc-sub : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (s : Tm n) → (σ : Sub n m ⋆) → sub-from-disc d (A [ σ ]ty) (trans (sym (sub-dim σ A)) p) (s [ σ ]tm) ≃s sub-from-disc d A p s ● σ
 sub-from-disc-sub d A p s σ = Ext≃ (sub-from-sphere-sub d A p σ) refl≃tm
+
+sub-from-sphere-prop : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → sphere-type d [ sub-from-sphere d A p ]ty ≃ty A
+sub-from-sphere-prop zero ⋆ p = refl≃ty
+sub-from-sphere-prop (suc d) (s ─⟨ A ⟩⟶ t) p = Arr≃ refl≃tm lem refl≃tm
+  where
+    open Reasoning ty-setoid
+
+    lem : wk-ty (wk-ty (sphere-type d)) [ ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ]ty ≃ty A
+    lem = begin
+      < wk-ty (wk-ty (sphere-type d)) [ ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ]ty >ty
+        ≈⟨ apply-sub-wk-ty-≃ (wk-ty (sphere-type d)) ⟨ ⟨ sub-from-sphere d A _ , s ⟩ , t ⟩ ⟩
+      < wk-ty (sphere-type d) [ ⟨ sub-from-sphere d A _ , s ⟩ ]ty >ty
+        ≈⟨ apply-sub-wk-ty-≃ (sphere-type d) ⟨ sub-from-sphere d A _ , s ⟩ ⟩
+      < sphere-type d [ sub-from-sphere d A _ ]ty >ty
+        ≈⟨ sub-from-sphere-prop d A _ ⟩
+      < A >ty ∎
 
 identity-≃ : n ≡ m → σ ≃s τ → identity n σ ≃tm identity m τ
 identity-≃ refl p = Coh≃ refl≃c refl≃ty p
@@ -121,45 +121,52 @@ susp-sub-from-sphere (suc d) (s ─⟨ A ⟩⟶ t) p = Ext≃ (Ext≃ (susp-sub-
 susp-sub-from-disc : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (t : Tm n) → susp-sub (sub-from-disc d A p t) ≃s sub-from-disc (suc d) (susp-ty A) (trans (susp-dim A) (cong suc p)) (susp-tm t)
 susp-sub-from-disc d A p t = Ext≃ (susp-sub-from-sphere d A p) refl≃tm
 
-sub-from-sphere-type-dim : (σ : Sub (sphere-size n) m ⋆) → ty-dim (sub-from-sphere-type σ) ≡ n
-sub-from-sphere-type-dim {n = zero} σ = refl
-sub-from-sphere-type-dim {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = cong suc (sub-from-sphere-type-dim σ)
+prop-sub-from-sphere : (n : ℕ) → (σ : Sub (sphere-size n) m ⋆)
+                     → σ
+                       ≃s
+                       sub-from-sphere n (sphere-type n [ σ ]ty)
+                                         (trans (sym (sub-dim σ (sphere-type n)))
+                                                (sphere-type-dim n))
+prop-sub-from-sphere zero ⟨ .⋆ ⟩′ = refl≃s
+prop-sub-from-sphere (suc n) ⟨ ⟨ σ , s ⟩ , t ⟩
+  = Ext≃ (Ext≃ (begin
+    < σ >s
+      ≈⟨ prop-sub-from-sphere n σ ⟩
+    < sub-from-sphere n (sphere-type n [ σ ]ty) _ >s
+      ≈⟨ sub-from-sphere-≃ n n lem _ _ ⟩
+    < sub-from-sphere n (wk-ty (wk-ty (sphere-type n)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty) _ >s ∎
+    ) refl≃tm) refl≃tm
+    where
+      lem : sphere-type n [ σ ]ty ≃ty wk-ty (wk-ty (sphere-type n)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty
+      lem = begin
+        < sphere-type n [ σ ]ty >ty
+          ≈˘⟨ apply-sub-wk-ty-≃ (sphere-type n) ⟨ σ , s ⟩ ⟩
+        < wk-ty (sphere-type n) [ ⟨ σ , s ⟩ ]ty >ty
+          ≈˘⟨ apply-sub-wk-ty-≃ (wk-ty (sphere-type n)) ⟨ ⟨ σ , s ⟩ , t ⟩ ⟩
+        < wk-ty (wk-ty (sphere-type n)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty >ty ∎
+        where
+          open Reasoning ty-setoid
+      open Reasoning sub-setoid
 
-prop-sub-from-sphere : (σ : Sub (sphere-size n) m ⋆) → σ ≃s sub-from-sphere n (sub-from-sphere-type σ) (sub-from-sphere-type-dim σ)
-prop-sub-from-sphere {n = zero} ⟨ _ ⟩′ = refl≃s
-prop-sub-from-sphere {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (prop-sub-from-sphere σ) refl≃tm) refl≃tm
 
-sub-from-disc-type-dim : (σ : Sub (disc-size n) m ⋆) → ty-dim (sub-from-disc-type σ) ≡ n
-sub-from-disc-type-dim ⟨ σ , t ⟩ = sub-from-sphere-type-dim σ
+prop-sub-from-disc : (n : ℕ) → (σ : Sub (disc-size n) m ⋆)
+                   → σ
+                     ≃s
+                     sub-from-disc n (wk-ty (sphere-type n) [ σ ]ty)
+                                     (trans (sym (sub-dim σ _))
+                                            (trans (wk-ty-dim (sphere-type n))
+                                                   (sphere-type-dim n)))
+                                     (0V [ σ ]tm)
+prop-sub-from-disc n ⟨ σ , t ⟩
+  = Ext≃ (begin
+    < σ >s
+      ≈⟨ prop-sub-from-sphere n σ ⟩
+    < sub-from-sphere n (sphere-type n [ σ ]ty) _ >s
+      ≈˘⟨ sub-from-sphere-≃ n n (apply-sub-wk-ty-≃ (sphere-type n) ⟨ σ , t ⟩) _ _ ⟩
+    < sub-from-sphere n (wk-ty (sphere-type n) [ ⟨ σ , t ⟩ ]ty) _ >s ∎) refl≃tm
+    where
+      open Reasoning sub-setoid
 
-prop-sub-from-disc : (σ : Sub (disc-size n) m ⋆) → σ ≃s sub-from-disc n (sub-from-disc-type σ) (sub-from-disc-type-dim σ) (sub-from-disc-term σ)
-prop-sub-from-disc ⟨ σ , t ⟩ = Ext≃ (prop-sub-from-sphere σ) refl≃tm
-
-sub-from-disc-term-↓ : (σ : Sub (disc-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-disc-term (↓ σ) ≃tm sub-from-disc-term σ
-sub-from-disc-term-↓ ⟨ σ , t ⟩ = refl≃tm
-
-sub-from-sphere-type-↓ : (σ : Sub (sphere-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-sphere-type (↓ σ) ≃ty sub-from-sphere-type σ
-sub-from-sphere-type-↓ {n = zero} ⟨ _ ⟩′ = refl≃ty
-sub-from-sphere-type-↓ {n = suc n} ⟨ ⟨ σ , s ⟩ , t ⟩ = Arr≃ refl≃tm (sub-from-sphere-type-↓ σ) refl≃tm
-
-sub-from-disc-type-↓ : (σ : Sub (disc-size n) m (s ─⟨ A ⟩⟶ t)) → sub-from-disc-type (↓ σ) ≃ty sub-from-disc-type σ
-sub-from-disc-type-↓ ⟨ σ , t ⟩ = sub-from-sphere-type-↓ σ
-
-sub-from-sphere-type-prop : (σ : Sub (sphere-size d) m A) → sphere-type d [ σ ]ty ≃ty sub-from-sphere-type σ
-sub-from-sphere-type-prop {d = zero} σ = refl≃ty
-sub-from-sphere-type-prop {d = suc d} ⟨ ⟨ σ , s ⟩ , t ⟩ = Arr≃ refl≃tm lem refl≃tm
-  where
-    open Reasoning ty-setoid
-
-    lem : wk-ty (wk-ty (sphere-type d)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty ≃ty sub-from-sphere-type σ
-    lem = begin
-      < wk-ty (wk-ty (sphere-type d)) [ ⟨ ⟨ σ , s ⟩ , t ⟩ ]ty >ty
-        ≈⟨ apply-sub-wk-ty-≃ (wk-ty (sphere-type d)) ⟨ ⟨ σ , s ⟩ , t ⟩ ⟩
-      < wk-ty (sphere-type d) [ ⟨ σ , s ⟩ ]ty >ty
-        ≈⟨ apply-sub-wk-ty-≃ (sphere-type d) ⟨ σ , s ⟩ ⟩
-      < sphere-type d [ σ ]ty >ty
-        ≈⟨ sub-from-sphere-type-prop σ ⟩
-      < sub-from-sphere-type σ >ty ∎
 
 identity-term-sub : (A : Ty m) → (s : Tm m) → (σ : Sub m l ⋆) → identity-term A s [ σ ]tm ≃tm identity-term (A [ σ ]ty) (s [ σ ]tm)
 identity-term-sub A s σ = begin

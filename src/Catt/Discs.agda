@@ -39,13 +39,3 @@ identity-term A t = identity (ty-dim A) (sub-from-disc (ty-dim A) A refl t)
 
 disc-term : (n : ℕ) → Sub (disc-size n) m ⋆ → Tm m
 disc-term n σ = Coh (Disc n) (wk-ty (sphere-type n)) σ
-
-sub-from-disc-term : Sub (disc-size d) n A → Tm n
-sub-from-disc-term σ = sub-proj₂ σ
-
-sub-from-sphere-type : Sub (sphere-size d) n A → Ty n
-sub-from-sphere-type {d = zero} {A = A} σ = A
-sub-from-sphere-type {d = suc d} ⟨ ⟨ σ , s ⟩ , t ⟩ = s ─⟨ sub-from-sphere-type σ ⟩⟶ t
-
-sub-from-disc-type : Sub (disc-size d) n A → Ty n
-sub-from-disc-type σ = sub-from-sphere-type (sub-proj₁ σ)

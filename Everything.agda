@@ -61,6 +61,7 @@ import Catt.Dyck.Support
 import Catt.Dyck.Pruning
 import Catt.Dyck.Pruning.Properties
 import Catt.Dyck.FromTree
+import Catt.Dyck.Pruning.FromInsertion
 
 import Catt.Typing.Base
 import Catt.Typing

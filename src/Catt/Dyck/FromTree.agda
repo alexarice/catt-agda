@@ -24,7 +24,7 @@ n-extendable (suc n) (Join S T@(Join _ _)) = n-extendable (suc n) T
 extend-tree : (n : ℕ) → (T : Tree m) → .⦃ n-extendable n T ⦄ → Tree (2 + m)
 extend-tree zero Sing = Join Sing Sing
 extend-tree zero (Join S T) = Join S (extend-tree zero T)
-extend-tree (suc n) (Join S Sing) = Join (extend-tree n S) Sing
+extend-tree (suc n) (Susp S) = Susp (extend-tree n S)
 extend-tree (suc n) (Join S T@(Join _ _)) = Join S (extend-tree (suc n) T)
 
 join-tree-preserves-extendable : (n : ℕ) → (S : Tree m) → (T : Tree m′) → ⦃ n-extendable n T ⦄ → n-extendable n (Join S T)

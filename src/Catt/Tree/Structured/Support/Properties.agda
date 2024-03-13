@@ -469,5 +469,5 @@ ppath-≃-full (Join≃′ {S′ = S′} {T′ = T′} p q) = begin
         ≡⟨ ++t-incs-full S₂ T ⟩
       tFull ∎
 
-TransportVarSet-Label-DCT : {ΓS : CtxOrTree n} → (xs : TVarSet S) → (L : Label (COT-to-MT ΓS) S) → TransportVarSet-Label (DCT xs) L ≡ TransportVarSet-Label xs L
-TransportVarSet-Label-DCT xs L = cong (λ a → TransportVarSet a (label-to-sub (L ,, S⋆))) (DCT-toVarSet xs)
+vs-label-DCT : {ΓS : CtxOrTree n} → (xs : TVarSet S) → (L : Label (COT-to-MT ΓS) S) → DCT xs [ L ]vl ≡ xs [ L ]vl
+vs-label-DCT xs L = cong (λ a → a [ label-to-sub (L ,, S⋆) ]vs) (DCT-toVarSet xs)

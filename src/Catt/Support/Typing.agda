@@ -56,15 +56,15 @@ module _ where
   rulesWithSupp-sub p Γ σty [ x ,, supp ] .get .proj₁ = p Γ (Typing-Sub-⊆ rulesWithSupp⊆ σty) [ x ] .get
   rulesWithSupp-sub p {r = r} Γ {σ = σ} σty [ x ,, supp ] .get .proj₂ = begin
     SuppTm Γ (lhs [ σ ]tm)
-      ≡˘⟨ cong (DC Γ) (TransportVarSet-tm lhs σ) ⟩
-    DC Γ (TransportVarSet (FVTm lhs) σ)
-      ≡⟨ TransportVarSet-DC (FVTm lhs) σty ⟩
-    TransportVarSet (SuppTm tgtCtx lhs) σ
-      ≡⟨ cong (λ - → TransportVarSet - σ) supp ⟩
-    TransportVarSet (SuppTm tgtCtx rhs) σ
-      ≡˘⟨ TransportVarSet-DC (FVTm rhs) σty ⟩
-    DC Γ (TransportVarSet (FVTm rhs) σ)
-      ≡⟨ cong (DC Γ) (TransportVarSet-tm rhs σ) ⟩
+      ≡˘⟨ cong (DC Γ) (vs-sub-tm lhs σ) ⟩
+    DC Γ (FVTm lhs [ σ ]vs)
+      ≡⟨ vs-sub-DC (FVTm lhs) σty ⟩
+    SuppTm tgtCtx lhs [ σ ]vs
+      ≡⟨ cong (_[ σ ]vs) supp ⟩
+    SuppTm tgtCtx rhs [ σ ]vs
+      ≡˘⟨ vs-sub-DC (FVTm rhs) σty ⟩
+    DC Γ (FVTm rhs [ σ ]vs)
+      ≡⟨ cong (DC Γ) (vs-sub-tm rhs σ) ⟩
     SuppTm Γ (rhs [ σ ]tm) ∎
     where
       open Rule r

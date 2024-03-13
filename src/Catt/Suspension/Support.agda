@@ -140,19 +140,19 @@ suspSuppFull : suspSupp (full {n}) ≡ full
 suspSuppFull {zero} = refl
 suspSuppFull {suc n} = cong ewt suspSuppFull
 
-TransportVarSet-susp : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet (suspSupp xs) (susp-sub σ) ≡ suspSupp (TransportVarSet xs σ)
-TransportVarSet-susp emp ⟨ A ⟩′ = suspSuppLem _
-TransportVarSet-susp (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-susp xs σ
-TransportVarSet-susp (ewt xs) ⟨ σ , t ⟩ = begin
-  TransportVarSet (suspSupp xs) (susp-sub σ) ∪ FVTm (susp-tm t)
-    ≡⟨ cong (_∪ FVTm (susp-tm t)) (trans (TransportVarSet-susp xs σ) (suspSuppEmpRight (TransportVarSet xs σ))) ⟩
-  suspSupp (TransportVarSet xs σ) ∪ suspSupp empty ∪ FVTm (susp-tm t)
-    ≡⟨ ∪-assoc (suspSupp (TransportVarSet xs σ)) (suspSupp empty) (FVTm (susp-tm t)) ⟩
-  suspSupp (TransportVarSet xs σ) ∪ (suspSupp empty ∪ FVTm (susp-tm t))
-    ≡⟨ cong (suspSupp (TransportVarSet xs σ) ∪_) (suspSuppTm t) ⟩
-  suspSupp (TransportVarSet xs σ) ∪ suspSupp (FVTm t)
-    ≡⟨ suspSupp∪ (TransportVarSet xs σ) (FVTm t) ⟩
-  suspSupp (TransportVarSet xs σ ∪ FVTm t) ∎
+vs-sub-susp : (xs : VarSet n) → (σ : Sub n m ⋆) → suspSupp xs [ susp-sub σ ]vs ≡ suspSupp (xs [ σ ]vs)
+vs-sub-susp emp ⟨ A ⟩′ = suspSuppLem _
+vs-sub-susp (ewf xs) ⟨ σ , t ⟩ = vs-sub-susp xs σ
+vs-sub-susp (ewt xs) ⟨ σ , t ⟩ = begin
+  suspSupp xs [ susp-sub σ ]vs ∪ FVTm (susp-tm t)
+    ≡⟨ cong (_∪ FVTm (susp-tm t)) (trans (vs-sub-susp xs σ) (suspSuppEmpRight (xs [ σ ]vs))) ⟩
+  suspSupp (xs [ σ ]vs) ∪ suspSupp empty ∪ FVTm (susp-tm t)
+    ≡⟨ ∪-assoc (suspSupp (xs [ σ ]vs)) (suspSupp empty) (FVTm (susp-tm t)) ⟩
+  suspSupp (xs [ σ ]vs) ∪ (suspSupp empty ∪ FVTm (susp-tm t))
+    ≡⟨ cong (suspSupp (xs [ σ ]vs) ∪_) (suspSuppTm t) ⟩
+  suspSupp (xs [ σ ]vs) ∪ suspSupp (FVTm t)
+    ≡⟨ suspSupp∪ (xs [ σ ]vs) (FVTm t) ⟩
+  suspSupp (xs [ σ ]vs ∪ FVTm t) ∎
   where
     open ≡-Reasoning
 

@@ -64,14 +64,12 @@ open import Catt.Tree.Insertion.Typing All Weak-Rules (weak-tame all-tame)
                 → (q : lh p ≥ tree-dim T)
                 → (d : ℕ)
                 → (b : Bool)
-                → TransportVarSet-Label (supp-tree-bd d S b) (κ S p T) ≡ toVarSet (supp-tree-bd d (S >>[ p ] T) b)
+                → supp-tree-bd d S b [ κ S p T ]vl ≡ toVarSet (supp-tree-bd d (S >>[ p ] T) b)
 κ-boundary-supp S p T q d b = begin
-  TransportVarSet-Label (supp-tree-bd d S b)
-    (κ S p T)
-    ≡˘⟨ cong (λ a → TransportVarSet-Label a (κ S p T)) (trans (sym (FVLabel-WT-⋆ (ap (tree-inc-label d S b)))) (tree-inc-label-supp d S b)) ⟩
-  TransportVarSet-Label (FVLabel (ap (tree-inc-label d S b)))
-    (κ S p T)
-    ≡˘⟨ TransportVarSet-Label-Label (ap (tree-inc-label d S b)) (κ S p T) (κ-Ty S p T q) ⟩
+  supp-tree-bd d S b [ κ S p T ]vl
+    ≡˘⟨ cong (_[ κ S p T ]vl) (trans (sym (FVLabel-WT-⋆ (ap (tree-inc-label d S b)))) (tree-inc-label-supp d S b)) ⟩
+  FVLabel (ap (tree-inc-label d S b)) [ κ S p T ]vl
+    ≡˘⟨ vs-label-Label (ap (tree-inc-label d S b)) (κ S p T) (κ-Ty S p T q) ⟩
   toVarSet (FVLabel (ap (tree-inc-label d S b) ●l (κ S p T ,, S⋆)))
     ≡˘⟨ DCT-toVarSet (FVLabel (ap (tree-inc-label d S b) ●l (κ S p T ,, S⋆))) ⟩
   toVarSet

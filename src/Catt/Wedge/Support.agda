@@ -97,34 +97,34 @@ wedge-supp-full : ∀ n (t : Tm (suc n)) m → wedge-supp {n} {m} full t full �
 wedge-supp-full n t zero = ∪-left-zero (FVTm t)
 wedge-supp-full n t (suc m) = cong ewt (wedge-supp-full n t m)
 
-wedge-supp-inc-left : (xs : VarSet (suc n)) → (t : Tm (suc n)) → (m : ℕ) → TransportVarSet xs (wedge-inc-left t m) ≡ wedge-supp xs t empty
-wedge-supp-inc-left xs t zero = TransportVarSet-id xs
+wedge-supp-inc-left : (xs : VarSet (suc n)) → (t : Tm (suc n)) → (m : ℕ) → xs [ wedge-inc-left t m ]vs ≡ wedge-supp xs t empty
+wedge-supp-inc-left xs t zero = vs-sub-id xs
 wedge-supp-inc-left xs t (suc m) = begin
-  TransportVarSet xs (wk-sub (wedge-inc-left t m))
-    ≡⟨ TransportVarSet-wk xs (wedge-inc-left t m) ⟩
-  ewf (TransportVarSet xs (wedge-inc-left t m))
+  xs [ wk-sub (wedge-inc-left t m) ]vs
+    ≡⟨ vs-sub-wk xs (wedge-inc-left t m) ⟩
+  ewf (xs [ wedge-inc-left t m ]vs)
     ≡⟨ cong ewf (wedge-supp-inc-left xs t m) ⟩
   ewf (wedge-supp xs t empty) ∎
   where
     open ≡-Reasoning
 
-wedge-supp-inc-right : (t : Tm (suc n)) → (ys : VarSet (suc m)) → TransportVarSet ys (wedge-inc-right t m) ≡ wedge-supp empty t ys
+wedge-supp-inc-right : (t : Tm (suc n)) → (ys : VarSet (suc m)) → ys [ wedge-inc-right t m ]vs ≡ wedge-supp empty t ys
 wedge-supp-inc-right {m = zero} t (ewf ys) = refl
 wedge-supp-inc-right {m = zero} t (ewt ys) = refl
 wedge-supp-inc-right {m = suc m} t (ewf ys) = begin
-  TransportVarSet ys (wk-sub (wedge-inc-right t m))
-    ≡⟨ TransportVarSet-wk ys (wedge-inc-right t m) ⟩
-  ewf (TransportVarSet ys (wedge-inc-right t m))
+  ys [ wk-sub (wedge-inc-right t m) ]vs
+    ≡⟨ vs-sub-wk ys (wedge-inc-right t m) ⟩
+  ewf (ys [ wedge-inc-right t m ]vs)
     ≡⟨ cong ewf (wedge-supp-inc-right t ys) ⟩
   ewf (wedge-supp empty t ys) ∎
   where
     open ≡-Reasoning
 wedge-supp-inc-right {m = suc m} t (ewt ys) = begin
-  TransportVarSet ys (wk-sub (wedge-inc-right t m)) ∪ ewt empty
-    ≡⟨ cong (_∪ ewt empty) (TransportVarSet-wk ys (wedge-inc-right t m)) ⟩
-  ewt (TransportVarSet ys (wedge-inc-right t m) ∪ empty)
-    ≡⟨ cong ewt (∪-right-unit (TransportVarSet ys (wedge-inc-right t m))) ⟩
-  ewt (TransportVarSet ys (wedge-inc-right t m))
+  ys [ wk-sub (wedge-inc-right t m) ]vs ∪ ewt empty
+    ≡⟨ cong (_∪ ewt empty) (vs-sub-wk ys (wedge-inc-right t m)) ⟩
+  ewt (ys [ wedge-inc-right t m ]vs ∪ empty)
+    ≡⟨ cong ewt (∪-right-unit (ys [ wedge-inc-right t m ]vs)) ⟩
+  ewt (ys [ wedge-inc-right t m ]vs)
     ≡⟨ cong ewt (wedge-supp-inc-right t ys) ⟩
   ewt (wedge-supp empty t ys) ∎
   where
@@ -174,8 +174,8 @@ wedge-supp-DC {m = zero} Γ t (Δ , A) xs (ewt ys) p = trans (DC-∪ Γ xs (FVTm
 wedge-supp-DC {m = suc m} Γ t (Δ , A) xs (ewf ys) p = cong ewf (wedge-supp-DC Γ t Δ xs ys p)
 wedge-supp-DC {m = suc m} Γ t (Δ , A) xs (ewt ys) p = cong ewt (begin
   DC (wedge Γ t Δ) (wedge-supp xs t ys ∪ FVTy (A [ wedge-inc-right t m ]ty))
-    ≡˘⟨ cong (λ - → DC (wedge Γ t Δ) (wedge-supp xs t ys ∪ -)) (TransportVarSet-ty A (wedge-inc-right t m)) ⟩
-  DC (wedge Γ t Δ) (wedge-supp xs t ys ∪ TransportVarSet (FVTy A) (wedge-inc-right t m))
+    ≡˘⟨ cong (λ - → DC (wedge Γ t Δ) (wedge-supp xs t ys ∪ -)) (vs-sub-ty A (wedge-inc-right t m)) ⟩
+  DC (wedge Γ t Δ) (wedge-supp xs t ys ∪ FVTy A [ wedge-inc-right t m ]vs)
     ≡⟨ cong (λ - → DC (wedge Γ t Δ) (wedge-supp xs t ys ∪ -)) (wedge-supp-inc-right t (FVTy A)) ⟩
   DC (wedge Γ t Δ) (wedge-supp xs t ys ∪ wedge-supp empty t (FVTy A))
     ≡⟨ cong (DC (wedge Γ t Δ)) (wedge-supp-∪ xs empty ys (FVTy A) t) ⟩
@@ -204,8 +204,8 @@ wedge-susp-supp-ext {m = m} Γ t Δ = begin
     ≡˘⟨ wedge-susp-supp-DC Γ Δ ((FVTm (susp-tm t))) empty ⟩
   DC (wedge-susp Γ Δ) (wedge-susp-supp (FVTm (susp-tm t)) empty)
     ≡˘⟨ cong (DC (wedge-susp Γ Δ)) (wedge-supp-inc-left (FVTm (susp-tm t)) get-snd m) ⟩
-  DC (wedge-susp Γ Δ) (TransportVarSet (FVTm (susp-tm t)) (wedge-susp-inc-left _ m))
-    ≡⟨ cong (DC (wedge-susp Γ Δ)) (TransportVarSet-tm (susp-tm t) (wedge-susp-inc-left _ m)) ⟩
+  DC (wedge-susp Γ Δ) (FVTm (susp-tm t) [ wedge-susp-inc-left _ m ]vs)
+    ≡⟨ cong (DC (wedge-susp Γ Δ)) (vs-sub-tm (susp-tm t) (wedge-susp-inc-left _ m)) ⟩
   SuppTm (wedge-susp Γ Δ) (susp-tm t [ wedge-susp-inc-left _ m ]tm) ∎
      where
        open ≡-Reasoning
@@ -219,8 +219,8 @@ wedge-susp-supp-shift Γ Δ t = begin
     ≡˘⟨ wedge-susp-supp-DC Γ Δ empty (FVTm t) ⟩
   DC (wedge-susp Γ Δ) (wedge-susp-supp empty (FVTm t))
     ≡˘⟨ cong (DC (wedge-susp Γ Δ)) (wedge-supp-inc-right get-snd (FVTm t)) ⟩
-  DC (wedge-susp Γ Δ) (TransportVarSet (FVTm t) (wedge-susp-inc-right _ _))
-    ≡⟨ cong (DC (wedge-susp Γ Δ)) (TransportVarSet-tm t (wedge-susp-inc-right _ _)) ⟩
+  DC (wedge-susp Γ Δ) (FVTm t [ wedge-susp-inc-right _ _ ]vs)
+    ≡⟨ cong (DC (wedge-susp Γ Δ)) (vs-sub-tm t (wedge-susp-inc-right _ _)) ⟩
   SuppTm (wedge-susp Γ Δ) (t [ wedge-susp-inc-right _ _ ]tm) ∎
   where
     open ≡-Reasoning

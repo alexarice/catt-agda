@@ -15,5 +15,5 @@ PruningOp = ∀ {n} (dy : Dyck (suc n) 0)
                 → (ys : VarSet (3 + (n * 2)))
                 → ops ⌊ dy ⌋d xs ys
                 → ops ⌊ dy // pk ⌋d
-                      (TransportVarSet xs (π pk))
-                      (TransportVarSet ys (π pk))
+                      (xs [ π pk ]vs)
+                      (ys [ π pk ]vs)

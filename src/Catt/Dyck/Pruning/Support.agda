@@ -46,73 +46,73 @@ open ≡-Reasoning
        → (pk : Peak dy)
        → (d : ℕ)
        → (d ≤ m)
-       → TransportVarSet (drop (dyck-bd-supp d dy true)) (π pk)
+       → drop (dyck-bd-supp d dy true) [ π pk ]vs
          ≡
-         drop (TransportVarSet ((dyck-bd-supp d dy true)) (π pk))
+         drop (dyck-bd-supp d dy true [ π pk ]vs)
 π-drop (⇕pk dy) d p with <-cmp d (ty-dim (dyck-type dy))
 ... | tri< a ¬b ¬c = begin
-  TransportVarSet (drop (dyck-bd-supp d dy true)) idSub
-    ≡⟨ TransportVarSet-id (drop (dyck-bd-supp d dy true)) ⟩
+  drop (dyck-bd-supp d dy true) [ idSub ]vs
+    ≡⟨ vs-sub-id (drop (dyck-bd-supp d dy true)) ⟩
   drop (dyck-bd-supp d dy true)
-    ≡˘⟨ cong drop (TransportVarSet-id (dyck-bd-supp d dy true)) ⟩
-  drop (TransportVarSet (dyck-bd-supp d dy true) idSub) ∎
+    ≡˘⟨ cong drop (vs-sub-id (dyck-bd-supp d dy true)) ⟩
+  drop (dyck-bd-supp d dy true [ idSub ]vs) ∎
 ... | tri≈ ¬a b ¬c = begin
-  TransportVarSet (drop (dyck-bd-supp d dy true)) idSub
-    ≡⟨ TransportVarSet-id (drop (dyck-bd-supp d dy true)) ⟩
+  drop (dyck-bd-supp d dy true) [ idSub ]vs
+    ≡⟨ vs-sub-id (drop (dyck-bd-supp d dy true)) ⟩
   drop (dyck-bd-supp d dy true)
     ≡˘⟨ cong drop (dyck-bd-drop-≡ d dy (trans b (dyck-type-dim dy))) ⟩
   drop (drop (dyck-bd-supp d dy true) ∪ FVTm (dyck-term dy))
-    ≡˘⟨ cong (λ - → drop (- ∪ FVTm (dyck-term dy))) (TransportVarSet-id (drop (dyck-bd-supp d dy true))) ⟩
-  drop (TransportVarSet (drop (dyck-bd-supp d dy true)) idSub ∪ FVTm (dyck-term dy)) ∎
+    ≡˘⟨ cong (λ - → drop (- ∪ FVTm (dyck-term dy))) (vs-sub-id (drop (dyck-bd-supp d dy true))) ⟩
+  drop (drop (dyck-bd-supp d dy true) [ idSub ]vs ∪ FVTm (dyck-term dy)) ∎
 ... | tri> ¬a ¬b c = ⊥-elim (1+n≰n (≤-trans (≤-trans (s≤s (≤-reflexive (sym (dyck-type-dim dy)))) c) p))
 π-drop (⇑pk {dy = dy} pk) d p with <-cmp d (ty-dim (dyck-type dy))
 ... | tri< a ¬b ¬c = begin
-  TransportVarSet (drop (dyck-bd-supp d dy true)) (wk-sub (wk-sub (π pk)))
-    ≡⟨ TransportVarSet-wk (drop (dyck-bd-supp d dy true)) (wk-sub (π pk)) ⟩
-  ewf (TransportVarSet (drop (dyck-bd-supp d dy true)) (wk-sub (π pk)))
-    ≡⟨ cong ewf (TransportVarSet-wk (drop (dyck-bd-supp d dy true)) (π pk)) ⟩
-  ewf (ewf (TransportVarSet (drop (dyck-bd-supp d dy true)) (π pk)))
+  drop (dyck-bd-supp d dy true) [ wk-sub (wk-sub (π pk)) ]vs
+    ≡⟨ vs-sub-wk (drop (dyck-bd-supp d dy true)) (wk-sub (π pk)) ⟩
+  ewf (drop (dyck-bd-supp d dy true) [ wk-sub (π pk) ]vs)
+    ≡⟨ cong ewf (vs-sub-wk (drop (dyck-bd-supp d dy true)) (π pk)) ⟩
+  ewf (ewf (drop (dyck-bd-supp d dy true) [ π pk ]vs))
     ≡⟨ cong (ewf ∘ ewf) (π-drop pk d (≤-trans (n≤1+n d) (≤-trans a (≤-reflexive (dyck-type-dim dy))))) ⟩
-  ewf (ewf (drop (TransportVarSet (dyck-bd-supp d dy true) (π pk))))
-    ≡˘⟨ cong (drop ∘ ewf) (TransportVarSet-wk (dyck-bd-supp d dy true) (π pk)) ⟩
-  drop (ewf (TransportVarSet (dyck-bd-supp d dy true) (wk-sub (π pk))))
-    ≡˘⟨ cong drop (TransportVarSet-wk (dyck-bd-supp d dy true) (wk-sub (π pk))) ⟩
-  drop (TransportVarSet (dyck-bd-supp d dy true) (wk-sub (wk-sub (π pk)))) ∎
+  ewf (ewf (drop (dyck-bd-supp d dy true [ π pk ]vs)))
+    ≡˘⟨ cong (drop ∘ ewf) (vs-sub-wk (dyck-bd-supp d dy true) (π pk)) ⟩
+  drop (ewf (dyck-bd-supp d dy true [ wk-sub (π pk) ]vs))
+    ≡˘⟨ cong drop (vs-sub-wk (dyck-bd-supp d dy true) (wk-sub (π pk))) ⟩
+  drop (dyck-bd-supp d dy true [ wk-sub (wk-sub (π pk)) ]vs) ∎
 ... | tri≈ ¬a b ¬c = begin
-  TransportVarSet (drop (dyck-bd-supp d dy true)) (wk-sub (wk-sub (π pk)))
-    ≡⟨ TransportVarSet-wk (drop (dyck-bd-supp d dy true)) (wk-sub (π pk)) ⟩
-  ewf (TransportVarSet (drop (dyck-bd-supp d dy true)) (wk-sub (π pk)))
-    ≡⟨ cong ewf (TransportVarSet-wk (drop (dyck-bd-supp d dy true)) (π pk)) ⟩
-  ewf (ewf (TransportVarSet (drop (dyck-bd-supp d dy true)) (π pk)))
-    ≡˘⟨ cong (ewf ∘ ewf) (∪-right-unit (TransportVarSet (drop (dyck-bd-supp d dy true)) (π pk))) ⟩
-  ewf (ewf (TransportVarSet (drop (dyck-bd-supp d dy true)) (π pk)) ∪ empty)
-    ≡˘⟨ cong (λ - → drop (ewf (- ∪ ewt empty))) (TransportVarSet-wk (drop (dyck-bd-supp d dy true)) (π pk)) ⟩
-  drop (ewf (TransportVarSet (drop (dyck-bd-supp d dy true)) (wk-sub (π pk)) ∪ ewt empty))
-    ≡˘⟨ cong (λ - → drop (- ∪ ewf (ewt empty))) (TransportVarSet-wk (drop (dyck-bd-supp d dy true)) (wk-sub (π pk))) ⟩
-  drop (TransportVarSet (drop (dyck-bd-supp d dy true)) (wk-sub (wk-sub (π pk))) ∪ ewf (ewt empty)) ∎
+  drop (dyck-bd-supp d dy true) [ wk-sub (wk-sub (π pk)) ]vs
+    ≡⟨ vs-sub-wk (drop (dyck-bd-supp d dy true)) (wk-sub (π pk)) ⟩
+  ewf (drop (dyck-bd-supp d dy true) [ wk-sub (π pk) ]vs)
+    ≡⟨ cong ewf (vs-sub-wk (drop (dyck-bd-supp d dy true)) (π pk)) ⟩
+  ewf (ewf (drop (dyck-bd-supp d dy true) [ π pk ]vs))
+    ≡˘⟨ cong (ewf ∘ ewf) (∪-right-unit (drop (dyck-bd-supp d dy true) [ π pk ]vs)) ⟩
+  ewf (ewf (drop (dyck-bd-supp d dy true) [ π pk ]vs) ∪ empty)
+    ≡˘⟨ cong (λ - → drop (ewf (- ∪ ewt empty))) (vs-sub-wk (drop (dyck-bd-supp d dy true)) (π pk)) ⟩
+  drop (ewf (drop (dyck-bd-supp d dy true) [ wk-sub (π pk) ]vs ∪ ewt empty))
+    ≡˘⟨ cong (λ - → drop (- ∪ ewf (ewt empty))) (vs-sub-wk (drop (dyck-bd-supp d dy true)) (wk-sub (π pk))) ⟩
+  drop (drop (dyck-bd-supp d dy true) [ wk-sub (wk-sub (π pk)) ]vs ∪ ewf (ewt empty)) ∎
 ... | tri> ¬a ¬b c = begin
-  TransportVarSet (dyck-bd-supp d dy true) (wk-sub (wk-sub (π pk))) ∪ ewf (ewt empty)
-    ≡⟨ cong (_∪ ewf (ewt empty)) (TransportVarSet-wk (dyck-bd-supp d dy true) (wk-sub (π pk))) ⟩
-  ewf (TransportVarSet (dyck-bd-supp d dy true) (wk-sub (π pk)) ∪ ewt empty)
-    ≡˘⟨ cong ewf (∪-right-unit (TransportVarSet (dyck-bd-supp d dy true) (wk-sub (π pk)) ∪ ewt empty)) ⟩
-  ewf (TransportVarSet (dyck-bd-supp d dy true) (wk-sub (π pk)) ∪ ewt empty ∪ empty)
-    ≡˘⟨ cong (λ - → drop (- ∪ ewf (ewt empty) ∪ ewt empty)) (TransportVarSet-wk (dyck-bd-supp d dy true) (wk-sub (π pk))) ⟩
-  drop (TransportVarSet (dyck-bd-supp d dy true) (wk-sub (wk-sub (π pk))) ∪ ewf (ewt empty) ∪ ewt empty) ∎
+  dyck-bd-supp d dy true [ wk-sub (wk-sub (π pk)) ]vs ∪ ewf (ewt empty)
+    ≡⟨ cong (_∪ ewf (ewt empty)) (vs-sub-wk (dyck-bd-supp d dy true) (wk-sub (π pk))) ⟩
+  ewf (dyck-bd-supp d dy true [ wk-sub (π pk) ]vs ∪ ewt empty)
+    ≡˘⟨ cong ewf (∪-right-unit (dyck-bd-supp d dy true [ wk-sub (π pk) ]vs ∪ ewt empty)) ⟩
+  ewf (dyck-bd-supp d dy true [ wk-sub (π pk) ]vs ∪ ewt empty ∪ empty)
+    ≡˘⟨ cong (λ - → drop (- ∪ ewf (ewt empty) ∪ ewt empty)) (vs-sub-wk (dyck-bd-supp d dy true) (wk-sub (π pk))) ⟩
+  drop (dyck-bd-supp d dy true [ wk-sub (wk-sub (π pk)) ]vs ∪ ewf (ewt empty) ∪ ewt empty) ∎
 π-drop (⇓pk pk) d p = π-drop pk d (≤-trans p (n≤1+n _))
 
 π-boundary-supp : {dy : Dyck (suc n) m}
                 → (pk : Peak dy)
                 → (d : ℕ)
                 → (b : Bool)
-                → TransportVarSet (dyck-bd-supp d dy b) (π pk) ≡ dyck-bd-supp d (dy // pk) b
+                → dyck-bd-supp d dy b [ π pk ]vs ≡ dyck-bd-supp d (dy // pk) b
 π-boundary-supp (⇕pk dy) d b with <-cmp d (ty-dim (dyck-type dy))
-... | tri< a ¬b ¬c = TransportVarSet-id (dyck-bd-supp d dy b)
+... | tri< a ¬b ¬c = vs-sub-id (dyck-bd-supp d dy b)
 ... | tri> ¬a ¬b c = begin
-  TransportVarSet (dyck-bd-supp d dy b) idSub
+  dyck-bd-supp d dy b [ idSub ]vs
   ∪ FVTm (dyck-term dy)
   ∪ FVTm (identity-term (dyck-type dy) (dyck-term dy))
     ≡⟨ cong₂ (λ a b → a ∪ FVTm (dyck-term dy) ∪ b)
-             (TransportVarSet-id (dyck-bd-supp d dy b))
+             (vs-sub-id (dyck-bd-supp d dy b))
              (identity-term-supp (dyck-type dy) (dyck-term dy)) ⟩
   dyck-bd-supp d dy b
     ∪ FVTm (dyck-term dy)
@@ -130,35 +130,35 @@ open ≡-Reasoning
   where
     open Solver ∪-idempotentCommutativeMonoid
 ... | tri≈ ¬a b₁ ¬c with b
-... | false = TransportVarSet-id (dyck-bd-supp d dy false)
+... | false = vs-sub-id (dyck-bd-supp d dy false)
 ... | true = begin
-  TransportVarSet (drop (dyck-bd-supp d dy true)) idSub ∪ FVTm (dyck-term dy)
-    ≡⟨ cong (_∪ FVTm (dyck-term dy)) (TransportVarSet-id (drop (dyck-bd-supp d dy true))) ⟩
+  drop (dyck-bd-supp d dy true) [ idSub ]vs ∪ FVTm (dyck-term dy)
+    ≡⟨ cong (_∪ FVTm (dyck-term dy)) (vs-sub-id (drop (dyck-bd-supp d dy true))) ⟩
   drop (dyck-bd-supp d dy true) ∪ FVTm (dyck-term dy)
     ≡⟨ dyck-bd-drop-≡ d dy (trans b₁ (dyck-type-dim dy)) ⟩
   dyck-bd-supp d dy true ∎
 π-boundary-supp (⇑pk {dy = dy} pk) d b with <-cmp d (ty-dim (dyck-type dy))
 ... | tri< a ¬b ¬c = begin
-  TransportVarSet (dyck-bd-supp d dy b) (wk-sub (wk-sub (π pk)))
-    ≡⟨ TransportVarSet-wk (dyck-bd-supp d dy b) (wk-sub (π pk)) ⟩
-  ewf (TransportVarSet (dyck-bd-supp d dy b) (wk-sub (π pk)))
-    ≡⟨ cong ewf (TransportVarSet-wk (dyck-bd-supp d dy b) (π pk)) ⟩
-  ewf (ewf (TransportVarSet (dyck-bd-supp d dy b) (π pk)))
+  dyck-bd-supp d dy b [ wk-sub (wk-sub (π pk)) ]vs
+    ≡⟨ vs-sub-wk (dyck-bd-supp d dy b) (wk-sub (π pk)) ⟩
+  ewf (dyck-bd-supp d dy b [ wk-sub (π pk) ]vs)
+    ≡⟨ cong ewf (vs-sub-wk (dyck-bd-supp d dy b) (π pk)) ⟩
+  ewf (ewf (dyck-bd-supp d dy b [ π pk ]vs))
     ≡⟨ cong (ewf ∘ ewf) (π-boundary-supp pk d b) ⟩
   ewf (ewf (dyck-bd-supp d (dy // pk) b))
     ≡˘⟨ tri-case< (≤-trans a (≤-reflexive (trans (dyck-type-dim dy) (sym (dyck-type-dim (dy // pk))))))
                   (<-cmp d (ty-dim (dyck-type (dy // pk)))) _ _ _ ⟩
   _ ∎
 ... | tri> ¬a ¬b c = begin
-  TransportVarSet (dyck-bd-supp d dy b) (wk-sub (wk-sub (π pk))) ∪ ewf (ewt empty) ∪ ewt empty
+  dyck-bd-supp d dy b [ wk-sub (wk-sub (π pk)) ]vs ∪ ewf (ewt empty) ∪ ewt empty
     ≡⟨ ∪-assoc _ _ _ ⟩
-  TransportVarSet (dyck-bd-supp d dy b) (wk-sub (wk-sub (π pk))) ∪ (ewt (ewt (empty ∪ empty)))
-    ≡⟨ cong₂ _∪_ (TransportVarSet-wk (dyck-bd-supp d dy b) (wk-sub (π pk))) (cong (ewt ∘ ewt) (∪-left-unit empty)) ⟩
-  ewt (TransportVarSet (dyck-bd-supp d dy b) (wk-sub (π pk)) ∪ ewt empty)
-    ≡⟨ cong (λ a → ewt (a ∪ ewt empty)) (TransportVarSet-wk (dyck-bd-supp d dy b) (π pk)) ⟩
-  ewt (ewt (TransportVarSet (dyck-bd-supp d dy b) (π pk)) ∪ empty)
-    ≡⟨ cong (ewt ∘ ewt) (∪-right-unit (TransportVarSet (dyck-bd-supp d dy b) (π pk))) ⟩
-  ewt (ewt (TransportVarSet (dyck-bd-supp d dy b) (π pk)))
+  dyck-bd-supp d dy b [ wk-sub (wk-sub (π pk)) ]vs ∪ (ewt (ewt (empty ∪ empty)))
+    ≡⟨ cong₂ _∪_ (vs-sub-wk (dyck-bd-supp d dy b) (wk-sub (π pk))) (cong (ewt ∘ ewt) (∪-left-unit empty)) ⟩
+  ewt (dyck-bd-supp d dy b [ wk-sub (π pk) ]vs ∪ ewt empty)
+    ≡⟨ cong (λ a → ewt (a ∪ ewt empty)) (vs-sub-wk (dyck-bd-supp d dy b) (π pk)) ⟩
+  ewt (ewt (dyck-bd-supp d dy b [ π pk ]vs) ∪ empty)
+    ≡⟨ cong (ewt ∘ ewt) (∪-right-unit (dyck-bd-supp d dy b [ π pk ]vs)) ⟩
+  ewt (ewt (dyck-bd-supp d dy b [ π pk ]vs))
     ≡⟨ cong (ewt ∘ ewt) (π-boundary-supp pk d b) ⟩
   ewt (ewt (dyck-bd-supp d (dy // pk) b))
     ≡˘⟨ tri-case> (≤-trans (≤-reflexive (cong suc (trans (dyck-type-dim (dy // pk)) (sym (dyck-type-dim dy))))) c)
@@ -166,26 +166,26 @@ open ≡-Reasoning
   _ ∎
 ... | tri≈ ¬a b₁ ¬c with b
 ... | false = begin
-  TransportVarSet (dyck-bd-supp d dy false) (wk-sub (wk-sub (π pk)))
-    ≡⟨ TransportVarSet-wk (dyck-bd-supp d dy false) (wk-sub (π pk)) ⟩
-  ewf (TransportVarSet (dyck-bd-supp d dy false) (wk-sub (π pk)))
-    ≡⟨ cong ewf (TransportVarSet-wk (dyck-bd-supp d dy false) (π pk)) ⟩
-  ewf (ewf (TransportVarSet (dyck-bd-supp d dy false) (π pk)))
+  dyck-bd-supp d dy false [ wk-sub (wk-sub (π pk)) ]vs
+    ≡⟨ vs-sub-wk (dyck-bd-supp d dy false) (wk-sub (π pk)) ⟩
+  ewf (dyck-bd-supp d dy false [ wk-sub (π pk) ]vs)
+    ≡⟨ cong ewf (vs-sub-wk (dyck-bd-supp d dy false) (π pk)) ⟩
+  ewf (ewf (dyck-bd-supp d dy false [ π pk ]vs))
     ≡⟨ cong (ewf ∘ ewf) (π-boundary-supp pk d false) ⟩
   ewf (ewf (dyck-bd-supp d (dy // pk) false))
     ≡˘⟨ tri-case≡ (trans b₁ (trans (dyck-type-dim dy) (sym (dyck-type-dim (dy // pk)))))
                   (<-cmp d (ty-dim (dyck-type (dy // pk)))) _ _ _ ⟩
   _ ∎
 ... | true = begin
-  TransportVarSet (drop (dyck-bd-supp d dy true)) (wk-sub (wk-sub (π pk))) ∪ ewf (ewt empty)
-    ≡⟨ cong (_∪ ewf (ewt empty)) (TransportVarSet-wk (drop (dyck-bd-supp d dy true)) (wk-sub (π pk))) ⟩
-  ewf (TransportVarSet (drop (dyck-bd-supp d dy true)) (wk-sub (π pk)) ∪ ewt empty)
-    ≡⟨ cong (λ - → ewf (- ∪ ewt empty)) (TransportVarSet-wk (drop (dyck-bd-supp d dy true)) (π pk)) ⟩
-  ewf (ewt (TransportVarSet (drop (dyck-bd-supp d dy true)) (π pk) ∪ empty))
-    ≡⟨ cong (ewf ∘ ewt) (∪-right-unit (TransportVarSet (drop (dyck-bd-supp d dy true)) (π pk))) ⟩
-  ewf (ewt (TransportVarSet (drop (dyck-bd-supp d dy true)) (π pk)))
+  drop (dyck-bd-supp d dy true) [ wk-sub (wk-sub (π pk)) ]vs ∪ ewf (ewt empty)
+    ≡⟨ cong (_∪ ewf (ewt empty)) (vs-sub-wk (drop (dyck-bd-supp d dy true)) (wk-sub (π pk))) ⟩
+  ewf (drop (dyck-bd-supp d dy true) [ wk-sub (π pk) ]vs ∪ ewt empty)
+    ≡⟨ cong (λ - → ewf (- ∪ ewt empty)) (vs-sub-wk (drop (dyck-bd-supp d dy true)) (π pk)) ⟩
+  ewf (ewt (drop (dyck-bd-supp d dy true) [ π pk ]vs ∪ empty))
+    ≡⟨ cong (ewf ∘ ewt) (∪-right-unit (drop (dyck-bd-supp d dy true) [ π pk ]vs)) ⟩
+  ewf (ewt (drop (dyck-bd-supp d dy true) [ π pk ]vs))
     ≡⟨ cong (ewf ∘ ewt) (π-drop pk d (≤-reflexive (trans b₁ (dyck-type-dim dy)))) ⟩
-  ewf (ewt (drop (TransportVarSet (dyck-bd-supp d dy true) (π pk))))
+  ewf (ewt (drop (dyck-bd-supp d dy true [ π pk ]vs)))
     ≡⟨ cong (ewf ∘ ewt ∘ drop) (π-boundary-supp pk d true) ⟩
   ewf (ewt (drop (dyck-bd-supp d (dy // pk) true)))
     ≡˘⟨ tri-case≡ (trans b₁ (trans (dyck-type-dim dy) (sym (dyck-type-dim (dy // pk)))))

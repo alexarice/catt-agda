@@ -22,5 +22,5 @@ InsertionSOp = ∀ {n} {l} {m} (S : Tree n)
                            → (ys : TVarSet S)
                            → ops-s S xs ys
                            → ops ⌊ S >>[ P ] T ⌋
-                                 (TransportVarSet-Label xs (κ S P T))
-                                 (TransportVarSet-Label ys (κ S P T))
+                                 (xs [ κ S P T ]vl)
+                                 (ys [ κ S P T ]vl)

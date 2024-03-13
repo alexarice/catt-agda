@@ -61,14 +61,14 @@ pruning-conv [ Prune Γ dy A@(src ─⟨ _ ⟩⟶ tgt) p σ B t pf ] {A = C} tty
         open Reasoning (ty-setoid-≈ Γ)
 
     supp-lem : (s : Tm _)
-             → TransportVarSet (SuppTm ⌊ dy ⌋d s) (π p)
+             → SuppTm ⌊ dy ⌋d s [ π p ]vs
                ≡
                SuppTm ⌊ dy // p ⌋d (s [ π p ]tm)
     supp-lem s = begin
-      TransportVarSet (SuppTm ⌊ dy ⌋d s) (π p)
-        ≡˘⟨ TransportVarSet-DC (FVTm s) (W.π-Ty p) ⟩
-      DC ⌊ dy // p ⌋d (TransportVarSet (FVTm s) (π p))
-        ≡⟨ cong (DC ⌊ dy // p ⌋d) (TransportVarSet-tm s (π p)) ⟩
+      SuppTm ⌊ dy ⌋d s [ π p ]vs
+        ≡˘⟨ vs-sub-DC (FVTm s) (W.π-Ty p) ⟩
+      DC ⌊ dy // p ⌋d (FVTm s [ π p ]vs)
+        ≡⟨ cong (DC ⌊ dy // p ⌋d) (vs-sub-tm s (π p)) ⟩
       SuppTm ⌊ dy // p ⌋d (s [ π p ]tm) ∎
       where
         open ≡-Reasoning

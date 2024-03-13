@@ -299,9 +299,8 @@ fromPath-last-path (Join S T) rewrite tEmp-empty S = begin
     ≡⟨ cong (wedge-susp-supp empty) (fromPath-last-path T) ⟩
   wedge-susp-supp empty (FVTm (tree-last-var T))
     ≡˘⟨ wedge-supp-inc-right get-snd (FVTm (tree-last-var T)) ⟩
-  TransportVarSet (FVTm (tree-last-var T))
-    (wedge-susp-inc-right _ _)
-    ≡⟨ TransportVarSet-tm (tree-last-var T) (wedge-susp-inc-right _ _) ⟩
+  FVTm (tree-last-var T) [ wedge-susp-inc-right _ _ ]vs
+    ≡⟨ vs-sub-tm (tree-last-var T) (wedge-susp-inc-right _ _) ⟩
   FVTm (tree-last-var T [ wedge-susp-inc-right (tree-size S) (tree-size T) ]tm) ∎
   where
     open ≡-Reasoning

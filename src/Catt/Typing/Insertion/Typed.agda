@@ -111,14 +111,14 @@ ins-conv [ Insert Γ S As@(SArr _ _ _) L P T q M pf ] {A = A} tty
     open ≡-Reasoning
 
     l4 : (a : STm (someTree S))
-       → TransportVarSet-Label (DCT (FVSTm a)) (κ S P T)
+       → DCT (FVSTm a) [ κ S P T ]vl
          ≡
          toVarSet (DCT (FVSTm (a >>= (κ S P T ,, S⋆))))
     l4 a = begin
-      TransportVarSet-Label (DCT (FVSTm a)) (κ S P T)
-        ≡⟨ TransportVarSet-Label-DCT (FVSTm a) (κ S P T) ⟩
-      TransportVarSet-Label (FVSTm a) (κ S P T)
-        ≡˘⟨ TransportVarSet-Label-STm a (κ S P T) (W.κ-Ty S P T q) ⟩
+      DCT (FVSTm a) [ κ S P T ]vl
+        ≡⟨ vs-label-DCT (FVSTm a) (κ S P T) ⟩
+      FVSTm a [ κ S P T ]vl
+        ≡˘⟨ vs-label-STm a (κ S P T) (W.κ-Ty S P T q) ⟩
       toVarSet (FVSTm (a >>= (κ S P T ,, S⋆)))
         ≡˘⟨ DCT-toVarSet (FVSTm (a >>= (κ S P T ,, S⋆))) ⟩
       toVarSet (DCT (FVSTm (a >>= (κ S P T ,, S⋆)))) ∎

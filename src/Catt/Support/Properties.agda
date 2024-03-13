@@ -116,69 +116,70 @@ module _ {n : ℕ} where
     { isIdempotentCommutativeMonoid = ∪-isIdempotentCommutativeMonoid
     }
 
-TransportVarSet-empty : (σ : Sub n m ⋆) → TransportVarSet empty σ ≡ empty
-TransportVarSet-empty ⟨ _ ⟩′ = refl
-TransportVarSet-empty ⟨ σ , t ⟩ = TransportVarSet-empty σ
+vs-sub-empty : (σ : Sub n m ⋆) → empty [ σ ]vs ≡ empty
+vs-sub-empty ⟨ _ ⟩′ = refl
+vs-sub-empty ⟨ σ , t ⟩ = vs-sub-empty σ
 
-TransportVarSet-full : (σ : Sub n m ⋆) → TransportVarSet full σ ≡ FVSub σ
-TransportVarSet-full ⟨ _ ⟩′ = refl
-TransportVarSet-full ⟨ σ , t ⟩ = cong (_∪ FVTm t) (TransportVarSet-full σ)
+vs-sub-full : (σ : Sub n m ⋆) → full [ σ ]vs ≡ FVSub σ
+vs-sub-full ⟨ _ ⟩′ = refl
+vs-sub-full ⟨ σ , t ⟩ = cong (_∪ FVTm t) (vs-sub-full σ)
 
-TransportVarSet-∪ : (xs ys : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet (xs ∪ ys) σ ≡ TransportVarSet xs σ ∪ TransportVarSet ys σ
-TransportVarSet-∪ xs ys ⟨ _ ⟩′ = sym (∪-left-unit empty)
-TransportVarSet-∪ (ewf xs) (ewf ys) ⟨ σ , t ⟩ = TransportVarSet-∪ xs ys σ
-TransportVarSet-∪ (ewf xs) (ewt ys) ⟨ σ , t ⟩ = trans (cong (_∪ FVTm t) (TransportVarSet-∪ xs ys σ)) (∪-assoc (TransportVarSet xs σ) (TransportVarSet ys σ) (FVTm t))
-TransportVarSet-∪ (ewt xs) (ewf ys) ⟨ σ , t ⟩ = begin
-  TransportVarSet (xs ∪ ys) σ ∪ FVTm t
-    ≡⟨ cong (_∪ FVTm t) (TransportVarSet-∪ xs ys σ) ⟩
-  TransportVarSet xs σ ∪ TransportVarSet ys σ ∪ FVTm t
-    ≡⟨ ∪-assoc (TransportVarSet xs σ) (TransportVarSet ys σ) (FVTm t) ⟩
-  TransportVarSet xs σ ∪ (TransportVarSet ys σ ∪ FVTm t)
-    ≡⟨ cong (TransportVarSet xs σ ∪_) (∪-comm (TransportVarSet ys σ) (FVTm t)) ⟩
-  TransportVarSet xs σ ∪ (FVTm t ∪ TransportVarSet ys σ)
-    ≡˘⟨ ∪-assoc (TransportVarSet xs σ) (FVTm t) (TransportVarSet ys σ) ⟩
-  TransportVarSet xs σ ∪ FVTm t ∪ TransportVarSet ys σ ∎
+vs-sub-∪ : (xs ys : VarSet n) → (σ : Sub n m ⋆) → (xs ∪ ys) [ σ ]vs ≡ xs [ σ ]vs ∪ ys [ σ ]vs
+vs-sub-∪ xs ys ⟨ _ ⟩′ = sym (∪-left-unit empty)
+vs-sub-∪ (ewf xs) (ewf ys) ⟨ σ , t ⟩ = vs-sub-∪ xs ys σ
+vs-sub-∪ (ewf xs) (ewt ys) ⟨ σ , t ⟩ = trans (cong (_∪ FVTm t) (vs-sub-∪ xs ys σ))
+                                             (∪-assoc (xs [ σ ]vs) (ys [ σ ]vs) (FVTm t))
+vs-sub-∪ (ewt xs) (ewf ys) ⟨ σ , t ⟩ = begin
+  (xs ∪ ys) [ σ ]vs ∪ FVTm t
+    ≡⟨ cong (_∪ FVTm t) (vs-sub-∪ xs ys σ) ⟩
+  xs [ σ ]vs ∪ ys [ σ ]vs ∪ FVTm t
+    ≡⟨ ∪-assoc (xs [ σ ]vs) (ys [ σ ]vs) (FVTm t) ⟩
+  xs [ σ ]vs ∪ (ys [ σ ]vs ∪ FVTm t)
+    ≡⟨ cong (xs [ σ ]vs ∪_) (∪-comm (ys [ σ ]vs) (FVTm t)) ⟩
+  xs [ σ ]vs ∪ (FVTm t ∪ ys [ σ ]vs)
+    ≡˘⟨ ∪-assoc (xs [ σ ]vs) (FVTm t) (ys [ σ ]vs) ⟩
+  xs [ σ ]vs ∪ FVTm t ∪ ys [ σ ]vs ∎
   where
     open ≡-Reasoning
-TransportVarSet-∪ {n} {m} (ewt xs) (ewt ys) ⟨ σ , t ⟩ = begin
-  TransportVarSet (xs ∪ ys) σ ∪ FVTm t
-    ≡⟨ cong (_∪ FVTm t) (TransportVarSet-∪ xs ys σ) ⟩
-  TransportVarSet xs σ ∪ TransportVarSet ys σ ∪ FVTm t
-    ≡⟨ ∪-assoc (TransportVarSet xs σ) (TransportVarSet ys σ) (FVTm t) ⟩
-  TransportVarSet xs σ ∪ (TransportVarSet ys σ ∪ FVTm t)
-    ≡˘⟨ cong (λ - → TransportVarSet xs σ ∪ (TransportVarSet ys σ ∪ -)) (∪-idem (FVTm t)) ⟩
-  TransportVarSet xs σ ∪ (TransportVarSet ys σ ∪ (FVTm t ∪ FVTm t))
-    ≡˘⟨ cong (TransportVarSet xs σ ∪_) (∪-assoc (TransportVarSet ys σ) (FVTm t) (FVTm t)) ⟩
-  TransportVarSet xs σ ∪ (TransportVarSet ys σ ∪ FVTm t ∪ FVTm t)
-    ≡⟨ cong (λ - → TransportVarSet xs σ ∪ (- ∪ FVTm t)) (∪-comm (TransportVarSet ys σ) (FVTm t)) ⟩
-  TransportVarSet xs σ ∪ (FVTm t ∪ TransportVarSet ys σ ∪ FVTm t)
+vs-sub-∪ {n} {m} (ewt xs) (ewt ys) ⟨ σ , t ⟩ = begin
+  (xs ∪ ys) [ σ ]vs ∪ FVTm t
+    ≡⟨ cong (_∪ FVTm t) (vs-sub-∪ xs ys σ) ⟩
+  xs [ σ ]vs ∪ ys [ σ ]vs ∪ FVTm t
+    ≡⟨ ∪-assoc (xs [ σ ]vs) (ys [ σ ]vs) (FVTm t) ⟩
+  xs [ σ ]vs ∪ (ys [ σ ]vs ∪ FVTm t)
+    ≡˘⟨ cong (λ - → xs [ σ ]vs ∪ (ys [ σ ]vs ∪ -)) (∪-idem (FVTm t)) ⟩
+  xs [ σ ]vs ∪ (ys [ σ ]vs ∪ (FVTm t ∪ FVTm t))
+    ≡˘⟨ cong (xs [ σ ]vs ∪_) (∪-assoc (ys [ σ ]vs) (FVTm t) (FVTm t)) ⟩
+  xs [ σ ]vs ∪ (ys [ σ ]vs ∪ FVTm t ∪ FVTm t)
+    ≡⟨ cong (λ - → xs [ σ ]vs ∪ (- ∪ FVTm t)) (∪-comm (ys [ σ ]vs) (FVTm t)) ⟩
+  xs [ σ ]vs ∪ (FVTm t ∪ ys [ σ ]vs ∪ FVTm t)
     ≡⟨ solve (∪-monoid {m}) ⟩
-  TransportVarSet xs σ ∪ FVTm t ∪ (TransportVarSet ys σ ∪ FVTm t) ∎
+  xs [ σ ]vs ∪ FVTm t ∪ (ys [ σ ]vs ∪ FVTm t) ∎
   where
     open ≡-Reasoning
 
-TransportVarSet-ty : (A : Ty n) → (σ : Sub n m ⋆) → TransportVarSet (FVTy A) σ ≡ FVTy (A [ σ ]ty)
-TransportVarSet-tm : (t : Tm n) → (σ : Sub n m ⋆) → TransportVarSet (FVTm t) σ ≡ FVTm (t [ σ ]tm)
-TransportVarSet-sub : (τ : Sub l n A) → (σ : Sub n m ⋆) → TransportVarSet (FVSub τ) σ ≡ FVSub (τ ● σ)
+vs-sub-ty : (A : Ty n) → (σ : Sub n m ⋆) → (FVTy A) [ σ ]vs ≡ FVTy (A [ σ ]ty)
+vs-sub-tm : (t : Tm n) → (σ : Sub n m ⋆) → (FVTm t) [ σ ]vs ≡ FVTm (t [ σ ]tm)
+vs-sub-sub : (τ : Sub l n A) → (σ : Sub n m ⋆) → (FVSub τ) [ σ ]vs ≡ FVSub (τ ● σ)
 
-TransportVarSet-ty ⋆ σ = TransportVarSet-empty σ
-TransportVarSet-ty (s ─⟨ A ⟩⟶ t) σ = begin
-  TransportVarSet (FVTy (s ─⟨ A ⟩⟶ t)) σ
-    ≡⟨ TransportVarSet-∪ (FVTy A ∪ FVTm s) (FVTm t) σ ⟩
-  TransportVarSet (FVTy A ∪ FVTm s) σ ∪ TransportVarSet (FVTm t) σ
-    ≡⟨ cong (_∪ TransportVarSet (FVTm t) σ) (TransportVarSet-∪ (FVTy A) (FVTm s) σ) ⟩
-  TransportVarSet (FVTy A) σ ∪ TransportVarSet (FVTm s) σ ∪ TransportVarSet (FVTm t) σ
-    ≡⟨ cong₂ _∪_ (cong₂ _∪_ (TransportVarSet-ty A σ) (TransportVarSet-tm s σ)) (TransportVarSet-tm t σ) ⟩
+vs-sub-ty ⋆ σ = vs-sub-empty σ
+vs-sub-ty (s ─⟨ A ⟩⟶ t) σ = begin
+  (FVTy (s ─⟨ A ⟩⟶ t)) [ σ ]vs
+    ≡⟨ vs-sub-∪ (FVTy A ∪ FVTm s) (FVTm t) σ ⟩
+  (FVTy A ∪ FVTm s) [ σ ]vs ∪ (FVTm t) [ σ ]vs
+    ≡⟨ cong (_∪ (FVTm t) [ σ ]vs) (vs-sub-∪ (FVTy A) (FVTm s) σ) ⟩
+  (FVTy A) [ σ ]vs ∪ (FVTm s) [ σ ]vs ∪ (FVTm t) [ σ ]vs
+    ≡⟨ cong₂ _∪_ (cong₂ _∪_ (vs-sub-ty A σ) (vs-sub-tm s σ)) (vs-sub-tm t σ) ⟩
   FVTy ((s ─⟨ A ⟩⟶ t) [ σ ]ty) ∎
   where
     open ≡-Reasoning
 
-TransportVarSet-tm (Var zero) ⟨ σ , t ⟩ = trans (cong (_∪ FVTm t) (TransportVarSet-empty σ)) (∪-left-unit (FVTm t))
-TransportVarSet-tm (Var (suc i)) ⟨ σ , t ⟩ = TransportVarSet-tm (Var i) σ
-TransportVarSet-tm (Coh S A τ) σ = TransportVarSet-sub τ σ
+vs-sub-tm (Var zero) ⟨ σ , t ⟩ = trans (cong (_∪ FVTm t) (vs-sub-empty σ)) (∪-left-unit (FVTm t))
+vs-sub-tm (Var (suc i)) ⟨ σ , t ⟩ = vs-sub-tm (Var i) σ
+vs-sub-tm (Coh S A τ) σ = vs-sub-sub τ σ
 
-TransportVarSet-sub ⟨ A ⟩′ σ = TransportVarSet-ty A σ
-TransportVarSet-sub ⟨ τ , t ⟩ σ = trans (TransportVarSet-∪ (FVSub τ) (FVTm t) σ) (cong₂ _∪_ (TransportVarSet-sub τ σ) (TransportVarSet-tm t σ))
+vs-sub-sub ⟨ A ⟩′ σ = vs-sub-ty A σ
+vs-sub-sub ⟨ τ , t ⟩ σ = trans (vs-sub-∪ (FVSub τ) (FVTm t) σ) (cong₂ _∪_ (vs-sub-sub τ σ) (vs-sub-tm t σ))
 
 supp-wk-ty : (A : Ty n) → FVTy (wk-ty A) ≡ ewf (FVTy A)
 supp-wk-tm : (t : Tm n) → FVTm (wk-tm t) ≡ ewf (FVTm t)
@@ -201,30 +202,30 @@ idSub≃-supp : (p : Γ ≃c Δ) → FVSub (idSub≃ p) ≡ full
 idSub≃-supp Emp≃ = refl
 idSub≃-supp (Add≃ p x) = trans (cong (_∪ ewt empty) (supp-wk-sub (idSub≃ p))) (cong ewt (trans (∪-right-unit (FVSub (idSub≃ p))) (idSub≃-supp p)))
 
-TransportVarSet-wk : (xs : VarSet n) → (σ : Sub n m ⋆) → TransportVarSet xs (wk-sub σ) ≡ ewf (TransportVarSet xs σ)
-TransportVarSet-wk emp ⟨ _ ⟩′ = refl
-TransportVarSet-wk (ewf xs) ⟨ σ , t ⟩ = TransportVarSet-wk xs σ
-TransportVarSet-wk (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (TransportVarSet-wk xs σ) (supp-wk-tm t)
+vs-sub-wk : (xs : VarSet n) → (σ : Sub n m ⋆) → xs [ wk-sub σ ]vs ≡ ewf (xs [ σ ]vs)
+vs-sub-wk emp ⟨ _ ⟩′ = refl
+vs-sub-wk (ewf xs) ⟨ σ , t ⟩ = vs-sub-wk xs σ
+vs-sub-wk (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (vs-sub-wk xs σ) (supp-wk-tm t)
 
-TransportVarSet-id-lem : (b : Bool) → (xs : VarSet n) → (σ : Sub n m ⋆)
-                       → TransportVarSet (b ∷ xs) ⟨ wk-sub σ , 0V ⟩ ≡ b ∷ TransportVarSet xs σ
-TransportVarSet-id-lem false xs σ = TransportVarSet-wk xs σ
-TransportVarSet-id-lem true xs σ = begin
-  TransportVarSet xs (wk-sub σ) ∪ ewt empty
-    ≡⟨ cong (_∪ ewt empty) (TransportVarSet-wk xs σ) ⟩
-  ewt (TransportVarSet xs σ ∪ empty)
-    ≡⟨ cong ewt (∪-right-unit (TransportVarSet xs σ)) ⟩
-  ewt (TransportVarSet xs σ) ∎
+vs-sub-id-lem : (b : Bool) → (xs : VarSet n) → (σ : Sub n m ⋆)
+                       → (b ∷ xs) [ ⟨ wk-sub σ , 0V ⟩ ]vs ≡ b ∷ xs [ σ ]vs
+vs-sub-id-lem false xs σ = vs-sub-wk xs σ
+vs-sub-id-lem true xs σ = begin
+  xs [ wk-sub σ ]vs ∪ ewt empty
+    ≡⟨ cong (_∪ ewt empty) (vs-sub-wk xs σ) ⟩
+  ewt (xs [ σ ]vs ∪ empty)
+    ≡⟨ cong ewt (∪-right-unit (xs [ σ ]vs)) ⟩
+  ewt (xs [ σ ]vs) ∎
   where
     open ≡-Reasoning
 
-TransportVarSet-id : (xs : VarSet n) → TransportVarSet xs idSub ≡ xs
-TransportVarSet-id emp = refl
-TransportVarSet-id (b ∷ xs) = begin
-  TransportVarSet (b ∷ xs) idSub
-    ≡⟨ TransportVarSet-id-lem b xs idSub ⟩
-  b ∷ TransportVarSet xs idSub
-    ≡⟨ cong (b ∷_) (TransportVarSet-id xs) ⟩
+vs-sub-id : (xs : VarSet n) → xs [ idSub ]vs ≡ xs
+vs-sub-id emp = refl
+vs-sub-id (b ∷ xs) = begin
+  (b ∷ xs) [ idSub ]vs
+    ≡⟨ vs-sub-id-lem b xs idSub ⟩
+  b ∷ xs [ idSub ]vs
+    ≡⟨ cong (b ∷_) (vs-sub-id xs) ⟩
   b ∷ xs ∎
   where
     open ≡-Reasoning
@@ -293,13 +294,13 @@ Poset.isPartialOrder (⊆-poset n) = ⊆-partial-order n
 ⊆-drop (ewf xs) = ⊆-cong false (⊆-drop xs)
 ⊆-drop (ewt xs) = ⊆-step xs
 
-⊆-TransportVarSet : (σ : Sub n m ⋆) → {xs ys : VarSet n} → xs ⊆ ys → TransportVarSet xs σ ⊆ TransportVarSet ys σ
-⊆-TransportVarSet σ {xs} {ys} p = begin
-  TransportVarSet ys σ
-    ≡⟨ cong (λ - → TransportVarSet - σ) p ⟩
-  TransportVarSet (ys ∪ xs) σ
-    ≡⟨ TransportVarSet-∪ ys xs σ ⟩
-  TransportVarSet ys σ ∪ TransportVarSet xs σ ∎
+⊆-vs-sub : (σ : Sub n m ⋆) → {xs ys : VarSet n} → xs ⊆ ys → xs [ σ ]vs ⊆ ys [ σ ]vs
+⊆-vs-sub σ {xs} {ys} p = begin
+  ys [ σ ]vs
+    ≡⟨ cong (_[ σ ]vs) p ⟩
+  (ys ∪ xs) [ σ ]vs
+    ≡⟨ vs-sub-∪ ys xs σ ⟩
+  ys [ σ ]vs ∪ xs [ σ ]vs ∎
   where
     open ≡-Reasoning
 
@@ -308,15 +309,15 @@ lookup-isVar-⊆ (ewt xs) (Var zero) p = cong ewt (sym (∪-right-unit xs))
 lookup-isVar-⊆ (ewf xs) (Var (suc i)) p = cong ewf (lookup-isVar-⊆ xs (Var i) p)
 lookup-isVar-⊆ (ewt xs) (Var (suc i)) p = cong ewt (lookup-isVar-⊆ xs (Var i) p)
 
-TransportVarSet-comp : (xs : VarSet l) → (σ : Sub n m ⋆) → (τ : Sub l n ⋆) → TransportVarSet xs (τ ● σ) ≡ TransportVarSet (TransportVarSet xs τ) σ
-TransportVarSet-comp emp σ ⟨ _ ⟩′ = sym (TransportVarSet-empty σ)
-TransportVarSet-comp (ewf xs) σ ⟨ τ , t ⟩ = TransportVarSet-comp xs σ τ
-TransportVarSet-comp (ewt xs) σ ⟨ τ , t ⟩ = begin
-  TransportVarSet xs (τ ● σ) ∪ FVTm (t [ σ ]tm)
-    ≡⟨ cong₂ _∪_ (TransportVarSet-comp xs σ τ) (sym (TransportVarSet-tm t σ)) ⟩
-  TransportVarSet (TransportVarSet xs τ) σ ∪ TransportVarSet (FVTm t) σ
-    ≡˘⟨ TransportVarSet-∪ (TransportVarSet xs τ) (FVTm t) σ ⟩
-  TransportVarSet (TransportVarSet xs τ ∪ FVTm t) σ ∎
+vs-sub-comp : (xs : VarSet l) → (σ : Sub n m ⋆) → (τ : Sub l n ⋆) → xs [ τ ● σ ]vs ≡ xs [ τ ]vs [ σ ]vs
+vs-sub-comp emp σ ⟨ _ ⟩′ = sym (vs-sub-empty σ)
+vs-sub-comp (ewf xs) σ ⟨ τ , t ⟩ = vs-sub-comp xs σ τ
+vs-sub-comp (ewt xs) σ ⟨ τ , t ⟩ = begin
+  xs [ τ ● σ ]vs ∪ FVTm (t [ σ ]tm)
+    ≡⟨ cong₂ _∪_ (vs-sub-comp xs σ τ) (sym (vs-sub-tm t σ)) ⟩
+  xs [ τ ]vs [ σ ]vs ∪ (FVTm t) [ σ ]vs
+    ≡˘⟨ vs-sub-∪ (xs [ τ ]vs) (FVTm t) σ ⟩
+  (xs [ τ ]vs ∪ FVTm t) [ σ ]vs ∎
   where
     open ≡-Reasoning
 
@@ -363,10 +364,10 @@ coh-sub-fv {B = s ─⟨ B ⟩⟶ t} Γ A σ = begin
 ty-tgt′-⊆ : (A : Ty (suc n)) → .⦃ NonZero (ty-dim A) ⦄ → FVTm (ty-tgt′ A) ⊆ FVTy A
 ty-tgt′-⊆ (s ─⟨ A ⟩⟶ t) = ∪-⊆-2 (FVTy A ∪ FVTm s) (FVTm t)
 
-TransportVarSet-idSub≃ : (xs : VarSet n) → (p : Γ ≃c Δ) → TransportVarSet xs (idSub≃ p) ≡ᵖ xs
-TransportVarSet-idSub≃ emp Emp≃ = P.refl refl
-TransportVarSet-idSub≃ (ewf xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (TransportVarSet-wk xs (idSub≃ p))) (refl P.∷ TransportVarSet-idSub≃ xs p)
-TransportVarSet-idSub≃ (ewt xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (trans (cong (_∪ ewt empty) (TransportVarSet-wk xs (idSub≃ p))) (cong ewt (∪-right-unit (TransportVarSet xs (idSub≃ p)))))) (refl P.∷ TransportVarSet-idSub≃ xs p)
+vs-sub-idSub≃ : (xs : VarSet n) → (p : Γ ≃c Δ) → xs [ idSub≃ p ]vs ≡ᵖ xs
+vs-sub-idSub≃ emp Emp≃ = P.refl refl
+vs-sub-idSub≃ (ewf xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (vs-sub-wk xs (idSub≃ p))) (refl P.∷ vs-sub-idSub≃ xs p)
+vs-sub-idSub≃ (ewt xs) (Add≃ p y) = P.trans trans (P.≡⇒Pointwise-≡ (trans (cong (_∪ ewt empty) (vs-sub-wk xs (idSub≃ p))) (cong ewt (∪-right-unit (xs [ idSub≃ p ]vs))))) (refl P.∷ vs-sub-idSub≃ xs p)
 
 ∪-Truth : (xs ys : VarSet n) → (i : Fin n) → Truth (lookup (xs ∪ ys) i) → Truth (lookup xs i) ⊎ Truth (lookup ys i)
 ∪-Truth (x ∷ xs) (y ∷ ys) (suc i) truth = ∪-Truth xs ys i truth

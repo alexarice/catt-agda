@@ -37,7 +37,7 @@ trueAt : Fin n → VarSet n
 trueAt {n = suc n} zero = ewt empty
 trueAt {n = suc n} (suc i) = ewf (trueAt i)
 
-infixl 60 _∪_
+infixl 25 _∪_
 _∪_ : VarSet n → VarSet n → VarSet n
 emp ∪ emp = emp
 (x ∷ xs) ∪ (y ∷ ys) = (x ∨ y) ∷ xs ∪ ys
@@ -66,10 +66,11 @@ pdb-bd-supp n (Γ , B , A) b = tri-cases (<-cmp n (ty-dim B))
 pd-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pd : Γ ⊢pd ⦄ → (b : Bool) → VarSet m
 pd-bd-supp n Γ b = pdb-bd-supp n Γ ⦃ pd-to-pdb it ⦄ b
 
-TransportVarSet : VarSet n → Sub n m A → VarSet m
-TransportVarSet xs ⟨ _ ⟩′ = empty
-TransportVarSet (ewf xs) ⟨ σ , t ⟩ = TransportVarSet xs σ
-TransportVarSet (ewt xs) ⟨ σ , t ⟩ = TransportVarSet xs σ ∪ FVTm t
+infixr 30 _[_]vs
+_[_]vs : VarSet n → Sub n m A → VarSet m
+xs [ ⟨ _ ⟩′ ]vs = empty
+ewf xs [ ⟨ σ , t ⟩ ]vs = xs [ σ ]vs
+ewt xs [ ⟨ σ , t ⟩ ]vs = xs [ σ ]vs ∪ FVTm t
 
 lookup-isVar : (xs : VarSet n) → (t : Tm n) → .⦃ isVar t ⦄ → Bool
 lookup-isVar (x ∷ xs) (Var zero) = x

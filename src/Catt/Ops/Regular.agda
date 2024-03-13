@@ -107,8 +107,8 @@ std-pruning dy pk xs ys (Std _ d p q r)
         ⦃ dyck-to-pd (dy // pk) ⦄
         d
         dim-lem
-        (trans (cong (λ - → TransportVarSet - (π pk)) q) (π-boundary-supp pk d false))
-        (trans (cong (λ - → TransportVarSet - (π pk)) r) (π-boundary-supp pk d true))
+        (trans (cong (_[ π pk ]vs) q) (π-boundary-supp pk d false))
+        (trans (cong (_[ π pk ]vs) r) (π-boundary-supp pk d true))
   where
     dim-lem : suc d ≥ ctx-dim ⌊ dy // pk ⌋d
     dim-lem = begin
@@ -153,18 +153,18 @@ std-ins S P T x xs ys (Std _ d p q r)
    open ≡-Reasoning
 
    lem : (zs : TVarSet S) → (b : Bool) → toVarSet zs ≡ pd-bd-supp d ⌊ S ⌋ b
-       → TransportVarSet-Label zs (κ S P T) ≡ pd-bd-supp d ⌊ S >>[ P ] T ⌋ ⦃ tree-to-pd (S >>[ P ] T) ⦄ b
+       → zs [ κ S P T ]vl ≡ pd-bd-supp d ⌊ S >>[ P ] T ⌋ ⦃ tree-to-pd (S >>[ P ] T) ⦄ b
    lem zs b pf = begin
-     TransportVarSet-Label zs (κ S P T)
-       ≡˘⟨ TransportVarSet-Label-DCT zs (κ S P T) ⟩
-     TransportVarSet-Label (DCT zs) (κ S P T)
-       ≡⟨ cong (λ - → TransportVarSet-Label - (κ S P T))
+     zs [ κ S P T ]vl
+       ≡˘⟨ vs-label-DCT zs (κ S P T) ⟩
+     DCT zs [ κ S P T ]vl
+       ≡⟨ cong (_[ κ S P T ]vl)
                (DCT-reflect {xs = zs}
                             {ys = supp-tree-bd d S b}
                             (trans pf (sym (supp-compat′ d S b)))) ⟩
-     TransportVarSet-Label (DCT (supp-tree-bd d S b)) (κ S P T)
-       ≡⟨ TransportVarSet-Label-DCT (supp-tree-bd d S b) (κ S P T) ⟩
-     TransportVarSet-Label (supp-tree-bd d S b) (κ S P T)
+     DCT (supp-tree-bd d S b) [ κ S P T ]vl
+       ≡⟨ vs-label-DCT (supp-tree-bd d S b) (κ S P T) ⟩
+     supp-tree-bd d S b [ κ S P T ]vl
        ≡⟨ κ-boundary-supp S P T x d b ⟩
      toVarSet (supp-tree-bd d (S >>[ P ] T) b)
        ≡⟨ supp-compat′ d (S >>[ P ] T) b ⟩

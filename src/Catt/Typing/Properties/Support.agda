@@ -143,25 +143,25 @@ SuppTmChar″ {Γ = Γ} {t = t} {A = A} tty Aty = begin
     ≡⟨ DC-∪ Γ (FVTy A) (FVTm t) ⟩
   SuppTy Γ A ∪ SuppTm Γ t ∎
 
-TransportVarSet-DC : {σ : Sub n m ⋆} → (xs : VarSet n) → Typing-Sub Γ Δ σ → DC Δ (TransportVarSet xs σ) ≡ TransportVarSet (DC Γ xs) σ
-TransportVarSet-DC emp (TyNull x) = DC-empty _
-TransportVarSet-DC (ewf xs) (TyExt σty tty) = TransportVarSet-DC xs σty
-TransportVarSet-DC {Γ = Γ , A} {Δ = Δ} (ewt xs) (TyExt {σ = σ} {t = t} σty tty) = begin
-  DC Δ (TransportVarSet xs σ ∪ FVTm t)
-    ≡⟨ DC-∪ Δ (TransportVarSet xs σ) (FVTm t) ⟩
-  DC Δ (TransportVarSet xs σ) ∪ DC Δ (FVTm t)
-    ≡⟨ cong₂ _∪_ (TransportVarSet-DC xs σty) (SuppTmChar tty) ⟩
-  TransportVarSet (DC Γ xs) σ ∪ (SuppTy Δ (A [ σ ]ty) ∪ FVTm t)
-    ≡˘⟨ ∪-assoc (TransportVarSet (DC Γ xs) σ) (SuppTy Δ (A [ σ ]ty)) (FVTm t) ⟩
-  TransportVarSet (DC Γ xs) σ ∪ SuppTy Δ (A [ σ ]ty) ∪ FVTm t
-    ≡˘⟨ cong (λ - → TransportVarSet (DC Γ xs) σ ∪ DC Δ - ∪ FVTm t) (TransportVarSet-ty A σ) ⟩
-  TransportVarSet (DC Γ xs) σ ∪ DC Δ (TransportVarSet (FVTy A) σ) ∪ FVTm t
-    ≡⟨ cong (λ - → TransportVarSet (DC Γ xs) σ ∪ - ∪ FVTm t) (TransportVarSet-DC (FVTy A) σty) ⟩
-  TransportVarSet (DC Γ xs) σ ∪ TransportVarSet (DC Γ (FVTy A)) σ ∪ FVTm t
-    ≡˘⟨ cong (_∪ FVTm t) (TransportVarSet-∪ (DC Γ xs) (DC Γ (FVTy A)) σ) ⟩
-  TransportVarSet (DC Γ xs ∪ DC Γ (FVTy A)) σ ∪ FVTm t
-    ≡˘⟨ cong (λ - → TransportVarSet - σ ∪ FVTm t) (DC-∪ Γ xs (FVTy A)) ⟩
-  TransportVarSet (DC Γ (xs ∪ FVTy A)) σ ∪ FVTm t ∎
+vs-sub-DC : {σ : Sub n m ⋆} → (xs : VarSet n) → Typing-Sub Γ Δ σ → DC Δ (xs [ σ ]vs) ≡ DC Γ xs [ σ ]vs
+vs-sub-DC emp (TyNull x) = DC-empty _
+vs-sub-DC (ewf xs) (TyExt σty tty) = vs-sub-DC xs σty
+vs-sub-DC {Γ = Γ , A} {Δ = Δ} (ewt xs) (TyExt {σ = σ} {t = t} σty tty) = begin
+  DC Δ (xs [ σ ]vs ∪ FVTm t)
+    ≡⟨ DC-∪ Δ (xs [ σ ]vs) (FVTm t) ⟩
+  DC Δ (xs [ σ ]vs) ∪ DC Δ (FVTm t)
+    ≡⟨ cong₂ _∪_ (vs-sub-DC xs σty) (SuppTmChar tty) ⟩
+  DC Γ xs [ σ ]vs ∪ (SuppTy Δ (A [ σ ]ty) ∪ FVTm t)
+    ≡˘⟨ ∪-assoc (DC Γ xs [ σ ]vs) (SuppTy Δ (A [ σ ]ty)) (FVTm t) ⟩
+  DC Γ xs [ σ ]vs ∪ SuppTy Δ (A [ σ ]ty) ∪ FVTm t
+    ≡˘⟨ cong (λ - → DC Γ xs [ σ ]vs ∪ DC Δ - ∪ FVTm t) (vs-sub-ty A σ) ⟩
+  DC Γ xs [ σ ]vs ∪ DC Δ (FVTy A [ σ ]vs) ∪ FVTm t
+    ≡⟨ cong (λ - → DC Γ xs [ σ ]vs ∪ - ∪ FVTm t) (vs-sub-DC (FVTy A) σty) ⟩
+  DC Γ xs [ σ ]vs ∪ DC Γ (FVTy A) [ σ ]vs ∪ FVTm t
+    ≡˘⟨ cong (_∪ FVTm t) (vs-sub-∪ (DC Γ xs) (DC Γ (FVTy A)) σ) ⟩
+  (DC Γ xs ∪ DC Γ (FVTy A)) [ σ ]vs ∪ FVTm t
+    ≡˘⟨ cong (λ - → - [ σ ]vs ∪ FVTm t) (DC-∪ Γ xs (FVTy A)) ⟩
+  (DC Γ (xs ∪ FVTy A)) [ σ ]vs ∪ FVTm t ∎
 
 supp-condition-preserved : (b : Bool)
                          → A ≈[ Γ ]ty B

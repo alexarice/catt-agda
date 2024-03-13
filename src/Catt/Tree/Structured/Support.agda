@@ -19,7 +19,7 @@ MVarSet : (X : MaybeTree n) → Set
 MVarSet (someTree x) = TVarSet x
 MVarSet (Other n) = VarSet n
 
-infixl 60 _∪m_
+infixl 25 _∪m_
 _∪m_ : MVarSet X → MVarSet X → MVarSet X
 _∪m_ {X = someTree x} xs ys = xs ∪t ys
 _∪m_ {X = Other _} xs ys = xs ∪ ys
@@ -132,5 +132,7 @@ MtoVarSet : (ΓS : CtxOrTree n) → MVarSet (COT-to-MT ΓS) → VarSet n
 MtoVarSet (incTree _) xs = toVarSet xs
 MtoVarSet (incCtx Γ) xs = DC Γ xs
 
-TransportVarSet-Label : {ΓS : CtxOrTree n} → TVarSet S → (L : Label (COT-to-MT ΓS) S) → VarSet n
-TransportVarSet-Label xs L = TransportVarSet (toVarSet xs) (label-to-sub (L ,, S⋆))
+
+infixr 30 _[_]vl
+_[_]vl : {ΓS : CtxOrTree n} → TVarSet S → (L : Label (COT-to-MT ΓS) S) → VarSet n
+xs [ L ]vl = toVarSet xs [ label-to-sub (L ,, S⋆) ]vs

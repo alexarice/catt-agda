@@ -66,8 +66,8 @@ EqSuppLabel {ΓS = ΓS} {L = L} {M = M} p = DCM-reflect (begin
     ≡⟨ cong (MtoVarSet ΓS) (FVLabel-WT-⋆ M) ⟩
   MtoVarSet ΓS (FVLabel M) ∎)
 
-TransportVarSet-Label-Label : {ΓS : CtxOrTree n} → (L : Label (someTree T) S) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → MtoVarSet ΓS (FVLabel (L ●l (M ,, S⋆))) ≡ TransportVarSet-Label (FVLabel L) M
-TransportVarSet-Label-Label {T = T} {ΓS = ΓS} L M Mty = begin
+vs-label-Label : {ΓS : CtxOrTree n} → (L : Label (someTree T) S) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → MtoVarSet ΓS (FVLabel (L ●l (M ,, S⋆))) ≡ FVLabel L [ M ]vl
+vs-label-Label {T = T} {ΓS = ΓS} L M Mty = begin
   MtoVarSet ΓS (FVLabel (L ●l (M ,, S⋆)))
     ≡˘⟨ cong (MtoVarSet ΓS) (FVLabel-WT-⋆ (L ●l (M ,, S⋆))) ⟩
   MtoVarSet ΓS (FVLabel-WT ((L ,, S⋆) ●lt (M ,, S⋆)))
@@ -75,53 +75,50 @@ TransportVarSet-Label-Label {T = T} {ΓS = ΓS} L M Mty = begin
   SuppSub (COT-to-Ctx ΓS) (label-to-sub (L ●l (M ,, S⋆) ,, S⋆))
     ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (FVSub-≃ (label-comp-to-sub (L ,, S⋆) (M ,, S⋆))) ⟩
   DC (COT-to-Ctx ΓS) (FVSub (label-to-sub (L ,, S⋆) ● label-to-sub (M ,, S⋆)))
-    ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (TransportVarSet-sub (label-to-sub (L ,, S⋆)) (label-to-sub (M ,, S⋆))) ⟩
-  DC (COT-to-Ctx ΓS)
-    (TransportVarSet (FVSub (label-to-sub (L ,, S⋆)))
-     (label-to-sub (M ,, S⋆)))
-    ≡⟨ TransportVarSet-DC (FVSub (label-to-sub (L ,, S⋆))) (label-to-sub-Ty Mty TySStar) ⟩
-  TransportVarSet
-    (DC ⌊ T ⌋ (FVSub (label-to-sub (L ,, S⋆))))
-    (label-to-sub (M ,, S⋆))
-    ≡˘⟨ cong (λ a → TransportVarSet a (label-to-sub (M ,, S⋆))) (FVLabel-to-sub (L ,, S⋆)) ⟩
-  TransportVarSet-Label (FVLabel-WT (L ,, S⋆)) M
-    ≡⟨ cong (λ a → TransportVarSet-Label a M) (FVLabel-WT-⋆ L) ⟩
-  TransportVarSet-Label (FVLabel L) M ∎
+    ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (vs-sub-sub (label-to-sub (L ,, S⋆)) (label-to-sub (M ,, S⋆))) ⟩
+  DC (COT-to-Ctx ΓS) (FVSub (label-to-sub (L ,, S⋆)) [ label-to-sub (M ,, S⋆) ]vs)
+    ≡⟨ vs-sub-DC (FVSub (label-to-sub (L ,, S⋆))) (label-to-sub-Ty Mty TySStar) ⟩
+  DC ⌊ T ⌋ (FVSub (label-to-sub (L ,, S⋆))) [ label-to-sub (M ,, S⋆) ]vs
+    ≡˘⟨ cong (_[ label-to-sub (M ,, S⋆) ]vs) (FVLabel-to-sub (L ,, S⋆)) ⟩
+  FVLabel-WT (L ,, S⋆) [ M ]vl
+    ≡⟨ cong (λ a → a [ M ]vl) (FVLabel-WT-⋆ L) ⟩
+  FVLabel L [ M ]vl ∎
 
-TransportVarSet-Label-STm : {ΓS : CtxOrTree n} → (a : STm (someTree T)) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → MtoVarSet ΓS (FVSTm (a >>= (M ,, S⋆))) ≡ TransportVarSet-Label (FVSTm a) M
-TransportVarSet-Label-STm {T = T} {ΓS = ΓS} a M Mty = begin
+vs-label-STm : {ΓS : CtxOrTree n} → (a : STm (someTree T)) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → MtoVarSet ΓS (FVSTm (a >>= (M ,, S⋆))) ≡ FVSTm a [ M ]vl
+vs-label-STm {T = T} {ΓS = ΓS} a M Mty = begin
   MtoVarSet ΓS (FVSTm (a >>= (M ,, S⋆)))
     ≡⟨ FVSTm-to-term (a >>= (M ,, S⋆)) ⟩
   SuppTm (COT-to-Ctx ΓS) (stm-to-term (a >>= (M ,, S⋆)))
     ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (FVTm-≃ (label-to-sub-stm (M ,, S⋆) a)) ⟩
   DC (COT-to-Ctx ΓS) (FVTm (stm-to-term a [ label-to-sub (M ,, S⋆) ]tm))
-    ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (TransportVarSet-tm (stm-to-term a) (label-to-sub (M ,, S⋆))) ⟩
-  DC (COT-to-Ctx ΓS) (TransportVarSet (FVTm (stm-to-term a)) (label-to-sub (M ,, S⋆)))
-    ≡⟨ TransportVarSet-DC (FVTm (stm-to-term a)) (label-to-sub-Ty Mty TySStar) ⟩
-  TransportVarSet (DC ⌊ T ⌋ (FVTm (stm-to-term a))) (label-to-sub (M ,, S⋆))
-    ≡˘⟨ cong (λ a → TransportVarSet a (label-to-sub (M ,, S⋆))) (FVSTm-to-term a) ⟩
-  TransportVarSet-Label (FVSTm a) M ∎
+    ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (vs-sub-tm (stm-to-term a) (label-to-sub (M ,, S⋆))) ⟩
+  DC (COT-to-Ctx ΓS) (FVTm (stm-to-term a) [ label-to-sub (M ,, S⋆) ]vs)
+    ≡⟨ vs-sub-DC (FVTm (stm-to-term a)) (label-to-sub-Ty Mty TySStar) ⟩
+  DC ⌊ T ⌋ (FVTm (stm-to-term a)) [ label-to-sub (M ,, S⋆) ]vs
+    ≡˘⟨ cong (_[ label-to-sub (M ,, S⋆) ]vs) (FVSTm-to-term a) ⟩
+  FVSTm a [ M ]vl ∎
 
-TransportVarSet-Label-STy : {ΓS : CtxOrTree n} → (As : STy (someTree T)) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → MtoVarSet ΓS (FVSTy (As >>=′ (M ,, S⋆))) ≡ TransportVarSet-Label (FVSTy As) M
-TransportVarSet-Label-STy {T = T} {ΓS = ΓS} As M Mty = begin
+vs-label-STy : {ΓS : CtxOrTree n} → (As : STy (someTree T)) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → MtoVarSet ΓS (FVSTy (As >>=′ (M ,, S⋆))) ≡ FVSTy As [ M ]vl
+vs-label-STy {T = T} {ΓS = ΓS} As M Mty = begin
   MtoVarSet ΓS (FVSTy (As >>=′ (M ,, S⋆)))
     ≡⟨ FVSTy-to-type (As >>=′ (M ,, S⋆)) ⟩
   SuppTy (COT-to-Ctx ΓS) (sty-to-type (As >>=′ (M ,, S⋆)))
     ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (FVTy-≃ (label-to-sub-sty (M ,, S⋆) As)) ⟩
   DC (COT-to-Ctx ΓS) (FVTy (sty-to-type As [ label-to-sub (M ,, S⋆) ]ty))
-    ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (TransportVarSet-ty (sty-to-type As) (label-to-sub (M ,, S⋆))) ⟩
-  DC (COT-to-Ctx ΓS) (TransportVarSet (FVTy (sty-to-type As)) (label-to-sub (M ,, S⋆)))
-    ≡⟨ TransportVarSet-DC (FVTy (sty-to-type As)) (label-to-sub-Ty Mty TySStar) ⟩
-  TransportVarSet (DC ⌊ T ⌋ (FVTy (sty-to-type As))) (label-to-sub (M ,, S⋆))
-    ≡˘⟨ cong (λ a → TransportVarSet a (label-to-sub (M ,, S⋆))) (FVSTy-to-type As) ⟩
-  TransportVarSet-Label (FVSTy As) M ∎
+    ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (vs-sub-ty (sty-to-type As) (label-to-sub (M ,, S⋆))) ⟩
+  DC (COT-to-Ctx ΓS) (FVTy (sty-to-type As) [ label-to-sub (M ,, S⋆) ]vs)
+    ≡⟨ vs-sub-DC (FVTy (sty-to-type As)) (label-to-sub-Ty Mty TySStar) ⟩
+  DC ⌊ T ⌋ (FVTy (sty-to-type As)) [ label-to-sub (M ,, S⋆) ]vs
+    ≡˘⟨ cong (_[ label-to-sub (M ,, S⋆) ]vs) (FVSTy-to-type As) ⟩
+  FVSTy As [ M ]vl ∎
 
-TransportVarSet-Label-full : {ΓS : CtxOrTree n} → (L : Label (COT-to-MT ΓS) S) → Typing-Label (COT-to-Ctx ΓS) (L ,, S⋆) → TransportVarSet-Label tFull L ≡ MtoVarSet ΓS (FVLabel L)
-TransportVarSet-Label-full {S = S} {ΓS = ΓS} L Lty = begin
-  TransportVarSet-Label tFull L
-    ≡⟨ cong (λ a → TransportVarSet a (label-to-sub (L ,, S⋆))) (toVarSet-full S) ⟩
-  TransportVarSet full (label-to-sub (L ,, S⋆))
-    ≡⟨ TransportVarSet-full (label-to-sub (L ,, S⋆)) ⟩
+vs-label-full : {ΓS : CtxOrTree n} → (L : Label (COT-to-MT ΓS) S) → Typing-Label (COT-to-Ctx ΓS) (L ,, S⋆)
+              → tFull [ L ]vl ≡ MtoVarSet ΓS (FVLabel L)
+vs-label-full {S = S} {ΓS = ΓS} L Lty = begin
+  tFull [ L ]vl
+    ≡⟨ cong (_[ label-to-sub (L ,, S⋆) ]vs) (toVarSet-full S) ⟩
+  full [ label-to-sub (L ,, S⋆) ]vs
+    ≡⟨ vs-sub-full (label-to-sub (L ,, S⋆)) ⟩
   FVSub (label-to-sub (L ,, S⋆))
     ≡˘⟨ SuppSubFV (label-to-sub-Ty Lty TySStar) ⟩
   SuppSub (COT-to-Ctx ΓS) (label-to-sub (L ,, S⋆))
@@ -133,13 +130,13 @@ TransportVarSet-Label-full {S = S} {ΓS = ΓS} L Lty = begin
 FV-label-comp-full : (L : Label (someTree T) S) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → DCT (FVLabel L) ≡ tFull → DCM ΓS (FVLabel (L ●l (M ,, S⋆))) ≡ DCM ΓS (FVLabel M)
 FV-label-comp-full {T = T} {ΓS = ΓS} L M Mty p = DCM-reflect (begin
   MtoVarSet ΓS (FVLabel (L ●l (M ,, S⋆)))
-    ≡⟨ TransportVarSet-Label-Label L M Mty ⟩
-  TransportVarSet-Label (FVLabel L) M
-    ≡˘⟨ TransportVarSet-Label-DCT (FVLabel L) M ⟩
-  TransportVarSet-Label (DCT (FVLabel L)) M
-    ≡⟨ cong (λ a → TransportVarSet-Label a M) p ⟩
-  TransportVarSet-Label tFull M
-    ≡⟨ TransportVarSet-Label-full M Mty ⟩
+    ≡⟨ vs-label-Label L M Mty ⟩
+  FVLabel L [ M ]vl
+    ≡˘⟨ vs-label-DCT (FVLabel L) M ⟩
+  DCT (FVLabel L) [ M ]vl
+    ≡⟨ cong (_[ M ]vl) p ⟩
+  tFull [ M ]vl
+    ≡⟨ vs-label-full M Mty ⟩
   MtoVarSet ΓS (FVLabel M) ∎)
 
 replace-label-supp : {ΓS : CtxOrTree n} → (L : Label (COT-to-MT ΓS) S) → (a : STm (COT-to-MT ΓS)) → a ≈[ COT-to-Ctx ΓS ]stm L PHere → DCM ΓS (FVLabel (replace-label L a)) ≡ DCM ΓS (FVSTm a) ∪m DCM ΓS (FVLabel L)

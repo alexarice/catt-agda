@@ -31,19 +31,19 @@ ecr-supp [ ECR Γ Δ s sfull A σ ] tty = begin
   SuppSub Γ σ
     ≡⟨ SuppSubFV σty ⟩
   FVSub σ
-    ≡˘⟨ TransportVarSet-full σ ⟩
-  TransportVarSet full σ
-    ≡˘⟨ cong (λ - → TransportVarSet - σ) sfull ⟩
-  TransportVarSet (SuppTm Δ s) σ
-    ≡⟨ cong (λ - → TransportVarSet - σ) (SuppTmChar″ (ty-src-Ty Asty) (ty-base-Ty Asty)) ⟩
-  TransportVarSet (SuppTy Δ A ∪ SuppTm Δ s) σ
-    ≡˘⟨ cong (λ - → TransportVarSet - σ) (DC-∪ Δ (FVTy A) (FVTm s)) ⟩
-  TransportVarSet (DC Δ (FVTy A ∪ FVTm s)) σ
-    ≡˘⟨ TransportVarSet-DC (FVTy A ∪ FVTm s) σty ⟩
-  DC Γ (TransportVarSet (FVTy A ∪ FVTm s) σ)
-    ≡⟨ cong (DC Γ) (TransportVarSet-∪ (FVTy A) (FVTm s) σ) ⟩
-  DC Γ (TransportVarSet (FVTy A) σ ∪ TransportVarSet (FVTm s) σ)
-    ≡⟨ cong₂ (λ a b → DC Γ (a ∪ b)) (TransportVarSet-ty A σ) (TransportVarSet-tm s σ) ⟩
+    ≡˘⟨ vs-sub-full σ ⟩
+  full [ σ ]vs
+    ≡˘⟨ cong (_[ σ ]vs) sfull ⟩
+  SuppTm Δ s [ σ ]vs
+    ≡⟨ cong (_[ σ ]vs) (SuppTmChar″ (ty-src-Ty Asty) (ty-base-Ty Asty)) ⟩
+  (SuppTy Δ A ∪ SuppTm Δ s) [ σ ]vs
+    ≡˘⟨ cong (_[ σ ]vs) (DC-∪ Δ (FVTy A) (FVTm s)) ⟩
+  (DC Δ (FVTy A ∪ FVTm s)) [ σ ]vs
+    ≡˘⟨ vs-sub-DC (FVTy A ∪ FVTm s) σty ⟩
+  DC Γ ((FVTy A ∪ FVTm s) [ σ ]vs)
+    ≡⟨ cong (DC Γ) (vs-sub-∪ (FVTy A) (FVTm s) σ) ⟩
+  DC Γ (FVTy A [ σ ]vs ∪ FVTm s [ σ ]vs)
+    ≡⟨ cong₂ (λ a b → DC Γ (a ∪ b)) (vs-sub-ty A σ) (vs-sub-tm s σ) ⟩
   DC Γ (FVTy (A [ σ ]ty) ∪ FVTm (s [ σ ]tm))
     ≡˘⟨ cong (DC Γ) (sub-from-disc-supp (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm)) ⟩
   SuppSub Γ (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))

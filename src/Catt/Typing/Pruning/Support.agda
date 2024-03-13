@@ -30,11 +30,11 @@ pruning-supp [ Prune Γ dy A p σ B t pf ] tty = begin
   SuppSub Γ σ
     ≡⟨ EqSuppSub (prune-Eq p σty pf) ⟩
   SuppSub Γ (π p ● (σ //s p))
-    ≡˘⟨ cong (DC Γ) (TransportVarSet-sub (π p) (σ //s p)) ⟩
-  DC Γ (TransportVarSet (FVSub (π p)) (σ //s p))
-    ≡⟨ cong (λ - → DC Γ (TransportVarSet - (σ //s p))) (π-full p) ⟩
-  DC Γ (TransportVarSet full (σ //s p))
-    ≡⟨ cong (DC Γ) (TransportVarSet-full (σ //s p)) ⟩
+    ≡˘⟨ cong (DC Γ) (vs-sub-sub (π p) (σ //s p)) ⟩
+  DC Γ (FVSub (π p) [ σ //s p ]vs)
+    ≡⟨ cong (λ - → DC Γ (- [ σ //s p ]vs)) (π-full p) ⟩
+  DC Γ (full [ σ //s p ]vs)
+    ≡⟨ cong (DC Γ) (vs-sub-full (σ //s p)) ⟩
   SuppSub Γ (σ //s p)
     ≡⟨⟩
   SuppTm Γ (Coh ⌊ dy // p ⌋d (A [ π p ]ty) (σ //s p)) ∎

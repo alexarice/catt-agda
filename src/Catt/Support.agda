@@ -55,16 +55,16 @@ FVTy (s ─⟨ A ⟩⟶ t) = FVTy A ∪ FVTm s ∪ FVTm t
 FVSub ⟨ A ⟩′ = FVTy A
 FVSub ⟨ σ , t ⟩ = FVSub σ ∪ FVTm t
 
-pdb-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pdb : Γ ⊢pdb ⦄ → (b : Bool) → VarSet m
-pdb-bd-supp n ∅ ⦃ pdb ⦄ b = ⊥-elim (pdb-odd-length pdb)
-pdb-bd-supp n (∅ , A) b = ewt emp
-pdb-bd-supp n (Γ , B , A) b = tri-cases (<-cmp n (ty-dim B))
-                                            (ewf (ewf (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)))
-                                            (ewf (b ∷ cdrop b (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)))
-                                            (ewt (ewt (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b)))
+pdb-bd-vs : (n : ℕ) → (Γ : Ctx m) → .⦃ pdb : Γ ⊢pdb ⦄ → (b : Bool) → VarSet m
+pdb-bd-vs n ∅ ⦃ pdb ⦄ b = ⊥-elim (pdb-odd-length pdb)
+pdb-bd-vs n (∅ , A) b = ewt emp
+pdb-bd-vs n (Γ , B , A) b = tri-cases (<-cmp n (ty-dim B))
+                                            (ewf (ewf (pdb-bd-vs n Γ ⦃ pdb-prefix it ⦄ b)))
+                                            (ewf (b ∷ cdrop b (pdb-bd-vs n Γ ⦃ pdb-prefix it ⦄ b)))
+                                            (ewt (ewt (pdb-bd-vs n Γ ⦃ pdb-prefix it ⦄ b)))
 
-pd-bd-supp : (n : ℕ) → (Γ : Ctx m) → .⦃ pd : Γ ⊢pd ⦄ → (b : Bool) → VarSet m
-pd-bd-supp n Γ b = pdb-bd-supp n Γ ⦃ pd-to-pdb it ⦄ b
+pd-bd-vs : (n : ℕ) → (Γ : Ctx m) → .⦃ pd : Γ ⊢pd ⦄ → (b : Bool) → VarSet m
+pd-bd-vs n Γ b = pdb-bd-vs n Γ ⦃ pd-to-pdb it ⦄ b
 
 infixr 30 _[_]vs
 _[_]vs : VarSet n → Sub n m A → VarSet m
@@ -108,7 +108,7 @@ SuppSub Γ σ = DC Γ (FVSub σ)
 supp-condition : (b : Bool) → (A : Ty (suc n)) → (Γ : Ctx (suc n)) → Set
 supp-condition false A Γ = SuppTy Γ A ≡ full
 supp-condition true ⋆ Γ = ⊥
-supp-condition true (s ─⟨ A ⟩⟶ t) Γ = Σ[ pd ∈ Γ ⊢pd ] NonZero (ctx-dim Γ) × SuppTm Γ s ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ ⦃ pd ⦄ false × SuppTm Γ t ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ ⦃ pd ⦄ true
+supp-condition true (s ─⟨ A ⟩⟶ t) Γ = Σ[ pd ∈ Γ ⊢pd ] NonZero (ctx-dim Γ) × SuppTm Γ s ≡ pd-bd-vs (pred (ctx-dim Γ)) Γ ⦃ pd ⦄ false × SuppTm Γ t ≡ pd-bd-vs (pred (ctx-dim Γ)) Γ ⦃ pd ⦄ true
 
 varset-non-empty : VarSet n → Bool
 varset-non-empty emp = false

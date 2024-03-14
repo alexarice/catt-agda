@@ -43,11 +43,11 @@ module _ where
   rulesWithSupp-susp p [ x ,, supp ] .get .proj₁ = p [ x ] .get
   rulesWithSupp-susp p {r = r} [ x ,, supp ] .get .proj₂ = begin
     SuppTm (susp-ctx tgtCtx) (susp-tm lhs)
-      ≡⟨ susp-SuppTm′ tgtCtx lhs ⟩
-    susp-supp (SuppTm tgtCtx lhs)
-      ≡⟨ cong susp-supp supp ⟩
-    susp-supp (SuppTm tgtCtx rhs)
-      ≡˘⟨ susp-SuppTm′ tgtCtx rhs ⟩
+      ≡⟨ susp-SuppTm tgtCtx lhs ⟩
+    susp-vs (SuppTm tgtCtx lhs)
+      ≡⟨ cong susp-vs supp ⟩
+    susp-vs (SuppTm tgtCtx rhs)
+      ≡˘⟨ susp-SuppTm tgtCtx rhs ⟩
     SuppTm (susp-ctx tgtCtx) (susp-tm rhs) ∎
     where
       open Rule r

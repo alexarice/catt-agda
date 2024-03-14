@@ -35,7 +35,7 @@ data Regular : Op where
   Comp : (Γ : Ctx n)
        → .⦃ _ : Γ ⊢pd ⦄
        → .⦃ NonZero (ctx-dim Γ) ⦄
-       → Regular Γ (pd-bd-supp (pred (ctx-dim Γ)) Γ false) (pd-bd-supp (pred (ctx-dim Γ)) Γ true)
+       → Regular Γ (pd-bd-vs (pred (ctx-dim Γ)) Γ false) (pd-bd-vs (pred (ctx-dim Γ)) Γ true)
 
   Equiv : (Γ : Ctx n)
         → .⦃ Γ ⊢pd ⦄
@@ -47,8 +47,8 @@ data Standard : Op where
       → {xs ys : VarSet n}
       → (d : ℕ)
       → (p : suc d ≥ ctx-dim Γ)
-      → (xs ≡ pd-bd-supp d Γ false)
-      → (ys ≡ pd-bd-supp d Γ true)
+      → (xs ≡ pd-bd-vs d Γ false)
+      → (ys ≡ pd-bd-vs d Γ true)
       → Standard Γ xs ys
 
 reg→std : {Γ : Ctx n} → {xs ys : VarSet n} → Regular Γ xs ys → Standard Γ xs ys
@@ -58,19 +58,19 @@ reg→std (Comp Γ) = Std Γ (pred (ctx-dim Γ))
                          refl
 reg→std (Equiv Γ) = Std Γ (ctx-dim Γ)
                           (n≤1+n (ctx-dim Γ))
-                          (sym (pd-bd-supp-full (ctx-dim Γ) Γ false ≤-refl))
-                          (sym (pd-bd-supp-full (ctx-dim Γ) Γ true ≤-refl))
+                          (sym (pd-bd-vs-full (ctx-dim Γ) Γ false ≤-refl))
+                          (sym (pd-bd-vs-full (ctx-dim Γ) Γ true ≤-refl))
 
 std→reg : {Γ : Ctx n} → {xs ys : VarSet n} → Standard Γ xs ys → Regular Γ xs ys
 std→reg (Std Γ d p q r) with <-cmp (suc d) (ctx-dim Γ)
 ... | tri< a ¬b ¬c = ⊥-elim (1+n≰n (≤-trans (s≤s p) a))
 ... | tri≈ ¬a b ¬c = subst₂ (Regular Γ)
-                            (sym (trans q (cong (λ - → pd-bd-supp (pred -) Γ false) b)))
-                            (sym (trans r (cong (λ - → pd-bd-supp (pred -) Γ true) b)))
+                            (sym (trans q (cong (λ - → pd-bd-vs (pred -) Γ false) b)))
+                            (sym (trans r (cong (λ - → pd-bd-vs (pred -) Γ true) b)))
                             (Comp Γ ⦃ it ⦄ ⦃ NonZero-subst b it ⦄)
 ... | tri> ¬a ¬b c = subst₂ (Regular Γ)
-                            (sym (trans q (pd-bd-supp-full d Γ false (≤-pred c))))
-                            (sym (trans r (pd-bd-supp-full d Γ true (≤-pred c))))
+                            (sym (trans q (pd-bd-vs-full d Γ false (≤-pred c))))
+                            (sym (trans r (pd-bd-vs-full d Γ true (≤-pred c))))
                             (Equiv Γ)
 
 std-susp : SuspOp Standard
@@ -79,8 +79,8 @@ std-susp _ _ _ (Std Γ d p q r)
         ⦃ susp-pd it ⦄
         (suc d)
         (≤-trans (≤-reflexive (susp-ctx-dim Γ ⦃ pd-non-empty it ⦄)) (s≤s p))
-        (trans (cong susp-supp q) (susp-pd-bd-compat d Γ false))
-        (trans (cong susp-supp r) (susp-pd-bd-compat d Γ true))
+        (trans (cong susp-vs q) (susp-pd-bd-compat d Γ false))
+        (trans (cong susp-vs r) (susp-pd-bd-compat d Γ true))
 
 reg-susp : SuspOp Regular
 reg-susp _ _ _ reg = std→reg (std-susp _ _ _ (reg→std reg))
@@ -107,8 +107,8 @@ std-pruning dy pk xs ys (Std _ d p q r)
         ⦃ dyck-to-pd (dy // pk) ⦄
         d
         dim-lem
-        (trans (cong (_[ π pk ]vs) q) (π-boundary-supp pk d false))
-        (trans (cong (_[ π pk ]vs) r) (π-boundary-supp pk d true))
+        (trans (cong (_[ π pk ]vs) q) (π-boundary-vs pk d false))
+        (trans (cong (_[ π pk ]vs) r) (π-boundary-vs pk d true))
   where
     dim-lem : suc d ≥ ctx-dim ⌊ dy // pk ⌋d
     dim-lem = begin
@@ -152,23 +152,23 @@ std-ins S P T x xs ys (Std _ d p q r)
 
    open ≡-Reasoning
 
-   lem : (zs : TVarSet S) → (b : Bool) → toVarSet zs ≡ pd-bd-supp d ⌊ S ⌋ b
-       → zs [ κ S P T ]vl ≡ pd-bd-supp d ⌊ S >>[ P ] T ⌋ ⦃ tree-to-pd (S >>[ P ] T) ⦄ b
+   lem : (zs : TVarSet S) → (b : Bool) → toVarSet zs ≡ pd-bd-vs d ⌊ S ⌋ b
+       → zs [ κ S P T ]vl ≡ pd-bd-vs d ⌊ S >>[ P ] T ⌋ ⦃ tree-to-pd (S >>[ P ] T) ⦄ b
    lem zs b pf = begin
      zs [ κ S P T ]vl
        ≡˘⟨ vs-label-DCT zs (κ S P T) ⟩
      DCT zs [ κ S P T ]vl
        ≡⟨ cong (_[ κ S P T ]vl)
                (DCT-reflect {xs = zs}
-                            {ys = supp-tree-bd d S b}
+                            {ys = tree-bd-vs d S b}
                             (trans pf (sym (supp-compat′ d S b)))) ⟩
-     DCT (supp-tree-bd d S b) [ κ S P T ]vl
-       ≡⟨ vs-label-DCT (supp-tree-bd d S b) (κ S P T) ⟩
-     supp-tree-bd d S b [ κ S P T ]vl
-       ≡⟨ κ-boundary-supp S P T x d b ⟩
-     toVarSet (supp-tree-bd d (S >>[ P ] T) b)
+     DCT (tree-bd-vs d S b) [ κ S P T ]vl
+       ≡⟨ vs-label-DCT (tree-bd-vs d S b) (κ S P T) ⟩
+     tree-bd-vs d S b [ κ S P T ]vl
+       ≡⟨ κ-boundary-vs S P T x d b ⟩
+     toVarSet (tree-bd-vs d (S >>[ P ] T) b)
        ≡⟨ supp-compat′ d (S >>[ P ] T) b ⟩
-     pd-bd-supp d ⌊ S >>[ P ] T ⌋ ⦃ tree-to-pd (S >>[ P ] T) ⦄ b ∎
+     pd-bd-vs d ⌊ S >>[ P ] T ⌋ ⦃ tree-to-pd (S >>[ P ] T) ⦄ b ∎
 
 reg-ins : InsertionSOp Regular
 reg-ins S P T p xs ys reg = std→reg (std-ins S P T p xs ys (reg→std reg))

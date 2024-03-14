@@ -116,13 +116,13 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
       ≈⟨ reflexive≈stm (lem (sty-dim (standard-sty d T)) d (standard-sty-dim d T)) ⟩
     identity-stm (n-disc d) >>= (standard-label (n-disc d) T ,, S⋆) ∎
     where
-      supp-lem : (b : Bool) → DCT (FVSTm (standard-stm d T)) ≡ supp-tree-bd d T b
+      supp-lem : (b : Bool) → DCT (FVSTm (standard-stm d T)) ≡ tree-bd-vs d T b
       supp-lem b = begin
         DCT (FVSTm (standard-stm d T))
           ≡⟨ standard-stm-full d T (≤-pred p) ⟩
         tFull
-          ≡˘⟨ supp-tree-bd-full d T b (≤-pred p) ⟩
-        supp-tree-bd d T b ∎
+          ≡˘⟨ tree-bd-vs-full d T b (≤-pred p) ⟩
+        tree-bd-vs d T b ∎
         where
           open ≡-Reasoning
 

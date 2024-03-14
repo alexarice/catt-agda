@@ -33,7 +33,7 @@ dr-supp [ DR {n = n} Γ σ ] tty = begin
   SuppSub Γ σ
     ≡⟨ cong (DC Γ) (FVSub-≃ (prop-sub-from-disc n σ)) ⟩
   SuppSub Γ (sub-from-disc n (wk-ty (sphere-type n) [ σ ]ty) _ (0V [ σ ]tm))
-    ≡⟨ cong (DC Γ) (sub-from-disc-supp n (wk-ty (sphere-type n) [ σ ]ty) _ (0V [ σ ]tm)) ⟩
+    ≡⟨ cong (DC Γ) (sub-from-disc-fv n (wk-ty (sphere-type n) [ σ ]ty) _ (0V [ σ ]tm)) ⟩
   DC Γ (FVTy (wk-ty (sphere-type n) [ σ ]ty) ∪ FVTm (0V [ σ ]tm))
     ≡⟨ DC-∪ Γ (FVTy (wk-ty (sphere-type n) [ σ ]ty)) (FVTm (0V [ σ ]tm)) ⟩
   SuppTy Γ (wk-ty (sphere-type n) [ σ ]ty) ∪ SuppTm Γ (0V [ σ ]tm)

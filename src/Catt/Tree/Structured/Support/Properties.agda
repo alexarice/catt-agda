@@ -117,16 +117,16 @@ fromPath-to-term {S = S} PHere = begin
     ≡˘⟨ DC-fromℕ ⌊ S ⌋ ⟩
   SuppTm ⌊ S ⌋ (Var (fromℕ _)) ∎
 fromPath-to-term {S = Join S T} (PExt P) rewrite Truth-prop (fromPath-non-empty P) = begin
-  wedge-susp-supp (susp-supp (toVarSet (fromPath P))) (toVarSet (tEmp {S = T}))
-    ≡⟨ cong₂ (λ x y → wedge-susp-supp (susp-supp x) y) (fromPath-to-term P) (toVarSet-emp T) ⟩
-  wedge-susp-supp (susp-supp (SuppTm ⌊ S ⌋ (path-to-term P))) empty
-    ≡⟨ wedge-susp-supp-ext ⌊ S ⌋ (path-to-term P) ⌊ T ⌋ ⟩
+  wedge-susp-vs (susp-vs (toVarSet (fromPath P))) (toVarSet (tEmp {S = T}))
+    ≡⟨ cong₂ (λ x y → wedge-susp-vs (susp-vs x) y) (fromPath-to-term P) (toVarSet-emp T) ⟩
+  wedge-susp-vs (susp-vs (SuppTm ⌊ S ⌋ (path-to-term P))) empty
+    ≡⟨ wedge-susp-vs-ext ⌊ S ⌋ (path-to-term P) ⌊ T ⌋ ⟩
   SuppTm (⌊ Join S T ⌋) (susp-tm (path-to-term P) [ wedge-susp-inc-left _ _ ]tm) ∎
 fromPath-to-term {S = Join S T} (PShift P) rewrite Truth-not-prop (tvarset-empty S) = begin
-  wedge-susp-supp empty (toVarSet (fromPath P))
-    ≡⟨ cong (wedge-susp-supp empty) (fromPath-to-term P) ⟩
-  wedge-susp-supp empty (SuppTm ⌊ T ⌋ (path-to-term P))
-    ≡⟨ wedge-susp-supp-shift ⌊ S ⌋ ⌊ T ⌋ (path-to-term P) ⟩
+  wedge-susp-vs empty (toVarSet (fromPath P))
+    ≡⟨ cong (wedge-susp-vs empty) (fromPath-to-term P) ⟩
+  wedge-susp-vs empty (SuppTm ⌊ T ⌋ (path-to-term P))
+    ≡⟨ wedge-susp-vs-shift ⌊ S ⌋ ⌊ T ⌋ (path-to-term P) ⟩
   SuppTm (wedge-susp ⌊ S ⌋ ⌊ T ⌋) (path-to-term P [ wedge-susp-inc-right _ _ ]tm) ∎
 
 FVSTm-to-term : {ΓS : CtxOrTree n} → (a : STm (COT-to-MT ΓS)) → MtoVarSet ΓS (FVSTm a) ≡ SuppTm (COT-to-Ctx ΓS) (stm-to-term a)
@@ -154,16 +154,16 @@ FVSTm-to-term {ΓS = incCtx Γ} (SCoh S A L) = begin
   SuppTm Γ (Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm) ∎
 FVSTm-to-term {ΓS = incCtx _} (SOther t) = refl
 FVSTm-to-term {ΓS = incTree (Join S T)} (SExt a) rewrite Truth-prop (FVSTm-non-empty a) = begin
-  wedge-susp-supp (susp-supp (toVarSet (FVSTm a))) (toVarSet (tEmp {S = T}))
-    ≡⟨ cong₂ (λ x y → wedge-susp-supp (susp-supp x) y) (FVSTm-to-term a) (toVarSet-emp T) ⟩
-  wedge-susp-supp (susp-supp (SuppTm ⌊ S ⌋ (stm-to-term a))) empty
-    ≡⟨ wedge-susp-supp-ext ⌊ S ⌋ (stm-to-term a) ⌊ T ⌋ ⟩
+  wedge-susp-vs (susp-vs (toVarSet (FVSTm a))) (toVarSet (tEmp {S = T}))
+    ≡⟨ cong₂ (λ x y → wedge-susp-vs (susp-vs x) y) (FVSTm-to-term a) (toVarSet-emp T) ⟩
+  wedge-susp-vs (susp-vs (SuppTm ⌊ S ⌋ (stm-to-term a))) empty
+    ≡⟨ wedge-susp-vs-ext ⌊ S ⌋ (stm-to-term a) ⌊ T ⌋ ⟩
   SuppTm ⌊ Join S T ⌋ (susp-tm (stm-to-term a) [ wedge-susp-inc-left _ _ ]tm) ∎
 FVSTm-to-term {ΓS = incTree (Join S T)} (SShift a) rewrite Truth-not-prop (tvarset-empty S) = begin
-  wedge-susp-supp empty (toVarSet (FVSTm a))
-    ≡⟨ cong (wedge-susp-supp empty) (FVSTm-to-term a) ⟩
-  wedge-susp-supp empty (SuppTm ⌊ T ⌋ (stm-to-term a))
-    ≡⟨ wedge-susp-supp-shift ⌊ S ⌋ ⌊ T ⌋ (stm-to-term a)  ⟩
+  wedge-susp-vs empty (toVarSet (FVSTm a))
+    ≡⟨ cong (wedge-susp-vs empty) (FVSTm-to-term a) ⟩
+  wedge-susp-vs empty (SuppTm ⌊ T ⌋ (stm-to-term a))
+    ≡⟨ wedge-susp-vs-shift ⌊ S ⌋ ⌊ T ⌋ (stm-to-term a)  ⟩
   SuppTm ⌊ Join S T ⌋ (stm-to-term a [ wedge-susp-inc-right _ _ ]tm) ∎
 
 FVSTy-to-type {ΓS = ΓS} S⋆ = trans (MtoVarSet-emp ΓS) (sym (DC-empty (COT-to-Ctx ΓS)))
@@ -208,9 +208,9 @@ FVLabel-to-sub′ {S = Join S T} {ΓS = ΓS} L f g = begin
   MtoVarSet ΓS (FVLabel-WT (label₁ L)) ∪ MtoVarSet ΓS (FVLabel-WT (label₂ L))
     ≡⟨ cong₂ _∪_ (FVLabel-to-sub′ (label₁ L) (f ∘ PExt) l2) (FVLabel-to-sub′ (label₂ L) (f ∘ PShift) g) ⟩
   SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₁ L)) ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))
-    ≡˘⟨ cong (λ x → DC (COT-to-Ctx ΓS) x ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))) (↓-supp (label-to-sub (label₁ L))) ⟩
+    ≡˘⟨ cong (λ x → DC (COT-to-Ctx ΓS) x ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))) (↓-fv (label-to-sub (label₁ L))) ⟩
   SuppSub (COT-to-Ctx ΓS) (↓ (label-to-sub (label₁ L))) ∪ SuppSub (COT-to-Ctx ΓS) (label-to-sub (label₂ L))
-    ≡˘⟨ sub-from-wedge-supp′ (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) l3 ⟩
+    ≡˘⟨ sub-from-wedge-vs′ (↓ (label-to-sub (label₁ L))) (label-to-sub (label₂ L)) l3 ⟩
   SuppSub (COT-to-Ctx ΓS)
           (sub-from-wedge (↓ (label-to-sub (label₁ L)))
                           (label-to-sub (label₂ L))) ∎
@@ -295,7 +295,7 @@ supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = tree-to-pd S ,, 
 
     instance _ = tree-to-pd S
     lem1 : SuppTm ⌊ S ⌋ (stm-to-term s)
-         ≡ pd-bd-supp (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ false
+         ≡ pd-bd-vs (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ false
     lem1 = begin
       SuppTm ⌊ S ⌋ (stm-to-term s)
         ≡˘⟨ FVSTm-to-term s ⟩
@@ -303,14 +303,14 @@ supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = tree-to-pd S ,, 
         ≡˘⟨ DCT-toVarSet (FVSTm s) ⟩
       toVarSet (DCT (FVSTm s))
         ≡⟨ cong toVarSet sc1 ⟩
-      toVarSet (supp-tree-bd (pred (tree-dim S)) S false)
-        ≡⟨ cong (λ - → toVarSet (supp-tree-bd (pred -) S false)) lem  ⟩
-      toVarSet (supp-tree-bd (pred (ctx-dim ⌊ S ⌋)) S false)
+      toVarSet (tree-bd-vs (pred (tree-dim S)) S false)
+        ≡⟨ cong (λ - → toVarSet (tree-bd-vs (pred -) S false)) lem  ⟩
+      toVarSet (tree-bd-vs (pred (ctx-dim ⌊ S ⌋)) S false)
         ≡⟨ supp-compat′ (pred (ctx-dim ⌊ S ⌋)) S false ⟩
-      pd-bd-supp (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ false ∎
+      pd-bd-vs (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ false ∎
 
     lem2 : SuppTm ⌊ S ⌋ (stm-to-term t)
-         ≡ pd-bd-supp (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ true
+         ≡ pd-bd-vs (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ true
     lem2 = begin
       SuppTm ⌊ S ⌋ (stm-to-term t)
         ≡˘⟨ FVSTm-to-term t ⟩
@@ -318,11 +318,11 @@ supp-condition-compat true S (SArr s As t) (nz ,, sc1 ,, sc2) = tree-to-pd S ,, 
         ≡˘⟨ DCT-toVarSet (FVSTm t) ⟩
       toVarSet (DCT (FVSTm t))
         ≡⟨ cong toVarSet sc2 ⟩
-      toVarSet (supp-tree-bd (pred (tree-dim S)) S true)
-        ≡⟨ cong (λ - → toVarSet (supp-tree-bd (pred -) S true)) lem  ⟩
-      toVarSet (supp-tree-bd (pred (ctx-dim ⌊ S ⌋)) S true)
+      toVarSet (tree-bd-vs (pred (tree-dim S)) S true)
+        ≡⟨ cong (λ - → toVarSet (tree-bd-vs (pred -) S true)) lem  ⟩
+      toVarSet (tree-bd-vs (pred (ctx-dim ⌊ S ⌋)) S true)
         ≡⟨ supp-compat′ (pred (ctx-dim ⌊ S ⌋)) S true ⟩
-      pd-bd-supp (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ true ∎
+      pd-bd-vs (pred (ctx-dim ⌊ S ⌋)) ⌊ S ⌋ true ∎
 
 DCM-reflect : {xs ys : MVarSet (COT-to-MT ΓS)} → MtoVarSet ΓS xs ≡ MtoVarSet ΓS ys → DCM ΓS xs ≡ DCM ΓS ys
 DCM-reflect {ΓS = incTree x} p = DCT-reflect p

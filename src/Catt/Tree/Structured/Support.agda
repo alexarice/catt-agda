@@ -125,8 +125,8 @@ supp-condition-s : (b : Bool) → (S : Tree n) → (As : STy (someTree S)) → S
 supp-condition-s false S As = DCT (FVSTy As) ≡ mFull
 supp-condition-s true S S⋆ = ⊥
 supp-condition-s true S (SArr s As t) = NonZero (tree-dim S)
-                                      × DCT (FVSTm s) ≡ supp-tree-bd (pred (tree-dim S)) S false
-                                      × DCT (FVSTm t) ≡ supp-tree-bd (pred (tree-dim S)) S true
+                                      × DCT (FVSTm s) ≡ tree-bd-vs (pred (tree-dim S)) S false
+                                      × DCT (FVSTm t) ≡ tree-bd-vs (pred (tree-dim S)) S true
 
 MtoVarSet : (ΓS : CtxOrTree n) → MVarSet (COT-to-MT ΓS) → VarSet n
 MtoVarSet (incTree _) xs = toVarSet xs

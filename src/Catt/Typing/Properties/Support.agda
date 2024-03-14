@@ -179,18 +179,18 @@ supp-condition-preserved {A = A} {Γ = Γ} {B = B} false p Aty Bty sc = begin
 supp-condition-preserved {Γ = Γ} true (Arr≈ p q r) (TyArr {s = s} {A} {t} sty Aty tty) (TyArr {s = s′} {B} {t′} sty′ Bty tty′) (pd ,, nz ,, sc1 ,, sc2)
   = pd ,, nz ,, l1 ,, l2
   where
-    l1 : SuppTm Γ s′ ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ false
+    l1 : SuppTm Γ s′ ≡ pd-bd-vs (pred (ctx-dim Γ)) Γ false
     l1 = begin
       SuppTm Γ s′
         ≡˘⟨ EqSuppTm p ⟩
       SuppTm Γ s
         ≡⟨ sc1 ⟩
-      pd-bd-supp (pred (ctx-dim Γ)) Γ false ∎
+      pd-bd-vs (pred (ctx-dim Γ)) Γ false ∎
 
-    l2 : SuppTm Γ t′ ≡ pd-bd-supp (pred (ctx-dim Γ)) Γ true
+    l2 : SuppTm Γ t′ ≡ pd-bd-vs (pred (ctx-dim Γ)) Γ true
     l2 = begin
       SuppTm Γ t′
         ≡˘⟨ EqSuppTm r ⟩
       SuppTm Γ t
         ≡⟨ sc2 ⟩
-      pd-bd-supp (pred (ctx-dim Γ)) Γ true ∎
+      pd-bd-vs (pred (ctx-dim Γ)) Γ true ∎

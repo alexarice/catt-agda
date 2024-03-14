@@ -194,13 +194,13 @@ fv-wk-tm (Coh S A σ) = fv-wk-sub σ
 fv-wk-sub ⟨ _ ⟩′ = refl
 fv-wk-sub ⟨ σ , t ⟩ = cong₂ _∪_ (fv-wk-sub σ) (fv-wk-tm t)
 
-idSub-supp : FVSub (idSub {n}) ≡ full
-idSub-supp {zero} = refl
-idSub-supp {suc n} = trans (cong (_∪ ewt empty) (fv-wk-sub idSub)) (cong ewt (trans (∪-right-unit (FVSub idSub)) idSub-supp))
+idSub-fv : FVSub (idSub {n}) ≡ full
+idSub-fv {zero} = refl
+idSub-fv {suc n} = trans (cong (_∪ ewt empty) (fv-wk-sub idSub)) (cong ewt (trans (∪-right-unit (FVSub idSub)) idSub-fv))
 
-idSub≃-supp : (p : Γ ≃c Δ) → FVSub (idSub≃ p) ≡ full
-idSub≃-supp Emp≃ = refl
-idSub≃-supp (Add≃ p x) = trans (cong (_∪ ewt empty) (fv-wk-sub (idSub≃ p))) (cong ewt (trans (∪-right-unit (FVSub (idSub≃ p))) (idSub≃-supp p)))
+idSub≃-fv : (p : Γ ≃c Δ) → FVSub (idSub≃ p) ≡ full
+idSub≃-fv Emp≃ = refl
+idSub≃-fv (Add≃ p x) = trans (cong (_∪ ewt empty) (fv-wk-sub (idSub≃ p))) (cong ewt (trans (∪-right-unit (FVSub (idSub≃ p))) (idSub≃-fv p)))
 
 vs-sub-wk : (xs : VarSet n) → (σ : Sub n m ⋆) → xs [ wk-sub σ ]vs ≡ ewf (xs [ σ ]vs)
 vs-sub-wk emp ⟨ _ ⟩′ = refl
@@ -321,12 +321,12 @@ vs-sub-comp (ewt xs) σ ⟨ τ , t ⟩ = begin
   where
     open ≡-Reasoning
 
-isVar-supp : (t : Tm n) → .⦃ _ : isVar t ⦄ → FVTm t ≡ trueAt (getVarFin t)
-isVar-supp (Var i) = refl
+isVar-fv : (t : Tm n) → .⦃ _ : isVar t ⦄ → FVTm t ≡ trueAt (getVarFin t)
+isVar-fv (Var i) = refl
 
-↓-supp : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → FVSub (↓ σ) ≡ FVSub σ
-↓-supp ⟨ _ ⟩′ = refl
-↓-supp ⟨ σ , t ⟩ = cong (_∪ FVTm t) (↓-supp σ)
+↓-fv : (σ : Sub n m (s ─⟨ A ⟩⟶ t)) → FVSub (↓ σ) ≡ FVSub σ
+↓-fv ⟨ _ ⟩′ = refl
+↓-fv ⟨ σ , t ⟩ = cong (_∪ FVTm t) (↓-fv σ)
 
 coh-sub-fv : (Γ : Ctx (suc n)) → (A : Ty (suc n)) → (σ : Sub (suc n) m B) → FVTm (Coh Γ A idSub [ σ ]tm) ≡ FVSub σ
 coh-sub-fv {B = ⋆} Γ A σ = FVSub-≃ (id-left-unit σ)
@@ -336,7 +336,7 @@ coh-sub-fv {B = s ─⟨ B ⟩⟶ t} Γ A σ = begin
   FVTm (Coh (susp-ctx Γ) (susp-ty A) idSub [ ↓ σ ]tm)
     ≡⟨ coh-sub-fv (susp-ctx Γ) (susp-ty A) (↓ σ) ⟩
   FVSub (↓ σ)
-    ≡⟨ ↓-supp σ ⟩
+    ≡⟨ ↓-fv σ ⟩
   FVSub σ ∎
   where
     open ≡-Reasoning
@@ -488,7 +488,7 @@ FVTm-comp-⊆ {A = s ─⟨ A ⟩⟶ t} (Coh Δ B τ) σ = begin
       (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ) [ ↓ σ ]tm)
     ≤⟨ FVTm-comp-⊆ (Coh (susp-ctx Δ) (susp-ty B) (susp-sub τ)) (↓ σ) ⟩
   FVSub (↓ σ)
-    ≡⟨ ↓-supp σ ⟩
+    ≡⟨ ↓-fv σ ⟩
   FVSub σ ∎
   where
     open PReasoning (⊆-poset _)
@@ -581,19 +581,19 @@ empty-is-empty : {n : ℕ} → varset-non-empty (empty {n = n}) ≡ false
 empty-is-empty {n = zero} = refl
 empty-is-empty {n = suc n} = empty-is-empty {n = n}
 
-pdb-bd-supp-full : (n : ℕ)
+pdb-bd-vs-full : (n : ℕ)
                  → (Γ : Ctx m)
                  → .⦃ _ : Γ ⊢pdb ⦄
                  → (b : Bool)
                  → n ≥ ctx-dim Γ
-                 → pdb-bd-supp n Γ b ≡ full
-pdb-bd-supp-full n ∅ ⦃ pdb ⦄ b p = ⊥-elim (pdb-odd-length pdb)
-pdb-bd-supp-full n (∅ , A) b p = refl
-pdb-bd-supp-full n (Γ , B , A) b p = begin
-  pdb-bd-supp n (Γ , B , A) b
+                 → pdb-bd-vs n Γ b ≡ full
+pdb-bd-vs-full n ∅ ⦃ pdb ⦄ b p = ⊥-elim (pdb-odd-length pdb)
+pdb-bd-vs-full n (∅ , A) b p = refl
+pdb-bd-vs-full n (Γ , B , A) b p = begin
+  pdb-bd-vs n (Γ , B , A) b
     ≡⟨ tri-case> lem (<-cmp n (ty-dim B)) _ _ _ ⟩
-  ewt (ewt (pdb-bd-supp n Γ ⦃ pdb-prefix it ⦄ b))
-    ≡⟨ cong (ewt ∘ ewt) (pdb-bd-supp-full n Γ ⦃ pdb-prefix it ⦄ b lem2) ⟩
+  ewt (ewt (pdb-bd-vs n Γ ⦃ pdb-prefix it ⦄ b))
+    ≡⟨ cong (ewt ∘ ewt) (pdb-bd-vs-full n Γ ⦃ pdb-prefix it ⦄ b lem2) ⟩
   ewt (ewt full) ∎
   where
     lem : ty-dim B < n
@@ -621,10 +621,10 @@ pdb-bd-supp-full n (Γ , B , A) b p = begin
         open ≤-Reasoning
     open ≡-Reasoning
 
-pd-bd-supp-full : (n : ℕ)
+pd-bd-vs-full : (n : ℕ)
                 → (Γ : Ctx m)
                 → .⦃ _ : Γ ⊢pd ⦄
                 → (b : Bool)
                 → n ≥ ctx-dim Γ
-                → pd-bd-supp n Γ b ≡ full
-pd-bd-supp-full n Γ b p = pdb-bd-supp-full n Γ ⦃ pd-to-pdb it ⦄ b p
+                → pd-bd-vs n Γ b ≡ full
+pd-bd-vs-full n Γ b p = pdb-bd-vs-full n Γ ⦃ pd-to-pdb it ⦄ b p

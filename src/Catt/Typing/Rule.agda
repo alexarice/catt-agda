@@ -71,11 +71,11 @@ rs ⊆r rs′ = ∀ {r} → r ∈r rs → r ∈r rs′
 SuspOp : Op → Set
 SuspOp ops = ∀ {n} (Γ : Ctx n) .⦃ _ : Γ ⊢pd ⦄ (xs ys : VarSet n)
            → ops Γ xs ys
-           → ops (susp-ctx Γ) (susp-supp xs) (susp-supp ys)
+           → ops (susp-ctx Γ) (susp-vs xs) (susp-vs ys)
 
 StandardOp : Op → Set
 StandardOp ops = ∀ {n} (Γ : Ctx n) .⦃ _ : Γ ⊢pd ⦄ (d : ℕ) (p : suc d ≥ ctx-dim Γ)
-               → ops Γ (pd-bd-supp d Γ false) (pd-bd-supp d Γ true)
+               → ops Γ (pd-bd-vs d Γ false) (pd-bd-vs d Γ true)
 
 wk-rule : (r : Rule) → Ty (r .len) → Rule
 wk-rule r A .len = suc (r .len)

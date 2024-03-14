@@ -29,8 +29,8 @@ open import Catt.Tree.Structured.Support
 open import Catt.Tree.Structured.Support.Properties
 open import Catt.Tree.Structured.Construct.Support
 
-supp-standard-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → DCT (FVSTm (standard-stm d (tree-bd d T) >>= tree-inc-label d T b)) ≡ supp-tree-bd d T b
-supp-standard-coh-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → DCT (FVSTm (standard-coh d (tree-bd d T) >>= tree-inc-label d T b)) ≡ supp-tree-bd d T b
+supp-standard-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → DCT (FVSTm (standard-stm d (tree-bd d T) >>= tree-inc-label d T b)) ≡ tree-bd-vs d T b
+supp-standard-coh-lem : (d : ℕ) → (T : Tree n) → (b : Bool) → DCT (FVSTm (standard-coh d (tree-bd d T) >>= tree-inc-label d T b)) ≡ tree-bd-vs d T b
 
 supp-standard-lem zero Sing false = refl
 supp-standard-lem zero Sing true = refl
@@ -46,7 +46,7 @@ supp-standard-lem (suc d) (Susp T) b = begin
     ≡˘⟨ FVSTm-susp (standard-stm d (tree-bd d T) >>= tree-inc-label d T b) ⟩
   susp-tvarset (DCT (FVSTm (standard-stm d (tree-bd d T) >>= tree-inc-label d T b)))
     ≡⟨ cong susp-tvarset (supp-standard-lem d T b) ⟩
-  susp-tvarset (supp-tree-bd d T b) ∎
+  susp-tvarset (tree-bd-vs d T b) ∎
   where
     l1 : (standard-stm d (tree-bd d T) >>=
             label₁ (tree-inc-label (suc d) (Susp T) b))
@@ -66,9 +66,9 @@ supp-standard-lem (suc d) (Join T (Join T₁ T₂)) b = supp-standard-coh-lem (s
 supp-standard-coh-lem d T b = begin
   DCT (FVLabel-WT (tree-inc-label d T b))
     ≡⟨ cong DCT (tree-inc-label-supp d T b) ⟩
-  DCT (supp-tree-bd d T b)
-    ≡⟨ DCT-supp-tree-bd d T b ⟩
-  supp-tree-bd d T b ∎
+  DCT (tree-bd-vs d T b)
+    ≡⟨ DCT-tree-bd-vs d T b ⟩
+  tree-bd-vs d T b ∎
   where open ≡-Reasoning
 
 standard-supp-condition-1 : (d : ℕ) → .⦃ NonZero d ⦄ → (T : Tree n) → (tree-dim T ≡ d) → supp-condition-s true T (standard-sty d T)
@@ -102,8 +102,8 @@ standard-supp-condition-2 (suc d) T p = begin
     lem = begin
       DCT (FVSTm (standard-stm d (tree-bd d T) >>= tree-inc-label d T true))
         ≡⟨ supp-standard-lem d T true ⟩
-      supp-tree-bd d T true
-        ≡⟨ supp-tree-bd-full d T true (≤-pred p) ⟩
+      tree-bd-vs d T true
+        ≡⟨ tree-bd-vs-full d T true (≤-pred p) ⟩
       tFull ∎
 
 open ≡-Reasoning

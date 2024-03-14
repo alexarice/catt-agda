@@ -31,8 +31,8 @@ disc-term-Ty : (n : ℕ) → .⦃ NonZero n ⦄ → {σ : Sub (disc-size n) m �
 disc-term-Ty n@(suc n′) σty = let
   instance _ = disc-pd n
   in TyConv (TyCoh (subst₂ (ops (Disc n))
-                           (sym (var2-disc-supp n′))
-                           (sym (var1-disc-supp n′))
+                           (sym (var2-disc-fv n′))
+                           (sym (var1-disc-fv n′))
                            (standard-op (Disc n) n′ (≤-reflexive (disc-dim n))))
                    (wk-ty-typing (sphere-type-Ty n)) σty)
             (reflexive≈ty (apply-sub-wk-ty-≃ (sphere-type n) _))
@@ -93,8 +93,8 @@ identity-Ty : (n : ℕ) → ∀ {σ} → Typing-Sub (Disc n) Γ σ → Typing-Tm
 identity-Ty n σty = let
   instance _ = disc-pd n
   in TyCoh (subst₂ (ops (Disc n))
-                   (trans (pd-bd-supp-full n (Disc n) false (≤-reflexive (disc-dim n))) (sym (var0-disc-full n)))
-                   (trans (pd-bd-supp-full n (Disc n) true (≤-reflexive (disc-dim n))) (sym (var0-disc-full n)))
+                   (trans (pd-bd-vs-full n (Disc n) false (≤-reflexive (disc-dim n))) (sym (var0-disc-full n)))
+                   (trans (pd-bd-vs-full n (Disc n) true (≤-reflexive (disc-dim n))) (sym (var0-disc-full n)))
                    (standard-op (Disc n) n (≤-trans (≤-reflexive (disc-dim n)) (n≤1+n n))))
            (TyArr (TyVar zero) (wk-ty-typing (sphere-type-Ty n)) (TyVar zero))
            σty

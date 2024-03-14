@@ -15,7 +15,7 @@ open import Catt.Tree.Structured.Support.Properties
 
 open import Tactic.MonoidSolver
 
-tree-inc-label-supp′ : (d : ℕ) → (S : Tree n) → (b : Bool) → FVLabel′ (fromPath ∘ tree-inc-label′ d S b) ≡ supp-tree-bd d S b
+tree-inc-label-supp′ : (d : ℕ) → (S : Tree n) → (b : Bool) → FVLabel′ (fromPath ∘ tree-inc-label′ d S b) ≡ tree-bd-vs d S b
 tree-inc-label-supp′ zero S false = refl
 tree-inc-label-supp′ zero S true = refl
 tree-inc-label-supp′ (suc d) Sing b = refl
@@ -32,43 +32,43 @@ tree-inc-label-supp′ (suc d) (Join S T) b = begin
   VSJoin true (FVLabel′ (fromPath ∘ tree-inc-label′ d S b))
               (FVLabel′ (fromPath ∘ tree-inc-label′ (suc d) T b))
     ≡⟨ cong₂ (VSJoin true) (tree-inc-label-supp′ d S b) (tree-inc-label-supp′ (suc d) T b) ⟩
-  VSJoin true (supp-tree-bd d S b) (supp-tree-bd (suc d) T b) ∎
+  VSJoin true (tree-bd-vs d S b) (tree-bd-vs (suc d) T b) ∎
   where
     open ≡-Reasoning
 
-tree-inc-label-supp : (d : ℕ) → (S : Tree n) → (b : Bool) → FVLabel-WT (tree-inc-label d S b) ≡ supp-tree-bd d S b
+tree-inc-label-supp : (d : ℕ) → (S : Tree n) → (b : Bool) → FVLabel-WT (tree-inc-label d S b) ≡ tree-bd-vs d S b
 tree-inc-label-supp d S b = begin
   tEmp ∪t FVLabel′ (λ P → fromPath (tree-inc-label′ d S b P))
     ≡⟨ ∪t-left-unit (FVLabel (λ x → SPath (tree-inc-label′ d S b x))) ⟩
   FVLabel (SPath ∘ tree-inc-label′ d S b)
     ≡⟨ tree-inc-label-supp′ d S b ⟩
-  supp-tree-bd d S b ∎
+  tree-bd-vs d S b ∎
   where
     open ≡-Reasoning
 
-supp-tree-bd-fst : (d : ℕ) → (S : Tree n) → (b : Bool) → Truth (tvarset-fst (supp-tree-bd (suc d) S b))
-supp-tree-bd-fst d Sing b = tt
-supp-tree-bd-fst d (Join S T) b = tt
+tree-bd-vs-fst : (d : ℕ) → (S : Tree n) → (b : Bool) → Truth (tvarset-fst (tree-bd-vs (suc d) S b))
+tree-bd-vs-fst d Sing b = tt
+tree-bd-vs-fst d (Join S T) b = tt
 
-DCT-supp-tree-bd : (d : ℕ) → (S : Tree n) → (b : Bool) → DCT (supp-tree-bd d S b) ≡ supp-tree-bd d S b
-DCT-supp-tree-bd zero S false = DCT-fst S
-DCT-supp-tree-bd zero S true = DCT-last-path S
-DCT-supp-tree-bd (suc d) Sing b = refl
-DCT-supp-tree-bd (suc d) (Join S T) b
-  rewrite Truth-prop (supp-tree-bd-non-empty d S b)
-  = cong₂ (VSJoin true) (DCT-supp-tree-bd d S b) (begin
-    set-fst-true (DCT (supp-tree-bd (suc d) T b))
-      ≡⟨ cong set-fst-true (DCT-supp-tree-bd (suc d) T b) ⟩
-    set-fst-true (supp-tree-bd (suc d) T b)
-      ≡⟨ tvarset-fst-set-fst (supp-tree-bd (suc d) T b) (supp-tree-bd-fst d T b) ⟩
-    supp-tree-bd (suc d) T b ∎)
+DCT-tree-bd-vs : (d : ℕ) → (S : Tree n) → (b : Bool) → DCT (tree-bd-vs d S b) ≡ tree-bd-vs d S b
+DCT-tree-bd-vs zero S false = DCT-fst S
+DCT-tree-bd-vs zero S true = DCT-last-path S
+DCT-tree-bd-vs (suc d) Sing b = refl
+DCT-tree-bd-vs (suc d) (Join S T) b
+  rewrite Truth-prop (tree-bd-vs-non-empty d S b)
+  = cong₂ (VSJoin true) (DCT-tree-bd-vs d S b) (begin
+    set-fst-true (DCT (tree-bd-vs (suc d) T b))
+      ≡⟨ cong set-fst-true (DCT-tree-bd-vs (suc d) T b) ⟩
+    set-fst-true (tree-bd-vs (suc d) T b)
+      ≡⟨ tvarset-fst-set-fst (tree-bd-vs (suc d) T b) (tree-bd-vs-fst d T b) ⟩
+    tree-bd-vs (suc d) T b ∎)
     where open ≡-Reasoning
 
-supp-tree-bd-full : (d : ℕ) → (S : Tree n) → (b : Bool) → (tree-dim S ≤ d) → supp-tree-bd d S b ≡ tFull
-supp-tree-bd-full zero Sing false p = refl
-supp-tree-bd-full zero Sing true p = refl
-supp-tree-bd-full (suc d) Sing b p = refl
-supp-tree-bd-full (suc d) (Join S T) b p
+tree-bd-vs-full : (d : ℕ) → (S : Tree n) → (b : Bool) → (tree-dim S ≤ d) → tree-bd-vs d S b ≡ tFull
+tree-bd-vs-full zero Sing false p = refl
+tree-bd-vs-full zero Sing true p = refl
+tree-bd-vs-full (suc d) Sing b p = refl
+tree-bd-vs-full (suc d) (Join S T) b p
   = cong₂ (VSJoin true)
-          (supp-tree-bd-full d S b (≤-trans (m≤n⊔m (pred (tree-dim T)) (tree-dim S)) (≤-pred p)))
-          (supp-tree-bd-full (suc d) T b (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p))
+          (tree-bd-vs-full d S b (≤-trans (m≤n⊔m (pred (tree-dim T)) (tree-dim S)) (≤-pred p)))
+          (tree-bd-vs-full (suc d) T b (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p))

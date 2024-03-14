@@ -47,8 +47,8 @@ susp-tmTy (TyCoh {Δ = Δ} {A = A@(s ─⟨ _ ⟩⟶ t)} supp Aty σty) = let
   instance .x : susp-ctx Δ ⊢pd
   x = susp-pd it
   in TyConv (TyCoh ⦃ nz = NonZero-subst (sym (susp-dim A)) it ⦄
-                   (subst₂ (ops (susp-ctx Δ)) (sym (susp-SuppTm′ Δ s))
-                                              (sym (susp-SuppTm′ Δ t))
+                   (subst₂ (ops (susp-ctx Δ)) (sym (susp-SuppTm Δ s))
+                                              (sym (susp-SuppTm Δ t))
                                               (susp-op _ _ _ supp))
                    (susp-tyTy Aty)
                    (susp-subTy σty))

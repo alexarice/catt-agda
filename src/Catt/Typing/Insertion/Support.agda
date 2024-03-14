@@ -153,7 +153,7 @@ module _ where
       ... | tri≈ ¬a b ¬c = ⊥-elim (subst Truth eq (≡⇒≡ᵇ (tree-dim (S >>[ P ] T)) (tree-dim S) b))
       ... | tri> ¬a ¬b c = ⊥-elim (≤⇒≯ (insertion-tree-dim S P T p) c)
 
-      l1 : toVarSet (FVSTm (t >>= (κ S P T ,, S⋆))) ≡ toVarSet (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true)
+      l1 : toVarSet (FVSTm (t >>= (κ S P T ,, S⋆))) ≡ toVarSet (tree-bd-vs (pred (tree-dim S)) (S >>[ P ] T) true)
       l1 = begin
         toVarSet (FVSTm (t >>= (κ S P T ,, S⋆)))
           ≡⟨ vs-label-STm t (κ S P T) (κ-Ty S P T p) ⟩
@@ -161,18 +161,18 @@ module _ where
           ≡˘⟨ vs-label-DCT (FVSTm t) (κ S P T) ⟩
         DCT (FVSTm t) [ κ S P T ]vl
           ≡⟨ cong (_[ κ S P T ]vl) tgt ⟩
-        supp-tree-bd (pred (tree-dim S)) S true [ κ S P T ]vl
-          ≡⟨ κ-boundary-supp S P T p (pred (tree-dim S)) true ⟩
-        toVarSet (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true) ∎
+        tree-bd-vs (pred (tree-dim S)) S true [ κ S P T ]vl
+          ≡⟨ κ-boundary-vs S P T p (pred (tree-dim S)) true ⟩
+        toVarSet (tree-bd-vs (pred (tree-dim S)) (S >>[ P ] T) true) ∎
 
       lem : DCT (FVSTm (t >>= (κ S P T ,, S⋆))) ≡ tFull
       lem = begin
         DCT (FVSTm (t >>= (κ S P T ,, S⋆)))
           ≡⟨ DCT-reflect l1 ⟩
-        DCT (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true)
-          ≡⟨ DCT-supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true ⟩
-        supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) true
-          ≡⟨ supp-tree-bd-full (pred (tree-dim S)) (S >>[ P ] T) true dim-< ⟩
+        DCT (tree-bd-vs (pred (tree-dim S)) (S >>[ P ] T) true)
+          ≡⟨ DCT-tree-bd-vs (pred (tree-dim S)) (S >>[ P ] T) true ⟩
+        tree-bd-vs (pred (tree-dim S)) (S >>[ P ] T) true
+          ≡⟨ tree-bd-vs-full (pred (tree-dim S)) (S >>[ P ] T) true dim-< ⟩
         tFull ∎
   ... | true | [ eq ]r = NonZero-subst (sym dim-eq) nz ,, lem s false src ,, lem t true tgt
     where
@@ -181,10 +181,10 @@ module _ where
 
       l1 : (a : STm (someTree S))
          → (b : Bool)
-         → DCT (FVSTm a) ≡ supp-tree-bd (pred (tree-dim S)) S b
+         → DCT (FVSTm a) ≡ tree-bd-vs (pred (tree-dim S)) S b
          → toVarSet (FVSTm (a >>= (κ S P T ,, S⋆)))
            ≡
-           toVarSet (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b)
+           toVarSet (tree-bd-vs (pred (tree-dim S)) (S >>[ P ] T) b)
       l1 a b q = begin
         toVarSet (FVSTm (a >>= (κ S P T ,, S⋆)))
           ≡⟨ vs-label-STm a (κ S P T) (κ-Ty S P T p) ⟩
@@ -192,21 +192,21 @@ module _ where
           ≡˘⟨ vs-label-DCT (FVSTm a) (κ S P T) ⟩
         DCT (FVSTm a) [ κ S P T ]vl
           ≡⟨ cong (_[ κ S P T ]vl) q ⟩
-        supp-tree-bd (pred (tree-dim S)) S b [ κ S P T ]vl
-          ≡⟨ κ-boundary-supp S P T p (pred (tree-dim S)) b ⟩
-        toVarSet (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b) ∎
+        tree-bd-vs (pred (tree-dim S)) S b [ κ S P T ]vl
+          ≡⟨ κ-boundary-vs S P T p (pred (tree-dim S)) b ⟩
+        toVarSet (tree-bd-vs (pred (tree-dim S)) (S >>[ P ] T) b) ∎
 
       lem : (a : STm (someTree S))
           → (b : Bool)
-          → DCT (FVSTm a) ≡ supp-tree-bd (pred (tree-dim S)) S b
+          → DCT (FVSTm a) ≡ tree-bd-vs (pred (tree-dim S)) S b
           → DCT (FVSTm (a >>= (κ S P T ,, S⋆)))
             ≡
-            supp-tree-bd (pred (tree-dim (S >>[ P ] T))) (S >>[ P ] T) b
+            tree-bd-vs (pred (tree-dim (S >>[ P ] T))) (S >>[ P ] T) b
       lem a b q = begin
         DCT (FVSTm (a >>= (κ S P T ,, S⋆)))
           ≡⟨ DCT-reflect (l1 a b q) ⟩
-        DCT (supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b)
-          ≡⟨ DCT-supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b ⟩
-        supp-tree-bd (pred (tree-dim S)) (S >>[ P ] T) b
-          ≡˘⟨ cong (λ - → supp-tree-bd (pred -) (S >>[ P ] T) b) dim-eq ⟩
-        supp-tree-bd (pred (tree-dim (S >>[ P ] T))) (S >>[ P ] T) b ∎
+        DCT (tree-bd-vs (pred (tree-dim S)) (S >>[ P ] T) b)
+          ≡⟨ DCT-tree-bd-vs (pred (tree-dim S)) (S >>[ P ] T) b ⟩
+        tree-bd-vs (pred (tree-dim S)) (S >>[ P ] T) b
+          ≡˘⟨ cong (λ - → tree-bd-vs (pred -) (S >>[ P ] T) b) dim-eq ⟩
+        tree-bd-vs (pred (tree-dim (S >>[ P ] T))) (S >>[ P ] T) b ∎

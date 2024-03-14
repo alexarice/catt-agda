@@ -69,11 +69,11 @@ ecr-susp [ ECR Γ Δ s sfull A σ ] = ∈r-≃ [ ECR (susp-ctx Γ) (susp-ctx Δ)
     supp-lem : SuppTm (susp-ctx Δ) (susp-tm s) ≡ full
     supp-lem = begin
       SuppTm (susp-ctx Δ) (susp-tm s)
-        ≡⟨ susp-SuppTm′ Δ s ⟩
-      susp-supp (SuppTm Δ s)
-        ≡⟨ cong susp-supp sfull ⟩
-      susp-supp full
-        ≡⟨ susp-supp-full ⟩
+        ≡⟨ susp-SuppTm Δ s ⟩
+      susp-vs (SuppTm Δ s)
+        ≡⟨ cong susp-vs sfull ⟩
+      susp-vs full
+        ≡⟨ susp-vs-full ⟩
       full ∎
       where
         open ≡-Reasoning

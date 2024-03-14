@@ -18,7 +18,7 @@ ops-s S xs ys = ops ⌊ S ⌋ (toVarSet xs) (toVarSet ys)
 
 StandardSOp : SOp → Set
 StandardSOp o = ∀ {n} (S : Tree n) (d : ℕ) (p : suc d ≥ tree-dim S)
-               → o S (supp-tree-bd d S false) (supp-tree-bd d S true)
+               → o S (tree-bd-vs d S false) (tree-bd-vs d S true)
 
 standard-op-s : StandardOp ops → StandardSOp ops-s
 standard-op-s std S d p = subst₂ (ops ⌊ S ⌋)

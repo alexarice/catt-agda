@@ -79,8 +79,8 @@ std-susp _ _ _ (Std Γ d p q r)
         ⦃ susp-pd it ⦄
         (suc d)
         (≤-trans (≤-reflexive (susp-ctx-dim Γ ⦃ pd-non-empty it ⦄)) (s≤s p))
-        (trans (cong suspSupp q) (susp-pd-bd-compat d Γ false))
-        (trans (cong suspSupp r) (susp-pd-bd-compat d Γ true))
+        (trans (cong susp-supp q) (susp-pd-bd-compat d Γ false))
+        (trans (cong susp-supp r) (susp-pd-bd-compat d Γ true))
 
 reg-susp : SuspOp Regular
 reg-susp _ _ _ reg = std→reg (std-susp _ _ _ (reg→std reg))

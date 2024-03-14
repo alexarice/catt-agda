@@ -35,8 +35,8 @@ wedge-supp-empty : (n : ℕ) → (t : Tm (suc n)) → (m : ℕ) → wedge-supp {
 wedge-supp-empty n t zero = refl
 wedge-supp-empty n t (suc m) = cong ewf (wedge-supp-empty n t m)
 
-wedge-susp-supp-base : (xs : VarSet (suc n)) → wedge-susp-supp (suspSupp xs) (ewt emp) ≡ suspSupp xs
-wedge-susp-supp-base xs = sym (lookup-isVar-⊆ (suspSupp xs) get-snd (suspSuppSndTruth xs))
+wedge-susp-supp-base : (xs : VarSet (suc n)) → wedge-susp-supp (susp-supp xs) (ewt emp) ≡ susp-supp xs
+wedge-susp-supp-base xs = sym (lookup-isVar-⊆ (susp-supp xs) get-snd (susp-suppSndTruth xs))
 
 VarSet-NonEmpty-Special : (xs : VarSet n) → Set
 VarSet-NonEmpty-Special {zero} xs = ⊥
@@ -62,11 +62,11 @@ wedge-susp-pdb-bd-compat : (n : ℕ)
                       → (Δ : Ctx (suc l))
                       → .⦃ pdb : Δ ⊢pdb ⦄
                       → (b : Bool)
-                      → wedge-susp-supp (suspSupp (pd-bd-supp n Γ b)) (pdb-bd-supp (suc n) Δ b) ≡ pdb-bd-supp (suc n) (wedge-susp Γ Δ) ⦃ wedge-susp-pdb pd pdb ⦄ b
+                      → wedge-susp-supp (susp-supp (pd-bd-supp n Γ b)) (pdb-bd-supp (suc n) Δ b) ≡ pdb-bd-supp (suc n) (wedge-susp Γ Δ) ⦃ wedge-susp-pdb pd pdb ⦄ b
 wedge-susp-pdb-bd-compat n Γ ⦃ pd ⦄ (∅ , A) b = begin
-  wedge-susp-supp (suspSupp (pd-bd-supp n Γ b)) (ewt emp)
+  wedge-susp-supp (susp-supp (pd-bd-supp n Γ b)) (ewt emp)
     ≡⟨ wedge-susp-supp-base (pd-bd-supp n Γ b) ⟩
-  suspSupp (pd-bd-supp n Γ b)
+  susp-supp (pd-bd-supp n Γ b)
     ≡⟨ susp-pd-bd-compat n Γ b ⟩
   pd-bd-supp (suc n) (susp-ctx Γ) ⦃ susp-pd it ⦄ b ∎
   where
@@ -77,7 +77,7 @@ wedge-susp-pdb-bd-compat {m = m} n Γ (Δ , C , B , A) b rewrite sym (sub-dim (w
 ... | tri< a ¬b ¬c | b = cong ewf (cong ewf (wedge-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ b))
 ... | tri≈ ¬a b₁ ¬c | false = cong ewf (cong ewf (wedge-susp-pdb-bd-compat n Γ (Δ , C) ⦃ pdb-prefix it ⦄ false))
 ... | tri≈ ¬a b₁ ¬c | true
-  = cong ewf (cong ewt (trans (wedge-drop (suspSupp (pd-bd-supp n Γ true))
+  = cong ewf (cong ewt (trans (wedge-drop (susp-supp (pd-bd-supp n Γ true))
                                           (pdb-bd-supp (suc n) (Δ , C) ⦃ pdb-prefix it ⦄ true)
                                           ⦃ pdb-bd-supp-non-empty-special n (Δ , C) ⦃ pdb-prefix it ⦄ true
                                                                           ⦃ focus-ty-dim-to-non-empty (pdb-prefix it) (≤-trans (≤-trans (s≤s z≤n) (≤-reflexive b₁)) (≤-reflexive (ty-dim-≃ (pdb-proj₁ {Γ = Δ , C} it)))) ⦄ ⦄)
@@ -90,7 +90,7 @@ wedge-susp-pd-bd-compat : (n : ℕ)
                       → (Δ : Ctx (suc l))
                       → .⦃ pd2 : Δ ⊢pd ⦄
                       → (b : Bool)
-                      → wedge-susp-supp (suspSupp (pd-bd-supp n Γ b)) (pd-bd-supp (suc n) Δ b) ≡ pd-bd-supp (suc n) (wedge-susp Γ Δ) ⦃ wedge-susp-pd pd pd2 ⦄ b
+                      → wedge-susp-supp (susp-supp (pd-bd-supp n Γ b)) (pd-bd-supp (suc n) Δ b) ≡ pd-bd-supp (suc n) (wedge-susp Γ Δ) ⦃ wedge-susp-pd pd pd2 ⦄ b
 wedge-susp-pd-bd-compat n Γ ⦃ pd ⦄ Δ ⦃ pd2 ⦄ b = wedge-susp-pdb-bd-compat n Γ Δ ⦃ pd-to-pdb pd2 ⦄ b
 
 wedge-supp-full : ∀ n (t : Tm (suc n)) m → wedge-supp {n} {m} full t full ≡ full
@@ -161,8 +161,8 @@ wedge-supp-∪ {n = n} {m = zero} xs xs′ (ewt ys) (ewt ys′) t = begin
     open ≡-Reasoning
 wedge-supp-∪ {m = suc m} xs xs′ (y ∷ ys) (y′ ∷ ys′) t = cong ((y ∨ y′) ∷_) (wedge-supp-∪ xs xs′ ys ys′ t)
 
-wedge-susp-supp-lem : (xs : VarSet (suc n)) → (ys : VarSet (suc m)) → wedge-susp-supp (suspSupp xs) ys ≡ wedge-susp-supp (suspSupp xs) (trueAt (fromℕ _) ∪ ys)
-wedge-susp-supp-lem {m = zero} xs (ewf emp) = lookup-isVar-⊆ (suspSupp xs) get-snd (suspSuppSndTruth xs)
+wedge-susp-supp-lem : (xs : VarSet (suc n)) → (ys : VarSet (suc m)) → wedge-susp-supp (susp-supp xs) ys ≡ wedge-susp-supp (susp-supp xs) (trueAt (fromℕ _) ∪ ys)
+wedge-susp-supp-lem {m = zero} xs (ewf emp) = lookup-isVar-⊆ (susp-supp xs) get-snd (susp-suppSndTruth xs)
 wedge-susp-supp-lem {m = zero} xs (ewt emp) = refl
 wedge-susp-supp-lem {m = suc m} xs (y ∷ ys) = cong (y ∷_) (wedge-susp-supp-lem xs ys)
 
@@ -195,10 +195,10 @@ wedge-susp-supp-DC Γ Δ xs ys = wedge-supp-DC (susp-ctx Γ) get-snd Δ xs ys (l
     lem (Γ , A) = cong ewf (lem Γ)
 
 wedge-susp-supp-ext : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m))
-                      → wedge-susp-supp (suspSupp (SuppTm Γ t)) empty ≡ SuppTm (wedge-susp Γ Δ) (susp-tm t [ wedge-susp-inc-left n m ]tm)
+                      → wedge-susp-supp (susp-supp (SuppTm Γ t)) empty ≡ SuppTm (wedge-susp Γ Δ) (susp-tm t [ wedge-susp-inc-left n m ]tm)
 wedge-susp-supp-ext {m = m} Γ t Δ = begin
-  wedge-susp-supp (suspSupp (SuppTm Γ t)) empty
-    ≡˘⟨ cong₂ wedge-susp-supp (suspSuppTm′ Γ t) (DC-empty Δ) ⟩
+  wedge-susp-supp (susp-supp (SuppTm Γ t)) empty
+    ≡˘⟨ cong₂ wedge-susp-supp (susp-SuppTm′ Γ t) (DC-empty Δ) ⟩
   wedge-susp-supp (SuppTm (susp-ctx Γ) (susp-tm t))
     (DC Δ empty)
     ≡˘⟨ wedge-susp-supp-DC Γ Δ ((FVTm (susp-tm t))) empty ⟩

@@ -71,7 +71,7 @@ rs ⊆r rs′ = ∀ {r} → r ∈r rs → r ∈r rs′
 SuspOp : Op → Set
 SuspOp ops = ∀ {n} (Γ : Ctx n) .⦃ _ : Γ ⊢pd ⦄ (xs ys : VarSet n)
            → ops Γ xs ys
-           → ops (susp-ctx Γ) (suspSupp xs) (suspSupp ys)
+           → ops (susp-ctx Γ) (susp-supp xs) (susp-supp ys)
 
 StandardOp : Op → Set
 StandardOp ops = ∀ {n} (Γ : Ctx n) .⦃ _ : Γ ⊢pd ⦄ (d : ℕ) (p : suc d ≥ ctx-dim Γ)

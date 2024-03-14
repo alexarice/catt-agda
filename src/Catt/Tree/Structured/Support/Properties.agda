@@ -117,9 +117,9 @@ fromPath-to-term {S = S} PHere = begin
     ≡˘⟨ DC-fromℕ ⌊ S ⌋ ⟩
   SuppTm ⌊ S ⌋ (Var (fromℕ _)) ∎
 fromPath-to-term {S = Join S T} (PExt P) rewrite Truth-prop (fromPath-non-empty P) = begin
-  wedge-susp-supp (suspSupp (toVarSet (fromPath P))) (toVarSet (tEmp {S = T}))
-    ≡⟨ cong₂ (λ x y → wedge-susp-supp (suspSupp x) y) (fromPath-to-term P) (toVarSet-emp T) ⟩
-  wedge-susp-supp (suspSupp (SuppTm ⌊ S ⌋ (path-to-term P))) empty
+  wedge-susp-supp (susp-supp (toVarSet (fromPath P))) (toVarSet (tEmp {S = T}))
+    ≡⟨ cong₂ (λ x y → wedge-susp-supp (susp-supp x) y) (fromPath-to-term P) (toVarSet-emp T) ⟩
+  wedge-susp-supp (susp-supp (SuppTm ⌊ S ⌋ (path-to-term P))) empty
     ≡⟨ wedge-susp-supp-ext ⌊ S ⌋ (path-to-term P) ⌊ T ⌋ ⟩
   SuppTm (⌊ Join S T ⌋) (susp-tm (path-to-term P) [ wedge-susp-inc-left _ _ ]tm) ∎
 fromPath-to-term {S = Join S T} (PShift P) rewrite Truth-not-prop (tvarset-empty S) = begin
@@ -154,9 +154,9 @@ FVSTm-to-term {ΓS = incCtx Γ} (SCoh S A L) = begin
   SuppTm Γ (Coh ⌊ S ⌋ (sty-to-type A) idSub [ label-to-sub L ]tm) ∎
 FVSTm-to-term {ΓS = incCtx _} (SOther t) = refl
 FVSTm-to-term {ΓS = incTree (Join S T)} (SExt a) rewrite Truth-prop (FVSTm-non-empty a) = begin
-  wedge-susp-supp (suspSupp (toVarSet (FVSTm a))) (toVarSet (tEmp {S = T}))
-    ≡⟨ cong₂ (λ x y → wedge-susp-supp (suspSupp x) y) (FVSTm-to-term a) (toVarSet-emp T) ⟩
-  wedge-susp-supp (suspSupp (SuppTm ⌊ S ⌋ (stm-to-term a))) empty
+  wedge-susp-supp (susp-supp (toVarSet (FVSTm a))) (toVarSet (tEmp {S = T}))
+    ≡⟨ cong₂ (λ x y → wedge-susp-supp (susp-supp x) y) (FVSTm-to-term a) (toVarSet-emp T) ⟩
+  wedge-susp-supp (susp-supp (SuppTm ⌊ S ⌋ (stm-to-term a))) empty
     ≡⟨ wedge-susp-supp-ext ⌊ S ⌋ (stm-to-term a) ⌊ T ⌋ ⟩
   SuppTm ⌊ Join S T ⌋ (susp-tm (stm-to-term a) [ wedge-susp-inc-left _ _ ]tm) ∎
 FVSTm-to-term {ΓS = incTree (Join S T)} (SShift a) rewrite Truth-not-prop (tvarset-empty S) = begin

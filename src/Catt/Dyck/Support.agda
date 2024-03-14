@@ -97,9 +97,9 @@ dyck-bd-drop {d = d} (2+ m) (⇑ dy) with <-cmp d (ty-dim (dyck-type dy))
       FVTm (ty-tgt′ (wk-ty (truncate′ m (wk-ty (wk-ty (dyck-pre-type dy))))))
         ≡⟨ FVTm-≃ l1 ⟩
       FVTm (wk-tm (wk-tm (ty-tgt′ (wk-ty (truncate′ m (dyck-pre-type dy))))))
-        ≡⟨ supp-wk-tm (wk-tm (ty-tgt′ (wk-ty (truncate′ m (dyck-pre-type dy))))) ⟩
+        ≡⟨ fv-wk-tm (wk-tm (ty-tgt′ (wk-ty (truncate′ m (dyck-pre-type dy))))) ⟩
       ewf (FVTm (wk-tm (ty-tgt′ (wk-ty (truncate′ m (dyck-pre-type dy))))))
-        ≡⟨ cong ewf (supp-wk-tm (ty-tgt′ (wk-ty (truncate′ m (dyck-pre-type dy))))) ⟩
+        ≡⟨ cong ewf (fv-wk-tm (ty-tgt′ (wk-ty (truncate′ m (dyck-pre-type dy))))) ⟩
       ewf (ewf (FVTm (ty-tgt′ (wk-ty (truncate′ m (dyck-pre-type dy)))))) ∎
 
 
@@ -123,10 +123,10 @@ dyck-bd-contains-ty zero d End b p = ⊆-bot (drop (dyck-bd-supp d End b))
 dyck-bd-contains-ty zero d (⇑ dy) b p = begin
   FVTy (wk-ty (wk-ty (dyck-type dy))) ∪ FVTm (wk-tm (wk-tm (dyck-term dy))) ∪ ewf (ewt empty)
     ≈⟨ cong₂ (λ a b → a ∪ b ∪ ewf (ewt empty))
-             (trans (supp-wk-ty (wk-ty (dyck-type dy)))
-                    (cong ewf (supp-wk-ty (dyck-type dy))))
-             (trans (supp-wk-tm (wk-tm (dyck-term dy)))
-                    (cong ewf (supp-wk-tm (dyck-term dy)))) ⟩
+             (trans (fv-wk-ty (wk-ty (dyck-type dy)))
+                    (cong ewf (fv-wk-ty (dyck-type dy))))
+             (trans (fv-wk-tm (wk-tm (dyck-term dy)))
+                    (cong ewf (fv-wk-tm (dyck-term dy)))) ⟩
   ewf (ewt (FVTy (dyck-type dy) ∪ FVTm (dyck-term dy) ∪ empty))
     ≈⟨ cong (ewf ∘ ewt) (∪-right-unit (FVTy (wk-ty (dyck-pre-type dy)) ∪ FVTm (dyck-term dy))) ⟩
   ewf (ewt (FVTy (dyck-type dy) ∪ FVTm (dyck-term dy)))
@@ -157,9 +157,9 @@ dyck-bd-contains-ty (suc x) d (⇑ dy) b p with <-cmp d (ty-dim (wk-ty (dyck-pre
   FVTy (wk-ty (truncate′ x (wk-ty (wk-ty (dyck-pre-type dy)))))
     ≈⟨ FVTy-≃ (wk-ty-≃ (lem x dy)) ⟩
   FVTy (wk-ty (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))))
-    ≈⟨ supp-wk-ty (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
+    ≈⟨ fv-wk-ty (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
   ewf (FVTy (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))))
-    ≈⟨ cong ewf (supp-wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
+    ≈⟨ cong ewf (fv-wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
   ewf (ewf (FVTy (wk-ty (truncate′ x (dyck-pre-type dy)))))
     ≤⟨ cong (ewf ∘ ewf) (dyck-bd-contains-ty x d dy b (≤-pred p)) ⟩
   ewf (ewf (drop (dyck-bd-supp d dy b))) ∎
@@ -169,9 +169,9 @@ dyck-bd-contains-ty (suc x) d (⇑ dy) b p with <-cmp d (ty-dim (wk-ty (dyck-pre
   FVTy (wk-ty (truncate′ x (wk-ty (wk-ty (dyck-pre-type dy)))))
     ≈⟨ FVTy-≃ (wk-ty-≃ (lem x dy)) ⟩
   FVTy (wk-ty (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))))
-    ≈⟨ supp-wk-ty (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
+    ≈⟨ fv-wk-ty (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
   ewf (FVTy (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))))
-    ≈⟨ cong ewf (supp-wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
+    ≈⟨ cong ewf (fv-wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
   ewf (ewf (FVTy (wk-ty (truncate′ x (dyck-pre-type dy)))))
     ≤⟨ cong (ewf ∘ ewf) (dyck-bd-contains-ty′ x d dy b (≤-pred p)) ⟩
   ewf (ewf (dyck-bd-supp d dy b))
@@ -183,9 +183,9 @@ dyck-bd-contains-ty (suc x) d (⇑ dy) b p with <-cmp d (ty-dim (wk-ty (dyck-pre
   FVTy (wk-ty (truncate′ x (wk-ty (wk-ty (dyck-pre-type dy)))))
     ≈⟨ FVTy-≃ (wk-ty-≃ (lem x dy)) ⟩
   FVTy (wk-ty (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))))
-    ≈⟨ supp-wk-ty (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
+    ≈⟨ fv-wk-ty (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
   ewf (FVTy (wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))))
-    ≈⟨ cong ewf (supp-wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
+    ≈⟨ cong ewf (fv-wk-ty (wk-ty (truncate′ x (dyck-pre-type dy)))) ⟩
   ewf (ewf (FVTy (wk-ty (truncate′ x (dyck-pre-type dy)))))
     ≤⟨ cong (ewf ∘ ewf) (dyck-bd-contains-ty x d dy b (≤-pred p)) ⟩
   ewf (ewf (drop (dyck-bd-supp d dy b)))

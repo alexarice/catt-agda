@@ -52,8 +52,8 @@ supp-ctx-inc-v2v (ewt xs) = (wk-sub-preserve-var-to-var (supp-ctx-inc xs) ⦃ su
 
 supp-ctx-inc-FV : (xs : VarSet n) → FVSub (supp-ctx-inc xs) ≡ xs
 supp-ctx-inc-FV emp = refl
-supp-ctx-inc-FV (ewf xs) = trans (supp-wk-sub (supp-ctx-inc xs)) (cong ewf (supp-ctx-inc-FV xs))
-supp-ctx-inc-FV (ewt xs) = trans (cong (_∪ ewt empty) (supp-wk-sub (supp-ctx-inc xs))) (cong ewt (trans (∪-right-unit (FVSub (supp-ctx-inc xs))) (supp-ctx-inc-FV xs)))
+supp-ctx-inc-FV (ewf xs) = trans (fv-wk-sub (supp-ctx-inc xs)) (cong ewf (supp-ctx-inc-FV xs))
+supp-ctx-inc-FV (ewt xs) = trans (cong (_∪ ewt empty) (fv-wk-sub (supp-ctx-inc xs))) (cong ewt (trans (∪-right-unit (FVSub (supp-ctx-inc xs))) (supp-ctx-inc-FV xs)))
 
 supp-ctx : (Γ : Ctx n) → (xs : VarSet n) → .(is-DC Γ xs) → Ctx (VarSet-size xs)
 supp-ctx ∅ emp dc = ∅

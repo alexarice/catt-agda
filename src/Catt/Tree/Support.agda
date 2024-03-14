@@ -356,9 +356,9 @@ supp-compat′ zero T true = let
       FVTm (pdb-right-base pdb)
         ≡⟨ FVTm-≃ (pdb-right-base-prefix pdb a) ⟩
       FVTm (wk-tm (wk-tm (pdb-right-base (pdb-prefix pdb))))
-        ≡⟨ supp-wk-tm (wk-tm (pdb-right-base (pdb-prefix pdb))) ⟩
+        ≡⟨ fv-wk-tm (wk-tm (pdb-right-base (pdb-prefix pdb))) ⟩
       ewf (FVTm (wk-tm (pdb-right-base (pdb-prefix pdb))))
-        ≡⟨ cong ewf (supp-wk-tm (pdb-right-base (pdb-prefix pdb))) ⟩
+        ≡⟨ cong ewf (fv-wk-tm (pdb-right-base (pdb-prefix pdb))) ⟩
       ewf (ewf (FVTm (pdb-right-base (pdb-prefix pdb))))
         ≡⟨ cong ewf (cong ewf (lem (Γ , C) (pdb-prefix pdb))) ⟩
       ewf (ewf (pdb-bd-supp 0 (Γ , C) ⦃ pdb-prefix pdb ⦄ true)) ∎

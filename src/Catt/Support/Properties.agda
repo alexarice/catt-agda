@@ -181,31 +181,31 @@ vs-sub-tm (Coh S A τ) σ = vs-sub-sub τ σ
 vs-sub-sub ⟨ A ⟩′ σ = vs-sub-ty A σ
 vs-sub-sub ⟨ τ , t ⟩ σ = trans (vs-sub-∪ (FVSub τ) (FVTm t) σ) (cong₂ _∪_ (vs-sub-sub τ σ) (vs-sub-tm t σ))
 
-supp-wk-ty : (A : Ty n) → FVTy (wk-ty A) ≡ ewf (FVTy A)
-supp-wk-tm : (t : Tm n) → FVTm (wk-tm t) ≡ ewf (FVTm t)
-supp-wk-sub : (σ : Sub n m ⋆) → FVSub (wk-sub σ) ≡ ewf (FVSub σ)
+fv-wk-ty : (A : Ty n) → FVTy (wk-ty A) ≡ ewf (FVTy A)
+fv-wk-tm : (t : Tm n) → FVTm (wk-tm t) ≡ ewf (FVTm t)
+fv-wk-sub : (σ : Sub n m ⋆) → FVSub (wk-sub σ) ≡ ewf (FVSub σ)
 
-supp-wk-ty ⋆ = refl
-supp-wk-ty (s ─⟨ A ⟩⟶ t) = cong₂ _∪_ (cong₂ _∪_ (supp-wk-ty A) (supp-wk-tm s)) (supp-wk-tm t)
+fv-wk-ty ⋆ = refl
+fv-wk-ty (s ─⟨ A ⟩⟶ t) = cong₂ _∪_ (cong₂ _∪_ (fv-wk-ty A) (fv-wk-tm s)) (fv-wk-tm t)
 
-supp-wk-tm (Var i) = refl
-supp-wk-tm (Coh S A σ) = supp-wk-sub σ
+fv-wk-tm (Var i) = refl
+fv-wk-tm (Coh S A σ) = fv-wk-sub σ
 
-supp-wk-sub ⟨ _ ⟩′ = refl
-supp-wk-sub ⟨ σ , t ⟩ = cong₂ _∪_ (supp-wk-sub σ) (supp-wk-tm t)
+fv-wk-sub ⟨ _ ⟩′ = refl
+fv-wk-sub ⟨ σ , t ⟩ = cong₂ _∪_ (fv-wk-sub σ) (fv-wk-tm t)
 
 idSub-supp : FVSub (idSub {n}) ≡ full
 idSub-supp {zero} = refl
-idSub-supp {suc n} = trans (cong (_∪ ewt empty) (supp-wk-sub idSub)) (cong ewt (trans (∪-right-unit (FVSub idSub)) idSub-supp))
+idSub-supp {suc n} = trans (cong (_∪ ewt empty) (fv-wk-sub idSub)) (cong ewt (trans (∪-right-unit (FVSub idSub)) idSub-supp))
 
 idSub≃-supp : (p : Γ ≃c Δ) → FVSub (idSub≃ p) ≡ full
 idSub≃-supp Emp≃ = refl
-idSub≃-supp (Add≃ p x) = trans (cong (_∪ ewt empty) (supp-wk-sub (idSub≃ p))) (cong ewt (trans (∪-right-unit (FVSub (idSub≃ p))) (idSub≃-supp p)))
+idSub≃-supp (Add≃ p x) = trans (cong (_∪ ewt empty) (fv-wk-sub (idSub≃ p))) (cong ewt (trans (∪-right-unit (FVSub (idSub≃ p))) (idSub≃-supp p)))
 
 vs-sub-wk : (xs : VarSet n) → (σ : Sub n m ⋆) → xs [ wk-sub σ ]vs ≡ ewf (xs [ σ ]vs)
 vs-sub-wk emp ⟨ _ ⟩′ = refl
 vs-sub-wk (ewf xs) ⟨ σ , t ⟩ = vs-sub-wk xs σ
-vs-sub-wk (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (vs-sub-wk xs σ) (supp-wk-tm t)
+vs-sub-wk (ewt xs) ⟨ σ , t ⟩ = cong₂ _∪_ (vs-sub-wk xs σ) (fv-wk-tm t)
 
 vs-sub-id-lem : (b : Bool) → (xs : VarSet n) → (σ : Sub n m ⋆)
                        → (b ∷ xs) [ ⟨ wk-sub σ , 0V ⟩ ]vs ≡ b ∷ xs [ σ ]vs
@@ -506,7 +506,7 @@ FVSub-comp-⊆ ⟨ τ , t ⟩ σ = begin
 SuppContainsType : (t : Tm n) → (Γ : Ctx n) → SuppTy Γ (tm-to-ty Γ t) ⊆ SuppTm Γ t
 SuppContainsType (Var zero) (Γ , A) = begin
   SuppTy (Γ , A) (wk-ty A)
-    ≡⟨ cong (DC (Γ , A)) (supp-wk-ty A) ⟩
+    ≡⟨ cong (DC (Γ , A)) (fv-wk-ty A) ⟩
   ewf (SuppTy Γ A)
     ≤⟨ cong ewt (sym (∪-idem (SuppTy Γ A))) ⟩
   ewt (SuppTy Γ A)
@@ -519,7 +519,7 @@ SuppContainsType (Var zero) (Γ , A) = begin
 
 SuppContainsType (Var (suc i)) (Γ , A) = begin
   SuppTy (Γ , A) (wk-ty (Γ ‼ i))
-    ≡⟨ cong (DC (Γ , A)) (supp-wk-ty (Γ ‼ i)) ⟩
+    ≡⟨ cong (DC (Γ , A)) (fv-wk-ty (Γ ‼ i)) ⟩
   ewf (SuppTy Γ (Γ ‼ i))
     ≤⟨ cong ewf (SuppContainsType (Var i) Γ) ⟩
   ewf (SuppTm Γ (Var i))

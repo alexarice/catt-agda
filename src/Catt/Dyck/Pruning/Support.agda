@@ -32,9 +32,9 @@ open ≡-Reasoning
   full ∎
 π-full {n = suc n} (⇑pk p) = begin
   FVSub (wk-sub (wk-sub (π p))) ∪ ewf (ewt empty) ∪ ewt empty
-    ≡⟨ cong (λ - → - ∪ ewf (ewt empty) ∪ ewt empty) (supp-wk-sub (wk-sub (π p))) ⟩
+    ≡⟨ cong (λ - → - ∪ ewf (ewt empty) ∪ ewt empty) (fv-wk-sub (wk-sub (π p))) ⟩
   ewt (FVSub (wk-sub (π p)) ∪ ewt empty ∪ empty)
-    ≡⟨ cong (λ - → ewt (- ∪ ewt empty ∪ empty)) (supp-wk-sub (π p)) ⟩
+    ≡⟨ cong (λ - → ewt (- ∪ ewt empty ∪ empty)) (fv-wk-sub (π p)) ⟩
   ewt (ewt (FVSub (π p) ∪ empty ∪ empty))
     ≡⟨ cong (ewt ∘ ewt) (solve (∪-monoid {n = suc (n * 2)})) ⟩
   ewt (ewt (FVSub (π p)))

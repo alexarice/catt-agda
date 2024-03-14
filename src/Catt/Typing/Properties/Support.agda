@@ -108,14 +108,14 @@ SuppTmChar (TyVar {Γ = Γ , A} zero) = begin
   ewt (SuppTy Γ A)
     ≡˘⟨ cong ewt (∪-right-unit (SuppTy Γ A)) ⟩
   ewt (SuppTy Γ A ∪ empty)
-    ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewt empty) (supp-wk-ty A) ⟩
+    ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewt empty) (fv-wk-ty A) ⟩
   SuppTy (Γ , A) (wk-ty A) ∪ ewt empty ∎
 
 SuppTmChar (TyVar {Γ = Γ , A} (suc i)) = begin
   ewf (SuppTm Γ (Var i))
     ≡⟨ cong ewf (SuppTmChar (TyVar i)) ⟩
   ewf (SuppTy Γ (Γ ‼ i) ∪ FVTm (Var i))
-    ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewf (FVTm (Var i))) (supp-wk-ty (Γ ‼ i)) ⟩
+    ≡˘⟨ cong (λ - → DC (Γ , A) - ∪ ewf (FVTm (Var i))) (fv-wk-ty (Γ ‼ i)) ⟩
   SuppTy (Γ , A) (wk-ty (Γ ‼ i)) ∪ ewf (FVTm (Var i)) ∎
 
 SuppTmChar {Γ = Γ} (TyCoh {Δ = Δ} {A = A} {σ = σ} x Aty σty) = begin

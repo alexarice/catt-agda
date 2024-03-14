@@ -30,11 +30,11 @@ module _ where
   rulesWithSupp-wk p A [ x ,, supp ] .get .proj₁ = p A [ x ] .get
   rulesWithSupp-wk p {r = r} A [ x ,, supp ] .get .proj₂ = begin
     SuppTm (tgtCtx , A) (wk-tm lhs)
-      ≡⟨ cong (DC _) (supp-wk-tm lhs) ⟩
+      ≡⟨ cong (DC _) (fv-wk-tm lhs) ⟩
     ewf (SuppTm tgtCtx lhs)
       ≡⟨ cong ewf supp ⟩
     ewf (SuppTm tgtCtx rhs)
-      ≡˘⟨ cong (DC _) (supp-wk-tm rhs) ⟩
+      ≡˘⟨ cong (DC _) (fv-wk-tm rhs) ⟩
     SuppTm (tgtCtx , A) (wk-tm rhs) ∎
     where
       open Rule r

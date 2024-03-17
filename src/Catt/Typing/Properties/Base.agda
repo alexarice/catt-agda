@@ -10,6 +10,7 @@ open import Catt.Syntax.Properties
 open import Catt.Variables
 open import Catt.Globular
 open import Catt.Suspension
+open import Catt.Suspension.Properties
 open import Catt.Pasting
 open import Catt.Pasting.Properties
 open import Catt.Support
@@ -178,6 +179,28 @@ ty-dim-≈ (Arr≈ _ p _) = cong suc (ty-dim-≈ p)
 ↓-≈ : σ ≈[ Δ ]s τ → ↓ σ ≈[ Δ ]s ↓ τ
 ↓-≈ (Null≈ (Arr≈ p q r)) = Ext≈ (Ext≈ (Null≈ q) p) r
 ↓-≈ (Ext≈ eq x) = Ext≈ (↓-≈ eq) x
+
+↓-Ty : Typing-Sub Γ Δ σ → Typing-Sub (susp-ctx Γ) Δ (↓ σ)
+↓-Ty (TyNull (TyArr p q r)) = TyExt (TyExt (TyNull q) p) r
+↓-Ty (TyExt σty x) = TyExt (↓-Ty σty) (TyConv x (reflexive≈ty (sym≃ty (↓-comp-ty _ _))))
+
+↑-Ty : {σ : Sub (2 + n) m A}
+     → Typing-Sub (susp-ctx Γ) Δ σ
+     → Typing-Sub Γ Δ (↑ σ)
+↑-Ty {Γ = ∅} (TyExt (TyExt (TyNull z) y) x) = TyNull (TyArr y z x)
+↑-Ty {Γ = ∅ , A} (TyExt (TyExt (TyExt σty z) y) x)
+  = TyExt (↑-Ty (TyExt (TyExt σty z) y))
+          (TyConv x (reflexive≈ty (trans≃ty (sub-action-≃-ty (refl≃ty {A = susp-ty A}) (sym≃s (↓-↑-≃ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))
+                                            (↓-comp-ty A (↑ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))))
+↑-Ty {Γ = ∅ , B , A} (TyExt (TyExt (TyExt σty z) y) x)
+  = TyExt (↑-Ty (TyExt (TyExt σty z) y))
+          (TyConv x (reflexive≈ty (trans≃ty (sub-action-≃-ty (refl≃ty {A = susp-ty A}) (sym≃s (↓-↑-≃ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))
+                                            (↓-comp-ty A (↑ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))))
+↑-Ty {Γ = Γ , C , B , A} (TyExt (TyExt (TyExt σty z) y) x)
+  = TyExt (↑-Ty (TyExt (TyExt σty z) y))
+          (TyConv x (reflexive≈ty (trans≃ty (sub-action-≃-ty (refl≃ty {A = susp-ty A}) (sym≃s (↓-↑-≃ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))
+                                            (↓-comp-ty A (↑ ⟨ ⟨ _ , _ ⟩ , _ ⟩)))))
+
 
 truncate′-≈ : d ≡ d′ → A ≈[ Γ ]ty A′ → truncate′ d A ≈[ Γ ]ty truncate′ d′ A′
 truncate′-≈ {d = zero} refl p = p

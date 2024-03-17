@@ -89,6 +89,16 @@ sub-from-sphere-Eq {Γ = Γ} (suc d) (TyExt (TyExt {σ = σ} σty y) x) (TyExt (
 sub-from-disc-Eq : (d : ℕ) → {σ : Sub (disc-size d) n A} → {τ : Sub (disc-size d) n A} → Typing-Sub (Disc d) Γ σ → Typing-Sub (Disc d) Γ τ → 0V [ σ ]tm ≃tm 0V [ τ ]tm → σ ≈[ Γ ]s τ
 sub-from-disc-Eq d (TyExt σty x) (TyExt τty y) p = Ext≈ (sub-from-sphere-Eq d σty τty (Ty-unique-≃ p x y)) (reflexive≈tm p)
 
+sub-from-sphere-Ty-prop : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → Typing-Sub (Sphere d) Γ (sub-from-sphere d A p) → Typing-Ty Γ A
+sub-from-sphere-Ty-prop d A p σty = transport-typing-ty (apply-sub-weak-ty-typing (W.sphere-type-Ty d) σty)
+                                                        refl≃c
+                                                        (sub-from-sphere-prop d A p)
+  where
+    import Catt.Discs.Typing.Base ops Weak-Rules weak-wk as W
+
+sub-from-disc-Ty-prop : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (t : Tm n) → Typing-Sub (Disc d) Γ (sub-from-disc d A p t) → Typing-Tm Γ t A
+sub-from-disc-Ty-prop d A p t (TyExt σty tty) = TyConv tty (reflexive≈ty (sub-from-sphere-prop d A p))
+
 identity-Ty : (n : ℕ) → ∀ {σ} → Typing-Sub (Disc n) Γ σ → Typing-Tm Γ (identity n σ) ((0V ─⟨ wk-ty (sphere-type n) ⟩⟶ 0V) [ σ ]ty)
 identity-Ty n σty = let
   instance _ = disc-pd n
@@ -126,12 +136,10 @@ identity-term-≈ {A = A} {B = B} {s = s} {t = t} p q = begin
 
 identity-to-term-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Tm Γ t A
 identity-to-term-Ty (TyConv tty p) = identity-to-term-Ty tty
-identity-to-term-Ty {A = A} (TyCoh supp Aty (TyExt σty x))
-  = TyConv x (reflexive≈ty (sub-from-sphere-prop (ty-dim A) A refl))
+identity-to-term-Ty {A = A} (TyCoh supp Aty σty)
+  = sub-from-disc-Ty-prop (ty-dim A) A refl _ σty
 
 identity-to-type-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Ty Γ A
 identity-to-type-Ty (TyConv tty p) = identity-to-type-Ty tty
 identity-to-type-Ty {A = A} (TyCoh supp Aty (TyExt σty _))
-  = transport-typing-ty (apply-sub-weak-ty-typing (W.sphere-type-Ty (ty-dim A)) σty) refl≃c (sub-from-sphere-prop (ty-dim A) A refl)
-  where
-    import Catt.Discs.Typing.Base ops Weak-Rules weak-wk as W
+  = sub-from-sphere-Ty-prop (ty-dim A) A refl σty

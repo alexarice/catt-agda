@@ -9,6 +9,7 @@ open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
+open import Catt.Suspension
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules

@@ -18,7 +18,7 @@ open import Catt.Wedge.Properties
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties ops rules tame
-open import Catt.Suspension.Typing ops susp-op rules wk-cond susp-cond
+open import Catt.Suspension.Typing ops susp-op rules susp-cond
 
 
 wedge-Ty : {Γ : Ctx (suc n)} → Typing-Ctx Γ → {t : Tm (suc n)} → Typing-Tm Γ t ⋆ → {Δ : Ctx (suc m)} → Typing-Ctx Δ → Typing-Ctx (wedge Γ t Δ)

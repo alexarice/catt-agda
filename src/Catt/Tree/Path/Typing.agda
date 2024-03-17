@@ -22,7 +22,7 @@ open import Catt.Tree.Structured.ToTerm
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties ops rules tame
-open import Catt.Suspension.Typing ops susp-op rules wk-cond susp-cond
+open import Catt.Suspension.Typing ops susp-op rules susp-cond
 open import Catt.Wedge.Typing ops rules tame
 
 path-to-term-Ty : (P : Path S) → Typing-Tm ⌊ S ⌋ (path-to-term P) (sty-to-type (getPathType P))

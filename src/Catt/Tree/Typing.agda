@@ -19,7 +19,7 @@ open import Catt.Tree.Properties
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties ops rules tame
 open import Catt.Globular.Typing ops rules
-open import Catt.Suspension.Typing ops susp-op rules wk-cond susp-cond
+open import Catt.Suspension.Typing ops susp-op rules susp-cond
 open import Catt.Wedge.Typing ops rules tame
 
 ⌊⌋-Ty : (T : Tree n) → Typing-Ctx ⌊ T ⌋

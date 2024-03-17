@@ -3,7 +3,6 @@ open import Catt.Typing.Rule
 module Catt.Suspension.Typing (ops : Op)
                               (susp-op : SuspOp ops)
                               (rules : RuleSet)
-                              (wk-cond : WkCond rules)
                               (susp-cond : SuspCond rules) where
 
 open import Catt.Prelude
@@ -21,15 +20,20 @@ open import Catt.Suspension.Support
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
-open import Catt.Typing.Properties.Weakening ops rules wk-cond
 
+open import Catt.Typing.Weak ops
+open import Catt.Typing.Rule.Properties ops
+
+get-fstTy : {Γ : Ctx n} → Typing-Tm (susp-ctx Γ) (get-fst) ⋆
+get-fstTy {Γ = Γ} = TyConv (TyVar (fromℕ _)) (reflexive≈ty (susp-‼-get-fst Γ))
+
+get-sndTy : {Γ : Ctx n} → Typing-Tm (susp-ctx Γ) (get-snd) ⋆
+get-sndTy {Γ = Γ} = TyConv (TyVar (inject₁ (fromℕ _))) (reflexive≈ty (susp-‼-get-snd Γ))
 
 susp-ctxTy : Typing-Ctx Γ → Typing-Ctx (susp-ctx Γ)
 susp-tyTy : Typing-Ty Γ A → Typing-Ty (susp-ctx Γ) (susp-ty A)
 susp-tmTy : Typing-Tm Γ t A → Typing-Tm (susp-ctx Γ) (susp-tm t) (susp-ty A)
 susp-subTy : Typing-Sub Γ Δ σ → Typing-Sub (susp-ctx Γ) (susp-ctx Δ) (susp-sub σ)
-get-fstTy : {Γ : Ctx n} → Typing-Tm (susp-ctx Γ) (get-fst) ⋆
-get-sndTy : {Γ : Ctx n} → Typing-Tm (susp-ctx Γ) (get-snd) ⋆
 
 susp-tyEq : A ≈[ Γ ]ty B → susp-ty A ≈[ susp-ctx Γ ]ty susp-ty B
 susp-tmEq : s ≈[ Γ ]tm t → susp-tm s ≈[ susp-ctx Γ ]tm susp-tm t
@@ -56,12 +60,6 @@ susp-tmTy (TyCoh {Δ = Δ} {A = A@(s ─⟨ _ ⟩⟶ t)} supp Aty σty) = let
 
 susp-subTy (TyNull x) = TyExt (TyExt (TyNull TyStar) get-fstTy) get-sndTy
 susp-subTy (TyExt p r) = TyExt (susp-subTy p) (TyConv (susp-tmTy r) (reflexive≈ty (susp-functorial-ty _ _)))
-
-get-fstTy {Γ = ∅} = TyVar (suc zero)
-get-fstTy {Γ = Γ , A} = wk-tm-typing get-fstTy
-
-get-sndTy {Γ = ∅} = TyVar zero
-get-sndTy {Γ = Γ , A} = wk-tm-typing get-sndTy
 
 susp-tyEq Star≈ = refl≈ty
 susp-tyEq (Arr≈ q r s) = Arr≈ (susp-tmEq q) (susp-tyEq r) (susp-tmEq s)

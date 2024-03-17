@@ -20,6 +20,14 @@ susp-‼ : (Γ : Ctx n) → (i : Fin (ctxLength Γ)) → susp-ctx Γ ‼ inject�
 susp-‼ (Γ , A) zero = sym≃ty (susp-ty-wk A)
 susp-‼ (Γ , A) (suc i) = trans≃ty (wk-ty-≃ (susp-‼ Γ i)) (sym≃ty (susp-ty-wk (Γ ‼ i)))
 
+susp-‼-get-fst : (Γ : Ctx n) → susp-ctx Γ ‼ fromℕ _ ≃ty ⋆ {n = 2 + n}
+susp-‼-get-fst ∅ = refl≃ty
+susp-‼-get-fst (Γ , A) = wk-ty-≃ (susp-‼-get-fst Γ)
+
+susp-‼-get-snd : (Γ : Ctx n) → susp-ctx Γ ‼ inject₁ (fromℕ _) ≃ty ⋆ {n = 2 + n}
+susp-‼-get-snd ∅ = refl≃ty
+susp-‼-get-snd (Γ , A) = wk-ty-≃ (susp-‼-get-snd Γ)
+
 susp-functorial-id : {n : ℕ} → susp-sub (idSub {n}) ≃s idSub {2 + n}
 susp-functorial-id {zero} = refl≃s
 susp-functorial-id {suc n} = Ext≃ (trans≃s (susp-sub-wk idSub) (wk-sub-≃ (susp-functorial-id))) refl≃tm

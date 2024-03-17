@@ -96,8 +96,12 @@ sub-from-sphere-Ty-prop d A p σty = transport-typing-ty (apply-sub-weak-ty-typi
   where
     import Catt.Discs.Typing.Base ops Weak-Rules weak-wk as W
 
-sub-from-disc-Ty-prop : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (t : Tm n) → Typing-Sub (Disc d) Γ (sub-from-disc d A p t) → Typing-Tm Γ t A
-sub-from-disc-Ty-prop d A p t (TyExt σty tty) = TyConv tty (reflexive≈ty (sub-from-sphere-prop d A p))
+sub-from-disc-Ty-prop-ty : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (t : Tm n) → Typing-Sub (Disc d) Γ (sub-from-disc d A p t) → Typing-Ty Γ A
+sub-from-disc-Ty-prop-ty d A p t (TyExt σty _)
+  = sub-from-sphere-Ty-prop d A p σty
+
+sub-from-disc-Ty-prop-tm : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (t : Tm n) → Typing-Sub (Disc d) Γ (sub-from-disc d A p t) → Typing-Tm Γ t A
+sub-from-disc-Ty-prop-tm d A p t (TyExt σty tty) = TyConv tty (reflexive≈ty (sub-from-sphere-prop d A p))
 
 identity-Ty : (n : ℕ) → ∀ {σ} → Typing-Sub (Disc n) Γ σ → Typing-Tm Γ (identity n σ) ((0V ─⟨ wk-ty (sphere-type n) ⟩⟶ 0V) [ σ ]ty)
 identity-Ty n σty = let
@@ -137,9 +141,9 @@ identity-term-≈ {A = A} {B = B} {s = s} {t = t} p q = begin
 identity-to-term-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Tm Γ t A
 identity-to-term-Ty (TyConv tty p) = identity-to-term-Ty tty
 identity-to-term-Ty {A = A} (TyCoh supp Aty σty)
-  = sub-from-disc-Ty-prop (ty-dim A) A refl _ σty
+  = sub-from-disc-Ty-prop-tm (ty-dim A) A refl _ σty
 
 identity-to-type-Ty : Typing-Tm Γ (identity-term A t) B → Typing-Ty Γ A
 identity-to-type-Ty (TyConv tty p) = identity-to-type-Ty tty
-identity-to-type-Ty {A = A} (TyCoh supp Aty (TyExt σty _))
-  = sub-from-sphere-Ty-prop (ty-dim A) A refl σty
+identity-to-type-Ty {A = A} (TyCoh supp Aty σty)
+  = sub-from-disc-Ty-prop-ty (ty-dim A) A refl _ σty

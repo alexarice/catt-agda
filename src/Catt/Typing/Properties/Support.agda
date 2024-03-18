@@ -16,7 +16,7 @@ open import Catt.Typing ops rules
 open import Catt.Support
 open import Catt.Support.Properties
 
-open import Tactic.MonoidSolver
+import Algebra.Solver.IdempotentCommutativeMonoid as Solver
 
 open ≡-Reasoning
 
@@ -70,14 +70,12 @@ SuppTyFV (TyArr {n} {Γ = Γ} {s} {A} {t} sty Aty tty) = begin
   SuppTy Γ A ∪ SuppTm Γ s ∪ SuppTm Γ t
     ≡⟨ cong₂ _∪_ (cong₂ _∪_ (SuppTyFV Aty) (SuppTmChar′ sty Aty)) (SuppTmChar′ tty Aty) ⟩
   FVTy A ∪ (FVTy A ∪ FVTm s) ∪ (FVTy A ∪ FVTm t)
-    ≡⟨ solve (∪-monoid {n}) ⟩
-  FVTy A ∪ FVTy A ∪ (FVTm s ∪ FVTy A) ∪ FVTm t
-    ≡⟨ cong₂ (λ a b → a ∪ b ∪ FVTm t) (∪-idem (FVTy A)) (∪-comm (FVTm s) (FVTy A)) ⟩
-  FVTy A ∪ (FVTy A ∪ FVTm s) ∪ FVTm t
-    ≡⟨ solve (∪-monoid {n}) ⟩
-  FVTy A ∪ FVTy A ∪ FVTm s ∪ FVTm t
-    ≡⟨ cong (λ a → a ∪ FVTm s ∪ FVTm t) (∪-idem (FVTy A)) ⟩
+    ≡⟨ prove 3 ((var 0F ⊕ (var 0F ⊕ var 1F)) ⊕ (var 0F ⊕ var 2F))
+               ((var 0F ⊕ var 1F) ⊕ var 2F)
+               (FVTy A ∷ FVTm s ∷ FVTm t ∷ emp) ⟩
   FVTy A ∪ FVTm s ∪ FVTm t ∎
+  where
+    open Solver ∪-idempotentCommutativeMonoid
 
 SuppSubFV (TyNull x) = SuppTyFV x
 SuppSubFV {Δ = Δ} (TyExt {σ = σ} {t = t} {A = A} σty tty) = begin

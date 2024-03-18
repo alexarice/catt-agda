@@ -203,30 +203,54 @@ DC-susp-vs (Γ , A) (ewt xs) = cong ewt (begin
       susp-vs (xs ∪ FVTy A) ∎
 
 susp-SuppTm : (Γ : Ctx n) → (t : Tm n) → SuppTm (susp-ctx Γ) (susp-tm t) ≡ susp-vs (SuppTm Γ t)
-susp-SuppTm Γ t = begin
-  SuppTm (susp-ctx Γ) (susp-tm t)
-    ≡⟨ susp-SuppTmContainsEmpty Γ t ⟩
-  SuppTm (susp-ctx Γ) (susp-tm t) ∪ susp-vs empty
-    ≡⟨ ∪-comm (DC (susp-ctx Γ) (FVTm (susp-tm t))) (susp-vs empty) ⟩
-  susp-vs empty ∪ SuppTm (susp-ctx Γ) (susp-tm t)
-    ≡˘⟨ cong (_∪ SuppTm (susp-ctx Γ) (susp-tm t)) (trans (DC-susp-vs Γ empty) (cong susp-vs (DC-empty Γ))) ⟩
-  DC (susp-ctx Γ) (susp-vs empty) ∪ DC (susp-ctx Γ) (FVTm (susp-tm t))
-    ≡˘⟨ DC-∪ (susp-ctx Γ) (susp-vs empty) (FVTm (susp-tm t)) ⟩
-  DC (susp-ctx Γ) (susp-vs empty ∪ FVTm (susp-tm t))
-    ≡⟨ cong (DC (susp-ctx Γ)) (susp-FVTm t) ⟩
-  DC (susp-ctx Γ) (susp-vs (FVTm t))
-    ≡⟨ DC-susp-vs Γ (FVTm t) ⟩
-  susp-vs (SuppTm Γ t) ∎
+susp-SuppTy : (Γ : Ctx n) → (A : Ty n) → SuppTy (susp-ctx Γ) (susp-ty A) ≡ susp-vs (SuppTy Γ A)
+susp-SuppSub : (Γ : Ctx n) → (σ : Sub m n ⋆) → SuppSub (susp-ctx Γ) (susp-sub σ) ≡ susp-vs (SuppSub Γ σ)
+
+susp-SuppTm Γ (Coh Δ A σ) = susp-SuppSub Γ σ
+susp-SuppTm (Γ , A) (Var 0F) = cong ewt (begin
+  DC (susp-ctx Γ) (empty ∪ FVTy (susp-ty A))
+    ≡⟨ cong (DC (susp-ctx Γ)) (∪-left-unit (FVTy (susp-ty A))) ⟩
+  SuppTy (susp-ctx Γ) (susp-ty A)
+    ≡⟨ susp-SuppTy Γ A ⟩
+  susp-vs (SuppTy Γ A)
+    ≡˘⟨ cong (susp-vs ∘ DC Γ) (∪-left-unit (FVTy A)) ⟩
+  susp-vs (DC Γ (empty ∪ FVTy A)) ∎)
   where
     open ≡-Reasoning
+susp-SuppTm (Γ , A) (Var (suc i)) = cong ewf (susp-SuppTm Γ (Var i))
 
-susp-SuppTy : (Γ : Ctx n) → (A : Ty n) → SuppTy (susp-ctx Γ) (susp-ty A) ≡ susp-vs (SuppTy Γ A)
-susp-SuppTy Γ A = begin
-  SuppTy (susp-ctx Γ) (susp-ty A)
-    ≡⟨ cong (DC (susp-ctx Γ)) (susp-FVTy A) ⟩
-  DC (susp-ctx Γ) (susp-vs (FVTy A))
-    ≡⟨ DC-susp-vs Γ (FVTy A) ⟩
-  susp-vs (SuppTy Γ A) ∎
+susp-SuppTy Γ (s ─⟨ A ⟩⟶ t) = begin
+  SuppTy (susp-ctx Γ) (susp-ty (s ─⟨ A ⟩⟶ t))
+    ≡⟨ DC-∪ (susp-ctx Γ) (FVTy (susp-ty A) ∪ FVTm (susp-tm s)) (FVTm (susp-tm t)) ⟩
+  DC (susp-ctx Γ) (FVTy (susp-ty A) ∪ FVTm (susp-tm s)) ∪ SuppTm (susp-ctx Γ) (susp-tm t)
+    ≡⟨ cong (_∪ SuppTm (susp-ctx Γ) (susp-tm t)) (DC-∪ (susp-ctx Γ) (FVTy (susp-ty A)) (FVTm (susp-tm s))) ⟩
+  SuppTy (susp-ctx Γ) (susp-ty A) ∪ SuppTm (susp-ctx Γ) (susp-tm s) ∪ SuppTm (susp-ctx Γ) (susp-tm t)
+    ≡⟨ cong₃ (λ a b c → a ∪ b ∪ c) (susp-SuppTy Γ A) (susp-SuppTm Γ s) (susp-SuppTm Γ t) ⟩
+  susp-vs (SuppTy Γ A) ∪ susp-vs (SuppTm Γ s) ∪ susp-vs (SuppTm Γ t)
+    ≡⟨ cong (_∪ susp-vs (SuppTm Γ t)) (susp-vs-∪ (SuppTy Γ A) (SuppTm Γ s)) ⟩
+  susp-vs (SuppTy Γ A ∪ SuppTm Γ s) ∪ susp-vs (SuppTm Γ t)
+    ≡⟨ susp-vs-∪ (SuppTy Γ A ∪ SuppTm Γ s) (SuppTm Γ t) ⟩
+  susp-vs (SuppTy Γ A ∪ SuppTm Γ s ∪ SuppTm Γ t)
+    ≡˘⟨ cong (λ - → susp-vs (- ∪ SuppTm Γ t)) (DC-∪ Γ (FVTy A) (FVTm s)) ⟩
+  susp-vs (DC Γ (FVTy A ∪ FVTm s) ∪ SuppTm Γ t)
+    ≡˘⟨ cong susp-vs (DC-∪ Γ (FVTy A ∪ FVTm s) (FVTm t)) ⟩
+  susp-vs (SuppTy Γ (s ─⟨ A ⟩⟶ t)) ∎
+  where
+    open ≡-Reasoning
+susp-SuppTy ∅ ⋆ = refl
+susp-SuppTy (Γ , A) ⋆ = cong ewf (susp-SuppTy Γ ⋆)
+
+susp-SuppSub Γ ⟨ .⋆ ⟩′ = susp-SuppTy Γ ⋆
+susp-SuppSub Γ ⟨ σ , t ⟩ = begin
+  SuppSub (susp-ctx Γ) (susp-sub ⟨ σ , t ⟩)
+    ≡⟨ DC-∪ (susp-ctx Γ) (FVSub (susp-sub σ)) (FVTm (susp-tm t)) ⟩
+  SuppSub (susp-ctx Γ) (susp-sub σ) ∪ SuppTm (susp-ctx Γ) (susp-tm t)
+    ≡⟨ cong₂ _∪_ (susp-SuppSub Γ σ) (susp-SuppTm Γ t) ⟩
+  susp-vs (SuppSub Γ σ) ∪ susp-vs (SuppTm Γ t)
+    ≡⟨ susp-vs-∪ (SuppSub Γ σ) (SuppTm Γ t) ⟩
+  susp-vs (SuppSub Γ σ ∪ SuppTm Γ t)
+    ≡˘⟨ cong susp-vs (DC-∪ Γ (FVSub σ) (FVTm t)) ⟩
+  susp-vs (SuppSub Γ ⟨ σ , t ⟩) ∎
   where
     open ≡-Reasoning
 

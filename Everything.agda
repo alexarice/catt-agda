@@ -72,7 +72,7 @@ import Catt.Typing.Properties.Weakening
 import Catt.Typing.Properties.Substitution
 import Catt.Typing.Properties.Substitution.Suspended
 import Catt.Typing.Properties
-import Catt.Typing.Properties.Conversion
+import Catt.Typing.Properties.Preservation
 
 import Catt.Globular.Typing
 import Catt.Pasting.Typing

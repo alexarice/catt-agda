@@ -57,8 +57,8 @@ open import Catt.Typing.DiscRemoval.Typed ops standard-op SUA-Rules sua-wk
 open import Catt.Typing.EndoCoherenceRemoval.Typed ops standard-op SUA-Rules sua-wk sua-sub
 open import Catt.Typing.Insertion.Typed ops ins-op SUA-Rules sua-tame
 
-sua-conv : ConvCond ops SUA-Rules
-sua-conv = ConvCond-∪ ops dr-conv (ConvCond-∪ ops ecr-conv ins-conv)
+sua-pres : PresCond ops SUA-Rules
+sua-pres = PresCond-∪ ops dr-pres (PresCond-∪ ops ecr-pres ins-pres)
 
 module _ where
   open import Catt.Support.Typing ops SUA-Rules

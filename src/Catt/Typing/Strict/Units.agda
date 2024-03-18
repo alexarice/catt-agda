@@ -57,8 +57,8 @@ open import Catt.Typing.DiscRemoval.Typed ops standard-op Unit-Rules units-wk
 open import Catt.Typing.EndoCoherenceRemoval.Typed ops standard-op Unit-Rules units-wk units-sub
 open import Catt.Typing.Pruning.Typed ops standard-op pruning-op Unit-Rules units-wk units-sub
 
-units-conv : ConvCond ops Unit-Rules
-units-conv = ConvCond-∪ ops dr-conv (ConvCond-∪ ops ecr-conv pruning-conv)
+units-pres : PresCond ops Unit-Rules
+units-pres = PresCond-∪ ops dr-pres (PresCond-∪ ops ecr-pres pruning-pres)
 
 module _ where
   open import Catt.Support.Typing ops Unit-Rules

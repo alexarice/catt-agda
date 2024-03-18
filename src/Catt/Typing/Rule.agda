@@ -119,13 +119,13 @@ module _ (ops : Op) where
     SubCond′ : RuleSet → Set
     SubCond′ rs = ∀ {r n} (Γ : Ctx n) {σ : Sub (r .len) n ⋆} → Typing-Sub (r .tgtCtx) Γ σ → r ∈r rs → sub-rule r Γ σ ∈r rs
 
-    ConvCondRule : Rule → Set
-    ConvCondRule r = {A : Ty (r .len)}
+    PresCondRule : Rule → Set
+    PresCondRule r = {A : Ty (r .len)}
                    → Typing-Tm (r .tgtCtx) (r .lhs) A
                    → Typing-Tm (r .tgtCtx) (r .rhs) A
 
-    ConvCond′ : RuleSet → Set
-    ConvCond′ rs = ∀ {r} → r ∈r rs → ConvCondRule r
+    PresCond′ : RuleSet → Set
+    PresCond′ rs = ∀ {r} → r ∈r rs → PresCondRule r
 
     SupportCondRule : Rule → Set
     SupportCondRule r = {A : Ty (r .len)}
@@ -141,9 +141,9 @@ module _ (ops : Op) where
     SubCond-∪ : ∀ {rs rs′} → SubCond′ rs → SubCond′ rs′ → SubCond′ (rs ∪r rs′)
     SubCond-∪ p q Γ σ [ i ] = [ map⊎ (p Γ σ) (q Γ σ) i ]
 
-    ConvCond-∪ : ∀ {rs rs′} → ConvCond′ rs → ConvCond′ rs′ → ConvCond′ (rs ∪r rs′)
-    ConvCond-∪ p q [ inj₁ x ] = p x
-    ConvCond-∪ p q [ inj₂ y ] = q y
+    PresCond-∪ : ∀ {rs rs′} → PresCond′ rs → PresCond′ rs′ → PresCond′ (rs ∪r rs′)
+    PresCond-∪ p q [ inj₁ x ] = p x
+    PresCond-∪ p q [ inj₂ y ] = q y
 
     SupportCond-∪ : ∀ {rs rs′} → SupportCond′ rs → SupportCond′ rs′ → SupportCond′ (rs ∪r rs′)
     SupportCond-∪ p q [ inj₁ x ] = p x
@@ -158,8 +158,8 @@ module _ (ops : Op) where
   SubCond : RuleSet → Set
   SubCond rs = SubCond′ rs rs
 
-  ConvCond : RuleSet → Set
-  ConvCond rs = ConvCond′ rs rs
+  PresCond : RuleSet → Set
+  PresCond rs = PresCond′ rs rs
 
   SupportCond : RuleSet → Set
   SupportCond rs = SupportCond′ rs rs

@@ -41,9 +41,9 @@ open import Catt.Tree.Insertion.Typing ops rules tame
 
 open import Catt.Typing.Weak ops
 
-ins-conv : ConvCond′ ops rules InsertionSet
-ins-conv [ Insert Γ S S⋆ L P T q M pf ] {A = A} tty = ⊥-elim (NonZero-⊥ z≤n ⦃ coh-nonZero tty ⦄)
-ins-conv [ Insert Γ S As@(SArr _ _ _) L P T q M pf ] {A = A} tty
+ins-pres : PresCond′ ops rules InsertionSet
+ins-pres [ Insert Γ S S⋆ L P T q M pf ] {A = A} tty = ⊥-elim (NonZero-⊥ z≤n ⦃ coh-nonZero tty ⦄)
+ins-pres [ Insert Γ S As@(SArr _ _ _) L P T q M pf ] {A = A} tty
   = TyConv (stm-to-term-Ty (TySCoh (S >>[ P ] T)
                                    (subst₂ (ops ⌊ S >>[ P ] T ⌋)
                                            (l4 (sty-src As))

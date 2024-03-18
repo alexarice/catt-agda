@@ -24,8 +24,8 @@ open import Catt.Typing.Properties.Substitution ops rules sub-cond
 open import Catt.Globular.Typing ops rules
 open import Catt.Discs.Typing ops standard-op rules wk-cond
 
-ecr-conv : ConvCond′ ops rules ECRSet
-ecr-conv [ ECR Γ Δ s sfull A σ ] {A = B} tty
+ecr-pres : PresCond′ ops rules ECRSet
+ecr-pres [ ECR Γ Δ s sfull A σ ] {A = B} tty
   = TyConv (identity-Ty (ty-dim A) (sub-from-disc-Ty (ty-dim A)
                                                      (apply-sub-ty-typing A_ty σty)
                                                      (sym (sub-dim σ A))

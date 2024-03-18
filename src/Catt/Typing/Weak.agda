@@ -28,8 +28,8 @@ weak-tame tame .wk-cond = weak-wk
 weak-tame tame .susp-cond = weak-susp
 weak-tame tame .sub-cond = weak-sub
 
-weak-conv : ConvCond ops Weak-Rules
-weak-conv ()
+weak-pres : PresCond ops Weak-Rules
+weak-pres ()
 
 weak-supp : SupportCond ops Weak-Rules
 weak-supp ()

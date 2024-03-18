@@ -30,9 +30,9 @@ open import Catt.Globular.Typing ops rules
 
 open import Catt.Typing.Weak ops
 
-pruning-conv : ConvCond′ ops rules PruningSet
-pruning-conv [ Prune Γ dy ⋆ p σ B t pf ] {A = C} tty = ⊥-elim (NonZero-⊥ z≤n ⦃ coh-nonZero tty ⦄)
-pruning-conv [ Prune Γ dy A@(src ─⟨ _ ⟩⟶ tgt) p σ B t pf ] {A = C} tty
+pruning-pres : PresCond′ ops rules PruningSet
+pruning-pres [ Prune Γ dy ⋆ p σ B t pf ] {A = C} tty = ⊥-elim (NonZero-⊥ z≤n ⦃ coh-nonZero tty ⦄)
+pruning-pres [ Prune Γ dy A@(src ─⟨ _ ⟩⟶ tgt) p σ B t pf ] {A = C} tty
   = TyConv (TyCoh ⦃ dyck-to-pd (dy // p) ⦄
                   (subst₂ (ops ⌊ dy // p ⌋d)
                           (supp-lem src)

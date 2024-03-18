@@ -45,7 +45,7 @@ HasEndoCoherenceRemoval = ∀ {m n}
                         → {σ : Sub (suc n) m ⋆}
                         → {B : Ty m}
                         → Typing-Tm Γ (Coh Δ (s ─⟨ A ⟩⟶ s) σ) B
-                        → Coh Δ (s ─⟨ A ⟩⟶ s) σ ≈[ Γ ]tm identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))
+                        → Coh Δ (s ─⟨ A ⟩⟶ s) σ ≈[ Γ ]tm identity-term (A [ σ ]ty) (s [ σ ]tm)
 
 HasEndoCoherenceRemoval-STm : Set
 HasEndoCoherenceRemoval-STm = ∀ {m n}

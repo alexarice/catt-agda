@@ -56,22 +56,10 @@ ecr-stm S s sfull As supp L [ sty ] [ Asty ] Lty .get = begin
                           supp)
                   (TyArr sty Asty sty)
                   (label-to-sub-Ty Lty TySStar)) ⟩
-  identity (ty-dim (sty-to-type As))
-           (sub-from-disc (ty-dim (sty-to-type As))
-                          (sty-to-type As [ label-to-sub (L ,, S⋆) ]ty)
-                          _
-                          (stm-to-term s [ label-to-sub (L ,, S⋆) ]tm))
-    ≈⟨ reflexive≈tm (identity-≃ refl
-                                (sub-from-disc-sub (ty-dim (sty-to-type As))
-                                                   (sty-to-type As)
-                                                   refl
-                                                   (stm-to-term s)
-                                                   (label-to-sub (L ,, S⋆)))) ⟩
-  identity (ty-dim (sty-to-type As))
-           (sub-from-disc (ty-dim (sty-to-type As))
-                          (sty-to-type As)
-                          _
-                          (stm-to-term s))
+  identity-term (sty-to-type As [ label-to-sub (L ,, S⋆) ]ty)
+                (stm-to-term s [ label-to-sub (L ,, S⋆) ]tm)
+    ≈˘⟨ reflexive≈tm (identity-term-sub (sty-to-type As) (stm-to-term s) (label-to-sub (L ,, S⋆))) ⟩
+  identity-term (sty-to-type As) (stm-to-term s)
     [ label-to-sub (L ,, S⋆) ]tm
     ≈⟨ reflexive≈tm (sub-action-≃-tm (identity-≃ (sty-to-type-dim As) lem) (refl≃s {σ = label-to-sub (L ,, S⋆)})) ⟩
   identity (sty-dim As) (label-to-sub (stm-to-label (n-disc (sty-dim As)) s As ,, S⋆)) [ label-to-sub (L ,, S⋆) ]tm

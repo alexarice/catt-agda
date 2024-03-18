@@ -45,10 +45,10 @@ ecr-supp [ ECR Γ Δ s sfull A σ ] tty = begin
   DC Γ (FVTy A [ σ ]vs ∪ FVTm s [ σ ]vs)
     ≡⟨ cong₂ (λ a b → DC Γ (a ∪ b)) (vs-sub-ty A σ) (vs-sub-tm s σ) ⟩
   DC Γ (FVTy (A [ σ ]ty) ∪ FVTm (s [ σ ]tm))
-    ≡˘⟨ cong (DC Γ) (sub-from-disc-fv (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm)) ⟩
-  SuppSub Γ (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))
+    ≡˘⟨ cong (DC Γ) (sub-from-disc-fv _ (A [ σ ]ty) refl (s [ σ ]tm)) ⟩
+  SuppSub Γ (sub-from-disc _ (A [ σ ]ty) refl (s [ σ ]tm))
     ≡⟨⟩
-  SuppTm Γ (identity (ty-dim A) (sub-from-disc (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) (s [ σ ]tm))) ∎
+  SuppTm Γ (identity-term (A [ σ ]ty) (s [ σ ]tm)) ∎
   where
     open ≡-Reasoning
 

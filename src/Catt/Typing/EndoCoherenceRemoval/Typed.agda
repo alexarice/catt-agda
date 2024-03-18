@@ -26,11 +26,9 @@ open import Catt.Discs.Typing ops standard-op rules wk-cond
 
 ecr-pres : PresCond′ ops rules ECRSet
 ecr-pres [ ECR Γ Δ s sfull A σ ] {A = B} tty
-  = TyConv (identity-Ty (ty-dim A) (sub-from-disc-Ty (ty-dim A)
-                                                     (apply-sub-ty-typing A_ty σty)
-                                                     (sym (sub-dim σ A))
-                                                     (apply-sub-tm-typing s_ty σty)))
-           lem
+  = TyConv (identity-term-Ty (apply-sub-ty-typing A_ty σty)
+                             (apply-sub-tm-typing s_ty σty))
+           (tm-to-ty-prop tty)
   where
     σty : Typing-Sub Δ Γ σ
     σty = coh-sub-ty tty
@@ -40,29 +38,3 @@ ecr-pres [ ECR Γ Δ s sfull A σ ] {A = B} tty
 
     A_ty : Typing-Ty Δ A
     A_ty = ty-base-Ty (coh-ty-ty tty)
-
-    l2 : wk-ty (sphere-type (ty-dim A))
-           [ ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ]ty
-         ≃ty
-         A [ σ ]ty
-    l2 = begin
-      < wk-ty (sphere-type (ty-dim A)) [ ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ]ty >ty
-        ≈⟨ apply-sub-wk-ty-≃ (sphere-type (ty-dim A)) ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ⟩
-      < sphere-type (ty-dim A) [ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ ]ty >ty
-        ≈⟨ sub-from-sphere-prop (ty-dim A) (A [ σ ]ty) (sym (sub-dim σ A)) ⟩
-      < A [ σ ]ty >ty ∎
-      where
-        open Reasoning ty-setoid
-
-    lem : (Var 0F ─⟨ wk-ty (sphere-type (ty-dim A)) ⟩⟶ Var 0F)
-            [ sub-from-disc (ty-dim A) (A [ σ ]ty) _ (s [ σ ]tm) ]ty
-          ≈[ Γ ]ty
-          B
-    lem = begin
-      (s [ σ ]tm) ─⟨ wk-ty (sphere-type (ty-dim A)) [ ⟨ sub-from-sphere (ty-dim A) (A [ σ ]ty) _ , s [ σ ]tm ⟩ ]ty ⟩⟶ (s [ σ ]tm)
-        ≈⟨ Arr≈ refl≈tm (reflexive≈ty l2) refl≈tm ⟩
-      (s [ σ ]tm) ─⟨ A [ σ ]ty ⟩⟶ (s [ σ ]tm)
-        ≈⟨ tm-to-ty-prop tty ⟩
-      B ∎
-      where
-        open Reasoning (ty-setoid-≈ Γ)

@@ -142,5 +142,101 @@ susp-//s (⇓pk p) σ = susp-//s p σ
 
 prune-dim : {dy : Dyck (suc n) d} → (p : Peak dy) → dyck-dim (dy // p) ≤ dyck-dim dy
 prune-dim (⇕pk {d = d} dy) = m≤m⊔n (dyck-dim (⇓ (⇑ dy) // ⇕pk dy)) (suc d)
-prune-dim (⇑pk {d} p) = ⊔-monoˡ-≤ (suc d) (prune-dim p)
+prune-dim (⇑pk {d = d} p) = ⊔-monoˡ-≤ (suc d) (prune-dim p)
 prune-dim (⇓pk p) = prune-dim p
+
+peak-1-lem : {dy : Dyck 1 d} → (p q : Peak dy) → p ≡ q
+peak-1-lem (⇕pk dy) (⇕pk .dy) = refl
+peak-1-lem (⇓pk p) (⇓pk q) = cong ⇓pk (peak-1-lem p q)
+
+prune-peak : {dy : Dyck (suc n) d} → (p q : Peak dy) → .(p ≢ q) → Peak (dy // p)
+prune-peak (⇕pk dy) (⇕pk .dy) x = ⊥-elim (x refl)
+prune-peak (⇕pk dy) (⇓pk (⇑pk q)) x = q
+prune-peak {n = suc zero} (⇑pk p) (⇑pk q) x = ⊥-elim (x (cong ⇑pk (peak-1-lem p q)))
+prune-peak {n = 2+ n} (⇑pk p) (⇑pk q) x = ⇑pk (prune-peak p q (x ∘ cong ⇑pk))
+prune-peak (⇓pk p) (⇓pk q) x = ⇓pk (prune-peak p q (x ∘ cong ⇓pk))
+prune-peak (⇓pk (⇑pk p)) (⇕pk dy) x = ⇕pk (dy // p)
+
+prune-conf : {dy : Dyck (2+ n) d} → (p q : Peak dy) → (x : p ≢ q) → dy // p // prune-peak p q x ≃d dy // q // prune-peak q p (≢-sym x)
+prune-conf (⇕pk dy) (⇕pk .dy) x = ⊥-elim (x refl)
+prune-conf (⇕pk dy) (⇓pk (⇑pk q)) x = refl≃d
+prune-conf {n = zero} (⇑pk p) (⇑pk q) x = ⊥-elim (x (cong ⇑pk (peak-1-lem p q)))
+prune-conf {n = suc n} (⇑pk p) (⇑pk q) x = ⇑≃ (prune-conf p q (x ∘ cong ⇑pk))
+prune-conf (⇓pk p) (⇓pk q) x = ⇓≃ (prune-conf p q (x ∘ cong ⇓pk))
+prune-conf (⇓pk (⇑pk p)) (⇕pk dy) x = refl≃d
+
+prune-sub-conf : {dy : Dyck (2+ n) d} → (p q : Peak dy) → (σ : Sub (5 + n * 2) m ⋆) → (x : p ≢ q) → σ //s p //s prune-peak p q x ≃s σ //s q //s prune-peak q p (≢-sym x)
+prune-sub-conf (⇕pk dy) (⇕pk .dy) σ x = ⊥-elim (x refl)
+prune-sub-conf (⇕pk dy) (⇓pk (⇑pk q)) ⟨ ⟨ σ , s ⟩ , t ⟩ x = refl≃s
+prune-sub-conf {n = zero} (⇑pk p) (⇑pk q) σ x = ⊥-elim (x (cong ⇑pk (peak-1-lem p q)))
+prune-sub-conf {n = suc n} (⇑pk p) (⇑pk q) ⟨ ⟨ σ , s ⟩ , t ⟩ x = Ext≃ (Ext≃ (prune-sub-conf p q σ (x ∘ cong ⇑pk)) refl≃tm) refl≃tm
+prune-sub-conf (⇓pk p) (⇓pk q) σ x = prune-sub-conf p q σ (x ∘ cong ⇓pk)
+prune-sub-conf (⇓pk (⇑pk p)) (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ x = refl≃s
+
+π-conf-lem-1 : {dy : Dyck (suc n) d} → (q : Peak dy)
+             → identity-term (dyck-type dy) (dyck-term dy) [ π q ]tm
+               ≃tm
+               identity-term (dyck-type (dy // q)) (dyck-term (dy // q))
+π-conf-lem-1 {dy = dy} q = begin
+  < identity-term (dyck-type dy) (dyck-term dy) [ π q ]tm >tm
+    ≈⟨ identity-term-sub (dyck-type dy) (dyck-term dy) (π q) ⟩
+  < identity-term (dyck-type dy [ π q ]ty) (dyck-term dy [ π q ]tm) >tm
+    ≈˘⟨ identity-term-≃ (dyck-type-prune q) (dyck-term-prune q) ⟩
+  < identity-term (dyck-type (dy // q)) (dyck-term (dy // q)) >tm ∎
+  where
+    open Reasoning tm-setoid
+
+π-conf-lem-2 : {dy : Dyck (suc n) d} → (q : Peak dy)
+             → idSub ● π q
+               ≃s
+               wk-sub (wk-sub (π q)) ● π (⇕pk (dy // q))
+π-conf-lem-2 {dy = dy} q = begin
+  < idSub ● π q >s
+    ≈⟨ id-left-unit (π q) ⟩
+  < π q >s
+    ≈˘⟨ id-right-unit (π q) ⟩
+  < π q ● idSub >s
+    ≈˘⟨ apply-sub-wk-sub-≃ (π q) (sub-proj₁ (π (⇕pk (dy // q)))) ⟩
+  < wk-sub (π q) ● sub-proj₁ (π (⇕pk (dy // q))) >s
+    ≈˘⟨ apply-sub-wk-sub-≃ (wk-sub (π q)) (π (⇕pk (dy // q))) ⟩
+  < wk-sub (wk-sub (π q)) ● π (⇕pk (dy // q)) >s ∎
+  where
+    open Reasoning sub-setoid
+
+
+π-conf : {dy : Dyck (2+ n) d} → (p q : Peak dy) → (x : p ≢ q) → π p ● π (prune-peak p q x) ≃s π q ● π (prune-peak q p (≢-sym x))
+π-conf (⇕pk dy) (⇕pk .dy) x = ⊥-elim (x refl)
+π-conf (⇕pk dy) (⇓pk (⇑pk q)) x = Ext≃ (Ext≃ (π-conf-lem-2 q)
+                                             (sym≃tm (dyck-term-prune q)))
+                                       (π-conf-lem-1 q)
+π-conf {n = zero} (⇑pk p) (⇑pk q) x = ⊥-elim (x (cong ⇑pk (peak-1-lem p q)))
+π-conf {n = suc n} (⇑pk p) (⇑pk q) x = Ext≃ (Ext≃ lem refl≃tm) refl≃tm
+  where
+    open Reasoning sub-setoid
+    lem : wk-sub (wk-sub (π p)) ● π (prune-peak (⇑pk p) (⇑pk q) x)
+          ≃s
+          wk-sub (wk-sub (π q)) ● π (prune-peak (⇑pk q) (⇑pk p) (≢-sym x))
+    lem = begin
+      < wk-sub (wk-sub (π p)) ● π (prune-peak (⇑pk p) (⇑pk q) x) >s
+        ≈⟨ apply-sub-wk-sub-≃ (wk-sub (π p)) _ ⟩
+      < wk-sub (π p) ● sub-proj₁ (π (prune-peak (⇑pk p) (⇑pk q) x)) >s
+        ≈⟨ apply-sub-wk-sub-≃ (π p) _ ⟩
+      < π p ● wk-sub (wk-sub (π (prune-peak p q _))) >s
+        ≈⟨ apply-wk-sub-sub-≃ (π p) (wk-sub (π (prune-peak p q _))) ⟩
+      < wk-sub (π p ● wk-sub (π (prune-peak p q _))) >s
+        ≈⟨ wk-sub-≃ (apply-wk-sub-sub-≃ (π p) (π (prune-peak p q _))) ⟩
+      < wk-sub (wk-sub (π p ● π (prune-peak p q _))) >s
+        ≈⟨ wk-sub-≃ (wk-sub-≃ (π-conf p q (x ∘ cong ⇑pk))) ⟩
+      < wk-sub (wk-sub (π q ● π (prune-peak q p _))) >s
+        ≈˘⟨ wk-sub-≃ (apply-wk-sub-sub-≃ (π q) (π (prune-peak q p _))) ⟩
+      < wk-sub (π q ● wk-sub (π (prune-peak q p _))) >s
+        ≈˘⟨ apply-wk-sub-sub-≃ (π q) (wk-sub (π (prune-peak q p _))) ⟩
+      < π q ● wk-sub (wk-sub (π (prune-peak q p _))) >s
+        ≈˘⟨ apply-sub-wk-sub-≃ (π q) _ ⟩
+      < wk-sub (π q) ● sub-proj₁ (π (prune-peak (⇑pk q) (⇑pk p) (≢-sym x))) >s
+        ≈˘⟨ apply-sub-wk-sub-≃ (wk-sub (π q)) _ ⟩
+      < wk-sub (wk-sub (π q)) ● π (prune-peak (⇑pk q) (⇑pk p) (≢-sym x)) >s ∎
+π-conf (⇓pk p) (⇓pk q) x = π-conf p q (x ∘ cong ⇓pk)
+π-conf (⇓pk (⇑pk p)) (⇕pk dy) x = Ext≃ (Ext≃ (sym≃s (π-conf-lem-2 p))
+                                             (dyck-term-prune p))
+                                       (sym≃tm (π-conf-lem-1 p))

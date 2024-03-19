@@ -25,14 +25,14 @@ dyck-pre-type-Ty : (dy : Dyck n d) → Typing-Ty (⌊ dy ⌋d , dyck-type dy)
       (wk-tm (dyck-term dy) ─⟨ wk-ty (dyck-type dy) ⟩⟶ 0V)
 dyck-pre-type-Ty dy = TyArr (wk-tm-typing (dyck-term-Ty dy)) (wk-ty-typing (dyck-type-Ty dy)) (TyVar zero)
 
-⌊⌋d-Ty End = TyAdd TyEmp TyStar
+⌊⌋d-Ty ⊝ = TyAdd TyEmp TyStar
 ⌊⌋d-Ty (⇑ dy) = TyAdd (TyAdd (⌊⌋d-Ty dy) (dyck-type-Ty dy)) (dyck-pre-type-Ty dy)
 ⌊⌋d-Ty (⇓ dy) = ⌊⌋d-Ty dy
 
-dyck-type-Ty End = TyStar
+dyck-type-Ty ⊝ = TyStar
 dyck-type-Ty (⇑ dy) = wk-ty-typing (TyArr (wk-tm-typing (dyck-term-Ty dy)) (wk-ty-typing (dyck-type-Ty dy)) (TyVar zero))
 dyck-type-Ty (⇓ dy) = transport-typing-ty (ty-base-Ty (dyck-type-Ty dy) ⦃ NonZero-subst (sym (dyck-type-dim dy)) it ⦄) refl≃c (ty-base-wk (dyck-pre-type dy))
 
-dyck-term-Ty End = TyVar zero
+dyck-term-Ty ⊝ = TyVar zero
 dyck-term-Ty (⇑ dy) = TyVar zero
 dyck-term-Ty (⇓ dy) = TyConv (ty-tgt′-Ty (dyck-type-Ty dy) ⦃ NonZero-subst (sym (dyck-type-dim dy)) it ⦄) (reflexive≈ty (ty-base-wk (dyck-pre-type dy)))

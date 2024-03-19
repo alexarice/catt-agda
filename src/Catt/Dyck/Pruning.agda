@@ -7,7 +7,7 @@ open import Catt.Discs
 open import Catt.Dyck
 open import Catt.Dyck.Properties
 
-infix 5 _//_
+infixl 5 _//_
 _//_ : (dy : Dyck (suc n) d) → Peak dy → Dyck n d
 dy // ⇕pk d = d
 ⇑ dy // ⇑pk p = ⇑ (dy // p)
@@ -20,10 +20,10 @@ dy // ⇕pk d = d
 
 private
   prune-sub : {dy : Dyck (suc n) d} → Peak dy → Sub (3 + n * 2) m ⋆ → Sub (1 + n * 2) m ⋆
-  prune-sub (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ = σ
+  prune-sub (⇕pk dy) σ = sub-proj₁ (sub-proj₁ σ)
   prune-sub (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ = ⟨ ⟨ (prune-sub p σ) , s ⟩ , t ⟩
   prune-sub (⇓pk p) σ = prune-sub p σ
 
-infix 5 _//s_
+infixl 5 _//s_
 _//s_ : {dy : Dyck (suc n) d} → Sub (3 + n * 2) m ⋆ → Peak dy → Sub (1 + n * 2) m ⋆
 σ //s p = prune-sub p σ

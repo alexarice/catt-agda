@@ -33,7 +33,7 @@ private
 
 
 dyck-bd-drop : (m : ℕ) → (dy : Dyck n (m + d)) → drop (dyck-bd-vs d dy true) ∪ FVTm (dyck-term-fixed d m dy) ≡ dyck-bd-vs d dy true
-dyck-bd-drop zero End = refl
+dyck-bd-drop zero ⊝ = refl
 dyck-bd-drop zero (⇑ {d = d} dy) with <-cmp (suc d) (ty-dim (dyck-type dy))
 ... | tri< a ¬b ¬c = ⊥-elim (1+n≰n (≤-trans a (≤-trans (≤-reflexive (dyck-type-dim dy)) (n≤1+n d))))
 ... | tri≈ ¬a b ¬c = ⊥-elim (1+n≢n (trans b (dyck-type-dim dy)))
@@ -119,7 +119,7 @@ dyck-bd-contains-ty′ : (x d : ℕ) → (dy : Dyck n m) → (b : Bool) → m �
 dyck-bd-contains-tm : (d : ℕ) → (dy : Dyck n m) → (b : Bool) → m < d
                     → FVTm (dyck-term dy) ⊆ dyck-bd-vs d dy b
 
-dyck-bd-contains-ty zero d End b p = ⊆-bot (drop (dyck-bd-vs d End b))
+dyck-bd-contains-ty zero d ⊝ b p = ⊆-bot (drop (dyck-bd-vs d ⊝ b))
 dyck-bd-contains-ty zero d (⇑ dy) b p = begin
   FVTy (wk-ty (wk-ty (dyck-type dy))) ∪ FVTm (wk-tm (wk-tm (dyck-term dy))) ∪ ewf (ewt empty)
     ≈⟨ cong₂ (λ a b → a ∪ b ∪ ewf (ewt empty))
@@ -140,12 +140,12 @@ dyck-bd-contains-ty zero d (⇑ dy) b p = begin
   where
     open PReasoning (⊆-poset _)
 dyck-bd-contains-ty zero d (⇓ dy) b p = dyck-bd-contains-ty 1 d dy b (s≤s p)
-dyck-bd-contains-ty (suc x) d End b p = begin
+dyck-bd-contains-ty (suc x) d ⊝ b p = begin
   FVTy (wk-ty (truncate′ x ⋆))
     ≈⟨ l1 x ⟩
   empty
-    ≤⟨ ⊆-bot (drop (dyck-bd-vs d End b)) ⟩
-  drop (dyck-bd-vs d End b) ∎
+    ≤⟨ ⊆-bot (drop (dyck-bd-vs d ⊝ b)) ⟩
+  drop (dyck-bd-vs d ⊝ b) ∎
   where
     l1 : (y : ℕ) → FVTy (wk-ty (truncate′ y (⋆ {n = n}))) ≡ empty
     l1 zero = refl
@@ -210,7 +210,7 @@ dyck-bd-contains-ty′ x d dy b p = begin
   where
     open PReasoning (⊆-poset _)
 
-dyck-bd-contains-tm d End b p = refl
+dyck-bd-contains-tm d ⊝ b p = refl
 dyck-bd-contains-tm d (⇑ dy) b p = begin
   ewt empty
     ≤⟨ ⊆-cong {xs = empty} true (⊆-bot (ewt (dyck-bd-vs d dy b))) ⟩

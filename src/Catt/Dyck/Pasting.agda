@@ -17,7 +17,7 @@ dyck-to-pdb-focus-ty : (dy : Dyck n d) → focus-ty (dyck-to-pdb dy) ≃ty dyck-
 dyck-to-pdb-focus-tm : (dy : Dyck n d) → focus-tm (dyck-to-pdb dy) ≃tm dyck-term dy
 dyck-to-pdb-focus-ty-dim : (dy : Dyck n d) → ty-dim (focus-ty (dyck-to-pdb dy)) ≡ d
 
-dyck-to-pdb End = Base
+dyck-to-pdb ⊝ = Base
 dyck-to-pdb (⇑ dy) = Extend (dyck-to-pdb dy)
                             (sym≃ty (dyck-to-pdb-focus-ty dy))
                             (sym≃ty (Arr≃ (wk-tm-≃ (dyck-to-pdb-focus-tm dy))
@@ -25,7 +25,7 @@ dyck-to-pdb (⇑ dy) = Extend (dyck-to-pdb dy)
                                           refl≃tm))
 dyck-to-pdb (⇓ dy) = Restr (dyck-to-pdb dy) ⦃ NonZero-subst (sym (dyck-to-pdb-focus-ty-dim dy)) it ⦄
 
-dyck-to-pdb-focus-ty End = refl≃ty
+dyck-to-pdb-focus-ty ⊝ = refl≃ty
 dyck-to-pdb-focus-ty (⇑ dy) = refl≃ty
 dyck-to-pdb-focus-ty (⇓ dy) = begin
   < ty-base (focus-ty (dyck-to-pdb dy)) >ty
@@ -36,7 +36,7 @@ dyck-to-pdb-focus-ty (⇓ dy) = begin
   where
     open Reasoning ty-setoid
 
-dyck-to-pdb-focus-tm End = refl≃tm
+dyck-to-pdb-focus-tm ⊝ = refl≃tm
 dyck-to-pdb-focus-tm (⇑ dy) = refl≃tm
 dyck-to-pdb-focus-tm (⇓ dy) = begin
   < ty-tgt (focus-ty (dyck-to-pdb dy)) ⦃ _ ⦄ >tm
@@ -77,7 +77,7 @@ dyck-term-⇓-NonZero : (dy : Dyck n d) → .⦃ _ : NonZero d ⦄ → dyck-term
 dyck-term-⇓-NonZero {d = suc d} dy = refl≃tm
 
 pdb-to-dyck : (pdb : Γ ⊢pdb) → Dyck (pdb-length pdb) (pdb-focus-dim pdb)
-pdb-to-dyck Base = End
+pdb-to-dyck Base = ⊝
 pdb-to-dyck (Extend pdb p q) = ⇑ (pdb-to-dyck pdb)
 pdb-to-dyck (Restr pdb) = ⇓-NonZero (pdb-to-dyck pdb) ⦃ NonZero-subst (sym (pdb-focus-dim-prop pdb)) it ⦄
 
@@ -121,7 +121,7 @@ pdb-to-dyck-focus-tm (Restr pdb) = begin
     open Reasoning tm-setoid
 
 dyck-to-pdb-to-dyck : (dy : Dyck n d) → pdb-to-dyck (dyck-to-pdb dy) ≃d dy
-dyck-to-pdb-to-dyck End = refl≃d
+dyck-to-pdb-to-dyck ⊝ = refl≃d
 dyck-to-pdb-to-dyck (⇑ dy) = ⇑≃ (dyck-to-pdb-to-dyck dy)
 dyck-to-pdb-to-dyck (⇓ dy) = sym≃d (⇓-NonZero-≃ (sym≃d (dyck-to-pdb-to-dyck dy)))
 

@@ -108,14 +108,15 @@ peak-to-branch-lem : {dy : Dyck (suc n) d}
                                           (peak-to-branch pk)
 
 peak-to-branch (⇕pk {d = d} dy) = extend-tree-branch d (dyck-to-tree dy) ⦃ _ ⦄
-peak-to-branch (⇑pk {d} {dy = dy} pk) = extend-branch d (dyck-to-tree dy)
-                                                      ⦃ dyck-to-tree-is-n-extendable dy ⦄
-                                                      (peak-to-branch pk)
-                                                      (peak-to-branch-lem pk)
+peak-to-branch (⇑pk {d = d} {dy = dy} pk)
+  = extend-branch d (dyck-to-tree dy)
+                    ⦃ dyck-to-tree-is-n-extendable dy ⦄
+                    (peak-to-branch pk)
+                    (peak-to-branch-lem pk)
 peak-to-branch (⇓pk pk) = peak-to-branch pk
 
 peak-to-branch-lem (⇕pk {d = d} dy) = extend-tree-branch-leaves-branch d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄
-peak-to-branch-lem (⇑pk {d} {dy = dy} pk)
+peak-to-branch-lem (⇑pk {d = d} {dy = dy} pk)
   = extend-tree-leaves-branch d (dyck-to-tree dy)
                               ⦃ dyck-to-tree-is-n-extendable dy ⦄
                               (peak-to-branch pk)

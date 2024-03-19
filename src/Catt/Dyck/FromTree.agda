@@ -52,11 +52,11 @@ pred-n-extendable (suc n) (Join S T@(Join _ _)) = pred-n-extendable (suc n) T
 dyck-to-tree : Dyck n d → Tree (n * 2)
 dyck-to-tree-is-n-extendable : (dy : Dyck n d) → n-extendable d (dyck-to-tree dy)
 
-dyck-to-tree End = Sing
+dyck-to-tree ⊝ = Sing
 dyck-to-tree (⇑ {d = d} dy) = extend-tree d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄
 dyck-to-tree (⇓ dy) = dyck-to-tree dy
 
-dyck-to-tree-is-n-extendable End = tt
+dyck-to-tree-is-n-extendable ⊝ = tt
 dyck-to-tree-is-n-extendable (⇑ {d = d} dy) = extended-tree-is-more-extendable d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄
 dyck-to-tree-is-n-extendable (⇓ {d = d} dy) = pred-n-extendable d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄
 
@@ -88,7 +88,7 @@ tree-to-dyck-len-prop (suc d) (Join S T@(Join _ _)) = begin
     open ≡-Reasoning
 
 tree-to-dyck : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄ → Dyck (tree-to-dyck-len d T) d
-tree-to-dyck zero Sing = End
+tree-to-dyck zero Sing = ⊝
 tree-to-dyck zero (Join S T) = wedge-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck zero T)
 tree-to-dyck (suc d) (Join S Sing) = susp-dyck (tree-to-dyck d S)
 tree-to-dyck (suc d) (Join S T@(Join _ _)) = wedge-dyck (⇓ (susp-dyck (tree-to-dyck zero S))) (tree-to-dyck (suc d) T)
@@ -136,7 +136,7 @@ extend-wedge-tree {n = n} (Join S S′) T ⦃ ex ⦄ = let
             (Join≃ refl≃ (extend-wedge-tree S′ T))
 
 wedge-dyck-tree : (dy : Dyck n 0) → (ey : Dyck m d) → dyck-to-tree (wedge-dyck dy ey) ≃ dyck-to-tree dy ++t dyck-to-tree ey
-wedge-dyck-tree dy End = ≃′-to-≃ (sym≃′ (++t-right-unit (dyck-to-tree dy)))
+wedge-dyck-tree dy ⊝ = ≃′-to-≃ (sym≃′ (++t-right-unit (dyck-to-tree dy)))
 wedge-dyck-tree dy (⇑ ey) = let
   instance _ = dyck-to-tree-is-n-extendable (wedge-dyck dy ey)
   instance _ = dyck-to-tree-is-n-extendable ey
@@ -144,7 +144,7 @@ wedge-dyck-tree dy (⇑ ey) = let
 wedge-dyck-tree dy (⇓ ey) = wedge-dyck-tree dy ey
 
 susp-dyck-tree : (dy : Dyck n d) → dyck-to-tree (susp-dyck dy) ≃ Susp (dyck-to-tree dy)
-susp-dyck-tree End = refl≃
+susp-dyck-tree ⊝ = refl≃
 susp-dyck-tree (⇑ dy) = let
   instance _ = dyck-to-tree-is-n-extendable (susp-dyck dy)
   in extend-tree-eq (susp-dyck-tree dy)
@@ -181,7 +181,7 @@ tree-to-dyck-restrict (suc d) (Join S T@(Join _ _)) = let
   in wedge-dyck-≃ refl≃d (tree-to-dyck-restrict (suc d) T)
 
 dyck-to-tree-to-dyck : (dy : Dyck n d) → tree-to-dyck d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄ ≃d dy
-dyck-to-tree-to-dyck End = refl≃d
+dyck-to-tree-to-dyck ⊝ = refl≃d
 dyck-to-tree-to-dyck {d = suc d} (⇑ dy) = let
   instance _ = dyck-to-tree-is-n-extendable dy
   instance _ = extended-tree-is-more-extendable d (dyck-to-tree dy)

@@ -147,7 +147,8 @@ prune-sub-Ty : {Γ : Ctx n}
              → {A : Ty n}
              → peak-term p [ σ ]tm
                ≃tm
-               identity-term A t → Typing-Sub ⌊ _ // p ⌋d Γ (σ //s p)
+               identity-term A t
+             → Typing-Sub ⌊ _ // p ⌋d Γ (σ //s p)
 prune-sub-Ty (⇕pk dy) (TyExt (TyExt σty sty) tty) q = σty
 prune-sub-Ty (⇑pk {dy = dy} p) (TyExt (TyExt {Δ = Δ} {σ = σ} σty sty) tty) {t} {A} q
   = TyExt (TyExt (prune-sub-Ty p σty l4) (TyConv sty l1)) (TyConv tty (Arr≈ l2 l3 refl≈tm))

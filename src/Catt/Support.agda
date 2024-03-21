@@ -93,8 +93,16 @@ is-DC (Γ , A) (ewt xs) = is-DC Γ xs × (FVTy A ⊆ xs)
 
 DC : (Γ : Ctx n) → VarSet n → VarSet n
 DC ∅ xs = emp
-DC (Γ , A) (ewf xs) = ewf (DC Γ xs)
-DC (Γ , A) (ewt xs) = ewt (DC Γ (xs ∪ FVTy A))
+DC (Γ , A) (x ∷ xs) = x ∷ DC Γ (if x then xs ∪ FVTy A else xs)
+
+infixl 30 _/s_
+_/s_ : VarSet n → VarSet n → VarSet n
+emp /s ys = emp
+(x ∷ xs) /s (y ∷ ys) = (x ∧ not y) ∷ xs /s ys
+
+LM : (Γ : Ctx n) → VarSet n
+LM ∅ = emp
+LM (Γ , A) = ewt (LM Γ /s FVTy A)
 
 SuppTm : (Γ : Ctx n) → (t : Tm n) → VarSet n
 SuppTm Γ t = DC Γ (FVTm t)

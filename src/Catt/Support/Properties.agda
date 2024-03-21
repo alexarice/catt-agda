@@ -309,6 +309,10 @@ lookup-isVar-⊆ (ewt xs) (Var zero) p = cong ewt (sym (∪-right-unit xs))
 lookup-isVar-⊆ (ewf xs) (Var (suc i)) p = cong ewf (lookup-isVar-⊆ xs (Var i) p)
 lookup-isVar-⊆ (ewt xs) (Var (suc i)) p = cong ewt (lookup-isVar-⊆ xs (Var i) p)
 
+lookup-isVar-wk : (xs : VarSet (suc n)) → (s : Tm n) → .⦃ _ : isVar s ⦄
+                → lookup-isVar xs (wk-tm s) ⦃ wk-tm-preserve-isVar s it ⦄ ≡ lookup-isVar (tail xs) s
+lookup-isVar-wk (x ∷ xs) (Var i) = refl
+
 vs-sub-comp : (xs : VarSet l) → (σ : Sub n m ⋆) → (τ : Sub l n ⋆) → xs [ τ ● σ ]vs ≡ xs [ τ ]vs [ σ ]vs
 vs-sub-comp emp σ ⟨ _ ⟩′ = sym (vs-sub-empty σ)
 vs-sub-comp (ewf xs) σ ⟨ τ , t ⟩ = vs-sub-comp xs σ τ

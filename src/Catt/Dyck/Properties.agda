@@ -6,6 +6,7 @@ open import Catt.Syntax
 open import Catt.Syntax.Bundles
 open import Catt.Syntax.Properties
 open import Catt.Variables
+open import Catt.Variables.Properties
 open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Wedge
@@ -260,3 +261,8 @@ wedge-⌊⌋d dy (⇑ ey)
   = Add≃ (Add≃ (wedge-⌊⌋d dy ey) (wedge-dyck-type dy ey)) (wedge-dyck-pre-type dy (⇑ ey))
 wedge-⌊⌋d dy (⇓ ey)
   = wedge-⌊⌋d dy ey
+
+peak-term-isVar : {dy : Dyck n d} → (p : Peak dy) → isVar (peak-term p)
+peak-term-isVar (⇕pk dy) = tt
+peak-term-isVar (⇑pk p) = wk-tm-preserve-isVar (wk-tm (peak-term p)) (wk-tm-preserve-isVar (peak-term p) (peak-term-isVar p))
+peak-term-isVar (⇓pk p) = peak-term-isVar p

@@ -157,6 +157,37 @@ prune-peak {n = 2+ n} (⇑pk p) (⇑pk q) x = ⇑pk (prune-peak p q (x ∘ cong 
 prune-peak (⇓pk p) (⇓pk q) x = ⇓pk (prune-peak p q (x ∘ cong ⇓pk))
 prune-peak (⇓pk (⇑pk p)) (⇕pk dy) x = ⇕pk (dy // p)
 
+prune-peak-prop : {dy : Dyck (suc n) d} → (p q : Peak dy) → .(x : p ≢ q) → peak-term (prune-peak p q x) ≃tm peak-term q [ π p ]tm
+prune-peak-prop (⇕pk dy) (⇕pk .dy) x = ⊥-elim (x refl)
+prune-peak-prop (⇕pk dy) (⇓pk (⇑pk q)) x = begin
+  < peak-term q >tm
+    ≈˘⟨ id-on-tm (peak-term q) ⟩
+  < peak-term q [ idSub ]tm >tm
+    ≈˘⟨ apply-sub-wk-tm-≃ (peak-term q) _ ⟩
+  < wk-tm (peak-term q) [ ⟨ idSub , dyck-term dy ⟩ ]tm >tm
+    ≈˘⟨ apply-sub-wk-tm-≃ (wk-tm (peak-term q)) _ ⟩
+  < wk-tm (wk-tm (peak-term q))
+    [ ⟨ ⟨ idSub , dyck-term dy ⟩ , identity-term (dyck-type dy) (dyck-term dy) ⟩ ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+prune-peak-prop {n = suc zero} (⇑pk p) (⇑pk q) x = ⊥-elim (x (cong ⇑pk (peak-1-lem p q)))
+prune-peak-prop {n = 2+ n} (⇑pk p) (⇑pk q) x = begin
+  < wk-tm (wk-tm (peak-term (prune-peak p q _))) >tm
+    ≈⟨ wk-tm-≃ (wk-tm-≃ (prune-peak-prop p q _)) ⟩
+  < wk-tm (wk-tm (peak-term q [ π p ]tm)) >tm
+    ≈˘⟨ wk-tm-≃ (apply-wk-sub-tm-≃ (peak-term q) (π p)) ⟩
+  < wk-tm (peak-term q [ wk-sub (π p) ]tm) >tm
+    ≈˘⟨ apply-wk-sub-tm-≃ (peak-term q) (wk-sub (π p)) ⟩
+  < peak-term q [ wk-sub (wk-sub (π p)) ]tm >tm
+    ≈˘⟨ apply-sub-wk-tm-≃ (peak-term q) _ ⟩
+  < wk-tm (peak-term q) [ ⟨ wk-sub (wk-sub (π p)) , Var 1F ⟩ ]tm >tm
+    ≈˘⟨ apply-sub-wk-tm-≃ (wk-tm (peak-term q)) _ ⟩
+  < wk-tm (wk-tm (peak-term q)) [ ⟨ ⟨ wk-sub (wk-sub (π p)) , Var 1F ⟩ , Var 0F ⟩ ]tm >tm ∎
+  where
+    open Reasoning tm-setoid
+prune-peak-prop (⇓pk p) (⇓pk q) x = prune-peak-prop p q (x ∘ cong ⇓pk)
+prune-peak-prop (⇓pk (⇑pk p)) (⇕pk dy) x = refl≃tm
+
 prune-conf : {dy : Dyck (2+ n) d} → (p q : Peak dy) → (x : p ≢ q) → dy // p // prune-peak p q x ≃d dy // q // prune-peak q p (≢-sym x)
 prune-conf (⇕pk dy) (⇕pk .dy) x = ⊥-elim (x refl)
 prune-conf (⇕pk dy) (⇓pk (⇑pk q)) x = refl≃d

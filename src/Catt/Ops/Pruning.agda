@@ -11,8 +11,8 @@ open import Catt.Support
 PruningOp : Set
 PruningOp = ∀ {n} (dy : Dyck (suc n) 0)
                 → (pk : Peak dy)
-                → (xs : VarSet (3 + (n * 2)))
-                → (ys : VarSet (3 + (n * 2)))
+                → (xs : VarSet (3 + double n))
+                → (ys : VarSet (3 + double n))
                 → ops ⌊ dy ⌋d xs ys
                 → ops ⌊ dy // pk ⌋d
                       (xs [ π pk ]vs)

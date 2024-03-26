@@ -36,7 +36,7 @@ open ≡-Reasoning
   ewt (FVSub (wk-sub (π p)) ∪ ewt empty ∪ empty)
     ≡⟨ cong (λ - → ewt (- ∪ ewt empty ∪ empty)) (fv-wk-sub (π p)) ⟩
   ewt (ewt (FVSub (π p) ∪ empty ∪ empty))
-    ≡⟨ cong (ewt ∘ ewt) (solve (∪-monoid {n = suc (n * 2)})) ⟩
+    ≡⟨ cong (ewt ∘ ewt) (solve (∪-monoid {n = suc (double n)})) ⟩
   ewt (ewt (FVSub (π p)))
     ≡⟨ cong (ewt ∘ ewt) (π-full p) ⟩
   full ∎

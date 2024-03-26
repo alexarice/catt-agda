@@ -26,9 +26,9 @@ HasPruning : Set
 HasPruning = ∀ {m n}
            → {Γ : Ctx m}
            → {dy : Dyck (suc n) 0}
-           → {A : Ty (3 + n * 2)}
+           → {A : Ty (3 + double n)}
            → (p : Peak dy)
-           → {σ : Sub (3 + n * 2) m ⋆}
+           → {σ : Sub (3 + double n) m ⋆}
            → {B : Ty m}
            → {t : Tm m}
            → (peak-term p [ σ ]tm ≃tm identity-term B t)

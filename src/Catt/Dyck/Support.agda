@@ -13,10 +13,10 @@ open import Catt.Support.Properties
 open import Catt.Globular
 open import Catt.Globular.Properties
 
-dyck-bd-vs : (d : ℕ) → (dy : Dyck n m) → (b : Bool) → VarSet (suc (n * 2))
+dyck-bd-vs : (d : ℕ) → (dy : Dyck n m) → (b : Bool) → VarSet (suc (double n))
 dyck-bd-vs d dy b = pdb-bd-vs d ⌊ dy ⌋d ⦃ dyck-to-pdb dy ⦄ b
 
-dyck-term-fixed : (d m : ℕ) → (dy : Dyck n (m + d)) → Tm (suc (n * 2))
+dyck-term-fixed : (d m : ℕ) → (dy : Dyck n (m + d)) → Tm (suc (double n))
 dyck-term-fixed d zero dy = dyck-term dy
 dyck-term-fixed d (suc m) dy = ty-tgt′ (wk-ty (truncate′ m (dyck-pre-type dy)))
 

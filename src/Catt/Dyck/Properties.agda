@@ -9,6 +9,7 @@ open import Catt.Variables
 open import Catt.Variables.Properties
 open import Catt.Globular
 open import Catt.Globular.Properties
+open import Catt.Discs
 open import Catt.Wedge
 open import Catt.Suspension
 open import Catt.Suspension.Properties
@@ -117,13 +118,13 @@ dyck-type-≃ : dy ≃d ey → dyck-type dy ≃ty dyck-type ey
 dyck-term-≃ : dy ≃d ey → dyck-term dy ≃tm dyck-term ey
 
 dyck-pre-type-≃ ⊝≃ = refl≃ty
-dyck-pre-type-≃ (⇑≃ p) = Arr≃ (wk-tm-≃ (dyck-term-≃ p)) (wk-ty-≃ (dyck-type-≃ p)) (Var≃ (cong (λ - → 2 + - * 2) (≃d-to-same-n p)) refl)
+dyck-pre-type-≃ (⇑≃ p) = Arr≃ (wk-tm-≃ (dyck-term-≃ p)) (wk-ty-≃ (dyck-type-≃ p)) (Var≃ (cong (λ - → 2 + double -) (≃d-to-same-n p)) refl)
 dyck-pre-type-≃ (⇓≃ p) = ty-base-≃ (dyck-pre-type-≃ p)
 
 dyck-type-≃ p = wk-ty-≃ (dyck-pre-type-≃ p)
 
 dyck-term-≃ ⊝≃ = refl≃tm
-dyck-term-≃ (⇑≃ p) = Var≃ (cong (λ - → 3 + - * 2) (≃d-to-same-n p)) refl
+dyck-term-≃ (⇑≃ p) = Var≃ (cong (λ - → 3 + double -) (≃d-to-same-n p)) refl
 dyck-term-≃ (⇓≃ p) = ty-tgt′-≃ (dyck-type-≃ p)
 
 ⌊⌋d-≃ : dy ≃d ey → ⌊ dy ⌋d ≃c ⌊ ey ⌋d
@@ -193,7 +194,7 @@ wedge-dyck-term : (dy : Dyck n 0) → (ey : Dyck m d)
                   dyck-term ey [ wedge-inc-right (dyck-term dy) _ ]tm
 
 wedge-dyck-pre-type {n = n} {m = m} dy (⇑ ey)
-  = Arr≃ l1 l2 (Var≃ (cong 2+ (*-distribʳ-+ 2 m n)) refl)
+  = Arr≃ l1 l2 (Var≃ (cong 2+ (double-+ m n)) refl)
   where
     l1 : wk-tm (dyck-term (wedge-dyck dy ey))
          ≃tm
@@ -245,7 +246,7 @@ wedge-dyck-type {m = suc m} dy ey = begin
     open Reasoning ty-setoid
 
 wedge-dyck-term dy ⊝ = refl≃tm
-wedge-dyck-term {n = n} dy (⇑ {n = m} ey) = Var≃ (cong (3 +_) (*-distribʳ-+ 2 m n)) refl
+wedge-dyck-term {n = n} dy (⇑ {n = m} ey) = Var≃ (cong (3 +_) (double-+ m n)) refl
 wedge-dyck-term dy (⇓ ey) = begin
   < ty-tgt′ (dyck-type (wedge-dyck dy ey)) >tm
     ≈⟨ ty-tgt′-≃ (wedge-dyck-type dy ey) ⟩
@@ -266,3 +267,34 @@ peak-term-isVar : {dy : Dyck n d} → (p : Peak dy) → isVar (peak-term p)
 peak-term-isVar (⇕pk dy) = tt
 peak-term-isVar (⇑pk p) = wk-tm-preserve-isVar (wk-tm (peak-term p)) (wk-tm-preserve-isVar (peak-term p) (peak-term-isVar p))
 peak-term-isVar (⇓pk p) = peak-term-isVar p
+
+dyck-disc-is-disc : (n : ℕ) → ⌊ dyck-disc n ⌋d ≃c Disc n
+dyck-disc-pre-type : (n : ℕ) → dyck-pre-type (dyck-disc n) ≃ty sphere-type n
+dyck-disc-type : (n : ℕ) → dyck-type (dyck-disc n) ≃ty wk-ty (sphere-type n)
+dyck-disc-term : (n : ℕ) → dyck-term (dyck-disc n) ≃tm 0V {n = suc (double n)}
+
+dyck-disc-is-disc zero = refl≃c
+dyck-disc-is-disc (suc n) = Add≃ (Add≃ (dyck-disc-is-disc n)
+                                       (dyck-disc-type n))
+                                 (dyck-disc-pre-type (suc n))
+
+dyck-disc-pre-type zero = refl≃ty
+dyck-disc-pre-type (suc n) = Arr≃ (wk-tm-≃ (dyck-disc-term n))
+                                  (wk-ty-≃ (dyck-disc-type n))
+                                  refl≃tm
+
+dyck-disc-type n = wk-ty-≃ (dyck-disc-pre-type n)
+
+dyck-disc-term zero = refl≃tm
+dyck-disc-term (suc n) = refl≃tm
+
+dyck-disc-peak-term : (n : ℕ) → peak-term (dyck-disc-peak n) ≃tm 0V {n = suc (double (suc n))}
+dyck-disc-peak-term n = refl≃tm
+
+dyck-finish-ctx : (dy : Dyck n d) → ⌊ dyck-finish dy ⌋d ≃c ⌊ dy ⌋d
+dyck-finish-ctx {d = zero} dy = refl≃c
+dyck-finish-ctx {d = suc d} dy = dyck-finish-ctx (⇓ dy)
+
+dyck-finish-peak-term : {dy : Dyck n d} → (p : Peak dy) → peak-term (dyck-finish-peak p) ≃tm peak-term p
+dyck-finish-peak-term {d = zero} p = refl≃tm
+dyck-finish-peak-term {d = suc d} p = dyck-finish-peak-term (⇓pk p)

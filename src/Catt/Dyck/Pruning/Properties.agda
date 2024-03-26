@@ -128,13 +128,13 @@ susp-π (⇑pk p)
         open Reasoning sub-setoid
 susp-π (⇓pk p) = susp-π p
 
-susp-//s : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + n * 2) m ⋆)
+susp-//s : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + double n) m ⋆)
          → susp-sub σ //s susp-peak p ≃s susp-sub (σ //s p)
 susp-//s (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ = refl≃s
 susp-//s (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ = Ext≃ (Ext≃ (susp-//s p σ) refl≃tm) refl≃tm
 susp-//s (⇓pk p) σ = susp-//s p σ
 
-//s-sub : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + n * 2) m ⋆) → (τ : Sub m l ⋆)
+//s-sub : {dy : Dyck (suc n) d} → (p : Peak dy) → (σ : Sub (3 + double n) m ⋆) → (τ : Sub m l ⋆)
         → σ ● τ //s p ≃s (σ //s p) ● τ
 //s-sub (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ τ = refl≃s
 //s-sub (⇑pk p) ⟨ ⟨ σ , s ⟩ , t ⟩ τ = Ext≃ (Ext≃ (//s-sub p σ τ) refl≃tm) refl≃tm
@@ -196,7 +196,7 @@ prune-conf {n = suc n} (⇑pk p) (⇑pk q) x = ⇑≃ (prune-conf p q (x ∘ con
 prune-conf (⇓pk p) (⇓pk q) x = ⇓≃ (prune-conf p q (x ∘ cong ⇓pk))
 prune-conf (⇓pk (⇑pk p)) (⇕pk dy) x = refl≃d
 
-prune-sub-conf : {dy : Dyck (2+ n) d} → (p q : Peak dy) → (σ : Sub (5 + n * 2) m ⋆) → (x : p ≢ q) → σ //s p //s prune-peak p q x ≃s σ //s q //s prune-peak q p (≢-sym x)
+prune-sub-conf : {dy : Dyck (2+ n) d} → (p q : Peak dy) → (σ : Sub (5 + double n) m ⋆) → (x : p ≢ q) → σ //s p //s prune-peak p q x ≃s σ //s q //s prune-peak q p (≢-sym x)
 prune-sub-conf (⇕pk dy) (⇕pk .dy) σ x = ⊥-elim (x refl)
 prune-sub-conf (⇕pk dy) (⇓pk (⇑pk q)) ⟨ ⟨ σ , s ⟩ , t ⟩ x = refl≃s
 prune-sub-conf {n = zero} (⇑pk p) (⇑pk q) σ x = ⊥-elim (x (cong ⇑pk (peak-1-lem p q)))
@@ -271,3 +271,12 @@ prune-sub-conf (⇓pk (⇑pk p)) (⇕pk dy) ⟨ ⟨ σ , s ⟩ , t ⟩ x = refl�
 π-conf (⇓pk (⇑pk p)) (⇕pk dy) x = Ext≃ (Ext≃ (sym≃s (π-conf-lem-2 p))
                                              (dyck-term-prune p))
                                        (sym≃tm (π-conf-lem-1 p))
+
+disc-prune : (n : ℕ) → ⇓ (dyck-disc (suc n)) // dyck-disc-peak n ≃d dyck-disc n
+disc-prune n = refl≃d
+
+sub-from-disc-prune : (d : ℕ) → (A : Ty n) → .(p : ty-dim A ≡ d) → (s u t : Tm n)
+                    → sub-from-disc (suc d) (s ─⟨ A ⟩⟶ u) (cong suc p) t //s dyck-disc-peak d
+                      ≃s
+                      sub-from-disc d A p s
+sub-from-disc-prune d A p s u t = refl≃s

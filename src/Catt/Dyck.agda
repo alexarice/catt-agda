@@ -15,10 +15,10 @@ data Dyck where
 variable
   dy ey fy : Dyck n d
 
-⌊_⌋d : Dyck n d → Ctx (suc (n * 2))
-dyck-pre-type : Dyck n d → Ty (n * 2)
-dyck-type : Dyck n d → Ty (suc (n * 2))
-dyck-term : Dyck n d → Tm (suc (n * 2))
+⌊_⌋d : Dyck n d → Ctx (suc (double n))
+dyck-pre-type : Dyck n d → Ty (double n)
+dyck-type : Dyck n d → Ty (suc (double n))
+dyck-term : Dyck n d → Tm (suc (double n))
 
 ⌊ ⊝ ⌋d = ∅ , ⋆
 ⌊ ⇑ d ⌋d = ⌊ d ⌋d , dyck-type d , dyck-pre-type (⇑ d)
@@ -44,7 +44,7 @@ peak-height (⇕pk {d = d} dy) = d
 peak-height (⇑pk pk) = peak-height pk
 peak-height (⇓pk pk) = peak-height pk
 
-peak-term : {dy : Dyck n d} → Peak dy → Tm (suc (n * 2))
+peak-term : {dy : Dyck n d} → Peak dy → Tm (suc (double n))
 peak-term (⇕pk dy) = 0V
 peak-term (⇑pk p) = wk-tm (wk-tm (peak-term p))
 peak-term (⇓pk p) = peak-term p
@@ -68,3 +68,18 @@ dyck-dim : (dy : Dyck n d) → ℕ
 dyck-dim ⊝ = 0
 dyck-dim (⇑ {d = d} dy) = dyck-dim dy ⊔ suc d
 dyck-dim (⇓ dy) = dyck-dim dy
+
+dyck-finish : Dyck n d → Dyck n 0
+dyck-finish {d = zero} dy = dy
+dyck-finish {d = suc d} dy = dyck-finish (⇓ dy)
+
+dyck-disc : (n : ℕ) → Dyck n n
+dyck-disc zero = ⊝
+dyck-disc (suc n) = ⇑ (dyck-disc n)
+
+dyck-disc-peak : (n : ℕ) → Peak (⇓ (dyck-disc (suc n)))
+dyck-disc-peak n = ⇕pk (dyck-disc n)
+
+dyck-finish-peak : {dy : Dyck n d} → Peak dy → Peak (dyck-finish dy)
+dyck-finish-peak {d = zero} p = p
+dyck-finish-peak {d = suc d} p = dyck-finish-peak (⇓pk p)

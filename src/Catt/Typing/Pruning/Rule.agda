@@ -18,9 +18,9 @@ open Rule
 
 Pruning : (Γ : Ctx m)
         → (dy : Dyck (suc n) 0)
-        → (A : Ty (3 + n * 2))
+        → (A : Ty (3 + double n))
         → (p : Peak dy)
-        → (σ : Sub (3 + n * 2) m ⋆)
+        → (σ : Sub (3 + double n) m ⋆)
         → Rule
 Pruning Γ dy A p σ .len = _
 Pruning Γ dy A p σ .tgtCtx = Γ
@@ -30,9 +30,9 @@ Pruning Γ dy A p σ .rhs = Coh ⌊ dy // p ⌋d (A [ π p ]ty) (σ //s p)
 data PruningSet : RuleSet where
   Prune : (Γ : Ctx m)
         → (dy : Dyck (suc n) 0)
-        → (A : Ty (3 + n * 2))
+        → (A : Ty (3 + double n))
         → (p : Peak dy)
-        → (σ : Sub (3 + n * 2) m ⋆)
+        → (σ : Sub (3 + double n) m ⋆)
         → (B : Ty m)
         → (t : Tm m)
         → (pf : peak-term p [ σ ]tm ≃tm identity-term B t)

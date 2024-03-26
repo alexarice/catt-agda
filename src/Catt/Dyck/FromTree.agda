@@ -67,21 +67,21 @@ tree-to-dyck-len (suc d) (Susp S) = suc (tree-to-dyck-len d S)
 tree-to-dyck-len (suc d) (Join S T@(Join _ _)) = tree-to-dyck-len (suc d) T + suc (tree-to-dyck-len zero S)
 
 tree-to-dyck-len-prop : (d : ℕ) → (T : Tree n) → .⦃ _ : n-extendable d T ⦄
-                      → tree-to-dyck-len d T * 2 ≡ n
+                      → double (tree-to-dyck-len d T) ≡ n
 tree-to-dyck-len-prop zero Sing = refl
 tree-to-dyck-len-prop zero (Join S T) = begin
-  (tree-to-dyck-len 0 T + suc (tree-to-dyck-len zero S)) * 2
-    ≡⟨ *-distribʳ-+ 2 (tree-to-dyck-len 0 T) (suc (tree-to-dyck-len zero S)) ⟩
-  tree-to-dyck-len 0 T * 2 + suc (tree-to-dyck-len zero S) * 2
+  double (tree-to-dyck-len 0 T + suc (tree-to-dyck-len zero S))
+    ≡⟨ double-+ (tree-to-dyck-len 0 T) (suc (tree-to-dyck-len 0 S)) ⟩
+  double (tree-to-dyck-len 0 T) + 2+ (double (tree-to-dyck-len zero S))
     ≡⟨ cong₂ _+_ (tree-to-dyck-len-prop 0 T) (cong 2+ (tree-to-dyck-len-prop 0 S)) ⟩
   _ ∎
   where
     open ≡-Reasoning
 tree-to-dyck-len-prop (suc d) (Susp T) = cong 2+ (tree-to-dyck-len-prop d T)
 tree-to-dyck-len-prop (suc d) (Join S T@(Join _ _)) = begin
-  (tree-to-dyck-len (suc d) T + suc (tree-to-dyck-len zero S)) * 2
-    ≡⟨ *-distribʳ-+ 2 (tree-to-dyck-len (suc d) T) (suc (tree-to-dyck-len zero S)) ⟩
-  tree-to-dyck-len (suc d) T * 2 + suc (tree-to-dyck-len zero S) * 2
+  double (tree-to-dyck-len (suc d) T + suc (tree-to-dyck-len zero S))
+    ≡⟨ double-+ (tree-to-dyck-len (suc d) T) (suc (tree-to-dyck-len 0 S)) ⟩
+  double (tree-to-dyck-len (suc d) T) + 2+ (double (tree-to-dyck-len zero S))
     ≡⟨ cong₂ _+_ (tree-to-dyck-len-prop (suc d) T) (cong 2+ (tree-to-dyck-len-prop 0 S)) ⟩
   _ ∎
   where

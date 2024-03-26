@@ -275,7 +275,7 @@ right-base-isVar (s ─⟨ A ⟩⟶ t) (g1 ,, g2 ,, g3) _ _ = right-base-isVar A
 pdb-right-base-isVar : (pdb : Γ ⊢pdb) → isVar (pdb-right-base pdb)
 pdb-right-base-isVar pdb = right-base-isVar (focus-ty pdb) (focus-ty-is-globular pdb) (focus-tm pdb) (focus-tm-is-globular pdb)
 
-pdb-length-prop : (pdb : Γ ⊢pdb) → 1 + pdb-length pdb * 2 ≡ ctxLength Γ
+pdb-length-prop : (pdb : Γ ⊢pdb) → 1 + double (pdb-length pdb) ≡ ctxLength Γ
 pdb-length-prop Base = refl
 pdb-length-prop (Extend pdb p q) = cong 2+ (pdb-length-prop pdb)
 pdb-length-prop (Restr pdb) = pdb-length-prop pdb

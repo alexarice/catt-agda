@@ -106,3 +106,7 @@ if-lem-const true x = refl
 
 Odd-is-NonZero : (n : ℕ) → Odd n → NonZero n
 Odd-is-NonZero (suc n) odd = it
+
+double-+ : (m n : ℕ) → double (m + n) ≡ double m + double n
+double-+ zero n = refl
+double-+ (suc m) n = cong 2+ (double-+ m n)

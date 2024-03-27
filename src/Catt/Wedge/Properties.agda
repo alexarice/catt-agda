@@ -147,6 +147,13 @@ wedge-susp-assoc : (Γ : Ctx (suc n)) → (Δ : Ctx (suc m)) → (s : Tm (suc m)
               → wedge (wedge-susp Γ Δ) (s [ wedge-susp-inc-right n m ]tm) Υ ≃c wedge-susp Γ (wedge Δ s Υ)
 wedge-susp-assoc Γ Δ s Υ = wedge-assoc (susp-ctx Γ) get-snd Δ s Υ
 
+sub-from-wedge-assoc : (σ : Sub (suc n) o A) → (τ : Sub (suc m) o A) → (μ : Sub (suc l) o A)
+                     → sub-from-wedge (sub-from-wedge σ τ) μ
+                       ≃s
+                       sub-from-wedge σ (sub-from-wedge τ μ)
+sub-from-wedge-assoc {l = zero} σ τ ⟨ μ , t ⟩ = refl≃s
+sub-from-wedge-assoc {l = suc l} σ τ ⟨ μ , t ⟩ = Ext≃ (sub-from-wedge-assoc σ τ μ) refl≃tm
+
 sub-from-wedge-inc-left : (σ : Sub (suc n) l A) → (t : Tm (suc n)) → (τ : Sub (suc m) l A) → wedge-inc-left t m ● sub-from-wedge σ τ ≃s σ
 sub-from-wedge-inc-left σ t τ@(⟨ ⟨ _ ⟩′ , s ⟩) = id-left-unit (sub-from-wedge σ τ)
 sub-from-wedge-inc-left σ t ⟨ ⟨ τ , s ⟩ , u ⟩ = begin

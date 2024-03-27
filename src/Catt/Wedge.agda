@@ -27,8 +27,8 @@ wedge-susp-inc-left : (n m : ℕ) → Sub (3 + n) (suc (m + (2 + n))) ⋆
 wedge-susp-inc-left n m = wedge-inc-left get-snd m
 
 sub-from-wedge : Sub (suc n) l A → Sub (suc m) l A → Sub (suc (m + n)) l A
-sub-from-wedge σ ⟨ ⟨ _ ⟩′ , t ⟩ = σ
-sub-from-wedge σ ⟨ ⟨ τ , u ⟩ , t ⟩ = ⟨ sub-from-wedge σ ⟨ τ , u ⟩ , t ⟩
+sub-from-wedge {m = zero} σ ⟨ τ , t ⟩ = σ
+sub-from-wedge {m = suc m} σ ⟨ τ , t ⟩ = ⟨ sub-from-wedge σ τ , t ⟩
 
 sub-between-wedges : Sub (suc n) (suc l) ⋆ → Sub (suc m) (suc l′) ⋆ → (s : Tm (suc l)) → Sub (suc (m + n)) (suc (l′ + l)) ⋆
 sub-between-wedges {l′ = l′} σ τ s = sub-from-wedge (σ ● wedge-inc-left s l′) (τ ● wedge-inc-right s l′)

@@ -116,7 +116,7 @@ module _ {n : ℕ} where
     { isIdempotentCommutativeMonoid = ∪-isIdempotentCommutativeMonoid
     }
 
-vs-sub-empty : (σ : Sub n m ⋆) → empty [ σ ]vs ≡ empty
+vs-sub-empty : (σ : Sub n m A) → empty [ σ ]vs ≡ empty
 vs-sub-empty ⟨ _ ⟩′ = refl
 vs-sub-empty ⟨ σ , t ⟩ = vs-sub-empty σ
 
@@ -176,7 +176,7 @@ vs-sub-ty (s ─⟨ A ⟩⟶ t) σ = begin
 
 vs-sub-tm (Var zero) ⟨ σ , t ⟩ = trans (cong (_∪ FVTm t) (vs-sub-empty σ)) (∪-left-unit (FVTm t))
 vs-sub-tm (Var (suc i)) ⟨ σ , t ⟩ = vs-sub-tm (Var i) σ
-vs-sub-tm (Coh S A τ) σ = vs-sub-sub τ σ
+vs-sub-tm (Coh S B τ) σ = vs-sub-sub τ σ
 
 vs-sub-sub ⟨ A ⟩′ σ = vs-sub-ty A σ
 vs-sub-sub ⟨ τ , t ⟩ σ = trans (vs-sub-∪ (FVSub τ) (FVTm t) σ) (cong₂ _∪_ (vs-sub-sub τ σ) (vs-sub-tm t σ))
@@ -632,3 +632,20 @@ pd-bd-vs-full : (n : ℕ)
                 → n ≥ ctx-dim Γ
                 → pd-bd-vs n Γ b ≡ full
 pd-bd-vs-full n Γ b p = pdb-bd-vs-full n Γ ⦃ pd-to-pdb it ⦄ b p
+
+FVTm-coh-sub : (Δ : Ctx (suc m)) → (A : Ty (suc m)) → (σ : Sub (suc m) n B)
+             → FVTm (Coh Δ A idSub [ σ ]tm) ≡ FVSub σ
+FVTm-coh-sub {B = ⋆} Δ A σ = FVSub-≃ (id-left-unit σ)
+FVTm-coh-sub {B = s ─⟨ B ⟩⟶ t} Δ A σ = begin
+  FVTm (Coh (susp-ctx Δ) (susp-ty A) (susp-sub idSub) [ ↓ σ ]tm)
+    ≡⟨ FVTm-≃ (sub-action-≃-tm (Coh≃ (refl≃c {Γ = susp-ctx Δ})
+                                     (refl≃ty {A = susp-ty A})
+                                     susp-functorial-id)
+                               (refl≃s {σ = ↓ σ})) ⟩
+  FVTm (Coh (susp-ctx Δ) (susp-ty A) idSub [ ↓ σ ]tm)
+    ≡⟨ FVTm-coh-sub (susp-ctx Δ) (susp-ty A) (↓ σ) ⟩
+  FVSub (↓ σ)
+    ≡⟨ ↓-fv σ ⟩
+  FVSub σ ∎
+  where
+    open ≡-Reasoning

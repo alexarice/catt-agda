@@ -1,6 +1,6 @@
 open import Catt.Typing.Rule
 
-module Catt.Ops.Tree (ops : Op) where
+module Deprecated.Ops.Tree (ops : Op) where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -8,7 +8,7 @@ open import Catt.Globular
 open import Catt.Globular.Properties
 open import Catt.Tree
 open import Catt.Tree.Pasting
-open import Catt.Tree.Support
+open import Deprecated.Tree.Support
 
 SOp : Set₁
 SOp = ∀ {n} (S : Tree n) → TVarSet S → TVarSet S → Set

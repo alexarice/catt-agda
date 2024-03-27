@@ -109,7 +109,6 @@ import Catt.Typing.Pruning.Typed
 
 import Catt.Ops
 import Catt.Ops.Pruning
-import Catt.Ops.Tree
 import Catt.Ops.Insertion
 import Catt.Ops.All
 import Catt.Ops.Regular
@@ -125,11 +124,13 @@ import Catt.Discs.Support
 import Catt.Dyck.Support
 import Catt.Dyck.Pruning.Support
 import Catt.Tree.Support
+import Catt.Tree.Path.Support
 import Catt.Tree.Structured.Support
-import Catt.Tree.Structured.Support.Properties
+import Catt.Tree.Structured.Construct.Support
 import Catt.Tree.Boundary.Support
 import Catt.Tree.Standard.Support
 import Catt.Tree.Insertion.Support
+import Catt.Tree.Insertion.Boundary.Support
 
 import Catt.Typing.Properties.Support
 import Catt.Typing.Structured.Support
@@ -139,5 +140,15 @@ import Catt.Typing.Insertion.Support
 import Catt.Typing.Pruning.Support
 
 import Catt.Typing.Weak
+import Catt.Typing.Strict.DR
 import Catt.Typing.Strict.Units
 import Catt.Typing.Strict.UA
+
+import Deprecated.Ops.Tree
+import Deprecated.Tree.Support
+import Deprecated.Tree.Structured.Support
+import Deprecated.Tree.Structured.Support.Properties
+import Deprecated.Tree.Structured.Construct.Support
+import Deprecated.Tree.Standard.Support
+import Deprecated.Typing.Structured.Support
+import Deprecated.Typing.Insertion.Support

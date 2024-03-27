@@ -21,7 +21,6 @@ tree-size : Tree n → ℕ
 tree-size {n} T = n
 
 ⌊_⌋ : (T : Tree m) → Ctx (suc m)
-tree-last-var : (T : Tree n) → Tm (suc n)
 
 ⌊ Sing ⌋ = singleton-ctx
 ⌊ Join S T ⌋ = wedge-susp ⌊ S ⌋ ⌊ T ⌋
@@ -29,6 +28,7 @@ tree-last-var : (T : Tree n) → Tm (suc n)
 tree-fst-var : (T : Tree n) → Tm (suc n)
 tree-fst-var T = Var (fromℕ _)
 
+tree-last-var : (T : Tree n) → Tm (suc n)
 tree-last-var Sing = 0V
 tree-last-var (Join S T) = tree-last-var T [ wedge-susp-inc-right (tree-size S) (tree-size T) ]tm
 

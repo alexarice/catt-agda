@@ -11,6 +11,7 @@ open import Catt.Suspension
 open import Catt.Wedge
 open import Catt.Wedge.Properties
 open import Catt.Tree
+open import Catt.Tree.Pasting
 open import Catt.Tree.Properties
 open import Catt.Tree.Insertion
 open import Catt.Dyck

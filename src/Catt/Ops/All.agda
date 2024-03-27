@@ -21,5 +21,5 @@ all-tame .TameOp.standard-op = all-standard-op
 all-pruning-op : PruningOp All
 all-pruning-op dy pk xs ys x = tt
 
-all-insertion-op : InsertionSOp All
+all-insertion-op : InsertionOp All
 all-insertion-op S P T x xs ys y = tt

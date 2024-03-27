@@ -18,8 +18,6 @@ open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
 open import Catt.Tree.Structured.ToTerm
 
-open import Catt.Tree.Support
-
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
 

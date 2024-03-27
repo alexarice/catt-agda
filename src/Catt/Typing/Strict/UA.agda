@@ -1,7 +1,7 @@
 open import Catt.Typing.Rule
 open import Catt.Ops.Insertion
 
-module Catt.Typing.Strict.UA (ops : Op) (tameOp : TameOp ops) (ins-op : InsertionSOp ops) where
+module Catt.Typing.Strict.UA (ops : Op) (tameOp : TameOp ops) (ins-op : InsertionOp ops) where
 
 open import Catt.Prelude
 open import Catt.Syntax

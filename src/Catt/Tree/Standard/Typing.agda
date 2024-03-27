@@ -10,6 +10,7 @@ open import Catt.Prelude
 open import Catt.Prelude.Properties
 open import Catt.Syntax
 open import Catt.Tree
+open import Catt.Tree.Pasting
 open import Catt.Tree.Standard
 open import Catt.Tree.Standard.Properties
 open import Catt.Tree.Path
@@ -19,8 +20,6 @@ open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Boundary
 open import Catt.Tree.Boundary.Properties
-
-open import Catt.Ops.Tree ops
 
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
@@ -55,10 +54,10 @@ standard-stm-Ty (suc d) (Join T (Join T₁ T₂)) p = standard-coh-Ty (suc d) (J
 
 standard-coh-Ty (suc d) T p
   = TySConv (TySCoh T
-                    (subst₂ (ops-s T)
+                    (subst₂ (ops ⌊ T ⌋)
                             (sym (supp-standard-lem d T false))
                             (sym (supp-standard-lem d T true))
-                            (standard-op-s standard-op T d p))
+                            (tree-standard-op ops standard-op T d p))
                     (standard-sty-Ty (suc d) T)
                     (id-label-Ty T)
                     TySStar)

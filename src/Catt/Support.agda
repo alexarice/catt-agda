@@ -73,8 +73,7 @@ ewf xs [ ⟨ σ , t ⟩ ]vs = xs [ σ ]vs
 ewt xs [ ⟨ σ , t ⟩ ]vs = xs [ σ ]vs ∪ FVTm t
 
 lookup-isVar : (xs : VarSet n) → (t : Tm n) → .⦃ isVar t ⦄ → Bool
-lookup-isVar (x ∷ xs) (Var zero) = x
-lookup-isVar (x ∷ xs) (Var (suc i)) = lookup-isVar xs (Var i)
+lookup-isVar xs (Var i) = lookup xs i
 
 _⊆_ : VarSet n → VarSet n → Set
 xs ⊆ ys = ys ≡ ys ∪ xs

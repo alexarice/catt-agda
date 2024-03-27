@@ -28,7 +28,6 @@ open import Catt.Tree.Standard.Properties
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 
-open import Catt.Ops.Tree ops
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties ops rules tame
 open import Catt.Suspension.Typing ops susp-op rules susp-cond
@@ -43,6 +42,7 @@ open import Catt.Typing.DiscRemoval ops rules
 open import Catt.Typing.EndoCoherenceRemoval ops rules
 open import Catt.Typing.Insertion ops rules
 
+open import Catt.Support
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
 open import Catt.Tree.Standard.Support
@@ -79,10 +79,10 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
       ≈⟨ ecr-stm T (standard-stm d T)
                    (standard-stm-full d T (≤-pred p))
                    (standard-sty d T)
-                   (subst₂ (ops-s T)
-                           (sym (supp-lem false))
-                           (sym (supp-lem true))
-                           (standard-op-s standard-op T d (≤-trans (n≤1+n (tree-dim T)) p)))
+                   (subst₂ (ops ⌊ T ⌋)
+                           (supp-lem false)
+                           (supp-lem true)
+                           (tree-standard-op ops standard-op T d (≤-trans (n≤1+n (tree-dim T)) p)))
                    (id-label T)
                    (standard-stm-Ty d T (≤-pred p))
                    (standard-sty-Ty d T)
@@ -116,13 +116,13 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
       ≈⟨ reflexive≈stm (lem (sty-dim (standard-sty d T)) d (standard-sty-dim d T)) ⟩
     identity-stm (n-disc d) >>= (standard-label (n-disc d) T ,, S⋆) ∎
     where
-      supp-lem : (b : Bool) → DCT (FVSTm (standard-stm d T)) ≡ tree-bd-vs d T b
+      supp-lem : (b : Bool) → tree-bd-vs d T b ≡ SuppSTm (incTree T) (standard-stm d T)
       supp-lem b = begin
-        DCT (FVSTm (standard-stm d T))
-          ≡⟨ standard-stm-full d T (≤-pred p) ⟩
-        tFull
-          ≡˘⟨ tree-bd-vs-full d T b (≤-pred p) ⟩
-        tree-bd-vs d T b ∎
+        tree-bd-vs d T b
+          ≡⟨ tree-bd-vs-full d T b (≤-pred p) ⟩
+        full
+          ≡˘⟨ standard-stm-full d T (≤-pred p) ⟩
+        SuppSTm (incTree T) (standard-stm d T) ∎
         where
           open ≡-Reasoning
 
@@ -318,6 +318,17 @@ module _ (disc-rem : HasDiscRemoval) where
 module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
   open import Catt.Typing.DiscRemoval.Properties ops rules tame dr
 
+  κ-standard-lem : (S : Tree n)
+                 → (P : Branch S l)
+                 → (T : Tree m)
+                 → .⦃ _ : has-trunk-height l T ⦄
+                 → (d : ℕ)
+                 → (tree-dim T ≤ lh P)
+                 → (b : Bool)
+                 → standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
+                   ≈[ ⌊ S >>[ P ] T ⌋ ]stm
+                   standard-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b
+
   κ-standard-sty : (S : Tree n)
                  → (P : Branch S l)
                  → (T : Tree m)
@@ -358,6 +369,73 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
                    ≈[ ⌊ S >>[ P ] T ⌋ ]stm
                    standard-stm d (S >>[ P ] T)
 
+  κ-standard-lem S P T d q b with Bd-Conditions-one-of d P T
+  ... | Bd-Cond1 x y = begin
+    standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
+      ≈⟨ >>=-≈ (standard-stm d (tree-bd d S))
+               (label-max-equality-to-equality (bd-κ-comm-1 S P T d x y q b)
+                                               (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T q) TySStar)
+                                               (label-≃-Ty (insertion-bd-1 S P T d y q) (tree-inc-Ty d (S >>[ P ] T) b)))
+               refl≈sty ⟩
+    standard-stm d (tree-bd d S) >>=
+      label-wt-≃ (insertion-bd-1 S P T d y q) (tree-inc-label d (S >>[ P ] T) b)
+      ≈˘⟨ reflexive≈stm (>>=-assoc (standard-stm d (tree-bd d S)) _ _) ⟩
+    standard-stm d (tree-bd d S) >>= (SPath ∘ ppath-≃ (insertion-bd-1 S P T d y q) ,, S⋆) >>= tree-inc-label d (S >>[ P ] T) b
+      ≈⟨ reflexive≈stm (>>=-≃ (standard-stm-≃-prop d (insertion-bd-1 S P T d y q)) refl≃l refl≃sty) ⟩
+    standard-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b ∎
+    where
+      open Reasoning stm-setoid-≈
+  ... | Bd-Cond2 x = begin
+    standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
+      ≈⟨ >>=-≈ (standard-stm d (tree-bd d S))
+               (label-max-equality-to-equality
+                 (bd-κ-comm-2 S P T d b q x)
+                 (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T q) TySStar)
+                 (label-comp-Ty (κ-Ty (tree-bd d S)
+                                      (bd-branch S P d _)
+                                      (tree-bd d T)
+                                      ⦃ _ ⦄
+                                      (bd-branch-lh S P d (bd-branch-lem P x) T q))
+                                (label-≃-Ty (insertion-bd-2 S P T d _) (tree-inc-Ty d (S >>[ P ] T) b)) TySStar))
+               refl≈sty ⟩
+    standard-stm d (tree-bd d S)
+      >>= (κ (tree-bd d S)
+                          (bd-branch S P d _)
+                          (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
+      ●lt (label-wt-≃ (insertion-bd-2 S P T d _)
+                      (tree-inc-label d (S >>[ P ] T) b))
+      ≈˘⟨ reflexive≈stm (>>=-assoc (standard-stm d (tree-bd d S))
+                                   (κ (tree-bd d S)
+                                                   (bd-branch S P d _)
+                                                   (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
+                                   (_ ,, S⋆)) ⟩
+    standard-stm d (tree-bd d S)
+      >>= (κ (tree-bd d S) (bd-branch S P d _) (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
+      >>= label-wt-≃ (insertion-bd-2 S P T d _) (tree-inc-label d (S >>[ P ] T) b)
+      ≈⟨ ≈->>= (κ-standard-stm (tree-bd d S)
+                                       (bd-branch S P d (bd-branch-lem P x))
+                                       (tree-bd d T)
+                                       ⦃ _ ⦄
+                                       d
+                                       (tree-dim-bd″ d S)
+                                       (bd-branch-lh S P d (bd-branch-lem P x) T q))
+               (label-≃-Ty (insertion-bd-2 S P T d _) (tree-inc-Ty d (S >>[ P ] T) b))
+               TySStar ⟩
+    standard-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄)
+      >>= label-wt-≃ (insertion-bd-2 S P T d _)
+                     (tree-inc-label d (S >>[ P ] T) b)
+      ≈˘⟨ reflexive≈stm (>>=-assoc (standard-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄))
+                        (SPath ∘ ppath-≃ (insertion-bd-2 S P T d _) ,, S⋆)
+                        (tree-inc-label d (S >>[ P ] T) b)) ⟩
+    standard-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄)
+      >>= ((SPath ∘ ppath-≃ (insertion-bd-2 S P T d _)) ,, S⋆)
+      >>= tree-inc-label d (S >>[ P ] T) b
+      ≈⟨ reflexive≈stm (>>=-≃ (standard-stm-≃-prop d (insertion-bd-2 S P T d _)) refl≃l refl≃sty) ⟩
+    standard-stm d (tree-bd d (S >>[ P ] T))
+      >>= tree-inc-label d (S >>[ P ] T) b ∎
+      where
+        open Reasoning stm-setoid-≈
+
   κ-standard-sty S P T zero q = refl≈sty
   κ-standard-sty S P T (suc d) q
     = ≈SArr (lem false)
@@ -366,74 +444,6 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
     where
 
       open Reasoning stm-setoid-≈
-
-      lem2 : (b : Bool)
-           → Bd-Conditions d P T
-           → standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
-             ≈[ ⌊ S >>[ P ] T ⌋ ]stm
-             standard-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b
-      lem2 b (Bd-Cond1 x y) = begin
-        standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
-          ≈⟨ >>=-≈ (standard-stm d (tree-bd d S))
-                   (label-max-equality-to-equality (bd-κ-comm-1 S P T d x y q b)
-                                                   (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T q) TySStar)
-                                                   (label-≃-Ty (insertion-bd-1 S P T d y q) (tree-inc-Ty d (S >>[ P ] T) b)))
-                   refl≈sty ⟩
-        standard-stm d (tree-bd d S) >>=
-          label-wt-≃ (insertion-bd-1 S P T d y q) (tree-inc-label d (S >>[ P ] T) b)
-          ≈˘⟨ reflexive≈stm (>>=-assoc (standard-stm d (tree-bd d S)) _ _) ⟩
-        standard-stm d (tree-bd d S) >>= (SPath ∘ ppath-≃ (insertion-bd-1 S P T d y q) ,, S⋆) >>= tree-inc-label d (S >>[ P ] T) b
-          ≈⟨ reflexive≈stm (>>=-≃ (standard-stm-≃-prop d (insertion-bd-1 S P T d y q)) refl≃l refl≃sty) ⟩
-        standard-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b ∎
-      lem2 b (Bd-Cond2 x) = begin
-        standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
-          ≈⟨ >>=-≈ (standard-stm d (tree-bd d S))
-                   (label-max-equality-to-equality
-                     (bd-κ-comm-2 S P T d b q x)
-                     (label-comp-Ty (tree-inc-Ty d S b) (κ-Ty S P T q) TySStar)
-                     (label-comp-Ty (κ-Ty (tree-bd d S)
-                                          (bd-branch S P d _)
-                                          (tree-bd d T)
-                                          ⦃ _ ⦄
-                                          (bd-branch-lh S P d (bd-branch-lem P x) T q))
-                                    (label-≃-Ty (insertion-bd-2 S P T d _) (tree-inc-Ty d (S >>[ P ] T) b)) TySStar))
-                   refl≈sty ⟩
-        standard-stm d (tree-bd d S)
-          >>= (κ (tree-bd d S)
-                              (bd-branch S P d _)
-                              (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
-          ●lt (label-wt-≃ (insertion-bd-2 S P T d _)
-                          (tree-inc-label d (S >>[ P ] T) b))
-          ≈˘⟨ reflexive≈stm (>>=-assoc (standard-stm d (tree-bd d S))
-                                       (κ (tree-bd d S)
-                                                       (bd-branch S P d _)
-                                                       (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
-                                       (_ ,, S⋆)) ⟩
-        standard-stm d (tree-bd d S)
-          >>= (κ (tree-bd d S) (bd-branch S P d _) (tree-bd d T) ⦃ _ ⦄ ,, S⋆)
-          >>= label-wt-≃ (insertion-bd-2 S P T d _) (tree-inc-label d (S >>[ P ] T) b)
-          ≈⟨ ≈->>= (κ-standard-stm (tree-bd d S)
-                                           (bd-branch S P d (bd-branch-lem P x))
-                                           (tree-bd d T)
-                                           ⦃ _ ⦄
-                                           d
-                                           (tree-dim-bd″ d S)
-                                           (bd-branch-lh S P d (bd-branch-lem P x) T q))
-                   (label-≃-Ty (insertion-bd-2 S P T d _) (tree-inc-Ty d (S >>[ P ] T) b))
-                   TySStar ⟩
-        standard-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄)
-          >>= label-wt-≃ (insertion-bd-2 S P T d _)
-                         (tree-inc-label d (S >>[ P ] T) b)
-          ≈˘⟨ reflexive≈stm (>>=-assoc (standard-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄))
-                            (SPath ∘ ppath-≃ (insertion-bd-2 S P T d _) ,, S⋆)
-                            (tree-inc-label d (S >>[ P ] T) b)) ⟩
-        standard-stm d ((tree-bd d S >>[ bd-branch S P d _ ] tree-bd d T) ⦃ _ ⦄)
-          >>= ((SPath ∘ ppath-≃ (insertion-bd-2 S P T d _)) ,, S⋆)
-          >>= tree-inc-label d (S >>[ P ] T) b
-          ≈⟨ reflexive≈stm (>>=-≃ (standard-stm-≃-prop d (insertion-bd-2 S P T d _)) refl≃l refl≃sty) ⟩
-        standard-stm d (tree-bd d (S >>[ P ] T))
-          >>= tree-inc-label d (S >>[ P ] T) b ∎
-
       lem : (b : Bool)
           → standard-stm d (tree-bd d S) >>= tree-inc-label d S b >>= (κ S P T ,, S⋆)
             ≈[ ⌊ S >>[ P ] T ⌋ ]stm
@@ -442,7 +452,7 @@ module _ (dr : HasDiscRemoval) (insert : HasInsertion) where
         standard-stm d (tree-bd d S) >>= tree-inc-label d S b >>= (κ S P T ,, S⋆)
           ≈⟨ reflexive≈stm (>>=-assoc (standard-stm d (tree-bd d S)) _ _) ⟩
         standard-stm d (tree-bd d S) >>= tree-inc-label d S b ●lt (κ S P T ,, S⋆)
-          ≈⟨ lem2 b (Bd-Conditions-one-of d P T) ⟩
+          ≈⟨ κ-standard-lem S P T d q b ⟩
         standard-stm d (tree-bd d (S >>[ P ] T)) >>= tree-inc-label d (S >>[ P ] T) b ∎
 
   κ-standard-coh S@(Join _ _) P T d q p = begin

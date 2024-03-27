@@ -21,8 +21,8 @@ open import Catt.Tree.Pasting
 open import Catt.Tree.Insertion
 open import Catt.Tree.Insertion.Properties
 open import Catt.Tree.Insertion.Support
+open import Catt.Tree.Insertion.Boundary.Support
 open import Catt.Tree.Structured.Support
-open import Catt.Tree.Structured.Support.Properties
 open import Catt.Tree.Support
 open import Catt.Dyck
 open import Catt.Dyck.Properties
@@ -30,6 +30,7 @@ open import Catt.Dyck.Pruning
 open import Catt.Dyck.Pruning.Support
 open import Catt.Dyck.Pruning.Properties
 open import Catt.Dyck.Pasting
+
 
 data Regular : Op where
   Comp : (Γ : Ctx n)
@@ -127,7 +128,7 @@ std-pruning dy pk xs ys (Std _ d p q r)
 reg-pruning : PruningOp Regular
 reg-pruning dy pk xs ys reg = std→reg (std-pruning dy pk xs ys (reg→std reg))
 
-std-ins : InsertionSOp Standard
+std-ins : InsertionOp Standard
 std-ins S P T x xs ys (Std _ d p q r)
   = Std ⌊ S >>[ P ] T ⌋
         ⦃ tree-to-pd (S >>[ P ] T) ⦄
@@ -152,23 +153,17 @@ std-ins S P T x xs ys (Std _ d p q r)
 
    open ≡-Reasoning
 
-   lem : (zs : TVarSet S) → (b : Bool) → toVarSet zs ≡ pd-bd-vs d ⌊ S ⌋ b
+   lem : (zs : VarSet (suc (tree-size S))) → (b : Bool) → zs ≡ pd-bd-vs d ⌊ S ⌋ b
        → zs [ κ S P T ]vl ≡ pd-bd-vs d ⌊ S >>[ P ] T ⌋ ⦃ tree-to-pd (S >>[ P ] T) ⦄ b
    lem zs b pf = begin
      zs [ κ S P T ]vl
-       ≡˘⟨ vs-label-DCT zs (κ S P T) ⟩
-     DCT zs [ κ S P T ]vl
        ≡⟨ cong (_[ κ S P T ]vl)
-               (DCT-reflect {xs = zs}
-                            {ys = tree-bd-vs d S b}
-                            (trans pf (sym (supp-compat′ d S b)))) ⟩
-     DCT (tree-bd-vs d S b) [ κ S P T ]vl
-       ≡⟨ vs-label-DCT (tree-bd-vs d S b) (κ S P T) ⟩
+               (trans pf (sym (tree-bd-vs-compat d S b))) ⟩
      tree-bd-vs d S b [ κ S P T ]vl
        ≡⟨ κ-boundary-vs S P T x d b ⟩
-     toVarSet (tree-bd-vs d (S >>[ P ] T) b)
-       ≡⟨ supp-compat′ d (S >>[ P ] T) b ⟩
+     tree-bd-vs d (S >>[ P ] T) b
+       ≡⟨ tree-bd-vs-compat d (S >>[ P ] T) b ⟩
      pd-bd-vs d ⌊ S >>[ P ] T ⌋ ⦃ tree-to-pd (S >>[ P ] T) ⦄ b ∎
 
-reg-ins : InsertionSOp Regular
+reg-ins : InsertionOp Regular
 reg-ins S P T p xs ys reg = std→reg (std-ins S P T p xs ys (reg→std reg))

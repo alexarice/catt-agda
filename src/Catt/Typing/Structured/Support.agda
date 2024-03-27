@@ -5,11 +5,9 @@ module Catt.Typing.Structured.Support (ops : Op)
                                       (tame : Tame ops rules)
                                       (supp-cond : SupportCond ops rules) where
 
-open Tame tame
-
 open import Catt.Prelude
-open import Catt.Prelude.Properties
 open import Catt.Syntax
+open import Catt.Suspension
 open import Catt.Tree
 open import Catt.Tree.Path
 open import Catt.Tree.Structured
@@ -19,75 +17,82 @@ open import Catt.Tree.Structured.ToTerm
 
 open import Catt.Typing ops rules
 open import Catt.Tree.Structured.Typing ops rules
-open import Catt.Typing.Properties.Support ops rules supp-cond
 open import Catt.Tree.Structured.Typing.Properties ops rules tame
+open import Catt.Typing.Properties.Support ops rules supp-cond
 
 open import Catt.Support
 open import Catt.Support.Properties
-open import Catt.Tree.Support
+open import Catt.Wedge.Support
+open import Catt.Suspension.Support
 open import Catt.Tree.Structured.Support
-open import Catt.Tree.Structured.Support.Properties
+open import Catt.Tree.Structured.Construct.Support
 
+import Algebra.Solver.IdempotentCommutativeMonoid as Solver
 open import Tactic.MonoidSolver
 
 open ≡-Reasoning
 
-EqSuppSTy : {As Bs : STy (COT-to-MT ΓS)} → As ≈[ COT-to-Ctx ΓS ]sty Bs → DCM ΓS (FVSTy As) ≡ DCM ΓS (FVSTy Bs)
-EqSuppSTy {ΓS = ΓS} {As = As} {Bs = Bs} [ p ] = DCM-reflect (begin
-  MtoVarSet ΓS (FVSTy As)
-    ≡⟨ FVSTy-to-type As ⟩
+EqSuppSTy : {As Bs : STy (COT-to-MT ΓS)} → As ≈[ COT-to-Ctx ΓS ]sty Bs → SuppSTy ΓS As ≡ SuppSTy ΓS Bs
+EqSuppSTy {ΓS = ΓS} {As = As} {Bs = Bs} [ p ] = begin
+  SuppSTy ΓS As
+    ≡⟨ SuppSTy-to-type ΓS As ⟩
   SuppTy (COT-to-Ctx ΓS) (sty-to-type As)
     ≡⟨ EqSuppTy p ⟩
   SuppTy (COT-to-Ctx ΓS) (sty-to-type Bs)
-    ≡˘⟨ FVSTy-to-type Bs ⟩
-  MtoVarSet ΓS (FVSTy Bs) ∎)
+    ≡˘⟨ SuppSTy-to-type ΓS Bs ⟩
+  SuppSTy ΓS Bs ∎
 
-EqSuppSTm : {a b : STm (COT-to-MT ΓS)} → a ≈[ COT-to-Ctx ΓS ]stm b → DCM ΓS (FVSTm a) ≡ DCM ΓS (FVSTm b)
-EqSuppSTm {ΓS = ΓS} {a = a} {b = b} [ p ] = DCM-reflect (begin
-  MtoVarSet ΓS (FVSTm a)
-    ≡⟨ FVSTm-to-term a ⟩
-  SuppTm (COT-to-Ctx ΓS) (stm-to-term a)
+EqSuppSTm : {As Bs : STm (COT-to-MT ΓS)} → As ≈[ COT-to-Ctx ΓS ]stm Bs → SuppSTm ΓS As ≡ SuppSTm ΓS Bs
+EqSuppSTm {ΓS = ΓS} {As = As} {Bs = Bs} [ p ] = begin
+  SuppSTm ΓS As
+    ≡⟨ SuppSTm-to-term ΓS As ⟩
+  SuppTm (COT-to-Ctx ΓS) (stm-to-term As)
     ≡⟨ EqSuppTm p ⟩
-  SuppTm (COT-to-Ctx ΓS) (stm-to-term b)
-    ≡˘⟨ FVSTm-to-term b ⟩
-  MtoVarSet ΓS (FVSTm b) ∎)
+  SuppTm (COT-to-Ctx ΓS) (stm-to-term Bs)
+    ≡˘⟨ SuppSTm-to-term ΓS Bs ⟩
+  SuppSTm ΓS Bs ∎
 
-EqSuppLabel : {L M : Label (COT-to-MT ΓS) S} → L ≈[ COT-to-Ctx ΓS ]l M → DCM ΓS (FVLabel L) ≡ DCM ΓS (FVLabel M)
-EqSuppLabel {ΓS = ΓS} {L = L} {M = M} p = DCM-reflect (begin
-  MtoVarSet ΓS (FVLabel L)
-    ≡˘⟨ cong (MtoVarSet ΓS) (FVLabel-WT-⋆ L) ⟩
-  MtoVarSet ΓS (FVLabel-WT (L ,, S⋆))
-    ≡⟨ FVLabel-to-sub (L ,, S⋆) ⟩
+
+EqSuppLabel : {L M : Label (COT-to-MT ΓS) S} → L ≈[ COT-to-Ctx ΓS ]l M → SuppLabel ΓS L ≡ SuppLabel ΓS M
+EqSuppLabel {ΓS = ΓS} {L = L} {M = M} p = begin
+  SuppLabel ΓS L
+    ≡˘⟨ ∪-left-unit (SuppLabel ΓS L) ⟩
+  SuppLabel-WT ΓS (L ,, S⋆)
+    ≡⟨ SuppLabel-to-sub ΓS (L ,, S⋆) ⟩
   SuppSub (COT-to-Ctx ΓS) (label-to-sub (L ,, S⋆))
     ≡⟨ EqSuppSub (label-equality-to-sub (L ,, S⋆) (M ,, S⋆) p refl≈sty) ⟩
   SuppSub (COT-to-Ctx ΓS) (label-to-sub (M ,, S⋆))
-    ≡˘⟨ FVLabel-to-sub (M ,, S⋆) ⟩
-  MtoVarSet ΓS (FVLabel-WT (M ,, S⋆))
-    ≡⟨ cong (MtoVarSet ΓS) (FVLabel-WT-⋆ M) ⟩
-  MtoVarSet ΓS (FVLabel M) ∎)
+    ≡˘⟨ SuppLabel-to-sub ΓS (M ,, S⋆) ⟩
+  SuppLabel-WT ΓS (M ,, S⋆)
+    ≡⟨ ∪-left-unit (SuppLabel ΓS M) ⟩
+  SuppLabel ΓS M ∎
 
-vs-label-Label : {ΓS : CtxOrTree n} → (L : Label (someTree T) S) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → MtoVarSet ΓS (FVLabel (L ●l (M ,, S⋆))) ≡ FVLabel L [ M ]vl
-vs-label-Label {T = T} {ΓS = ΓS} L M Mty = begin
-  MtoVarSet ΓS (FVLabel (L ●l (M ,, S⋆)))
-    ≡˘⟨ cong (MtoVarSet ΓS) (FVLabel-WT-⋆ (L ●l (M ,, S⋆))) ⟩
-  MtoVarSet ΓS (FVLabel-WT ((L ,, S⋆) ●lt (M ,, S⋆)))
-    ≡⟨ FVLabel-to-sub (L ●l (M ,, S⋆) ,, S⋆) ⟩
-  SuppSub (COT-to-Ctx ΓS) (label-to-sub (L ●l (M ,, S⋆) ,, S⋆))
+vs-label-Label : (ΓS : CtxOrTree n) → (L : Label (someTree T) S) → (M : Label (COT-to-MT ΓS) T)
+               → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆)
+               → SuppLabel ΓS (L ●l (M ,, S⋆)) ≡ SuppLabel (incTree T) L [ M ]vl
+vs-label-Label {T = T} ΓS L M Mty = begin
+  SuppLabel ΓS (L ●l (M ,, S⋆))
+    ≡˘⟨ ∪-left-unit (SuppLabel ΓS (L ●l (M ,, S⋆))) ⟩
+  SuppLabel-WT ΓS ((L ,, S⋆) ●lt (M ,, S⋆))
+    ≡⟨ SuppLabel-to-sub ΓS ((L ,, S⋆) ●lt (M ,, S⋆)) ⟩
+  SuppSub (COT-to-Ctx ΓS) (label-to-sub ((L ,, S⋆) ●lt (M ,, S⋆)))
     ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (FVSub-≃ (label-comp-to-sub (L ,, S⋆) (M ,, S⋆))) ⟩
   DC (COT-to-Ctx ΓS) (FVSub (label-to-sub (L ,, S⋆) ● label-to-sub (M ,, S⋆)))
     ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (vs-sub-sub (label-to-sub (L ,, S⋆)) (label-to-sub (M ,, S⋆))) ⟩
   DC (COT-to-Ctx ΓS) (FVSub (label-to-sub (L ,, S⋆)) [ label-to-sub (M ,, S⋆) ]vs)
     ≡⟨ vs-sub-DC (FVSub (label-to-sub (L ,, S⋆))) (label-to-sub-Ty Mty TySStar) ⟩
-  DC ⌊ T ⌋ (FVSub (label-to-sub (L ,, S⋆))) [ label-to-sub (M ,, S⋆) ]vs
-    ≡˘⟨ cong (_[ label-to-sub (M ,, S⋆) ]vs) (FVLabel-to-sub (L ,, S⋆)) ⟩
-  FVLabel-WT (L ,, S⋆) [ M ]vl
-    ≡⟨ cong (λ a → a [ M ]vl) (FVLabel-WT-⋆ L) ⟩
-  FVLabel L [ M ]vl ∎
+  SuppSub ⌊ T ⌋ (label-to-sub (L ,, S⋆)) [ label-to-sub (M ,, S⋆) ]vs
+    ≡˘⟨ cong (_[ label-to-sub (M ,, S⋆) ]vs) (SuppLabel-to-sub (incTree T) (L ,, S⋆)) ⟩
+  SuppLabel-WT (incTree T) (L ,, S⋆) [ label-to-sub (M ,, S⋆) ]vs
+    ≡⟨ cong (_[ M ]vl) (∪-left-unit (SuppLabel (incTree T) L)) ⟩
+  SuppLabel (incTree T) L [ M ]vl ∎
 
-vs-label-STm : {ΓS : CtxOrTree n} → (a : STm (someTree T)) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → MtoVarSet ΓS (FVSTm (a >>= (M ,, S⋆))) ≡ FVSTm a [ M ]vl
-vs-label-STm {T = T} {ΓS = ΓS} a M Mty = begin
-  MtoVarSet ΓS (FVSTm (a >>= (M ,, S⋆)))
-    ≡⟨ FVSTm-to-term (a >>= (M ,, S⋆)) ⟩
+vs-label-STm : (ΓS : CtxOrTree n) → (a : STm (someTree T)) → (M : Label (COT-to-MT ΓS) T)
+             → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆)
+             → SuppSTm ΓS (a >>= (M ,, S⋆)) ≡ SuppSTm (incTree T) a [ M ]vl
+vs-label-STm {T = T} ΓS a M Mty = begin
+  SuppSTm ΓS (a >>= (M ,, S⋆))
+    ≡⟨ SuppSTm-to-term ΓS (a >>= (M ,, S⋆)) ⟩
   SuppTm (COT-to-Ctx ΓS) (stm-to-term (a >>= (M ,, S⋆)))
     ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (FVTm-≃ (label-to-sub-stm (M ,, S⋆) a)) ⟩
   DC (COT-to-Ctx ΓS) (FVTm (stm-to-term a [ label-to-sub (M ,, S⋆) ]tm))
@@ -95,13 +100,15 @@ vs-label-STm {T = T} {ΓS = ΓS} a M Mty = begin
   DC (COT-to-Ctx ΓS) (FVTm (stm-to-term a) [ label-to-sub (M ,, S⋆) ]vs)
     ≡⟨ vs-sub-DC (FVTm (stm-to-term a)) (label-to-sub-Ty Mty TySStar) ⟩
   DC ⌊ T ⌋ (FVTm (stm-to-term a)) [ label-to-sub (M ,, S⋆) ]vs
-    ≡˘⟨ cong (_[ label-to-sub (M ,, S⋆) ]vs) (FVSTm-to-term a) ⟩
-  FVSTm a [ M ]vl ∎
+    ≡˘⟨ cong (_[ label-to-sub (M ,, S⋆) ]vs) (SuppSTm-to-term (incTree T) a) ⟩
+  SuppSTm (incTree T) a [ M ]vl ∎
 
-vs-label-STy : {ΓS : CtxOrTree n} → (As : STy (someTree T)) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → MtoVarSet ΓS (FVSTy (As >>=′ (M ,, S⋆))) ≡ FVSTy As [ M ]vl
-vs-label-STy {T = T} {ΓS = ΓS} As M Mty = begin
-  MtoVarSet ΓS (FVSTy (As >>=′ (M ,, S⋆)))
-    ≡⟨ FVSTy-to-type (As >>=′ (M ,, S⋆)) ⟩
+vs-label-STy : (ΓS : CtxOrTree n) → (As : STy (someTree T)) → (M : Label (COT-to-MT ΓS) T)
+             → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆)
+             → SuppSTy ΓS (As >>=′ (M ,, S⋆)) ≡ SuppSTy (incTree T) As [ M ]vl
+vs-label-STy {T = T} ΓS As M Mty = begin
+  SuppSTy ΓS (As >>=′ (M ,, S⋆))
+    ≡⟨ SuppSTy-to-type ΓS (As >>=′ (M ,, S⋆)) ⟩
   SuppTy (COT-to-Ctx ΓS) (sty-to-type (As >>=′ (M ,, S⋆)))
     ≡˘⟨ cong (DC (COT-to-Ctx ΓS)) (FVTy-≃ (label-to-sub-sty (M ,, S⋆) As)) ⟩
   DC (COT-to-Ctx ΓS) (FVTy (sty-to-type As [ label-to-sub (M ,, S⋆) ]ty))
@@ -109,153 +116,157 @@ vs-label-STy {T = T} {ΓS = ΓS} As M Mty = begin
   DC (COT-to-Ctx ΓS) (FVTy (sty-to-type As) [ label-to-sub (M ,, S⋆) ]vs)
     ≡⟨ vs-sub-DC (FVTy (sty-to-type As)) (label-to-sub-Ty Mty TySStar) ⟩
   DC ⌊ T ⌋ (FVTy (sty-to-type As)) [ label-to-sub (M ,, S⋆) ]vs
-    ≡˘⟨ cong (_[ label-to-sub (M ,, S⋆) ]vs) (FVSTy-to-type As) ⟩
-  FVSTy As [ M ]vl ∎
+    ≡˘⟨ cong (_[ label-to-sub (M ,, S⋆) ]vs) (SuppSTy-to-type (incTree T) As) ⟩
+  SuppSTy (incTree T) As [ M ]vl ∎
 
-vs-label-full : {ΓS : CtxOrTree n} → (L : Label (COT-to-MT ΓS) S) → Typing-Label (COT-to-Ctx ΓS) (L ,, S⋆)
-              → tFull [ L ]vl ≡ MtoVarSet ΓS (FVLabel L)
-vs-label-full {S = S} {ΓS = ΓS} L Lty = begin
-  tFull [ L ]vl
-    ≡⟨ cong (_[ label-to-sub (L ,, S⋆) ]vs) (toVarSet-full S) ⟩
+vs-label-full : (ΓS : CtxOrTree n) → (L : Label (COT-to-MT ΓS) S)
+              → Typing-Label (COT-to-Ctx ΓS) (L ,, S⋆)
+              → full [ L ]vl ≡ SuppLabel ΓS L
+vs-label-full {S = S} ΓS L Lty = begin
   full [ label-to-sub (L ,, S⋆) ]vs
     ≡⟨ vs-sub-full (label-to-sub (L ,, S⋆)) ⟩
   FVSub (label-to-sub (L ,, S⋆))
     ≡˘⟨ SuppSubFV (label-to-sub-Ty Lty TySStar) ⟩
   SuppSub (COT-to-Ctx ΓS) (label-to-sub (L ,, S⋆))
-    ≡˘⟨ FVLabel-to-sub (L ,, S⋆) ⟩
-  MtoVarSet ΓS (FVLabel-WT (L ,, S⋆))
-    ≡⟨ cong (MtoVarSet ΓS) (FVLabel-WT-⋆ L) ⟩
-  MtoVarSet ΓS (FVLabel L) ∎
+    ≡˘⟨ SuppLabel-to-sub ΓS (L ,, S⋆) ⟩
+  SuppLabel-WT ΓS (L ,, S⋆)
+    ≡⟨ ∪-left-unit (SuppLabel ΓS L) ⟩
+  SuppLabel ΓS L ∎
 
-FV-label-comp-full : (L : Label (someTree T) S) → (M : Label (COT-to-MT ΓS) T) → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆) → DCT (FVLabel L) ≡ tFull → DCM ΓS (FVLabel (L ●l (M ,, S⋆))) ≡ DCM ΓS (FVLabel M)
-FV-label-comp-full {T = T} {ΓS = ΓS} L M Mty p = DCM-reflect (begin
-  MtoVarSet ΓS (FVLabel (L ●l (M ,, S⋆)))
-    ≡⟨ vs-label-Label L M Mty ⟩
-  FVLabel L [ M ]vl
-    ≡˘⟨ vs-label-DCT (FVLabel L) M ⟩
-  DCT (FVLabel L) [ M ]vl
+SuppLabel-comp-full : (ΓS : CtxOrTree n) → (L : Label (someTree T) S) → (M : Label (COT-to-MT ΓS) T)
+                    → Typing-Label (COT-to-Ctx ΓS) (M ,, S⋆)
+                    → SuppLabel (incTree T) L ≡ full
+                    → SuppLabel ΓS (L ●l (M ,, S⋆)) ≡ SuppLabel ΓS M
+SuppLabel-comp-full {T = T} ΓS L M Mty p = begin
+  SuppLabel ΓS (L ●l (M ,, S⋆))
+    ≡⟨ vs-label-Label ΓS L M Mty ⟩
+  SuppLabel (incTree T) L [ M ]vl
     ≡⟨ cong (_[ M ]vl) p ⟩
-  tFull [ M ]vl
-    ≡⟨ vs-label-full M Mty ⟩
-  MtoVarSet ΓS (FVLabel M) ∎)
+  full [ M ]vl
+    ≡⟨ vs-label-full ΓS M Mty ⟩
+  SuppLabel ΓS M ∎
 
-replace-label-supp : {ΓS : CtxOrTree n} → (L : Label (COT-to-MT ΓS) S) → (a : STm (COT-to-MT ΓS)) → a ≈[ COT-to-Ctx ΓS ]stm L PHere → DCM ΓS (FVLabel (replace-label L a)) ≡ DCM ΓS (FVSTm a) ∪m DCM ΓS (FVLabel L)
-replace-label-supp {S = Sing} L a p = trans (sym (∪m-idem (DCM _ (FVLabel (replace-label L a))))) (cong (DCM _ (FVSTm a) ∪m_) (EqSuppSTm p))
-replace-label-supp {S = Join S₁ S₂} {ΓS = ΓS} L a p = begin
-  DCM _ (FVSTm a ∪m FVLabel (L ∘ PExt) ∪m FVLabel (L ∘ PShift))
-    ≡⟨ DCM-∪ _ (FVSTm a ∪m FVLabel (λ x → L (PExt x))) (FVLabel (λ x → L (PShift x))) ⟩
-  DCM _ (FVSTm a ∪m FVLabel (λ x → L (PExt x))) ∪m DCM _ (FVLabel (λ x → L (PShift x)))
-    ≡⟨ cong (_∪m _) (DCM-∪ _ (FVSTm a) (FVLabel (λ x → L (PExt x)))) ⟩
-  DCM _ (FVSTm a) ∪m DCM _ (FVLabel (L ∘ PExt)) ∪m DCM _ (FVLabel (L ∘ PShift))
-    ≡⟨ solve (∪m-monoid {X = COT-to-MT ΓS}) ⟩
-  DCM _ (FVSTm a) ∪m (DCM _ (FVLabel (L ∘ PExt)) ∪m DCM _ (FVLabel (L ∘ PShift)))
-    ≡⟨ cong (_∪m _) (trans (sym (∪m-idem (DCM ΓS (FVSTm a)))) (cong (_ ∪m_) (EqSuppSTm p))) ⟩
-  DCM _ (FVSTm a) ∪m DCM _ (FVSTm (L PHere)) ∪m (DCM _ (FVLabel (L ∘ PExt)) ∪m DCM _ (FVLabel (L ∘ PShift)))
-    ≡⟨ solve (∪m-monoid {X = COT-to-MT ΓS}) ⟩
-  DCM _ (FVSTm a) ∪m (DCM _ (FVSTm (L PHere)) ∪m DCM _ (FVLabel (L ∘ PExt)) ∪m DCM _ (FVLabel (L ∘ PShift)))
-    ≡˘⟨ cong (λ a → _ ∪m (a ∪m DCM _ (FVLabel (L ∘ PShift)))) (DCM-∪ _ (FVSTm (L PHere)) (FVLabel (λ x → L (PExt x)))) ⟩
-  DCM _ (FVSTm a) ∪m
-    (DCM _ (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) ∪m
-     DCM _ (FVLabel (λ x → L (PShift x))))
-    ≡˘⟨ cong (_ ∪m_) (DCM-∪ _ (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) (FVLabel (λ x → L (PShift x)))) ⟩
-  DCM _ (FVSTm a) ∪m DCM _ (FVSTm (L PHere) ∪m FVLabel (L ∘ PExt) ∪m FVLabel (L ∘ PShift)) ∎
+replace-label-supp : {ΓS : CtxOrTree n}
+                   → (L : Label (COT-to-MT ΓS) S)
+                   → (a : STm (COT-to-MT ΓS))
+                   → a ≈[ COT-to-Ctx ΓS ]stm L PHere
+                   → SuppLabel ΓS (replace-label L a) ≡ SuppSTm ΓS a ∪ SuppLabel ΓS L
+replace-label-supp {S = Sing} {ΓS = ΓS} L a p = begin
+  SuppSTm ΓS a
+    ≡˘⟨ ∪-idem (SuppSTm ΓS a) ⟩
+  SuppSTm ΓS a ∪ SuppSTm ΓS a
+    ≡⟨ cong (SuppSTm ΓS a ∪_) (EqSuppSTm p) ⟩
+  SuppSTm ΓS a ∪ SuppLabel ΓS L ∎
+replace-label-supp {S = Join S T} {ΓS = ΓS} L a p = begin
+  SuppSTm ΓS a ∪ SuppLabel ΓS (L ∘ PExt) ∪ SuppLabel ΓS (L ∘ PShift)
+    ≡⟨ prove 3 ((var 0F ⊕ var 1F) ⊕ var 2F )
+               (var 0F ⊕ ((var 0F ⊕ var 1F) ⊕ var 2F))
+               (SuppSTm ΓS a ∷ SuppLabel ΓS (L ∘ PExt) ∷ SuppLabel ΓS (L ∘ PShift) ∷ emp) ⟩
+  SuppSTm ΓS a ∪
+   (SuppSTm ΓS a ∪ SuppLabel ΓS (L ∘ PExt) ∪
+    SuppLabel ΓS (L ∘ PShift))
+    ≡⟨ cong (λ - → SuppSTm ΓS a ∪ (- ∪ SuppLabel ΓS (L ∘ PExt) ∪ SuppLabel ΓS (L ∘ PShift)))
+            (EqSuppSTm p) ⟩
+  SuppSTm ΓS a
+  ∪ (SuppSTm ΓS (L PHere)
+     ∪ SuppLabel ΓS (L ∘ PExt)
+     ∪ SuppLabel ΓS (L ∘ PShift)) ∎
+     where
+       open Solver ∪-idempotentCommutativeMonoid
 
-++l-supp : {ΓS : CtxOrTree n} → (L : Label (COT-to-MT ΓS) S) → (M : Label (COT-to-MT ΓS) T) → L (last-path S) ≈[ COT-to-Ctx ΓS ]stm M PHere → DCM ΓS (FVLabel (L ++l M)) ≡ DCM ΓS (FVLabel L) ∪m DCM ΓS (FVLabel M)
-++l-supp {S = Sing} L M p = replace-label-supp M (L PHere) p
-++l-supp {S = Join S₁ S₂} {ΓS = ΓS} L M p = begin
-  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (L ∘ PExt) ∪m FVLabel (L ∘ PShift ++l M))
-    ≡⟨ DCM-∪ ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) (FVLabel (L ∘ PShift ++l M)) ⟩
-  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) ∪m DCM ΓS (FVLabel (L ∘ PShift ++l M))
-    ≡⟨ cong (_ ∪m_) (++l-supp (L ∘ PShift) M p) ⟩
-  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) ∪m (DCM ΓS (FVLabel (L ∘ PShift)) ∪m DCM ΓS (FVLabel M))
-    ≡⟨ solve (∪m-monoid {X = COT-to-MT ΓS}) ⟩
-  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) ∪m DCM ΓS (FVLabel (L ∘ PShift)) ∪m DCM ΓS (FVLabel M)
-    ≡˘⟨ cong (_∪m _) (DCM-∪ ΓS (FVSTm (L PHere) ∪m FVLabel′ (λ x → FVSTm (L (PExt x)))) (FVLabel′ (λ x → FVSTm (L (PShift x))))) ⟩
-  DCM ΓS (FVLabel L) ∪m DCM ΓS (FVLabel M) ∎
-
-++l′-supp : {ΓS : CtxOrTree n} → (L : Label (COT-to-MT ΓS) S) → (M : Label (COT-to-MT ΓS) T) → L (last-path S) ≈[ COT-to-Ctx ΓS ]stm M PHere → DCM ΓS (FVLabel (L ++l′ M)) ≡ DCM ΓS (FVLabel L) ∪m DCM ΓS (FVLabel M)
+++l′-supp : {ΓS : CtxOrTree n} → (L : Label (COT-to-MT ΓS) S) → (M : Label (COT-to-MT ΓS) T)
+          → L (last-path S) ≈[ COT-to-Ctx ΓS ]stm M PHere
+          → SuppLabel ΓS (L ++l′ M) ≡ SuppLabel ΓS L ∪ SuppLabel ΓS M
 ++l′-supp {S = Sing} {ΓS = ΓS} L M p = begin
-  DCM ΓS (FVLabel M)
-    ≡⟨ cong (DCM ΓS) (label-ap-⊆ M PHere) ⟩
-  DCM ΓS (FVLabel M ∪m FVSTm (M PHere))
-    ≡⟨ DCM-∪ ΓS (FVLabel M) (FVSTm (M PHere)) ⟩
-  DCM ΓS (FVLabel M) ∪m DCM ΓS (FVSTm (M PHere))
-    ≡⟨ ∪m-comm (DCM ΓS (FVLabel M)) (DCM ΓS (FVSTm (M PHere))) ⟩
-  DCM ΓS (FVSTm (M PHere)) ∪m DCM ΓS (FVLabel M)
-    ≡˘⟨ cong (_∪m DCM ΓS (FVLabel M)) (EqSuppSTm p) ⟩
-  DCM ΓS (FVSTm (L PHere)) ∪m DCM ΓS (FVLabel M) ∎
-++l′-supp {S = Join S₁ S₂} {ΓS = ΓS} L M p = begin
-  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (L ∘ PExt) ∪m FVLabel (L ∘ PShift ++l′ M))
-    ≡⟨ DCM-∪ ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) (FVLabel (L ∘ PShift ++l′ M)) ⟩
-  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) ∪m DCM ΓS (FVLabel (L ∘ PShift ++l′ M))
-    ≡⟨ cong (_ ∪m_) (++l′-supp (L ∘ PShift) M p) ⟩
-  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) ∪m (DCM ΓS (FVLabel (L ∘ PShift)) ∪m DCM ΓS (FVLabel M))
-    ≡⟨ solve (∪m-monoid {X = COT-to-MT ΓS}) ⟩
-  DCM ΓS (FVSTm (L PHere) ∪m FVLabel (λ x → L (PExt x))) ∪m DCM ΓS (FVLabel (L ∘ PShift)) ∪m DCM ΓS (FVLabel M)
-    ≡˘⟨ cong (_∪m _) (DCM-∪ ΓS (FVSTm (L PHere) ∪m FVLabel′ (λ x → FVSTm (L (PExt x)))) (FVLabel′ (λ x → FVSTm (L (PShift x))))) ⟩
-  DCM ΓS (FVLabel L) ∪m DCM ΓS (FVLabel M) ∎
+  SuppLabel ΓS M
+    ≡⟨ SuppLabel-PHere-⊆ ΓS M ⟩
+  SuppLabel ΓS M ∪ SuppSTm ΓS (M PHere)
+    ≡⟨ ∪-comm (SuppLabel ΓS M) (SuppSTm ΓS (M PHere)) ⟩
+  SuppSTm ΓS (M PHere) ∪ SuppLabel ΓS M
+    ≡˘⟨ cong (_∪ SuppLabel ΓS M) (EqSuppSTm p) ⟩
+  SuppSTm ΓS (L PHere) ∪ SuppLabel ΓS M ∎
+++l′-supp {n = n} {S = Join S S₁} {ΓS = ΓS} L M p = begin
+  SuppSTm ΓS (L PHere)
+  ∪ SuppLabel ΓS (L ∘ PExt)
+  ∪ SuppLabel ΓS ((L ∘ PShift) ++l′ M)
+    ≡⟨ cong (SuppSTm ΓS (L PHere) ∪ SuppLabel ΓS (L ∘ PExt) ∪_) (++l′-supp (L ∘ PShift) M p) ⟩
+  SuppSTm ΓS (L PHere) ∪ SuppLabel ΓS (L ∘ PExt) ∪ (SuppLabel ΓS (L ∘ PShift) ∪ SuppLabel ΓS M)
+    ≡⟨ solve (∪-monoid {n = n}) ⟩
+  SuppSTm ΓS (L PHere)
+  ∪ SuppLabel ΓS (L ∘ PExt)
+  ∪ SuppLabel ΓS (L ∘ PShift)
+  ∪ SuppLabel ΓS M ∎
 
 label-between-++t-full : (L : Label (someTree S′) S) → (M : Label (someTree T′) T)
-                                 → L (last-path S) ≈[ ⌊ S′ ⌋ ]stm SPath (last-path S′)
-                                 → M PHere ≈[ ⌊ T′ ⌋ ]stm SHere
-                                 → DCM (incTree S′) (FVLabel L) ≡ tFull
-                                 → DCM (incTree T′) (FVLabel M) ≡ tFull
-                                 → DCM (incTree (S′ ++t T′)) (FVLabel (label-between-++t L M)) ≡ tFull
+                       → L (last-path S) ≈[ ⌊ S′ ⌋ ]stm SPath (last-path S′)
+                       → M PHere ≈[ ⌊ T′ ⌋ ]stm SHere
+                       → SuppLabel (incTree S′) L ≡ full
+                       → SuppLabel (incTree T′) M ≡ full
+                       → SuppLabel (incTree (S′ ++t T′)) (label-between-++t L M) ≡ full
 label-between-++t-full {S′ = S′} {T′ = T′} L M p q r s = begin
-  DCM (incTree (S′ ++t T′)) (FVLabel (label-between-++t L M))
-    ≡⟨ ++l′-supp (L ●l (++t-inc-left S′ T′)) (M ●l (++t-inc-right S′ T′)) (label-between-++t-lem L M p q) ⟩
-  DCM (incTree (S′ ++t T′))
-    (FVLabel (L ●l (++t-inc-left S′ T′)))
-    ∪m
-    DCM (incTree (S′ ++t T′))
-    (FVLabel (M ●l (++t-inc-right S′ T′)))
-    ≡⟨ cong₂ _∪m_ (FV-label-comp-full L (ap (++t-inc-left S′ T′)) (++t-inc-left-Ty S′ T′) r) (FV-label-comp-full M (ap (++t-inc-right S′ T′)) (++t-inc-right-Ty S′ T′) s) ⟩
-  DCT (FVLabel (ap (++t-inc-left S′ T′))) ∪m DCT (FVLabel (ap (++t-inc-right S′ T′)))
-    ≡˘⟨ DCT-∪ (FVLabel′ (λ P → FVSTm (proj₁ (++t-inc-left S′ T′) P))) (FVLabel (proj₁ (++t-inc-right S′ T′))) ⟩
-  DCT (FVLabel (ap (++t-inc-left S′ T′)) ∪m FVLabel (ap (++t-inc-right S′ T′)))
-    ≡⟨ cong DCT (++t-incs-full S′ T′) ⟩
-  DCT tFull
-    ≡⟨ DCT-full ⟩
-  tFull ∎
+  SuppLabel (incTree (S′ ++t T′)) (label-between-++t L M)
+    ≡⟨ ++l′-supp (L ●l (++t-inc-left S′ T′)) (M ●l ++t-inc-right S′ T′) (label-between-++t-lem L M p q) ⟩
+  SuppLabel (incTree (S′ ++t T′)) (L ●l ++t-inc-left S′ T′)
+  ∪ SuppLabel (incTree (S′ ++t T′)) (M ●l ++t-inc-right S′ T′)
+    ≡⟨ cong₂ _∪_ (SuppLabel-comp-full (incTree (S′ ++t T′))
+                                      L
+                                      (ap (++t-inc-left S′ T′))
+                                      (++t-inc-left-Ty S′ T′)
+                                      r)
+                 (SuppLabel-comp-full (incTree (S′ ++t T′))
+                                      M
+                                      (ap (++t-inc-right S′ T′))
+                                      (++t-inc-right-Ty S′ T′)
+                                      s) ⟩
+  SuppLabel (incTree (S′ ++t T′)) (ap (++t-inc-left S′ T′)) ∪
+   SuppLabel (incTree (S′ ++t T′)) (ap (++t-inc-right S′ T′))
+    ≡⟨ ++t-incs-full S′ T′ ⟩
+  full ∎
 
-label-between-joins-full : (L : Label (someTree S′) S) → (M : Label (someTree T′) T) → DCT (FVLabel L) ≡ tFull → DCT (FVLabel M) ≡ tFull → DCT (FVLabel (label-between-joins L M)) ≡ tFull
+label-between-joins-full : (L : Label (someTree S′) S) → (M : Label (someTree T′) T)
+                         → SuppLabel _ L ≡ full
+                         → SuppLabel _ M ≡ full
+                         → SuppLabel _ (label-between-joins L M) ≡ full
 label-between-joins-full {S′ = S′} {T′ = T′} L M p q = begin
-  DCT
-      (VSJoin true tEmp tEmp ∪t
-       FVLabel′ (λ x → VSJoin false (FVSTm (L x)) tEmp)
-       ∪t FVLabel′ (λ x → VSJoin false tEmp (FVSTm (M x))))
-    ≡⟨ cong DCT (cong₂ (λ a b → VSJoin true tEmp tEmp ∪t a ∪t b) (FVLabel′-map (FVSTm ∘ L) (λ x → VSJoin false x tEmp) (λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp)))) (FVLabel′-map (FVSTm ∘ M) (VSJoin false tEmp) (λ xs ys → cong (λ x → VSJoin false x (xs ∪t ys)) (sym (∪t-right-unit tEmp))))) ⟩
-  DCT
-    (VSJoin true tEmp tEmp ∪t
-     VSJoin false (FVLabel′ (λ x → FVSTm (L x))) tEmp
-     ∪t VSJoin false tEmp (FVLabel′ (λ x → FVSTm (M x))))
-    ≡⟨⟩
-  VSJoin true (DCT (tEmp ∪t FVLabel′ (λ x → FVSTm (L x)) ∪t tEmp))
-      (if
-       tvarset-non-empty (tEmp ∪t FVLabel′ (λ x → FVSTm (L x)) ∪t tEmp)
-       then
-       set-fst-true (DCT (tEmp ∪t tEmp ∪t FVLabel′ (λ x → FVSTm (M x))))
-       else DCT (tEmp ∪t tEmp ∪t FVLabel′ (λ x → FVSTm (M x))))
-    ≡⟨ cong₃ (λ a b c → VSJoin true a (if tvarset-non-empty (tEmp ∪t FVLabel′ (λ x → FVSTm (L x)) ∪t tEmp) then b else c)) lem1 (trans (cong set-fst-true lem2) set-fst-true-full) lem2 ⟩
-  VSJoin true tFull (if tvarset-non-empty (tEmp ∪t FVLabel′ (λ x → FVSTm (L x)) ∪t tEmp)
-     then tFull else tFull)
-    ≡⟨ cong (VSJoin true tFull) (if-lem-const (tvarset-non-empty (tEmp ∪t FVLabel′ (λ x → FVSTm (L x)) ∪t tEmp)) tFull) ⟩
-  VSJoin true tFull tFull
-    ≡⟨⟩
-  tFull ∎
+  trueAt (fromℕ _)
+   ∪ SuppLabel _ (SExt {T = T′} ∘ L)
+   ∪ SuppLabel _ (SShift {S = S′} ∘ M)
+    ≡⟨ cong₂ (λ a b → trueAt (fromℕ _) ∪ a ∪ b)
+             (SuppLabel-ext L T′)
+             (SuppLabel-shift M S′) ⟩
+  trueAt (fromℕ (_ + (2 + _))) ∪
+   wedge-susp-vs (susp-vs (SuppLabel (incTree S′) L)) empty
+   ∪ wedge-susp-vs empty (SuppLabel (incTree T′) M)
+    ≡⟨ ∪-assoc _ _ _ ⟩
+  trueAt (fromℕ (_ + (2 + _))) ∪
+   (wedge-susp-vs (susp-vs (SuppLabel (incTree S′) L)) empty ∪
+    wedge-susp-vs empty (SuppLabel (incTree T′) M))
+    ≡⟨ cong (trueAt (fromℕ (_ + (2 + _))) ∪_)
+            (wedge-vs-∪ (susp-vs (SuppLabel (incTree S′) L)) empty empty (SuppLabel (incTree T′) M) get-snd) ⟩
+  trueAt (fromℕ (_ + (2 + _))) ∪
+   wedge-susp-vs (susp-vs (SuppLabel (incTree S′) L) ∪ empty) (empty ∪ SuppLabel (incTree T′) M)
+    ≡⟨ cong (trueAt (fromℕ (_ + (2 + _))) ∪_)
+            (cong₂ wedge-susp-vs l1 l2) ⟩
+  trueAt (fromℕ (_ + (2 + _))) ∪ wedge-susp-vs full full
+    ≡⟨ cong (trueAt (fromℕ (_ + (2 + _))) ∪_) (wedge-vs-full (suc _) get-snd _) ⟩
+  trueAt (fromℕ (_ + (2 + _))) ∪ full
+    ≡⟨ ∪-right-zero (trueAt (fromℕ (_ + (2 + _)))) ⟩
+  full ∎
   where
-    lem1 : DCT (tEmp ∪t FVLabel L ∪t tEmp) ≡ tFull
-    lem1 = begin
-      DCT (tEmp ∪t FVLabel L ∪t tEmp)
-        ≡⟨ cong DCT (solve (∪t-monoid {S = S′})) ⟩
-      DCT (FVLabel L)
-        ≡⟨ p ⟩
-      tFull ∎
+    l1 : susp-vs (SuppLabel (incTree S′) L) ∪ empty ≡ full
+    l1 = begin
+      susp-vs (SuppLabel (incTree S′) L) ∪ empty
+        ≡⟨ ∪-right-unit (susp-vs (SuppLabel (incTree S′) L)) ⟩
+      susp-vs (SuppLabel (incTree S′) L)
+        ≡⟨ cong susp-vs p ⟩
+      susp-vs full
+        ≡⟨ susp-vs-full ⟩
+      full ∎
 
-    lem2 : DCT (tEmp ∪t tEmp ∪t FVLabel M) ≡ tFull
-    lem2 = begin
-      DCT (tEmp ∪t tEmp ∪t FVLabel M)
-        ≡⟨ cong DCT (solve (∪t-monoid {S = T′})) ⟩
-      DCT (FVLabel M)
+    l2 : empty ∪ SuppLabel (incTree T′) M ≡ full
+    l2 = begin
+      empty ∪ SuppLabel (incTree T′) M
+        ≡⟨ ∪-left-unit (SuppLabel (incTree T′) M) ⟩
+      SuppLabel (incTree T′) M
         ≡⟨ q ⟩
-      tFull ∎
+      full ∎

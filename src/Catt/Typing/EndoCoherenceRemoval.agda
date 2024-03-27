@@ -22,7 +22,6 @@ open import Catt.Tree.Structured.Globular
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Path
 
-open import Catt.Ops.Tree ops
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties.Base ops rules
 open import Catt.Tree.Structured.Typing ops rules
@@ -53,9 +52,9 @@ HasEndoCoherenceRemoval-STm = ∀ {m n}
                             → {X : MaybeTree m}
                             → (S : Tree n)
                             → (s : STm (someTree S))
-                            → (DCT (FVSTm s) ≡ tFull)
+                            → (SuppSTm (incTree S) s ≡ full)
                             → (As : STy (someTree S))
-                            → ops-s S (DCT (FVSTm s)) (DCT (FVSTm s))
+                            → ops ⌊ S ⌋ (SuppSTm (incTree S) s) (SuppSTm (incTree S) s)
                             → (L : Label X S)
                             → Typing-STm ⌊ S ⌋ s As
                             → Typing-STy ⌊ S ⌋ As

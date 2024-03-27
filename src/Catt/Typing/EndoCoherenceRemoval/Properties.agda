@@ -39,7 +39,6 @@ open import Catt.Discs.Typing ops standard-op rules wk-cond
 open import Catt.Support
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
-open import Catt.Tree.Structured.Support.Properties
 
 open ECR ops rules
 
@@ -51,8 +50,8 @@ ecr-stm S s sfull As supp L [ sty ] [ Asty ] Lty .get = begin
     ≈⟨ ecr full-lem
            (TyCoh ⦃ tree-to-pd S ⦄
                   (subst₂ (ops ⌊ S ⌋)
-                          (trans (DCT-toVarSet (FVSTm s)) (FVSTm-to-term s))
-                          (trans (DCT-toVarSet (FVSTm s)) (FVSTm-to-term s))
+                          (SuppSTm-to-term (incTree S) s)
+                          (SuppSTm-to-term (incTree S) s)
                           supp)
                   (TyArr sty Asty sty)
                   (label-to-sub-Ty Lty TySStar)) ⟩
@@ -96,13 +95,9 @@ ecr-stm S s sfull As supp L [ sty ] [ Asty ] Lty .get = begin
     full-lem : SuppTm ⌊ S ⌋ (stm-to-term s) ≡ full
     full-lem = begin
       SuppTm ⌊ S ⌋ (stm-to-term s)
-        ≡˘⟨ FVSTm-to-term s ⟩
-      toVarSet (FVSTm s)
-        ≡˘⟨ DCT-toVarSet (FVSTm s) ⟩
-      toVarSet (DCT (FVSTm s))
-        ≡⟨ cong toVarSet sfull ⟩
-      toVarSet (tFull {S = S})
-        ≡⟨ toVarSet-full S ⟩
+        ≡˘⟨ SuppSTm-to-term (incTree S) s ⟩
+      SuppSTm (incTree S) s
+        ≡⟨ sfull ⟩
       full ∎
       where
         open ≡-Reasoning

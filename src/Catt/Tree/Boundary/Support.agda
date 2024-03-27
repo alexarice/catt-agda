@@ -2,73 +2,85 @@ module Catt.Tree.Boundary.Support where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
+open import Catt.Syntax
+open import Catt.Suspension
+open import Catt.Wedge
 open import Catt.Tree
 open import Catt.Tree.Path
-open import Catt.Tree.Structured
+open import Catt.Tree.Path.Properties
 open import Catt.Tree.Boundary
-open import Catt.Tree.Boundary.Properties
+open import Catt.Tree.Structured
 
 open import Catt.Support
+open import Catt.Support.Properties
+open import Catt.Wedge.Support
+open import Catt.Suspension.Support
 open import Catt.Tree.Support
+open import Catt.Tree.Path.Support
 open import Catt.Tree.Structured.Support
-open import Catt.Tree.Structured.Support.Properties
 
-open import Tactic.MonoidSolver
+open import Catt.Ops.All
+open import Catt.Typing.Weak All
 
-tree-inc-label-supp′ : (d : ℕ) → (S : Tree n) → (b : Bool) → FVLabel′ (fromPath ∘ tree-inc-label′ d S b) ≡ tree-bd-vs d S b
-tree-inc-label-supp′ zero S false = refl
-tree-inc-label-supp′ zero S true = refl
-tree-inc-label-supp′ (suc d) Sing b = refl
-tree-inc-label-supp′ (suc d) (Join S T) b = begin
-  VSJoin true tEmp tEmp
-  ∪t FVLabel′ (λ x → VSJoin false (fromPath (tree-inc-label′ d S b x)) tEmp)
-  ∪t FVLabel′ (λ x → VSJoin false tEmp (fromPath (tree-inc-label′ (suc d) T b x)))
-    ≡⟨ cong₂ (λ a b → VSJoin true tEmp tEmp ∪t a ∪t b)
-             (FVLabel′-map (fromPath ∘ tree-inc-label′ d S b) (λ a → VSJoin false a tEmp) λ xs ys → cong (VSJoin false (xs ∪t ys)) (sym (∪t-left-unit tEmp)))
-             (FVLabel′-map (fromPath ∘ tree-inc-label′ (suc d) T b) (VSJoin false tEmp) (λ xs ys → cong (λ a → VSJoin false a (xs ∪t ys)) (sym (∪t-left-unit tEmp)))) ⟩
-  VSJoin true (tEmp ∪t FVLabel′ (fromPath ∘ tree-inc-label′ d S b) ∪t tEmp)
-              (tEmp ∪t tEmp ∪t FVLabel′ (fromPath ∘ tree-inc-label′ (suc d) T b))
-    ≡⟨ cong₂ (VSJoin true) (solve (∪t-monoid {S = S})) (solve (∪t-monoid {S = T})) ⟩
-  VSJoin true (FVLabel′ (fromPath ∘ tree-inc-label′ d S b))
-              (FVLabel′ (fromPath ∘ tree-inc-label′ (suc d) T b))
-    ≡⟨ cong₂ (VSJoin true) (tree-inc-label-supp′ d S b) (tree-inc-label-supp′ (suc d) T b) ⟩
-  VSJoin true (tree-bd-vs d S b) (tree-bd-vs (suc d) T b) ∎
-  where
-    open ≡-Reasoning
+open import Catt.Typing All Weak-Rules
+open import Catt.Tree.Typing All Weak-Rules (weak-tame all-tame)
+open import Catt.Typing.Properties.Support All Weak-Rules weak-supp
 
-tree-inc-label-supp : (d : ℕ) → (S : Tree n) → (b : Bool) → FVLabel-WT (tree-inc-label d S b) ≡ tree-bd-vs d S b
-tree-inc-label-supp d S b = begin
-  tEmp ∪t FVLabel′ (λ P → fromPath (tree-inc-label′ d S b P))
-    ≡⟨ ∪t-left-unit (FVLabel (λ x → SPath (tree-inc-label′ d S b x))) ⟩
-  FVLabel (SPath ∘ tree-inc-label′ d S b)
-    ≡⟨ tree-inc-label-supp′ d S b ⟩
-  tree-bd-vs d S b ∎
-  where
-    open ≡-Reasoning
+open ≡-Reasoning
 
-tree-bd-vs-fst : (d : ℕ) → (S : Tree n) → (b : Bool) → Truth (tvarset-fst (tree-bd-vs (suc d) S b))
-tree-bd-vs-fst d Sing b = tt
-tree-bd-vs-fst d (Join S T) b = tt
+SuppPath-last : (T : Tree n) → SuppPath (last-path T) ≡ FVTm (tree-last-var T)
+SuppPath-last T = begin
+  SuppPath (last-path T)
+    ≡⟨ SuppPath-to-term (last-path T) ⟩
+  SuppTm ⌊ T ⌋ (path-to-term (last-path T))
+    ≡⟨ cong (DC ⌊ T ⌋) (FVTm-≃ (last-path-to-term T)) ⟩
+  SuppTm ⌊ T ⌋ (tree-last-var T)
+    ≡⟨ SuppTmChar′ (tree-last-var-Ty T) TyStar ⟩
+  FVTy ⋆ ∪ FVTm (tree-last-var T)
+    ≡⟨ ∪-left-unit (FVTm (tree-last-var T)) ⟩
+  FVTm (tree-last-var T) ∎
 
-DCT-tree-bd-vs : (d : ℕ) → (S : Tree n) → (b : Bool) → DCT (tree-bd-vs d S b) ≡ tree-bd-vs d S b
-DCT-tree-bd-vs zero S false = DCT-fst S
-DCT-tree-bd-vs zero S true = DCT-last-path S
-DCT-tree-bd-vs (suc d) Sing b = refl
-DCT-tree-bd-vs (suc d) (Join S T) b
-  rewrite Truth-prop (tree-bd-vs-non-empty d S b)
-  = cong₂ (VSJoin true) (DCT-tree-bd-vs d S b) (begin
-    set-fst-true (DCT (tree-bd-vs (suc d) T b))
-      ≡⟨ cong set-fst-true (DCT-tree-bd-vs (suc d) T b) ⟩
-    set-fst-true (tree-bd-vs (suc d) T b)
-      ≡⟨ tvarset-fst-set-fst (tree-bd-vs (suc d) T b) (tree-bd-vs-fst d T b) ⟩
-    tree-bd-vs (suc d) T b ∎)
-    where open ≡-Reasoning
-
-tree-bd-vs-full : (d : ℕ) → (S : Tree n) → (b : Bool) → (tree-dim S ≤ d) → tree-bd-vs d S b ≡ tFull
-tree-bd-vs-full zero Sing false p = refl
-tree-bd-vs-full zero Sing true p = refl
-tree-bd-vs-full (suc d) Sing b p = refl
-tree-bd-vs-full (suc d) (Join S T) b p
-  = cong₂ (VSJoin true)
-          (tree-bd-vs-full d S b (≤-trans (m≤n⊔m (pred (tree-dim T)) (tree-dim S)) (≤-pred p)))
-          (tree-bd-vs-full (suc d) T b (≤-trans (≤-trans (suc-pred-≤ (tree-dim T)) (s≤s (m≤m⊔n (pred (tree-dim T)) (tree-dim S)))) p))
+tree-inc-label-supp : (d : ℕ) → (T : Tree n) → (b : Bool)
+                    → SuppLabel (incTree T) (ap (tree-inc-label d T b))
+                      ≡
+                      tree-bd-vs d T b
+tree-inc-label-supp zero T false = refl
+tree-inc-label-supp zero T true = SuppPath-last T
+tree-inc-label-supp (suc d) Sing b = refl
+tree-inc-label-supp (suc d) (Join S T) b = begin
+  trueAt (fromℕ _)
+  ∪ SuppLabel (incTree (Join S T)) (SExt ∘ ap (tree-inc-label d S b))
+  ∪ SuppLabel (incTree (Join S T)) (SShift ∘ ap (tree-inc-label (suc d) T b))
+    ≡⟨ cong₂ (λ a b → trueAt (fromℕ _) ∪ a ∪ b)
+             (SuppLabel-ext (ap (tree-inc-label d S b)) T)
+             (SuppLabel-shift (ap (tree-inc-label (suc d) T b)) S) ⟩
+  trueAt (fromℕ _) ∪
+   wedge-susp-vs
+   (susp-vs (SuppLabel (incTree S) (ap (tree-inc-label d S b))))
+   (empty {n = suc (tree-size T)})
+   ∪
+   wedge-susp-vs empty
+   (SuppLabel (incTree T) (ap (tree-inc-label (suc d) T b)))
+    ≡⟨ cong (_∪ wedge-susp-vs empty (SuppLabel (incTree T) (ap (tree-inc-label (suc d) T b))))
+        (sym (trans (lookup-isVar-⊆ (wedge-susp-vs
+   (susp-vs (SuppLabel (incTree S) (ap (tree-inc-label d S b))))
+   empty) (Var (fromℕ _)) (Truth-prop′ (trans (wedge-susp-vs-fst-var {m = suc (tree-size T)} (susp-vs (SuppLabel (incTree S) (ap (tree-inc-label d S b)))) empty) (susp-vs-fst-var (SuppLabel (incTree S) (ap (tree-inc-label d S b))))))) (∪-comm _ _))) ⟩
+  wedge-susp-vs
+   (susp-vs (SuppLabel (incTree S) (ap (tree-inc-label d S b))))
+   empty
+   ∪
+   wedge-susp-vs empty
+   (SuppLabel (incTree T) (ap (tree-inc-label (suc d) T b)))
+    ≡⟨ wedge-vs-∪ (susp-vs (SuppLabel (incTree S) (ap (tree-inc-label d S b))))
+                  empty
+                  empty
+                  (SuppLabel (incTree T) (ap (tree-inc-label (suc d) T b)))
+                  get-snd ⟩
+  wedge-susp-vs
+   (susp-vs (SuppLabel (incTree S) (ap (tree-inc-label d S b))) ∪
+    empty)
+   (empty ∪
+    SuppLabel (incTree T) (ap (tree-inc-label (suc d) T b)))
+    ≡⟨ cong₂ wedge-susp-vs (trans (∪-right-unit _) (cong susp-vs (tree-inc-label-supp d S b)))
+                           (trans (∪-left-unit _) (tree-inc-label-supp (suc d) T b)) ⟩
+  wedge-susp-vs (susp-vs (tree-bd-vs d S b)) (tree-bd-vs (suc d) T b) ∎

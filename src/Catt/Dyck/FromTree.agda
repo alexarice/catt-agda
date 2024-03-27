@@ -15,6 +15,7 @@ open import Catt.Tree.Properties
 open import Catt.Dyck
 open import Catt.Dyck.Properties
 
+-- Extendability
 n-extendable : ℕ → Tree n → Set
 n-extendable zero T = ⊤
 n-extendable (suc n) Sing = ⊥

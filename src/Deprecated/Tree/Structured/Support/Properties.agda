@@ -1,4 +1,4 @@
-module Catt.Tree.Structured.Support.Properties where
+module Deprecated.Tree.Structured.Support.Properties where
 
 open import Catt.Prelude
 open import Catt.Prelude.Properties
@@ -21,8 +21,8 @@ open import Catt.Support
 open import Catt.Support.Properties
 open import Catt.Suspension.Support
 open import Catt.Wedge.Support
-open import Catt.Tree.Support
-open import Catt.Tree.Structured.Support
+open import Deprecated.Tree.Support
+open import Deprecated.Tree.Structured.Support
 
 open import Algebra.Bundles
 open import Algebra.Definitions

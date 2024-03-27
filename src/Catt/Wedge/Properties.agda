@@ -87,6 +87,47 @@ wedge-inc-right-assoc t s (suc n) = Ext≃ lem (Var≃ (cong suc (cong suc (sym 
         ≈˘⟨ apply-sub-wk-sub-≃ (wedge-inc-right s n) (wedge-inc-right t (suc n + _)) ⟩
       < wk-sub (wedge-inc-right s n) ● ⟨ wk-sub (wedge-inc-right t (n + _)) , Var zero ⟩ >s ∎
 
+wedge-inc-left-assoc : (t : Tm (suc l)) → (s : Tm (suc m)) → (n : ℕ)
+                     → wedge-inc-left t m ● wedge-inc-left (s [ wedge-inc-right t m ]tm) n
+                       ≃s
+                       wedge-inc-left t (n + m)
+wedge-inc-left-assoc t s zero = id-right-unit (wedge-inc-left t _)
+wedge-inc-left-assoc {m = m} t s (suc n) = begin
+  < wedge-inc-left t m ● wk-sub (wedge-inc-left (s [ wedge-inc-right t m ]tm) n) >s
+    ≈⟨ apply-wk-sub-sub-≃ (wedge-inc-left t m) _ ⟩
+  < wk-sub (wedge-inc-left t m ● wedge-inc-left (s [ wedge-inc-right t m ]tm) n) >s
+    ≈⟨ wk-sub-≃ (wedge-inc-left-assoc t s n) ⟩
+  < wk-sub (wedge-inc-left t (n + m)) >s ∎
+  where
+    open Reasoning sub-setoid
+
+wedge-incs-assoc : (t : Tm (suc l)) → (s : Tm (suc m)) → (n : ℕ)
+                 → wedge-inc-right t m ● wedge-inc-left (s [ wedge-inc-right t m ]tm) n
+                   ≃s
+                   wedge-inc-left s n ● wedge-inc-right t (n + m)
+wedge-incs-assoc {m = m} t s zero = begin
+  < wedge-inc-right t m ● idSub >s
+    ≈⟨ id-right-unit (wedge-inc-right t m) ⟩
+  < wedge-inc-right t m >s
+    ≈˘⟨ id-left-unit (wedge-inc-right t m) ⟩
+  < idSub ● wedge-inc-right t m >s ∎
+  where
+    open Reasoning sub-setoid
+wedge-incs-assoc {m = m} t s (suc n) = begin
+  < wedge-inc-right t m ●
+      wk-sub (wedge-inc-left (s [ wedge-inc-right t m ]tm) n) >s
+    ≈⟨ apply-wk-sub-sub-≃ (wedge-inc-right t m) _ ⟩
+  < wk-sub (wedge-inc-right t m ● wedge-inc-left (s [ wedge-inc-right t m ]tm) n) >s
+    ≈⟨ wk-sub-≃ (wedge-incs-assoc t s n) ⟩
+  < wk-sub (wedge-inc-left s n ● wedge-inc-right t (n + m)) >s
+    ≈˘⟨ apply-wk-sub-sub-≃ (wedge-inc-left s n) _ ⟩
+  < wedge-inc-left s n ● wk-sub (wedge-inc-right t (n + m)) >s
+    ≈˘⟨ apply-sub-wk-sub-≃ (wedge-inc-left s n) _ ⟩
+  < wk-sub (wedge-inc-left s n) ●
+      ⟨ wk-sub (wedge-inc-right t (n + m)) , Var 0F ⟩ >s ∎
+  where
+    open Reasoning sub-setoid
+
 wedge-assoc : (Γ : Ctx (suc n)) → (t : Tm (suc n)) → (Δ : Ctx (suc m)) → (s : Tm (suc m)) → (Υ : Ctx (suc l))
               → wedge (wedge Γ t Δ) (s [ wedge-inc-right t m ]tm) Υ ≃c wedge Γ t (wedge Δ s Υ)
 wedge-assoc Γ t Δ s (∅ , A) = refl≃c

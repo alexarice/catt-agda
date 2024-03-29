@@ -114,10 +114,16 @@ full-term-pres′ p eq = (term-preservation′ p) ⇔-∘ (mk⇔ (λ tty → TyC
 
 type-preservation : A ≈[ Γ ]ty B → Typing-Ty Γ A → Typing-Ty Γ B
 sub-preservation : σ ≈[ Δ ]s τ → Typing-Sub Γ Δ σ → Typing-Sub Γ Δ τ
+term-preservation : s ≈[ Γ ]tm t → Typing-Tm Γ s A → Typing-Tm Γ t A
 full-term-pres : s ≈[ Γ ]tm t → A ≈[ Γ ]ty B → Typing-Tm Γ s A → Typing-Tm Γ t B
 
 type-preservation p = E.to (type-preservation′ p)
 
 sub-preservation p = E.to (sub-preservation′ p)
 
+term-preservation p = E.to (term-preservation′ p)
+
 full-term-pres p q = E.to (full-term-pres′ p q)
+
+Ty-unique-≈ : s ≈[ Γ ]tm t → Typing-Tm Γ s A → Typing-Tm Γ t B → A ≈[ Γ ]ty B
+Ty-unique-≈ p sty tty = Ty-unique (term-preservation p sty) tty

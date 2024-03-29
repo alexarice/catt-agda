@@ -83,6 +83,7 @@ import Catt.Tree.Typing
 import Catt.Tree.Path.Typing
 import Catt.Tree.Structured.Typing
 import Catt.Tree.Structured.Typing.Properties
+import Catt.Tree.Structured.Typing.Preservation
 import Catt.Tree.Boundary.Typing
 import Catt.Tree.Standard.Typing
 import Catt.Tree.Insertion.Typing

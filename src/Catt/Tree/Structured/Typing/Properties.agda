@@ -64,6 +64,12 @@ label-to-sub-Ty : {L : Label-WT X S} → Typing-Label Γ L → Typing-STy Γ (lt
 label-to-sub-Ty (TySing [ x ]) [ Aty ] = TyExt (TyNull Aty) x
 label-to-sub-Ty {L = L} (TyJoin x Lty Mty) Aty = sub-from-wedge-Ty (↓-Ty (label-to-sub-Ty Lty (TySArr x Aty (ap-phere-Ty Mty)))) get-sndTy (label-to-sub-Ty Mty Aty) (reflexive≈tm (label-to-sub-lem L) )
 
+label-to-sub-≈ : {L M : Label-WT X S} → ap L ≈[ Γ ]l ap M → lty L ≈[ Γ ]sty lty M → label-to-sub L ≈[ Γ ]s label-to-sub M
+label-to-sub-≈ {S = Sing} [ p ] [ q ] = Ext≈ (Null≈ q) (p PHere .get)
+label-to-sub-≈ {S = Join S T} [ p ] q
+  = sub-from-wedge-≈ (↓-≈ (label-to-sub-≈ [ p ∘ PExt ] (≈SArr (p PHere) q (p (PShift PHere)))))
+                     (label-to-sub-≈ [ p ∘ PShift ] q)
+
 TySPath : (P : Path S) → Typing-STm ⌊ S ⌋ (SPath P) (getPathType P)
 TySPath P .get = path-to-term-Ty P
 
@@ -223,8 +229,8 @@ to-label-Ty S Γ σty = label-sub-Ty (id-label-Ty S) σty
 Label′-Ty : {L : Label-WT X S} → Typing-Label Γ L → Typing-STy Γ (lty L) → Typing-Label′ Γ L
 Label′-Ty Lty Asty = [ label-to-sub-Ty Lty Asty ]
 
-Label-ty : {L : Label-WT X S} → Typing-Label′ Γ L → Typing-Label Γ L
-Label-ty {S = S} {Γ = Γ} {L = L} [ Lty ] = transport-label-typing (to-label-Ty S Γ Lty) (label-to-sub-to-label L) (sty-to-type-to-sty (lty L))
+Label-Ty : {L : Label-WT X S} → Typing-Label′ Γ L → Typing-Label Γ L
+Label-Ty {S = S} {Γ = Γ} {L = L} [ Lty ] = transport-label-typing (to-label-Ty S Γ Lty) (label-to-sub-to-label L) (sty-to-type-to-sty (lty L))
 
 ++t-inc-left-Ty : (S : Tree n)
                          → (T : Tree m)
@@ -380,7 +386,7 @@ SCoh-typing-prop {S = S} {Γ = Γ} {As = As} {L = L} [ tty ] .get = begin
 
 SCoh-Label-Ty : Typing-Tm Γ (stm-to-term (SCoh S As (L ,, S⋆))) B → Typing-Label Γ (L ,, S⋆)
 SCoh-Label-Ty {L = L} aty
-  = Label-ty [ (transport-typing-sub (coh-sub-ty aty) refl≃c refl≃c (id-left-unit (label-to-sub (L ,, S⋆)))) ]
+  = Label-Ty [ (transport-typing-sub (coh-sub-ty aty) refl≃c refl≃c (id-left-unit (label-to-sub (L ,, S⋆)))) ]
 
 sty-to-coh-Ty : {As : STy (someTree S)}
               → .⦃ _ : NonZero (sty-dim As) ⦄

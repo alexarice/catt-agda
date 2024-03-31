@@ -110,7 +110,6 @@ ecr-stm S s sfull As supp L [ sty ] [ Asty ] Lty .get = begin
     open Reasoning (tm-setoid-≈ _)
 
 standard-ecr : (d : ℕ)
-             → .⦃ NonZero d ⦄
              → (T : Tree n)
              → (tree-dim T < d)
              → standard-coh d T

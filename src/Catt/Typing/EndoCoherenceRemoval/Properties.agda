@@ -21,6 +21,7 @@ open import Catt.Tree
 open import Catt.Tree.Properties
 open import Catt.Tree.Pasting
 open import Catt.Tree.Path
+open import Catt.Tree.Boundary
 open import Catt.Tree.Structured
 open import Catt.Tree.Structured.Properties
 open import Catt.Tree.Structured.Globular
@@ -28,17 +29,21 @@ open import Catt.Tree.Structured.Globular.Properties
 open import Catt.Tree.Structured.ToTerm
 open import Catt.Tree.Structured.Construct
 open import Catt.Tree.Structured.Construct.Properties
+open import Catt.Tree.Standard
+open import Catt.Tree.Standard.Properties
 
 open import Catt.Typing ops rules
 open import Catt.Typing.Properties ops rules tame
 open import Catt.Tree.Structured.Typing ops rules
 open import Catt.Tree.Structured.Typing.Properties ops rules tame
+open import Catt.Tree.Standard.Typing ops rules tame
 open import Catt.Globular.Typing ops rules
 open import Catt.Discs.Typing ops standard-op rules wk-cond
 
 open import Catt.Support
 open import Catt.Tree.Support
 open import Catt.Tree.Structured.Support
+open import Catt.Tree.Standard.Support
 
 open ECR ops rules
 
@@ -103,3 +108,81 @@ ecr-stm S s sfull As supp L [ sty ] [ Asty ] Lty .get = begin
         open ≡-Reasoning
 
     open Reasoning (tm-setoid-≈ _)
+
+standard-ecr : (d : ℕ)
+             → .⦃ NonZero d ⦄
+             → (T : Tree n)
+             → (tree-dim T < d)
+             → standard-coh d T
+               ≈[ ⌊ T ⌋ ]stm
+               identity-stm (n-disc (pred d)) >>= (stm-to-label (n-disc (pred d)) (standard-stm (pred d) T) (standard-sty (pred d) T) ⦃ trans≃n tree-dim-n-disc it ⦄ ,, S⋆)
+standard-ecr (suc d) T p = begin
+  SCoh T
+       (SArr (standard-stm d (tree-bd d T) >>=
+                             (tree-inc-label d T false))
+             (standard-sty d T)
+             (standard-stm d (tree-bd d T) >>=
+                             (tree-inc-label d T true)))
+       (id-label-wt T)
+    ≈⟨ reflexive≈stm (SCoh≃ T (SArr≃ (standard-stm-full-lem d T false (≤-pred p))
+                                     refl≃sty
+                                     (standard-stm-full-lem d T true (≤-pred p)))
+                              refl≃l
+                              refl≃sty) ⟩
+  SCoh T (SArr (standard-stm d T)
+               (standard-sty d T)
+               (standard-stm d T))
+         (id-label-wt T)
+    ≈⟨ ecr-stm T (standard-stm d T)
+                 (standard-stm-full d T (≤-pred p))
+                 (standard-sty d T)
+                 (subst₂ (ops ⌊ T ⌋)
+                         (supp-lem false)
+                         (supp-lem true)
+                         (tree-standard-op ops standard-op T d (≤-trans (n≤1+n (tree-dim T)) p)))
+                 (id-label T)
+                 (standard-stm-Ty d T (≤-pred p))
+                 (standard-sty-Ty d T)
+                 (id-label-Ty T) ⟩
+  identity-stm (n-disc (sty-dim (standard-sty d T)))
+    >>=
+    (stm-to-label (n-disc (sty-dim (standard-sty d T)))
+                  (standard-stm d T)
+                  (standard-sty d T) ,, S⋆)
+    ●lt id-label-wt T
+    ≈⟨ reflexive≈stm (>>=-≃ (refl≃stm {a = identity-stm (n-disc (sty-dim (standard-sty d T)))})
+                            (comp-right-unit (stm-to-label (n-disc (sty-dim (standard-sty d T)))
+                                                           (standard-stm d T)
+                                                           (standard-sty d T)))
+                            refl≃sty) ⟩
+  identity-stm (n-disc (sty-dim (standard-sty d T)))
+    >>= (stm-to-label (n-disc (sty-dim (standard-sty d T)))
+                      (standard-stm d T)
+                      (standard-sty d T) ⦃ _ ⦄ ,, S⋆)
+    ≈⟨ reflexive≈stm (lem (standard-sty-dim d T)) ⟩
+  identity-stm (n-disc d)
+    >>= (stm-to-label (n-disc d)
+                      (standard-stm d T)
+                      (standard-sty d T) ⦃ _ ⦄ ,, S⋆) ∎
+  where
+    supp-lem : (b : Bool) → tree-bd-vs d T b ≡ SuppSTm (incTree T) (standard-stm d T)
+    supp-lem b = begin
+      tree-bd-vs d T b
+        ≡⟨ tree-bd-vs-full d T b (≤-pred p) ⟩
+      full
+        ≡˘⟨ standard-stm-full d T (≤-pred p) ⟩
+      SuppSTm (incTree T) (standard-stm d T) ∎
+      where
+        open ≡-Reasoning
+
+    open Reasoning stm-setoid-≈
+
+    lem : (p : d′ ≡ d)
+        → identity-stm (n-disc d′)
+          >>= (stm-to-label (n-disc d′) (standard-stm d T) (standard-sty d T)
+                            ⦃ trans≃n tree-dim-n-disc (trans≃n (≡-to-≃n p) it) ⦄ ,, S⋆)
+          ≃stm
+          identity-stm (n-disc d)
+          >>= (stm-to-label (n-disc d) (standard-stm d T) (standard-sty d T)
+                            ⦃ trans≃n tree-dim-n-disc it ⦄ ,, S⋆)
+    lem refl = refl≃stm

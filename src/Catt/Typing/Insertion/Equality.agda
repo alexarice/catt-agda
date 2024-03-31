@@ -52,93 +52,39 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
   open import Catt.Typing.DiscRemoval.Properties ops rules tame dr
   open import Catt.Typing.EndoCoherenceRemoval.Properties ops rules tame ecr
 
-  standard-ecr : (d : ℕ)
+  standard-ecr′ : (d : ℕ)
                → (T : Tree n)
                → (tree-dim T < d)
                → (1 < d)
                → standard-coh d T
                  ≈[ ⌊ T ⌋ ]stm
                  identity-stm (n-disc (pred d)) >>= (standard-label (n-disc (pred d)) T ,, S⋆)
-  standard-ecr (suc d) T p q = begin
-    SCoh T
-         (SArr (standard-stm d (tree-bd d T) >>=
-                               (tree-inc-label d T false))
-               (standard-sty d T)
-               (standard-stm d (tree-bd d T) >>=
-                               (tree-inc-label d T true)))
-         (id-label-wt T)
-      ≈⟨ reflexive≈stm (SCoh≃ T (SArr≃ (standard-stm-full-lem d T false (≤-pred p))
-                                       refl≃sty
-                                       (standard-stm-full-lem d T true (≤-pred p)))
-                                refl≃l
-                                refl≃sty) ⟩
-    SCoh T (SArr (standard-stm d T)
-                 (standard-sty d T)
-                 (standard-stm d T))
-           (id-label-wt T)
-      ≈⟨ ecr-stm T (standard-stm d T)
-                   (standard-stm-full d T (≤-pred p))
-                   (standard-sty d T)
-                   (subst₂ (ops ⌊ T ⌋)
-                           (supp-lem false)
-                           (supp-lem true)
-                           (tree-standard-op ops standard-op T d (≤-trans (n≤1+n (tree-dim T)) p)))
-                   (id-label T)
-                   (standard-stm-Ty d T (≤-pred p))
-                   (standard-sty-Ty d T)
-                   (id-label-Ty T) ⟩
-    identity-stm (n-disc (sty-dim (standard-sty d T)))
-      >>=
-      (stm-to-label (n-disc (sty-dim (standard-sty d T)))
-                    (standard-stm d T)
-                    (standard-sty d T) ,, S⋆)
-      ●lt id-label-wt T
-      ≈⟨ reflexive≈stm (>>=-≃ (refl≃stm {a = identity-stm (n-disc (sty-dim (standard-sty d T)))})
-                              (comp-right-unit (stm-to-label (n-disc (sty-dim (standard-sty d T)))
-                                                             (standard-stm d T)
-                                                             (standard-sty d T)))
-                              refl≃sty) ⟩
-    identity-stm (n-disc (sty-dim (standard-sty d T)))
-      >>= (stm-to-label (n-disc (sty-dim (standard-sty d T)))
+  standard-ecr′ (suc d) T p q = begin
+    standard-coh (suc d) T
+      ≈⟨ standard-ecr (suc d) T p ⟩
+    identity-stm (n-disc d)
+      >>= (stm-to-label (n-disc d)
                         (standard-stm d T)
-                        (standard-sty d T) ,, S⋆)
-      ≈⟨ >>=-≈ (identity-stm (n-disc (sty-dim (standard-sty d T))))
-               (stm-to-label-≈ (n-disc (sty-dim (standard-sty d T)))
-                               (trans≈stm (standard-stm-is-comp′ d ⦃ NonZero-≤ (≤-pred q) it ⦄ T)
-                                          (reflexive≈stm (standard-coh′-≃ (sym (≃n-to-≡ tree-dim-n-disc)) refl≃)))
-                               (reflexive≈sty (standard-sty-≃ (sym (≃n-to-≡ tree-dim-n-disc)) refl≃)))
+                        (standard-sty d T) ⦃ _ ⦄ ,, S⋆)
+      ≈⟨ >>=-≈ (identity-stm (n-disc d))
+               (stm-to-label-≈ (n-disc d)
+                               lem
+                               (reflexive≈sty (standard-sty-≃ (≃n-to-≡ (sym≃n tree-dim-n-disc)) refl≃))
+                               ⦃ _ ⦄)
                refl≈sty ⟩
-    identity-stm (n-disc (sty-dim (standard-sty d T)))
-      >>= (stm-to-label (n-disc (sty-dim (standard-sty d T)))
-                        (standard-coh′ (tree-dim (n-disc d)) T)
-                        (standard-sty (tree-dim (n-disc d)) T)
-                        ⦃ l1 (standard-sty-dim d T) ⦄ ,, S⋆)
-      ≈⟨ reflexive≈stm (lem (sty-dim (standard-sty d T)) d (standard-sty-dim d T)) ⟩
     identity-stm (n-disc d) >>= (standard-label (n-disc d) T ,, S⋆) ∎
     where
-      supp-lem : (b : Bool) → tree-bd-vs d T b ≡ SuppSTm (incTree T) (standard-stm d T)
-      supp-lem b = begin
-        tree-bd-vs d T b
-          ≡⟨ tree-bd-vs-full d T b (≤-pred p) ⟩
-        full
-          ≡˘⟨ standard-stm-full d T (≤-pred p) ⟩
-        SuppSTm (incTree T) (standard-stm d T) ∎
-        where
-          open ≡-Reasoning
-
       open Reasoning stm-setoid-≈
 
-      l1 : n ≡ m → has-dim (tree-dim (n-disc n)) (standard-sty (tree-dim (n-disc m)) T)
-      l1 {m = m} refl = ≡-to-≃n (sym (standard-sty-dim (tree-dim (n-disc m)) T))
-
-      lem : (n m : ℕ) → (q : n ≡ m)
-          → identity-stm (n-disc n)
-              >>= (stm-to-label (n-disc n)
-                                (standard-coh′ (tree-dim (n-disc m)) T)
-                                (standard-sty (tree-dim (n-disc m)) T) ⦃ l1 q ⦄ ,, S⋆)
-            ≃stm
-            identity-stm (n-disc m) >>= (standard-label (n-disc m) T ,, S⋆)
-      lem _ _ refl = refl≃stm
+      lem : standard-stm d T
+            ≈[ ⌊ T ⌋ ]stm
+            standard-coh′ (tree-dim (n-disc d)) T
+      lem = begin
+        standard-stm d T
+          ≈⟨ standard-stm-is-comp′ d ⦃ NonZero-≤ (≤-pred q) it ⦄ T ⟩
+        standard-coh′ d T
+          ≈⟨ reflexive≈stm (standard-coh′-≃ (sym (≃n-to-≡ tree-dim-n-disc)) refl≃) ⟩
+        standard-coh′ (tree-dim (n-disc d)) T ∎
 
   pruned-branch-κ : (S : Tree n)
                   → (P : Branch S l)
@@ -225,7 +171,7 @@ module _ (ecr : HasEndoCoherenceRemoval) (dr : HasDiscRemoval) where
     identity-stm (n-disc (suc (tree-dim S₁)))
       >>= (standard-label (n-disc (suc (tree-dim S₁))) T ,, S⋆)
       >>= ++t-inc-left T S₂
-      ≈˘⟨ ≈->>= (standard-ecr (2+ (tree-dim S₁)) T x (s≤s (s≤s z≤n))) (++t-inc-left-Ty T S₂) TySStar ⟩
+      ≈˘⟨ ≈->>= (standard-ecr′ (2+ (tree-dim S₁)) T x (s≤s (s≤s z≤n))) (++t-inc-left-Ty T S₂) TySStar ⟩
     standard-coh (2+ (tree-dim S₁)) T >>= ++t-inc-left T S₂
       ≈˘⟨ reflexive≈stm (>>=-≃ (standard-coh′-compat (2+ (tree-dim S₁)) T) refl≃l refl≃sty) ⟩
     standard-coh′ (2+ (tree-dim S₁)) T >>= ++t-inc-left T S₂

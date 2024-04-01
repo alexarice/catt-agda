@@ -90,6 +90,20 @@ tm-to-ty-coh-sub {A = s ─⟨ A ⟩⟶ t} Δ B τ Γ σ = begin
   where
     open Reasoning ty-setoid
 
+wk-tm-to-ty : (Γ : Ctx n) → (t : Tm n) → (A : Ty n) → tm-to-ty (Γ , A) (wk-tm t) ≃ty wk-ty (tm-to-ty Γ t)
+wk-tm-to-ty Γ (Var i) A = refl≃ty
+wk-tm-to-ty Γ (Coh Δ B σ) A = apply-wk-sub-ty-≃ B σ
+
+wk-tm-height : (Γ : Ctx n) → (t : Tm n) → (A : Ty n) → tm-height (Γ , A) (wk-tm t) ≡ tm-height Γ t
+wk-tm-height Γ t A = begin
+  tm-height (Γ , A) (wk-tm t)
+    ≡⟨ ty-dim-≃ (wk-tm-to-ty Γ t A) ⟩
+  ty-dim (wk-ty (tm-to-ty Γ t))
+    ≡⟨ wk-ty-dim (tm-to-ty Γ t) ⟩
+  tm-height Γ t ∎
+  where
+    open ≡-Reasoning
+
 susp-tm-height : (t : Tm n) → (Δ : Ctx n) → tm-height (susp-ctx Δ) (susp-tm t) ≡ suc (tm-height Δ t)
 susp-tm-height (Var zero) (Δ , A) = begin
   ty-dim (wk-ty (susp-ty A))

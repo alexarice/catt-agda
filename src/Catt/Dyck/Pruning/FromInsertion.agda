@@ -14,9 +14,50 @@ open import Catt.Tree
 open import Catt.Tree.Pasting
 open import Catt.Tree.Properties
 open import Catt.Tree.Insertion
+open import Catt.Tree.Path
 open import Catt.Dyck
 open import Catt.Dyck.Properties
 open import Catt.Dyck.FromTree
+
+extend-tree-path : (n : ℕ) → (T : Tree m) → .⦃ _ : n-extendable n T ⦄ → Path (extend-tree n T)
+extend-tree-path zero Sing = PExt PHere
+extend-tree-path zero (Join S T) = PShift (extend-tree-path zero T)
+extend-tree-path (suc n) (Susp S) = PExt (extend-tree-path n S)
+extend-tree-path (suc n) (Join S T@(Join _ _)) = PShift (extend-tree-path (suc n) T)
+
+instance
+  extend-tree-path-not-here : .⦃ _ : n-extendable n T ⦄ → not-here (extend-tree-path n T)
+  extend-tree-path-not-here {n = zero} {T = Sing} = tt
+  extend-tree-path-not-here {n = zero} {T = Join S T} = tt
+  extend-tree-path-not-here {n = suc n} {T = Susp S} = tt
+  extend-tree-path-not-here {n = suc n} {T = Join S (Join T₁ T₂)} = tt
+
+
+  extend-tree-path-maximal : .⦃ _ : n-extendable n T ⦄ → is-maximal (extend-tree-path n T)
+  extend-tree-path-maximal {n = zero} {T = Sing} = inst
+  extend-tree-path-maximal {n = zero} {T = Join S T} = build
+  extend-tree-path-maximal {n = suc n} {T = Susp S} = inst
+  extend-tree-path-maximal {n = suc n} {T = Join S (Join T₁ T₂)} = build
+
+extend-path : (n : ℕ) → (T : Tree m) → .⦃ _ : n-extendable n T ⦄
+            → (P : Path T)
+            → Path (extend-tree n T)
+extend-path zero Sing P = PHere
+extend-path zero (Join S T) PHere = PHere
+extend-path zero (Join S T) (PExt P) = PExt P
+extend-path zero (Join S T) (PShift P) = PShift (extend-path zero T P)
+extend-path (suc n) (Susp S) PHere = PHere
+extend-path (suc n) (Susp S) (PExt P) = PExt (extend-path n S P)
+extend-path (suc n) (Susp S) (PShift P) = PShift PHere
+extend-path (suc n) (Join S T@(Join _ _)) PHere = PHere
+extend-path (suc n) (Join S T@(Join _ _)) (PExt P) = PExt P
+extend-path (suc n) (Join S T@(Join _ _)) (PShift P) = PShift (extend-path (suc n) T P)
+
+peak-to-path : {dy : Dyck (suc n) d} → (pk : Peak dy) → Path (dyck-to-tree dy)
+peak-to-path (⇕pk {d = d} dy) = extend-tree-path d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄
+peak-to-path (⇑pk {d = d} {dy = dy} pk)
+  = extend-path d (dyck-to-tree dy) ⦃ dyck-to-tree-is-n-extendable dy ⦄ (peak-to-path pk)
+peak-to-path (⇓pk pk) = peak-to-path pk
 
 extend-tree-branch : (n : ℕ) → (T : Tree m) → .⦃ _ : n-extendable n T ⦄ → Branch (extend-tree n T) n
 extend-tree-branch zero Sing = BHere
@@ -127,3 +168,21 @@ peak-to-branch-lem (⇓pk {n} {d} {dy = dy} pk)
                               ⦃ dyck-to-tree-is-n-extendable dy ⦄
                               (peak-to-branch pk)
                               (peak-to-branch-lem pk)
+
+peak-to-branch-height-prop : {dy : Dyck (suc n) d}
+                           → (pk : Peak dy)
+                           → peak-to-branch-height pk
+                             ≡
+                             pred (tm-height ⌊ dy ⌋d (peak-term pk))
+peak-to-branch-height-prop (⇕pk {d = d} dy) = begin
+  d
+    ≡˘⟨ dyck-type-dim dy ⟩
+  ty-dim (dyck-type dy)
+    ≡˘⟨ wk-ty-dim (dyck-type dy) ⟩
+  ty-dim (wk-ty (dyck-type dy))
+    ≡˘⟨ wk-ty-dim (wk-ty (dyck-type dy)) ⟩
+  ty-dim (wk-ty (wk-ty (dyck-type dy))) ∎
+  where
+    open ≡-Reasoning
+peak-to-branch-height-prop (⇑pk pk) = {!!}
+peak-to-branch-height-prop (⇓pk pk) = {!!}

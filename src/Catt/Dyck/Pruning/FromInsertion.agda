@@ -184,5 +184,15 @@ peak-to-branch-height-prop (⇕pk {d = d} dy) = begin
   ty-dim (wk-ty (wk-ty (dyck-type dy))) ∎
   where
     open ≡-Reasoning
-peak-to-branch-height-prop (⇑pk pk) = {!!}
-peak-to-branch-height-prop (⇓pk pk) = {!!}
+peak-to-branch-height-prop (⇑pk {dy = dy} pk) = begin
+  peak-to-branch-height pk
+    ≡⟨ peak-to-branch-height-prop pk ⟩
+  pred (tm-height ⌊ dy ⌋d (peak-term pk))
+    ≡˘⟨ cong pred (wk-tm-height ⌊ dy ⌋d (peak-term pk) (dyck-type dy)) ⟩
+  pred (tm-height (⌊ dy ⌋d , dyck-type dy) (wk-tm (peak-term pk)))
+    ≡˘⟨ cong pred (wk-tm-height (⌊ dy ⌋d , dyck-type dy) (wk-tm (peak-term pk)) (dyck-pre-type (⇑ dy))) ⟩
+  pred (tm-height (⌊ dy ⌋d , dyck-type dy , dyck-pre-type (⇑ dy))
+       (wk-tm (wk-tm (peak-term pk)))) ∎
+  where
+    open ≡-Reasoning
+peak-to-branch-height-prop (⇓pk pk) = peak-to-branch-height-prop pk

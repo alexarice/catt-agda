@@ -281,7 +281,7 @@ label-from-insertion-map f L (BShift P) M .get (PShift Z) = label-from-insertion
   where
     open Reasoning stm-setoid
 
-insertion-parallel : (S : Tree n)
+insertion-irrel : (S : Tree n)
                    → (P : Branch S l)
                    → (Q : Branch S l′)
                    → (T : Tree m)
@@ -289,13 +289,13 @@ insertion-parallel : (S : Tree n)
                    → .⦃ _ : has-trunk-height l′ T ⦄
                    → ⌊ P ⌋p ≃p ⌊ Q ⌋p
                    → S >>[ P ] T ≃′ S >>[ Q ] T
-insertion-parallel (Join S₁ S₂) BHere BHere T Z = Refl≃′
-insertion-parallel (Join S₁ S₂) BHere (BExt Q) (Susp T) p = Join≃′ (sym≃′ (disc-insertion S₁ Q T)) Refl≃′
-insertion-parallel (Join S₁ S₂) (BExt P) BHere (Susp T) p = Join≃′ (disc-insertion S₁ P T) Refl≃′
-insertion-parallel (Join S₁ S₂) (BExt P) (BExt Q) (Susp T) p = Join≃′ (insertion-parallel S₁ P Q T (proj-ext p)) Refl≃′
-insertion-parallel (Join S₁ S₂) (BShift P) (BShift Q) T p = Join≃′ Refl≃′ (insertion-parallel S₂ P Q T (proj-shift p))
+insertion-irrel (Join S₁ S₂) BHere BHere T Z = Refl≃′
+insertion-irrel (Join S₁ S₂) BHere (BExt Q) (Susp T) p = Join≃′ (sym≃′ (disc-insertion S₁ Q T)) Refl≃′
+insertion-irrel (Join S₁ S₂) (BExt P) BHere (Susp T) p = Join≃′ (disc-insertion S₁ P T) Refl≃′
+insertion-irrel (Join S₁ S₂) (BExt P) (BExt Q) (Susp T) p = Join≃′ (insertion-irrel S₁ P Q T (proj-ext p)) Refl≃′
+insertion-irrel (Join S₁ S₂) (BShift P) (BShift Q) T p = Join≃′ Refl≃′ (insertion-irrel S₂ P Q T (proj-shift p))
 
-κ-parallel : (S : Tree n)
+κ-irrel : (S : Tree n)
            → (P : Branch S l)
            → (Q : Branch S l′)
            → (T : Tree m)
@@ -303,8 +303,8 @@ insertion-parallel (Join S₁ S₂) (BShift P) (BShift Q) T p = Join≃′ Refl�
            → .⦃ _ : has-trunk-height l′ T ⦄
            → ⌊ P ⌋p ≃p ⌊ Q ⌋p
              → κ S P T ≃lm κ S Q T
-κ-parallel (Join S₁ S₂) BHere BHere T p = refl≃lm
-κ-parallel (Join S₁ S₂) BHere (BExt {n = n} Q) (Susp T) p .get (PExt Z) = begin
+κ-irrel (Join S₁ S₂) BHere BHere T p = refl≃lm
+κ-irrel (Join S₁ S₂) BHere (BExt {n = n} Q) (Susp T) p .get (PExt Z) = begin
   < standard-label (Susp S₁) (Susp T) (PExt Z) >>= ++t-inc-left (Susp T) S₂ >stm
     ≈⟨ >>=-≃ (standard-label-max (Susp S₁) (Susp T) (PExt Z)) refl≃l refl≃sty ⟩
   < standard-coh′ (tree-dim S₁) T >>= label₁ (++t-inc-left (Susp T) S₂) >stm
@@ -325,38 +325,38 @@ insertion-parallel (Join S₁ S₂) (BShift P) (BShift Q) T p = Join≃′ Refl�
   < SExt (κ S₁ Q T Z) >stm ∎
   where
     open Reasoning stm-setoid
-κ-parallel (Join S₁ S₂) BHere (BExt Q) (Susp T) p .get (PShift Z) = compute-≃ (SShift≃ (sym≃ (≃′-to-≃ (disc-insertion S₁ Q T))) refl≃stm)
-κ-parallel (Join S₁ S₂) (BExt P) BHere (Susp T) p .get (PExt Z)
-  = sym≃stm (κ-parallel (Join S₁ S₂) BHere (BExt P) (Susp T) (sym≃p p) .get (PExt Z))
-κ-parallel (Join S₁ S₂) (BExt P) BHere (Susp T) p .get (PShift Z)
-  = sym≃stm (κ-parallel (Join S₁ S₂) BHere (BExt P) (Susp T) (sym≃p p) .get (PShift Z))
-κ-parallel (Join S₁ S₂) (BExt P) (BExt Q) (Susp T) p .get (PExt Z)
-  = SExt≃ (κ-parallel S₁ P Q T (proj-ext p) .get Z) refl≃
-κ-parallel (Join S₁ S₂) (BExt P) (BExt Q) (Susp T) p .get (PShift Z)
-  = SShift≃ (≃′-to-≃ (insertion-parallel S₁ P Q T (proj-ext p))) refl≃stm
-κ-parallel (Join S₁ S₂) (BShift P) (BShift Q) T p .get (PExt Z)
-  = SExt≃ refl≃stm (≃′-to-≃ (insertion-parallel S₂ P Q T (proj-shift p)))
-κ-parallel (Join S₁ S₂) (BShift P) (BShift Q) T p .get (PShift Z)
-  = SShift≃ refl≃ (κ-parallel S₂ P Q T (proj-shift p) .get Z)
+κ-irrel (Join S₁ S₂) BHere (BExt Q) (Susp T) p .get (PShift Z) = compute-≃ (SShift≃ (sym≃ (≃′-to-≃ (disc-insertion S₁ Q T))) refl≃stm)
+κ-irrel (Join S₁ S₂) (BExt P) BHere (Susp T) p .get (PExt Z)
+  = sym≃stm (κ-irrel (Join S₁ S₂) BHere (BExt P) (Susp T) (sym≃p p) .get (PExt Z))
+κ-irrel (Join S₁ S₂) (BExt P) BHere (Susp T) p .get (PShift Z)
+  = sym≃stm (κ-irrel (Join S₁ S₂) BHere (BExt P) (Susp T) (sym≃p p) .get (PShift Z))
+κ-irrel (Join S₁ S₂) (BExt P) (BExt Q) (Susp T) p .get (PExt Z)
+  = SExt≃ (κ-irrel S₁ P Q T (proj-ext p) .get Z) refl≃
+κ-irrel (Join S₁ S₂) (BExt P) (BExt Q) (Susp T) p .get (PShift Z)
+  = SShift≃ (≃′-to-≃ (insertion-irrel S₁ P Q T (proj-ext p))) refl≃stm
+κ-irrel (Join S₁ S₂) (BShift P) (BShift Q) T p .get (PExt Z)
+  = SExt≃ refl≃stm (≃′-to-≃ (insertion-irrel S₂ P Q T (proj-shift p)))
+κ-irrel (Join S₁ S₂) (BShift P) (BShift Q) T p .get (PShift Z)
+  = SShift≃ refl≃ (κ-irrel S₂ P Q T (proj-shift p) .get Z)
 
-parallel-label-from : (L : Label X S)
+irrel-label-from : (L : Label X S)
                     → (P : Branch S l)
                     → (Q : Branch S l′)
                     → (M : Label X T)
                     → .⦃ _ : has-trunk-height (bh P) T ⦄
                     → .⦃ _ : has-trunk-height (bh Q) T ⦄
                     → (p : ⌊ P ⌋p ≃p ⌊ Q ⌋p)
-                    → L >>l[ P ] M ≃lm label-≃ (insertion-parallel S P Q T p) (L >>l[ Q ] M)
-parallel-label-from L BHere BHere M p = refl≃lm
-parallel-label-from {T = Susp T} L BHere (BExt Q) M p .get (PExt Z)
+                    → L >>l[ P ] M ≃lm label-≃ (insertion-irrel S P Q T p) (L >>l[ Q ] M)
+irrel-label-from L BHere BHere M p = refl≃lm
+irrel-label-from {T = Susp T} L BHere (BExt Q) M p .get (PExt Z)
   = sym≃stm (label-≃-sym (disc-insertion _ Q T) (disc-label-from (L ∘ PExt) Q (M ∘ PExt)) .get Z)
-parallel-label-from {T = Susp T} L BHere (BExt Q) M p .get (PShift Z) = refl≃stm
-parallel-label-from {T = Susp T} L (BExt P) BHere M p .get (PExt Z) = disc-label-from (L ∘ PExt) P (M ∘ PExt) .get Z
-parallel-label-from {T = Susp T} L (BExt P) BHere M p .get (PShift Z) = refl≃stm
-parallel-label-from {T = Susp T} L (BExt P) (BExt Q) M p .get (PExt Z) = parallel-label-from (L ∘ PExt) P Q (M ∘ PExt) (proj-ext p) .get Z
-parallel-label-from {T = Susp T} L (BExt P) (BExt Q) M p .get (PShift Z) = refl≃stm
-parallel-label-from L (BShift P) (BShift Q) M p .get (PExt Z) = refl≃stm
-parallel-label-from L (BShift P) (BShift Q) M p .get (PShift Z) = parallel-label-from (L ∘ PShift) P Q M (proj-shift p) .get Z
+irrel-label-from {T = Susp T} L BHere (BExt Q) M p .get (PShift Z) = refl≃stm
+irrel-label-from {T = Susp T} L (BExt P) BHere M p .get (PExt Z) = disc-label-from (L ∘ PExt) P (M ∘ PExt) .get Z
+irrel-label-from {T = Susp T} L (BExt P) BHere M p .get (PShift Z) = refl≃stm
+irrel-label-from {T = Susp T} L (BExt P) (BExt Q) M p .get (PExt Z) = irrel-label-from (L ∘ PExt) P Q (M ∘ PExt) (proj-ext p) .get Z
+irrel-label-from {T = Susp T} L (BExt P) (BExt Q) M p .get (PShift Z) = refl≃stm
+irrel-label-from L (BShift P) (BShift Q) M p .get (PExt Z) = refl≃stm
+irrel-label-from L (BShift P) (BShift Q) M p .get (PShift Z) = irrel-label-from (L ∘ PShift) P Q M (proj-shift p) .get Z
 
 label-from-insertion-≃ : {L : Label X S}
                        → {L′ : Label Y S}
@@ -584,104 +584,104 @@ label-from-branch-right {S = Sing} L M P N .get Z = refl≃stm
 label-from-branch-right {S = Join S₁ S₂} L M P N .get (PExt Z) = refl≃stm
 label-from-branch-right {S = Join S₁ S₂} L M P N .get (PShift Z) = label-from-branch-right (L ∘ PShift) M P N .get Z
 
-Orthogonal : (P : Branch S l) → (Q : Branch S l′) → Set
-Orthogonal BHere BHere = ⊥
-Orthogonal BHere (BExt Q) = ⊥
-Orthogonal BHere (BShift Q) = ⊤
-Orthogonal (BExt P) BHere = ⊥
-Orthogonal (BExt P) (BExt Q) = Orthogonal P Q
-Orthogonal (BExt P) (BShift Q) = ⊤
-Orthogonal (BShift P) BHere = ⊤
-Orthogonal (BShift P) (BExt Q) = ⊤
-Orthogonal (BShift P) (BShift Q) = Orthogonal P Q
+Parallel : (P : Branch S l) → (Q : Branch S l′) → Set
+Parallel BHere BHere = ⊥
+Parallel BHere (BExt Q) = ⊥
+Parallel BHere (BShift Q) = ⊤
+Parallel (BExt P) BHere = ⊥
+Parallel (BExt P) (BExt Q) = Parallel P Q
+Parallel (BExt P) (BShift Q) = ⊤
+Parallel (BShift P) BHere = ⊤
+Parallel (BShift P) (BExt Q) = ⊤
+Parallel (BShift P) (BShift Q) = Parallel P Q
 
-Orthogonal-sym : (P : Branch S l) → (Q : Branch S l′) → .⦃ Orthogonal P Q ⦄ → Orthogonal Q P
-Orthogonal-sym BHere (BShift Q) = tt
-Orthogonal-sym (BExt P) (BExt Q) = Orthogonal-sym P Q
-Orthogonal-sym (BExt P) (BShift Q) = tt
-Orthogonal-sym (BShift P) BHere = tt
-Orthogonal-sym (BShift P) (BExt Q) = tt
-Orthogonal-sym (BShift P) (BShift Q) = Orthogonal-sym P Q
+Parallel-sym : (P : Branch S l) → (Q : Branch S l′) → .⦃ Parallel P Q ⦄ → Parallel Q P
+Parallel-sym BHere (BShift Q) = tt
+Parallel-sym (BExt P) (BExt Q) = Parallel-sym P Q
+Parallel-sym (BExt P) (BShift Q) = tt
+Parallel-sym (BShift P) BHere = tt
+Parallel-sym (BShift P) (BExt Q) = tt
+Parallel-sym (BShift P) (BShift Q) = Parallel-sym P Q
 
-Orthogonal→≢ : (P : Branch S l) → (Q : Branch S l′) → ⦃ Orthogonal P Q ⦄ → ¬ ⌊ P ⌋p ≃p ⌊ Q ⌋p
-Orthogonal→≢ BHere BHere p = it
-Orthogonal→≢ BHere (BExt Q) p = it
-Orthogonal→≢ BHere (BShift Q) ()
-Orthogonal→≢ (BExt P) (BExt Q) (Ext≃ p x) = Orthogonal→≢ P Q p
-Orthogonal→≢ (BShift P) (BShift Q) (Shift≃ x p) = Orthogonal→≢ P Q p
+Parallel→≢ : (P : Branch S l) → (Q : Branch S l′) → ⦃ Parallel P Q ⦄ → ¬ ⌊ P ⌋p ≃p ⌊ Q ⌋p
+Parallel→≢ BHere BHere p = it
+Parallel→≢ BHere (BExt Q) p = it
+Parallel→≢ BHere (BShift Q) ()
+Parallel→≢ (BExt P) (BExt Q) (Ext≃ p x) = Parallel→≢ P Q p
+Parallel→≢ (BShift P) (BShift Q) (Shift≃ x p) = Parallel→≢ P Q p
 
-orthog-branch : (P : Branch S l)
+parallel-branch : (P : Branch S l)
               → (Q : Branch S l′)
-              → .⦃ Orthogonal P Q ⦄
+              → .⦃ Parallel P Q ⦄
               → (T : Tree m)
               → .⦃ _ : has-trunk-height (bh P) T ⦄
               → Branch (S >>[ P ] T) l′
-orthog-branch BHere (BShift Q) T = wedge-branch-right T _ Q
-orthog-branch (BExt P) (BExt Q) (Susp T) = BExt (orthog-branch P Q T)
-orthog-branch (BExt P) (BShift Q) (Susp T) = BShift Q
-orthog-branch (BShift P) BHere T = BHere
-orthog-branch (BShift P) (BExt Q) T = BExt Q
-orthog-branch (BShift P) (BShift Q) T = BShift (orthog-branch P Q T)
+parallel-branch BHere (BShift Q) T = wedge-branch-right T _ Q
+parallel-branch (BExt P) (BExt Q) (Susp T) = BExt (parallel-branch P Q T)
+parallel-branch (BExt P) (BShift Q) (Susp T) = BShift Q
+parallel-branch (BShift P) BHere T = BHere
+parallel-branch (BShift P) (BExt Q) T = BExt Q
+parallel-branch (BShift P) (BShift Q) T = BShift (parallel-branch P Q T)
 
-orthog-branch-prop : (S : Tree n)
+parallel-branch-prop : (S : Tree n)
                    → (P : Branch S l)
                    → (Q : Branch S l′)
-                   → .⦃ _ : Orthogonal P Q ⦄
+                   → .⦃ _ : Parallel P Q ⦄
                    → (T : Tree m)
                    → .⦃ _ : has-trunk-height (bh P) T ⦄
-                   → SPath ⌊ orthog-branch P Q T ⌋p
+                   → SPath ⌊ parallel-branch P Q T ⌋p
                      ≃stm
                      κ S P T ⌊ Q ⌋p
-orthog-branch-prop (Join S₁ S₂) BHere (BShift Q) T = wedge-branch-right-prop T S₂ Q
-orthog-branch-prop (Join S₁ S₂) (BExt P) (BExt Q) (Susp T) = compute-≃ (SExt≃ (orthog-branch-prop S₁ P Q T) refl≃)
-orthog-branch-prop (Join S₁ S₂) (BExt P) (BShift Q) (Susp T) = compute-≃ refl≃stm
-orthog-branch-prop (Join S₁ S₂) (BShift P) BHere T = compute-≃ refl≃stm
-orthog-branch-prop (Join S₁ S₂) (BShift P) (BExt Q) T = compute-≃ refl≃stm
-orthog-branch-prop (Join S₁ S₂) (BShift P) (BShift Q) T = compute-≃ (SShift≃ refl≃ (orthog-branch-prop S₂ P Q T))
+parallel-branch-prop (Join S₁ S₂) BHere (BShift Q) T = wedge-branch-right-prop T S₂ Q
+parallel-branch-prop (Join S₁ S₂) (BExt P) (BExt Q) (Susp T) = compute-≃ (SExt≃ (parallel-branch-prop S₁ P Q T) refl≃)
+parallel-branch-prop (Join S₁ S₂) (BExt P) (BShift Q) (Susp T) = compute-≃ refl≃stm
+parallel-branch-prop (Join S₁ S₂) (BShift P) BHere T = compute-≃ refl≃stm
+parallel-branch-prop (Join S₁ S₂) (BShift P) (BExt Q) T = compute-≃ refl≃stm
+parallel-branch-prop (Join S₁ S₂) (BShift P) (BShift Q) T = compute-≃ (SShift≃ refl≃ (parallel-branch-prop S₂ P Q T))
 
-orthog-lh : (P : Branch S l)
+parallel-lh : (P : Branch S l)
           → (Q : Branch S l′)
-          → .⦃ _ : Orthogonal P Q ⦄
+          → .⦃ _ : Parallel P Q ⦄
           → (T : Tree m)
           → .⦃ _ : has-trunk-height (bh P) T ⦄
-          → lh (orthog-branch P Q T) ≃n lh Q
-orthog-lh BHere (BShift Q) T = wedge-branch-right-height T _ Q
-orthog-lh (BExt P) (BExt Q) (Susp T) = inst ⦃ orthog-lh P Q T ⦄
-orthog-lh (BExt P) (BShift Q) (Susp T) = refl≃n
-orthog-lh (BShift P) BHere T = refl≃n
-orthog-lh (BShift P) (BExt Q) T = refl≃n
-orthog-lh (BShift P) (BShift Q) T = orthog-lh P Q T
+          → lh (parallel-branch P Q T) ≃n lh Q
+parallel-lh BHere (BShift Q) T = wedge-branch-right-height T _ Q
+parallel-lh (BExt P) (BExt Q) (Susp T) = inst ⦃ parallel-lh P Q T ⦄
+parallel-lh (BExt P) (BShift Q) (Susp T) = refl≃n
+parallel-lh (BShift P) BHere T = refl≃n
+parallel-lh (BShift P) (BExt Q) T = refl≃n
+parallel-lh (BShift P) (BShift Q) T = parallel-lh P Q T
 
-insertion-orthog : (S : Tree n)
+insertion-parallel : (S : Tree n)
                  → (P : Branch S l)
                  → (T : Tree m)
                  → .⦃ _ : has-trunk-height (bh P) T ⦄
                  → (Q : Branch S l′)
-                 → .⦃ _ : Orthogonal P Q ⦄
+                 → .⦃ _ : Parallel P Q ⦄
                  → (U : Tree m′)
                  → .⦃ _ : has-trunk-height (bh Q) U ⦄
-                 → (S >>[ P ] T) >>[ orthog-branch P Q T ] U ≃′ (S >>[ Q ] U) >>[ orthog-branch Q P ⦃ Orthogonal-sym P Q ⦄ U ] T
-insertion-orthog (Join S₁ S₂) BHere T (BShift Q) U = insertion-branch-right T S₂ Q U
-insertion-orthog (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) (Susp U) = Join≃′ (insertion-orthog S₁ P T Q U) Refl≃′
-insertion-orthog (Join S₁ S₂) (BExt P) (Susp T) (BShift Q) U = Refl≃′
-insertion-orthog (Join S₁ S₂) (BShift P) T BHere U = sym≃′ (insertion-branch-right U S₂ P T)
-insertion-orthog (Join S₁ S₂) (BShift P) T (BExt Q) (Susp U) = Refl≃′
-insertion-orthog (Join S₁ S₂) (BShift P) T (BShift Q) U = Join≃′ Refl≃′ (insertion-orthog S₂ P T Q U)
+                 → (S >>[ P ] T) >>[ parallel-branch P Q T ] U ≃′ (S >>[ Q ] U) >>[ parallel-branch Q P ⦃ Parallel-sym P Q ⦄ U ] T
+insertion-parallel (Join S₁ S₂) BHere T (BShift Q) U = insertion-branch-right T S₂ Q U
+insertion-parallel (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) (Susp U) = Join≃′ (insertion-parallel S₁ P T Q U) Refl≃′
+insertion-parallel (Join S₁ S₂) (BExt P) (Susp T) (BShift Q) U = Refl≃′
+insertion-parallel (Join S₁ S₂) (BShift P) T BHere U = sym≃′ (insertion-branch-right U S₂ P T)
+insertion-parallel (Join S₁ S₂) (BShift P) T (BExt Q) (Susp U) = Refl≃′
+insertion-parallel (Join S₁ S₂) (BShift P) T (BShift Q) U = Join≃′ Refl≃′ (insertion-parallel S₂ P T Q U)
 
 module _ where
   open Reasoning stm-setoid
-  κ-orthog : (S : Tree n)
+  κ-parallel : (S : Tree n)
            → (P : Branch S l)
            → (T : Tree m)
            → .⦃ _ : has-trunk-height (bh P) T ⦄
            → (Q : Branch S l′)
-           → .⦃ _ : Orthogonal P Q ⦄
+           → .⦃ _ : Parallel P Q ⦄
            → (U : Tree m′)
            → .⦃ _ : has-trunk-height (bh Q) U ⦄
-           → κ S P T ●l (κ (S >>[ P ] T) (orthog-branch P Q T) U ,, S⋆)
+           → κ S P T ●l (κ (S >>[ P ] T) (parallel-branch P Q T) U ,, S⋆)
              ≃lm
-             κ S Q U ●l (κ (S >>[ Q ] U) (orthog-branch Q P ⦃ Orthogonal-sym P Q ⦄ U) T ,, S⋆)
-  κ-orthog (Join S₁ S₂) BHere T (BShift Q) U .get (PExt Z) = begin
+             κ S Q U ●l (κ (S >>[ Q ] U) (parallel-branch Q P ⦃ Parallel-sym P Q ⦄ U) T ,, S⋆)
+  κ-parallel (Join S₁ S₂) BHere T (BShift Q) U .get (PExt Z) = begin
     < standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T S₂
       >>= (κ (T ++t S₂) (wedge-branch-right T S₂ Q) U ,, S⋆) >stm
@@ -691,19 +691,19 @@ module _ where
       ≈⟨ >>=-≃ (refl≃stm {a = standard-label (Susp S₁) T (PExt Z)}) (κ-branch-right-inc-left T S₂ Q U) (S⋆-≃ (≃′-to-≃ (insertion-branch-right T S₂ Q U))) ⟩
     < standard-label (Susp S₁) T (PExt Z)
       >>= ++t-inc-left T (S₂ >>[ Q ] U) >stm ∎
-  κ-orthog (Join S₁ S₂) BHere T (BShift Q) U .get (PShift Z) = κ-branch-right-inc-right T S₂ Q U .get Z
-  κ-orthog (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) (Susp U) .get (PExt Z) = let
-    instance _ = Orthogonal-sym P Q
+  κ-parallel (Join S₁ S₂) BHere T (BShift Q) U .get (PShift Z) = κ-branch-right-inc-right T S₂ Q U .get Z
+  κ-parallel (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) (Susp U) .get (PExt Z) = let
+    instance _ = Parallel-sym P Q
     in begin
-    < κ S₁ P T Z >>= map-ext (κ (S₁ >>[ P ] T) (orthog-branch P Q T) U ,, S⋆) >stm
-      ≈⟨ >>=-ext (κ S₁ P T Z) (κ (S₁ >>[ P ] T) (orthog-branch P Q T) U ,, S⋆) ⟩
-    < SExt (κ S₁ P T Z >>= (κ (S₁ >>[ P ] T) (orthog-branch P Q T) U ,, S⋆)) >stm
-      ≈⟨ SExt≃ (κ-orthog S₁ P T Q U .get Z) refl≃ ⟩
-    < SExt (κ S₁ Q U Z >>= (κ (S₁ >>[ Q ] U) (orthog-branch Q P U) T ,, S⋆)) >stm
-      ≈˘⟨ >>=-ext (κ S₁ Q U Z) (κ (S₁ >>[ Q ] U) (orthog-branch Q P U) T ,, S⋆) ⟩
-    < κ S₁ Q U Z >>= map-ext (κ (S₁ >>[ Q ] U) (orthog-branch Q P U) T ,, S⋆) >stm ∎
-  κ-orthog (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) (Susp U) .get (PShift Z) = SShift≃ (≃′-to-≃ (insertion-orthog S₁ P T Q U)) refl≃stm
-  κ-orthog (Join S₁ S₂) (BExt P) (Susp T) (BShift Q) U .get (PExt Z) = begin
+    < κ S₁ P T Z >>= map-ext (κ (S₁ >>[ P ] T) (parallel-branch P Q T) U ,, S⋆) >stm
+      ≈⟨ >>=-ext (κ S₁ P T Z) (κ (S₁ >>[ P ] T) (parallel-branch P Q T) U ,, S⋆) ⟩
+    < SExt (κ S₁ P T Z >>= (κ (S₁ >>[ P ] T) (parallel-branch P Q T) U ,, S⋆)) >stm
+      ≈⟨ SExt≃ (κ-parallel S₁ P T Q U .get Z) refl≃ ⟩
+    < SExt (κ S₁ Q U Z >>= (κ (S₁ >>[ Q ] U) (parallel-branch Q P U) T ,, S⋆)) >stm
+      ≈˘⟨ >>=-ext (κ S₁ Q U Z) (κ (S₁ >>[ Q ] U) (parallel-branch Q P U) T ,, S⋆) ⟩
+    < κ S₁ Q U Z >>= map-ext (κ (S₁ >>[ Q ] U) (parallel-branch Q P U) T ,, S⋆) >stm ∎
+  κ-parallel (Join S₁ S₂) (BExt P) (Susp T) (BExt Q) (Susp U) .get (PShift Z) = SShift≃ (≃′-to-≃ (insertion-parallel S₁ P T Q U)) refl≃stm
+  κ-parallel (Join S₁ S₂) (BExt P) (Susp T) (BShift Q) U .get (PExt Z) = begin
     < κ S₁ P T Z >>= ((SExt ∘ SPath) ,, SArr (SPath PHere) S⋆ (SShift (κ S₂ Q U PHere))) >stm
       ≈⟨ >>=-≃ (refl≃stm {a = κ S₁ P T Z}) refl≃l (SArr≃ refl≃stm refl≃sty (SShift≃ refl≃ (κ-phere S₂ Q U))) ⟩
     < κ S₁ P T Z >>= map-ext (id-label-wt (S₁ >>[ P ] T)) >stm
@@ -711,15 +711,15 @@ module _ where
     < SExt (κ S₁ P T Z >>= id-label-wt (S₁ >>[ P ] T)) >stm
       ≈⟨ SExt≃ (>>=-id (κ S₁ P T Z)) refl≃ ⟩
     < SExt (κ S₁ P T Z) >stm ∎
-  κ-orthog (Join S₁ S₂) (BExt P) (Susp T) (BShift Q) U .get (PShift Z) = begin
+  κ-parallel (Join S₁ S₂) (BExt P) (Susp T) (BShift Q) U .get (PShift Z) = begin
     < SShift (κ S₂ Q U Z) >stm
       ≈˘⟨ SShift≃ refl≃ (>>=-id (κ S₂ Q U Z)) ⟩
     < SShift (κ S₂ Q U Z >>= id-label-wt (S₂ >>[ Q ] U)) >stm
       ≈˘⟨ >>=-shift (κ S₂ Q U Z) (id-label-wt (S₂ >>[ Q ] U)) ⟩
     < κ S₂ Q U Z >>= map-shift (id-label-wt (S₂ >>[ Q ] U)) >stm ∎
-  κ-orthog (Join S₁ S₂) (BShift P) T BHere U .get (PExt Z) = sym≃stm (κ-orthog (Join S₁ S₂) BHere U (BShift P) T .get (PExt Z))
-  κ-orthog (Join S₁ S₂) (BShift P) T BHere U .get (PShift Z) = sym≃stm (κ-orthog (Join S₁ S₂) BHere U (BShift P) T .get (PShift Z))
-  κ-orthog (Join S₁ S₂) (BShift P) T (BExt Q) (Susp U) .get (PExt Z) = begin
+  κ-parallel (Join S₁ S₂) (BShift P) T BHere U .get (PExt Z) = sym≃stm (κ-parallel (Join S₁ S₂) BHere U (BShift P) T .get (PExt Z))
+  κ-parallel (Join S₁ S₂) (BShift P) T BHere U .get (PShift Z) = sym≃stm (κ-parallel (Join S₁ S₂) BHere U (BShift P) T .get (PShift Z))
+  κ-parallel (Join S₁ S₂) (BShift P) T (BExt Q) (Susp U) .get (PExt Z) = begin
     < SExt (κ S₁ Q U Z) >stm
       ≈˘⟨ SExt≃ (>>=-id (κ S₁ Q U Z)) refl≃ ⟩
     < SExt (κ S₁ Q U Z >>= id-label-wt (S₁ >>[ Q ] U)) >stm
@@ -727,23 +727,23 @@ module _ where
     < κ S₁ Q U Z >>= map-ext (id-label-wt (S₁ >>[ Q ] U)) >stm
       ≈˘⟨ >>=-≃ (refl≃stm {a = κ S₁ Q U Z}) refl≃l (SArr≃ refl≃stm refl≃sty (SShift≃ refl≃ (κ-phere S₂ P T))) ⟩
     < κ S₁ Q U Z >>= (SExt ∘ SPath ,, SArr (SPath PHere) S⋆ (SShift (κ S₂ P T PHere))) >stm ∎
-  κ-orthog (Join S₁ S₂) (BShift P) T (BExt Q) (Susp U) .get (PShift Z) = begin
+  κ-parallel (Join S₁ S₂) (BShift P) T (BExt Q) (Susp U) .get (PShift Z) = begin
     < κ S₂ P T Z >>= map-shift (id-label-wt (S₂ >>[ P ] T)) >stm
       ≈⟨ >>=-shift (κ S₂ P T Z) (id-label-wt (S₂ >>[ P ] T)) ⟩
     < SShift (κ S₂ P T Z >>= id-label-wt (S₂ >>[ P ] T)) >stm
       ≈⟨ SShift≃ refl≃ (>>=-id (κ S₂ P T Z)) ⟩
     < SShift (κ S₂ P T Z) >stm ∎
-  κ-orthog (Join S₁ S₂) (BShift P) T (BShift Q) U .get (PExt Z) = SExt≃ refl≃stm (≃′-to-≃ (insertion-orthog S₂ P T Q U))
-  κ-orthog (Join S₁ S₂) (BShift P) T (BShift Q) U .get (PShift Z) = let
-    instance _ = Orthogonal-sym P Q
+  κ-parallel (Join S₁ S₂) (BShift P) T (BShift Q) U .get (PExt Z) = SExt≃ refl≃stm (≃′-to-≃ (insertion-parallel S₂ P T Q U))
+  κ-parallel (Join S₁ S₂) (BShift P) T (BShift Q) U .get (PShift Z) = let
+    instance _ = Parallel-sym P Q
     in begin
-    < κ S₂ P T Z >>= map-shift (κ (S₂ >>[ P ] T) (orthog-branch P Q T) U ,, S⋆) >stm
-      ≈⟨ >>=-shift (κ S₂ P T Z) (κ (S₂ >>[ P ] T) (orthog-branch P Q T) U ,, S⋆) ⟩
-    < SShift (κ S₂ P T Z >>= (κ (S₂ >>[ P ] T) (orthog-branch P Q T) U ,, S⋆)) >stm
-      ≈⟨ SShift≃ refl≃ (κ-orthog S₂ P T Q U .get Z) ⟩
-    < SShift (κ S₂ Q U Z >>= (κ (S₂ >>[ Q ] U) (orthog-branch Q P U) T ,, S⋆)) >stm
-      ≈˘⟨ >>=-shift (κ S₂ Q U Z) (κ (S₂ >>[ Q ] U) (orthog-branch Q P U) T ,, S⋆) ⟩
-    < κ S₂ Q U Z >>= map-shift (κ (S₂ >>[ Q ] U) (orthog-branch Q P U) T ,, S⋆) >stm ∎
+    < κ S₂ P T Z >>= map-shift (κ (S₂ >>[ P ] T) (parallel-branch P Q T) U ,, S⋆) >stm
+      ≈⟨ >>=-shift (κ S₂ P T Z) (κ (S₂ >>[ P ] T) (parallel-branch P Q T) U ,, S⋆) ⟩
+    < SShift (κ S₂ P T Z >>= (κ (S₂ >>[ P ] T) (parallel-branch P Q T) U ,, S⋆)) >stm
+      ≈⟨ SShift≃ refl≃ (κ-parallel S₂ P T Q U .get Z) ⟩
+    < SShift (κ S₂ Q U Z >>= (κ (S₂ >>[ Q ] U) (parallel-branch Q P U) T ,, S⋆)) >stm
+      ≈˘⟨ >>=-shift (κ S₂ Q U Z) (κ (S₂ >>[ Q ] U) (parallel-branch Q P U) T ,, S⋆) ⟩
+    < κ S₂ Q U Z >>= map-shift (κ (S₂ >>[ Q ] U) (parallel-branch Q P U) T ,, S⋆) >stm ∎
 
   label-from-insertion′-replace : (L : Label X S)
                                 → (P : Branch S l)
@@ -759,7 +759,7 @@ module _ where
   label-from-insertion′-replace L (BShift P) M a .get (PExt Z) = refl≃stm
   label-from-insertion′-replace L (BShift P) M a .get (PShift Z) = refl≃stm
 
-  label-from-orthog-lem : {S₁ : Tree n}
+  label-from-parallel-lem : {S₁ : Tree n}
                         → {S₂ : Tree m}
                         → (L : Label X (Join S₁ S₂))
                         → (M : Label X T)
@@ -769,35 +769,35 @@ module _ where
                         → replace-label (M ++l′ L ∘ PShift) (L PHere) >>l′[ wedge-branch-right T S₂ Q ] N
                           ≃lm
                           label-≃ (insertion-branch-right T S₂ Q U) (replace-label (M ++l′ (L ∘ PShift >>l′[ Q ] N)) (L PHere))
-  label-from-orthog-lem {T = Sing} L M Q N .get Z = label-from-insertion′-replace (L ∘ PShift) Q N (L PHere) .get Z
-  label-from-orthog-lem {T = Join T₁ T₂} L M Q N .get (PExt Z) = refl≃stm
-  label-from-orthog-lem {T = Join T₁ T₂} L M Q N .get (PShift Z) = label-from-branch-right (M ∘ PShift) (L ∘ PShift) Q N .get Z
+  label-from-parallel-lem {T = Sing} L M Q N .get Z = label-from-insertion′-replace (L ∘ PShift) Q N (L PHere) .get Z
+  label-from-parallel-lem {T = Join T₁ T₂} L M Q N .get (PExt Z) = refl≃stm
+  label-from-parallel-lem {T = Join T₁ T₂} L M Q N .get (PShift Z) = label-from-branch-right (M ∘ PShift) (L ∘ PShift) Q N .get Z
 
-  label-from-orthog : (L : Label X S)
+  label-from-parallel : (L : Label X S)
                     → (P : Branch S l)
                     → {T : Tree n}
                     → (M : Label X T)
                     → .⦃ _ : has-trunk-height (bh P) T ⦄
                     → (Q : Branch S l′)
                     → {U : Tree m}
-                    → .⦃ _ : Orthogonal P Q ⦄
+                    → .⦃ _ : Parallel P Q ⦄
                     → (N : Label X U)
                     → .⦃ _ : has-trunk-height (bh Q) U ⦄
-                    → (L >>l′[ P ] M) >>l′[ orthog-branch P Q T ] N
+                    → (L >>l′[ P ] M) >>l′[ parallel-branch P Q T ] N
                       ≃lm
-                      label-≃ (insertion-orthog S P T Q U) ((L >>l′[ Q ] N) >>l′[ orthog-branch Q P ⦃ Orthogonal-sym P Q ⦄ U ] M)
-  label-from-orthog L BHere M (BShift Q) N = label-from-orthog-lem L M Q N
-  label-from-orthog L (BExt P) {T = Susp T} M (BExt Q) {U = Susp U} N .get (PExt Z)
-    = label-from-orthog (L ∘ PExt) P (M ∘ PExt) Q (N ∘ PExt) .get Z
-  label-from-orthog L (BExt P) {T = Susp T} M (BExt Q) {U = Susp U} N .get (PShift Z) = refl≃stm
-  label-from-orthog L (BExt P) {T = Susp T} M (BShift Q) N .get (PExt Z) = refl≃stm
-  label-from-orthog L (BExt P) {T = Susp T} M (BShift Q) N .get (PShift Z) = refl≃stm
-  label-from-orthog L (BShift P) M BHere N
-    = sym≃lm (label-≃-sym-max (insertion-branch-right _ _ P _) (label-from-orthog-lem L N P M))
-  label-from-orthog L (BShift P) M (BExt Q) {U = Susp U} N .get (PExt Z) = refl≃stm
-  label-from-orthog L (BShift P) M (BExt Q) {U = Susp U} N .get (PShift Z) = refl≃stm
-  label-from-orthog L (BShift P) M (BShift Q) N .get (PExt Z) = refl≃stm
-  label-from-orthog L (BShift P) M (BShift Q) N .get (PShift Z) = label-from-orthog (L ∘ PShift) P M Q N .get Z
+                      label-≃ (insertion-parallel S P T Q U) ((L >>l′[ Q ] N) >>l′[ parallel-branch Q P ⦃ Parallel-sym P Q ⦄ U ] M)
+  label-from-parallel L BHere M (BShift Q) N = label-from-parallel-lem L M Q N
+  label-from-parallel L (BExt P) {T = Susp T} M (BExt Q) {U = Susp U} N .get (PExt Z)
+    = label-from-parallel (L ∘ PExt) P (M ∘ PExt) Q (N ∘ PExt) .get Z
+  label-from-parallel L (BExt P) {T = Susp T} M (BExt Q) {U = Susp U} N .get (PShift Z) = refl≃stm
+  label-from-parallel L (BExt P) {T = Susp T} M (BShift Q) N .get (PExt Z) = refl≃stm
+  label-from-parallel L (BExt P) {T = Susp T} M (BShift Q) N .get (PShift Z) = refl≃stm
+  label-from-parallel L (BShift P) M BHere N
+    = sym≃lm (label-≃-sym-max (insertion-branch-right _ _ P _) (label-from-parallel-lem L N P M))
+  label-from-parallel L (BShift P) M (BExt Q) {U = Susp U} N .get (PExt Z) = refl≃stm
+  label-from-parallel L (BShift P) M (BExt Q) {U = Susp U} N .get (PShift Z) = refl≃stm
+  label-from-parallel L (BShift P) M (BShift Q) N .get (PExt Z) = refl≃stm
+  label-from-parallel L (BShift P) M (BShift Q) N .get (PShift Z) = label-from-parallel (L ∘ PShift) P M Q N .get Z
 
 insertion-bd-1 : (S : Tree n)
                → (P : Branch S l)

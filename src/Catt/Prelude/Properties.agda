@@ -12,6 +12,7 @@ import Relation.Binary.Reasoning.StrictPartialOrder
 open import Algebra.Construct.NaturalChoice.Base
 import Algebra.Construct.NaturalChoice.MinMaxOp as MinMaxOp
 open import Algebra.Bundles
+open import Algebra.Definitions.RawMagma public
 
 module Reasoning = Relation.Binary.Reasoning.Setoid
 module PReasoning = Relation.Binary.Reasoning.PartialOrder

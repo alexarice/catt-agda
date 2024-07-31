@@ -160,15 +160,15 @@ pdb-reduce-dim-dim pdb d (suc k) p = pdb-reduce-dim-dim (Restr pdb ⦃ NonZero-s
 
 pdb-to-dim : {Γ : Ctx n} → (pdb : Γ ⊢pdb) → (d : ℕ) → (d ≤ pdb-max-dim pdb) → Γ ⊢pdb
 pdb-to-dim pdb d p with d ≤″? ty-dim (focus-ty pdb)
-... | yes (less-than-or-equal {k = k} q) = pdb-reduce-dim pdb d k q
-pdb-to-dim Base .zero z≤n | no q = ⊥-elim (q (less-than-or-equal refl))
+... | yes (k , q) = pdb-reduce-dim pdb d k q
+pdb-to-dim Base .zero z≤n | no q = ⊥-elim (q (zero , refl))
 pdb-to-dim (Extend pdb p₁ q₁) d p | no q = ⊥-elim (q (≤⇒≤″ (≤-trans p (≤-reflexive (sym (wk-ty-dim _))))))
 pdb-to-dim (Restr pdb) d p | no q = pdb-to-dim pdb d p
 
 pdb-to-dim-dim : {Γ : Ctx n} → (pdb : Γ ⊢pdb) → (d : ℕ) → (p : d ≤ pdb-max-dim pdb) → d ≡ ty-dim (focus-ty (pdb-to-dim pdb d p))
 pdb-to-dim-dim pdb d p with d ≤″? ty-dim (focus-ty pdb)
-... | yes (less-than-or-equal {k = k} q) = pdb-reduce-dim-dim pdb d k q
-pdb-to-dim-dim Base .zero z≤n | no q = ⊥-elim (q (less-than-or-equal refl))
+... | yes (k , q) = pdb-reduce-dim-dim pdb d k q
+pdb-to-dim-dim Base .zero z≤n | no q = ⊥-elim (q (zero , refl))
 pdb-to-dim-dim (Extend pdb p₁ q₁) d p | no q = ⊥-elim (q (≤⇒≤″ (≤-trans p (≤-reflexive (sym (wk-ty-dim _))))))
 pdb-to-dim-dim (Restr pdb) d p | no q = pdb-to-dim-dim pdb d p
 

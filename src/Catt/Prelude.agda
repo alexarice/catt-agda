@@ -9,7 +9,7 @@ open import Relation.Binary.Definitions hiding (Irrelevant) public
 open import Data.Empty using (⊥) public
 open import Data.Empty.Irrelevant public
 open import Data.Unit using (⊤; tt) public
-open import Relation.Nullary hiding (⌊_⌋) public
+open import Relation.Nullary using (¬_; Irrelevant; Dec; yes; no; recompute) public
 open import Data.Fin.Patterns public
 open import Data.Wrap public
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′) renaming (map to map⊎) public
